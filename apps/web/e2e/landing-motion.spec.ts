@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 test("Signals discloses its fictional storyworld and uses a real archive action", async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
   await page.goto("/");
@@ -162,6 +163,7 @@ test("mobile landing preview opens the query-resolved event detail", async ({ pa
 test("live reduction reveals offscreen content and atmosphere responds to resizing", async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   // Dev-server compile plus two p5 mounts exceeds the default 30s budget.
   test.setTimeout(60000);
   await page.setViewportSize({ width: 390, height: 844 });
