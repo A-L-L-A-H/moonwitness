@@ -188,6 +188,7 @@ test("live reduction reveals offscreen content and atmosphere responds to resizi
 });
 
 test("decorative parallax resets live and survives navigation unmount", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   const decoration = page.locator("#home [data-hero-parallax]");
   await expect(decoration).toHaveCount(1);
