@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth, requireRole } from "../../middleware/auth";
 import {
+  canonicalStoragePath,
   getStorageSigningCredentials,
   hasCallerSignatureQuery,
   signStorageRequest,
@@ -10,16 +11,16 @@ const STORAGE_URL = process.env.STORAGE_URL ?? "http://127.0.0.1:8091";
 
 export function resolveStorageTarget(target: string): URL {
   const baseUrl = new URL(STORAGE_URL);
-  const targetUrl = new URL(target, baseUrl);
-  if (
-    targetUrl.protocol !== baseUrl.protocol ||
-    targetUrl.hostname !== baseUrl.hostname ||
-    targetUrl.port !== baseUrl.port ||
-    targetUrl.username !== "" ||
-    targetUrl.password !== ""
-  ) {
-    throw new Error("storage target must remain on the configured service origin");
+  const queryStart = target.indexOf("?");
+  const rawPath = queryStart === -1 ? target : target.slice(0, queryStart);
+  const rawQuery = queryStart === -1 ? "" : target.slice(queryStart + 1);
+  if (!rawPath.startsWith("/") || rawPath.startsWith("//")) {
+    throw new Error("storage target must be an absolute path on the configured service");
   }
+
+  const targetUrl = new URL(baseUrl);
+  targetUrl.pathname = canonicalStoragePath(rawPath);
+  targetUrl.search = rawQuery ? `?${rawQuery}` : "";
   return targetUrl;
 }
 
