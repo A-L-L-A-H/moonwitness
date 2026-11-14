@@ -11,7 +11,13 @@ const STORAGE_URL = process.env.STORAGE_URL ?? "http://127.0.0.1:8091";
 export function resolveStorageTarget(target: string): URL {
   const baseUrl = new URL(STORAGE_URL);
   const targetUrl = new URL(target, baseUrl);
-  if (targetUrl.origin !== baseUrl.origin) {
+  if (
+    targetUrl.protocol !== baseUrl.protocol ||
+    targetUrl.hostname !== baseUrl.hostname ||
+    targetUrl.port !== baseUrl.port ||
+    targetUrl.username !== "" ||
+    targetUrl.password !== ""
+  ) {
     throw new Error("storage target must remain on the configured service origin");
   }
   return targetUrl;
