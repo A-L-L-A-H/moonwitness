@@ -63,13 +63,6 @@ jobs:
             --exit-code 1 \
             .
 
-      - name: Upload Trivy results to Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: "trivy-results.sarif"
-          category: "trivy"
-
       - name: Upload Trivy results as artifact
         uses: actions/upload-artifact@v4
         if: always()
@@ -87,6 +80,11 @@ jobs:
             
             if [ "$ERROR_COUNT" -gt 0 ] || [ "$WARNING_COUNT" -gt 0 ]; then
               echo "::warning::Found $ERROR_COUNT error-level and $WARNING_COUNT warning-level findings"
-              echo "::warning::Review Trivy results in Security tab"
+              echo "::warning::Review the Trivy SARIF artifact attached to this workflow run"
             fi
           fi
+
+      - name: Note Code Scanning upload is unavailable
+        if: always()
+        run: |
+          echo "::notice::Trivy results are retained as an Actions artifact; Code Scanning upload is unavailable for this private repository."
