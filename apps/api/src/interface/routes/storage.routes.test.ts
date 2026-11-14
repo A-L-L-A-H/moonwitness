@@ -20,6 +20,7 @@ describe("storage proxy", () => {
 
   it("pins wildcard targets to the configured Storage origin", () => {
     expect(resolveStorageTarget("/media/object.bin").origin).toBe("http://127.0.0.1:8091");
+    expect(resolveStorageTarget("/media").pathname).toBe("/media");
     const backslashPath = resolveStorageTarget("/\\\\attacker.example/object.bin");
     expect(backslashPath.origin).toBe("http://127.0.0.1:8091");
     expect(backslashPath.pathname).toBe("/%5C%5Cattacker.example/object.bin");

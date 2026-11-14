@@ -52,6 +52,13 @@ export function canonicalStoragePath(pathname: string): string {
   return /^\/[^/]+$/.test(canonical) ? `${canonical}/` : canonical;
 }
 
+export function encodeStoragePath(pathname: string): string {
+  return pathname
+    .split("/")
+    .map((segment) => uriEncode(decodeURIComponent(segment)))
+    .join("/");
+}
+
 export function canonicalStorageQuery(rawQuery: string): string {
   const pairs: Array<[string, string]> = parseQuery(rawQuery).map(([key, value]) => [
     uriEncode(key),

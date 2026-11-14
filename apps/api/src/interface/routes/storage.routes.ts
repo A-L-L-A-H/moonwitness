@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth, requireRole } from "../../middleware/auth";
 import {
-  canonicalStoragePath,
+  encodeStoragePath,
   getStorageSigningCredentials,
   hasCallerSignatureQuery,
   signStorageRequest,
@@ -19,7 +19,7 @@ export function resolveStorageTarget(target: string): URL {
   }
 
   const targetUrl = new URL(baseUrl);
-  targetUrl.pathname = canonicalStoragePath(rawPath);
+  targetUrl.pathname = encodeStoragePath(rawPath);
   targetUrl.search = rawQuery ? `?${rawQuery}` : "";
   return targetUrl;
 }
