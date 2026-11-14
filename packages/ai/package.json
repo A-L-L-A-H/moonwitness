@@ -14,7 +14,7 @@
   "dependencies": {
     "@moonwitness/errors": "workspace:*",
     "@moonwitness/types": "workspace:*",
-    "zod": "^3.25.76"
+    "zod": "^4.6.7"
   },
   "scripts": {
     "lint": "eslint src",
@@ -32,6 +32,6 @@
     "eslint-plugin-import": "^2.32.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.2",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.12"
   }
 }
