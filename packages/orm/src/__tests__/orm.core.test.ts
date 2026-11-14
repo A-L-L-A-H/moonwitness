@@ -113,6 +113,16 @@ describe("defineModel", () => {
       }),
     ).toThrow(/Unsupported schema type/);
   });
+
+  it("uses the input field shape for transformed Zod schemas", () => {
+    const transformedModel = defineModel({
+      name: "test.transformed",
+      table: "test_transformed",
+      schema: z.object({ title: z.string().transform((value) => value.trim()) }),
+    });
+
+    expect(transformedModel.ddl).toContain('"title" TEXT NOT NULL');
+  });
 });
 
 describe("BaseRepository", () => {
