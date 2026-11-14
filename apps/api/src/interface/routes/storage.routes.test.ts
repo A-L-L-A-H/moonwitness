@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
-import { storageRoutes } from "./storage.routes";
+import { resolveStorageTarget, storageRoutes } from "./storage.routes";
 
 vi.mock("../../middleware/auth", () => ({
   requireAuth: () => async () => {},
@@ -16,6 +16,13 @@ describe("storage proxy", () => {
   beforeEach(() => {
     process.env.STORAGE_ACCESS_KEY = "test-storage-access";
     process.env.STORAGE_SECRET_KEY = "test-storage-secret";
+  });
+
+  it("pins wildcard targets to the configured Storage origin", () => {
+    expect(resolveStorageTarget("/media/object.bin").origin).toBe("http://127.0.0.1:8091");
+    expect(() => resolveStorageTarget("/\\\\attacker.example/object.bin")).toThrow(
+      "storage target must remain on the configured service origin",
+    );
   });
 
   afterEach(async () => {

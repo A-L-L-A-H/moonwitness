@@ -8,6 +8,15 @@ import {
 
 const STORAGE_URL = process.env.STORAGE_URL ?? "http://127.0.0.1:8091";
 
+export function resolveStorageTarget(target: string): URL {
+  const baseUrl = new URL(STORAGE_URL);
+  const targetUrl = new URL(target, baseUrl);
+  if (targetUrl.origin !== baseUrl.origin) {
+    throw new Error("storage target must remain on the configured service origin");
+  }
+  return targetUrl;
+}
+
 // Allow application/octet-stream and other binary content types for storage uploads
 function configureContentTypeParsers(fastify: FastifyInstance): void {
   fastify.addContentTypeParser(
@@ -63,7 +72,7 @@ async function forward(
       return reply.code(400).send({ error: "invalid storage path" });
     }
 
-    upstreamUrl = new URL(target, STORAGE_URL);
+    upstreamUrl = resolveStorageTarget(target);
     if (sign) {
       const rawQuery = upstreamUrl.search.slice(1);
       if (hasCallerSignatureQuery(rawQuery)) {
