@@ -13,6 +13,8 @@ const base = {
   RATE_LIMIT_WINDOW_MS: "60000",
   RADIUS_URL: "http://127.0.0.1:8090",
   STORAGE_URL: "http://127.0.0.1:8091",
+  STORAGE_ACCESS_KEY: "test-storage-access",
+  STORAGE_SECRET_KEY: "test-storage-secret",
   SYSLOG_URL: "http://127.0.0.1:8093",
   SNMP_POLLER_URL: "http://127.0.0.1:8094",
 };
@@ -57,6 +59,18 @@ describe("validateProductionEnv", () => {
     expect(validateProductionEnv({ ...base, CORS_ORIGINS: "*" })).toContain(
       "CORS_ORIGINS must not use '*' in production.",
     );
+  });
+
+  it("requires non-placeholder Storage signing credentials in production", () => {
+    expect(validateProductionEnv({ ...base, STORAGE_ACCESS_KEY: undefined })).toContain(
+      "STORAGE_ACCESS_KEY must be set for server-side Storage signing in production.",
+    );
+    expect(validateProductionEnv({ ...base, STORAGE_SECRET_KEY: undefined })).toContain(
+      "STORAGE_SECRET_KEY must be set for server-side Storage signing in production.",
+    );
+    expect(
+      validateProductionEnv({ ...base, STORAGE_SECRET_KEY: "change-me-storage-secret" }),
+    ).toContain("STORAGE_SECRET_KEY must not use the example placeholder in production.");
   });
 
   it("assertProductionEnv throws with actionable detail on unsafe config", () => {

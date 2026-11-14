@@ -1,4 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { requireAuth } from "../../middleware/auth";
 
 const SYSLOG_URL = process.env.SYSLOG_URL ?? "http://127.0.0.1:8093";
 
@@ -39,6 +40,8 @@ async function forward(
 }
 
 export async function syslogRoutes(fastify: FastifyInstance) {
+  fastify.addHook("preHandler", requireAuth());
+
   fastify.get("/syslog/health", async (request, reply) =>
     forward(request, reply, "/health", "GET"),
   );

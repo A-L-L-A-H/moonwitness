@@ -8,6 +8,8 @@ pub struct Device {
     pub host: String,
     pub port: i64,
     pub version: String,
+    #[allow(dead_code)]
+    #[serde(skip_serializing)]
     pub community: String,
     pub enabled: bool,
     pub created_at: i64,
@@ -57,4 +59,26 @@ pub struct Stats {
     pub enabled_devices: i64,
     pub total_targets: i64,
     pub total_samples: i64,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Device;
+
+    #[test]
+    fn device_serialization_never_exposes_community_credentials() {
+        let device = Device {
+            id: "device-1".to_string(),
+            name: "router".to_string(),
+            host: "192.0.2.1".to_string(),
+            port: 161,
+            version: "2c".to_string(),
+            community: "private-community".to_string(),
+            enabled: true,
+            created_at: 1,
+        };
+
+        let serialized = serde_json::to_value(device).expect("device serializes");
+        assert!(serialized.get("community").is_none());
+    }
 }

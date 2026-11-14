@@ -1,15 +1,39 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
-import { storageRoutes } from "./storage.routes";
+import { resolveStorageTarget, storageRoutes } from "./storage.routes";
+
+vi.mock("../../middleware/auth", () => ({
+  requireAuth: () => async () => {},
+  requireRole: () => async () => {},
+}));
 
 describe("storage proxy", () => {
+  const envBackup = { ...process.env };
   let app: FastifyInstance | null = null;
+
+  beforeEach(() => {
+    process.env.STORAGE_ACCESS_KEY = "test-storage-access";
+    process.env.STORAGE_SECRET_KEY = "test-storage-secret";
+  });
+
+  it("pins wildcard targets to the configured Storage origin", () => {
+    expect(resolveStorageTarget("/media/object.bin").origin).toBe("http://127.0.0.1:8091");
+    expect(resolveStorageTarget("/media").pathname).toBe("/media");
+    const backslashPath = resolveStorageTarget("/\\\\attacker.example/object.bin");
+    expect(backslashPath.origin).toBe("http://127.0.0.1:8091");
+    expect(backslashPath.pathname).toBe("/%5C%5Cattacker.example/object.bin");
+    expect(() => resolveStorageTarget("//attacker.example/object.bin")).toThrow(
+      "storage target must be an absolute path on the configured service",
+    );
+  });
 
   afterEach(async () => {
     await app?.close();
     app = null;
     vi.unstubAllGlobals();
+    process.env = { ...envBackup };
   });
 
   it("forwards reads to the upstream storage service", async () => {
@@ -199,11 +223,56 @@ describe("storage proxy", () => {
     const write = await app.inject({
       method: "PUT",
       url: "/storage/buckets/media/hello.txt",
-      headers: { "content-type": "application/octet-stream" },
+      headers: {
+        "content-type": "application/octet-stream",
+        authorization: "Bearer caller-token",
+        cookie: "mw_session=caller-session",
+      },
       payload: "hello",
     });
     expect(write.statusCode).toBe(200);
     expect(fetch).toHaveBeenCalledTimes(1);
+    const options = fetch.mock.calls[0]?.[1];
+    const headers = new Headers(options?.headers);
+    expect(headers.get("authorization")).toMatch(
+      /^AWS4-HMAC-SHA256 Credential=test-storage-access\//,
+    );
+    expect(headers.get("x-amz-content-sha256")).toBe(
+      createHash("sha256").update("hello").digest("hex"),
+    );
+    expect(headers.get("cookie")).toBeNull();
+  });
+
+  it("does not forward when server-side Storage credentials are missing", async () => {
+    delete process.env.STORAGE_SECRET_KEY;
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    app = Fastify({ logger: false });
+    await app.register(FastifyCors);
+    await app.register(storageRoutes);
+    await app.ready();
+
+    const response = await app.inject({ method: "GET", url: "/storage/buckets" });
+
+    expect(response.statusCode).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("rejects caller-supplied SigV4 query credentials", async () => {
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    app = Fastify({ logger: false });
+    await app.register(FastifyCors);
+    await app.register(storageRoutes);
+    await app.ready();
+
+    const response = await app.inject({
+      method: "GET",
+      url: "/storage/buckets/media?X-Amz-Signature=caller-signature",
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("returns 502 when the upstream storage service is unreachable", async () => {

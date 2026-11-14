@@ -3,6 +3,11 @@ import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
 import { radiusRoutes } from "./radius.routes";
 
+vi.mock("../../middleware/auth", () => ({
+  requireAuth: () => async () => {},
+  requireRole: () => async () => {},
+}));
+
 describe("RADIUS proxy authorization", () => {
   let app: FastifyInstance | null = null;
 

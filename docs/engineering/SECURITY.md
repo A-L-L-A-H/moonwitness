@@ -39,6 +39,15 @@ affected versions, and impact. Expect an acknowledgement before any public discl
   a successful recovery message without performing recovery.
 - Public timeline reads remain anonymous. Authenticated timeline requests use the verified session
   to create their ORM `ActorContext`; caller-provided identity or role headers are not trusted.
+- Every Rust-service proxy route, including health endpoints, requires the server-verified `mw_session`
+  cookie. `viewer`, `editor`, and `admin` may read; service mutations require `admin`. RADIUS writes
+  also require the `RADIUS_PROXY_ADMIN=1` operational switch.
+- SNMP community strings and other secret-like response fields are omitted from operator responses.
+  Service session cookies and caller-provided authorization headers are never forwarded upstream.
+- Storage requests are signed by the API with server-only `STORAGE_ACCESS_KEY` and
+  `STORAGE_SECRET_KEY`; the browser must not receive or persist these values. The Storage service
+  requires both credentials and rejects unsigned requests unless its local-only anonymous mode is
+  explicitly enabled for development.
 
 ## Dependency policy
 

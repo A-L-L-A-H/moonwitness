@@ -1,6 +1,28 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { requireAuth, requireRole } from "../../middleware/auth";
+import {
+  encodeStoragePath,
+  getStorageSigningCredentials,
+  hasCallerSignatureQuery,
+  signStorageRequest,
+} from "../../services/storage-sigv4";
 
 const STORAGE_URL = process.env.STORAGE_URL ?? "http://127.0.0.1:8091";
+
+export function resolveStorageTarget(target: string): URL {
+  const baseUrl = new URL(STORAGE_URL);
+  const queryStart = target.indexOf("?");
+  const rawPath = queryStart === -1 ? target : target.slice(0, queryStart);
+  const rawQuery = queryStart === -1 ? "" : target.slice(queryStart + 1);
+  if (!rawPath.startsWith("/") || rawPath.startsWith("//")) {
+    throw new Error("storage target must be an absolute path on the configured service");
+  }
+
+  const targetUrl = new URL(baseUrl);
+  targetUrl.pathname = encodeStoragePath(rawPath);
+  targetUrl.search = rawQuery ? `?${rawQuery}` : "";
+  return targetUrl;
+}
 
 // Allow application/octet-stream and other binary content types for storage uploads
 function configureContentTypeParsers(fastify: FastifyInstance): void {
@@ -32,20 +54,58 @@ async function forward(
   reply: FastifyReply,
   target: string,
   method: string,
+  sign = true,
 ) {
+  const body = request.body;
+  const bodyBytes =
+    body === undefined || body === null
+      ? Buffer.alloc(0)
+      : Buffer.isBuffer(body)
+        ? body
+        : typeof body === "string"
+          ? Buffer.from(body)
+          : Buffer.from(JSON.stringify(body));
+  const upstreamHeaders = forwardHeaders(request);
+  let upstreamUrl: URL;
+
+  try {
+    const rawPath = target.split("?", 1)[0] ?? "";
+    if (
+      rawPath.split("/").some((segment) => {
+        const decoded = decodeURIComponent(segment);
+        return decoded === "." || decoded === "..";
+      })
+    ) {
+      return reply.code(400).send({ error: "invalid storage path" });
+    }
+
+    upstreamUrl = resolveStorageTarget(target);
+    if (sign) {
+      const rawQuery = upstreamUrl.search.slice(1);
+      if (hasCallerSignatureQuery(rawQuery)) {
+        return reply.code(400).send({ error: "caller-supplied S3 signatures are not accepted" });
+      }
+      const credentials = getStorageSigningCredentials();
+      if (!credentials) {
+        request.log.error("Storage SigV4 credentials are not configured");
+        return reply.code(503).send({ error: "storage signing is not configured" });
+      }
+      Object.assign(
+        upstreamHeaders,
+        signStorageRequest(method, upstreamUrl, bodyBytes, credentials),
+      );
+    }
+  } catch (error) {
+    request.log.warn({ err: error, target }, "invalid storage request target");
+    return reply.code(400).send({ error: "invalid storage request target" });
+  }
+
   let upstream: Response;
   try {
-    const body = request.body;
-    const serializedBody =
-      typeof body === "string" || body instanceof Buffer
-        ? body
-        : body
-          ? JSON.stringify(body)
-          : undefined;
-    upstream = await fetch(`${STORAGE_URL}${target}`, {
+    upstream = await fetch(upstreamUrl, {
       method,
-      headers: forwardHeaders(request),
-      body: serializedBody,
+      headers: upstreamHeaders,
+      body: bodyBytes.length > 0 ? bodyBytes : undefined,
       signal: AbortSignal.timeout(15_000),
     });
   } catch (error) {
@@ -53,12 +113,12 @@ async function forward(
     return reply.code(502).send({ error: "storage tidak dapat dihubungi", reachable: false });
   }
 
-  const body = Buffer.from(await upstream.arrayBuffer());
+  const responseBody = Buffer.from(await upstream.arrayBuffer());
   return reply
     .code(upstream.status)
     .header("content-type", upstream.headers.get("content-type") ?? "application/xml")
     .header("cache-control", "no-store")
-    .send(body);
+    .send(responseBody);
 }
 
 interface WildcardParams {
@@ -84,22 +144,27 @@ function queryOf(request: FastifyRequest): string {
 
 export async function storageRoutes(fastify: FastifyInstance) {
   configureContentTypeParsers(fastify);
+  fastify.addHook("preHandler", requireAuth());
 
   fastify.get("/storage/health", async (request, reply) =>
-    forward(request, reply, "/health", "GET"),
+    forward(request, reply, "/health", "GET", false),
   );
 
   fastify.get("/storage/buckets", async (request, reply) => forward(request, reply, "/", "GET"));
 
   // All bucket/object operations share one wildcard route to avoid Fastify
   // route conflicts between `/:bucket` and `/:bucket/*`.
-  fastify.put<{ Params: WildcardParams }>("/storage/buckets/*", async (request, reply) => {
-    const { bucket, key } = parseBucketKey(request.params["*"]);
-    if (key) {
-      return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "PUT");
-    }
-    return forward(request, reply, `/${bucket}${queryOf(request)}`, "PUT");
-  });
+  fastify.put<{ Params: WildcardParams }>(
+    "/storage/buckets/*",
+    { preHandler: requireRole("admin") },
+    async (request, reply) => {
+      const { bucket, key } = parseBucketKey(request.params["*"]);
+      if (key) {
+        return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "PUT");
+      }
+      return forward(request, reply, `/${bucket}${queryOf(request)}`, "PUT");
+    },
+  );
 
   fastify.head<{ Params: WildcardParams }>("/storage/buckets/*", async (request, reply) => {
     const { bucket, key } = parseBucketKey(request.params["*"]);
@@ -109,21 +174,29 @@ export async function storageRoutes(fastify: FastifyInstance) {
     return forward(request, reply, `/${bucket}${queryOf(request)}`, "HEAD");
   });
 
-  fastify.delete<{ Params: WildcardParams }>("/storage/buckets/*", async (request, reply) => {
-    const { bucket, key } = parseBucketKey(request.params["*"]);
-    if (key) {
-      return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "DELETE");
-    }
-    return forward(request, reply, `/${bucket}${queryOf(request)}`, "DELETE");
-  });
+  fastify.delete<{ Params: WildcardParams }>(
+    "/storage/buckets/*",
+    { preHandler: requireRole("admin") },
+    async (request, reply) => {
+      const { bucket, key } = parseBucketKey(request.params["*"]);
+      if (key) {
+        return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "DELETE");
+      }
+      return forward(request, reply, `/${bucket}${queryOf(request)}`, "DELETE");
+    },
+  );
 
-  fastify.post<{ Params: WildcardParams }>("/storage/buckets/*", async (request, reply) => {
-    const { bucket, key } = parseBucketKey(request.params["*"]);
-    if (key) {
-      return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "POST");
-    }
-    return forward(request, reply, `/${bucket}${queryOf(request)}`, "POST");
-  });
+  fastify.post<{ Params: WildcardParams }>(
+    "/storage/buckets/*",
+    { preHandler: requireRole("admin") },
+    async (request, reply) => {
+      const { bucket, key } = parseBucketKey(request.params["*"]);
+      if (key) {
+        return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "POST");
+      }
+      return forward(request, reply, `/${bucket}${queryOf(request)}`, "POST");
+    },
+  );
 
   fastify.get<{ Params: WildcardParams }>("/storage/buckets/*", async (request, reply) => {
     const { bucket, key } = parseBucketKey(request.params["*"]);

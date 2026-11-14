@@ -196,9 +196,15 @@ pub fn authenticate(
             .find(|(k, _)| k.eq_ignore_ascii_case("x-amz-credential"))
             .map(|(_, v)| v.clone())
             .ok_or_else(|| SigV4Error::Malformed("missing X-Amz-Credential".into()))?;
-        let access_key = credential.split('/').next().unwrap_or_default().to_string();
+        let (access_key, credential_scope) = credential
+            .split_once('/')
+            .ok_or_else(|| SigV4Error::Malformed("malformed X-Amz-Credential".into()))?;
+        let access_key = access_key.to_string();
         if access_key != state.config.access_key {
             return Err(SigV4Error::UnknownAccessKey.into());
+        }
+        if credential_scope.split('/').count() != 4 {
+            return Err(SigV4Error::Malformed("malformed X-Amz-Credential scope".into()).into());
         }
         let amz_date = query
             .iter()
@@ -216,11 +222,18 @@ pub fn authenticate(
             .map(|(_, v)| v.clone())
             .ok_or_else(|| SigV4Error::Malformed("missing X-Amz-Signature".into()))?;
 
-        let mut presign_headers = BTreeMap::new();
-        presign_headers.insert(
-            "host".to_string(),
-            header_map.get("host").cloned().unwrap_or_default(),
-        );
+        let signed_headers = query
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("x-amz-signedheaders"))
+            .map(|(_, v)| {
+                v.split(';')
+                    .map(|header| header.trim().to_ascii_lowercase())
+                    .collect::<Vec<_>>()
+            })
+            .ok_or_else(|| SigV4Error::Malformed("missing X-Amz-SignedHeaders".into()))?;
+        if !signed_headers.iter().any(|header| header == "host") {
+            return Err(SigV4Error::Malformed("presigned request must sign host".into()).into());
+        }
 
         sigv4::verify_presigned(
             &state.config.secret_key,
@@ -230,7 +243,9 @@ pub fn authenticate(
             expires,
             &amz_date,
             &signature,
-            &credential,
+            credential_scope,
+            &header_map,
+            &signed_headers,
             "UNSIGNED-PAYLOAD",
             DEFAULT_REGION,
             SERVICE_NAME,
