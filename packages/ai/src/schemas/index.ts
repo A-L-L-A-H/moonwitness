@@ -68,7 +68,7 @@ export const ToolDefinitionSchema = z.object({
   function: z.object({
     name: z.string().min(1),
     description: z.string(),
-    parameters: z.record(z.unknown()), // JSON Schema
+    parameters: z.record(z.string(), z.unknown()), // JSON Schema
   }),
 });
 
@@ -100,7 +100,10 @@ export const ChatRequestOptionsSchema = z.object({
   responseFormat: z
     .union([
       z.object({ type: z.literal("json_object") }),
-      z.object({ type: z.literal("json_schema"), jsonSchema: z.record(z.unknown()) }),
+      z.object({
+        type: z.literal("json_schema"),
+        jsonSchema: z.record(z.string(), z.unknown()),
+      }),
     ])
     .optional(),
   seed: z.number().int().optional(),
@@ -153,7 +156,7 @@ export const ChatResponseSchema = z.object({
   choices: z.array(ChatChoiceSchema).min(1),
   usage: UsageMetadataSchema,
   createdAt: z.number().int().positive(),
-  providerMetadata: z.record(z.unknown()).optional(),
+  providerMetadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type ChatResponse = z.infer<typeof ChatResponseSchema>;
@@ -237,7 +240,7 @@ export const ProviderHealthSchema = z.object({
   latencyMs: z.number().int().nonnegative().nullable(),
   error: z.string().optional(),
   models: z.array(ModelIdentitySchema).optional(),
-  details: z.record(z.unknown()).optional(),
+  details: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type ProviderHealth = z.infer<typeof ProviderHealthSchema>;
