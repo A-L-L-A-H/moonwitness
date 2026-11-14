@@ -223,7 +223,9 @@ describe("storage proxy", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     const options = fetch.mock.calls[0]?.[1];
     const headers = new Headers(options?.headers);
-    expect(headers.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 Credential=test-storage-access\//);
+    expect(headers.get("authorization")).toMatch(
+      /^AWS4-HMAC-SHA256 Credential=test-storage-access\//,
+    );
     expect(headers.get("x-amz-content-sha256")).toBe(
       createHash("sha256").update("hello").digest("hex"),
     );

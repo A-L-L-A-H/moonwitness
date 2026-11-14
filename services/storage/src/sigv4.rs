@@ -532,8 +532,8 @@ mod tests {
             &signed_headers,
             "UNSIGNED-PAYLOAD",
         );
-        let signature = signature("secret", scope, amz_date, "us-east-1", "s3", &canonical)
-            .unwrap();
+        let signature =
+            signature("secret", scope, amz_date, "us-east-1", "s3", &canonical).unwrap();
 
         verify_presigned(
             "secret",

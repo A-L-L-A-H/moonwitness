@@ -8,6 +8,7 @@ pub struct Device {
     pub host: String,
     pub port: i64,
     pub version: String,
+    #[allow(dead_code)]
     #[serde(skip_serializing)]
     pub community: String,
     pub enabled: bool,

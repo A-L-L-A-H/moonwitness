@@ -69,14 +69,10 @@ export async function radiusRoutes(fastify: FastifyInstance) {
     forward(request, reply, `/api/users/${encodeURIComponent(request.params.username)}`, "GET"),
   );
 
-  fastify.post(
-    "/radius/users",
-    { preHandler: requireRole("admin") },
-    async (request, reply) => {
-      if (!requireAdmin(reply)) return reply;
-      return forward(request, reply, "/api/users", "POST");
-    },
-  );
+  fastify.post("/radius/users", { preHandler: requireRole("admin") }, async (request, reply) => {
+    if (!requireAdmin(reply)) return reply;
+    return forward(request, reply, "/api/users", "POST");
+  });
 
   fastify.put<{ Params: { username: string } }>(
     "/radius/users/:username",

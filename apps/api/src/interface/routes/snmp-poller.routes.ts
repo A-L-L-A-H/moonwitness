@@ -70,10 +70,8 @@ export async function snmpPollerRoutes(fastify: FastifyInstance) {
     forward(request, reply, "/api/devices", "GET"),
   );
 
-  fastify.post(
-    "/snmp/devices",
-    { preHandler: requireRole("admin") },
-    async (request, reply) => forward(request, reply, "/api/devices", "POST"),
+  fastify.post("/snmp/devices", { preHandler: requireRole("admin") }, async (request, reply) =>
+    forward(request, reply, "/api/devices", "POST"),
   );
 
   fastify.get<{ Params: { id: string } }>("/snmp/devices/:id", async (request, reply) =>

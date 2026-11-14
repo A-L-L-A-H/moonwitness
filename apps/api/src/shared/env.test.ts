@@ -62,12 +62,12 @@ describe("validateProductionEnv", () => {
   });
 
   it("requires non-placeholder Storage signing credentials in production", () => {
-    expect(
-      validateProductionEnv({ ...base, STORAGE_ACCESS_KEY: undefined }),
-    ).toContain("STORAGE_ACCESS_KEY must be set for server-side Storage signing in production.");
-    expect(
-      validateProductionEnv({ ...base, STORAGE_SECRET_KEY: undefined }),
-    ).toContain("STORAGE_SECRET_KEY must be set for server-side Storage signing in production.");
+    expect(validateProductionEnv({ ...base, STORAGE_ACCESS_KEY: undefined })).toContain(
+      "STORAGE_ACCESS_KEY must be set for server-side Storage signing in production.",
+    );
+    expect(validateProductionEnv({ ...base, STORAGE_SECRET_KEY: undefined })).toContain(
+      "STORAGE_SECRET_KEY must be set for server-side Storage signing in production.",
+    );
     expect(
       validateProductionEnv({ ...base, STORAGE_SECRET_KEY: "change-me-storage-secret" }),
     ).toContain("STORAGE_SECRET_KEY must not use the example placeholder in production.");
