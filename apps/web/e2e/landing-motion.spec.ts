@@ -163,6 +163,8 @@ test("mobile landing preview opens the query-resolved event detail", async ({ pa
 test("live reduction reveals offscreen content and atmosphere responds to resizing", async ({
   page,
 }) => {
+  // The page can mount two p5 sketches after the viewport crosses the desktop breakpoint.
+  test.setTimeout(60_000);
   await page.emulateMedia({ reducedMotion: "no-preference" });
   // Dev-server compile plus two p5 mounts exceeds the default 30s budget.
   test.setTimeout(60000);
