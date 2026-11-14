@@ -92,13 +92,32 @@ pub fn parse_authorization(header: &str) -> Result<ParsedAuth, SigV4Error> {
     let signature =
         signature.ok_or_else(|| SigV4Error::Malformed("missing Signature field".into()))?;
 
-    let mut pieces = credential.splitn(5, '/');
+    let mut pieces = credential.split('/');
     let access_key = pieces
         .next()
         .filter(|s| !s.is_empty())
         .ok_or_else(|| SigV4Error::Malformed("empty access key".into()))?
         .to_string();
-    let credential_scope = credential.clone();
+    let date_stamp = pieces
+        .next()
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| SigV4Error::Malformed("missing credential date".into()))?;
+    let region = pieces
+        .next()
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| SigV4Error::Malformed("missing credential region".into()))?;
+    let service = pieces
+        .next()
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| SigV4Error::Malformed("missing credential service".into()))?;
+    let terminator = pieces
+        .next()
+        .filter(|s| !s.is_empty())
+        .ok_or_else(|| SigV4Error::Malformed("missing credential terminator".into()))?;
+    if terminator != "aws4_request" || pieces.next().is_some() {
+        return Err(SigV4Error::Malformed("invalid credential scope".into()));
+    }
+    let credential_scope = format!("{date_stamp}/{region}/{service}/{terminator}");
 
     Ok(ParsedAuth {
         access_key,
@@ -168,6 +187,8 @@ pub fn verify_presigned(
     amz_date: &str,
     signature_hex: &str,
     credential_scope: &str,
+    headers: &BTreeMap<String, String>,
+    signed_headers: &[String],
     payload_hash: &str,
     region: &str,
     service: &str,
@@ -179,16 +200,12 @@ pub fn verify_presigned(
         return Err(SigV4Error::Expired);
     }
 
-    let mut headers = BTreeMap::new();
-    headers.insert("host".to_string(), String::new());
-    headers.insert("x-amz-date".to_string(), amz_date.to_string());
-
     let canonical_request = canonical_request(
         method,
         canonical_uri,
         canonical_query,
-        &headers,
-        &["host".to_string()],
+        headers,
+        signed_headers,
         payload_hash,
     );
     let expected = signature(
@@ -481,5 +498,59 @@ mod tests {
         assert_eq!(parsed.access_key, "AK");
         assert_eq!(parsed.signed_headers, vec!["host", "x-amz-date"]);
         assert_eq!(parsed.signature, "abc");
+        assert_eq!(
+            parsed.credential_scope,
+            "20261114/us-east-1/s3/aws4_request"
+        );
+    }
+
+    #[test]
+    fn verifies_presigned_request_using_the_request_host() {
+        let now = chrono::DateTime::parse_from_rfc3339("2026-11-14T00:00:00Z")
+            .unwrap()
+            .with_timezone(&chrono::Utc);
+        let amz_date = "20261114T000000Z";
+        let scope = "20261114/us-east-1/s3/aws4_request";
+        let signed_headers = vec!["host".to_string()];
+        let hdrs = headers(&[("host", "storage.example.test")]);
+        let query = vec![
+            ("X-Amz-Algorithm".to_string(), ALGORITHM.to_string()),
+            (
+                "X-Amz-Credential".to_string(),
+                "AK/20261114/us-east-1/s3/aws4_request".to_string(),
+            ),
+            ("X-Amz-Date".to_string(), amz_date.to_string()),
+            ("X-Amz-Expires".to_string(), "60".to_string()),
+            ("X-Amz-SignedHeaders".to_string(), "host".to_string()),
+        ];
+        let canonical_query = canonical_query_string(&query);
+        let canonical = canonical_request(
+            "GET",
+            "/alpha/",
+            &canonical_query,
+            &hdrs,
+            &signed_headers,
+            "UNSIGNED-PAYLOAD",
+        );
+        let signature = signature("secret", scope, amz_date, "us-east-1", "s3", &canonical)
+            .unwrap();
+
+        verify_presigned(
+            "secret",
+            "GET",
+            "/alpha/",
+            &canonical_query,
+            60,
+            amz_date,
+            &signature,
+            scope,
+            &hdrs,
+            &signed_headers,
+            "UNSIGNED-PAYLOAD",
+            "us-east-1",
+            "s3",
+            now,
+        )
+        .unwrap();
     }
 }

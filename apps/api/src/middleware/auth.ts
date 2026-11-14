@@ -16,19 +16,30 @@ export interface AuthenticatedRequest extends FastifyRequest {
   };
 }
 
-export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
+type AuthenticatedUser = NonNullable<AuthenticatedRequest["user"]>;
+
+async function resolveAuthenticatedUser(
+  request: FastifyRequest,
+  reply: FastifyReply,
+): Promise<AuthenticatedUser | null> {
+  if (request.method === "OPTIONS") return null;
+
+  const typedReq = request as AuthenticatedRequest;
+  if (typedReq.user) return typedReq.user;
+
   const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
   if (!sessionId) {
-    return reply.code(401).send({ error: "Not authenticated" });
+    reply.code(401).send({ error: "Not authenticated" });
+    return null;
   }
 
   const session = await getSessionWithUser(sessionId);
   if (!session) {
-    reply.clearCookie("mw_session", { path: "/" });
-    return reply.code(401).send({ error: "Session expired or invalid" });
+    reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+    reply.code(401).send({ error: "Session expired or invalid" });
+    return null;
   }
 
-  const typedReq = request as AuthenticatedRequest;
   typedReq.user = {
     id: session.userId,
     username: session.username,
@@ -36,62 +47,33 @@ export async function authMiddleware(request: FastifyRequest, reply: FastifyRepl
     role: session.role,
     displayName: session.displayName,
   };
+  return typedReq.user;
+}
+
+export async function authMiddleware(request: FastifyRequest, reply: FastifyReply) {
+  await resolveAuthenticatedUser(request, reply);
 }
 
 export function requireAuth() {
   return async (request: FastifyRequest, reply: FastifyReply) => {
-    const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
-    if (!sessionId) {
-      return reply.code(401).send({ error: "Not authenticated" });
-    }
-
-    const session = await getSessionWithUser(sessionId);
-    if (!session) {
-      reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
-      return reply.code(401).send({ error: "Session expired or invalid" });
-    }
-
-    const typedReq = request as AuthenticatedRequest;
-    typedReq.user = {
-      id: session.userId,
-      username: session.username,
-      email: session.email,
-      role: session.role,
-      displayName: session.displayName,
-    };
+    await resolveAuthenticatedUser(request, reply);
   };
 }
 
 export function requireRole(...allowedRoles: ("admin" | "editor" | "viewer")[]) {
   return async (request: FastifyRequest, reply: FastifyReply) => {
-    const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
-    if (!sessionId) {
-      return reply.code(401).send({ error: "Not authenticated" });
-    }
+    const user = await resolveAuthenticatedUser(request, reply);
+    if (!user) return;
 
-    const session = await getSessionWithUser(sessionId);
-    if (!session) {
-      reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
-      return reply.code(401).send({ error: "Session expired or invalid" });
-    }
-
-    if (!allowedRoles.includes(session.role)) {
+    if (!allowedRoles.includes(user.role)) {
       return reply.code(403).send({ error: "Forbidden: insufficient permissions" });
     }
-
-    const typedReq = request as AuthenticatedRequest;
-    typedReq.user = {
-      id: session.userId,
-      username: session.username,
-      email: session.email,
-      role: session.role,
-      displayName: session.displayName,
-    };
   };
 }
 
 export function optionalAuth() {
   return async (request: FastifyRequest, _reply: FastifyReply) => {
+    if (request.method === "OPTIONS") return;
     const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
     if (!sessionId) return;
 

@@ -21,9 +21,15 @@ impl Config {
         let database_url = std::env::var("DATABASE_URL")
             .unwrap_or_else(|_| "sqlite:./storage.db?mode=rwc".to_string());
         let access_key = std::env::var("STORAGE_ACCESS_KEY")
-            .unwrap_or_else(|_| "moonwitness-storage".to_string());
+            .map_err(|_| anyhow::anyhow!("STORAGE_ACCESS_KEY must be configured"))?;
         let secret_key = std::env::var("STORAGE_SECRET_KEY")
-            .unwrap_or_else(|_| "change-me-storage-secret".to_string());
+            .map_err(|_| anyhow::anyhow!("STORAGE_SECRET_KEY must be configured"))?;
+        if access_key.trim().is_empty() {
+            anyhow::bail!("STORAGE_ACCESS_KEY must not be empty");
+        }
+        if secret_key.trim().is_empty() {
+            anyhow::bail!("STORAGE_SECRET_KEY must not be empty");
+        }
         let allow_anonymous = std::env::var("STORAGE_ALLOW_ANONYMOUS")
             .map(|v| matches!(v.trim().to_ascii_lowercase().as_str(), "1" | "true" | "yes"))
             .unwrap_or(false);

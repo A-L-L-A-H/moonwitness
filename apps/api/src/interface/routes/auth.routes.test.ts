@@ -288,4 +288,63 @@ describe("auth routes", () => {
     expect(adminApply.statusCode).toBe(200);
     expect(fetch).toHaveBeenCalledTimes(2);
   });
+
+  it("protects service proxies with verified sessions and admin-only mutations", async () => {
+    process.env.STORAGE_ACCESS_KEY = "test-storage-access";
+    process.env.STORAGE_SECRET_KEY = "test-storage-secret";
+    app = await loadApp();
+    const fetch = vi.fn(
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+        new Response("<ListAllMyBucketsResult/>", {
+          status: 200,
+          headers: { "content-type": "application/xml" },
+        }),
+    );
+    vi.stubGlobal("fetch", fetch);
+
+    const anonymousSpoof = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/storage/buckets`,
+      headers: { "x-actor-id": "1", "x-actor-role": "admin" },
+    });
+    expect(anonymousSpoof.statusCode).toBe(401);
+    expect(fetch).not.toHaveBeenCalled();
+
+    const viewer = await createUser({
+      username: "proxy-viewer",
+      email: "proxy-viewer@moon.world",
+      password: "proxy-viewer-password-2026",
+      role: "viewer",
+      displayName: "Proxy Viewer",
+    });
+    const viewerCookie = await login(app, viewer.username, "proxy-viewer-password-2026");
+    const viewerRead = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/storage/buckets`,
+      headers: { cookie: viewerCookie },
+    });
+    expect(viewerRead.statusCode).toBe(200);
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    const viewerWrite = await app.inject({
+      method: "PUT",
+      url: `${API_PREFIX}/storage/buckets/media/protected.txt`,
+      headers: { cookie: viewerCookie, "content-type": "application/octet-stream" },
+      payload: "protected",
+    });
+    expect(viewerWrite.statusCode).toBe(403);
+    expect(fetch).toHaveBeenCalledTimes(1);
+
+    const adminCookie = await login(app, ADMIN_USERNAME, ADMIN_PASSWORD);
+    const adminWrite = await app.inject({
+      method: "PUT",
+      url: `${API_PREFIX}/storage/buckets/media/protected.txt`,
+      headers: { cookie: adminCookie, "content-type": "application/octet-stream" },
+      payload: "protected",
+    });
+    expect(adminWrite.statusCode).toBe(200);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    const upstreamHeaders = new Headers(fetch.mock.calls[1]?.[1]?.headers);
+    expect(upstreamHeaders.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 /);
+  });
 });
