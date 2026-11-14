@@ -53,7 +53,10 @@ export function canonicalStoragePath(pathname: string): string {
 }
 
 export function canonicalStorageQuery(rawQuery: string): string {
-  const pairs = parseQuery(rawQuery).map(([key, value]) => [uriEncode(key), uriEncode(value)]);
+  const pairs: Array<[string, string]> = parseQuery(rawQuery).map(([key, value]) => [
+    uriEncode(key),
+    uriEncode(value),
+  ]);
   pairs.sort(([leftKey, leftValue], [rightKey, rightValue]) => {
     if (leftKey !== rightKey) return leftKey < rightKey ? -1 : 1;
     return leftValue === rightValue ? 0 : leftValue < rightValue ? -1 : 1;

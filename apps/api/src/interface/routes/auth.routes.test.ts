@@ -294,7 +294,7 @@ describe("auth routes", () => {
     process.env.STORAGE_SECRET_KEY = "test-storage-secret";
     app = await loadApp();
     const fetch = vi.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      async (_input: string | URL, _init?: RequestInit) =>
         new Response("<ListAllMyBucketsResult/>", {
           status: 200,
           headers: { "content-type": "application/xml" },

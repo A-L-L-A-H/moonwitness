@@ -97,12 +97,12 @@ async function forward(
     return reply.code(502).send({ error: "storage tidak dapat dihubungi", reachable: false });
   }
 
-  const body = Buffer.from(await upstream.arrayBuffer());
+  const responseBody = Buffer.from(await upstream.arrayBuffer());
   return reply
     .code(upstream.status)
     .header("content-type", upstream.headers.get("content-type") ?? "application/xml")
     .header("cache-control", "no-store")
-    .send(body);
+    .send(responseBody);
 }
 
 interface WildcardParams {
