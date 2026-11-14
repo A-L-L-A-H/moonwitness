@@ -292,22 +292,65 @@ describe("auth routes", () => {
   it("protects service proxies with verified sessions and admin-only mutations", async () => {
     process.env.STORAGE_ACCESS_KEY = "test-storage-access";
     process.env.STORAGE_SECRET_KEY = "test-storage-secret";
+    process.env.RADIUS_PROXY_ADMIN = "0";
     app = await loadApp();
     const fetch = vi.fn(
       async (_input: string | URL, _init?: RequestInit) =>
-        new Response("<ListAllMyBucketsResult/>", {
-          status: 200,
-          headers: { "content-type": "application/xml" },
-        }),
+        new Response(
+          JSON.stringify({ id: "device-1", community: "private", authPassword: "secret" }),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        ),
     );
     vi.stubGlobal("fetch", fetch);
 
-    const anonymousSpoof = await app.inject({
-      method: "GET",
-      url: `${API_PREFIX}/storage/buckets`,
-      headers: { "x-actor-id": "1", "x-actor-role": "admin" },
-    });
-    expect(anonymousSpoof.statusCode).toBe(401);
+    const radiusReadPath = `${API_PREFIX}/radius/users`;
+    const readPaths = [
+      radiusReadPath,
+      `${API_PREFIX}/storage/buckets`,
+      `${API_PREFIX}/syslog/messages`,
+      `${API_PREFIX}/snmp/devices`,
+    ];
+    const healthPaths = [
+      `${API_PREFIX}/radius/health`,
+      `${API_PREFIX}/storage/health`,
+      `${API_PREFIX}/syslog/health`,
+      `${API_PREFIX}/snmp/health`,
+    ];
+    const writeRequests: Array<{
+      method: "POST" | "PUT";
+      url: string;
+      headers?: Record<string, string>;
+      payload: Record<string, string> | string;
+    }> = [
+      {
+        method: "POST" as const,
+        url: `${API_PREFIX}/radius/users`,
+        payload: { username: "proxy-user" },
+      },
+      {
+        method: "PUT" as const,
+        url: `${API_PREFIX}/storage/buckets/media/protected.txt`,
+        headers: { "content-type": "application/octet-stream" },
+        payload: "protected",
+      },
+      {
+        method: "POST" as const,
+        url: `${API_PREFIX}/snmp/devices`,
+        payload: { name: "router" },
+      },
+    ];
+
+    for (const url of [...readPaths, ...healthPaths]) {
+      const anonymousSpoof = await app.inject({
+        method: "GET",
+        url,
+        headers: { "x-actor-id": "1", "x-actor-role": "admin" },
+      });
+      expect(anonymousSpoof.statusCode).toBe(401);
+    }
     expect(fetch).not.toHaveBeenCalled();
 
     const viewer = await createUser({
@@ -318,33 +361,62 @@ describe("auth routes", () => {
       displayName: "Proxy Viewer",
     });
     const viewerCookie = await login(app, viewer.username, "proxy-viewer-password-2026");
-    const viewerRead = await app.inject({
-      method: "GET",
-      url: `${API_PREFIX}/storage/buckets`,
-      headers: { cookie: viewerCookie },
-    });
-    expect(viewerRead.statusCode).toBe(200);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    for (const url of readPaths) {
+      const viewerRead = await app.inject({
+        method: "GET",
+        url,
+        headers: { cookie: viewerCookie },
+      });
+      expect(viewerRead.statusCode).toBe(200);
+      if (url.endsWith("/snmp/devices")) {
+        expect(viewerRead.json()).toEqual({ id: "device-1" });
+      }
+    }
+    expect(fetch).toHaveBeenCalledTimes(readPaths.length);
 
-    const viewerWrite = await app.inject({
-      method: "PUT",
-      url: `${API_PREFIX}/storage/buckets/media/protected.txt`,
-      headers: { cookie: viewerCookie, "content-type": "application/octet-stream" },
-      payload: "protected",
+    for (const request of writeRequests) {
+      const viewerWrite = await app.inject({
+        ...request,
+        headers: { ...request.headers, cookie: viewerCookie },
+      });
+      expect(viewerWrite.statusCode).toBe(403);
+    }
+    expect(fetch).toHaveBeenCalledTimes(readPaths.length);
+
+    const editor = await createUser({
+      username: "proxy-editor",
+      email: "proxy-editor@moon.world",
+      password: "proxy-editor-password-2026",
+      role: "editor",
+      displayName: "Proxy Editor",
     });
-    expect(viewerWrite.statusCode).toBe(403);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    const editorRead = await app.inject({
+      method: "GET",
+      url: radiusReadPath,
+      headers: { cookie: await login(app, editor.username, "proxy-editor-password-2026") },
+    });
+    expect(editorRead.statusCode).toBe(200);
 
     const adminCookie = await login(app, ADMIN_USERNAME, ADMIN_PASSWORD);
-    const adminWrite = await app.inject({
-      method: "PUT",
-      url: `${API_PREFIX}/storage/buckets/media/protected.txt`,
-      headers: { cookie: adminCookie, "content-type": "application/octet-stream" },
-      payload: "protected",
+    const radiusKillSwitch = await app.inject({
+      method: "POST",
+      url: `${API_PREFIX}/radius/users`,
+      headers: { cookie: adminCookie },
+      payload: { username: "proxy-user" },
     });
-    expect(adminWrite.statusCode).toBe(200);
-    expect(fetch).toHaveBeenCalledTimes(2);
-    const upstreamHeaders = new Headers(fetch.mock.calls[1]?.[1]?.headers);
+    expect(radiusKillSwitch.statusCode).toBe(403);
+    expect(fetch).toHaveBeenCalledTimes(readPaths.length + 1);
+
+    process.env.RADIUS_PROXY_ADMIN = "1";
+    for (const request of writeRequests) {
+      const adminWrite = await app.inject({
+        ...request,
+        headers: { ...request.headers, cookie: adminCookie },
+      });
+      expect(adminWrite.statusCode).toBe(200);
+    }
+    expect(fetch).toHaveBeenCalledTimes(readPaths.length + 1 + writeRequests.length);
+    const upstreamHeaders = new Headers(fetch.mock.calls[readPaths.length + 2]?.[1]?.headers);
     expect(upstreamHeaders.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 /);
   });
 });
