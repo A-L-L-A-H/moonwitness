@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 test("Signals discloses its fictional storyworld and uses a real archive action", async ({
   page,
 }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
   await page.goto("/");
@@ -162,6 +163,9 @@ test("mobile landing preview opens the query-resolved event detail", async ({ pa
 test("live reduction reveals offscreen content and atmosphere responds to resizing", async ({
   page,
 }) => {
+  // Both hero p5 sketches can take over 20s to remount in a loaded headless CI browser.
+  test.setTimeout(60_000);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   // Dev-server compile plus two p5 mounts exceeds the default 30s budget.
   test.setTimeout(60000);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -175,17 +179,18 @@ test("live reduction reveals offscreen content and atmosphere responds to resizi
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 1024, height: 844 });
   await expect
-    .poll(() => page.locator("#home canvas").count(), { timeout: 20000 })
+    .poll(() => page.locator("#home canvas").count(), { timeout: 30_000 })
     .toBeGreaterThan(0);
   await page.setViewportSize({ width: 430, height: 844 });
   await expect(page.locator("#home canvas")).toHaveCount(0);
   await page.setViewportSize({ width: 1024, height: 844 });
   await expect
-    .poll(() => page.locator("#home canvas").count(), { timeout: 20000 })
+    .poll(() => page.locator("#home canvas").count(), { timeout: 30_000 })
     .toBeGreaterThan(0);
 });
 
 test("decorative parallax resets live and survives navigation unmount", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   const decoration = page.locator("#home [data-hero-parallax]");
   await expect(decoration).toHaveCount(1);

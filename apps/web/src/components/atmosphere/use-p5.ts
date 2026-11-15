@@ -24,7 +24,7 @@ interface UseP5Options {
 
 /**
  * Lifecycle p5 instance-mode yang aman untuk Next App Router + StrictMode:
- * dynamic import client-only, mount sekali per effect, cleanup .remove(),
+ * dynamic import client-only, mount lazily at desktop/near-viewport, cleanup .remove(),
  * pause saat off-screen / tab hidden, resize mengikuti container.
  */
 export function useP5(
@@ -45,87 +45,127 @@ export function useP5(
     const el = containerRef.current;
     if (!el) return;
 
-    // Skip loading on mobile to reduce main thread blocking
-    if (window.innerWidth < 768) return;
+    const desktop = window.matchMedia("(min-width: 768px)");
+    let dispose: (() => void) | undefined;
+    let isVisible = typeof IntersectionObserver === "undefined";
+    let visibilityObserver: IntersectionObserver | undefined;
 
-    const controller = new AbortController();
-    let cancelled = false;
-    let instance: p5 | null = null;
-    let ro: ResizeObserver | undefined;
-    let io: IntersectionObserver | undefined;
-    let lastW = el.clientWidth;
-    let lastH = el.clientHeight;
+    const mount = () => {
+      if (!desktop.matches || dispose) return;
 
-    const ctx: P5Context = {
-      el,
-      signal: controller.signal,
-      palette: readPalette(el),
-      pointer: { x: 0.5, y: 0.5 },
-      seed,
-    };
+      const controller = new AbortController();
+      let cancelled = false;
+      let instance: p5 | null = null;
+      let ro: ResizeObserver | undefined;
+      let io: IntersectionObserver | undefined;
+      let lastW = el.clientWidth;
+      let lastH = el.clientHeight;
+      let lastIntersecting = true;
 
-    const onPointer = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect();
-      ctx.pointer.x = (e.clientX - r.left) / Math.max(1, r.width);
-      ctx.pointer.y = (e.clientY - r.top) / Math.max(1, r.height);
-    };
+      const ctx: P5Context = {
+        el,
+        signal: controller.signal,
+        palette: readPalette(el),
+        pointer: { x: 0.5, y: 0.5 },
+        seed,
+      };
 
-    const syncLoop = () => {
-      if (!instance || !continuous) return;
-      const visible = io ? lastIntersecting : true;
-      if (document.hidden || !visible || pausedRef.current) instance.noLoop();
-      else instance.loop();
-    };
+      const onPointer = (e: PointerEvent) => {
+        const r = el.getBoundingClientRect();
+        ctx.pointer.x = (e.clientX - r.left) / Math.max(1, r.width);
+        ctx.pointer.y = (e.clientY - r.top) / Math.max(1, r.height);
+      };
 
-    let lastIntersecting = true;
-    syncRef.current = syncLoop;
+      const syncLoop = () => {
+        if (!instance || !continuous) return;
+        const visible = io ? lastIntersecting : true;
+        if (document.hidden || !visible || pausedRef.current) instance.noLoop();
+        else instance.loop();
+      };
+      syncRef.current = syncLoop;
 
-    void import("p5")
-      .then((mod) => {
-        if (cancelled) return;
-        const P5 = mod.default;
-        instance = new P5((p) => factory(p, ctx), el);
+      void import("p5")
+        .then((mod) => {
+          if (cancelled) return;
+          const P5 = mod.default;
+          instance = new P5((p) => factory(p, ctx), el);
 
-        ro = new ResizeObserver(() => {
-          const w = el.clientWidth;
-          const h = el.clientHeight;
-          if (!instance || w === 0 || h === 0 || (w === lastW && h === lastH)) return;
-          lastW = w;
-          lastH = h;
-          instance.resizeCanvas(w, h);
-          if (!continuous) instance.redraw();
+          ro = new ResizeObserver(() => {
+            const w = el.clientWidth;
+            const h = el.clientHeight;
+            if (!instance || w === 0 || h === 0 || (w === lastW && h === lastH)) return;
+            lastW = w;
+            lastH = h;
+            instance.resizeCanvas(w, h);
+            if (!continuous) instance.redraw();
+          });
+          ro.observe(el);
+
+          io = new IntersectionObserver(
+            (entries) => {
+              const entry = entries[0];
+              if (!entry) return;
+              lastIntersecting = entry.isIntersecting;
+              syncLoop();
+            },
+            { threshold: 0.01 },
+          );
+          io.observe(el);
+
+          document.addEventListener("visibilitychange", syncLoop);
+          if (interactive) window.addEventListener("pointermove", onPointer, { passive: true });
+          syncLoop();
+        })
+        .catch(() => {
+          /* p5 gagal dimuat: biarkan fallback CSS halftone/grain yang sudah ada. */
         });
-        ro.observe(el);
 
-        io = new IntersectionObserver(
-          (entries) => {
-            const entry = entries[0];
-            if (!entry) return;
-            lastIntersecting = entry.isIntersecting;
-            syncLoop();
-          },
-          { threshold: 0.01 },
-        );
-        io.observe(el);
+      dispose = () => {
+        cancelled = true;
+        controller.abort();
+        ro?.disconnect();
+        io?.disconnect();
+        document.removeEventListener("visibilitychange", syncLoop);
+        window.removeEventListener("pointermove", onPointer);
+        syncRef.current = () => {};
+        instance?.remove();
+        instance = null;
+      };
+    };
 
-        document.addEventListener("visibilitychange", syncLoop);
-        if (interactive) window.addEventListener("pointermove", onPointer, { passive: true });
-        syncLoop();
-      })
-      .catch(() => {
-        /* p5 gagal dimuat: biarkan fallback CSS halftone/grain yang sudah ada. */
-      });
+    const syncViewport = () => {
+      if (desktop.matches) {
+        if (isVisible) mount();
+        return;
+      }
+      const unmount = dispose;
+      dispose = undefined;
+      unmount?.();
+    };
 
+    // Avoid starting every below-the-fold p5 sketch at once on desktop.
+    if (typeof IntersectionObserver !== "undefined") {
+      visibilityObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (!entry) return;
+          isVisible = entry.isIntersecting;
+          if (isVisible) syncViewport();
+        },
+        { rootMargin: "120px" },
+      );
+      visibilityObserver.observe(el);
+    }
+
+    desktop.addEventListener("change", syncViewport);
+    syncViewport();
     return () => {
-      cancelled = true;
-      controller.abort();
-      ro?.disconnect();
-      io?.disconnect();
-      document.removeEventListener("visibilitychange", syncLoop);
-      window.removeEventListener("pointermove", onPointer);
+      desktop.removeEventListener("change", syncViewport);
+      visibilityObserver?.disconnect();
+      const unmount = dispose;
+      dispose = undefined;
+      unmount?.();
       syncRef.current = () => {};
-      instance?.remove();
-      instance = null;
     };
   }, [enabled, continuous, interactive, seed, factory, containerRef]);
 }
