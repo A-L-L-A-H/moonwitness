@@ -19,12 +19,12 @@ jobs:
     steps:
       - name: Explain promotion policy
         env:
-            EVENT_NAME: ${{ github.event_name }}
-            CI_RUN_URL: ${{ github.event.workflow_run.html_url }}
+          EVENT_NAME: ${{ github.event_name }}
+          CI_RUN_URL: ${{ github.event.workflow_run.html_url }}
         run: |
-            if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-              echo "::notice::Manual run only. Confirm the latest CI on dev before promotion."
-            else
-              echo "CI passed on dev: $CI_RUN_URL"
-            fi
-            echo "The repository owner must open, review, and manually merge the dev-to-main promotion PR."
+          if [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+            echo "::notice::Manual run only. Confirm the latest CI on dev before promotion."
+          else
+            echo "CI passed on dev: $CI_RUN_URL"
+          fi
+          echo "The repository owner must open, review, and manually merge the dev-to-main promotion PR."
