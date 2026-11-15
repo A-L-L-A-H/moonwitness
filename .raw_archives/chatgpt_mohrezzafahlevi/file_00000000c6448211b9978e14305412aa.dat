@@ -1,0 +1,995 @@
+TASK: CREATE THE COMPLETE OX-DX BRAND ASSET SYSTEM
+
+Repository:
+
+https://github.com/bjo163/universal-ontology-engine
+
+The public brand is:
+
+OX-DX
+
+Descriptor:
+
+Universal Ontology & Experience Engine
+
+Core tagline:
+
+FROM STRUCTURE TO EXPERIENCE.
+
+Secondary:
+
+FROM UNIVERSE TO BIT.
+
+# ============================================================ 0. IMPORTANT — USE THE APPROVED VISUAL DIRECTION
+
+A visual exploration has already been generated separately.
+
+Use the SINGLE visual direction selected by the project owner as the canonical design reference.
+
+Do NOT mix multiple rejected concepts.
+
+Do NOT redesign the identity.
+
+Do NOT introduce a new visual direction.
+
+Everything created in this task must belong to ONE coherent OX-DX visual system.
+
+The approved visual identity combines:
+
+QURANIC
+×
+GEN-Z
+×
+GRUNGE
+×
+INTELLIGENT
+
+The result must feel:
+
+ancient mathematical order
+\+
+modern computation
+\+
+raw underground energy
+\+
+serious systems intelligence
+
+\============================================================
+
+1. GIT WORKFLOW
+   \============================================================
+
+Create a dedicated branch from the current default branch.
+
+Branch name:
+
+`feature/ox-dx-brand-assets`
+
+Before making changes:
+
+1. inspect current branch
+2. pull/fetch latest repository state
+3. create the branch
+4. verify working tree
+5. inspect existing folders and documentation
+6. check whether an `assets/` directory already exists
+7. do not destroy unrelated assets
+
+Do NOT commit directly to `main`.
+
+Do NOT commit directly to `dev` unless repository workflow explicitly requires it.
+
+Keep this task isolated to branding/assets/documentation.
+
+# ============================================================ 2. ASSET ROOT
+
+Create:
+
+`assets/`
+
+If an assets directory already exists:
+
+DO NOT overwrite blindly.
+
+Inspect it first.
+
+Preserve existing unrelated files.
+
+Create the following structure:
+
+assets/
+├── brand/
+│ ├── logo/
+│ ├── icon/
+│ ├── wordmark/
+│ ├── lockups/
+│ └── marks/
+│
+├── vector/
+│ ├── primary/
+│ ├── monochrome/
+│ ├── inverse/
+│ └── variants/
+│
+├── raster/
+│ ├── png/
+│ ├── webp/
+│ └── favicon/
+│
+├── web/
+│ ├── header/
+│ ├── hero/
+│ ├── footer/
+│ ├── backgrounds/
+│ └── social/
+│
+├── documentation/
+│ ├── github/
+│ ├── README/
+│ └── technical/
+│
+└── source/
+├── design/
+├── references/
+└── exports/
+
+Keep the directory structure clean.
+
+# ============================================================ 3. BRAND MASTER ASSETS
+
+Create the canonical OX-DX master identity.
+
+Required:
+
+A. Primary logo
+
+B. Symbol-only logo
+
+C. OX-DX wordmark
+
+D. Horizontal logo lockup
+
+E. Vertical/stacked logo lockup
+
+F. Monochrome black
+
+G. Monochrome white
+
+H. Dark-background version
+
+I. Light-background version
+
+J. Small-size icon
+
+The core geometry must remain identical across variants.
+
+Only color/background treatment may differ.
+
+# ============================================================ 4. LOGO REQUIREMENTS
+
+The main logo must work at:
+
+16 × 16
+24 × 24
+32 × 32
+48 × 48
+64 × 64
+128 × 128
+256 × 256
+512 × 512
+1024 × 1024
+
+It must remain recognizable at tiny sizes.
+
+Do not create unnecessary micro-detail.
+
+The symbol must communicate:
+
+ontology
+\+
+relation
+\+
+resolution
+\+
+observation
+\+
+structure
+
+without becoming a literal diagram.
+
+The logo must work:
+
+without the wordmark
+with the wordmark
+in monochrome
+in a terminal
+on GitHub
+on a website
+on documentation
+on merchandise
+
+# ============================================================ 5. SVG / VECTOR
+
+SVG is the canonical source format.
+
+Create clean, editable SVG files.
+
+Required:
+
+`ox-dx-logo-primary.svg`
+
+`ox-dx-logo-monochrome.svg`
+
+`ox-dx-logo-white.svg`
+
+`ox-dx-logo-black.svg`
+
+`ox-dx-icon.svg`
+
+`ox-dx-wordmark.svg`
+
+`ox-dx-lockup-horizontal.svg`
+
+`ox-dx-lockup-stacked.svg`
+
+`ox-dx-mark.svg`
+
+Requirements:
+
+- vector paths where appropriate
+- no embedded raster image
+- no unnecessary metadata
+- no broken references
+- no external font dependency
+- no accidental clipping
+- proper viewBox
+- correct aspect ratio
+- scalable to arbitrary size
+
+The SVG files must render correctly independently.
+
+# ============================================================ 6. VECTOR SYSTEM
+
+Do not create only a logo.
+
+Build a small supporting OX-DX vector language.
+
+Create reusable vector primitives inspired by:
+
+- nodes
+- relations
+- layers
+- resolution
+- grids
+- observation
+- signal
+- transformation
+- fragments
+- geometric order
+- nested structures
+
+Create examples such as:
+
+`resolution-grid.svg`
+
+`relation-node.svg`
+
+`layer-pattern.svg`
+
+`observation-frame.svg`
+
+`signal-fragment.svg`
+
+`ontology-pattern.svg`
+
+These are graphic primitives.
+
+They must NOT be interpreted as new ontology semantics.
+
+Do not invent additional ontology concepts.
+
+# ============================================================ 7. ICON SYSTEM
+
+Create an icon set derived from the canonical geometry.
+
+At minimum:
+
+`icon.svg`
+`favicon.svg`
+`favicon-16.png`
+`favicon-32.png`
+`favicon-48.png`
+`icon-192.png`
+`icon-512.png`
+
+Also provide:
+
+- monochrome icon
+- inverse icon
+- transparent icon
+
+The favicon must remain readable without text.
+
+# ============================================================ 8. HERO BANNER
+
+Create the primary OX-DX website hero visual.
+
+Concept:
+
+**FROM STRUCTURE TO EXPERIENCE.**
+
+Visual journey:
+
+large structured geometry
+→ layers
+→ graph
+→ observation
+→ representation
+→ increasingly fine resolution
+
+The visual may subtly imply:
+
+UNIVERSE
+↓
+STRUCTURE
+↓
+GRAPH
+↓
+OBSERVATION
+↓
+DATA
+↓
+BIT
+
+Do NOT literally write all 49 ontology names into the banner.
+
+Do NOT create a generic galaxy image.
+
+Do NOT use stock imagery.
+
+Do NOT use human portraits.
+
+Do NOT use AI-brain imagery.
+
+Do NOT use generic circuit-board graphics.
+
+The hero must feel like an engineered visual artifact.
+
+Required exports:
+
+`ox-dx-hero.svg`
+
+`ox-dx-hero.png`
+
+`ox-dx-hero.webp`
+
+Provide desktop and mobile compositions where useful:
+
+`hero-desktop`
+`hero-mobile`
+
+# ============================================================ 9. HEADER ASSET
+
+Create a website header system.
+
+Required visual assets:
+
+`header-logo.svg`
+
+`header-logo-dark.svg`
+
+`header-logo-light.svg`
+
+`header-pattern.svg`
+
+Header must work with:
+
+OX-DX
+
+Universal Ontology & Experience Engine
+
+Keep the header minimal.
+
+The logo is the hero of the header.
+Do not overload it with decorative elements.
+
+# ============================================================ 10. FOOTER ASSET
+
+Create a footer visual language.
+
+Required:
+
+`footer-pattern.svg`
+
+`footer-background.svg`
+
+`footer-mark.svg`
+
+The footer should feel like the visual closing of the system.
+
+Conceptually:
+
+"From Universe to Bit."
+
+Use subtle geometry rather than large decorative artwork.
+
+# ============================================================ 11. README / GITHUB ASSETS
+
+Create assets specifically optimized for GitHub and documentation.
+
+Required:
+
+`github-social-preview.png`
+
+`github-social-preview.webp`
+
+`github-banner.svg`
+
+`readme-banner.svg`
+
+`readme-header.svg`
+
+`readme-section-divider.svg`
+
+`readme-ontology-spine.svg`
+
+`readme-architecture.svg`
+
+They should be readable in GitHub's rendering environment.
+
+Avoid tiny text.
+
+Prefer strong geometry + short labels.
+
+# ============================================================ 12. SOCIAL PREVIEW
+
+Create GitHub/social preview artwork.
+
+Recommended composition:
+
+OX-DX
+
+Universal Ontology & Experience Engine
+
+FROM STRUCTURE TO EXPERIENCE.
+
+Optional secondary:
+
+FROM UNIVERSE TO BIT.
+
+The image should remain visually strong when displayed as a small social preview.
+
+# ============================================================ 13. COLOR SYSTEM
+
+Use a dark-first identity.
+
+Base:
+
+near-black
+charcoal
+graphite
+
+Accent palette:
+
+acid green
+electric cyan
+ultraviolet / magenta
+
+Use the exact colors selected during visual exploration if available.
+
+Do NOT introduce random additional colors.
+
+Create monochrome versions regardless of the accent palette.
+
+The identity MUST work without color.
+
+# ============================================================ 14. TYPOGRAPHY
+
+Use the selected typography direction from the approved visual identity.
+
+For vector assets:
+
+avoid external font dependency.
+
+For documentation of typography:
+
+create a simple reference file:
+
+`assets/documentation/technical/typography.md`
+
+Document:
+
+- primary display type
+- secondary/body type
+- monospace/technical type
+- recommended hierarchy
+
+Do not install proprietary fonts into the repository.
+
+# ============================================================ 15. GRUNGE TREATMENT
+
+Grunge is a surface layer.
+
+It must NOT corrupt the core logo geometry.
+
+Use grunge primarily for:
+
+- hero
+- banners
+- backgrounds
+- social preview
+- section dividers
+
+Possible treatments:
+
+- subtle noise
+- distressed texture
+- photocopy texture
+- scratches
+- broken lines
+- controlled distortion
+
+Maintain high readability.
+
+The logo itself should have a clean canonical version.
+
+# ============================================================ 16. QURANIC VISUAL INFLUENCE
+
+The visual influence should come through:
+
+- mathematical symmetry
+- geometric proportion
+- repetition
+- radial organization
+- layered structures
+- balance
+- order emerging from complexity
+
+Do NOT use:
+
+- Quranic verses
+- Arabic calligraphy
+- invented Arabic text
+- crescent symbols
+- mosque illustrations
+- religious iconography
+
+The influence is philosophical and geometric.
+
+# ============================================================ 17. SUPPORTING DESIGN TOKENS
+
+Create:
+
+`assets/documentation/technical/design-tokens.md`
+
+Document the canonical:
+
+- colors
+- spacing
+- corner radius
+- line weight
+- icon scale
+- logo clear space
+- minimum logo size
+- background usage
+- contrast rules
+
+Do not invent an enormous design system.
+
+Keep it proportional to the current project.
+
+# ============================================================ 18. BRAND GUIDELINES
+
+Create:
+
+`assets/documentation/brand-guidelines.md`
+
+Include:
+
+Brand:
+OX-DX
+
+Descriptor:
+Universal Ontology & Experience Engine
+
+Taglines:
+
+FROM STRUCTURE TO EXPERIENCE.
+
+FROM UNIVERSE TO BIT.
+
+Brand voice:
+
+Quranic depth
+Gen-Z clarity
+Grunge attitude
+Intelligent precision
+
+Explain correct logo usage.
+
+Explain incorrect logo usage.
+
+Explain:
+
+- don't stretch the logo
+- don't rotate the logo
+- don't distort geometry
+- don't place over unreadable backgrounds
+- don't invent colors
+- don't modify the wordmark
+- don't add arbitrary effects to the canonical logo
+
+# ============================================================ 19. ASSET NAMING
+
+Use deterministic lowercase filenames.
+
+Format:
+
+`ox-dx-{asset}-{variant}.{extension}`
+
+Examples:
+
+ox-dx-logo-primary.svg
+ox-dx-logo-white.svg
+ox-dx-icon.svg
+ox-dx-hero-desktop.svg
+ox-dx-hero-mobile.webp
+ox-dx-footer-pattern.svg
+
+No:
+
+final-final.svg
+logo-new2.svg
+logo-last.svg
+test123.svg
+
+# ============================================================ 20. FILE FORMATS
+
+Canonical:
+
+SVG
+
+Web optimization:
+
+WEBP
+
+General compatibility:
+
+PNG
+
+Do not generate JPEG unless genuinely necessary.
+
+Preferred:
+
+logos → SVG + PNG
+
+icons → SVG + PNG
+
+web graphics → SVG + WEBP
+
+hero → SVG + WEBP + PNG
+
+social → PNG + WEBP
+
+# ============================================================ 21. QUALITY CHECK
+
+After generating all assets:
+
+Check every SVG.
+
+Verify:
+
+- valid XML
+- valid viewBox
+- no missing references
+- no broken paths
+- no embedded unwanted raster
+- correct transparency
+- correct aspect ratio
+
+Check raster outputs.
+
+Verify:
+
+- correct dimensions
+- correct transparency where needed
+- no accidental crop
+- no compression artifacts
+- readable logo
+- readable text
+
+Check favicon.
+
+Verify:
+
+- recognizable at 16×16
+- recognizable at 32×32
+
+# ============================================================ 22. CONSISTENCY CHECK
+
+Verify that all assets feel like the same identity.
+
+Check:
+
+LOGO
+↓
+ICON
+↓
+WORDMARK
+↓
+HEADER
+↓
+HERO
+↓
+FOOTER
+↓
+README
+↓
+GITHUB SOCIAL
+
+They must share:
+
+same geometry
+same proportions
+same palette
+same typography
+same visual language
+same grunge treatment
+
+Do not allow the hero to look like a different brand from the logo.
+
+# ============================================================ 23. README INTEGRATION
+
+Inspect README.md.
+
+Do NOT redesign README content in this task unless necessary to add asset references.
+
+Where appropriate, add references such as:
+
+assets/web/header/...
+assets/web/hero/...
+assets/documentation/...
+
+Do not break existing technical documentation.
+
+Do not invent paths.
+
+Make sure every referenced asset actually exists.
+
+# ============================================================ 24. ASSET INDEX
+
+Create:
+
+`assets/ASSET_INDEX.md`
+
+Document every canonical asset.
+
+Columns:
+
+Asset
+Purpose
+Format
+Variant
+Recommended Usage
+
+Organize:
+
+Brand
+Logo
+Icon
+Vector
+Hero
+Header
+Footer
+GitHub
+Documentation
+Source
+
+This file becomes the asset inventory.
+
+# ============================================================ 25. SOURCE FILE POLICY
+
+Keep source/editable material under:
+
+`assets/source/`
+
+Do not put huge temporary files into the repository.
+
+Do not commit:
+
+- generation caches
+- random temp files
+- model metadata
+- duplicated previews
+- unrelated screenshots
+
+Only commit useful source and distribution assets.
+
+# ============================================================ 26. NO SEMANTIC OVERREACH
+
+The supporting visual system must not introduce new technical ontology.
+
+Do not label random graphics as new ontology levels.
+
+Do not modify:
+
+- ontology specification
+- schema
+- ontology names
+- ontology relationships
+
+Assets are visual representation only.
+
+# ============================================================ 27. DOCUMENTATION
+
+Create:
+
+`assets/README.md`
+
+This should explain:
+
+What this folder contains.
+
+Where canonical assets live.
+
+Which file is the master logo.
+
+Which files are intended for GitHub.
+
+Which files are intended for web.
+
+Which files are source/editable.
+
+How future contributors should add assets.
+
+Keep it concise.
+
+# ============================================================ 28. FINAL DIRECTORY TARGET
+
+Aim for:
+
+assets/
+├── README.md
+├── ASSET\_INDEX.md
+│
+├── brand/
+│ ├── logo/
+│ ├── icon/
+│ ├── wordmark/
+│ ├── lockups/
+│ └── marks/
+│
+├── vector/
+│ ├── primary/
+│ ├── monochrome/
+│ ├── inverse/
+│ └── variants/
+│
+├── raster/
+│ ├── png/
+│ ├── webp/
+│ └── favicon/
+│
+├── web/
+│ ├── header/
+│ ├── hero/
+│ ├── footer/
+│ ├── backgrounds/
+│ └── social/
+│
+├── documentation/
+│ ├── github/
+│ ├── README/
+│ ├── technical/
+│ └── brand-guidelines.md
+│
+└── source/
+├── design/
+└── references/
+
+Adapt only when existing repository conventions make a different structure more appropriate.
+
+# ============================================================ 29. GIT VERIFICATION
+
+After creating the assets:
+
+Run:
+
+git status
+
+Verify only intended files changed.
+
+Check that no source implementation files changed unexpectedly.
+
+Check that branch is:
+
+`feature/ox-dx-brand-assets`
+
+Then perform appropriate lightweight validation.
+
+For SVG assets, validate syntax.
+
+For Markdown, validate formatting where possible.
+
+# ============================================================ 30. COMMIT
+
+Create a focused commit:
+
+`feat(branding): add OX-DX visual asset system`
+
+Do not mix unrelated code changes.
+
+# ============================================================ 31. FINAL REPORT
+
+Return:
+
+BRANCH:
+feature/ox-dx-brand-assets
+
+ASSETS CREATED:
+number + categorized summary
+
+MASTER LOGO:
+path
+
+MASTER ICON:
+path
+
+HERO:
+path
+
+HEADER:
+path
+
+FOOTER:
+path
+
+GITHUB:
+path
+
+VECTOR:
+path
+
+DOCUMENTATION:
+path
+
+VALIDATION:
+pass/fail
+
+COMMIT:
+commit hash
+
+UNRELATED CHANGES:
+must be NONE
+
+# ============================================================ FINAL DESIGN PRINCIPLE
+
+The asset system should communicate:
+
+ANCIENT ORDER
+×
+MODERN COMPUTATION
+×
+RAW ENERGY
+×
+SYSTEMS INTELLIGENCE
+
+OX-DX is not supposed to look polished for the sake of being polished.
+
+It should look intentional.
+
+It should feel discovered.
+
+It should feel like a system.
+
+It should work at 16 pixels.
+
+It should also work on a wall.
+
+**FROM STRUCTURE TO EXPERIENCE.**
+
+Create the branch.
+Create the folder.
+Create the complete asset system.
+Validate everything.
+Commit only the branding work.

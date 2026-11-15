@@ -1,0 +1,45 @@
+import swisseph as swe, numpy as np, json
+from scipy.optimize import brentq, minimize_scalar
+from datetime import datetime,timedelta,timezone
+F=swe.FLG_MOSEPH
+UTC=timezone.utc
+
+def pos(j,body,flags=F):return swe.calc_ut(j,body,flags)[0]
+def diff(a,b):return (a-b+180)%360-180
+def sol(y):
+ a=swe.julday(y,12,18);return brentq(lambda t:diff(pos(t,swe.SUN)[0],270),a,a+9,xtol=1e-9)
+def phase(j):return diff(pos(j,swe.MOON)[0]-pos(j,swe.SUN)[0],180)
+def fulls(y):
+ start=swe.julday(y,12,1); grid=np.arange(start,start+43,0.9); out=[]
+ for a,b in zip(grid[:-1],grid[1:]):
+  fa,fb=phase(a),phase(b)
+  if fa*fb<=0 and abs(fa-fb)<90:out.append(brentq(phase,a,b,xtol=1e-8))
+ return out
+def dist(t):return pos(t,swe.MOON)[2]
+def dec(t):return pos(t,swe.MOON,F|swe.FLG_EQUATORIAL)[1]
+def nearest_extreme(f,t,window,kind):
+ grid=np.arange(t-window,t+window+0.5,0.5);v=np.array([f(z) for z in grid]); ix=[]
+ for i in range(1,len(grid)-1):
+  if (kind=='min' and v[i]<v[i-1] and v[i]<v[i+1]) or (kind=='max' and v[i]>v[i-1] and v[i]>v[i+1]):ix.append(i)
+ if not ix:return None
+ i=min(ix,key=lambda k:abs(grid[k]-t));r=minimize_scalar((lambda z:f(z)) if kind=='min' else (lambda z:-f(z)),bounds=(grid[i-1],grid[i+1]),method='bounded',options={'xatol':1e-7});return float(r.x)
+def dt(j):
+ y,m,d,h=swe.revjul(j);return datetime(y,m,d,tzinfo=UTC)+timedelta(hours=h)
+def wib(j):return dt(j)+timedelta(hours=7)
+def code(j):
+ t=wib(j);return t.hour,t.minute
+rows=[]
+for y in range(1500,2500):
+ s=sol(y); fs=fulls(y); f=min(fs,key=lambda x:abs(x-s));p=nearest_extreme(dist,f,17,'min');n=nearest_extreme(dec,f,17,'max')
+ rows.append(dict(y=y,sol=s,full=f,per=p,north=n,sol_full_h=abs(f-s)*24,full_per_h=abs(f-p)*24,full_north_h=abs(f-n)*24,code_sol=code(s),code_full=code(f),code_per=code(p),code_north=code(n)))
+r=next(z for z in rows if z['y']==2026)
+for z in rows:z['all72']=z['sol_full_h']<=72 and z['full_per_h']<=12 and z['full_north_h']<=36
+print('2026',[(k,(wib(r[k]).isoformat() if k in ('sol','full','per','north') else r[k])) for k in r])
+print('count all72',sum(z['all72'] for z in rows),'within 48h sol full +12h per +36h north',sum(z['sol_full_h']<=48 and z['full_per_h']<=12 and z['full_north_h']<=36 for z in rows))
+print('full on dec24 WIB',sum(wib(z['full']).month==12 and wib(z['full']).day==24 for z in rows))
+print('full near solstice <=72h',sum(z['sol_full_h']<=72 for z in rows))
+print('full per <=12h',sum(z['full_per_h']<=12 for z in rows))
+print('code 2026',[(k,r[k]) for k in ('code_sol','code_full','code_per','code_north')])
+print('exact all four codes',sum(all(z[k]==r[k] for k in ('code_sol','code_full','code_per','code_north')) for z in rows))
+print('2026 rank sum thresholds',sum(z['sol_full_h']<=r['sol_full_h'] and z['full_per_h']<=r['full_per_h'] and z['full_north_h']<=r['full_north_h'] for z in rows))
+with open('/mnt/data/moonwitness_1000y_results.json','w') as fp:json.dump({'baseline':'1500-2499 inclusive, Moshier analytical ephemeris, geocentric, UTC+7 fixed','results':rows},fp)

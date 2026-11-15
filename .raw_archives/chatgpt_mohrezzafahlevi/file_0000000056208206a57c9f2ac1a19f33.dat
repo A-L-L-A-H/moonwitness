@@ -1,0 +1,21 @@
+{
+  "source": "umbrella_repository_SUPER_ULTRA_MEGA_FULL_ONESHOT_v5_PROGRAMMATIC_SCORING.md",
+  "output_version": "v6",
+  "markdown_fences_balanced": true,
+  "fence_count": 1158,
+  "required_sections_present": true,
+  "baseline_domain_weight_sum": 100,
+  "component_weight_sum": 1.0,
+  "deployment_weight_sum": 1.0,
+  "suspicious_common_misspellings": {},
+  "semantic_checks": {
+    "health_confidence_separated": true,
+    "unknown_not_silently_excluded": true,
+    "closed_not_auto_progress": true,
+    "score_gate_dual": true,
+    "prompt_compiler": true,
+    "machine_report_validation": true,
+    "no_manual_score": true
+  },
+  "all_semantic_checks_pass": true
+}

@@ -1,0 +1,797 @@
+# FINAL MEGA PROMPT v2 — Moonframe Online Audit → TODO.md + Incremental Releases + Local Coding-Agent Execution Prompt
+
+**Target repository:** https://github.com/bjo163/moonframe  
+**Role of the current AI:** Online research/audit orchestrator and local-execution-prompt author.  
+**Role of the next AI:** Local coding agent with repository checkout, terminal, build/test tools, and browser capability where available.  
+**Primary outcome:** A repository-aware, evidence-based, execution-ready prompt for the local coding agent.  
+**Important boundary:** The current online AI must not start implementing the UI product. It audits, researches, reconciles the specification where justified, and writes the next prompt. The local AI will perform implementation after receiving that prompt.
+
+---
+
+## 0. EXECUTIVE MISSION
+
+You are the senior technical lead for Moonframe UI. You are responsible for transforming the accumulated design-system research into a safe, properly sequenced implementation plan that a local coding agent can execute without guessing, duplicating work, or rewriting previously agreed contracts.
+
+The user has run ten deep-research prompt tracks, covering:
+
+1. Token Architecture & Theme Engine Bible
+2. Component API & Behavior Bible
+3. Premium Blocks & Template Product Bible
+4. Advanced Data Workspace Bible
+5. Auth & Security UI Integration Bible
+6. Original Asset & Brand Bible
+7. Motion, Interaction & SFX Bible
+8. Accessibility & Visual QA Bible
+9. Package Architecture & Developer Experience Bible
+10. Master Integration Audit & GitHub Issue Bible
+
+These tracks may have produced substantial documentation, contracts, schemas, research logs, delivery reports, and GitHub issues. **Do not assume all ten tracks are complete, mutually consistent, or correctly implemented. Verify every claim against the current repository.**
+
+Your job is not to create an eleventh broad research Bible. Your job is to determine the true current state, close any specification/CI blocker that prevents safe implementation when feasible, research remaining decisions, and then produce a single comprehensive but staged **Local Coding Agent Execution Prompt**.
+
+The local prompt must tell the local AI exactly what to inspect, what to implement first, what it must not touch, how to test, what evidence to record, how to use existing GitHub issues, and where to stop if a real blocker remains.
+
+
+## 0.1 MANDATORY FINALIZATION — TODO.md, MILESTONES, RELEASES, AND PARALLEL ADOPTION
+
+These requirements are **mandatory additions** to the earlier online-to-local handoff workflow. They override any weaker output wording elsewhere in this prompt.
+
+The online AI must not return only a report and a local-agent prompt. It must create a usable **master `TODO.md`** and a release-aware execution plan from the verified repository state.
+
+### A. Required primary outputs
+
+1. **Repository audit and source-of-truth reconciliation** based on actual current GitHub state.
+2. **`TODO.md` at repository root**: a comprehensive but readable list of small, independently verifiable tasks. It must be useful to a human and to another AI agent without requiring the full chat history.
+3. **Milestone and incremental release plan**: every phase/milestone must end with a release decision and an adoptable artifact or an explicitly recorded blocker. A release may be documentation/specification-only, internal preview, local package preview, prerelease, release candidate, or stable product release. Never present a docs-only milestone as a published software release.
+4. **Dependency and parallelization map**: tasks that can proceed concurrently, tasks that must remain serial, file ownership/conflict warnings, and integration checkpoints.
+5. **Local coding-agent execution prompt**: the final deliverable remains a copy-and-paste-ready prompt, written to a Markdown file in the repo when possible and adapted to the live repository.
+6. **Adoption plan**: describe how a consumer/demo app can adopt each meaningful software milestone while implementation continues, without consuming unstable internal files or waiting for every skin/feature to be complete.
+
+### B. `TODO.md` is required, not optional
+
+Create or update `TODO.md` in the root of `bjo163/moonframe`. First inspect whether an existing canonical TODO/backlog file already exists. If a repository convention prefers another path, explain it and still make the root `TODO.md` a concise index pointing to the authoritative detailed plan. Do not create another competing backlog.
+
+`TODO.md` must contain:
+
+- current audit date/timezone, exact audited HEAD SHA, branch, and whether the plan matches the current remote HEAD;
+- a concise verified status summary: existing, specified-only, implemented-and-tested, blocked, unknown;
+- release train overview and milestone table;
+- workstreams and dependencies;
+- small task IDs (stable, unique and never silently reused);
+- task title and concise objective;
+- priority P0/P1/P2/P3 and task size target (prefer roughly one focused agent session; if larger, split it);
+- dependencies/predecessors and safe parallel group, if any;
+- intended files/areas, clearly labeled as expected rather than guaranteed when further inspection is required;
+- acceptance criteria, exact validation/test command when the stack is verified (otherwise a validation plan, not an invented command);
+- definition of done and evidence required;
+- milestone/release target;
+- issue status as verified at audit time or an issue link; never fabricate issue numbers;
+- explicit status (`planned`, `ready`, `in-progress`, `blocked`, `done`) only when there is evidence, and a note that live GitHub issue status supersedes a stale mirrored status;
+- risk, rollback/migration consideration, and artifact to adopt/test at the end of the task or milestone.
+
+Keep `TODO.md` scan-friendly. Put detailed descriptions, research, schema and long acceptance criteria in canonical documents or GitHub issues; link to them from `TODO.md`. Do not copy the entire contents of every Bible into it.
+
+If the repository already uses `docs/backlog/*.md`, treat those as detailed catalogs only if that is what the live audit confirms. Establish a clear ownership rule: `TODO.md` = top-level ordered execution map; existing detailed backlog files = atomic task specs by domain; GitHub issues = live task state once issues exist. If a GitHub issue and `TODO.md` disagree about whether work is open/closed, trust live GitHub state, reconcile the mirror and report the correction.
+
+### C. Every phase/milestone must include a release/adoption gate
+
+For every milestone, specify:
+
+- milestone ID and goal;
+- entry criteria and exact prerequisite tasks;
+- an independently verifiable **release artifact**;
+- validation gates and required evidence;
+- version/tag recommendation, if appropriate, with naming policy;
+- changelog/release notes and migration notes;
+- known limitations and compatibility promise;
+- rollback/revert strategy;
+- who/what can adopt it (demo consumer, internal Moon app, local package tarball, registry/source install, docs-only reviewer);
+- what is deliberately excluded until a later milestone;
+- decision: `release`, `prerelease`, `docs-only checkpoint`, or `blocked`; never call a milestone released without evidence.
+
+Do not assume the user wants immediate public npm publication, or that npm package scope/license/domain rights have been approved. The first adoption path may be a local workspace or packed tarball consumed by a sample app. Public release is an owner-approved decision. Use tags/releases only when justified by the current package/distribution ADR.
+
+### D. Release incrementally; make adoption possible before everything is done
+
+Design the plan so a useful slice is delivered at each milestone. It is **not acceptable** to make one giant v1.0 release depend on all 15 skins, all optional modules, all assets, all SFX, and every premium template being finished.
+
+At minimum, evaluate a sequence like this and adjust it to evidence/current ADRs:
+
+- **M0 — Repository/contract trust:** CI and spec validation are reliable; `TODO.md`, source-of-truth map, current issue dependencies and first local prompt are verified. Artifact: auditable specification snapshot, not a software package release.
+- **M1 — Package foundation:** minimal package + consumer fixture can install/build/import a placeholder or first safe export. Artifact: local pack/consumer smoke test and development prerelease if the distribution strategy permits.
+- **M2 — Token source/generator slice:** small approved fixture values generate deterministic CSS/token types and the consumer fixture can use them. Artifact: generator proof + fixture output; not all production skin tokens yet.
+- **M3 — Theme runtime slice:** requested/effective appearance model, persistence/fallback, and one consumer fixture work. Artifact: preview usable internally.
+- **M4 — Four-skin proof/Skin Lab:** Classic, Moonpunk, Moonzine and Moonledger × Light/Dark run on the same reference screens. Artifact: internal design-system preview; visual pair status remains unreviewed until evidence is captured/reviewed.
+- **M5 — Core component slice:** useful foundational controls work with contract-driven states and tests. Artifact: adoptable local/package prerelease.
+- **M6 — Form and overlay slice:** accessible forms, dialog/menu/select/popover/feedback patterns work. Artifact: incremental prerelease and migration notes.
+- **M7 — First premium blocks/templates:** login UI (presentation only), onboarding, dashboard, CRUD list/detail/settings and all essential empty/loading/error states. Artifact: example app that can be adopted independently of real auth/domain backend.
+- **M8 — Data workspace slice:** Table/DataTable/filters/pagination/selection and a defined optional engine integration. Artifact: data-workspace prerelease or opt-in module; heavy grid features may remain later.
+- **M9 — Additional skin rollout:** remaining skins delivered in tested batches, with distinct grammar evidence rather than recolored themes. Artifact: versioned preview packages and updated coverage evidence.
+- **M10 — Asset/motion optional packs:** approved original assets and opt-in SFX/motion are shipped only after provenance, licensing, performance and accessibility gates. Artifact: optional assets/effects pack; not forced into core bundle.
+- **M11 — Release candidate:** package exports, docs, consumer tests, accessibility/visual QA, migration guide, and limitations reviewed.
+- **M12 — Stable release:** publish/tag only when owner approval, package-name/license decisions, versioning and release gates are satisfied.
+
+This is a candidate release train, not a demand to use those exact numbering/version strings. Preserve the principle that **each milestone delivers a verifiable increment** and consumer adoption can start early. If repo evidence calls for another order, explain why and update `TODO.md`, the roadmap, and local prompt consistently.
+
+A phase may end with `blocked` rather than a fake release if a decision/evidence gate cannot be met. Record the reason, blocker owner/decision, recovery task, and whether other independent lanes may continue.
+
+### E. Parallel workstreams: concurrency with explicit boundaries
+
+Identify workstreams that can proceed in parallel only after their interfaces/dependencies are stable. At minimum consider:
+
+- **Lane A — Repo/CI/governance:** validator reliability, issue/backlog reconciliation, docs navigation, release policy.
+- **Lane B — Package and consumer fixture:** only after toolchain/support/primitive/distribution choices are evidence-backed enough.
+- **Lane C — Token source and validation:** may design/validate fixture contracts while provider evaluation proceeds, but cannot finalize generator outputs before the token-format decision.
+- **Lane D — Theme resolver / Skin Lab:** contracts and deterministic fixtures may be planned early, runtime depends on token/source/provider/consumer constraints.
+- **Lane E — Component/API proof slice:** public API contract can be refined in parallel, but implementation begins after primitive provider/API decisions are closed.
+- **Lane F — Premium blocks and data workspace:** specs/catalog may proceed in parallel; implementation depends on core components and their state/accessibility contracts.
+- **Lane G — Assets/motion/SFX:** manifests/briefs/policies can be refined in parallel; production asset/audio work waits for approved skin grammar and explicit phase authorization.
+- **Lane H — QA/release infrastructure:** test matrix and release checklist can proceed in parallel; visual baseline pass requires actual deterministic renders.
+
+For each lane document:
+
+- prerequisites and interface contracts;
+- files/paths it owns (avoid two agents editing the same file concurrently);
+- tasks safe to parallelize;
+- tasks that must be serialized;
+- merge/integration checkpoint;
+- tests required before other lanes consume its output.
+
+Parallelism is not “give 10 agents the same repo and hope.” Avoid conflicting edits to README, master Bible, contract IDs, schemas or validator. Assign file ownership or sequence the integration.
+
+### F. Adoption lane and consumer feedback loop
+
+Define an adoption lane that runs alongside product implementation:
+
+1. Start with a minimal reference consumer app after the foundation can be built safely.
+2. Install the package using the intended supported path (workspace, local tarball, or source registry) rather than importing private source paths.
+3. Exercise theme selection, one reference page and basic components.
+4. At later milestones, add forms/overlays, blocks/templates and data workspace incrementally.
+5. Track integration friction: required CSS, Tailwind scanning/config, SSR/hydration behavior, TypeScript exports, peer dependency errors, styles leaking, accessibility regressions and upgrade steps.
+6. Feed findings back into developer docs and compatibility tests before expanding public API.
+
+The consumer lane should not need all 15 skins or every template before providing useful feedback. Use a small controlled fixture first, then a realistic adopter app. Avoid inventing real Moonships/Moonradio application versions: use actual consumer evidence if available; otherwise call it a synthetic fixture.
+
+### Product north star
+
+> **One behavioral system. Fifteen genuinely distinct visual grammars. Thirty Light/Dark baseline appearances. A premium-ready component, block, and template system.**
+
+The product is not a simple theme-color switcher. Each of the 15 skins should ultimately alter visual grammar (layout composition, geometry, type hierarchy, surfaces, navigation/data composition, component recipes, media/decorative language, and motion), while preserving component meaning, behavior, keyboard semantics, and accessibility.
+
+### Non-negotiable scope boundary
+
+- The online AI must **not** implement React components, the production theme runtime, UI templates, auth backends, data engines, or production design assets.
+- The online AI must not generate production logos, SVG/PNG artwork, icon packs, illustrations, fonts, or SFX.
+- The online AI may inspect code/specs, run/read remote validation evidence where supported, do current web research, update or create documentation/contracts only when required to correct a proven conflict, and create the local-execution prompt.
+- The local AI will implement in small, dependency-aware slices. The local AI must not try to deliver all 15 skins and every premium feature in one uncontrolled pass.
+- Never claim work is complete without evidence from current GitHub state or actual local test output.
+
+---
+
+## 1. PHASE ZERO — AUDIT THE LIVE REPOSITORY FIRST
+
+Repository: **https://github.com/bjo163/moonframe**
+
+Start by accessing the actual repository and current default branch. Do not rely on this prompt's historical snapshot as current truth.
+
+### 1.1 Confirm repository facts
+
+Record:
+
+- repository full name, visibility, default branch, current HEAD SHA, latest commit message/date;
+- branch and PR status, issue count/state, repository permissions available to you;
+- latest CI runs and statuses, especially contract-validation workflow;
+- live tracked file inventory, including `.github/`, `contracts/`, `schemas/`, `scripts/`, `docs/`, package manifests, lockfiles and source directories;
+- whether the repo contains a real UI implementation or still only specifications/tooling;
+- whether a local checkout is available to you. If not, explicitly say that working-tree cleanliness and local commands cannot be asserted.
+
+Use repository files and current GitHub state as evidence. Follow repository links and inspect full relevant documents, not only README excerpts.
+
+### 1.2 Historical clues to re-check (not guaranteed current)
+
+At a prior inspection on 2026-10-25, the repo had accumulated documents and machine-readable contracts for:
+
+- 15 skin identities and 30 Light/Dark appearances;
+- 105 skin-pair review records, which were expected to stay `not-reviewed` until actual rendered evidence exists;
+- token dictionary and source plan;
+- component manifest, component API/behavior contract, state matrix, QA profiles;
+- premium block manifest, page-template manifest, starter manifest, premium coverage;
+- auth flow/provider/threat-model contracts;
+- advanced data workspace contract and presets;
+- asset manifest and per-skin asset briefs;
+- motion recipes/interactions/skin matrix and optional SFX contract;
+- accessibility requirements, QA evidence, visual baseline matrix;
+- package architecture and developer-experience contract;
+- JSON schemas, synthetic invalid fixtures, `scripts/validate-contracts.mjs`, and `.github/workflows/contract-validation.yml`;
+- audit, research, delivery, ADR, QA, and backlog documents.
+
+Prior inspection also showed six open foundation issues:
+
+- #1 `[MF-003] Inventory consumer environments and support constraints`
+- #2 `[MF-004] Define pinned Classic visual baseline without official shadcn claims`
+- #3 `[MF-005] Primitive provider spike: Base UI vs Radix vs React Aria`
+- #4 `[MF-006] Package boundary, exports, and distribution ADR`
+- #5 `[MF-013] DTCG 2025.10 subset and token-resolver proof`
+- #6 `[MF-024] Deterministic same-content Skin Lab fixture specification`
+
+Previously observed links:
+
+- Repository: https://github.com/bjo163/moonframe
+- Issue #1: https://github.com/bjo163/moonframe/issues/1
+- Issue #2: https://github.com/bjo163/moonframe/issues/2
+- Issue #3: https://github.com/bjo163/moonframe/issues/3
+- Issue #4: https://github.com/bjo163/moonframe/issues/4
+- Issue #5: https://github.com/bjo163/moonframe/issues/5
+- Issue #6: https://github.com/bjo163/moonframe/issues/6
+- An earlier latest-looking workflow run was failing: https://github.com/bjo163/moonframe/actions/runs/40186397781
+
+**These clues may be stale. Re-fetch all current state before using them.** Do not assume these issues remain open or these run statuses remain relevant.
+
+### 1.3 Read all canonical documentation and key contracts
+
+Inspect at least the current versions of:
+
+- `README.md`
+- the master Design System Bible;
+- `docs/implementation-roadmap.md`;
+- repository baseline audit and subsequent delivery reports;
+- token/theme research, ADRs, token pipeline, token source plan, token dictionary and theme contract;
+- component API & behavior Bible, component manifest, API contract, state/keyboard matrices;
+- premium-scope Bible, block manifest, page-template manifest, starter manifest, coverage and competitive analysis;
+- advanced data workspace Bible/contracts/research;
+- auth/security UI Bible/contracts/research;
+- original asset/brand Bible, asset manifest, per-skin briefs and asset QA;
+- motion/interaction/SFX Bible/contracts/research;
+- accessibility/visual QA Bible, requirements, evidence ledger, baseline matrix and QA profiles;
+- package architecture & DX Bible, ADRs, schema, consumer matrix and distribution proposal;
+- integration manifest, backlog documents, all JSON schemas and fixtures;
+- `scripts/validate-contracts.mjs` and `.github/workflows/contract-validation.yml`;
+- current issue and PR lists and latest CI logs.
+
+You do not have to paste all file contents into the final answer. You must build an internal source map and accurately cite/link any fact that affects the handoff prompt.
+
+### 1.4 Audit contradictions, drift, and status honesty
+
+Explicitly compare:
+
+- all skin IDs across theme, grammar, asset, motion, auth, data, QA and template contracts;
+- Light/Dark/System semantics and requested preference versus resolved mode;
+- component, block, page-template, starter, integration and optional module IDs for collisions/overlap;
+- canonical token source versus token dictionary versus generated-output plans;
+- component count/tier totals versus manifest contents;
+- schema fields versus contract payloads and validator expectations;
+- references/paths in README versus live paths;
+- roadmap tasks versus GitHub issue list and already-completed audit work;
+- `specified`, `implemented`, `tested`, `reviewed`, and `released` statuses;
+- report claims about tests versus actual CI log evidence;
+- source-owned registry versus npm package assumptions;
+- chosen/pending primitive provider and runtime support;
+- original assets/SFX production claims versus manifest state.
+
+Use these classifications:
+
+- `verified-existing`
+- `specified-not-implemented`
+- `partially-specified`
+- `implemented-and-tested` (only with code plus real test evidence)
+- `missing`
+- `contradictory`
+- `stale-needs-research`
+- `blocked-by-decision`
+
+Never mark a documentation contract as an implemented component. Never treat a planned screenshot slot as a screenshot. Never infer browser, SSR, React, Tailwind, package-manager, or provider versions that are not evidenced.
+
+### 1.5 Inspect the latest CI failure, do not guess
+
+If the latest relevant CI run is failing:
+
+1. Identify the exact commit and workflow.
+2. Read step annotations/logs if supported by your tools.
+3. Reproduce the reported failure if a local checkout/runtime is available; otherwise isolate it from the script and fixture source.
+4. Find the smallest evidence-backed cause.
+5. Determine whether the error is in the validator, contract data, schema, link checker, or workflow assumptions.
+6. Decide whether correcting it online as a documentation/validation change is safe. Do not rewrite product code or bypass a substantive failing check.
+7. If you cannot repair it with the available tools, make it an explicit first blocker in the local prompt with file path, expected diagnosis steps, and acceptance evidence. Do not hide it.
+8. Never weaken validation simply to get green CI. A fixed validator must still fail on deliberately invalid fixtures.
+
+### 1.6 Create an audit report only if needed
+
+If an accurate current audit already exists and is linked from the README, update it rather than creating another competing file. If missing/stale, create or update a canonical report such as `docs/audit/online-to-local-handoff-audit.md` containing:
+
+- the exact audited HEAD SHA and date/timezone;
+- inventory and implementation status;
+- CI status and failure diagnosis/evidence;
+- issue status and dependency relationships;
+- source-of-truth map;
+- P0/P1/P2/P3 findings with evidence and risk;
+- decisions already closed versus still blocked;
+- what the local agent must do first.
+
+Do not create one more generic Bible if an equivalent authoritative document exists.
+
+---
+
+## 2. PHASE ONE — CURRENT PRIMARY-SOURCE RESEARCH
+
+Use web research, including official docs, standards and relevant release notes. Record source URL, publication/release date when verifiable, access date, conclusion, confidence, and which decision/task it affects. Do not rely on historical citations blindly; re-open sources because dates and APIs can change.
+
+### Mandatory research areas
+
+1. **shadcn/ui:** current components, theming, source-owned components, blocks/registry, Base UI/Radix options and changelog.
+2. **Primitive providers:** Base UI, Radix UI, React Aria; Dialog, Select, Combobox, menus, focus, keyboard, SSR, RTL and styling APIs.
+3. **Tokens:** W3C Design Tokens Community Group format (including the published 2025.10 report), semantic token patterns, alias resolver options, exact tool support and caveats.
+4. **CSS/Tailwind:** Tailwind CSS v4 theme variables, `@theme`, `@theme inline`, runtime CSS custom properties, static class scanning and SSR theme selection.
+5. **React/TypeScript/package distribution:** current React/TypeScript, exports, peer dependencies, CSS side effects, tree-shaking, package manager/build tooling, semver and consumer-test patterns.
+6. **Testing:** contract/schema validation, unit/integration, keyboard/accessibility, visual regression and reproducible screenshot fixtures.
+7. **Accessibility/security:** WCAG 2.2, WAI-ARIA APG, forced colors, reduced motion, auth UI boundaries, SVG safety and content/data export concerns as relevant.
+8. **Data workspace:** TanStack Table/Virtual and relevant grid engines; features, license, performance, keyboard/ARIA and integration costs.
+9. **DX/docs:** Storybook or viable alternatives, local playground/Skin Lab, docs source of truth, code examples, troubleshooting and migration guidance.
+10. **GitHub process:** issue dependencies, issue forms, labels/milestones if actually configured, Actions status, PR checks and contract CI.
+
+### Research rules
+
+- Prefer official docs/specs/changelogs and repository evidence.
+- Distinguish standards from recommendations, vendor claims, experiments and assumptions.
+- For vendor selection, provide a comparative matrix with criteria, weighting, evidence, confidence and caveats. Mark unmeasured things as `unknown/unmeasured` rather than inventing scores.
+- Do not select provider, build tool, generator, runtime, npm namespace, license, or browser support solely due to popularity.
+- If a decision needs a short local prototype, make it a specific time-boxed issue with identical fixtures and tests; do not pretend documentary research can prove runtime behavior.
+- Do not copy substantial third-party docs verbatim.
+
+---
+
+## 3. PHASE TWO — CLOSE THE READINESS GAPS
+
+After the audit, decide which gaps the online agent can safely resolve with docs/contracts and which require local execution.
+
+### The online agent may
+
+- correct stale/conflicting docs;
+- normalize links/source-of-truth map;
+- update a contract or schema if a clear contradiction is proven;
+- add a small audit report or ADR only if needed;
+- clarify existing GitHub issues and add missing dependencies/acceptance criteria if GitHub tools support it and repo conventions permit;
+- create the local execution prompt tailored to the actual repository state;
+- run/inspect contract validation if the available tools allow it.
+
+### The online agent must not
+
+- implement React components/theme runtime/Skin Lab;
+- scaffold a package or change dependencies;
+- generate production tokens/assets/SFX;
+- publish packages;
+- close issues without evidence;
+- mark skin pairs as visually approved without actual screenshots/review;
+- remove/disable failing tests to manufacture green CI;
+- create duplicate Bibles or broad duplicate issue lists;
+- rewrite Git history or force-push.
+
+Prefer small commits and current branch/repo policies. Do not create a new branch reflexively; obey policy. Verify any GitHub operation succeeded before reporting it.
+
+---
+
+## 4. PHASE THREE — DESIGN THE LOCAL EXECUTION PROGRAM
+
+Your primary output is one **Local Coding Agent Execution Prompt**, adapted to the actual audit. This is a prompt for an AI with local repository access, terminal, Node/npm or the verified package manager, browser and test tools where possible.
+
+The prompt must be directly pasteable into the local agent. It must include:
+
+- repository path/remote expectations;
+- current verified HEAD SHA and default branch;
+- exact docs/contracts to read first;
+- exact blockers and issue numbers still open;
+- dependencies and order;
+- what code/files are allowed to change in each initial task;
+- exact acceptance criteria;
+- commands to run only if they match the actual stack;
+- expected test/evidence artifact names;
+- safe Git workflow and commit expectations;
+- stop conditions and decision escalation rules;
+- prohibited changes;
+- final report format;
+- truthful definition of done.
+
+**Do not produce a generic prompt that asks a local AI to “implement Moonframe completely.”** It must direct the local AI through staged execution and verified checkpoints.
+
+### 4.1 Local execution must start by inspecting the workspace
+
+The local prompt must require the local AI to:
+
+1. verify current working directory and Git remote;
+2. run `git status --short --branch`, `git log -5 --oneline`, `git remote -v` and inspect uncommitted changes;
+3. never discard the user's uncommitted work;
+4. fetch/pull only after reviewing divergence and protecting uncommitted changes;
+5. compare local HEAD with the remote baseline from the handoff;
+6. read current audit and all referenced canonical docs;
+7. inspect Node/package manager and available tools before suggesting install commands;
+8. reproduce the latest CI/validator failure locally, if one remains;
+9. not create a parallel source tree if code already appeared after the online audit;
+10. update the plan when live repository state differs from the snapshot.
+
+### 4.2 Local implementation task order
+
+The final local prompt must adapt these phases after audit; it should not blindly force all phases if repository reality says otherwise.
+
+**Phase L0 — Safe workspace and CI baseline**
+- Inspect working tree and branches.
+- Reproduce/fix current validation failure without weakening checks.
+- Run normal contract validation and negative self-tests.
+- Fix broken links/schema/manifest drift only where proven.
+- Save actual before/after evidence.
+- Do not yet build UI if a foundational contract cannot be trusted.
+
+**Phase L1 — Foundation decisions**
+- Verify consumer environments/support constraints (likely issue #1).
+- Finish primitive-provider research/spike (likely #3) using identical Dialog, Select, Combobox and nested Menu fixtures if runtime is now available.
+- Prove bounded DTCG token source and resolver behavior (likely #5) with valid/invalid fixtures.
+- Pin Classic reference policy without claiming official shadcn affiliation (likely #2).
+- Decide package/export/distribution model (likely #4) only after consumer/provider evidence.
+- Finalize deterministic same-content Skin Lab fixture spec (likely #6).
+- Preserve or update issue numbers based on live state; do not recreate duplicates.
+
+**Phase L2 — Minimal package foundation**
+- Implement only the approved minimum package setup.
+- Confirm package manager/runtime based on actual consumer matrix.
+- Establish build/typecheck/lint/test commands and public exports.
+- Avoid empty package proliferation; keep optional modules out of core until justified.
+- Prove a minimal consumer import/build and CSS integration.
+- No public npm publish during this stage.
+
+**Phase L3 — Token source, validator and generator MVP**
+- Use the approved bounded token schema/resolver decision.
+- Keep `pending` production coverage honest; use fixtures to prove generation first.
+- Add token validation for types, aliases, unresolved references, cycles, missing semantics, mode holes and deterministic outputs.
+- Generate CSS custom properties/TS types/bridge only when architecture ADR approved.
+- Prove Tailwind v4 static utility vs runtime CSS variable integration.
+- Do not fabricate final token values for all 15 skins.
+
+**Phase L4 — Theme Engine runtime**
+- Implement preferences and deterministic precedence for controlled options, saved prefs, OS/system preference and app defaults.
+- Separate requested `system` preference from effective `light`/`dark` mode.
+- Include safe fallback for unknown skin/mode/density/motion/contrast.
+- Consider SSR/hydration only within verified runtime constraints; avoid writing a framework-specific solution before knowing consumers.
+- Respect reduced motion and forced colors.
+- Test persistence failure, OS mode changes, invalid storage, and no-JS/SSR behavior where supported.
+
+**Phase L5 — Skin Lab four-skin vertical slice**
+- Implement reference screen fixtures and minimal lab to validate Classic, Moonpunk, Moonzine and Moonledger in Light/Dark.
+- Use the same deterministic data, dimensions, locale, timezone, fonts and content.
+- Include grayscale and decoration-off review modes, focus/state specimens and responsive widths.
+- Do not claim 105 pairs passed; at this point only review the appropriate subset with evidence.
+
+**Phase L6 — Core components by dependency order**
+- Begin with low-complexity foundations/actions/fields.
+- Then overlays/navigation with selected provider.
+- Then forms/validation and data-display components.
+- Follow the canonical Component Manifest and API/Behavior Bible; no ad hoc public API.
+- For each component: types, skin-compatible visual recipes, relevant states, keyboard contract, tests, docs, examples and acceptance evidence.
+
+**Phase L7 — Blocks, templates and data workspace**
+- Build approved MVP templates (auth UI, dashboard, CRUD, settings, detail) from the component library.
+- Keep authentication/backend and business logic outside generic UI.
+- Build simple table before advanced DataTable; use the approved data engine architecture.
+- Keep virtualization, advanced charting, editor, calendar and other heavy modules optional unless roadmap says otherwise.
+
+**Phase L8 — Remaining skins and original asset production**
+- Add remaining skin grammars based on approved specs after the four-skin prototype.
+- Keep Light/Dark, accessibility, density and motion independent.
+- Produce original assets only after design briefs and provenance contracts are approved.
+- SFX stays opt-in and can be deferred until its policy is reviewed.
+
+**Phase L9 — QA and release candidate**
+- Complete token/contract CI, unit/integration, keyboard/accessibility, consumer-build, package-export and visual regression checks.
+- Verify all 30 baseline appearances render when implemented.
+- Review all 105 pairwise skin comparisons only after actual rendered screenshots exist. Store reviewer/evidence/status; do not mark `pass` from textual descriptions.
+- Record known gaps and release status. No npm publication absent explicit release approval.
+
+### 4.3 Atomic task execution rules for local AI
+
+- Work in small, dependency-ordered vertical slices.
+- Before each task: read issue, dependencies, canonical docs, and relevant contracts.
+- After each task: run targeted tests, broader validation, inspect diff, update relevant docs and evidence, then report.
+- Use existing issue/task IDs. Do not invent duplicates or close an issue without evidence.
+- If a decision is open, prefer a time-boxed spike with an ADR over hard-coding a guess.
+- If the environment/tool cannot run a test, state `not run` with cause; do not claim pass.
+- Do not batch unrelated refactors into a task.
+- Do not create all 15 skin implementations before four distinct representative skins validate the design architecture.
+- Do not create all premium blocks before the core API and theme runtime are stable.
+
+---
+
+## 5. REQUIRED LOCAL PROMPT SAFETY AND GIT RULES
+
+The local prompt must explicitly tell the local agent:
+
+- Do not delete/overwrite uncommitted work or user-created files.
+- Do not run destructive git operations such as `reset --hard`, force push, history rewrite, mass deletes, or blind clean commands.
+- Do not rebase/merge without examining status and repository policy.
+- Do not install/migrate libraries without approved ADR and actual toolchain verification.
+- Do not run package publication or release commands without separate explicit approval.
+- Do not put secrets into GitHub issues, logs, artifacts, README or test fixtures.
+- Use synthetic data only; no real user/auth credentials.
+- Keep auth/backend, accounting/ERP logic, RPG rules, messaging transport and infrastructure orchestration out of the UI design system.
+- Do not claim accessibility conformance based only on axe/automated checks.
+- Keep original assets/SFX uncreated until the specific task is authorized.
+- Do not claim code production-ready before relevant tests/review/consumer validation pass.
+
+If the repository changed since the online audit, local AI must trust the actual checkout, re-audit affected paths and adapt without losing the intended goals.
+
+---
+
+## 5.1 REQUIRED EXECUTION ARTIFACTS — TODO.md AND RELEASE-AWARE ROADMAP
+
+In addition to the repo-specific local coding-agent prompt, the online AI must **actually create or update repository files** (if GitHub write access is available) to make the next step deterministic. Do not merely suggest their contents in chat.
+
+### Required file 1: root `TODO.md`
+
+- Create/update `TODO.md` at repository root, after checking whether a canonical master TODO exists.
+- It must contain the complete phase/milestone task catalog at a useful granularity, with an index to detailed task specs rather than duplicate full Bible content.
+- A typical atomic task should fit one focused coding-agent run and be independently verifiable. Split tasks that combine multiple unrelated deliverables or require several major architectural decisions.
+- Use stable IDs, e.g. `MF-BOOT-001`, `MF-TOKEN-001`, `MF-THEME-001`, `MF-SKINLAB-001`, `MF-COMP-001`, `MF-BLOCK-001`, `MF-DATA-001`, `MF-ASSET-001`, `MF-QA-001`. Reuse existing IDs where they already identify work; never rename/reassign them casually.
+- Every item needs: priority, size, goal, dependency IDs, parallel-safe group (or `serial`), expected file scope, acceptance criteria, validation/evidence, milestone, release artifact/adoption target, status and issue link if verified.
+- Keep statuses honest and timestamp the audit. Existing issues may be open/closed/in progress; reconcile against live GitHub state. Do not report every planned task as an existing issue.
+- Include a compact milestone overview at the top, followed by the detailed task checklist grouped under each milestone.
+- Link existing domain backlogs rather than copying their mutable contents; explicitly state which file is canonical for task scope and where live status resides.
+
+### Required file 2: local execution prompt
+
+Create/update a single canonical handoff prompt, preferably `docs/handoff/moonframe-local-coding-agent-execution-prompt.md` unless an equivalent already exists. The prompt must be tailored to current HEAD and the **first milestone only**, not ask local AI to do all milestones in one go. Include:
+
+- safe local audit steps (`pwd`, `git status`, remote/branch/HEAD, protect uncommitted work);
+- current verified repo snapshot and key file paths;
+- first task/issue and why it is first;
+- complete acceptance criteria, exact tests where known, expected evidence;
+- next-task preview and dependency graph;
+- explicit out-of-scope work;
+- stopping conditions for missing decisions, failing tests or unexpected working-tree state;
+- release artifact expected from the first milestone;
+- final report/commit/push/issue update requirements.
+
+### Required file 3: release and milestone strategy
+
+If not already clearly present, add or update a canonical `docs/architecture/release-train-and-adoption.md` or an equivalent existing file. It must define milestone-to-release mapping, version/tag policy (proposal versus accepted), internal preview/adoption routes, changelog/migration expectations, rollback, owner approval gates, and explicit distinctions among docs checkpoint, dev preview, alpha, beta, RC, and stable release. Do not invent package names or publish to npm.
+
+### Required file 4: issue-ready detailed backlog
+
+Use existing `docs/backlog/*.md` files as the canonical detailed task catalogs when appropriate. Add or refine only the missing tasks. Each issue candidate should have objective, scope/non-goals, dependencies, acceptance criteria, tests/evidence, risks, release/milestone and DoD. Deduplicate against existing GitHub issues first.
+
+### GitHub issue creation policy
+
+If GitHub issue creation is available, do not flood the repo with every future task immediately. Create or update issues for:
+
+1. current P0/P1 blockers;
+2. the current milestone and its direct dependencies;
+3. a small next-ready batch that can run in parallel without file conflicts.
+
+Keep later phases in `TODO.md` and detailed backlog files until they are near-ready. If an issue already exists, update/link it rather than creating a duplicate. If issue creation is unavailable or inappropriate, report this clearly; the backlog still must be ready for issue conversion.
+
+## 6. REQUIRED OUTPUTS FROM THE ONLINE AI
+
+The online AI must deliver a self-contained package of findings, a master `TODO.md`, an incremental milestone/release/adoption plan, and one execution prompt. Avoid creating documents that duplicate existing canonical sources. The repository files—not only the final chat answer—must be updated when permissions permit.
+
+### Output A — concise audit report
+
+Include:
+
+- audited repository URL, branch, exact HEAD SHA and timestamp;
+- current directory/file inventory by area;
+- source-of-truth map (what is canonical for token, theme, component API, blocks, data workspace, auth, assets, motion, QA and package DX);
+- actual CI status and failure diagnosis with link/evidence;
+- issues: open/closed and dependency map;
+- implementation-vs-specification status;
+- P0/P1/P2/P3 count and high-risk blockers;
+- major cross-contract conflicts, duplication or stale links;
+- current consumer/build/test facts versus unknowns;
+- primary-source research findings that materially affect the local plan.
+
+### Output B — current-repo local execution prompt
+
+Write a **single copy-and-paste-ready prompt** in a Markdown file named preferably:
+
+`docs/handoff/moonframe-local-coding-agent-execution-prompt.md`
+
+Only use that path if no equivalent canonical handoff already exists; otherwise update the existing authoritative file to avoid duplicate truth. If GitHub writing is unavailable, provide the complete prompt as a downloadable `.md` artifact and state this limitation.
+
+The prompt itself must include all required local workspace safeguards, current repo snapshot, canonical docs/issues, exact first task, dependency-ordered subsequent phases, acceptance criteria, tests, expected evidence, stopping conditions and final-report schema. It must be adapted to actual current state rather than simply copy the phase list in this meta-prompt.
+
+### Output C — optional handoff metadata
+
+If useful and not duplicative, include a small machine-readable handoff JSON with:
+
+- schema/contract version;
+- audited HEAD SHA;
+- timestamp;
+- confirmed open issue IDs;
+- first local task ID;
+- blockers and stop conditions;
+- canonical doc paths;
+- verification commands supported by the current environment;
+- `productionImplementationAllowed: true` only for the local stage and only within the scoped task;
+- `assetProductionAllowed: false` until explicitly approved by the asset production phase.
+
+Do not add this JSON if an integration manifest already serves the same role; update that source instead.
+
+### Output D — verification and GitHub operations report
+
+State exactly:
+
+- which files were read/changed/created;
+- which contract validators or CI runs were actually observed;
+- commit SHAs and links for changes made;
+- whether the local prompt was committed or only returned/downloaded;
+- whether any issues were created/updated (and links), or none;
+- what was not validated;
+- why this local prompt is the safest next step.
+
+Never claim that a file was pushed, an issue created, or a test passed without confirmed tool output.
+
+
+### Output E — root TODO.md and task dependency map
+
+Verify that root `TODO.md` exists and contains:
+
+- small tasks across all implementation phases;
+- each task's stable ID, priority, size, dependencies, parallel safety, acceptance criteria, tests/evidence, milestone, release artifact, and current verified issue link/status;
+- phase/milestone groupings and an explicit critical path;
+- a shortlist of tasks that can start in parallel, with file ownership and integration checkpoints;
+- links to canonical detailed backlog documents instead of duplicated mutable text;
+- release/adoption status per milestone.
+
+Report task counts by phase and priority, dependency blockers, and what must be executed first. A generic roadmap with broad goals is not enough.
+
+### Output F — releases and adoption matrix
+
+Provide a table with one row per milestone: entry criteria, deliverable, tests, adoption path, release kind, version/tag proposal, changelog/migration note, rollback, excluded scope, and status. Every milestone has a release gate; if it is not safe to release, mark it `blocked` with a concrete recovery action. Explain how a consumer can adopt early slices while later work continues.
+
+### Output G — final local prompt
+
+Ensure the final local prompt is specifically for the first milestone and instructs the local AI to complete only the first scoped increment, test it, leave the repository in a coherent state, and report evidence. It must direct the local AI to consult `TODO.md` to select the next task only after the first milestone is verified. Do not let the local prompt expand to all 15 skins or the full component catalog in one run.
+
+---
+
+## 7. HOW TO IMPROVE DOCUMENTATION WITHOUT CREATING OVERLAP
+
+Establish a source-of-truth ownership table before editing.
+
+| Subject | Preferred canonical owner (confirm live repo) |
+|---|---|
+| Overall product principles/skin inventory | Master Design System Bible + Theme Contract |
+| Detailed skin visual grammar and uniqueness | Skin Grammar Contract + Skin Specifications |
+| Token vocabulary/source/output/resolver | Token Dictionary + Token Source Plan + Token Pipeline/ADRs |
+| Component API and behavior/state contracts | Component API & Behavior Bible + Component Manifest/state/keyboard matrices |
+| Premium blocks/page/starter templates | Premium Scope Bible + Block/Page/Starter Manifests |
+| Auth provider-neutral flows | Auth UI Suite + Auth Flow/Provider/Threat Contracts |
+| Advanced data workspace | Data Workspace Bible + Data/Query/Preset Contracts |
+| Brand/assets/provenance | Original Asset & Brand Bible + Asset Manifest/Briefs |
+| Motion/interactions/audio | Motion Bible + Motion Recipe/Interaction/SFX Contracts |
+| Accessibility/visual validation evidence | Accessibility & Visual QA Bible + Requirements/Evidence/Baseline Matrix |
+| Package/runtime/distribution DX | Package & DX Bible + ADRs/package contracts |
+| Current state and traceability | Audit/Delivery Reports and Research Logs |
+| Task dependencies and actionable work | GitHub issues + canonical roadmap/backlog |
+| Local implementation instructions | One canonical local-execution handoff file |
+
+The ownership table is provisional; update it only if live files demonstrate a better canonical owner. Cross-link rather than duplicate full mutable inventories. A report is an audit snapshot, not a second source of truth.
+
+---
+
+## 8. RESEARCH AND IMPLEMENTATION DECISIONS THAT MUST NOT BE GUESSED
+
+The online AI must identify which are already decided by evidence and which are not. Common open decisions may include:
+
+- exact local consumer app(s), React versions, SSR requirements and supported browsers;
+- primitive provider among Base UI/Radix/React Aria;
+- bounded DTCG format, schema validation and token generator implementation;
+- package vs source-owned registry vs staged hybrid;
+- Classic reference baseline and compatibility boundary;
+- minimum package scope and peer dependencies;
+- SSR/theme hydration and persistence approach;
+- Skin Lab renderer/test stack;
+- core-v1 vs optional modules for data grid/charts/editor/calendar/auth integrations;
+- final production token values and font licensing;
+- original asset and sound production authorization;
+- npm scope, project license, trademarks, and public release timing.
+
+Do not settle legal/owner choices by inference. For each open decision, produce options, evidence, implications, recommended action, and whether it blocks the first local slice.
+
+---
+
+## 9. LOCAL EXECUTION PROMPT — REQUIRED DETAIL LEVEL
+
+The prompt file generated by the online AI must be specific enough that an independent coding agent can begin without asking the user broad questions.
+
+At minimum, it must include:
+
+### A. Context and contract
+- project summary and the 15 stable skin IDs;
+- 30 baseline appearance promise;
+- distinction between design specification and implementation;
+- current repository HEAD and issue state;
+- source-of-truth links;
+- explicit no-overlap rules.
+
+### B. First run checklist
+- verify local repo/branch/remote/status;
+- protect all local changes;
+- inspect package manifests and tooling;
+- pull/fetch safely if appropriate;
+- reproduce current CI failure if it remains;
+- run exact current contract validator and self-tests;
+- output the plan before large edits.
+
+### C. First task should be concrete
+The first task must target the highest current blocker, often CI/contract-validator diagnosis or a prerequisite consumer/toolchain decision. Choose based on live evidence. Include:
+
+- objective;
+- non-goals;
+- exact files likely affected (not falsely definitive if code inspection may alter them);
+- step-by-step diagnosis;
+- acceptance criteria;
+- tests/commands;
+- evidence required;
+- rollback considerations;
+- commit/issue update expectations;
+- stop condition if a maintainer decision is needed.
+
+### D. Sequence all follow-on work
+Provide a dependency graph or numbered stages so the local AI does not start UI components before token/provider/runtime decisions that materially affect them are settled.
+
+### E. Definitions of done
+Every implementation task must have code, tests, documentation, relevant accessibility checks, and evidence. A successful schema validator does not prove React build, accessibility, rendering, visual skin uniqueness or production readiness.
+
+### F. Final report shape
+The local agent must report:
+
+1. Completed task/issue IDs.
+2. Files changed and rationale.
+3. Commands run with exact pass/fail outcomes.
+4. Current HEAD/commit and remote push confirmation.
+5. GitHub issue updates/links.
+6. Behavior verified vs not verified.
+7. Remaining blockers/risks.
+8. Next single recommended task.
+
+---
+
+## 10. EXIT CRITERIA FOR THIS ONLINE TASK
+
+Do not finish until all of the following have been attempted or explicitly marked blocked:
+
+- [ ] Actual repository/default branch/HEAD re-verified.
+- [ ] Live file inventory and canonical source map inspected.
+- [ ] Current issue state verified; no duplicate backlog invented.
+- [ ] Latest CI status inspected; failure diagnosis documented or explicit access limitation noted.
+- [ ] Current primary-source research performed and logged.
+- [ ] Cross-contract drift/contradictions checked.
+- [ ] Existing specs/documents reconciled only where needed, with no duplicate Bible created.
+- [ ] A detailed, repo-specific **local coding-agent execution prompt** has been generated as Markdown.
+- [ ] Root `TODO.md` contains small, dependency-ordered tasks for all phases, not just broad roadmap headings.
+- [ ] Every milestone has a release/adoption artifact, explicit validation gate, rollback and status; no fake release claims.
+- [ ] Parallel workstreams and file ownership/integration checkpoints are documented.
+- [ ] A consumer/adoption lane allows useful slices to be tested before the full catalog/15 skins are complete.
+- [ ] The local prompt is scoped to the first milestone only, with later work selected from `TODO.md` after verification.
+- [ ] The prompt instructs the local agent to begin with safe workspace/CI checks and then execute in dependency order.
+- [ ] No product components, theme engine, backend, production token maps, production visual assets or sound files were generated by the online agent.
+- [ ] Final report links the files/commits and states honest limitations.
+
+If a remote operation cannot be completed, do the useful non-destructive work and report the blocker; do not pretend to have completed it. Do not remain stuck in planning. The deliverable is the actual local execution prompt.
+
+---
+
+## 11.1 FINAL OUTPUT GUARD — DO NOT OMIT THESE DELIVERABLES
+
+The task is **not complete** if the answer only recommends that a TODO or local prompt should be made. The AI must create/update and verify, when repository tools permit:
+
+1. `TODO.md` — root task plan, phase/milestone checklist, release artifact and adoption gates, small tasks and dependencies.
+2. One canonical local execution prompt file — first milestone only, fully pasteable for the local coding agent.
+3. A release train/adoption document if no canonical one exists.
+4. Audit/research updates and canonical link reconciliation only where necessary.
+5. Verified GitHub issue updates/creation for the first small batch only, when the tool supports it and deduplication is complete.
+
+The final answer must link these repository paths and the exact commit(s). If unable to write to GitHub, provide actual downloadable files from the current environment and state that no remote update was performed.
+
+**Release discipline:** every milestone must be defined as a potential independently adoptable increment, but cannot be called released until its tests/evidence pass. If release is blocked, show the blocker and what the consumer can safely adopt instead (if anything).
+
+## 12. BEGIN NOW
+
+Start with **Phase Zero: audit the live `bjo163/moonframe` repository**. Then create/update the master `TODO.md`, release/milestone/adoption map and first-milestone local prompt as required deliverables. Inspect current files, issues, CI and commits. Re-open official primary sources for material technical decisions. Reconcile the existing specification set without producing duplicate documents. Then generate one tailored, downloadable and preferably repository-stored **Local Coding Agent Execution Prompt** with concrete first task, staged implementation sequence, acceptance criteria, test commands, evidence, and safe-stop conditions.
+
+Do not build Moonframe UI in this online phase. Prepare the next AI to build it safely in the local workspace.

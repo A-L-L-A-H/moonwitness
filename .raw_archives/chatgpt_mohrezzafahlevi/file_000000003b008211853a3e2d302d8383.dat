@@ -1,0 +1,825 @@
+# SUPER DEEP RESEARCH PROMPT
+# Moonframe UI — Motion, Interaction & SFX Bible
+
+**Target repository:** https://github.com/bjo163/moonframe  
+**Task type:** repository audit, official-source research, design-system specification, contracts, validation plan and roadmap  
+**Implementation boundary:** documentation/specification only; do not build production UI components or generate production assets/audio in this phase.  
+**Primary product constraint:** 15 distinct visual skins × Light/Dark = 30 baseline appearances, while behavior and accessibility remain consistent.
+
+---
+
+## 0. MANDATE — READ BEFORE DOING ANYTHING
+
+You are acting as a principal design-systems architect, interaction designer, motion-design specialist, accessibility engineer, sound-design systems architect, senior React/CSS engineer, browser-platform researcher, test architect, and repository maintainer.
+
+Your task is to deeply research, audit, reconcile, and improve the **Motion, Interaction & SFX specification** for Moonframe UI. The goal is not to add animations or sound for decoration. The goal is to establish a complete, coherent, accessible, performance-conscious, machine-verifiable system that future developers and AI agents can implement without guessing.
+
+**Start by auditing the actual GitHub repository.** Do not start from assumptions in this prompt, old chat summaries, or your own previous response. Repository state may have changed. Prove what exists, what is merely specified, what is implemented, and what has passed tests.
+
+After the audit, perform current research using official sources and relevant standards. Then update the existing Bible/contracts/roadmap in the repository with the smallest coherent set of documents. Do not create duplicated sources of truth. Validate links, schemas and cross-document references.
+
+### Hard scope boundary
+
+This phase is for **research, documentation, contracts, decision records, QA design, and task planning**. Do not:
+
+- implement React components or production motion utilities;
+- install animation/audio libraries merely to experiment, unless a strictly read-only/source research path cannot answer a question;
+- generate logos, vectors, illustrations, PNGs, icon packs, sound effects, music, voice, or other production assets;
+- add autoplay audio, live sound, or decorative effects to the application;
+- implement authentication, product/business behavior, or application-specific sound logic;
+- claim the design system is production-ready, accessible, tested, or complete without evidence;
+- mark any skin/animation/pairwise review as passed without actual reviewed evidence.
+
+Small documentation-only schema validation or a minimal deterministic contract validator may be justified if the repository already has suitable tooling and the change is low risk. If adding code or CI exceeds the present repository’s scope, specify it as a later task instead.
+
+Do not ask the user to repeat information that is available in the repo or this prompt. If a decision requires more evidence, document the options, trade-offs, recommendation, confidence, and the precise evidence still needed, then continue with the work that can be done safely.
+
+## 1. PRODUCT CONTEXT AND NON-NEGOTIABLE PRINCIPLES
+
+Moonframe UI is planned as a first-party premium UI system for the Moon ecosystem. It aims to provide shared component behavior, distinctive visual skins, premium blocks/templates, a token architecture, original branding assets, and optional interaction sound packs.
+
+The skin catalog is intended to contain exactly these 15 stable IDs unless a proposed change is documented and explicitly left as an open decision:
+
+1. `moonpunk` — acid-lime manga punk / neo-brutalist impact.
+2. `moonriot` — riot editorial / angular cyberpunk.
+3. `moonzine` — underground zine / collage editorial.
+4. `moonhalftone` — manga screentone / monochrome ink.
+5. `moonglitch` — terminal telemetry / controlled signal distortion.
+6. `moonsmash` — kinetic impact / explosive visual focal point.
+7. `moonink` — brush-ink / expressive illustration.
+8. `mooncrash` — industrial utility / mechanical hazard.
+9. `moonpanel` — strict modular comic-panel composition.
+10. `moonscrawl` — sketchbook / hand annotations.
+11. `moonraw` — raw minimalist brutalism / exposed structure.
+12. `moonchrome` — futuristic metallic / controlled reflective material.
+13. `classic` — restrained, familiar shadcn-style baseline; not an official shadcn product.
+14. `moonquest` — RPG/adventure presentation language, not a game engine.
+15. `moonledger` — clean, compact professional ERP presentation, not an ERP engine.
+
+Each skin has **Light and Dark** appearances, producing 30 baseline appearances. `system` resolves to Light or Dark based on the user-agent/system preference; it is not an additional skin or an additional visual grammar.
+
+### Global laws
+
+1. **Skin is a visual grammar, not a color palette.** Its motion can reinforce the grammar, but motion alone cannot make otherwise identical skins unique.
+2. **Behavior is stable across skins.** A Dialog, menu, form, table, and button must preserve their semantics, keyboard behavior, focus management and accessibility regardless of skin.
+3. **Motion is functional first.** Every motion must have a stated purpose: feedback, orientation, continuity, hierarchy, progress, or carefully justified expression. Decorative movement must never obstruct reading or action.
+4. **No animation is required to understand the interface.** Important state, errors, success, progress and relationships must remain perceivable when motion is disabled.
+5. **Respect user preferences.** The system must research and specify OS/browser reduced-motion preferences, a product-level override where appropriate, and safe transitions between preference states.
+6. **No sound autoplay.** Sound must be optional, deliberately enabled by a user action, globally muteable, reasonably quiet/short, and supplemental to visible information.
+7. **No sound-only meaning.** Never communicate success, error, danger, completion, or alerts only through audio.
+8. **No surprise motion or audio.** No auto-playing decorative loops, persistent shaking, random effects, click sounds on every control, or loud unexpected rewards by default.
+9. **Performance and clarity beat spectacle.** Avoid layout thrash, excessive blur, perpetual animation, focus movement, motion that delays action, and sound playback on high-frequency events.
+10. **Specification status must be truthful.** Distinguish proposed, specified, implemented, tested, reviewed, and released.
+
+## 2. PHASE 0 — AUDIT THE ACTUAL REPOSITORY FIRST
+
+Before editing anything, inspect the actual repo `bjo163/moonframe` and capture the exact branch/commit audited.
+
+### Audit actions
+
+1. Verify repository identity, owner, visibility, default branch, permissions, current HEAD, and whether there is a local checkout. Record current date and commit SHA.
+2. List actual files and directories. Inspect README, all versions of the Design System Bible, Theme Contract, Skin Grammar Contract, Token Dictionary, asset/brand contract, component catalog, premium blocks/template catalog, implementation roadmap, research logs, ADRs, schema files, validators, tests, CI workflows, issue/PR templates, licenses, and relevant GitHub issues/PRs.
+3. Read the full relevant documents, not only their titles or first few lines. Use file paths and section anchors as evidence.
+4. Identify current source-of-truth ownership: which document defines motion tokens, which defines skin identity, which defines component behavior, which defines asset/SFX files, and which defines QA/release criteria.
+5. Search all existing documentation for terms such as `motion`, `animation`, `transition`, `reduced motion`, `SFX`, `audio`, `sound`, `interaction`, `focus`, `hover`, `press`, `gesture`, `autoplay`, `audio pack`, `motion token`, `sound event`, and `Skin Lab`.
+6. Inspect current JSON schemas and manifests, if present. Validate JSON parseability and check for duplicate IDs, missing fields, mismatched skin IDs, stale references, inconsistent status labels, invalid paths, and naming conflicts.
+7. Search GitHub issues/PRs for existing decisions or work on motion, audio, assets, accessibility, and theme behavior. Do not duplicate tasks that already exist.
+8. Distinguish facts using these statuses:
+   - `verified-existing`
+   - `specified-not-implemented`
+   - `partially-specified`
+   - `missing`
+   - `contradictory`
+   - `stale-needs-research`
+   - `implemented-and-tested` (only with code/test evidence)
+9. Create/update a repository audit report, if not already present, using a path consistent with existing docs. Record path/section evidence, severity, impact, and recommendation for each meaningful gap.
+10. Do not overstate what the repository contains. A contract is not the same as implementation; a mockup is not the same as a tested behavior; an asset brief is not an actual licensed asset.
+
+### Expected audit output
+
+A short `Motion / Interaction / SFX audit` section in the existing audit report or a dedicated report if that is cleaner. Include:
+
+- commit audited and date;
+- existing source-of-truth files and their responsibility;
+- motion/interaction/audio content that already exists;
+- contradictions, duplication, gaps and stale assumptions;
+- relevant existing issues/PRs;
+- highest-risk missing contracts;
+- recommendation for the smallest non-duplicative set of changes.
+
+Do not create a new “master Bible” just because the work is complex. First decide whether the existing master Bible should link to a focused new document or incorporate a concise section. There must be one authoritative home for each decision.
+
+## 3. PHASE 1 — DEEP RESEARCH FROM CURRENT PRIMARY SOURCES
+
+Research must be conducted during the task. Do not rely only on prior model knowledge or stale recollections. Prefer standards, official browser documentation, official library docs, and official release notes. Record source title, publisher, URL, publication/update date if shown, access date, relevant claim, caveats, and the decision it influences.
+
+### Starting primary-source list — verify current status and relevance
+
+#### Accessibility and interaction standards
+
+- WCAG 2.2: https://www.w3.org/TR/WCAG22/
+- WAI-ARIA Authoring Practices Guide: https://www.w3.org/WAI/ARIA/apg/
+- WAI-ARIA 1.2: https://www.w3.org/TR/wai-aria-1.2/
+- Understanding WCAG 2.2 Pause, Stop, Hide: https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide.html
+- Understanding WCAG 2.2 Three Flashes: https://www.w3.org/WAI/WCAG22/Understanding/three-flashes.html
+- Understanding WCAG 2.2 Animation from Interactions: https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html
+- MDN `prefers-reduced-motion`: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+- MDN `forced-colors`: https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors
+
+#### Browser motion platforms
+
+- MDN CSS animations: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_animations
+- MDN CSS transitions: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_transitions
+- MDN Web Animations API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API
+- MDN View Transition API: https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API
+- MDN `requestAnimationFrame`: https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame
+- MDN Page Visibility API: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+- MDN Web Vitals/performance resources where relevant; confirm official source and current terminology.
+
+#### Animation library candidates — assess, do not assume
+
+- Motion for React: https://motion.dev/docs/react-animation
+- Motion accessibility: https://motion.dev/docs/react-accessibility
+- Motion `useReducedMotion`: https://motion.dev/docs/react-use-reduced-motion
+- React official docs: https://react.dev/
+- shadcn/ui documentation and changelog: https://ui.shadcn.com/docs
+- Base UI, Radix Primitives, and React Aria official documentation if their capabilities intersect with interaction/focus/overlay behavior.
+
+#### Audio and browser policies
+
+- MDN Web Audio API: https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
+- MDN Autoplay guide: https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay
+- MDN HTMLMediaElement: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement
+- Chrome Autoplay Policy: https://developer.chrome.com/blog/autoplay
+- Official documentation for any candidate audio library (e.g. Howler.js) only if evaluation proves it relevant; inspect license, size, browser limitations and maintenance.
+
+These links are a starting point, not a guarantee that every page remains current or exhaustive. Verify actual status and use the correct current WCAG/ARIA editions and official URLs. If a URL redirects, is superseded, or is outdated, document the current canonical source instead of blindly preserving it.
+
+### Required research questions
+
+1. Which interactions should use native CSS transitions, CSS keyframes, Web Animations API, View Transition API, or an optional React motion library?
+2. What capability actually justifies a motion dependency: exit-presence, layout animation, gesture controls, springs, sequence orchestration, scroll motion, SVG path animation, or something else?
+3. Which transitions are design tokens versus named recipes/presets?
+4. How should reduced motion change transforms, layout animation, parallax, auto-playing backgrounds, decorative loops, and route/page transitions?
+5. What does the current standard require versus recommend? Distinguish WCAG conformance requirements from best practices and product policy.
+6. Which patterns are high risk for vestibular conditions, photosensitivity, cognitive overload, screen reader users, keyboard users, touch users, or low-power devices?
+7. How should user-initiated movement, automatically moving content, looping animation, and auto-updating status be distinguished?
+8. What are browser autoplay restrictions for sound and media? How does user activation affect audio playback? What should happen when playback is blocked?
+9. What does a responsible sound pack require for opt-in, mute, volume, frequency limiting, failure handling, reduced stimulation, and accessibility?
+10. What is the most maintainable architecture for 15 visually distinct skins without maintaining 15 unrelated animation engines or interaction behavior forks?
+11. Which tests can be automated, and which need human review or real assistive technology?
+12. How can performance and visual regression tests be repeatable across CI environments?
+
+### Source evidence and decision log
+
+Add/update a research log in the repository's established structure. For every significant technical recommendation, cite at least one source that directly supports it. Prefer standards and official docs over a vendor's marketing page. If vendor docs are necessary, label them as vendor-specific evidence. Include publication date/version when verifiable and access date. Never infer a requirement from a general article if the normative standard says something more precise.
+
+## 4. PHASE 2 — DEFINE THE SYSTEM BOUNDARIES
+
+The final specification must separate five concepts that are commonly conflated:
+
+1. **Interaction behavior:** focus, keyboard response, pointer/touch response, state change, event order, cancellation, validation and feedback.
+2. **Motion tokens:** reusable timing, easing, distance, spring/settle behavior, staggering, reduced-motion policy and motion intensity.
+3. **Motion recipes:** purposeful patterns such as dropdown enter/exit, dialog open/close, toast enter/dismiss, loading state, drag/drop, route transition and chart update.
+4. **Skin motion art direction:** each skin's visual timing/character or optional expressive accent. It must not change semantics or override reduced motion.
+5. **Sound-event system:** optional audio feedback with deliberate consent, semantic events, global/user controls, playback policy, cooldown and file provenance.
+
+Do not confuse a component’s interaction state with its animation implementation. For example, `pressed` is a semantic/visual state; its scale transition is optional motion treatment. `error` is a state; a shake animation must not be mandatory or the only signal of invalidity.
+
+### Boundaries with existing Moonframe documentation
+
+- **Design System Bible:** high-level principles and links to focused specifications.
+- **Token Dictionary / Theme Contract:** token names and resolved theme semantics. Motion token identifiers and types belong to token documentation; motion meaning/recipes belong to this Bible.
+- **Skin Grammar Contract:** visual territories and anti-overlap. This Bible defines per-skin motion/audio direction, not a second full copy of every skin's full visual brief.
+- **Component API & Behavior Bible:** component API and state behavior. This Bible specifies generic motion interaction patterns and points to the component contract instead of duplicating every prop definition.
+- **Premium Blocks & Template Bible:** what blocks/templates exist. This Bible defines reusable interaction/motion/SFX conventions that blocks may consume.
+- **Original Asset & Brand Bible:** asset provenance and production rules. This Bible defines audio behavior and SFX metadata requirements; do not duplicate the whole asset taxonomy.
+- **QA/Accessibility strategy:** test implementation and release gates. This Bible states motion/audio acceptance requirements and references the central test plan.
+
+Audit actual filenames/versions before creating new files. If a corresponding contract already exists, update it rather than creating competing alternatives. A file's title is not enough: establish its authority and cross-links.
+
+## 5. PHASE 3 — MOTION PRINCIPLES AND GRAMMAR
+
+Specify an explicit motion philosophy rather than a collection of arbitrary milliseconds. Every motion recipe should declare its intent and risk.
+
+### Allowed purposes
+
+- **Feedback:** show that an interaction was accepted or a state changed.
+- **Orientation:** help users understand where a panel/menu/content originated or where it went.
+- **Continuity:** preserve context when content changes without misleading the user.
+- **Hierarchy:** emphasize the most important action or transition without excessive distraction.
+- **Progress:** show ongoing work, completion or indeterminate activity honestly.
+- **Expression:** reinforce a skin’s personality only where it remains optional, brief and non-blocking.
+
+### Disallowed by default
+
+- animations that delay input acceptance or hide state;
+- perpetual decorative loops in core workspace areas;
+- repeated shaking as a generic error response;
+- flashing/glitch effects near text, focus rings or rapidly changing status;
+- large parallax, zooming, rotation or spatial travel when it can be replaced by a calmer transition;
+- motion that moves the keyboard focus or changes reading order unexpectedly;
+- animation that replays unnecessarily on every React rerender;
+- entrance sequences that block interaction until complete;
+- animations whose meaning is available only while the animation is running;
+- essential data or controls hidden in the middle of a motion sequence;
+- audio-triggered animation loops or sound that repeats at high event frequency.
+
+### Motion recipe metadata
+
+Every named recipe should have a machine-readable record with fields equivalent to:
+
+- stable ID and human-readable name;
+- purpose/category (`feedback`, `orientation`, `continuity`, `hierarchy`, `progress`, `expression`);
+- target use cases/components;
+- trigger and state transition;
+- start/end behavior;
+- duration/easing/distance/intensity tokens or approved preset references;
+- entry and exit behavior;
+- interruption/cancellation and reduced-motion behavior;
+- keyboard/focus implications;
+- accessibility risk and relevant standard references;
+- performance considerations;
+- whether continuous or auto-starting;
+- whether pause/stop/hide controls are needed;
+- applicable skins and explicit exceptions;
+- test requirements;
+- status (`proposed`, `specified`, `implemented`, `tested`, `reviewed`, `released`).
+
+The motion recipes contract must avoid storing arbitrary per-component magic numbers unless there is a documented exception. Exact numeric token values should be informed by research and prototype review, not copied blindly from a library default.
+
+## 6. PHASE 4 — MOTION TOKEN ARCHITECTURE
+
+Audit the existing token dictionary. Determine where motion tokens should live and avoid duplicate definitions.
+
+### Token families to evaluate
+
+- duration: immediate/fast/normal/slow or a justified equivalent;
+- easing: standard, emphasized, enter, exit, linear/continuous where necessary;
+- distance: subtle/short/medium/large movement distances;
+- scale: restrained press/feedback scaling where applicable;
+- opacity: entry/exit values only where useful;
+- spring/settle behavior if the chosen engine justifies a spring model;
+- stagger: limited sequences for repeated child items;
+- layout transition: shared semantic names for reflow/position change;
+- feedback intensity: baseline, expressive, and reduced-motion policy;
+- continuous/loop policy: default off, play conditions and pause behavior;
+- skin-specific recipe selector: references named recipes instead of embedding a second token system;
+- preference mapping: `full` / `reduced`, plus OS/system resolution.
+
+Do not assume that every motion concept needs a CSS custom property. Some values may be better represented as typed recipe configuration. Specify the boundary clearly.
+
+### Token requirements
+
+- Define names, types, descriptions, units, valid ranges, defaults, references and aliases.
+- No unresolved references or cycles.
+- Avoid duplicate tokens with different names unless they have materially different semantics.
+- Keep skin identity separate from accessibility preference. A skin may provide a motion signature, but `reduced` must resolve consistently across all skins.
+- Avoid exposing a `motion: full` option that overrides OS preferences silently. Define how user override and OS preference interact, and specify the initial default.
+- Ensure Light/Dark theme maps do not unnecessarily duplicate motion tokens that are not color-dependent.
+- Define how runtime attributes/config interact with CSS variables and a React motion layer if one is selected.
+- Define server-rendering and hydration behavior so the initial state does not animate unexpectedly or flash between incompatible recipes.
+- Add token coverage validation and a canonical export/generation strategy in the existing token pipeline plan.
+
+Do not fill the repository with final values before the token architecture and reference patterns are reviewed. Mark any unapproved numeric tokens as `proposed` or `pending-review`.
+
+## 7. PHASE 5 — INTERACTION PATTERN INVENTORY
+
+Build a machine-readable interaction pattern inventory. Do not implement these patterns yet.
+
+### A. Basic input and pointer states
+
+- hover, active/pressed, focus-visible, selected, checked, disabled, loading, invalid, read-only;
+- touch/click/tap response and coarse-pointer fallback;
+- hover must never be the only way to reveal information or action;
+- focus indicator remains visible over skin-specific backgrounds, textures and animations;
+- pointer-down/up/cancel semantics; prevent accidental activation on drag or cancellation;
+- avoid making scale/translation animation change layout or target hit areas unexpectedly.
+
+### B. Navigation
+
+- tabs, sidebar navigation, collapsed navigation rail, mobile navigation, breadcrumb changes;
+- route/page transition policy (native view transitions vs reduced/none);
+- active item state changes without focus hijacking;
+- loading/navigation pending states;
+- history/back-forward restoration and interruption behavior where applicable.
+
+### C. Overlays and transient UI
+
+- dropdown/popover open/close;
+- dialog/drawer open, close, escape, outside click and focus restoration;
+- tooltip delay, positioning changes and dismissal;
+- toast enter/dismiss and queue behavior;
+- nested overlay layering and how animation order interacts with focus and accessibility tree;
+- avoid exit animations leaving hidden interactive content reachable.
+
+### D. Forms and validation
+
+- pending/submitting state, success, field-level error, form-level error, validation on blur/change/submit;
+- async validation and cancellation/race behavior;
+- dirty state, unsaved change confirmation, reset/undo affordance;
+- motion must not replace error text, label or ARIA announcement;
+- no arbitrary shaking of the entire form as a mandatory invalid-state cue.
+
+### E. Data-intensive interactions
+
+- sorting/filtering/saved view changes;
+- table row selection and bulk-action presentation;
+- pagination/virtualization without disorienting jumps;
+- row expansion/details panel;
+- loading, skeleton, stale data, empty result, retry and optimistic update;
+- progress/counter/metric updates without distracting repeated animations;
+- charts: data update motion and accessible static equivalent;
+- drag/reorder/grouping: keyboard alternative and cancellation semantics.
+
+### F. Upload and asynchronous operations
+
+- file drag-over, acceptance/rejection, queued/uploading/progress/complete/error/retry/cancel;
+- retry and progress should be distinguishable from final success;
+- cancellation must stop both operation feedback and nonessential animation;
+- no sounds for every byte/progress tick or repeated tiny state event.
+
+### G. AI/chat/streaming interfaces
+
+- streaming in progress, stop/regenerate, tool execution, approval pending, source/citation expansion, artifact preview and retry/error;
+- no endless animated indicators that continue after completion/cancel;
+- reduced-motion alternative for typing/reveal effects; full text must remain available when motion is disabled;
+- rate-limit sound/visual cues so streaming chunks do not overwhelm the user.
+
+### H. RPG and expressive UI
+
+- optional reward/achievement/progression animations for Moonquest;
+- no essential game state conveyed only by motion or sound;
+- replay/skip behavior where appropriate;
+- prevent repeated reward audio or effect spam;
+- keep expressive/celebratory effects isolated from the core component API and disabled/reduced by user preference.
+
+### I. Errors, destructive actions and recovery
+
+- visible error state, confirmation of destructive action, undo, retryable vs permanent error;
+- prefer clear layout/semantic emphasis over startling motion or loud sound;
+- prevent accidental state loss when overlays/page transitions interrupt.
+
+For every pattern family, define triggers, state model, animation optionality, focus/keyboard interaction, reduced-motion fallback, audio eligibility (usually none by default), and tests. Where detailed component state already exists in the Component API & Behavior Bible, reference it rather than duplicating the prop contract.
+
+## 8. PHASE 6 — REDUCED MOTION AND ACCESSIBILITY CONTRACT
+
+Research current standards carefully. Separate mandatory conformance requirements from stronger Moonframe product policy. Explicitly record which WCAG criteria are Level A/AA/AAA; do not describe an AAA recommendation as an AA requirement or vice versa.
+
+### Required policy questions
+
+1. How does the system honor `prefers-reduced-motion` at first paint and runtime changes?
+2. Can a product override exist? If yes, how is it presented, remembered, and resolved without silently overriding OS settings?
+3. Which recipes are removed entirely, replaced by opacity/instant changes, or retained because they are essential to information/function?
+4. How are auto-playing loops, animated backgrounds, parallax, animated charts and scroll-linked transitions treated?
+5. When must moving/auto-updating content expose pause/stop/hide or frequency controls?
+6. What visual behavior replaces a reward, toast, loading, or transition animation when reduced motion is enabled?
+7. How does high contrast/forced colors affect animated borders, glows, shadows and focus indicators?
+8. How do screen readers learn about state changes without depending on animation timing?
+9. How are keyboard focus and DOM visibility synchronized through exit animations?
+10. How do skins that emphasize glitch, impact, parallax or metallic highlights remain safe and readable?
+
+### Reduced-motion specification
+
+For every motion recipe, require a `reducedMotion` definition. Acceptable options may include:
+
+- `none`: no animation; state changes immediately;
+- `opacity-only`: permitted only where appropriate and non-distracting;
+- `shortened`: reduce duration/amplitude but preserve useful continuity;
+- `static-equivalent`: use a border, icon or content state rather than movement;
+- `essential`: requires explicit rationale and human accessibility review.
+
+These are possible contract values, not a presumption that every recipe should use one of them. Research and adjust the enum based on practical coverage.
+
+Do not treat opacity changes as automatically accessible in every situation; evaluate context and perceptibility. Avoid flashing patterns and rapidly alternating colors. Ensure any motion control is accessible by keyboard and remains available if the skin changes.
+
+## 9. PHASE 7 — THE 15 SKIN MOTION SIGNATURES
+
+Create a **motion art-direction matrix** for all 15 skins. The matrix should be concise enough not to duplicate Skin Grammar Contract, but detailed enough that future designers can implement it without guessing.
+
+Each skin record should state: signature motion character, permitted representative recipe families, disallowed motion patterns, speed/intensity direction (without unreviewed magic numbers), sound profile direction (if any), reduced-motion replacement, and which shared recipes remain identical.
+
+Initial directions to investigate—not approved final designs:
+
+| Skin | Candidate motion grammar | Special caution |
+|---|---|---|
+| Moonpunk | brief impact snap, hard-stop transitions, restrained offset movement | no constant shaking or large-scale bounce |
+| Moonriot | angular/directional wipes, interruption motif used sparingly | no flashing glitch text or signal-like rapid strobing |
+| Moonzine | editorial reveal, paper-layer/sequence metaphor | no auto-moving collage that impairs reading |
+| Moonhalftone | panel reveal and restrained ink/raster transition | halftone texture must not pulse or reduce contrast |
+| Moonglitch | brief signal shift/telemetry update | no frequent flashing, jitter or perpetual scanline motion |
+| Moonsmash | concise impact/scale emphasis for selected events | avoid large zoom, screen shake and forced reward animation |
+| Moonink | optional line-draw/brush reveal for decorative assets | all meaning must exist without drawing animation |
+| Mooncrash | mechanical panel/plate transition and precise state feedback | no shaking/error theatrics or excessive heavy movement |
+| Moonpanel | bounded panel transition and clear grid continuity | preserve spatial orientation and focus sequence |
+| Moonscrawl | optional sketch/draw-on accents | no animated scribble behind content or focus indicators |
+| Moonraw | minimal, immediate transitions and direct state updates | should not be forced to animate for brand differentiation |
+| Moonchrome | controlled reflection/glint as optional ornament | avoid expensive continuous shine, blur or flashing highlights |
+| Classic | restrained familiar transitions and conventional interaction timing | do not add ornamental effects to prove uniqueness |
+| Moonquest | optional quest/reward/progression accent | audio/effects must be optional and event-rate-limited |
+| Moonledger | calm micro-transitions and stability-first data updates | no table row choreography that harms scanning or productivity |
+
+Evaluate these directions against the Skin Grammar Contract and other planned skin work. Avoid overlap by distinguishing motion characteristics but do not introduce a separate behavior for the same semantic state solely to make every skin look different. A coherent shared base is allowed; each skin does not need 15 entirely different animations.
+
+For each skin, document how Light and Dark affect contrast of animated surfaces/focus but do not create a new motion grammar per mode. All skin signatures must degrade gracefully under reduced motion.
+
+## 10. PHASE 8 — SOUND EFFECT SYSTEM (SFX) CONTRACT
+
+This is a system specification only. Do not create, synthesize, download, or commit sound assets in this task.
+
+### Sound goals
+
+Define when sound improves confirmation, situational awareness or an optional game-like experience, and when no sound is better. A premium UI system should not sound noisy by default.
+
+### Default policy
+
+- Sound is **off until a user explicitly enables it** through a clear control/gesture.
+- No playback on initial render, navigation, hover, scroll, typing, rendering, component mount, route hydration or every normal button click.
+- Provide a global master mute and a persisted user preference when a consuming application chooses to persist it.
+- Provide reasonable volume defaults/limits and optional per-category preferences, with no abrupt loud peaks.
+- Sound feedback is supplementary. Visible state/text and accessible announcements carry all essential information.
+- Playback blocked by browser policy or missing audio assets must be silent and non-fatal; never block the interaction waiting for sound.
+- Debounce/throttle/deduplicate high-frequency events; avoid a sound for every streaming token, log line, row update or progress tick.
+- Respect user expectations, reduced-stimulation settings and app context. The library should provide controls and policies; the application chooses if/when sound is appropriate.
+- No default sound in authentication/security errors, finance-critical/destructive actions, or sensitive flows unless the consumer explicitly opts in with a documented rationale.
+
+### Sound event taxonomy
+
+Research and define a bounded event taxonomy such as:
+
+- `confirm.success` — a discrete user-requested operation completed;
+- `confirm.warning` — an important actionable warning, if sound is justified;
+- `confirm.error` — a discrete actionable operation failed, if enabled;
+- `notification.incoming` — an explicitly opted-in incoming event;
+- `operation.progress-complete` — only for meaningful long-running completion, not ordinary page loading;
+- `game.reward` / `game.achievement` — optional Moonquest-style experience, consumer-triggered and rate-limited;
+- `interaction.toggle` — likely muted/off by default; justify any use;
+- `ambient` — out of scope for core UI; never autoplay by default.
+
+This is an initial taxonomy to assess, not a requirement to implement every event. Merge/remove events if research shows duplicated meaning or excessive noise. Define each event’s semantic intent, eligible source, urgency, cooldown/dedupe behavior, visual equivalent, accessibility equivalent, enablement policy and skin variation rules.
+
+### Sound profile vs skin
+
+Do not assume 15 entirely independent sound packs are necessary. Evaluate an architecture such as:
+
+- one coherent semantic core pack;
+- optional, small per-skin timbre/texture variants for a few expressive skins;
+- no sound profile for skins whose visual territory does not benefit from audio;
+- a single shared user preference model and consistent semantic event mapping.
+
+Compare the cost of 15 packs against perceived value, file weight, discoverability, consistency and accessibility. Any per-skin distinction is optional and must not change the meaning of events. Moonledger may reasonably use no sound by default; Moonquest may have an opt-in reward sound profile; these are product policy candidates, not automatic defaults.
+
+### Sound asset record
+
+Define fields appropriate to the repo’s asset contract, such as:
+
+- stable `soundId` and semantic event;
+- optional skin/profile and category;
+- source file and web export paths (future only);
+- file format/container/codec, duration, channel count/sample rate/bit depth if relevant;
+- loudness/peak/normalization review criteria;
+- file size and maximum budget;
+- creator/provenance/source and license status;
+- generation/editing/source notes when applicable;
+- usage, playback policy, cooldown and priority;
+- volume default/range and whether it can be muted;
+- visual equivalent and ARIA/status equivalent;
+- fallback if missing/unsupported/blocked;
+- checksum/version, review status, approval owner.
+
+Do not invent numerical audio budgets until you research formats and benchmark likely consumers. Propose budgets, state trade-offs and make them approval-gated. Distinguish source master from compressed browser export. Do not commit licensed font/audio binaries or other assets without provenance and rights review.
+
+### Audio engine decision
+
+Compare native HTMLAudioElement/Web Audio versus a library only if needed. Research:
+
+- browser autoplay/user-activation limitations;
+- concurrent playback, latency, memory and decode behavior;
+- lazy-loading and bundle-size cost;
+- visibility/background tab behavior;
+- volume/mute/cooldown support and clean disposal;
+- SSR safety and no import-time playback;
+- testing/mocking and accessibility policy;
+- licensing/maintenance if a third-party library is considered.
+
+Recommend the lowest-complexity architecture that satisfies demonstrated needs. Do not add an audio dependency simply because the Bible mentions SFX. Do not instantiate or play audio in this task.
+
+## 11. PHASE 9 — PERFORMANCE, INTERRUPTION, AND FAILURE POLICIES
+
+Specify behavior for:
+
+- reduced motion changing during an animation;
+- user changing skin/mode while a dialog, menu or toast is open;
+- route/navigation interruption before an exit animation completes;
+- component unmount and cleanup of timers/animation controls;
+- background tab/visibility and auto-updating displays;
+- reduced battery/device performance or browser feature support;
+- audio start blocked, audio decode failure, asset unavailable, unsupported codec, user mutes during playback, or tab goes inactive;
+- rapid repeated triggering and duplicate notifications;
+- stale async operations, cancellation and race conditions;
+- SSR/hydration and first-paint preference resolution;
+- UI being usable when JS animation/audio capability is unavailable.
+
+The end state must be reachable immediately when animation is cancelled or unavailable. Motion must not be the only route to completing a workflow. Sound failure must never cause a rejected user action or unhandled runtime error.
+
+Create an explicit **no-motion/no-audio fallback contract**. It should state which features are disabled, which instant state changes occur, and how status remains perceivable.
+
+## 12. PHASE 10 — IMPLEMENTATION TECHNOLOGY DECISION RECORD (ADR)
+
+Research, compare and document choices before implementation. Do not preselect a dependency.
+
+### Motion engine options
+
+Compare native CSS transitions/keyframes, Web Animations API, View Transition API, Motion for React, and any other candidate justified by a concrete use case. At minimum evaluate:
+
+- capabilities vs actual requirements;
+- keyboard/focus/DOM lifecycle integration;
+- reduced-motion ergonomics;
+- enter/exit presence and layout animation support;
+- gesture and drag/drop behavior;
+- sequences/stagger/spring model;
+- SSR/hydration behavior;
+- React version compatibility;
+- static CSS fallback and browser support;
+- performance and memory;
+- tree-shaking/package footprint;
+- bundle and dependency cost;
+- licensing, release activity, maintenance and lock-in;
+- testing determinism and how to disable motion in tests;
+- ability to keep the theme skin-agnostic and recipes data-driven.
+
+Use a weighted scoring matrix with explicit criteria/weights, source URLs, confidence and caveats. Scores must be evidence-backed, not made up to justify a favorite tool. If the repository is empty or does not reveal target compatibility, identify the missing fact and make the recommendation conditional.
+
+### Audio engine options
+
+Compare no engine/native browser API vs a small abstraction vs third-party audio library only against the approved use cases. Estimate operational complexity and asset delivery cost. Keep an optional audio module separate from core UI so consumers that do not want sound do not pay the dependency/bundle cost.
+
+### ADR outcome
+
+Record:
+
+- context and current repository facts;
+- requirements and non-goals;
+- options considered;
+- source evidence;
+- scoring and uncertainty;
+- chosen option or a time-boxed unresolved decision;
+- expected consequences and migration/exit strategy;
+- decision owner and review trigger.
+
+Do not install packages or implement engine adapters as part of this phase.
+
+## 13. PHASE 11 — MACHINE-READABLE CONTRACTS
+
+Inspect existing JSON contracts before creating anything new. Extend them if that gives a cleaner single source of truth. Proposed logical contracts include the following, but paths/names must follow repo conventions.
+
+### Motion contract
+
+At minimum describe:
+
+- contract/schema version;
+- token references and approved values/status;
+- named motion recipes;
+- triggers, duration/easing/distance references;
+- entry/exit/interruption behavior;
+- reduced-motion strategy;
+- continuous/auto-playing classification;
+- skin applicability and exceptions;
+- performance and accessibility notes;
+- testing/approval status.
+
+### Interaction contract
+
+At minimum describe:
+
+- pattern ID/category;
+- relevant states and transitions;
+- input modality (pointer, touch, keyboard, assistive technology);
+- focus/ARIA requirements;
+- effect on motion and audio eligibility;
+- cancellation/dismissal and recovery;
+- required tests and references to Component API contracts.
+
+### SFX contract
+
+At minimum describe:
+
+- stable event taxonomy and semantic meaning;
+- default enabled/off state and explicit user consent action;
+- global/category mute and volume semantics;
+- rate limit/dedupe/cooldown rules;
+- optional skin/profile overrides;
+- audio asset metadata schema;
+- visual/accessibility equivalents;
+- blocked/missing/failure fallback;
+- status and provenance/license fields.
+
+### Schema rules
+
+- JSON must be valid JSON with no comments or trailing commas.
+- Distinguish schema version from content/contract version.
+- Use stable IDs and enums.
+- Use `$ref` where appropriate instead of duplicating a large schema across documents.
+- Reject unknown skin IDs or document forward-compatible behavior intentionally.
+- Reject duplicate IDs and missing required fields.
+- Every motion recipe must specify reduced-motion behavior.
+- Every sound event must specify user-enablement policy and visual/accessibility equivalent.
+- Unknown SFX mapping resolves to silent/no-op, not arbitrary default playback.
+- Pairing with a skin must never override the global mute/reduced-motion policy.
+- Status defaults to `proposed` or `specified`, not `tested` or `released`.
+- Provide JSON Schema or equivalent validation contract if stable enough and compatible with current tooling.
+- If code validator/CI is deferred, write deterministic validation criteria and issue-ready tasks.
+
+Do not create parallel contracts that compete with the Theme, Token, Skin Grammar, Component, Premium Blocks or Asset contracts. Assign one owner document to each piece of data and cross-reference it elsewhere.
+
+## 14. PHASE 12 — QA AND VALIDATION MATRIX
+
+Design a test strategy with automated plus human review. Research tool choices and inspect the existing repo before recommending installation.
+
+### Motion checks
+
+- all named recipes have default and reduced-motion behavior;
+- state/action works with animation disabled;
+- no focus loss or inaccessible exit-animation remnants;
+- no motion loop that violates documented pause/stop policy;
+- high-risk patterns reviewed for flashing, spatial movement and repeated animation;
+- reduced-motion preference changes and user override behavior tested;
+- UI remains functional when animation APIs are unsupported or animation is cancelled;
+- no excessive long-running animation on background tabs;
+- deterministic visual snapshots with animations disabled or controlled.
+
+### Interaction checks
+
+- keyboard-only navigation, visible focus, appropriate Escape/arrow-key patterns;
+- pointer/touch cancellation, duplicate activation, busy/pending states;
+- dialog focus trap/restore and nested overlays;
+- screen reader announcements independent of animation/audio;
+- errors and success states remain understandable without color, animation, or sound;
+- touch/coarse-pointer behavior does not depend on hover;
+- high contrast/forced-colors and zoom/reflow;
+- skin switching while interactive UI is open;
+- no unexpected focus movement when content enters/exits.
+
+### Sound checks
+
+- off before explicit enablement;
+- no audio on first paint/mount/navigation;
+- master mute works across skins/events;
+- blocked autoplay, unsupported audio and missing file are silent/non-fatal;
+- user can mute during playback;
+- high-frequency events respect cooldown/dedupe;
+- no sound-only status communication;
+- no audio output during test runs unless explicitly testing the sound system;
+- sound is skipped in reduced/opt-out contexts according to policy;
+- source/provenance/license metadata check can be run when assets eventually exist.
+
+### Visual matrix
+
+- 15 skins × Light/Dark = 30 baseline appearances;
+- representative core components and premium blocks across skins;
+- shared reference interaction states for Classic, Moonpunk, Moonzine, Moonglitch, Moonquest and Moonledger at minimum, then broader coverage based on risk;
+- grayscale and decoration-off views to validate the base visual grammar;
+- reduced-motion views for every motion signature;
+- same-content screenshots where motion differs by skin, to avoid confusing content differences with design differences;
+- no marking of a skin/pair as passed without actual screenshots and human review.
+
+### Browser/device matrix
+
+Propose a realistic matrix based on target browsers/repository setup. Include mobile/coarse pointer, keyboard-only desktop, reduced-motion enabled, forced-colors/high-contrast where supported, and background tab behavior. Do not claim exhaustive testing across every OS/device if it was not run.
+
+### Release blockers
+
+Identify critical/high failures that block a release (e.g., essential action inaccessible with reduced motion, autoplay audio, focus lost after dialog exit, sound-only error, missing required semantic mapping) versus lower-priority visual polish issues. Create pass/fail rules with evidence fields and owners.
+
+## 15. PHASE 13 — ORIGINALITY AND ASSET BOUNDARIES
+
+This prompt concerns behavior and sound design policy, not the actual creation of media. It must link to the Original Asset & Brand Bible rather than duplicate the full asset catalog.
+
+Specify how future SFX must include provenance, original/master source, export format, duration/size/loudness metadata, creator/license, edit notes, stable asset ID, semantic event mapping, skin/profile optionality, fallback and review status. Do not create files.
+
+For motion-related visual assets (SVG streaks, impact marks, scribble paths, glints, manga speed lines), use the asset contract’s rules and stable asset IDs. Do not re-specify the entire SVG/PNG pipeline here.
+
+Do not scrape or copy branded sound logos, copyrighted game effects, recognizable melodies, anime signature sounds, or unlicensed packs. AI generation does not automatically prove legal uniqueness; provenance and review are still required.
+
+## 16. PHASE 14 — ROADMAP AND TASK BREAKDOWN
+
+Create a phased roadmap with small, independently executable tasks and explicit dependencies. Do not create hundreds of GitHub issues without first auditing existing issues.
+
+Suggested phases to validate and adjust after audit:
+
+1. `MOT-000` Audit current repository motion/interaction/SFX coverage.
+2. `MOT-010` Verify research sources and document WCAG/ARIA/autoplay requirements.
+3. `MOT-020` Define boundaries and source-of-truth ownership with existing Bibles.
+4. `MOT-030` Define motion token namespaces and validation requirements.
+5. `MOT-040` Define interaction pattern contract and state transitions.
+6. `MOT-050` Define reduced-motion and interruption behavior.
+7. `MOT-060` Define 15-skin motion art-direction matrix and Light/Dark implications.
+8. `MOT-070` Define SFX event taxonomy and opt-in/user-control policy.
+9. `MOT-080` Compare motion/audio technologies and create ADR.
+10. `MOT-090` Define machine-readable contracts/schema validation.
+11. `MOT-100` Define accessibility/performance/browser QA matrices.
+12. `MOT-110` Reconcile docs and make navigation/cross-links consistent.
+13. `MOT-120` Create small implementation-ready tasks for future work.
+
+This is only a starter plan. Combine or split tasks after checking actual dependencies and existing backlog. Each task must include objective, non-goals, prerequisites, files/areas, acceptance criteria, test/validation commands (if already known), documentation impact, risks, owner/status, and definition of done.
+
+Use status vocabulary consistently: `proposed`, `specified`, `implemented`, `tested`, `reviewed`, `released`. Do not call a specification `implemented`.
+
+## 17. GOVERNANCE AND ANTI-OVERLAP RULES
+
+- Keep one authoritative home for motion token schema, motion recipes, SFX event taxonomy and asset provenance.
+- The master Bible should link to focused contracts; do not copy a full matrix into five files.
+- Skin Grammar Contract owns overall visual territories; this Bible owns motion/SFX signature and interaction-level policy.
+- Component API Bible owns per-component props and behavioral API; this Bible owns cross-component motion/feedback patterns.
+- Premium Blocks Bible owns available blocks/templates; this Bible defines motion/SFX policies they can invoke.
+- Token Dictionary owns canonical token names/values or references; this Bible describes motion token use but should not invent conflicting aliases.
+- Original Asset & Brand Bible owns the broader asset taxonomy and licensing workflow; this Bible extends it only for SFX-specific event/playback metadata.
+- QA Bible owns the central test framework and release gates; this Bible supplies motion/interaction/audio cases and references that QA source of truth.
+- If any earlier doc conflicts with a newer contract, record the contradiction and update the source-of-truth map instead of silently picking whichever text is convenient.
+- Stable skin IDs must not change without a decision record and migration plan.
+- Do not create a motion dependency in core before the ADR and package-boundary decision.
+- No decorative motion or audio requirement may weaken accessibility, security, product policy or business workflows.
+
+## 18. REQUIRED DOCUMENTATION DELIVERABLES
+
+After the audit and research, update the smallest coherent set of existing documents. Add files only when there is a clear source-of-truth need. Potential deliverables—adapt to the actual repository structure—include:
+
+1. Motion, Interaction & SFX Bible (focused authoritative document).
+2. Research log with primary sources, dates/versions, findings and caveats.
+3. Motion token additions/contract in the existing token dictionary or schema.
+4. Motion recipe manifest/contract.
+5. Interaction pattern manifest if the Component API Bible lacks a suitable owner.
+6. SFX event taxonomy and audio policy contract, cross-linked to asset manifest.
+7. ADR comparing native CSS, WAAPI, View Transitions, Motion for React and audio options.
+8. Motion/interaction/audio QA matrix or amendments to the central QA Bible.
+9. 15-skin motion direction table and 30 baseline appearance coverage expectation.
+10. Updated implementation roadmap and issue-ready backlog.
+11. Updated README/doc navigation where needed.
+
+Do not create all of these automatically. Audit existing documents first, then choose the minimal non-duplicative structure. If a contract already contains the required fields, extend it with backward-conscious schema changes rather than creating a competing manifest.
+
+## 19. QUALITY BAR — REJECT THESE FAILURES
+
+- Every skin has the same animations with only different colors.
+- Every skin gets completely different behavior even when users expect a shared pattern.
+- Reduced-motion support is a single `transition: none` rule with no recipe analysis.
+- Animations cannot be interrupted or actions work only after animation completion.
+- UI states are communicated only by motion, color or audio.
+- Autoplay sound, sound on every click, repetitive notifications, or unexpected loud effects.
+- Sound failure breaks the user action or causes unhandled exceptions.
+- No clear global mute/opt-in policy.
+- SFX event names are vague, overlapping or carry duplicate meaning.
+- Continuous motion runs in hidden/background contexts without a clear need and pause strategy.
+- Audio assets have no source/provenance/license or are copied from anime/games/brands.
+- Motion library chosen without repository audit, capability needs, performance review or ADR.
+- A vendor’s documentation is treated as a normative accessibility standard.
+- WCAG levels are misrepresented or unsupported claims are made.
+- Motion and interaction rules are duplicated across several Bibles with subtle contradictions.
+- All 30 appearances are claimed tested when only a few mockups exist.
+- The document says “complete” while token values, reduced-motion recipes, SFX metadata, or tests remain undefined.
+
+## 20. DEFINITION OF DONE FOR THIS TASK
+
+This research/specification task is complete only when:
+
+1. Actual repository files and commit were audited.
+2. Current primary sources and standards have been verified and logged.
+3. Existing document ownership and overlap were mapped.
+4. Motion tokens, recipes, interaction pattern categories, reduced-motion policy, and SFX policy are specified at the appropriate level.
+5. All 15 skin motion directions are documented with boundaries; no claim of visual QA pass without evidence.
+6. Every motion recipe contract requires a reduced-motion and interruption policy.
+7. Every SFX event contract requires opt-in/enablement policy, global mute behavior, cooldown/dedupe, and visual/accessibility equivalent.
+8. Native/browser/library options have an evidence-backed decision or a clearly scoped unresolved ADR.
+9. Machine-readable schema/contract expectations are defined and validated if a validator exists; if not, remaining validation work is ticketed.
+10. QA matrices include accessibility, performance, browser behavior, 30 baseline appearances, and human review.
+11. Documentation links resolve and do not create duplicate sources of truth.
+12. A small implementation roadmap exists with dependencies and acceptance criteria.
+13. Any GitHub changes are confirmed on the remote by reading back the files/commit.
+14. No production UI components or audio/visual assets were generated.
+15. Final report separates completed docs, research results, validation actually run, open decisions and future implementation tasks.
+
+## 21. REQUIRED FINAL REPORT TO THE USER
+
+Respond in Bahasa Indonesia and report:
+
+- repository URL, branch and audited commit;
+- audit summary and P0/P1/P2/P3 counts;
+- official sources researched and decisions they influenced;
+- files added/changed and why each change belongs there;
+- motion/interaction/SFX contracts now specified;
+- status of all 15 skin directions and the 30 baseline appearances;
+- validation/tests actually run and their real outcomes;
+- whether any GitHub issues were created, with links, or an explicit statement that they were not;
+- open decisions, assumptions, uncertainty and risks;
+- next 3–5 tasks in dependency order;
+- explicit confirmation that component implementations and production audio/visual assets were **not** created in this phase.
+
+Never claim all skin pairs passed, accessibility is certified, sound packs exist, or implementation is production-ready without direct evidence. Be exact about what is only specified.
+
+---
+
+## START NOW
+
+**Begin with PHASE 0: audit the current `bjo163/moonframe` repository and read the existing documents.** Then perform primary-source research, log evidence, reconcile sources of truth, improve the focused Bible/contracts/roadmap, and verify the committed remote state where applicable.
+
+The desired result is a complete, maintainable, accessible, skin-aware **Motion, Interaction & SFX Bible** that future engineers/AI agents can implement with little ambiguity—without building the components or generating production assets in this task.

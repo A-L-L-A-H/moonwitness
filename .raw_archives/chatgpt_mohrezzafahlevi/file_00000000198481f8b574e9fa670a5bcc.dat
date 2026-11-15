@@ -1,0 +1,1027 @@
+Services that include monthly free amounts for 12 months
+
+For 12 months after signup, new customers can use up to the specified monthly free amount of each of these services without getting charged. **Service usage is billed at the pay-as-you-go rate after you reach the monthly limit.** [To learn more, see the Azure free account FAQ](https://azure.microsoft.com/free/free-account-faq/)
+
+svg
+
+Windows Virtual Machine
+
+Compute
+
+| 750 hours                                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| each of B2pts v2 (Arm-based) and B2ats v2 (AMD-based) burstable VMs.                                                                                  |
+| Create Windows virtual machines (VMs) in seconds to meet your workload and budget needs. [Learn more](https://go.microsoft.com/fwlink/?linkid=858851) |
+|                                                                                                                                                       |
+
+svg
+
+Linux Virtual Machine
+
+Compute
+
+| 750 hours                                                                                                                                           |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| each of B2pts v2 (Arm-based) and B2ats v2 (AMD-based) burstable VMs.                                                                                |
+| Create Linux virtual machines (VMs) in seconds to meet your workload and budget needs. [Learn more](https://go.microsoft.com/fwlink/?linkid=858852) |
+|                                                                                                                                                     |
+
+svg
+
+Azure Managed Disks
+
+Storage
+
+| 64 GB x 2                                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (P6) solid state drives SSD storage, plus 1 GB snapshot and 2 million I/O operations                                                                            |
+| Get high performance, durable block storage for Azure Virtual Machines with simplified management. [Learn more](https://go.microsoft.com/fwlink/?linkid=858853) |
+|                                                                                                                                                                 |
+
+svg
+
+Azure Blob Storage
+
+Storage
+
+| 5 GB                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------- |
+| locally redundant storage (LRS) hot block with 20,000 read and 10,000 write operations                                                |
+| Use massively-scalable object storage for any type of unstructured data. [Learn more](https://go.microsoft.com/fwlink/?linkid=858849) |
+|                                                                                                                                       |
+
+svg
+
+Azure Files
+
+Storage
+
+| 100GB                                                                                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| of LRS transaction optimized,k hot, and cool files. 2 million read, list, and other file operations                                                        |
+| Migrate to simple, distributed, cross-platform file storage without changing code. [Learn more](https://azure.microsoft.com/en-us/services/storage/files/) |
+|                                                                                                                                                            |
+
+svg
+
+Key Vault
+
+Security
+
+| 10,000 transactions                                                                                                           |
+| ----------------------------------------------------------------------------------------------------------------------------- |
+| RSA 2048-bit keys or secret operations, Standard tier.                                                                        |
+| Safeguard and maintain control of keys and other secrets. [Learn more](https://azure.microsoft.com/en-us/services/key-vault/) |
+|                                                                                                                               |
+
+svg
+
+Azure Database for MySQL
+
+Databases
+
+| 750 hours                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------- |
+| of Flexible Server—Burstable B1MS Instance, 32 GB storage, and 32 GB backup storage                                     |
+| Host a fully managed, scalable MySQL database in Azure. [Learn more](https://azure.microsoft.com/en-us/services/mysql/) |
+|                                                                                                                         |
+
+svg
+
+Azure Database for PostgreSQL
+
+Databases
+
+| 750 hours                                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| of Flexible Server—Burstable B1MS Instance, 32 GB storage, and 32 GB backup storage                                                                      |
+| Build intelligent, scalable apps with a fully managed PostgreSQL database on Azure. [Learn more](https://azure.microsoft.com/en-us/services/postgresql/) |
+|                                                                                                                                                          |
+
+svg
+
+Azure Cosmos DB
+
+Databases
+
+| 400 RU/s provisioned throughput                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| With 25 GB of storage                                                                                                                          |
+| Build modern apps at any scale using a fast NoSQL database with open APIs. [Learn more](https://azure.microsoft.com/en-us/services/cosmos-db/) |
+|                                                                                                                                                |
+
+svg
+
+Bandwidth (Data Transfer)
+
+Networking
+
+| 15 GB                                                                                                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| outbound                                                                                                                                           |
+| Transfer data inbound and outbound through our robust network of global data centers. [Learn more](https://go.microsoft.com/fwlink/?linkid=858855) |
+|                                                                                                                                                    |
+
+svg
+
+AI Custom Vision
+
+Foundry Tools
+
+| 5,000                                                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| transactions for each S1, S2, and S3 tier                                                                                                                         |
+| Extract rich information from images to categorize and process visual data. [Learn more](https://azure.microsoft.com/services/cognitive-services/computer-vision) |
+|                                                                                                                                                                   |
+
+svg
+
+Vision
+
+Azure Vision in Foundry Tools
+
+| 10,000                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| predictions S0 tier, one training hour, two projects with 5,000 training images each                                                                          |
+| Easily customize computer vision models for your unique use case. [Learn more](https://azure.microsoft.com/services/cognitive-services/custom-vision-service) |
+|                                                                                                                                                               |
+
+svg
+
+Face
+
+Azure Vision in Foundry Tools
+
+| 30,000                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------- |
+| transactions S0 tier                                                                                                          |
+| Detect and identify people and emotions in images. [Learn more](https://azure.microsoft.com/services/cognitive-services/face) |
+|                                                                                                                               |
+
+svg
+
+Azure Document Intelligence
+
+Foundry Tools
+
+| 500                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pages S0 tier                                                                                                                                                           |
+| Automate the extraction of text, key/value pairs, and tables from your documents. [Learn more](https://azure.microsoft.com/services/cognitive-services/form-recognizer) |
+|                                                                                                                                                                         |
+
+svg
+
+Service Bus
+
+Databases
+
+| 750 hours, 13 million operations                                                                                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Standard tier base unit                                                                                                                         |
+| Get reliable cloud messaging as a service with simple hybrid integration. [Learn more](https://azure.microsoft.com/en-us/services/service-bus/) |
+|                                                                                                                                                 |
+
+svg
+
+Container Registry
+
+Containers
+
+| 1 Standard tier registry                                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| With 100 GB storage and 10 webhooks                                                                                                                   |
+| Store and manage container images across all types of Azure deployments. [Learn more](https://azure.microsoft.com/en-us/services/container-registry/) |
+|                                                                                                                                                       |
+
+svg
+
+Azure Load Balancer
+
+Networking
+
+| 750 hours, 15 GB                                                                                                                                         |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| of data processing, and up to five rules with Standard Load Balancer                                                                                     |
+| Add scale, availability, and network performance to your applications instantly. [Learn more](https://azure.microsoft.com/en-us/services/load-balancer/) |
+|                                                                                                                                                          |
+
+svg
+
+Archive Storage
+
+Storage
+
+| 10 GB LRS storage                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 10 GB LRS/GRS write and retrieval plus 100 reads                                                                                                                                     |
+| Store and manage rarely accessed data with locally redundant storage (LRS) or geo-redundant storage (GRS). [Learn more](https://azure.microsoft.com/en-us/services/storage/archive/) |
+|                                                                                                                                                                                      |
+
+svg
+
+VPN Gateway
+
+Networking/Security
+
+| 750 hours                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------- |
+| VpnGw1 Gateway Type                                                                                                  |
+| Establish secure, cross-premises connectivity. [Learn more](https://azure.microsoft.com/en-us/services/vpn-gateway/) |
+|                                                                                                                      |
+
+svg
+
+Azure SQL Managed Instance
+
+Databases
+
+| 720 vCore hours per month                                                                                                                                |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| with 64 GB of storage and 300 IOPS                                                                                                                       |
+| Modernize existing apps with a fully managed SQL instance on Azure. [Learn more](https://azure.microsoft.com/en-us/products/azure-sql/managed-instance/) |
+|                                                                                                                                                          |
+
+Services that always include monthly free amounts
+
+All Azure accounts can use up to the specified monthly free amount of each of these services without getting charged. **Service usage is billed at the pay-as-you-go rate after you reach the monthly limit.**
+
+svg
+
+Azure SQL Database
+
+Databases
+
+| 100,000 vCore seconds                                                                                                                   |
+| --------------------------------------------------------------------------------------------------------------------------------------- |
+| of SQL database serverless usage per month with 32GB of storage                                                                         |
+| Create a SQL Database that delivers intelligence built-in. [Learn more](https://azure.microsoft.com/en-us/products/azure-sql/database/) |
+|                                                                                                                                         |
+
+svg
+
+Azure App Service
+
+Compute
+
+| Up to 10 web or API apps with 1 GB storage                                                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| and 1 hour per day                                                                                                                                                                  |
+| Quickly create powerful apps for any platform or device using your choice of tools including Node.js and PHP. [Learn more](https://azure.microsoft.com/en-us/services/app-service/) |
+|                                                                                                                                                                                     |
+
+svg
+
+Functions
+
+Compute
+
+| 1,000,000                                                                                                        |
+| ---------------------------------------------------------------------------------------------------------------- |
+| requests per month                                                                                               |
+| Process events with a serverless code architecture. [Learn more](https://go.microsoft.com/fwlink/?linkid=859175) |
+|                                                                                                                  |
+
+svg
+
+Microsoft Entra ID
+
+Security + Identity
+
+| 50,000 stored objects                                                                                                                                                 |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| with single sign-on (SSO) to all cloud apps                                                                                                                           |
+| Enable one-click sign-in to any cloud or on-premises web app for secured identity and access management. [Learn more](https://go.microsoft.com/fwlink/?linkid=859177) |
+|                                                                                                                                                                       |
+
+svg
+
+Service Fabric
+
+Containers
+
+| Free                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                       |
+| Build and operate always-on, scalable, distributed apps. [Learn more](https://go.microsoft.com/fwlink/?linkid=859179) |
+|                                                                                                                       |
+
+svg
+
+Azure DevOps
+
+Developer Tools
+
+| Unlimited                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| private Git repos                                                                                                                                 |
+| Build apps in any language using Git repos, CI/CD, and build and release automation. [Learn more](https://go.microsoft.com/fwlink/?linkid=859181) |
+|                                                                                                                                                   |
+
+svg
+
+DevTest Labs
+
+Developer Tools
+
+| Free                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                |
+| Enable fast, easy, and lean dev-test environments [Learn more](https://go.microsoft.com/fwlink/?linkid=859183) |
+|                                                                                                                |
+
+svg
+
+Security Center
+
+Security + Identity
+
+| Free                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                                                       |
+| Prevent, detect, and respond to threats with increased visibility and control over the security of your Azure resources. [Learn more](https://go.microsoft.com/fwlink/?linkid=859185) |
+|                                                                                                                                                                                       |
+
+svg
+
+Advisor
+
+Monitoring + Management
+
+| Unlimited                                                                                                              |
+| ---------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                        |
+| Get personalized recommendations to Azure best practices. [Learn more](https://go.microsoft.com/fwlink/?linkid=859186) |
+|                                                                                                                        |
+
+svg
+
+Microsoft IoT Hub
+
+Internet of Things
+
+| 8,000                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------- |
+| messages per day and .5 KB message meter size of Free edition                                                     |
+| Connect, monitor, and manage billions of IoT assets. [Learn more](https://go.microsoft.com/fwlink/?linkid=859187) |
+|                                                                                                                   |
+
+svg
+
+Data Factory
+
+Databases
+
+| 5                                                                                                       |
+| ------------------------------------------------------------------------------------------------------- |
+| activities low frequency                                                                                |
+| Compose and manage data services at scale. [Learn more](https://go.microsoft.com/fwlink/?linkid=859189) |
+|                                                                                                         |
+
+svg
+
+Azure AI Search
+
+Foundry IQ
+
+| 50 MB                                                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------- |
+| storage for 10,000 hosted documents and 3 indexes per service                                                                   |
+| Include a cloud search service in your web and mobile application. [Learn more](https://go.microsoft.com/fwlink/?linkid=859190) |
+|                                                                                                                                 |
+
+svg
+
+Batch
+
+Compute
+
+| Free                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|                                                                                                                                                              |
+| Scale your application in the cloud with job orchestration and scheduling for HPC applications. [Learn more](https://go.microsoft.com/fwlink/?linkid=859192) |
+|                                                                                                                                                              |
+
+svg
+
+Notification Hubs
+
+Mobile
+
+| 1,000,000                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------- |
+| push notifications with free namespace                                                                                  |
+| Send push notifications to any platform from any back end. [Learn more](https://go.microsoft.com/fwlink/?linkid=859191) |
+|                                                                                                                         |
+
+svg
+
+Automation
+
+Monitoring + Management
+
+| 500 minutes                                                                                                     |
+| --------------------------------------------------------------------------------------------------------------- |
+| of job run time                                                                                                 |
+| Simplify cloud management with process automation. [Learn more](https://go.microsoft.com/fwlink/?linkid=859193) |
+|                                                                                                                 |
+
+svg
+
+Data Catalog
+
+Data + Analytics
+
+| Unlimited                                                                                                               |
+| ----------------------------------------------------------------------------------------------------------------------- |
+| users                                                                                                                   |
+| Get more value from your enterprise data assets. [Learn more](https://azure.microsoft.com/en-us/products/data-catalog/) |
+|                                                                                                                         |
+
+svg
+
+Face
+
+Azure Vision in Foundry Tools
+
+| 30,000                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------- |
+| transactions of Free instance                                                                                                 |
+| Detect and identify people and emotions in images. [Learn more](https://azure.microsoft.com/services/cognitive-services/face) |
+|                                                                                                                               |
+
+svg
+
+Virtual Network
+
+Networking
+
+| 50                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------- |
+| virtual networks                                                                                                                |
+| Provision private networks and connect to on-premises datacenters. [Learn more](https://go.microsoft.com/fwlink/?linkid=859201) |
+|                                                                                                                                 |
+
+svg
+
+Bandwidth (Data Transfer)
+
+Networking
+
+| 100 GB                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| outbound                                                                                                                                           |
+| Transfer data inbound and outbound through our robust network of global data centers. [Learn more](https://go.microsoft.com/fwlink/?linkid=858855) |
+|                                                                                                                                                    |
+
+svg
+
+Machine Learning
+
+Azure Machine Learning
+
+| Free                                                                                                                         |
+| ---------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                              |
+| Develop and run R and Python models on your platform of choice. [Learn more](https://go.microsoft.com/fwlink/?linkid=859203) |
+|                                                                                                                              |
+
+svg
+
+Azure Logic Apps
+
+Integration
+
+| 4,000                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| built-in actions with the Consumption plan                                                                                                        |
+| Build automated integration solutions across clouds and on-premises systems. [Learn more](https://azure.microsoft.com/en-us/services/logic-apps/) |
+|                                                                                                                                                   |
+
+svg
+
+App Configuration
+
+Developer Tools
+
+| 1,000 requests                                                                                                                       |
+| ------------------------------------------------------------------------------------------------------------------------------------ |
+| per day with 10 MB storage                                                                                                           |
+| Store and manage configurations for all your Azure apps. [Learn more](https://azure.microsoft.com/en-us/services/app-configuration/) |
+|                                                                                                                                      |
+
+svg
+
+Azure API Management
+
+Integration
+
+| 1M                                                                                                                                                  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| monthly calls free with Consumption tier                                                                                                            |
+| A hybrid, multicloud management platform for APIs across all environments. [Learn more](https://azure.microsoft.com/en-us/services/api-management/) |
+|                                                                                                                                                     |
+
+svg
+
+Azure Arc
+
+Hybrid + multicloud
+
+| Free                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------ |
+| Azure control plane functionality for resources outside Azure, search and indexing for Azure Arc-enabled resources |
+| Extend Azure management and services. [Learn more](https://azure.microsoft.com/en-us/services/azure-arc/)          |
+|                                                                                                                    |
+
+svg
+
+Azure Cloud Shell
+
+Management and Governance
+
+| 5GB                                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| free storage in Azure Files for 12 months                                                                                                       |
+| Your Microsoft-managed, browser-based, admin machine in Azure, for Azure. [Learn more](https://azure.microsoft.com/en-us/features/cloud-shell/) |
+|                                                                                                                                                 |
+
+svg
+
+Azure Cosmos DB
+
+Databases
+
+| 1,000 requests units                                                                                                                           |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| per-second provisioned throughput with 25 GB storage                                                                                           |
+| Build modern apps at any scale using a fast NoSQL database with open APIs. [Learn more](https://azure.microsoft.com/en-us/services/cosmos-db/) |
+|                                                                                                                                                |
+
+svg
+
+Azure Kubernetes Service (AKS)
+
+Compute
+
+| Free                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                       |
+| Deploy and manage containers using the tools you choose. [Learn more](https://azure.microsoft.com/en-us/services/kubernetes-service/) |
+|                                                                                                                                       |
+
+svg
+
+Azure Lighthouse
+
+Management and Governance
+
+| Free                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------ |
+|                                                                                                                                      |
+| Manage service providers with Zero Trust access controls. [Learn more](https://azure.microsoft.com/en-us/services/azure-lighthouse/) |
+|                                                                                                                                      |
+
+svg
+
+Azure Managed Applications, Service Catalog
+
+Management and Governance
+
+| Free publishing                                                                                                                                               |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                               |
+| Make it easier to acquire services with a catalog of approved cloud offerings. [Learn more](https://azure.microsoft.com/en-us/services/managed-applications/) |
+|                                                                                                                                                               |
+
+svg
+
+Azure Maps
+
+Internet of Things
+
+| 1,000 to 5,000 transactions                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| for specific mapping and location insights features                                                                                                               |
+| Create location-aware web and mobile applications using geospatial services, APIs, and SDKs. [Learn more](https://azure.microsoft.com/en-us/services/azure-maps/) |
+|                                                                                                                                                                   |
+
+svg
+
+Azure Migrate
+
+Migration
+
+| Free                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                               |
+| Discover, assess, right-size, and migrate your on-premises virtual machines to Azure. [Learn more](https://azure.microsoft.com/en-us/services/azure-migrate/) |
+|                                                                                                                                                               |
+
+svg
+
+Azure Policy
+
+Management and Governance
+
+| Free access                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| to configuration and change tracking features                                                                                                           |
+| Achieve real-time cloud compliance at scale with consistent resource governance. [Learn more](https://azure.microsoft.com/en-us/services/azure-policy/) |
+|                                                                                                                                                         |
+
+svg
+
+Azure SignalR Service
+
+Web
+
+| 20                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------------------------------- |
+| concurrent connections per unit and 20,000 messages                                                                                |
+| Add real-time communications into your web applications. [Learn more](https://azure.microsoft.com/en-us/services/signalr-service/) |
+|                                                                                                                                    |
+
+svg
+
+AI Bot Service
+
+Foundry Tools
+
+| 10,000                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------------------------------------------- |
+| premium channel messages and unlimited standard channel messages                                                                       |
+| Develop intelligent, enterprise-grade bots that scale on demand. [Learn more](https://azure.microsoft.com/en-us/services/bot-service/) |
+|                                                                                                                                        |
+
+svg
+
+Azure Storage Mover
+
+Migration
+
+| Free                                                                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                                                 |
+| Migrate files and folders from on-premises environments or another cloud to Azure with minimal downtime. [Learn more](https://azure.microsoft.com/en-us/products/storage-mover) |
+|                                                                                                                                                                                 |
+
+svg
+
+Database Migration Service
+
+Databases
+
+| Free                                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------------------- |
+| Standard Compute                                                                                                                   |
+| Simplify on-premises database migration to the cloud. [Learn more](https://azure.microsoft.com/en-us/services/database-migration/) |
+|                                                                                                                                    |
+
+svg
+
+Event Grid
+
+Integration
+
+| 100,000                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------ |
+| operations per month                                                                                               |
+| Get reliable event delivery at massive scale. [Learn more](https://azure.microsoft.com/en-us/services/event-grid/) |
+|                                                                                                                    |
+
+svg
+
+AI Immersive Reader
+
+Foundry Tools
+
+| 3 million                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| characters                                                                                                                                      |
+| Embed text reading and comprehension capabilities into applications. [Learn more](https://azure.microsoft.com/en-us/services/immersive-reader/) |
+|                                                                                                                                                 |
+
+svg
+
+IoT Edge
+
+Internet of Things
+
+| Free                                                                                                                            |
+| ------------------------------------------------------------------------------------------------------------------------------- |
+| open-source edge runtime                                                                                                        |
+| Extend cloud intelligence and analytics to IoT edge devices. [Learn more](https://azure.microsoft.com/en-us/services/iot-edge/) |
+|                                                                                                                                 |
+
+svg
+
+Azure Monitor
+
+Management and Governance
+
+| Free amounts per feature                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| See Azure Monitor pricing details                                                                                                              |
+| Gain full observability into your applications, infrastructure, and network. [Learn more](https://azure.microsoft.com/en-us/services/monitor/) |
+|                                                                                                                                                |
+
+svg
+
+Network Watcher
+
+Networking
+
+| 5 GB                                                                                                                                                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| storage with 1,000 checks, 10 tests, and 10 connection metrics                                                                                           |
+| Monitor, diagnose, and gain insights into your network performance and health. [Learn more](https://azure.microsoft.com/en-us/products/network-watcher/) |
+|                                                                                                                                                          |
+
+svg
+
+Open Datasets
+
+Azure Machine Learning
+
+| Free                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------- |
+| (egress charges may apply)                                                                                                 |
+| Accelerate machine learning with curated datasets. [Learn more](https://azure.microsoft.com/en-us/products/open-datasets/) |
+|                                                                                                                            |
+
+svg
+
+Private Link
+
+Networking
+
+| Free                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|                                                                                                                                                        |
+| Privately access services on Azure, keeping your data on the Microsoft network. [Learn more](https://azure.microsoft.com/en-us/services/private-link/) |
+|                                                                                                                                                        |
+
+svg
+
+Speech to Text
+
+Azure Speech in Foundry Tools
+
+| 5 audio hours                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------------------- |
+| per month for Realtime Speech to Text                                                                                        |
+| Transcribe spoken audio to text. [Learn more](https://azure.microsoft.com/en-us/services/cognitive-services/speech-to-text/) |
+|                                                                                                                              |
+
+svg
+
+Speech Translation
+
+Azure Speech in Foundry Tools
+
+| 5 audio hours                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Standard                                                                                                                                              |
+| Integrate real-time speech translation into your app. [Learn more](https://azure.microsoft.com/en-us/services/cognitive-services/speech-translation/) |
+|                                                                                                                                                       |
+
+svg
+
+Static Web Apps
+
+Compute
+
+| 100GB                                                                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| bandwidth per subscription, 2 custom domains and .5 GB storage per app                                                                                       |
+| Streamline full-stack development from source code to global high availability. [Learn more](https://azure.microsoft.com/en-us/services/app-service/static/) |
+|                                                                                                                                                              |
+
+svg
+
+Container Apps
+
+Containers
+
+| 180,000 vCPU seconds, 360,000 GiB seconds                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| and 2 million requests                                                                                                                                        |
+| Build and deploy modern apps and microservices using serverless containers. [Learn more](https://azure.microsoft.com/en-us/products/container-apps/#overview) |
+|                                                                                                                                                               |
+
+svg
+
+Health Bot
+
+Foundry Tools
+
+| 3,000 messages                                                                                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| up to 10 messages per second                                                                                                                                                       |
+| Build and deploy AI-powered, compliant, conversational healthcare experiences at scale. [Learn more](https://azure.microsoft.com/en-us/products/bot-services/health-bot/#overview) |
+|                                                                                                                                                                                    |
+
+svg
+
+Health Data Services
+
+Integration
+
+| 1 GB structured and blob storage                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 50,000 API requests, 5 GB transformation operations, 100,000 events                                                                                                       |
+| Unify and manage health data and protected health information (PHI) in the cloud. [Learn more](https://azure.microsoft.com/en-us/products/health-data-services/#overview) |
+|                                                                                                                                                                           |
+
+svg
+
+Azure Resource Manager
+
+Management and Governance
+
+| Free                                                                                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                        |
+| Simplify how you manage your app resources. [Learn more](https://azure.microsoft.com/en-us/get-started/azure-portal/resource-manager/) |
+|                                                                                                                                        |
+
+svg
+
+Azure Resource Mover
+
+Management and Governance
+
+| Free                                                                                                                                              |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| (ingress and egress charges may apply)                                                                                                            |
+| Simplify how you move multiple resources between Azure regions. [Learn more](https://azure.microsoft.com/en-us/products/resource-mover/#overview) |
+|                                                                                                                                                   |
+
+svg
+
+Cost Management
+
+Management and Governance
+
+| Free                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                                             |
+| Monitor, allocate, and optimize cloud costs with transparency, accuracy, and efficiency. [Learn more](https://azure.microsoft.com/en-us/products/cost-management/#overview) |
+|                                                                                                                                                                             |
+
+svg
+
+Azure Attestation
+
+Security
+
+| Free                                                                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                                                               |
+| Verify the identity and security posture of trusted platform modules and trusted execution environments. [Learn more](https://azure.microsoft.com/en-us/products/azure-attestation/#overview) |
+|                                                                                                                                                                                               |
+
+svg
+
+Web PubSub
+
+Web
+
+| 20,000 messages per unit/day                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| and 20 concurrent connections per unit (1 unit max)                                                                                                 |
+| Build real-time, two-way communication into your web and mobile apps. [Learn more](https://azure.microsoft.com/en-us/products/web-pubsub/#overview) |
+|                                                                                                                                                     |
+
+svg
+
+Text to Speech
+
+Azure Speech in Foundry Tools
+
+| 0.5 million characters                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------- |
+| per month for Standard Neural Voices                                                                                                         |
+| Build apps that convert text to lifelike speech. [Learn more](https://azure.microsoft.com/en-us/services/cognitive-services/text-to-speech/) |
+|                                                                                                                                              |
+
+svg
+
+Visual Studio Code
+
+Developer Tools
+
+| Free                                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                                                 |
+| Boost productivity with a powerful, lightweight code editor for cloud development. [Learn more](https://azure.microsoft.com/en-us/products/visual-studio-code/) |
+|                                                                                                                                                                 |
+
+svg
+
+Azure Automanage
+
+Management and Governance
+
+| Free                                                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------------------------------------- |
+|                                                                                                                                          |
+| Simplify and optimize IT management with automated operations [Learn more](https://azure.microsoft.com/en-us/products/azure-automanage/) |
+|                                                                                                                                          |
+
+svg
+
+Azure Update Manager
+
+Management and Governance
+
+| Free                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+|                                                                                                                                                        |
+| Centrally govern and manage software updates at scale [Learn more](https://azure.microsoft.com/en-us/products/azure-update-management-center/#pricing) |
+|                                                                                                                                                        |
+
+svg
+
+Content Safety
+
+Foundry Control Plane
+
+| 5,000 text records or 5,000 images                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| of free tier                                                                                                                                                        |
+| Moderate text and images to provide a safer, more positive user experience. [Learn more](https://azure.microsoft.com/en-us/products/ai-services/ai-content-safety/) |
+|                                                                                                                                                                     |
+
+svg
+
+Translator
+
+Azure Translator in Foundry Tools
+
+| 2 million characters                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| of any combination of standard translation and custom translation training free per month                                                                                  |
+| Build applications, websites, tools, or any solution requiring multi-language support [Learn more](https://azure.microsoft.com/en-us/products/ai-foundry/tools/translator) |
+|                                                                                                                                                                            |
+
+svg
+
+Azure Language
+
+Foundry Tools
+
+| 5,000                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| text records                                                                                                                                                                          |
+| Extract information such as sentiment, key phrases, named entities, and language from your text. [Learn more](https://azure.microsoft.com/services/cognitive-services/text-analytics) |
+|                                                                                                                                                                                       |
+
+svg
+
+Active Directory B2C
+
+Identity
+
+| 50,000 active users per month (MAU)                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------------------------------------ |
+| monthly stored users                                                                                                                       |
+| Identity and access management for your customer-facing apps [Learn more](https://azure.microsoft.com/en-us/products/active-directory-b2c) |
+|                                                                                                                                            |
+
+svg
+
+Azure Container Storage
+
+Containers
+
+| 5 TiB                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| free tier for deployments with storage pool capacity                                                                                              |
+| Manage persistent storage volumes for stateful container applications [Learn more](https://azure.microsoft.com/en-us/products/container-storage/) |
+|                                                                                                                                                   |
+
+svg
+
+Azure Deployment Environments
+
+Developer Tools
+
+| Free                                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Charges may apply for other Azure resources deployed through the service.                                                                                      |
+| Quickly spin up app infrastructure environments with project-based templates [Learn more](https://azure.microsoft.com/en-us/products/deployment-environments/) |
+|                                                                                                                                                                |
+
+svg
+
+Azure DocumentDB
+
+Databases
+
+| 1 dedicated Mongo DB cluster                                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| with 32 GB storage                                                                                                                                 |
+| Build and migrate with an open-source document database for MongoDB workloads. [Learn more](https://azure.microsoft.com/en-us/products/documentdb) |
+|                                                                                                                                                    |

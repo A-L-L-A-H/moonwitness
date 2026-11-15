@@ -1,0 +1,115 @@
+# MOONWITNESS XV — TODO v2 REBUILD AUDIT & CUTOVER DECISION
+
+> **UNCOMMITTED RECOMMENDATION** · October 26, 2026 · remote `main` examined at `05eff5d68571c49240b04ea19dc52082eab6ad28` · does not include unpublished local work. This document is **not** a replacement source of truth until a controlled adoption. Do not change GitHub on the strength of this report alone.
+
+## Executive verdict
+
+**REBUILD THE PLANNING STRUCTURE**, not the implementation, IDs of canonical domain records, or accepted evidence. V1's 203 IDs are a historical audit register; V2 should become the single active executable queue only after all legacy tasks are mapped, old evidence preserved and present code inspected. Avoid a second active checklist while AI agents continue coding.
+
+## Observed evidence
+
+| Observation | Verified | Consequence |
+|---|---|---|
+| Remote head | `05eff5d` | Pin this snapshot only; redo SHA at adoption |
+| Tree | 619 blobs | Includes 6 apps and 27 package directories |
+| CI latest | GitHub Actions run `40301899408` success (install+monorepo verification) | CI green for this SHA, not proof of all external user journeys |
+| V1 TODO | 203 distinct IDs, 99 checked, 104 unchecked | Checkbox ≠ readiness and unchecked ≠ unimplemented |
+| V1 bad dependency closure | `M03-07` DONE though `M03-05` unchecked; `M04-07` DONE though `M04-05` unchecked | Completion and predecessor logic need reconciliation; no automatic uncheck without scoping the gate |
+| Blocked candidates | 83 unchecked tasks had >=1 prerequisite unfinished by literal DAG parse | Artificial blockers from milestone-wide dependencies are likely |
+| Nonportable evidence | 50 `file:///z:/...` links within `TODO.md`, plus docs links | Replace with Git-relative/evidence SHA links |
+| README | 'three apps and one contract' vs actual 6 apps | Differentiate 3 user-facing surfaces vs 3 service apps |
+| M28 order | Requires ARSY rename before new Corpus migration | Historical ordering already impossible: Corpus/Research packages exist and M07–M14 marked done |
+| M14 outcome | Backend review engine done; no public publication capability | Do not auto-mark HQ reviewer, Publishing Center or public release ready |
+| Cockpit | App.tsx refactored from ~1,634 to 588 lines; React extracted components; legacy static files still exist | Don't issue duplicate 'split App' task; test canonical UI and retirement instead |
+| Research | Core review code extracted into review-subsystem.ts, preserving tested behavior | Do not create MIZAN second state machine |
+| UI content | Dock Compare declares all six hard-coded examples rights-cleared; Timeline eight Eras differ from II source recovery | Provenance and canonical-vs-editorial content contract required |
+| HQ dashboard | Hardcoded progress and 14 system status claims | Replace with grounded capability registry and explicit demo/unknown |
+| Security | Cockpit API has permissive CORS and process-control routes; AI Gateway CORS permissive; Sentinel static fallback admin passwords | Prioritize threat validation and defensive security before deployment |
+| Branches | `m13-srgbgl` behind 10, `m14-mizan-v2` behind 5, `m14-mizan` diverged 2 ahead/9 behind | Preserve; never auto-merge or reset |
+
+## Gating contradictions requiring ADR errata rather than rewrite history
+
+1. **M28 chronology**: accepted ARSY identity remains, physical rename is future compatibility work on existing state. Rewrite forward condition as *migration before user-facing release promotion when feasible*, not fabricated 'before first Corpus addon'.
+2. **M03/M04 dependency semantics**: documentation can be done before an operational recovery/token test, but a complete operational gate cannot. Split completion type into `documented`, `implemented`, `runtime-proved`.
+3. **M14 semantics**: versioned research engine exists and is tested; the M18 release machine and M20 reviewer UI remain separate deliverables, not another research owner.
+4. **M23 semantics**: a Journey addon and Dock Patches Explorer exist, but mandate consent/public exposure/real-human status are not proved by existence. Classify as partial capability pending policy and tests.
+5. **Design**: MoonUI shared package exists and React Cockpit now modular; product consistency, semantic focus behavior, visual asset review and accessibility are independent validation tasks.
+
+## What exactly V2 replaces
+
+| Layer | Decision | Single authority |
+|---|---|---|
+| Vision | KEEP | `docs/vision/MASTER_VISION_NARRATIVE_XV.md` |
+| Architecture | AMEND via reviewed ADR errata | `BLUEPRINT.md`, `docs/decisions` |
+| Historic M00–M28 evidence | PRESERVE, READ-ONLY | archived v1 register and SHA-pinned audit docs |
+| Active status + priority + dependency/agent claim | REPLACE V1 register after crosswalk complete | `TODO.md` (only one active file) |
+| 70 previously proposed UIX findings | CROSSWALK as intake only | M19/M20 and other ownership lanes |
+| New work | 131 *candidate packets*; deduplicate and split before adoption | V2 candidate; not assumed outstanding |
+
+## 203-to-V2 mapping taxonomy
+
+Every V1 record must have a row in an eventual machine-readable crosswalk with:
+
+`legacy_id,legacy_status,legacy_evidence_sha,current_evidence_sha,decision,successor_ids,owner_domain,notes`
+
+`decision` allowed enum:
+
+- `PRESERVED_DONE`: the original evidence is still valid and no new implementation requested.
+- `VERIFY_AGAIN`: old evidence was SHA/fixture-limited or nonproduction.
+- `PARTIALLY_IMPLEMENTED`: code exists, acceptance not demonstrated.
+- `SPLIT`: epic-sized old item decomposes into unique bounded work packets.
+- `MERGED`: several old entries overlap a single canonical new task (all source IDs preserved in crosswalk).
+- `SUPERSEDED`: later code/ADR invalidates proposed earlier implementation and replacement documented.
+- `DEFERRED`: intentionally outside release slice, not deleted.
+
+Acceptance: 203 input IDs, 203 unique mapped entries, zero orphan task, zero active duplicate owner, zero erroneous DONE from checkbox-only inference.
+
+## Ownership boundaries (no accidental new app)
+
+- **Dock** public released or explicitly demo-tagged experience; data owner is never Dock itself.
+- **Headquarters** authenticated content stewardship, governance, research and SHADOW/100CENTER workspaces.
+- **Cockpit** local process/runtime operator controls. Never a second HQ governance interface.
+- **ARSY** existing single Fastify MoonQL backend currently named `apps/radio`; migration via accepted ADR M28 only.
+- **AI Gateway** model/provider transport with opt-in policy; never research truth authority.
+- **Sentinel** source collection with egress control, never publisher or final reviewer.
+- **MoonUI** shared components/tokens; **Moonframe** separate candidate contracts, not forced into production.
+
+Canonical entity owners remain D00–D13 per BLUEPRINT (Corpus, UNILEX, Ontology, Actors, Research, Witness, Story, Governance, Signal, World, Journey, Workflow, Design).
+
+## Immediate 12-item cutover-intake queue
+
+These are **not permission to commit automatically**, and not assertions work is yet outstanding. Check current SHA and tests before assigning:
+
+| Order | V2 candidate | Why now |
+|---|---|---|
+| 01 | R00-01 | Pin current HEAD and detect in-flight edits |
+| 02 | R00-02 | Automated actual ownership inventory |
+| 03 | R00-03 | Complete legacy 203/203 crosswalk |
+| 04 | R00-06 | Exclusive task/path leases |
+| 05 | R00-09 | Dependency graph cleanup |
+| 06 | R01-01 | Protect process-control API |
+| 07 | R01-05 | Remove Sentinel login guessing |
+| 08 | R01-06 | Constrain AI Gateway network origin/egress |
+| 09 | R01-07 | Verify Journey mandate disclosure |
+| 10 | R01-08 | Verify research public raw-model disclosure |
+| 11 | R05-07 | Fix Reader Compare rights assertions |
+| 12 | R06-01 | Remove HQ made-up live metrics |
+
+**Parallelism rule:** R00 owns the queue; R01 reviews security; R05/R06 can only start after path owners are assigned and R02 public projection ownership is clear. Protect `package.json`, `pnpm-lock.yaml`, `TODO.md`, `apps/radio/src/addons.ts`, global CSS with strict single-writer leases.
+
+## CI and evidence requirements
+
+At current head, [CI 40301899408](https://github.com/bjo163/moonwitnessxv/actions/runs/40301899408) passed. Subsequent work must re-run relevant negative-case tests and CI; a passing build alone is not evidence of authorization, privacy, rights, deletion propagation, native media stream, actual human review or real sourced world telemetry.
+
+## Cutover approach
+
+1. **Draft**: review `MOONWITNESS_XV_TODO_V2_CANDIDATE_2026-10-26.md`, no repository changes.
+2. **Observe**: re-fetch `main`, list in-flight worker patches/branches; path ownership freeze limited to the planning register.
+3. **Reconcile**: generate 203/203 crosswalk, sign off 0 orphan/0 collision and collect evidence.
+4. **Integrate**: coordinator archives previous register and makes only one `TODO.md` authoritative, reconciles README/BLUEPRINT and ADR errata in one ordered change set.
+5. **Validate**: test parser, dependency acyclicity, unique IDs, no duplicate canonical owner, Git-relative doc links, CI and rollback.
+6. **Resume**: agents consume disjoint READY packets with exclusive leases; only coordinator updates TODO and pushes `main` serially.
+
+## No modifications made
+
+This report and candidate TODO are local drafts. No GitHub write, issue, branch, push or commit performed. Re-check remote SHA before any future action.

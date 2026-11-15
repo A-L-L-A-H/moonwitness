@@ -1,0 +1,68 @@
+// Radio Indonesia — 50 pilihan untuk seed catalog (25 Oktober 2026).
+// Sumber: FreqTrail (working-stream directory), RadioStreaming.id,
+// situs resmi RRI, dan direktori broadcaster lainnya.
+// Urutan = prioritas kurasi (bukan peringkat Nielsen / audiens resmi).
+// PENTING: status realtime berubah; jalankan verify-radio-streams.mjs
+// sebelum menerapkan active:true di production.
+
+export const radioStations = [
+  // A. Jaringan nasional dan radio populer Jabodetabek
+  { name: 'Prambors FM Jakarta 102.2', streamUrl: 'https://stream.rcs.revma.com/h77wwp48kxcwv', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Gen 98.7 FM Jakarta', streamUrl: 'https://ic.mari.co.id:8443/genfm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Jak 101 FM Jakarta', streamUrl: 'https://ic.mari.co.id:8443/jakfm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Delta FM 99.1 Jakarta', streamUrl: 'https://stream.rcs.revma.com/k02rmq48kxcwv', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Ardan FM Bandung 105.9', streamUrl: 'https://stream.rcs.revma.com/ugpyzu9n5k3vv', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Sonora FM Jakarta 92.0', streamUrl: 'https://sonora-radio.arenastreaming.com/8130/stream', genre: 'news', countryRef: '@countries:id' },
+  { name: 'Elshinta FM Jakarta 90.0', streamUrl: 'https://stream-ssl.arenastreaming.com:8000/jakarta', genre: 'news', countryRef: '@countries:id' },
+  { name: 'Suara Surabaya 100.0 FM', streamUrl: 'https://c5.siar.us/proxy/ssfm/stream', genre: 'news', countryRef: '@countries:id' },
+  { name: 'RDI 97.1 FM Jakarta', streamUrl: 'https://stream.roov.id:8062', genre: 'dangdut', countryRef: '@countries:id' },
+  { name: 'Bens Radio 106.2 FM', streamUrl: 'https://streaming.bensradio.com:8522/stream', genre: 'dangdut', countryRef: '@countries:id' },
+  { name: 'RRI Pro 3 Nasional', streamUrl: 'https://stream-node0.rri.co.id/streaming/14/9014/kbrn.mp3', genre: 'news', countryRef: '@countries:id' },
+  { name: 'RRI Pro 1 Jakarta', streamUrl: 'https://stream-node1.rri.co.id/streaming/25/9025/rrijakartapro1.mp3', genre: 'news', countryRef: '@countries:id' },
+  { name: 'RRI Pro 2 Jakarta', streamUrl: 'https://stream-node1.rri.co.id/streaming/25/9025/rrijakartapro2.mp3', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'RRI Pro 4 Jakarta', streamUrl: 'https://stream-node1.rri.co.id/streaming/25/9025/rrijakartapro4.mp3', genre: 'culture', countryRef: '@countries:id' },
+  { name: 'iSWARA FM Jakarta 101.4', streamUrl: 'https://stream.radiojar.com/4ywdgup3bnzuv', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Mustang 88.0 FM Jakarta', streamUrl: 'https://ic.mari.co.id:8443/mustangfm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'KIS 95.1 FM Jakarta', streamUrl: 'https://ic.mari.co.id:8443/kisfm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'HOT 93.2 FM Jakarta', streamUrl: 'https://ic.mari.co.id:8443/hotfm', genre: 'dangdut', countryRef: '@countries:id' },
+  { name: 'MOST 105.8 FM Jakarta', streamUrl: 'https://ic.mari.co.id:8443/mostfm', genre: 'oldies', countryRef: '@countries:id' },
+  { name: 'Cosmopolitan 90.4 FM Jakarta', streamUrl: 'https://n0c.radiojar.com/u7d8heq3bnzuv', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'The Rockin Life Jakarta 87.6', streamUrl: 'https://stream.radiojar.com/7csmg90fuqruv', genre: 'rock', countryRef: '@countries:id' },
+
+  // B. Bandung, Semarang, radio musik/regional populer
+  { name: 'Radio Dahlia 101.5 FM Bandung', streamUrl: 'https://svara-stream.radioddns.net/bandung_dahliafm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Radio Cakra 90.5 FM Bandung', streamUrl: 'https://stream.rcs.revma.com/chuzgcqd6k3vv', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Gajahmada FM 102.4 Semarang', streamUrl: 'https://server.radioimeldafm.co.id:8040/gajahmadafm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Radio Imelda FM Semarang', streamUrl: 'https://server.radioimeldafm.co.id:8030/imeldafm', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Rasika FM Semarang', streamUrl: 'https://svara-stream.radioddns.net/rasikafm_stereo', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Radio Idola Semarang', streamUrl: 'https://livestreaming.radioidola.com/live.mp3', genre: 'news', countryRef: '@countries:id' },
+  { name: 'Radio Rodja 756 AM', streamUrl: 'https://radioislamindonesia.com/rodja.mp3?_=2', genre: 'religious', countryRef: '@countries:id' },
+  { name: 'K-Lite 107.1 FM Bandung', streamUrl: 'https://svara-stream.radioddns.net/bandung_klitefm_acc', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'MQFM Bandung', streamUrl: 'https://mqfmstreaming.kamil.web.id/;', genre: 'religious', countryRef: '@countries:id' },
+
+  // C. Dangdut, campursari, dan musik Indonesia
+  { name: 'Mettaswara Dangdut', streamUrl: 'https://mettaswara.com:8700/d4d', genre: 'dangdut', countryRef: '@countries:id' },
+  { name: 'Mettaswara Koplo', streamUrl: 'https://mettaswara.com:8700//koplo', genre: 'dangdut', countryRef: '@countries:id' },
+  { name: 'Campursari FM Jakarta', streamUrl: 'https://streaming.campursarifm.com/listen/campursari/campursari892', genre: 'dangdut', countryRef: '@countries:id' },
+  { name: 'Dengerin Musik Indonesia', streamUrl: 'https://stream.denger.in/', genre: 'pop', countryRef: '@countries:id' },
+
+  // D. Stasiun tambahan di berbagai kota / format berbeda
+  { name: 'VOKS Radio Bandung', streamUrl: 'https://svara-stream.radioddns.net/bandung_voksradio', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'RRI Pro 2 Bandung', streamUrl: 'https://stream-node0.rri.co.id/streaming/15/9015/rribandungpro2.mp3', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'RRI Pro 4 Bandung', streamUrl: 'https://stream-node0.rri.co.id/streaming/15/9015/rribandungpro4.mp3', genre: 'culture', countryRef: '@countries:id' },
+  { name: 'Geronimo FM Yogyakarta 106.1', streamUrl: 'https://ig.idstreamer.com:8090//live', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Rodja Bandung 104.3 FM', streamUrl: 'https://radioislamindonesia.com/rodja-bandung.mp3', genre: 'religious', countryRef: '@countries:id' },
+  { name: 'Radio Suara Al-Iman Surabaya', streamUrl: 'https://radioislamindonesia.com/aliman.mp3', genre: 'religious', countryRef: '@countries:id' },
+  { name: 'Heartline FM Tangerang', streamUrl: 'https://stream.heartline.co.id:8443/heartline_tangerang', genre: 'religious', countryRef: '@countries:id' },
+  { name: 'Phoenix Radio Bali', streamUrl: 'https://live.phoenixradiobali.com:8250/phoenixradio', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Radio AR Bali', streamUrl: 'https://live.radioarbali.com:8450/radioar', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'MGT Radio Bandung', streamUrl: 'https://s1.gntr.net/listen/mgtradio/mgtradio', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Elgangga FM Bekasi', streamUrl: 'https://b.alhastream.com:5140/radio', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'CLASSY NetRadio Surabaya', streamUrl: 'https://streaming.classynetradio.com:8000/classySD', genre: 'jazz', countryRef: '@countries:id' },
+  { name: 'JIZ 89.5 FM Yogyakarta', streamUrl: 'https://pu.klikhost.com/proxy/jizfm/stream', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'Radio Fress FM Jawa Barat', streamUrl: 'https://streaming.fressfm.com:11185/stream', genre: 'pop', countryRef: '@countries:id' },
+  { name: 'RRI Pro 1 Surabaya', streamUrl: 'https://stream-node0.rri.co.id/streaming/18/9018/rrisurabayapro1.mp3', genre: 'news', countryRef: '@countries:id' },
+  { name: 'Mettaswara Indonesia', streamUrl: 'https://mettaswara.com:8700/indo', genre: 'pop', countryRef: '@countries:id' },
+];
+
+export default radioStations;

@@ -1,0 +1,701 @@
+# SUPER-DEEP RESEARCH PROMPT
+# Moonframe UI — Master Integration Audit & GitHub Issue Bible
+
+**Prompt type:** Repository audit · Cross-document integration · Contract governance · Dependency-aware roadmap · GitHub issue planning  
+**Target repository:** https://github.com/bjo163/moonframe  
+**Language for reports and documentation:** Bahasa Indonesia by default, preserving standard English technical terminology where clearer  
+**Current scope:** Audit, research, reconcile, document, validate, prioritize, and plan. Do **not** implement product components or produce production assets in this phase.
+
+---
+
+## 0. MANDATE — WHAT YOU ARE BEING ASKED TO DO
+
+Act as a principal-level cross-functional team consisting of:
+
+- Principal Design Systems Architect.
+- Staff Frontend/Platform Engineer.
+- Design Token and Theme Architecture Specialist.
+- Component Library Product Manager.
+- Documentation/Knowledge Architecture Lead.
+- GitHub workflow and issue-management specialist.
+- Accessibility and QA governance lead.
+- Security and software supply-chain researcher.
+- Research analyst who verifies current primary sources, dates, versions, and limitations.
+- Repository maintainer who never claims that a change, test, issue, commit, or release succeeded without evidence.
+
+Your mission is to perform a **Master Integration Audit** of the actual `bjo163/moonframe` repository and make its design-system specifications, machine-readable contracts, roadmap, backlog, and governance mutually consistent. Then create a clear **GitHub Issue Bible**: a deduplicated, dependency-aware, appropriately sized backlog that a developer or AI coding agent can execute without inventing requirements.
+
+Do not merely give advice in chat. When repository access permits, make careful, non-destructive documentation/contract improvements directly in the repository, validate them, commit/push according to repository policy, and verify the remote state. If a tool or permission does not permit an operation, say so and produce the best repo-ready document possible without pretending the operation happened.
+
+**This is not an implementation sprint.** Do not build React components, theme runtime, token generator, Skin Lab, auth flows, tables, premium blocks, templates, logos, SVG/PNG/icon packs, illustrations, or audio/SFX. Do not add large runtime dependencies. Small schema/contract validation scripts are in scope only if they are necessary to make the specifications verifiable, remain documentation/governance tooling, and are justified by the actual audit.
+
+## 1. PRODUCT CONTEXT AND NON-NEGOTIABLE INTENT
+
+Moonframe UI is intended to become a premium, reusable UI design system for the Moon ecosystem—not a collection of color themes. Its defining promise is:
+
+> **One behavioral system. Fifteen distinct visual grammars. Thirty baseline appearances. Premium components and templates governed by clear contracts.**
+
+The current 15-skin concept is:
+
+1. `moonpunk` — acid-lime manga punk, neo-brutalist impact, offset frames and hard shadows.
+2. `moonriot` — angular riot/editorial cyberpunk, disrupted split compositions and signal annotations.
+3. `moonzine` — underground editorial collage, paper artifacts, photocopy/grunge and magazine layouts.
+4. `moonhalftone` — manga screentone, monochrome ink, raster fields and panel pacing.
+5. `moonglitch` — terminal/telemetry, controlled signal interruption, scanlines and diagnostic data.
+6. `moonsmash` — kinetic impact, oversized focal typography, radial bursts and explosive graphic composition.
+7. `moonink` — expressive brush ink, hand-painted strokes and illustration-led visual flow.
+8. `mooncrash` — industrial utility, mechanical plates, hazard markings and operational hierarchy.
+9. `moonpanel` — structured comic-panel grid, framing, gutters and deliberate panel composition.
+10. `moonscrawl` — sketchbook, exploratory canvas, hand annotations and margin notes.
+11. `moonraw` — raw/minimal brutalism, exposed structure, strict geometry and low ornament.
+12. `moonchrome` — futuristic metallic materials, reflective contours and controlled spectral accents.
+13. `classic` — familiar shadcn-style baseline, restrained conventional UI; do not imply official shadcn affiliation.
+14. `moonquest` — RPG/adventure presentation: quest journal, inventory, progression, map and reward framing; no game engine/business logic.
+15. `moonledger` — professional compact ERP/data-workbench presentation; no accounting/business logic.
+
+Each skin is planned to support `light` and `dark`, giving 30 baseline skin/mode appearances. `system` resolves to the appropriate color mode and is not another skin. Density, motion, contrast, viewport and direction/localization are independent preferences/axes, not additional skins.
+
+The skins must differ in composition/layout, geometry, typography hierarchy, surface construction, navigation, data presentation, component visual recipes, media/decoration, and motion—not merely palette. There are 105 unique unordered skin pairs (`15 × 14 / 2`) requiring visual distinction reviews. No pair can be reported as passing without rendered evidence and a recorded review.
+
+The intended future product includes multiple product layers:
+
+- design tokens and theme engine;
+- shared component API and behavior contracts;
+- core and advanced components;
+- premium blocks;
+- full page templates and optional starter layouts;
+- auth/security UI integration contracts (presentation only; no auth backend);
+- advanced data workspace and data-grid specifications;
+- 15 skin grammars and Skin Lab;
+- original asset/brand system (SVG/vector sources, logos, PNG exports, icons, patterns, textures, illustrations, provenance/license records);
+- optional motion, interaction and sound-effects system, opt-in and accessible;
+- developer experience, packaging, docs, testing and release governance.
+
+All of the above must remain clearly separated from consumer-app business logic, backend systems, data ownership, authorization enforcement, payments, game rules, messaging transports or infrastructure execution.
+
+## 2. START WITH PHASE 0 — AUDIT THE ACTUAL REPOSITORY
+
+**Do not begin by editing documents.** First inspect the current GitHub repository and establish the true baseline. Earlier notes or file lists are hypotheses only; trust the actual remote state.
+
+### 2.1 Verify repository state
+
+Verify and record:
+
+- repository owner/name and URL;
+- default branch, current HEAD commit SHA, commit message and timestamp if available;
+- repository visibility and permissions available to you;
+- current branch/working tree state if a local checkout is available;
+- root file/folder inventory, including hidden files, CI workflows, package manifests, lockfiles, schemas, generated files, docs, licenses and issue templates;
+- all existing branches, open/closed issues and PRs that are relevant, without assuming any prior task was completed;
+- current state of the documentation index and internal/external links;
+- whether any code, tests, apps, packages, token values, design assets or workflows actually exist.
+
+Do not dump huge outputs indiscriminately. Build a useful inventory, then inspect every relevant file in full or in bounded ranges. If the repository is empty, unavailable, permission-blocked, or differs from the prior snapshot, report that fact and continue using only the evidence that is available.
+
+### 2.2 Inspect all existing and newly added files
+
+Earlier known file paths include, but are not guaranteed to remain current:
+
+- `README.md`
+- `docs/moonframe-ui-design-system-bible-v1.3.md`
+- `docs/implementation-roadmap.md`
+- `contracts/moonframe-theme-contract-v1.3.json`
+- `contracts/moonframe-skin-grammar-contract-v1.0.json`
+- `contracts/moonframe-token-dictionary-v0.1.json`
+
+There may also be documentation produced by separate research prompts, such as:
+
+- Token Architecture & Theme Engine Bible;
+- Component API & Behavior Bible;
+- Premium Blocks & Template Product Bible;
+- Advanced Data Workspace Bible;
+- Auth & Security UI Integration Bible;
+- Original Asset & Brand Bible;
+- Motion, Interaction & SFX Bible;
+- Accessibility & Visual QA Bible;
+- Package Architecture & Developer Experience Bible;
+- prior repository audit/research logs, ADRs, schemas, manifests, roadmaps and issue backlogs.
+
+**Search the repo; do not assume those files exist.** Record each file as `verified-existing`, `missing`, `partial`, `stale`, `duplicate`, `contradictory`, or `not-accessible`. Read each relevant file, validate all JSON/YAML/Markdown links when possible, and identify whether a document is canonical, derivative, obsolete, or merely a draft.
+
+### 2.3 Build an evidence-based audit report
+
+Create or update a report, preferably at `docs/audit/master-integration-audit.md` unless the repository has a better established location. Include:
+
+- audit date and exact commit SHA;
+- inventory and purpose of each important file;
+- implementation-vs-specification status;
+- confirmed decisions and where they are defined;
+- duplicates and conflicting statements;
+- missing contracts, schema coverage, acceptance criteria and dependencies;
+- references to exact paths/sections/lines when possible;
+- severity (`P0`, `P1`, `P2`, `P3`), impact, recommendation and confidence;
+- what you could not verify and why.
+
+Never call a spec `implemented`, `tested`, `reviewed`, or `released` merely because a document describes it.
+
+## 3. PHASE 1 — DEEP RESEARCH WITH PRIMARY SOURCES
+
+After the initial audit, research the current official guidance relevant to repository integration, contracts, documentation governance, GitHub planning and eventual implementation. Use web research—not only pretrained knowledge. Record access date and source freshness. Prefer official docs/specifications/RFCs/release notes. Use community sources only to supplement and label them as secondary.
+
+### 3.1 Required research areas
+
+1. **GitHub documentation and issue planning**
+   - GitHub Issues, issue forms, labels, milestones, project fields/views, dependencies/blockers, linking PRs/issues, templates, discussions versus issues, search, automation, and issue lifecycle.
+   - Official GitHub Docs: `https://docs.github.com/en/issues`, `https://docs.github.com/en/issues/tracking-your-work-with-issues`, `https://docs.github.com/en/issues/building-community/configuring-issue-templates-for-your-repository`, `https://docs.github.com/en/issues/planning-and-tracking-with-projects`.
+   - Verify which capabilities are available in this repository, what is configured, and what requires explicit setup/permissions. Do not assume Projects, roadmap views, custom fields or issue creation tools are available.
+
+2. **Git repository and collaboration governance**
+   - protected branch/rulesets, branch naming, pull requests, commit hygiene, CODEOWNERS, CONTRIBUTING, issue/PR forms, ADR conventions, release notes, changelog, and ownership.
+   - Official GitHub docs: `https://docs.github.com/en/repositories`, `https://docs.github.com/en/pull-requests`, `https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository`.
+   - Inspect the actual ruleset/permissions before proposing a workflow. Do not create unnecessary branches or force a PR workflow if the owner’s actual convention says otherwise.
+
+3. **Design token governance and standards**
+   - DTCG format and token reference rules: `https://www.designtokens.org/tr/2025.10/` and the official W3C Community Group report pages.
+   - The standard's scope, status, naming/types/aliases and tooling compatibility must be checked. Do not claim full DTCG compliance for a merely similar JSON format.
+
+4. **UI framework and theme contracts**
+   - Current official shadcn/ui docs/changelog, Tailwind CSS v4 theme variables, CSS custom properties, React/TypeScript patterns, and primitive libraries Base UI/Radix/React Aria.
+   - Confirm current versions and explain which architecture choices affect specs/contracts. Do not re-run full primitive-provider research unless it is needed to resolve a concrete conflict; link to the canonical ADR if one exists.
+
+5. **Accessibility and QA governance**
+   - WCAG 2.2, WAI-ARIA APG, reduced motion/forced colors, Storybook/Playwright/axe-core/visual testing documentation.
+   - Identify which requirements can be machine-validated and which require manual visual/assistive-technology review.
+
+6. **Package/release governance**
+   - npm package exports, SemVer, changelog/changesets if relevant, GitHub Actions, provenance/supply-chain docs, lint/test/validation ownership.
+   - Only recommend systems that fit repository maturity; describe simpler alternatives where paid/cloud or infrastructure-heavy options are suggested.
+
+### 3.2 Research method
+
+For every important decision, record:
+
+- decision/question;
+- source URL and publisher;
+- version/release date/publication date if available;
+- access date;
+- relevant fact/constraint (paraphrase, no long copying);
+- interpretation for Moonframe;
+- confidence and unresolved caveats;
+- whether it changes an existing decision, adds a requirement, or merely confirms current direction.
+
+Create/update `docs/research/master-integration-research-log.md` or extend an existing canonical research log. Do not create a second research-log location if a clear canonical one already exists.
+
+## 4. PHASE 2 — DEFINE THE SOURCE-OF-TRUTH ARCHITECTURE
+
+The biggest risk is fragmentation: each specialty prompt might create another Bible, contract or backlog that duplicates other documents. The goal is not to accumulate documents; it is to build a coherent specification system.
+
+### 4.1 Establish canonical ownership
+
+Create a **Document Registry / Source-of-Truth Map** that names the one canonical owner for each concern. It should identify, at minimum:
+
+- product purpose, principles and scope;
+- design-system master architecture;
+- token naming/types and token values;
+- skin IDs, mode semantics and runtime preferences;
+- skin visual grammars and anti-overlap rules;
+- component public API and behavior;
+- component inventory and priority;
+- premium blocks/templates catalog;
+- advanced data workspace behavior;
+- auth/security UI boundaries and flows;
+- original asset taxonomy/provenance/licensing;
+- motion/interaction/SFX policy;
+- accessibility and visual QA requirements;
+- package architecture and developer experience;
+- roadmap and GitHub issue backlog;
+- research logs and Architecture Decision Records.
+
+For each concern define: canonical path, owner, status, version, last reviewed commit/date, inputs, outputs, dependent documents, and whether its schema is machine-validated. Other documents must link to the canonical owner rather than copy mutable lists/tokens verbatim.
+
+### 4.2 Decide the documentation hierarchy
+
+Recommend and implement a minimal, navigable structure. Do not force the exact proposed names below if an existing repository convention is better:
+
+- `README.md` — concise overview, status, navigation, contribution entry point.
+- `docs/bible/` — master principles and architecture, plus specialist bibles only where there is a distinct domain.
+- `docs/audit/` — baseline and integration audit.
+- `docs/research/` — canonical source log.
+- `docs/decisions/` or `docs/adr/` — material architecture decisions.
+- `docs/roadmap/` — phased roadmap and milestones.
+- `docs/governance/` — contribution, statuses, release criteria, issue policy.
+- `contracts/` — machine-readable contracts and schemas.
+- `backlog/` or `docs/backlog/` — issue-ready backlog only if it serves as a temporary/derived planning artifact, not a second mutable truth once GitHub issues are created.
+
+Avoid moving/renaming files without a clear benefit. If you move files, update all links and explain migration. Do not create a new master Bible that simply duplicates all specialist bibles; the master should define principles, navigation, cross-domain rules and conflict resolution.
+
+### 4.3 Reconcile document boundaries
+
+For each pair of documents, assess:
+
+- repeated content;
+- conflict in names, IDs, counts, terms, defaults, versions or status;
+- one document treating another's design as settled when it is actually open;
+- inconsistent definition of `skin`, `theme`, `appearance`, `density`, `block`, `template`, `module`, `primitive`, `component`, `asset` or `SFX`;
+- multiple roadmaps or backlogs that compete as source of truth;
+- links pointing to previous versions, absent files, or stale paths;
+- claims not supported by repository evidence.
+
+Create a **Contradiction & Duplication Register** with a stable finding ID, documents/sections affected, evidence, severity, proposed resolution, canonical owner, disposition, and status.
+
+Do not silently decide materially ambiguous product questions. For an open decision, state options, trade-offs, recommended default, confidence, and what evidence/owner approval is needed. You may resolve editorial inconsistencies and obvious stale links directly.
+
+## 5. PHASE 3 — INTEGRATE THE PRODUCT SPECIFICATIONS WITHOUT OVERLAP
+
+Create a coverage map showing which canonical document owns each domain and where dependencies cross. At minimum reconcile the following domains.
+
+### 5.1 Tokens and Theme Engine
+
+- 15 stable skin IDs and their semantic roles.
+- Light/Dark mappings and `system` resolution.
+- Density, motion, contrast, viewport and direction as independent axes.
+- Primitive/reference, semantic, visual-recipe, component exception and asset-reference layers.
+- Token validation, generation, fallbacks and generated-vs-source outputs.
+- Do not treat token taxonomy as final values or generation code unless evidence shows they exist.
+
+### 5.2 Skin Grammar and anti-overlap
+
+- Every skin has a complete non-color visual grammar.
+- `105` pairwise review records exist for 15 skins.
+- All unreviewed pairs remain `not-reviewed` unless real screenshot evidence and human review prove otherwise.
+- The visual grammar contract owns descriptions and uniqueness rules; Theme Contract owns stable IDs and mode semantics. Avoid duplicating full visual descriptions into multiple contracts unless generated from a canonical manifest.
+
+### 5.3 Component API and behavior
+
+- Public API, state matrix, keyboard contract, accessibility behavior and recipes.
+- Separate behavior contracts from visual recipes.
+- Do not list components as implemented if only a catalog/spec exists.
+- Define ownership for foundational primitives vs composite widgets vs special-purpose UI modules.
+
+### 5.4 Premium blocks and templates
+
+- Separate primitive, composite component, premium block, page template, starter app and optional integration/module.
+- Auth/login UI is not an auth backend.
+- DataTable is not automatically an enterprise data grid.
+- Moonquest presentation is not game logic; Moonledger presentation is not accounting logic.
+- Templates compose components and data states; they do not define the component API again.
+
+### 5.5 Auth/Security UI
+
+- Login/signup/reset/MFA/passkey/SSO/recovery/invitation/session management flows are UI/integration contracts only.
+- Backend auth, authorization enforcement, credential management, session engine and tenant data policy remain outside this design-system repository unless explicitly approved later.
+- Avoid duplicate auth flow lists in the premium blocks catalog and auth Bible: use a shared catalog/manifest with links.
+
+### 5.6 Advanced Data Workspace
+
+- Separate simple table, headless data-table presentation, advanced workspace and optional enterprise grid.
+- Source of truth for sorting/filter state/row identity/selection semantics/server-side query contract must be clear.
+- The template catalog can reference data-workspace presets rather than re-document the same capability.
+
+### 5.7 Original Asset & Brand
+
+- Original logos, vectors, PNG exports, icon packs, textures, fonts, illustrations, provenance and licensing are future deliverables.
+- Asset Bible owns asset taxonomy/creative brief/provenance; individual skin contracts point to asset IDs/briefs.
+- Do not create or claim production asset files exist in this phase.
+
+### 5.8 Motion/Interaction/SFX
+
+- Motion tokens and interaction timing should be tied to the token contract, while motion recipes and SFX event taxonomy live in a distinct canonical contract.
+- SFX is off by default, opt-in, muteable and supplementary; never a sole status channel.
+- Do not generate audio or animation assets in this phase.
+
+### 5.9 Accessibility and Visual QA
+
+- WCAG/ARIA requirements, automated tests, manual reviews, 30 baseline appearance coverage, component-state matrix, grayscale/decorations-off review, and 105 pair checks.
+- A contract cannot claim results. Keep criterion, test plan, evidence, result and review status distinct.
+
+### 5.10 Package architecture and developer experience
+
+- Public exports, package boundaries, dependencies, CSS integration, release/versioning, documentation, examples, contributor workflow and CI.
+- The architecture Bible owns package strategy; the roadmap references package milestones rather than duplicating technical decisions.
+
+Produce a **Cross-Domain Dependency Graph** or table: upstream decision, downstream contract/docs/tasks, blocking relationship, rationale, and verification condition. Do not invent technical dependencies where only documentation order matters.
+
+## 6. PHASE 4 — BUILD THE MASTER ISSUE BACKLOG
+
+A backlog is not a list of vague tasks. Each issue should be small, testable, scoped and safe for a developer/AI agent to execute without making unapproved architecture decisions.
+
+### 6.1 First audit existing GitHub issues
+
+Before creating any issue, search all relevant open/closed issues, pull requests, projects, milestones, labels and issue forms that the repository actually uses. Compare them against the proposed backlog. Do not create duplicates merely because a title differs. Identify existing issue owner/status, whether the work is already completed, abandoned, blocked or duplicated.
+
+If the repo has no issues or no templates, do not pretend they exist. Decide whether GitHub issues should be the execution source of truth and whether a markdown backlog should be a temporary import staging document or a permanently maintained derived index. Avoid two backlogs that drift.
+
+### 6.2 Issue hierarchy
+
+Use an appropriate hierarchy, for example:
+
+- **Epic/milestone:** a release outcome or coherent cross-domain workstream;
+- **Parent issue:** a significant capability/domain, where GitHub tooling supports it or linked task lists can be used;
+- **Task issue:** a small deliverable with concrete file/contracts/outcome;
+- **Subtask/checklist:** only when it improves execution and does not fragment excessively.
+
+Do not create an epic for every file. Do not turn every line in a spec into an issue. Group work around independently verifiable outcomes.
+
+### 6.3 Required issue fields
+
+Every issue-ready task should include:
+
+1. stable task ID;
+2. concise imperative title;
+3. type (`audit`, `research`, `decision`, `docs`, `contract`, `validation`, `test`, `implementation-later`, etc.);
+4. priority `P0/P1/P2/P3` with rationale;
+5. objective/problem statement;
+6. scope and explicit non-goals;
+7. repository evidence/current state;
+8. affected files/contracts;
+9. prerequisites and blocker dependencies;
+10. implementation/research plan, but not unjustified prescriptive code;
+11. exact acceptance criteria in checkable form;
+12. validation commands/checks, only if the toolchain is verified;
+13. evidence required for completion;
+14. risks/compatibility/accessibility/security considerations;
+15. docs/ADR/contract update requirements;
+16. Definition of Done;
+17. output/report expected;
+18. status and owner only where known; never invent a person/assignee.
+
+Issues should be written so an AI coding agent can act autonomously within its scope while not changing public names/IDs or making architecture decisions assigned to maintainers.
+
+### 6.4 Keep issue size appropriate
+
+A typical task should be achievable in one focused work session and have one main outcome. Split tasks when:
+
+- acceptance criteria represent multiple independently testable outcomes;
+- the task mixes research/decision and implementation that should not begin before the decision;
+- one task affects unrelated source domains;
+- it requires a large cross-skin visual review and unrelated package work;
+- it cannot be safely reviewed in one PR.
+
+Do not split every task into trivial micro-issues. Prefer bounded tasks with meaningful deliverables.
+
+### 6.5 Prioritization and sequencing
+
+Use a dependency-aware plan that avoids downstream work before upstream contracts stabilize. Consider this likely ordering, adapting it only with evidence:
+
+1. Baseline audit and source-of-truth registry.
+2. Research-log/ADR conventions and canonical naming.
+3. Reconcile stable skin IDs, modes, vocabulary and status semantics.
+4. Validate machine-readable contracts and links.
+5. Finalize token and theme semantics (values may remain pending where evidence is not available).
+6. Component API/behavior contracts.
+7. Premium blocks/templates, auth UI, advanced data workspace specs.
+8. Asset, motion/SFX, accessibility and QA contracts reconciled with earlier specs.
+9. Package architecture/DX decision and implementation prerequisites.
+10. Implementation roadmap with P0/P1 outcomes.
+11. Future implementation tasks only after specs/ADRs are approved.
+
+Do not treat this example ordering as a substitute for the actual dependency audit. The final graph must identify what blocks what and why.
+
+### 6.6 Status taxonomy
+
+Use precise statuses, such as:
+
+- `not-started`
+- `researching`
+- `proposed`
+- `specified`
+- `blocked`
+- `implemented`
+- `tested`
+- `reviewed`
+- `released`
+- `wont-do`
+
+Choose a minimal coherent status set and define transitions. Do not treat `specified` as `implemented`, `tested`, or `released`. Every status change should be based on evidence.
+
+### 6.7 Labels and milestones
+
+Audit existing labels/milestones first. Reuse existing conventions. If labels are missing, propose a minimal label taxonomy rather than creating dozens of near-duplicates. Potential label groups: `type:*`, `priority:*`, `area:*`, `status:*`, `needs-decision`, `good-first-task`, but only adopt what fits GitHub conventions and repo scale.
+
+Create milestone naming that refers to deliverable outcomes, not arbitrary dates. Do not invent due dates, assignees, or estimates without a basis.
+
+## 7. PHASE 5 — MACHINE-READABLE INTEGRATION AND VALIDATION
+
+Create or update appropriate contracts/schema only where they improve validation. Avoid turning every document into JSON. Markdown is appropriate for nuanced decisions; JSON/YAML/JSON Schema are appropriate for stable enumerated data and machine checks.
+
+### 7.1 Suggested contracts (audit before adding)
+
+Potential artifacts may include:
+
+- document registry/schema;
+- skin/theme contract;
+- token dictionary contract;
+- skin grammar/pairwise review manifest;
+- component manifest;
+- premium block/template catalog;
+- asset/SFX contracts;
+- test/QA gates;
+- issue backlog manifest (if there is a real consumer for it);
+- JSON Schemas for stable contracts.
+
+Do not create every file automatically. First find what exists, identify the canonical owner, then update existing contracts. New contracts require a clear purpose, schema owner and validation strategy.
+
+### 7.2 Required consistency checks
+
+At minimum, establish a way to verify:
+
+- exactly 15 unique stable skin IDs;
+- two baseline modes (`light`, `dark`) per skin;
+- `system` is a preference/resolution mode, not a skin;
+- 30 baseline appearances;
+- 105 unique unordered skin pairs, with each pair appearing once;
+- each pair has a truthful review status and evidence fields;
+- every contract reference points to an existing file/path;
+- every canonical document is linked from README/document registry;
+- no duplicate canonical ownership of the same mutable data;
+- no broken local Markdown links (where practical);
+- valid JSON/YAML and schema compliance if schemas exist;
+- cross-document versions, IDs, names, counts and status vocabulary agree;
+- issue backlog dependencies refer to known task IDs, with no cycles in a dependency graph;
+- each issue has acceptance criteria and a definition of done;
+- no issue is mislabeled implemented/released without evidence.
+
+If it is prudent, add a small deterministic validator for documentation/contracts. Do not build a runtime system or broad CI platform as part of this phase. If validators cannot be run in the environment, provide the command and state that it was not executed.
+
+## 8. PHASE 6 — DESIGN THE REPOSITORY GOVERNANCE MODEL
+
+Review whether the repository needs any of the following, based on actual maturity:
+
+- `CONTRIBUTING.md`;
+- `CODE_OF_CONDUCT.md`;
+- `SECURITY.md`;
+- `LICENSE` (do not choose a license without owner intent and due diligence);
+- `CODEOWNERS` (do not invent maintainers);
+- `.github/ISSUE_TEMPLATE/` YAML forms;
+- `.github/pull_request_template.md`;
+- labels/milestones and Projects setup;
+- ADR template;
+- issue/task template and AI-agent instructions;
+- documentation link checking/schema validation workflow;
+- branch/PR/release policy;
+- changelog and deprecation policy.
+
+For each proposed governance file or automation, state the problem it solves, whether it is necessary now, prerequisites, security implications, maintenance overhead and acceptance criteria. Avoid boilerplate additions with no owner or actual use.
+
+### AI-agent execution rules
+
+The issue system should prevent coding agents from:
+
+- inventing or renaming skin IDs;
+- changing a public contract not assigned in the task;
+- creating duplicate documentation instead of updating the canonical owner;
+- implementing components before their contract/ADR is approved;
+- generating assets without approved asset briefs and licensing/provenance requirements;
+- marking review/testing complete without evidence;
+- pushing directly to a protected branch if repository policy requires a PR;
+- expanding scope without documenting the dependency and creating a separate follow-up task.
+
+Create a short reusable instruction block/template for each future issue that tells an agent to read the canonical Bible, relevant contracts, source files and linked dependencies before changing anything.
+
+## 9. PHASE 7 — INTEGRATION MATRIX AND COVERAGE AUDIT
+
+Build a master matrix that shows every major product domain against its canonical document, contract, roadmap phase, acceptance criteria and status. At minimum include:
+
+| Domain | Canonical owner | Contract/schema | Depends on | Verification | Status |
+|---|---|---|---|---|---|
+| Product scope/principles | ... | ... | ... | ... | ... |
+| Repository baseline | ... | ... | ... | ... | ... |
+| Tokens/theme engine | ... | ... | ... | ... | ... |
+| 15 skin grammars | ... | ... | ... | ... | ... |
+| 30 appearance matrix | ... | ... | ... | ... | ... |
+| Component API/behavior | ... | ... | ... | ... | ... |
+| Premium blocks/templates | ... | ... | ... | ... | ... |
+| Authentication UI | ... | ... | ... | ... | ... |
+| Advanced data workspace | ... | ... | ... | ... | ... |
+| Original brand/assets | ... | ... | ... | ... | ... |
+| Motion/interaction/SFX | ... | ... | ... | ... | ... |
+| Accessibility/visual QA | ... | ... | ... | ... | ... |
+| Package architecture/DX | ... | ... | ... | ... | ... |
+| Docs governance/research | ... | ... | ... | ... | ... |
+| Issue backlog/release gates | ... | ... | ... | ... | ... |
+
+For each domain distinguish `not-specified`, `specified`, `validated`, `implemented`, `tested`, `reviewed`, `released` as appropriate. Do not infer progress from the existence of a document.
+
+### Coverage checks
+
+- Are component, block, template, auth, data workspace, assets, motion/SFX and QA specs aligned?
+- Are semantic token names used consistently?
+- Do skin IDs and appearance semantics match in every contract?
+- Is every feature categorized as core, premium block, template, optional module or consumer-app concern?
+- Are auth/business/game/backend boundaries respected?
+- Are accessibility requirements explicit per relevant component/flow rather than appended generically?
+- Are unique visual grammars linked to blocks/templates without duplicating their text?
+- Does the package architecture support optional/large dependencies without forcing them into core?
+- Does the roadmap resolve foundational decisions before implementation tasks?
+- Is every release gate measurable and evidence-based?
+
+## 10. REQUIRED DELIVERABLES
+
+After the audit, research and integration, produce the smallest coherent set of deliverables. Adapt paths to the repo’s actual conventions; do not create duplicates if equivalent canonical files already exist.
+
+### Required outcomes
+
+1. **Repository baseline audit report** with exact HEAD, inventory, evidence and severity.
+2. **Master source-of-truth/document registry** that names canonical owner for each domain.
+3. **Contradiction and duplication register** showing findings, resolution and status.
+4. **Research log** with primary sources, dates/versions, findings, caveats and decisions affected.
+5. **Master integration map** showing document links, contract links and dependencies.
+6. **Integrated roadmap** with dependency order, milestone outcomes, status vocabulary and release gates.
+7. **GitHub Issue Bible**: issue hierarchy, issue template, sizing rules, priority model, acceptance criteria requirements, status transitions, labels/milestones policy and issue-to-document linkage.
+8. **Deduplicated issue-ready backlog** with stable IDs, prerequisites, acceptance criteria and evidence needs.
+9. **Coverage matrix** for all product domains, including 15 skins × Light/Dark, 105 skin-pair reviews, components, blocks/templates, auth, data workspace, assets, motion/SFX, QA and package/DX.
+10. **Contract consistency results** — IDs/counts/schema/links/dependency checks with actual pass/fail output.
+11. **README/documentation navigation updates** pointing to canonical documents and clearly stating specification vs implementation status.
+12. **Final change report** listing files changed, commits, tests executed, issues actually created (if any), limitations and next tasks.
+
+Possible paths, subject to audit:
+
+- `docs/audit/master-integration-audit.md`
+- `docs/research/master-integration-research-log.md`
+- `docs/governance/document-registry.md`
+- `docs/governance/issue-bible.md`
+- `docs/governance/contradiction-register.md`
+- `docs/roadmap/master-roadmap.md`
+- `docs/roadmap/issue-ready-backlog.md`
+- `contracts/document-registry.json`
+- `contracts/master-coverage-matrix.json`
+- `.github/ISSUE_TEMPLATE/...`
+- `README.md`
+
+These are examples, not a command to create all of them. Prefer updating existing canonical files. If a JSON manifest duplicates a markdown table, designate one as authoritative and derive the other or remove one.
+
+## 11. GITHUB ISSUE CREATION POLICY — BE CAREFUL
+
+**Do not bulk-create issues before the backlog has been audited and deduplicated.** The initial deliverable may be an issue-ready markdown backlog even if direct issue creation is possible.
+
+After deduplication:
+
+1. Determine whether the repo’s actual workflow uses GitHub Issues/Projects or a file-based backlog.
+2. If issues should be created and the available tool/permission supports it, create only a manageable first batch of high-confidence, well-scoped tasks, unless repository policy requests all approved tasks.
+3. Search existing issues one more time before creating each task/batch.
+4. Record actual issue number and URL for every created issue. Never invent links or claim creation if the tool failed.
+5. Link dependencies where supported; otherwise document dependency IDs in issue body.
+6. Apply only existing/approved labels and milestones; do not silently create a large taxonomy.
+7. Do not assign people or due dates unless known and authorized.
+8. If issue creation is unsupported, blocked or unnecessary, do not stop. Provide the validated, issue-ready backlog as a file.
+
+Every GitHub task must include:
+
+- Title and stable task ID;
+- type, priority and area;
+- context/evidence;
+- objective and expected outcome;
+- scope and non-goals;
+- dependencies/blockers;
+- affected canonical documents/contracts;
+- acceptance criteria as checkable items;
+- validation/tests to run, only when the toolchain is known;
+- documentation/ADR updates required;
+- accessibility/security/compatibility considerations as relevant;
+- evidence to attach or link;
+- definition of done;
+- status.
+
+A useful issue must be small enough for an agent or developer to complete and review independently. Split research/decision from implementation where an ADR is a prerequisite. Avoid issues like “finish Moonframe” or “improve all skins” without bounded acceptance criteria.
+
+## 12. PRIORITY MODEL
+
+Use a consistent priority rubric and explain it in the backlog:
+
+- **P0 — Blocking integrity/safety:** wrong source of truth, schema ambiguity that would cause incompatible implementation, unsafe security/accessibility policy, destructive repository issue, or critical release blocker.
+- **P1 — Foundation:** missing/contradictory contract, audit/validation blocker, unresolved dependency required before implementation, or major cross-domain gap.
+- **P2 — Product completeness:** important premium catalog/QA/docs work that can follow stable foundations.
+- **P3 — Future/optional:** specialized modules, convenience automation, extra polish or speculative work.
+
+Prioritize by dependency and user impact, not how impressive a task sounds. Add confidence and risk. Make it clear when a priority is only provisional pending an owner decision.
+
+## 13. VALIDATION AND RELEASE GATES FOR THIS DOCUMENTATION SPRINT
+
+Before claiming completion, verify as many as are possible in the actual environment:
+
+### Repository/doc validation
+
+- README and document registry links resolve.
+- No stale path/version references remain without an explicit archive note.
+- Every canonical domain has exactly one designated source of truth.
+- All core documents are discoverable from README/registry.
+- Internal IDs, counts, names and terminology agree.
+- JSON is valid; YAML is valid if issue forms/workflows are added.
+- Schemas accept valid fixtures and reject invalid fixtures if schema validation is introduced.
+- `15` unique skin IDs are preserved.
+- `30` baseline appearances are stated consistently.
+- `105` unordered skin pairs exist once, not twice, and remain `not-reviewed` absent evidence.
+- Issue backlog dependency references exist and the dependency graph has no cycles.
+- Every task has acceptance criteria and definition of done.
+- No `implemented/tested/reviewed/released` status is assigned without evidence.
+- Existing issues were searched/deduplicated if issue creation is attempted.
+
+### Git validation
+
+- No destructive history rewrite.
+- No changes outside approved scope.
+- No production component/assets created.
+- Commit message is descriptive if committing.
+- Push/commit success is confirmed by actual tool response.
+- Re-fetch remote `main` and list changed files after write.
+
+If a check cannot be run, document the exact reason and command needed; do not report it as passed.
+
+## 14. ANTI-PATTERNS THAT MUST BE REJECTED
+
+- Creating one mega-Bible that duplicates every specialist Bible in full.
+- Leaving contradictory versions of the same mutable contract alive.
+- Treating the latest numbered filename as canonical without examining content and links.
+- Copying the whole component catalog into auth/data/templates docs instead of referencing the canonical manifest.
+- Creating thousands of trivial issues or a huge dependency tree that no one can maintain.
+- Creating only one vague issue per giant workstream.
+- Creating duplicate GitHub issues because existing issues were not searched.
+- Assuming project boards, labels, milestones, rulesets or automation exist without inspecting them.
+- Inventing issue numbers, assignments, due dates, branches, commits or test results.
+- Bulk-editing or deleting docs before mapping dependencies.
+- Forcing GitHub Projects or a monorepo without a demonstrated need.
+- Deciding primitive/library/framework versions without current primary-source research and actual repository fit.
+- Conflating design specification with implementation or production readiness.
+- Marking skin uniqueness, visual QA or accessibility passed without screenshots/results/manual review.
+- Creating production logos, SVG, PNG, icons, textures, illustrations or SFX during this task.
+- Adding auth backend, data engine, app business logic or React components to the scope.
+- Choosing a license, trademark policy or owner without authorization/evidence.
+- Leaving the user with just advice when available tools permit safe repo improvements.
+
+## 15. REQUIRED FINAL REPORT TO THE USER
+
+At the end, reply in Bahasa Indonesia and report:
+
+1. Verified repository URL, branch and exact commit SHA.
+2. Audit summary: number of P0/P1/P2/P3 findings and the most important evidence-backed findings.
+3. Which docs/contracts were canonicalized, updated, added, archived or left untouched, and why.
+4. Primary sources researched and key decisions that changed or were confirmed.
+5. Source-of-truth registry and contradiction-register status.
+6. Backlog summary: number of tasks by priority/type, dependency approach, what was deduplicated.
+7. If GitHub issues were created: actual issue links/numbers. If not, state that clearly and link the issue-ready backlog.
+8. Validation checks that were run, commands/results, checks not run and why.
+9. What remains open/blocked and who/what is needed to decide it.
+10. Confirmation that no production components/assets/SFX were created, unless scope was explicitly changed by authorized instruction.
+11. The next 3–5 tasks in dependency order.
+
+Do not say “everything complete,” “production-ready,” “all 105 pairs pass,” “fully accessible,” or “issues created” unless there is evidence for the exact claim.
+
+## 16. DEFINITION OF DONE
+
+This assignment is complete only when:
+
+- the actual repo baseline has been audited and recorded with a commit SHA;
+- all existing relevant docs and contracts have been read and reconciled;
+- primary-source research is logged and tied to decisions;
+- document/source-of-truth ownership is unambiguous;
+- contradictions/duplicates have explicit dispositions;
+- all product domains map to canonical documents/contracts and dependencies;
+- the 15-skin/30-appearance/105-pair invariants are consistent and honest;
+- issue backlog is deduplicated, dependency-aware, scoped, prioritized and issue-ready;
+- repository links, JSON and relevant schemas have been validated where tools permit;
+- README navigation and governance are updated without fragmentation;
+- any actual changes are committed/pushed and re-verified if permitted;
+- all not-run tests and unavailable capabilities are explicitly called out;
+- no UI product implementation or production asset/SFX generation was performed.
+
+## 17. START NOW
+
+Start with **PHASE 0 — audit the actual repository**. Do not trust the prompt's historical file list as current truth. Then perform current primary-source research, create the evidence-based audit report, define the document source-of-truth map, reconcile all existing Bibles/contracts, create a dependency graph, and prepare a deduplicated GitHub issue plan. Continue through documentation improvements and validation in the same work session where tools permit.
+
+**Audit first. Research second. Reconcile before adding. Make contracts machine-checkable. Make backlog executable. Verify every claim. Do not implement UI components or create production assets in this phase.**

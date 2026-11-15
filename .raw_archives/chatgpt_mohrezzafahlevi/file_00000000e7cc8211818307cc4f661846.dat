@@ -1,0 +1,953 @@
+# MOONWITNESS XV — DEEP INSIGHT PROJECT DECOMPOSITION PROMPT
+## REPO-AWARE GRANULARIZATION · MASTER VISION · MASTER BLUEPRINT · MASTER DESIGN · ATOMIC ADRs · MICRO-MILESTONES · AI-EXECUTABLE TASK PACKETS
+
+**Repository:** `https://github.com/bjo163/moonwitnessxv`  
+**Canonical branch:** `main`  
+**Master Vision:** `docs/vision/MASTER_VISION_NARRATIVE_XV.md`  
+**Master Blueprint:** `BLUEPRINT.md`  
+**Canonical TODO:** `TODO.md`  
+**ARSY decision:** `docs/decisions/ADR-0001-arsy-is-xv-hub.md`
+
+**Planning baseline previously inspected:** commit `8b6cb118a84f42ea42a6c0e5428e8fbd0c39da67`. This is an audit anchor, not a guarantee that it remains the latest HEAD when execution begins.
+
+**Primary objective:** Transform the existing planning system into a comprehensive, modular, deeply detailed, dependency-aware system where a small AI coding agent can safely execute one bounded task, verify its result, and report evidence without needing to understand the entire project.
+
+**Execution mode:** Deep repository audit → task granularity analysis → milestone decomposition → document modularization → execution-packet creation → consistency validation.
+
+**Authorization:** Directly modify and validate the canonical documentation and planning files in the existing repository. Do not modify application source code, package manifests, database schemas, production configuration, or deployed services as part of this planning phase.
+
+Do not stop after producing recommendations. Complete the authorized documentation work and report the actual outcome.
+
+---
+
+# 1. REVALIDATE THE LATEST REPOSITORY BEFORE DOING ANYTHING
+
+The previously inspected repository state already contains substantial planning work. Do not treat this repository as a blank slate.
+
+Immediately recheck the latest `main` HEAD, recent commits, relevant source files, documents, and task statuses.
+
+Read at minimum:
+
+- `README.md`
+- `docs/vision/MASTER_VISION_NARRATIVE_XV.md`
+- `BLUEPRINT.md`
+- `TODO.md`
+- All existing ADRs, particularly ADR-0001, ADR-0002, and ADR-0003 where present.
+- Existing audit reports, security and privacy policies, release checklists, runbooks, architecture specifications, and design documentation.
+- The application inventory, workspace configuration, relevant package manifests, scripts, tests, CI workflows, Dockerfiles, Compose files, and environment examples.
+
+Inspect the actual applications, including Dock, Headquarters, Cockpit, the current backend under `apps/radio`, AI Gateway, Sentinel, and every other app discovered in the source tree.
+
+Use actual files and current repository evidence. Do not rely on README summaries alone when the source can be inspected.
+
+## 1.1 Recalculate the current planning baseline
+
+The last inspected TODO snapshot contained:
+
+- 29 existing milestone identities, M00–M28.
+- 266 unique task rows.
+- 106 checked rows and 160 unchecked rows.
+- A historical baseline of 203 task IDs, expanded with additional unique microtasks.
+- A particularly expanded M05, M19, M27, and M28.
+
+Recalculate those numbers from the latest file before making any change. If another commit has landed, use the newly verified counts rather than these previous values.
+
+For each milestone, record:
+
+- Total execution tasks.
+- Checked, open, blocked, and other applicable statuses.
+- Umbrella/roll-up tasks.
+- Executable leaf tasks.
+- Task specifications already available.
+- Current entry and exit gates.
+- Outstanding acceptance criteria.
+
+Do not equate a checked individual task with a completed milestone. Some scoped tasks are legitimately complete while their parent milestone remains open.
+
+## 1.2 Establish the actual implementation baseline
+
+Inspect the documented six-application baseline and confirm current source:
+
+| Application/workspace | Known role requiring verification |
+|---|---|
+| `apps/radio` | Existing Fastify + MoonQL Hub, port 3000; target identity ARSY |
+| `apps/dock` | Public Next.js website, port 3001 |
+| `apps/headquarters` | Administrative Next.js application, port 3002 |
+| `apps/cockpit` | Vite/React developer GUI and process supervision, local port 3004 |
+| `apps/aigateway` | Internal model-inference adapter, local port 3003 |
+| `apps/sentinel` | Source-monitor/worker functionality without an expected public HTTP port |
+
+These are previously documented roles, not automatic production deployment guarantees.
+
+The inspected root package configuration specified Node.js `>=24 <25`, pnpm `10.33.4`, and these relevant scripts:
+
+- `pnpm verify`
+- `pnpm verify:docker`
+- `pnpm build`
+- `pnpm build:web`
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm gen:sdk:check`
+
+Revalidate their present definitions.
+
+The current Compose configuration previously showed `db`, `radio`, `headquarters`, `dock`, and `backup` services. The existing Docker verification script builds the current Hub, Dock, and Headquarters images, not automatically every local application.
+
+Therefore, create a task to classify each application by actual deployment intent, required production artifact, security boundary, and verification path. Do not assume every runnable workspace must become a public Docker service.
+
+## 1.3 Preserve known architectural and planning decisions
+
+The existing repository already contains:
+
+- A canonical Master Vision Narrative and Master Blueprint.
+- A single TODO register with an immediate execution track.
+- A physical Radio-to-ARSY migration plan.
+- Global `id`/`en` i18n and App Factory tasks.
+- Dock bilingual preview tasks.
+- Headquarters and Cockpit localization tasks.
+- A separate preview gate and full-stack release gate.
+- Parent-to-microtask ownership rules.
+- Rules against duplicate backends and duplicate canonical task registries.
+
+Respect these decisions.
+
+If source evidence contradicts an old statement, document the discrepancy and reconcile it without silently rewriting historical evidence.
+
+# 2. THE CORE OBJECTIVE: MAKE THE PLAN SMALLER WITHOUT LOSING THE VISION
+
+The goal is not simply to add more checkboxes.
+
+The goal is to turn every large objective into a sequence of small, independently verifiable deliverables while expanding coverage of the entire system.
+
+The resulting planning architecture must satisfy all these conditions:
+
+1. The full strategic vision remains discoverable and intact.
+2. Architectural responsibilities have one canonical owner.
+3. Detailed design rules can be applied independently by a low-context AI.
+4. Important decisions are documented once and linked to their implementation tasks.
+5. Every milestone produces a tangible outcome.
+6. Every implementation task has explicit instructions and pass/fail criteria.
+7. Dependencies are accurate and do not create artificial blockers.
+8. Existing completed work and historical evidence are preserved.
+9. Long-term capabilities have a complete, realistic roadmap.
+10. The first public preview is not delayed by unrelated future ambitions.
+
+**Do not maximize task counts artificially. Maximize executable clarity, coverage, independence, and verification.**
+
+# 3. CONDUCT A TASK-GRANULARITY AUDIT OF ALL EXISTING MILESTONES
+
+Audit every existing milestone M00–M28 and every task in its current scope.
+
+Do not focus exclusively on the newer tasks in M05, M19, M27, and M28. The older milestones also need a granularity review.
+
+Most of the historical milestone groups were originally structured around approximately seven tasks each. Some of those tasks encompass multiple layers of research, architecture, implementation, UI, security, integration, and testing.
+
+Inspect whether each task represents:
+
+- A single research result.
+- One architectural or product decision.
+- One bounded documentation change.
+- One implementation behavior.
+- One focused test.
+- One cross-component integration.
+- One operational verification.
+- One milestone-level acceptance gate.
+
+Where a task combines multiple independent outcomes, split it.
+
+## 3.1 Mandatory decomposition triggers
+
+A task requires deeper decomposition if one or more of the following applies:
+
+- It combines research and an implementation before the design decision is accepted.
+- It requires changing multiple applications or unrelated packages.
+- It combines frontend, backend, data model, deployment, and documentation work in one task.
+- It requires several independently testable changes.
+- It contains an entire feature, system, or release rather than one bounded deliverable.
+- It depends on unresolved assumptions.
+- It has more than one independently meaningful acceptance outcome.
+- A small AI agent would need to infer the implementation sequence.
+- Its required file changes are too broad for a controlled review.
+- It cannot be tested or reviewed independently.
+- Its failure cannot be isolated or diagnosed without inspecting unrelated work.
+- It has vague instructions such as “finish everything”, “complete the system”, or “make it production-ready”.
+
+As a default, target one principal outcome and no more than one to three primary implementation files per task. A wider change is acceptable only when the files are inherently coupled and the reason is explicit.
+
+Use the existing D1–D5 difficulty system. Difficult tasks, cross-application work, migrations, security changes, and deployment work deserve smaller decomposition and more explicit acceptance gates.
+
+## 3.2 Do not split tasks that are already appropriately atomic
+
+Some current tasks are already small and useful.
+
+Retain them when their scope, dependencies, implementation boundaries, and tests are sufficient for a small AI coding agent.
+
+For each existing task, classify its granularity as:
+
+- `ATOMIC_READY`
+- `NEEDS_CLARIFICATION`
+- `NEEDS_SUBTASKS`
+- `UMBRELLA_ROLLUP`
+- `DECISION_BLOCKED`
+- `ALREADY_VERIFIED`
+- `REQUIRES_REVALIDATION`
+
+Provide a brief rationale for tasks that remain large, are intentionally umbrella tasks, or cannot yet be decomposed safely.
+
+Do not duplicate a clear existing task merely to increase counts.
+
+# 4. PRESERVE EXISTING IDS AND CORRECTLY MODEL PARENT-CHILD WORK
+
+The existing roadmap already contains parent tasks and additional microtasks covering overlapping work.
+
+This must be respected.
+
+In particular, the latest planning baseline documented:
+
+- M28-01–07 as umbrella/acceptance tasks, refined by M28-08–15.
+- M19-08–35 as refinements of existing frontend, accessibility, and localization work.
+- M27-08–19 as a scoped preview-release track that does not close the complete M27 release gate.
+
+Preserve these relationships after rechecking the latest repository.
+
+Do not assign the parent and its implementing child tasks to different AI agents to implement the same change twice.
+
+## 4.1 Parent tasks versus executable tasks
+
+Make the distinction explicit:
+
+**Umbrella task:** Owns the consolidated outcome and aggregate acceptance gate. It is not separately assigned for implementation if its implementation work is delegated to child tasks.
+
+**Executable leaf task:** Owns one concrete implementation, design, research, documentation, or verification result.
+
+**Roll-up status:** A parent may be closed only after its relevant child evidence and complete parent acceptance criteria are satisfied.
+
+Where necessary, add a `Task role` field or equivalent convention. Do not create a second task status registry.
+
+## 4.2 Preserve historical identity
+
+Never casually renumber existing tasks or milestones.
+
+For each split task:
+
+1. Retain its valid original ID and historical meaning.
+2. Identify whether it remains an umbrella or still represents executable work.
+3. Create uniquely identified children only for genuine missing execution units.
+4. Update exact dependency references.
+5. Map each child to its parent.
+6. Explain what evidence is necessary to close the parent.
+7. Ensure no implementation requirement is counted twice.
+
+Existing unchecked work remains unchecked until verified. A planning-only change does not justify reopening valid historical evidence or marking additional work complete.
+
+# 5. INCREASE THE NUMBER OF MILESTONES WHERE REAL SEPARATION EXISTS
+
+The existing M00–M28 milestone identities must remain stable unless a genuinely necessary decision, approved under repository governance, changes their meaning.
+
+However, the overall project must gain more finely scoped milestones wherever an existing milestone contains several independent deliverables.
+
+## 5.1 Use new milestone IDs carefully
+
+After M28, inspect the latest milestone registry and use the next available milestone IDs, such as M29 onwards, only where new milestone boundaries are justified.
+
+Do not renumber M00–M28 to create a more aesthetically pleasing sequence.
+
+When splitting an existing broad initiative:
+
+- Preserve its original milestone as the umbrella, historical grouping, or parent acceptance gate where appropriate.
+- Introduce additional uniquely numbered milestones for independently useful deliverables.
+- Document the `Parent initiative` or `Parent milestone`.
+- Assign existing tasks and new leaf tasks to one clear execution owner.
+- Avoid simultaneous parent/child assignments.
+- Link all new milestones from the existing roadmap.
+- Update the dependency graph and release sequencing.
+
+A new milestone must represent an actual delivery boundary rather than another name for the same work.
+
+## 5.2 Recommended milestone sizing
+
+Use approximately three to eight coherent executable tasks as an initial guideline, not a rigid limit.
+
+A smaller milestone is appropriate when it represents a distinct security gate, accepted decision, compatibility boundary, or deployable feature.
+
+A larger milestone is acceptable only when its cohesive scope genuinely requires it. Prefer splitting complex work across several deliverables when the split is meaningful.
+
+Every new or restructured milestone must have:
+
+- Purpose and scope.
+- Prerequisites.
+- Parent initiative, where applicable.
+- Canonical task IDs.
+- A tangible expected artifact.
+- Measurable acceptance criteria.
+- Applicable tests and exact commands.
+- Known blockers and risks.
+- A release or adoption gate.
+- Evidence required for closure.
+- Rollback considerations where applicable.
+
+Do not make the roadmap numerically larger by creating milestones without real deliverables.
+
+# 6. CREATE REUSABLE TASK PACKETS FOR LOW-CONTEXT AI AGENTS
+
+The present TODO stores task descriptions inline and does not appear to link directly to a per-task specification hierarchy.
+
+After inspecting the complete repository tree, determine whether suitable milestone and task specification directories already exist. Reuse them when appropriate.
+
+If no suitable structure exists, introduce a consistent, lightweight documentation hierarchy.
+
+Possible patterns include:
+
+- `docs/milestones/M29-<short-name>.md`
+- `docs/tasks/M05/M05-08-<short-name>.md`
+- `docs/tasks/M19/M19-26-<short-name>.md`
+- `docs/architecture/<domain-contract>.md`
+- `docs/design/<app-or-contract>.md`
+- `docs/vision/chapters/<topic>.md`
+
+These are proposed paths, not claims that such files exist. Resolve the actual repository conventions before creating directories.
+
+## 6.1 Do not create 266 individual files blindly
+
+Use complexity and risk to determine which tasks deserve a standalone packet.
+
+A separate task specification is strongly preferred for:
+
+- D3–D5 tasks.
+- Cross-application work.
+- Security-sensitive work.
+- Database or schema migrations.
+- Compatibility changes.
+- Docker/Compose/Coolify and operational work.
+- Complex design tasks.
+- Work requiring multiple decisions or dependencies.
+- Tasks with more than three primary implementation files.
+- Tasks that must be handed independently to another AI agent.
+
+Simple D1–D2 tasks may remain inline in `TODO.md` when their specifications are fully clear.
+
+If multiple adjacent tasks are genuinely small and share one coherent delivery, a milestone specification may supply common context. Each leaf task must nevertheless retain its own objective, acceptance criteria, and evidence requirements.
+
+## 6.2 Mandatory task packet format
+
+Every standalone execution packet must contain the following information.
+
+### A. Identity and ownership
+
+- Task ID.
+- Title.
+- Parent milestone.
+- Parent task, when applicable.
+- Priority.
+- Difficulty.
+- Task type.
+- Owning application, package, domain, or documentation.
+- Current status.
+
+### B. Minimal context
+
+- What the project is trying to achieve in this specific area.
+- Why this task is needed.
+- The relevant Master Vision section.
+- The relevant Blueprint contract.
+- The relevant Master Design rule, if applicable.
+- The accepted ADR or decision, if applicable.
+- Exact source files or tests to inspect.
+- Relevant predecessor evidence.
+
+Do not copy the entire Master Vision or Blueprint into each task. Supply targeted context and working links.
+
+### C. Objective and boundaries
+
+State precisely:
+
+- The single intended outcome.
+- What the task must deliver.
+- What is explicitly in scope.
+- What is explicitly out of scope.
+- Which existing behaviors must remain unchanged.
+- Which files or components are expected to be affected, where knowable.
+
+### D. Preconditions
+
+List:
+
+- Exact prerequisite task IDs.
+- Required accepted decisions.
+- Required fixtures, data, configuration, or access.
+- Relevant environment requirements.
+- Any safety conditions.
+- The conditions that require the agent to stop and report a blocker.
+
+### E. Ordered instructions
+
+Provide an exact, bounded workflow:
+
+1. Inspect the named current files.
+2. Confirm the existing behavior and identify the smallest necessary change.
+3. Implement only the defined scope.
+4. Add or adjust the relevant tests.
+5. Run the exact applicable verification commands.
+6. Inspect the final diff and check for unrelated changes, compatibility regressions, and exposed secrets.
+7. Return the required evidence and blockers.
+
+Do not invent paths, APIs, scripts, or code structures. Derive these from the actual repository or mark them explicitly as proposed.
+
+### F. Acceptance criteria
+
+Use objective pass/fail conditions.
+
+For each criterion, specify what evidence proves it.
+
+Examples include a specific route returning the correct response, a generated application building successfully, a compatibility fixture remaining unchanged, a translation being present in both catalogs, or a public endpoint rejecting restricted data.
+
+Avoid “looks good”, “works correctly”, or “production-ready” without a defined test or review procedure.
+
+### G. Verification
+
+Include:
+
+- Focused positive tests.
+- Negative tests where relevant.
+- Regression tests.
+- Integration or cross-application tests where required.
+- Accessibility/localization tests where applicable.
+- Security and privacy tests.
+- Exact commands after verifying the package scripts.
+- Expected results.
+- Failure diagnostics.
+
+Do not require every task to run the complete project suite if a focused test is sufficient. Specify the full suite for integration and release gates where justified.
+
+### H. Evidence and completion
+
+Require:
+
+- Changed file list.
+- Test commands and real results.
+- Build outputs or artifacts where relevant.
+- Exact source and resulting commit SHA where available.
+- Reviewer or decision status when required.
+- Known limitations and related task IDs.
+- Explicit rollback or recovery notes when applicable.
+
+State exactly when the checkbox may be marked complete.
+
+The task agent must not modify unrelated files, silently alter architectural decisions, or mark the parent milestone complete simply because its own task passed.
+
+# 7. MODULARIZE THE MASTER VISION WITHOUT DESTROYING THE ARCHIVE
+
+The existing Master Vision is already substantial, with historical context, 99 editorial chapter headings, a detailed repository audit in Section 21A, source-specific discussions, creative archives, terminology, and research models.
+
+Do not delete or flatten this content.
+
+The goal is to make the vision navigable and modular enough that an AI agent can load only the topic it needs.
+
+First map the entire current narrative.
+
+Then:
+
+1. Preserve `docs/vision/MASTER_VISION_NARRATIVE_XV.md` as the canonical entry point.
+2. Create a clear table of contents and section ownership map.
+3. Identify cohesive thematic chapters that deserve separate documents.
+4. Retain the 99-chapter archival index and its historical purpose.
+5. Preserve the source audit, source pins, disputed items, provenance, and historical mappings.
+6. Move content into focused linked documents only when it improves clarity and reuse.
+7. Keep original meaning, source attribution, chronology, and unresolved disagreements.
+8. Replace internal broken links after moving material.
+9. Add an explicit crosswalk from the former section to its new location.
+10. Never present archival/editorial material as verified primary-source evidence simply because it has been preserved.
+
+The resulting Master Vision should allow a small AI to read one chapter—such as the history of the project, the mission, ZILL/SHADOW boundaries, the global movement, or the research principles—without loading all historical source material.
+
+Preserve distinctions among primary sources, recognized interpretations, personal reflections, project-authored concepts, and technical metaphors.
+
+Keep the project's intention to glorify ALLAH and honor Nabi Muhammad SAW and Nabi Isa AS expressed respectfully and with source discipline. Do not invent religious claims, Arabic etymologies, Quranic references, hadith, or divine authorization.
+
+# 8. MODULARIZE BLUEPRINT.md INTO CLEAR CONTRACTS
+
+The current Blueprint already contains architecture, ARSY, ecosystem surfaces, App Factory, i18n, bilingual preview, domain boundaries, source models, migration requirements, and security gates.
+
+Do not repeat these sections in an additional parallel blueprint.
+
+Use `BLUEPRINT.md` as the single master architecture index and core system contract.
+
+Where necessary, create or refine focused domain specifications that each own one responsibility.
+
+Examples of topics requiring review include:
+
+- Application inventory and ownership.
+- ARSY and SIGNAL/RADIO compatibility.
+- Workspace and App Factory contracts.
+- Global i18n and localization.
+- Public website and bilingual release.
+- Headquarters and Cockpit boundaries.
+- AI Gateway and Sentinel.
+- Source and corpus provenance.
+- Ontology and identity review.
+- Story and creative publishing.
+- Authentication, authorization, and privacy.
+- Design system integration.
+- Docker, Compose, and Coolify release topology.
+- Observability, backup, recovery, and rollback.
+
+These are coverage areas to audit, not a mandatory list of new files if the current documentation already covers them.
+
+Every domain contract must explain:
+
+- Purpose.
+- Owner.
+- Scope.
+- Non-goals.
+- Implemented versus planned status.
+- Inputs and outputs.
+- Interfaces and dependencies.
+- Data ownership.
+- Security and privacy boundaries.
+- Failure behavior.
+- Relevant tests.
+- Accepted ADRs.
+- Related milestone IDs and task packets.
+
+Ensure that a small AI coding agent can follow the owning contract without having to discover undocumented domain boundaries through trial and error.
+
+Do not create extra services or duplicate ownership just because a domain has a separate document.
+
+# 9. CREATE A MASTER DESIGN SYSTEM IF ONE DOES NOT ALREADY EXIST
+
+The previous repository check did not find a standalone Master Design document in the common locations tested. This is not proof that a design specification does not exist elsewhere.
+
+Search the full actual repository structure first.
+
+Inspect the existing `packages/moonui` implementation, its tokens and components, Dock, Headquarters, Cockpit, shared styles, assets, and existing M19 design-system tasks.
+
+If no suitable canonical design document exists, create one clear Master Design entry point and modular design specifications. Avoid duplicating a design system that already exists in source code or another established document.
+
+The Master Design should define the shared visual and interaction contract for all applicable applications.
+
+Cover, where relevant:
+
+- Brand and visual direction.
+- Color tokens and semantic roles.
+- Typography and hierarchy.
+- Spacing, layout, grids, and responsive rules.
+- Reusable components and variants.
+- Forms, validation, dialogs, buttons, links, navigation, and notifications.
+- Loading, error, empty, success, and disabled states.
+- Keyboard interaction and focus.
+- Accessibility and contrast.
+- Motion and reduced-motion behavior.
+- Mobile and responsive behavior.
+- Localization, text expansion, and multilingual navigation.
+- Source-language and RTL text handling.
+- Iconography and image usage.
+- Shared versus application-specific components.
+- Testing, visual regression, and design acceptance.
+
+Each component specification should be sufficient for a small AI agent to implement one component without inventing visual rules.
+
+Where an entire design system would be too large to create at once, decompose it into separate milestones and design tasks with an explicit adoption sequence.
+
+Do not delay the bilingual landing-page release while producing unnecessary design documentation for components it does not use.
+
+# 10. DECOMPOSE ADRs INTO REAL DECISIONS, NOT MICRO-ADRs
+
+Audit the existing decision records and their relationships.
+
+Preserve ADR-0001 and the accepted ARSY migration decision. Inspect ADR-0002 and ADR-0003, and any additional records discovered in the repository.
+
+If there is no canonical ADR index, create one using the established documentation conventions.
+
+For each important decision, verify:
+
+- It represents one meaningful product or architectural choice.
+- Its status is explicit.
+- The selected option and alternatives are clear.
+- Its rationale and trade-offs are recorded.
+- Its compatibility and migration effects are known.
+- Its security, privacy, operational, and cost implications are considered.
+- Its implementation tasks and acceptance criteria are linked.
+- Its superseding or superseded decisions are identified.
+
+Do not split one meaningful decision into several trivial ADRs merely to create more files.
+
+Use task packets for small implementation details and design documents for component or interface contracts.
+
+Keep the distinction between **decision accepted** and **implementation complete** explicit.
+
+An accepted ADR must not cause related implementation tasks to be checked automatically.
+
+# 11. DECOMPOSE THE GLOBAL ECOSYSTEM ROADMAP
+
+The current Blueprint's ecosystem proposal includes:
+
+- Lighthouse / `a-l-l-a-h.com`, initially intended to reuse Dock.
+- Harbor community.
+- SHADOW creative authoring.
+- MoonLab research.
+- WORKS commerce.
+- Conditional HELIOGRID, initially a read-only energy-oriented application after a calibrated pilot.
+
+These are currently proposed surfaces, not proof of six shipped applications.
+
+Decompose each into its own discovery, specification, decision, and potential implementation sequence while respecting the actual architecture.
+
+For each proposed surface, create or refine tasks covering:
+
+1. Source-backed product purpose.
+2. Intended audience and use cases.
+3. User journeys and information architecture.
+4. Domain owner and non-goals.
+5. Whether an existing app or route should be extended instead of creating a new app.
+6. Shared authentication and authorization requirements.
+7. Shared global i18n requirements.
+8. Data ownership, source rights, privacy, and safety.
+9. UI/UX and responsive design.
+10. Integration with ARSY/MoonQL or existing services.
+11. Build and test strategy.
+12. Deployment and operational needs.
+13. Security review.
+14. Cost and resource implications where relevant.
+15. Acceptance decision and implementation gate.
+
+No proposed application should become a new backend or database authority by default.
+
+Do not turn every historical Empire name into an independent application.
+
+HELIOGRID must retain its conditional, evidence-driven pilot gate. Do not plan hardware or live sensor work as if the scientific and operational prerequisites were already established.
+
+Future app implementation tasks should only proceed after the relevant product and architecture decisions are accepted. The App Factory and shared i18n foundation remain the early platform capabilities that make justified future apps cheaper to introduce.
+
+# 12. KEEP THE INITIAL EXECUTION TRACK CONNECTED TO THE CURRENT ROADMAP
+
+Preserve and refine the actual immediate execution sequence in `TODO.md`.
+
+Do not invent a competing initial roadmap or renumber existing milestones.
+
+The present plan includes:
+
+1. Baseline verification and discrepancy review.
+2. Shared global i18n contract.
+3. Early Radio-to-ARSY migration.
+4. App Factory.
+5. Localization of every actual user-facing application, including Cockpit.
+6. Bilingual Dock preview.
+7. Docker/Compose verification.
+8. Coolify readiness and preview release.
+
+Retain the current rule that the i18n contract and read-only ARSY inventory can start in parallel.
+
+Do not artificially require the physical ARSY rename or App Factory to finish before a static bilingual Dock preview if the actual dependency graph demonstrates that the preview can proceed safely without them.
+
+Conversely, do not claim the renamed ARSY production identity before its required migration gates pass.
+
+Keep all existing M05, M19, M27, and M28 work linked to its canonical IDs. Add new tasks only where the full granularity audit identifies a real gap.
+
+Ensure the task graph retains:
+
+- All-app global i18n coverage.
+- App Factory inheritance of shared conventions.
+- Dock `/id` and `/en` acceptance.
+- Headquarters localization.
+- Cockpit GUI and applicable CLI/TUI behavior.
+- ARSY human-facing messages without translating API contracts.
+- AI Gateway and Sentinel user-facing output where applicable.
+- Production build and actual deployment verification.
+- A separate, honest full-stack release gate.
+
+# 13. PRESERVE AND BREAK DOWN ACTUAL SECURITY AND RELIABILITY BLOCKERS
+
+The current planning notes include unresolved matters that must not become obscured by the expanded roadmap.
+
+Revalidate the present status of:
+
+- M01-05 — semantic versioning, changelog, and protected release lifecycle.
+- M01-06 — dependency and secret scanning.
+- M01-07 — CI evidence ledger and no-bypass rule.
+- M03-03 — forged/expired Headquarters cookie behavior.
+- M03-05 — token TTL, revocation, and API key cache boundaries.
+- M04-05 — off-host backup and retention verification.
+- Access controls for Research/Journey read projections.
+- Rights clearance for source publication.
+- Cockpit local mutation API controls.
+- AI Gateway authentication.
+- Sentinel credential fallback behavior.
+
+The above is a previous audit list, not an assertion that each problem remains unchanged at the newest HEAD.
+
+Inspect the actual source and existing task mappings.
+
+For each unresolved risk:
+
+1. Locate the existing canonical task.
+2. Determine whether its current acceptance criteria are granular enough.
+3. Split it if it still represents multiple independently testable outcomes.
+4. Add a uniquely identified task only if the requirement is genuinely untracked.
+5. Set the correct priority and dependencies.
+6. Define negative tests and security evidence.
+7. Ensure the applicable production or publication gate remains blocked until its requirements are actually satisfied.
+
+Never use the creation of additional milestones as a substitute for completing real security work.
+
+# 14. CREATE A COMPLETE ROADMAP FOR ALL REAL PROJECT CAPABILITIES
+
+Audit every current capability described in the Master Vision and Blueprint.
+
+Map each real capability through:
+
+`VISION → PRODUCT CAPABILITY → BLUEPRINT CONTRACT → DESIGN CONTRACT → ADR/DECISION → MILESTONE → TASKS → TESTS → RELEASE EVIDENCE`
+
+Where a layer is not necessary, record why.
+
+Where a required layer is absent, create the minimum appropriate specification and task.
+
+Consider the actual current roadmap's coverage of:
+
+- Foundation and release governance.
+- Application and package contracts.
+- ARSY migration and Radio compatibility.
+- App Factory.
+- Global i18n.
+- Public and administrative apps.
+- Design system and accessibility.
+- Corpus source rights and provenance.
+- Text, terminology, and ontology.
+- Research and review workflows.
+- Story, witness, and publishing.
+- ZILL/SHADOW-related capabilities and boundaries.
+- Community participation and correction.
+- AI assistance and automation.
+- World-monitoring and external-source observation.
+- Time, celestial, and scientific research.
+- Authentication, privacy, security, and operations.
+- Backups, restoration, observability, and reliability.
+- Future ecosystem apps and their separate acceptance gates.
+- Testing, documentation, releases, and long-term maintenance.
+
+This list represents audit coverage, not a mandate to fabricate functionality or implement everything immediately.
+
+Keep `PLANNED`, `PROPOSED`, and `UNKNOWN` capabilities distinct from the current application.
+
+Do not mark historical source imports, external references, creative concepts, or documented architecture as shipped functionality.
+
+# 15. GRANULARITY RULES FOR RESEARCH, DECISION, DESIGN, IMPLEMENTATION, AND RELEASE
+
+Do not use the same task template blindly for every activity.
+
+Use task types:
+
+- `RESEARCH`
+- `DECISION`
+- `DESIGN`
+- `DOCUMENTATION`
+- `IMPLEMENTATION`
+- `TESTING`
+- `SECURITY`
+- `OPERATIONS`
+- `INTEGRATION`
+- `RELEASE`
+
+A research task should deliver a source inventory, comparison, or evidence report.
+
+A decision task should resolve one explicit question and link the result to the accepted decision record.
+
+A design task should deliver one reviewable specification, prototype, or contract.
+
+An implementation task should produce one bounded behavior.
+
+A testing task should demonstrate one specific acceptance property.
+
+An integration task should prove that existing components work together while preserving their contracts.
+
+A release task should prove a defined deployment or adoption gate.
+
+Do not combine these stages into one broad task unless there is an unavoidable reason.
+
+Where the owner must make a choice, create a decision task with clear options and consequences. Do not allow a small AI agent to invent an important product, religious, architectural, security, or rights decision.
+
+# 16. AUTHOR A STANDARD AI TASK EXECUTION CONTRACT
+
+Create one canonical reusable task-execution contract that every detailed task packet can reference.
+
+It should tell an AI coding agent to:
+
+1. Read only the task packet and referenced sections necessary to understand the work.
+2. Recheck the latest branch and source state before editing.
+3. Identify relevant existing implementation and tests.
+4. Respect the declared scope and file ownership.
+5. Avoid unrelated refactoring.
+6. Preserve existing APIs, IDs, data, and compatibility unless explicitly authorized.
+7. Avoid changing architectural decisions without an approved ADR.
+8. Implement one bounded outcome.
+9. Run the exact relevant checks.
+10. Inspect the diff for side effects and unrelated changes.
+11. Report actual evidence rather than claims.
+12. Mark the task complete only when its acceptance criteria pass.
+13. Report a blocker instead of guessing.
+14. Return changed files, commands, results, commit SHA, known limitations, and the next eligible task.
+
+Also include a multi-agent coordination contract.
+
+Maintain the existing principle that shared files and integration contracts need one designated owner. For example:
+
+- A single integration owner controls TODO, milestone registry, shared configuration, and final integration.
+- A designated i18n owner controls shared catalogs and locale contracts.
+- An ARSY owner controls the backend migration.
+- Individual app owners make changes within their assigned scopes.
+- Cross-app changes are integrated through declared dependencies and review.
+
+No two agents should implement overlapping parent and child tasks simultaneously.
+
+Do not create a second active task/status registry or require every task agent to load the entire 1,245-line Master Vision.
+
+# 17. VALIDATE AND CLEAN THE DOCUMENTATION SYSTEM
+
+After the documentation work, run the available checks or perform equivalent safe validation.
+
+Check:
+
+- Unique milestone IDs.
+- Unique task IDs.
+- Unique ADR IDs.
+- Correct parent/child relationships.
+- Valid task and milestone dependencies.
+- Absence of circular dependencies.
+- No duplicate implementation work.
+- Correct status consistency.
+- Working Markdown links.
+- Correct application paths.
+- Current package and command names.
+- Consistent naming and terminology.
+- Completeness of localization coverage.
+- Correct release gates.
+- Accurate counts in the TODO introduction and footer.
+
+The existing planning history notes that approximately 50 historical `file:///z:/project/moonradio/...` references were non-portable. Scan the latest documentation for any such links or similar machine-local paths.
+
+Where a referenced artifact exists in the repository, replace the local link with its correct repository-relative URL.
+
+Where the evidence is missing or local-only, record that limitation rather than inventing a substitute.
+
+Do not claim that all links work unless they have been checked.
+
+If adding a documentation validator is justified, create an appropriately scoped task and specify its requirements. Do not introduce heavy code dependencies during this planning-only phase merely to obtain more automation.
+
+# 18. DOCUMENTATION-ONLY EXECUTION BOUNDARY
+
+You are authorized to update the canonical planning and documentation files.
+
+You may:
+
+- Update and modularize the Master Vision.
+- Update `BLUEPRINT.md` and create linked domain contracts where justified.
+- Create the Master Design documentation if needed.
+- Create or improve the ADR index and decision records when justified.
+- Refine the existing `TODO.md`.
+- Add milestone specification files and execution packets for complex tasks.
+- Update supporting documentation to keep naming, dependencies, and statuses consistent.
+- Run documentation and repository checks.
+
+You must not:
+
+- Modify application source code.
+- Change package manifests or lockfiles.
+- Perform the physical Radio-to-ARSY rename.
+- Implement App Factory or global i18n.
+- Change database schemas or migrations.
+- Alter production configuration.
+- Deploy to Coolify.
+- Create release tags or claim implementation completion.
+
+Preserve the established repository workflow. Do not create a branch, repository, competing task system, or unrelated refactor.
+
+If direct repository editing is unavailable, provide complete ready-to-apply changes and explicitly state which files remain untouched.
+
+# 19. FINAL REPORT — SHOW THE ACTUAL TRANSFORMATION
+
+After making the documentation updates, return an Indonesian report with the following sections.
+
+## A. Before and after
+
+Report the verified:
+
+- Milestone count.
+- Task row count.
+- Unique task ID count.
+- Checked, open, blocked, and umbrella-task counts.
+- Number of new milestone specifications.
+- Number of new detailed task packets.
+- Number of existing tasks split or clarified.
+- Number of task IDs preserved.
+- Number of new tasks added.
+- Number of obsolete or duplicate definitions resolved.
+
+Do not inflate the result by counting a cross-reference as another task or counting one deliverable twice.
+
+## B. Final documentation structure
+
+Show the actual structure of:
+
+- Master Vision and its chapters.
+- Master Blueprint and domain contracts.
+- Master Design and component specifications.
+- ADR index and individual ADRs.
+- TODO and its immediate execution track.
+- Milestone specifications.
+- Task execution packets.
+- Shared AI execution contract.
+
+List only files that actually exist after the change.
+
+## C. Full roadmap coverage
+
+Explain how every significant current and planned capability maps from vision to specification, task, tests, and release.
+
+Identify remaining gaps and why they remain open.
+
+## D. Immediate execution
+
+Show the precise initial task dependency graph, preserving current work and avoiding duplicated parent/child implementation.
+
+Retain the actual priorities for the global i18n contract, ARSY migration, App Factory, existing-application localization, bilingual landing page, Docker Compose, Coolify readiness, and outstanding security prerequisites.
+
+Identify safe parallel tasks.
+
+## E. Validation evidence
+
+Include exact changed paths, relevant commit SHAs, commands and real results, link/ID/dependency checks, and known limitations.
+
+Do not invent build or test results.
+
+## F. Remaining blockers
+
+Identify unresolved product decisions, source gaps, missing rights, security blockers, architecture questions, unavailable access, and tasks that still need owner input.
+
+## G. Next implementation task
+
+Name the single highest-priority ready task for the local coding AI.
+
+Link directly to its task packet. Explain its prerequisites and exactly what evidence the local agent should return.
+
+# DEFINITION OF DONE
+
+The planning transformation is complete only when:
+
+- The existing repository has been audited before modification.
+- Every existing milestone and task has been reviewed for appropriate granularity.
+- The roadmap is expanded with genuinely useful, independently verifiable milestones.
+- Existing IDs, historical evidence, and accepted decisions are preserved.
+- Parent/child task relationships do not duplicate implementation work.
+- Master Vision and Blueprint are modular and remain canonical entry points.
+- Master Design exists as one canonical contract, or the existing equivalent is identified and strengthened.
+- ADRs express real decisions rather than arbitrary micro-details.
+- Complex tasks have self-contained, linked execution packets.
+- A low-context AI can execute one task without reconstructing the entire system.
+- All major existing and planned capabilities have an explicit place in the roadmap.
+- The first-release objectives remain achievable.
+- Current security and reliability blockers remain visible.
+- IDs, dependencies, links, statuses, and document references are consistent.
+- The final report accurately distinguishes planning changes from implementation and release evidence.
+
+**Final operating principle:**
+
+> Preserve the whole vision. Split the work until it becomes executable. Keep architecture and design unambiguous. Make every milestone deliver something real. Give every complex task its own context and proof requirements. Never duplicate work merely to increase the task count. Build a planning system that a small AI agent can follow safely, one verified result at a time.

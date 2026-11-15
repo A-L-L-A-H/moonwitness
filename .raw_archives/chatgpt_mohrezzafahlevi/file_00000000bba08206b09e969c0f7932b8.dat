@@ -1,0 +1,3608 @@
+{
+  "schema_version": "2.0.0",
+  "document_type": "codex_one_shot_execution_spec",
+  "name": "mw-edge-full-business-domain-build-native-orm-domain-db",
+  "status": "implementation_ready",
+  "repository": {
+    "provider": "gitlab",
+    "project": "bjo163/mw",
+    "default_branch": "master",
+    "source_of_truth": "live_repository_state",
+    "workspace_type": "hybrid_rust_pnpm_monorepo"
+  },
+  "agent": {
+    "name": "codex",
+    "mode": "autonomous",
+    "execution": "one_shot",
+    "interaction": "non_interactive",
+    "planning_only": false,
+    "must_implement": true,
+    "must_test": true,
+    "must_autofix": true,
+    "must_document": true,
+    "stop_only_on": [
+      "V0.1_READY",
+      "VERIFIED_HARD_EXTERNAL_BLOCKER"
+    ]
+  },
+  "target": {
+    "path": "apps/mw-edge",
+    "create_if_missing": true,
+    "language": "javascript",
+    "module_system": "esm",
+    "runtime": "node_22",
+    "package_manager": "pnpm_11_17_0",
+    "http_adapter": "hono",
+    "primary_database": "sqlite",
+    "future_database": "d1",
+    "architecture_role": "moonwitness_business_application_data_engine",
+    "orm_strategy": "mw_native_custom_thin_orm",
+    "database_topology": "one_bounded_domain_one_logical_database"
+  },
+  "mission": {
+    "summary": "Build MW Edge as the canonical relational engine for MoonWitness-owned mutable business records using MW-native domain models, not Odoo models.",
+    "execution_loop": [
+      "AUDIT_LIVE_REPO",
+      "VERIFY_BASELINE",
+      "CREATE_OR_CONTINUE_APPS_MW_EDGE",
+      "IMPLEMENT_ALL_MODEL_CATALOG_ENTRIES",
+      "IMPLEMENT_ORM",
+      "IMPLEMENT_SQLITE",
+      "IMPLEMENT_MIGRATIONS",
+      "IMPLEMENT_DOMAIN_SERVICES",
+      "IMPLEMENT_INTERNAL_HTTP_ADAPTER",
+      "TEST",
+      "FIX",
+      "RETEST",
+      "DOCUMENT",
+      "COMMIT",
+      "FULL_VERIFY"
+    ],
+    "forbidden_early_stops": [
+      "analysis_only",
+      "audit_only",
+      "plan_only",
+      "todo_only",
+      "architecture_only",
+      "partial_implementation_without_verification"
+    ]
+  },
+  "read_before_editing": [
+    "AGENTS.md",
+    "README.md",
+    "package.json",
+    "pnpm-workspace.yaml",
+    "Cargo.toml",
+    "config/services.json",
+    "config/runtime-matrix.json",
+    "config/ports.json",
+    ".gitlab-ci.yml",
+    ".gitignore",
+    "crates/mw-api/**",
+    "crates/mw-cockpit/**",
+    "crates/mw-storage/**",
+    "crates/mw-identity/**",
+    "crates/mw-security/**",
+    "crates/mw-runtime/**",
+    "crates/mw-compute/**",
+    "crates/mw-sync/**",
+    "crates/mw-transport/**",
+    "crates/mw-cloudflare-adapter/**",
+    "apps/webhook/**",
+    "docs/design/cockpit-information-architecture-blueprint.json",
+    "specs/interface-and-api-boundary.json",
+    "specs/repository-and-storage.json",
+    "specs/replication-and-synchronization.json",
+    "specs/0000000000112-infra-provider-connector-contract.json",
+    "specs/0000000000113-tenant-isolation-authorization-boundary.json",
+    "specs/0000000000114-saas-catalog-subscription-billing-contract.json",
+    "specs/0000000000115-unified-audit-activity-provenance.json",
+    "specs/0000000000116-support-ticket-incident-boundary.json",
+    "specs/implement-cockpit-embedded-sqlite-projection-engine-and-realtime-telemetry.json",
+    "specs/establish-api-and-cockpit-ownership.json",
+    "decisions/0000000000122-establish-api-and-cockpit-ownership.json"
+  ],
+  "architecture_invariants": {
+    "business_domain_first": true,
+    "odoo_domain_clone_forbidden": true,
+    "odoo_model_names_forbidden": [
+      "res.partner",
+      "res.company",
+      "sale.order",
+      "account.move",
+      "product.template"
+    ],
+    "browser_single_origin": "mw-cockpit",
+    "cockpit_generic_model_proxy_forbidden": true,
+    "mw_edge_permanent_service_registration_in_v0_1": false,
+    "no_model_without_ownership": true,
+    "no_external_reference_as_local_fk_without_explicit_ownership": true,
+    "semantic_distinctions": [
+      "Identity != Permission",
+      "Identity != Membership",
+      "Authentication != Authorization",
+      "Authorization != Trust",
+      "Authorization != Execution",
+      "Role != Entitlement",
+      "Entitlement != Authorization",
+      "Capability != Authorization",
+      "Request != Authorization",
+      "Request != Execution",
+      "Action != Event",
+      "Event != State",
+      "State != Event",
+      "Evidence != Truth",
+      "Result != Provenance",
+      "Availability != Authority",
+      "Replication != Synchronization",
+      "Offer != Allocation",
+      "Order != Subscription",
+      "Payment != Entitlement",
+      "Support Ticket != Incident",
+      "Incident != Radicle Issue",
+      "Radicle Issue != Agent Task",
+      "Patch != Release"
+    ],
+    "one_bounded_domain_one_logical_database": true,
+    "cross_domain_foreign_keys_forbidden": true,
+    "same_domain_relation_only": true,
+    "cross_domain_reference_only": true,
+    "drizzle_forbidden": true,
+    "third_party_orm_forbidden": true,
+    "orm_must_be_native_mw": true
+  },
+  "existing_owner_boundaries": {
+    "tasks": {
+      "owner": "mw-task + tasks/*.json",
+      "authority": "CANONICAL",
+      "mw_edge_role": "NONE"
+    },
+    "cockpit_task_sqlite": {
+      "owner": "mw-cockpit",
+      "authority": "PROJECTION",
+      "mw_edge_role": "NONE"
+    },
+    "git_radicle_forge": {
+      "owner": "Git/Radicle/COB",
+      "authority": "CANONICAL",
+      "mw_edge_role": "NONE"
+    },
+    "identity": {
+      "owner": "mw-identity",
+      "authority": "CANONICAL_CONTRACT_OWNER",
+      "mw_edge_role": "REFERENCE_ONLY"
+    },
+    "authorization": {
+      "owner": "mw-security/policy boundary",
+      "authority": "CANONICAL_POLICY_DECISION",
+      "mw_edge_role": "REFERENCE_ONLY"
+    },
+    "runtime": {
+      "owner": "mw-runtime",
+      "authority": "CANONICAL_DOMAIN_OWNER",
+      "mw_edge_role": "REFERENCE_ONLY"
+    },
+    "compute": {
+      "owner": "mw-compute",
+      "authority": "CANONICAL_DOMAIN_OWNER",
+      "mw_edge_role": "REFERENCE_ONLY"
+    },
+    "content_and_provenance_storage": {
+      "owner": "mw-storage",
+      "authority": "CANONICAL_STORAGE_BOUNDARY",
+      "mw_edge_role": "REFERENCE_ONLY"
+    },
+    "cloudflare_resource_control": {
+      "owner": "mw-cloudflare-adapter",
+      "authority": "OBSERVATION_AND_CONTROL_ADAPTER",
+      "mw_edge_role": "NONE"
+    },
+    "webhook_ingress": {
+      "owner": "apps/webhook",
+      "authority": "INGRESS_APPLICATION",
+      "mw_edge_role": "NONE"
+    },
+    "operator_gateway": {
+      "owner": "mw-cockpit",
+      "authority": "LOCAL_OPERATOR_HTTP_GATEWAY",
+      "mw_edge_role": "INTERNAL_PROVIDER_ONLY_AFTER_SEPARATE_ADR"
+    }
+  },
+  "authority_classes": {
+    "CANONICAL": "Authoritative mutable state for the defined business scope.",
+    "PROJECTION": "Rebuildable derived representation of another canonical source.",
+    "CACHE": "Disposable retained copy for latency or availability.",
+    "OBSERVATION": "Externally observed state with freshness/provenance and no automatic truth or authority claim."
+  },
+  "field_system": {
+    "public_primitives": [
+      "String",
+      "Text",
+      "Integer",
+      "Decimal",
+      "Boolean",
+      "DateTime",
+      "Enum",
+      "Json",
+      "Reference",
+      "Relation"
+    ],
+    "system_fields": [
+      {
+        "name": "id",
+        "type": "Integer",
+        "managed": true,
+        "cross_boundary_identity": false
+      },
+      {
+        "name": "created_at",
+        "type": "DateTime",
+        "managed": true
+      },
+      {
+        "name": "updated_at",
+        "type": "DateTime",
+        "managed": true
+      }
+    ],
+    "reference_semantics": {
+      "meaning": "Opaque stable identifier owned by another bounded context.",
+      "must_not_auto_join": true,
+      "must_not_auto_load": true,
+      "must_not_imply_authorization": true,
+      "must_not_create_local_fk": true,
+      "cross_domain_default": true,
+      "required_for_cross_domain_links": true
+    },
+    "relation_semantics": {
+      "meaning": "Explicit relationship between MW Edge-owned canonical models inside the same bounded domain and therefore the same logical database.",
+      "same_domain_only": true,
+      "may_create_local_fk": true,
+      "must_validate_target": true,
+      "must_fail_closed_on_missing_required_target": true,
+      "cross_domain_relation_forbidden": true
+    }
+  },
+  "model_catalog": [
+    {
+      "name": "business.organization",
+      "table": "business_organizations",
+      "domain": "business",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Commercial organization record without replacing identity, membership, tenant authorization, or trust.",
+      "fields": {
+        "organization_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "organization_type": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "internal",
+            "customer",
+            "vendor",
+            "reseller",
+            "other"
+          ]
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "active",
+            "suspended",
+            "archived"
+          ],
+          "default": "draft"
+        },
+        "owner_ref": {
+          "type": "Reference",
+          "ref_kind": "identity_or_organization_owner"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "organization is not identity",
+        "organization is not membership",
+        "organization lifecycle is not authorization"
+      ],
+      "database": {
+        "domain": "business",
+        "logical_database": "business.db",
+        "sqlite_path": "apps/mw-edge/data/business.db"
+      }
+    },
+    {
+      "name": "business.project",
+      "table": "business_projects",
+      "domain": "business",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Business or delivery initiative linking related records without owning their lifecycles.",
+      "fields": {
+        "project_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "description": {
+          "type": "Text"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "planned",
+            "active",
+            "paused",
+            "completed",
+            "cancelled"
+          ],
+          "default": "planned"
+        },
+        "owner_ref": {
+          "type": "Reference",
+          "ref_kind": "identity_or_team"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "project may link records but does not own task, ticket, incident, order, issue, or provisioning lifecycle"
+      ],
+      "database": {
+        "domain": "business",
+        "logical_database": "business.db",
+        "sqlite_path": "apps/mw-edge/data/business.db"
+      }
+    },
+    {
+      "name": "crm.contact",
+      "table": "crm_contacts",
+      "domain": "crm",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Business contact profile without becoming canonical authentication identity.",
+      "fields": {
+        "contact_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "organization_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "identity_ref": {
+          "type": "Reference",
+          "ref_kind": "mw_identity"
+        },
+        "display_name": {
+          "type": "String",
+          "required": true
+        },
+        "email": {
+          "type": "String"
+        },
+        "phone": {
+          "type": "String"
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "active",
+            "inactive",
+            "archived"
+          ],
+          "default": "active"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "contact is not identity",
+        "email or phone does not prove authentication"
+      ],
+      "database": {
+        "domain": "crm",
+        "logical_database": "crm.db",
+        "sqlite_path": "apps/mw-edge/data/crm.db"
+      }
+    },
+    {
+      "name": "crm.lead",
+      "table": "crm_leads",
+      "domain": "crm",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Potential commercial lead.",
+      "fields": {
+        "lead_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "contact_ref": {
+          "type": "Relation",
+          "target": "crm.contact.contact_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "organization_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "title": {
+          "type": "String",
+          "required": true
+        },
+        "source_ref": {
+          "type": "Reference",
+          "ref_kind": "external_source"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "new",
+            "qualified",
+            "disqualified",
+            "converted"
+          ],
+          "default": "new"
+        },
+        "owner_ref": {
+          "type": "Reference",
+          "ref_kind": "identity_or_team"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "lead is not opportunity",
+        "qualified lead does not imply accepted order"
+      ],
+      "database": {
+        "domain": "crm",
+        "logical_database": "crm.db",
+        "sqlite_path": "apps/mw-edge/data/crm.db"
+      }
+    },
+    {
+      "name": "crm.opportunity",
+      "table": "crm_opportunities",
+      "domain": "crm",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Qualified commercial opportunity.",
+      "fields": {
+        "opportunity_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "lead_ref": {
+          "type": "Relation",
+          "target": "crm.lead.lead_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "contact_ref": {
+          "type": "Relation",
+          "target": "crm.contact.contact_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "organization_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "title": {
+          "type": "String",
+          "required": true
+        },
+        "stage": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "open",
+            "proposal",
+            "negotiation",
+            "won",
+            "lost"
+          ],
+          "default": "open"
+        },
+        "owner_ref": {
+          "type": "Reference",
+          "ref_kind": "identity_or_team"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "opportunity is not order",
+        "opportunity won does not imply order accepted"
+      ],
+      "database": {
+        "domain": "crm",
+        "logical_database": "crm.db",
+        "sqlite_path": "apps/mw-edge/data/crm.db"
+      }
+    },
+    {
+      "name": "reseller.relationship",
+      "table": "reseller_relationships",
+      "domain": "reseller",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Commercial relationship between a reseller organization and downstream tenant scope.",
+      "fields": {
+        "relationship_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "platform_or_owner_tenant"
+        },
+        "reseller_organization_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "downstream_tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "active",
+            "suspended",
+            "terminated"
+          ],
+          "default": "pending"
+        },
+        "authorization_ref": {
+          "type": "Reference",
+          "ref_kind": "authorization_decision"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "relationship does not create identity membership",
+        "relationship does not imply authorization"
+      ],
+      "database": {
+        "domain": "reseller",
+        "logical_database": "reseller.db",
+        "sqlite_path": "apps/mw-edge/data/reseller.db"
+      }
+    },
+    {
+      "name": "reseller.commission",
+      "table": "reseller_commissions",
+      "domain": "reseller",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Commercial commission record linked to reseller and business source.",
+      "fields": {
+        "commission_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "reseller_organization_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "source_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "order_subscription_or_invoice"
+        },
+        "amount": {
+          "type": "Decimal",
+          "required": true
+        },
+        "currency": {
+          "type": "String",
+          "required": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "earned",
+            "approved",
+            "paid",
+            "void"
+          ],
+          "default": "pending"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "commission paid is not payment-provider observation"
+      ],
+      "database": {
+        "domain": "reseller",
+        "logical_database": "reseller.db",
+        "sqlite_path": "apps/mw-edge/data/reseller.db"
+      }
+    },
+    {
+      "name": "catalog.product",
+      "table": "catalog_products",
+      "domain": "catalog",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Defines a sellable product or service.",
+      "fields": {
+        "product_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "owner_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "identity_or_organization_owner"
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "description": {
+          "type": "Text"
+        },
+        "product_kind": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "service",
+            "digital",
+            "physical",
+            "bundle",
+            "other"
+          ]
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "active",
+            "suspended",
+            "retired"
+          ],
+          "default": "draft"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "product is not offer",
+        "product does not imply entitlement"
+      ],
+      "database": {
+        "domain": "catalog",
+        "logical_database": "catalog.db",
+        "sqlite_path": "apps/mw-edge/data/catalog.db"
+      }
+    },
+    {
+      "name": "catalog.offer",
+      "table": "catalog_offers",
+      "domain": "catalog",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Prices and scopes a product for a commercial subject.",
+      "fields": {
+        "offer_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "product_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "catalog.product.product_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "scope_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "commercial_scope"
+        },
+        "terms_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "terms"
+        },
+        "price_amount": {
+          "type": "Decimal"
+        },
+        "price_currency": {
+          "type": "String"
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "active",
+            "suspended",
+            "retired"
+          ],
+          "default": "draft"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "offer is not allocation",
+        "offer does not prove authorization"
+      ],
+      "database": {
+        "domain": "catalog",
+        "logical_database": "catalog.db",
+        "sqlite_path": "apps/mw-edge/data/catalog.db"
+      }
+    },
+    {
+      "name": "commerce.order",
+      "table": "commerce_orders",
+      "domain": "commerce",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Records customer intent to acquire an offer.",
+      "fields": {
+        "order_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "offer_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:catalog.offer",
+          "target_model_hint": "catalog.offer",
+          "target_field_hint": "offer_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "subject_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "customer_or_subject"
+        },
+        "authorization_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "authorization_decision"
+        },
+        "policy_version": {
+          "type": "String",
+          "required": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "submitted",
+            "accepted",
+            "rejected",
+            "cancelled"
+          ],
+          "default": "draft"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "order is not subscription",
+        "accepted order must not silently create subscription",
+        "request is not authorization"
+      ],
+      "database": {
+        "domain": "commerce",
+        "logical_database": "commerce.db",
+        "sqlite_path": "apps/mw-edge/data/commerce.db"
+      }
+    },
+    {
+      "name": "service.subscription",
+      "table": "service_subscriptions",
+      "domain": "service",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Accepted recurring or finite service relationship.",
+      "fields": {
+        "subscription_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "order_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:commerce.order",
+          "target_model_hint": "commerce.order",
+          "target_field_hint": "order_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "active",
+            "suspended",
+            "cancelled",
+            "expired"
+          ],
+          "default": "pending"
+        },
+        "effective_at": {
+          "type": "DateTime",
+          "required": true
+        },
+        "expires_at": {
+          "type": "DateTime"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "subscription active does not prove provisioning",
+        "subscription is not allocation",
+        "subscription is not service health"
+      ],
+      "database": {
+        "domain": "service",
+        "logical_database": "service.db",
+        "sqlite_path": "apps/mw-edge/data/service.db"
+      }
+    },
+    {
+      "name": "billing.invoice",
+      "table": "billing_invoices",
+      "domain": "billing",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Records an amount due or accounting statement.",
+      "fields": {
+        "invoice_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "subscription_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:service.subscription",
+          "target_model_hint": "service.subscription",
+          "target_field_hint": "subscription_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "amount_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "amount_or_pricing_snapshot"
+        },
+        "amount": {
+          "type": "Decimal"
+        },
+        "currency": {
+          "type": "String"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "issued",
+            "paid",
+            "void",
+            "overdue"
+          ],
+          "default": "draft"
+        },
+        "issued_at": {
+          "type": "DateTime"
+        },
+        "due_at": {
+          "type": "DateTime"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "invoice is not payment"
+      ],
+      "database": {
+        "domain": "billing",
+        "logical_database": "billing.db",
+        "sqlite_path": "apps/mw-edge/data/billing.db"
+      }
+    },
+    {
+      "name": "billing.payment",
+      "table": "billing_payments",
+      "domain": "billing",
+      "authority": "OBSERVATION",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Records an external payment observation.",
+      "fields": {
+        "payment_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "invoice_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "billing.invoice.invoice_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "provider_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "payment_provider"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "succeeded",
+            "failed",
+            "refunded"
+          ]
+        },
+        "observed_at": {
+          "type": "DateTime",
+          "required": true
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "payment is observation",
+        "payment succeeded does not imply allocation",
+        "payment succeeded does not imply subscription activation",
+        "cancellation is not refund"
+      ],
+      "forbidden_fields": [
+        "card_number",
+        "cvv",
+        "bank_secret",
+        "payment_token",
+        "private_key",
+        "password"
+      ],
+      "database": {
+        "domain": "billing",
+        "logical_database": "billing.db",
+        "sqlite_path": "apps/mw-edge/data/billing.db"
+      }
+    },
+    {
+      "name": "entitlement.allocation",
+      "table": "entitlement_allocations",
+      "domain": "entitlement",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Records entitlement allocation after policy evaluation.",
+      "fields": {
+        "allocation_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "subscription_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:service.subscription",
+          "target_model_hint": "service.subscription",
+          "target_field_hint": "subscription_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "resource_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "resource"
+        },
+        "authorization_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "authorization_decision"
+        },
+        "policy_version": {
+          "type": "String",
+          "required": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "active",
+            "suspended",
+            "revoked"
+          ],
+          "default": "pending"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "allocation requires authorization reference",
+        "allocation is not provisioning",
+        "entitlement is not authorization"
+      ],
+      "database": {
+        "domain": "entitlement",
+        "logical_database": "entitlement.db",
+        "sqlite_path": "apps/mw-edge/data/entitlement.db"
+      }
+    },
+    {
+      "name": "provisioning.reference",
+      "table": "provisioning_references",
+      "domain": "provisioning",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Links an allocation to requested or observed provisioning operations without executing them.",
+      "fields": {
+        "provisioning_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "allocation_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "cross_domain:entitlement.allocation",
+          "target_model_hint": "entitlement.allocation",
+          "target_field_hint": "allocation_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "operation_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "provider_operation"
+        },
+        "result_ref": {
+          "type": "Reference",
+          "ref_kind": "provider_result"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "requested",
+            "submitted",
+            "executing",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "rolled_back"
+          ],
+          "default": "requested"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "provisioning reference does not execute",
+        "provisioning result is not entitlement",
+        "authorization is not execution"
+      ],
+      "database": {
+        "domain": "provisioning",
+        "logical_database": "provisioning.db",
+        "sqlite_path": "apps/mw-edge/data/provisioning.db"
+      }
+    },
+    {
+      "name": "support.sla",
+      "table": "support_slas",
+      "domain": "support",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Support service-level target definition.",
+      "fields": {
+        "sla_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "priority": {
+          "type": "Enum",
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ]
+        },
+        "response_target_minutes": {
+          "type": "Integer",
+          "required": true
+        },
+        "resolution_target_minutes": {
+          "type": "Integer"
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "active",
+            "retired"
+          ],
+          "default": "draft"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "support",
+        "logical_database": "support.db",
+        "sqlite_path": "apps/mw-edge/data/support.db"
+      }
+    },
+    {
+      "name": "support.ticket",
+      "table": "support_tickets",
+      "domain": "support",
+      "authority": "CANONICAL",
+      "contract_status": "approved",
+      "must_create": true,
+      "purpose": "Customer/user reported request or assistance need.",
+      "fields": {
+        "ticket_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "requester_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "identity_or_contact"
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "subject": {
+          "type": "String",
+          "required": true
+        },
+        "description": {
+          "type": "Text"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "new",
+            "triaged",
+            "open",
+            "waiting",
+            "resolved",
+            "closed"
+          ],
+          "default": "new"
+        },
+        "priority": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "low",
+            "normal",
+            "high",
+            "urgent"
+          ],
+          "default": "normal"
+        },
+        "sla_ref": {
+          "type": "Relation",
+          "target": "support.sla.sla_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "incident_ref": {
+          "type": "Reference",
+          "ref_kind": "operations_incident"
+        },
+        "radicle_issue_ref": {
+          "type": "Reference",
+          "ref_kind": "radicle_issue"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "support ticket is not incident",
+        "support ticket is not radicle issue",
+        "cross-link must not merge lifecycle"
+      ],
+      "database": {
+        "domain": "support",
+        "logical_database": "support.db",
+        "sqlite_path": "apps/mw-edge/data/support.db"
+      }
+    },
+    {
+      "name": "support.escalation",
+      "table": "support_escalations",
+      "domain": "support",
+      "authority": "CANONICAL",
+      "contract_status": "approved_semantics",
+      "must_create": true,
+      "purpose": "Escalation record that preserves support ticket ownership and lifecycle.",
+      "fields": {
+        "escalation_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "ticket_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "support.ticket.ticket_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "new",
+            "triaged",
+            "escalated",
+            "mitigated",
+            "resolved",
+            "closed"
+          ],
+          "default": "new"
+        },
+        "target_ref": {
+          "type": "Reference",
+          "ref_kind": "team_incident_or_issue"
+        },
+        "reason": {
+          "type": "Text",
+          "required": true
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "escalation does not convert ticket into incident",
+        "escalation does not merge issue ownership"
+      ],
+      "database": {
+        "domain": "support",
+        "logical_database": "support.db",
+        "sqlite_path": "apps/mw-edge/data/support.db"
+      }
+    },
+    {
+      "name": "knowledge.article",
+      "table": "knowledge_articles",
+      "domain": "knowledge",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Tenant-scoped support/business knowledge article.",
+      "fields": {
+        "article_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "title": {
+          "type": "String",
+          "required": true
+        },
+        "body": {
+          "type": "Text",
+          "required": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "published",
+            "archived"
+          ],
+          "default": "draft"
+        },
+        "owner_ref": {
+          "type": "Reference",
+          "ref_kind": "identity_or_team"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "knowledge",
+        "logical_database": "knowledge.db",
+        "sqlite_path": "apps/mw-edge/data/knowledge.db"
+      }
+    },
+    {
+      "name": "procurement.vendor",
+      "table": "procurement_vendors",
+      "domain": "procurement",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Commercial vendor record without replacing external identity.",
+      "fields": {
+        "vendor_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "organization_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "active",
+            "suspended",
+            "retired"
+          ],
+          "default": "draft"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "procurement",
+        "logical_database": "procurement.db",
+        "sqlite_path": "apps/mw-edge/data/procurement.db"
+      }
+    },
+    {
+      "name": "procurement.purchase_order",
+      "table": "procurement_purchase_orders",
+      "domain": "procurement",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Procurement intent/order toward a vendor.",
+      "fields": {
+        "purchase_order_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "vendor_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "procurement.vendor.vendor_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "submitted",
+            "approved",
+            "rejected",
+            "cancelled",
+            "fulfilled"
+          ],
+          "default": "draft"
+        },
+        "authorization_ref": {
+          "type": "Reference",
+          "ref_kind": "authorization_decision"
+        },
+        "policy_version": {
+          "type": "String"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "purchase order approved is not proof of delivery",
+        "authorization is not execution"
+      ],
+      "database": {
+        "domain": "procurement",
+        "logical_database": "procurement.db",
+        "sqlite_path": "apps/mw-edge/data/procurement.db"
+      }
+    },
+    {
+      "name": "procurement.purchase_order_line",
+      "table": "procurement_purchase_order_lines",
+      "domain": "procurement",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Line item belonging to a procurement purchase order.",
+      "fields": {
+        "purchase_order_line_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "purchase_order_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "procurement.purchase_order.purchase_order_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "item_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:inventory.item",
+          "target_model_hint": "inventory.item",
+          "target_field_hint": "item_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "description": {
+          "type": "String",
+          "required": true
+        },
+        "quantity": {
+          "type": "Decimal",
+          "required": true
+        },
+        "unit_amount": {
+          "type": "Decimal"
+        },
+        "currency": {
+          "type": "String"
+        }
+      },
+      "database": {
+        "domain": "procurement",
+        "logical_database": "procurement.db",
+        "sqlite_path": "apps/mw-edge/data/procurement.db"
+      }
+    },
+    {
+      "name": "inventory.item",
+      "table": "inventory_items",
+      "domain": "inventory",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Inventory-tracked item definition.",
+      "fields": {
+        "item_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "sku": {
+          "type": "String",
+          "unique": true
+        },
+        "item_kind": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "physical",
+            "consumable",
+            "asset",
+            "other"
+          ]
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "active",
+            "retired"
+          ],
+          "default": "draft"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "inventory",
+        "logical_database": "inventory.db",
+        "sqlite_path": "apps/mw-edge/data/inventory.db"
+      }
+    },
+    {
+      "name": "inventory.location",
+      "table": "inventory_locations",
+      "domain": "inventory",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Inventory location within a tenant scope.",
+      "fields": {
+        "location_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "location_kind": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "warehouse",
+            "room",
+            "rack",
+            "vehicle",
+            "virtual",
+            "other"
+          ]
+        },
+        "parent_location_ref": {
+          "type": "Relation",
+          "target": "inventory.location.location_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "active",
+            "inactive",
+            "archived"
+          ],
+          "default": "active"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "inventory",
+        "logical_database": "inventory.db",
+        "sqlite_path": "apps/mw-edge/data/inventory.db"
+      }
+    },
+    {
+      "name": "inventory.stock_movement",
+      "table": "inventory_stock_movements",
+      "domain": "inventory",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Explicit movement or adjustment of inventory quantity.",
+      "fields": {
+        "movement_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "item_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "inventory.item.item_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "source_location_ref": {
+          "type": "Relation",
+          "target": "inventory.location.location_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "destination_location_ref": {
+          "type": "Relation",
+          "target": "inventory.location.location_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "quantity": {
+          "type": "Decimal",
+          "required": true
+        },
+        "movement_kind": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "receipt",
+            "transfer",
+            "issue",
+            "adjustment",
+            "return"
+          ]
+        },
+        "occurred_at": {
+          "type": "DateTime",
+          "required": true
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "stock movement is not the global MW event/audit record"
+      ],
+      "database": {
+        "domain": "inventory",
+        "logical_database": "inventory.db",
+        "sqlite_path": "apps/mw-edge/data/inventory.db"
+      }
+    },
+    {
+      "name": "finance.account",
+      "table": "finance_accounts",
+      "domain": "finance",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Business accounting account definition; not identity account.",
+      "fields": {
+        "account_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "code": {
+          "type": "String",
+          "required": true
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "account_type": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "asset",
+            "liability",
+            "equity",
+            "income",
+            "expense"
+          ]
+        },
+        "lifecycle": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "active",
+            "inactive",
+            "archived"
+          ],
+          "default": "active"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "finance account is not user account"
+      ],
+      "database": {
+        "domain": "finance",
+        "logical_database": "finance.db",
+        "sqlite_path": "apps/mw-edge/data/finance.db"
+      }
+    },
+    {
+      "name": "finance.journal_entry",
+      "table": "finance_journal_entries",
+      "domain": "finance",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Accounting journal entry header.",
+      "fields": {
+        "journal_entry_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "draft",
+            "posted",
+            "reversed"
+          ],
+          "default": "draft"
+        },
+        "occurred_at": {
+          "type": "DateTime",
+          "required": true
+        },
+        "source_ref": {
+          "type": "Reference",
+          "ref_kind": "business_source"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "posted journal entry is not payment observation"
+      ],
+      "database": {
+        "domain": "finance",
+        "logical_database": "finance.db",
+        "sqlite_path": "apps/mw-edge/data/finance.db"
+      }
+    },
+    {
+      "name": "finance.journal_line",
+      "table": "finance_journal_lines",
+      "domain": "finance",
+      "authority": "CANONICAL",
+      "contract_status": "provisional",
+      "must_create": true,
+      "purpose": "Debit or credit line belonging to a journal entry.",
+      "fields": {
+        "journal_line_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "journal_entry_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "finance.journal_entry.journal_entry_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "account_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "finance.account.account_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "side": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "debit",
+            "credit"
+          ]
+        },
+        "amount": {
+          "type": "Decimal",
+          "required": true
+        },
+        "currency": {
+          "type": "String",
+          "required": true
+        },
+        "memo": {
+          "type": "Text"
+        }
+      },
+      "semantic_guards": [
+        "posting command must require balanced debit and credit totals"
+      ],
+      "database": {
+        "domain": "finance",
+        "logical_database": "finance.db",
+        "sqlite_path": "apps/mw-edge/data/finance.db"
+      }
+    },
+    {
+      "name": "isp.subscriber",
+      "table": "isp_subscribers",
+      "domain": "isp",
+      "authority": "CANONICAL",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "Commercial and operational ISP subscriber record.",
+      "fields": {
+        "subscriber_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "customer_organization_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:business.organization",
+          "target_model_hint": "business.organization",
+          "target_field_hint": "organization_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "contact_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:crm.contact",
+          "target_model_hint": "crm.contact",
+          "target_field_hint": "contact_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "subscription_ref": {
+          "type": "Reference",
+          "ref_kind": "cross_domain:service.subscription",
+          "target_model_hint": "service.subscription",
+          "target_field_hint": "subscription_ref",
+          "cross_domain": true,
+          "must_not_create_local_fk": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "active",
+            "suspended",
+            "terminated"
+          ],
+          "default": "pending"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "subscriber is not identity",
+        "subscriber is not radius credential",
+        "commercial subscription and access session remain distinct"
+      ],
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.nas",
+      "table": "isp_nas",
+      "domain": "isp",
+      "authority": "CANONICAL",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "Network access server inventory/configuration reference.",
+      "fields": {
+        "nas_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "host_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "network_host"
+        },
+        "vendor": {
+          "type": "String"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "planned",
+            "active",
+            "degraded",
+            "retired"
+          ],
+          "default": "planned"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.ip_pool",
+      "table": "isp_ip_pools",
+      "domain": "isp",
+      "authority": "CANONICAL",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "IP pool definition for subscriber access allocation.",
+      "fields": {
+        "ip_pool_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "cidr": {
+          "type": "String",
+          "required": true
+        },
+        "family": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "ipv4",
+            "ipv6"
+          ]
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "active",
+            "inactive",
+            "retired"
+          ],
+          "default": "active"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.bandwidth_profile",
+      "table": "isp_bandwidth_profiles",
+      "domain": "isp",
+      "authority": "CANONICAL",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "Subscriber bandwidth/service profile definition.",
+      "fields": {
+        "bandwidth_profile_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "download_bps": {
+          "type": "Integer",
+          "required": true
+        },
+        "upload_bps": {
+          "type": "Integer",
+          "required": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "active",
+            "inactive",
+            "retired"
+          ],
+          "default": "active"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.radius_profile",
+      "table": "isp_radius_profiles",
+      "domain": "isp",
+      "authority": "CANONICAL",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "RADIUS policy/profile reference without plaintext secret storage.",
+      "fields": {
+        "radius_profile_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "name": {
+          "type": "String",
+          "required": true
+        },
+        "bandwidth_profile_ref": {
+          "type": "Relation",
+          "target": "isp.bandwidth_profile.bandwidth_profile_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "ip_pool_ref": {
+          "type": "Relation",
+          "target": "isp.ip_pool.ip_pool_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "attributes": {
+          "type": "Json"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "active",
+            "inactive",
+            "retired"
+          ],
+          "default": "active"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "forbidden_fields": [
+        "password",
+        "shared_secret",
+        "private_key",
+        "token"
+      ],
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.pppoe_account",
+      "table": "isp_pppoe_accounts",
+      "domain": "isp",
+      "authority": "CANONICAL",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "PPPoE access account metadata referencing secret material indirectly.",
+      "fields": {
+        "pppoe_account_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "subscriber_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "isp.subscriber.subscriber_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "username": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "credential_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "secret_or_identity_credential"
+        },
+        "radius_profile_ref": {
+          "type": "Relation",
+          "target": "isp.radius_profile.radius_profile_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "nas_ref": {
+          "type": "Relation",
+          "target": "isp.nas.nas_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "pending",
+            "active",
+            "suspended",
+            "revoked"
+          ],
+          "default": "pending"
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "credential reference is not plaintext secret",
+        "PPPoE account is not subscriber identity"
+      ],
+      "forbidden_fields": [
+        "password",
+        "chap_secret",
+        "mschap_secret",
+        "shared_secret"
+      ],
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.pppoe_session",
+      "table": "isp_pppoe_sessions",
+      "domain": "isp",
+      "authority": "OBSERVATION",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "Observed PPPoE access session state.",
+      "fields": {
+        "session_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "subscriber_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "isp.subscriber.subscriber_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "pppoe_account_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "isp.pppoe_account.pppoe_account_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "nas_ref": {
+          "type": "Relation",
+          "target": "isp.nas.nas_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "framed_ip": {
+          "type": "String"
+        },
+        "status": {
+          "type": "Enum",
+          "required": true,
+          "enum": [
+            "starting",
+            "active",
+            "stopped",
+            "failed"
+          ]
+        },
+        "started_at": {
+          "type": "DateTime"
+        },
+        "stopped_at": {
+          "type": "DateTime"
+        },
+        "observed_at": {
+          "type": "DateTime",
+          "required": true
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "session is observation",
+        "session is not subscriber identity",
+        "session active does not prove entitlement"
+      ],
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    },
+    {
+      "name": "isp.usage_record",
+      "table": "isp_usage_records",
+      "domain": "isp",
+      "authority": "OBSERVATION",
+      "contract_status": "provisional_business_os",
+      "must_create": true,
+      "purpose": "Observed subscriber/session usage record.",
+      "fields": {
+        "usage_ref": {
+          "type": "String",
+          "required": true,
+          "unique": true
+        },
+        "tenant_ref": {
+          "type": "Reference",
+          "required": true,
+          "ref_kind": "tenant_scope"
+        },
+        "subscriber_ref": {
+          "type": "Relation",
+          "required": true,
+          "target": "isp.subscriber.subscriber_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "session_ref": {
+          "type": "Relation",
+          "target": "isp.pppoe_session.session_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "nas_ref": {
+          "type": "Relation",
+          "target": "isp.nas.nas_ref",
+          "cross_domain": false,
+          "same_domain_relation": true
+        },
+        "bytes_in": {
+          "type": "Integer",
+          "required": true
+        },
+        "bytes_out": {
+          "type": "Integer",
+          "required": true
+        },
+        "started_at": {
+          "type": "DateTime"
+        },
+        "ended_at": {
+          "type": "DateTime"
+        },
+        "observed_at": {
+          "type": "DateTime",
+          "required": true
+        },
+        "provenance_ref": {
+          "type": "Reference",
+          "ref_kind": "provenance"
+        }
+      },
+      "semantic_guards": [
+        "usage is observation",
+        "usage does not prove billing amount"
+      ],
+      "database": {
+        "domain": "isp",
+        "logical_database": "isp.db",
+        "sqlite_path": "apps/mw-edge/data/isp.db"
+      }
+    }
+  ],
+  "model_catalog_validation": {
+    "expected_model_count": 36,
+    "all_entries_must_have": [
+      "name",
+      "table",
+      "domain",
+      "authority",
+      "contract_status",
+      "must_create",
+      "purpose",
+      "fields"
+    ],
+    "all_models_must_be_created": true,
+    "all_tables_must_be_created": true,
+    "all_models_must_have_tests": true,
+    "provisional_semantics_rule": "Create the model and tests, but do not claim stronger lifecycle or authority semantics than this specification defines."
+  },
+  "domain_services": {
+    "required": true,
+    "rule": "Business lifecycle and cross-record operations live above the generic ORM.",
+    "commands": {
+      "business": [
+        "createOrganization",
+        "activateOrganization",
+        "suspendOrganization",
+        "archiveOrganization",
+        "createProject",
+        "activateProject",
+        "pauseProject",
+        "completeProject",
+        "cancelProject"
+      ],
+      "crm": [
+        "createContact",
+        "createLead",
+        "qualifyLead",
+        "disqualifyLead",
+        "convertLeadToOpportunity",
+        "advanceOpportunity",
+        "closeOpportunityWon",
+        "closeOpportunityLost"
+      ],
+      "reseller": [
+        "createRelationship",
+        "activateRelationship",
+        "suspendRelationship",
+        "terminateRelationship",
+        "recordCommission",
+        "approveCommission",
+        "markCommissionPaid"
+      ],
+      "catalog": [
+        "createProduct",
+        "activateProduct",
+        "retireProduct",
+        "createOffer",
+        "activateOffer",
+        "retireOffer"
+      ],
+      "commerce": [
+        "createOrder",
+        "submitOrder",
+        "acceptOrder",
+        "rejectOrder",
+        "cancelOrder"
+      ],
+      "service": [
+        "createSubscription",
+        "activateSubscription",
+        "suspendSubscription",
+        "cancelSubscription",
+        "expireSubscription"
+      ],
+      "billing": [
+        "createInvoice",
+        "issueInvoice",
+        "markInvoicePaid",
+        "voidInvoice",
+        "markInvoiceOverdue",
+        "recordPaymentObservation",
+        "recordRefundObservation"
+      ],
+      "entitlement": [
+        "createAllocation",
+        "activateAllocation",
+        "suspendAllocation",
+        "revokeAllocation"
+      ],
+      "provisioning": [
+        "createProvisioningReference",
+        "updateProvisioningReferenceFromExternalResult"
+      ],
+      "support": [
+        "createTicket",
+        "triageTicket",
+        "resolveTicket",
+        "closeTicket",
+        "escalateTicket"
+      ],
+      "knowledge": [
+        "createArticle",
+        "publishArticle",
+        "archiveArticle"
+      ],
+      "procurement": [
+        "createVendor",
+        "createPurchaseOrder",
+        "submitPurchaseOrder",
+        "approvePurchaseOrder",
+        "rejectPurchaseOrder",
+        "cancelPurchaseOrder"
+      ],
+      "inventory": [
+        "createItem",
+        "createLocation",
+        "recordStockMovement"
+      ],
+      "finance": [
+        "createAccount",
+        "createJournalEntry",
+        "addJournalLine",
+        "postJournalEntry",
+        "reverseJournalEntry"
+      ],
+      "isp": [
+        "createSubscriber",
+        "activateSubscriber",
+        "suspendSubscriber",
+        "terminateSubscriber",
+        "createNas",
+        "createIpPool",
+        "createBandwidthProfile",
+        "createRadiusProfile",
+        "createPppoeAccount",
+        "recordPppoeSessionObservation",
+        "recordUsageObservation"
+      ]
+    },
+    "forbidden_implicit_transitions": [
+      "payment_succeeded_to_allocation",
+      "payment_succeeded_to_subscription_activation",
+      "accepted_order_to_subscription_creation",
+      "subscription_active_to_provisioning_success",
+      "allocation_to_provider_execution",
+      "support_ticket_to_incident_conversion",
+      "support_ticket_to_radicle_issue_conversion",
+      "pppoe_account_to_identity"
+    ]
+  },
+  "orm_contract": {
+    "principle": "MW-native custom thin ORM, business-domain-first, one bounded domain per logical database, backend-neutral, no Drizzle, no third-party ORM, not Odoo-compatible by default.",
+    "required_capabilities": [
+      "model_registry",
+      "create",
+      "create_many",
+      "get_by_ref",
+      "find",
+      "find_one",
+      "count",
+      "update",
+      "delete",
+      "transactions",
+      "enum_validation",
+      "reference_validation",
+      "relation_validation",
+      "ordering",
+      "pagination",
+      "filtering",
+      "parameterized_sql",
+      "domain_registry",
+      "domain_database_registry",
+      "automatic_model_to_domain_database_routing",
+      "single_domain_transaction_routing",
+      "cross_domain_reference_handling"
+    ],
+    "query_operators": [
+      "eq",
+      "ne",
+      "gt",
+      "gte",
+      "lt",
+      "lte",
+      "like",
+      "ilike",
+      "in",
+      "notIn",
+      "isNull",
+      "notNull",
+      "and",
+      "or",
+      "not"
+    ],
+    "forbidden_requirements": [
+      "Odoo browse compatibility",
+      "Odoo searchRead compatibility",
+      "RecordSet parity",
+      "Many2one naming",
+      "Odoo tuple-domain syntax as canonical public API",
+      "Drizzle",
+      "Prisma",
+      "TypeORM",
+      "Sequelize",
+      "ORM-on-ORM layering",
+      "cross-domain Relation",
+      "cross-domain SQL foreign key",
+      "cross-domain SQL JOIN",
+      "cross-domain atomic transaction in v0.1"
+    ],
+    "backend_invariant": "Changing SQLite to D1 must not change model or domain semantics."
+  },
+  "database_contract": {
+    "directory": "apps/mw-edge/src/database",
+    "adapter_capabilities": [
+      "execute",
+      "query",
+      "first",
+      "transaction",
+      "migrate",
+      "close",
+      "open_domain",
+      "close_domain",
+      "route_domain"
+    ],
+    "sqlite": {
+      "required": true,
+      "modes": [
+        ":memory:",
+        "file"
+      ],
+      "foreign_keys": true,
+      "pragma": "PRAGMA foreign_keys = ON;",
+      "prepared_statements": true
+    },
+    "d1": {
+      "required_for_v0_1": false,
+      "must_have_adapter_boundary": true,
+      "must_not_require_cloudflare_credentials_for_default_tests": true
+    },
+    "topology": "one_domain_one_database",
+    "routing_required": true,
+    "domain_database_map": {
+      "billing": "apps/mw-edge/data/billing.db",
+      "business": "apps/mw-edge/data/business.db",
+      "catalog": "apps/mw-edge/data/catalog.db",
+      "commerce": "apps/mw-edge/data/commerce.db",
+      "crm": "apps/mw-edge/data/crm.db",
+      "entitlement": "apps/mw-edge/data/entitlement.db",
+      "finance": "apps/mw-edge/data/finance.db",
+      "inventory": "apps/mw-edge/data/inventory.db",
+      "isp": "apps/mw-edge/data/isp.db",
+      "knowledge": "apps/mw-edge/data/knowledge.db",
+      "procurement": "apps/mw-edge/data/procurement.db",
+      "provisioning": "apps/mw-edge/data/provisioning.db",
+      "reseller": "apps/mw-edge/data/reseller.db",
+      "service": "apps/mw-edge/data/service.db",
+      "support": "apps/mw-edge/data/support.db"
+    },
+    "cross_domain_fk": false,
+    "cross_domain_join": false,
+    "cross_domain_atomic_transaction": false
+  },
+  "migration_contract": {
+    "root_directory": "apps/mw-edge/migrations",
+    "strategy": "per_domain_migration_stream",
+    "domain_directories": {
+      "billing": "apps/mw-edge/migrations/billing",
+      "business": "apps/mw-edge/migrations/business",
+      "catalog": "apps/mw-edge/migrations/catalog",
+      "commerce": "apps/mw-edge/migrations/commerce",
+      "crm": "apps/mw-edge/migrations/crm",
+      "entitlement": "apps/mw-edge/migrations/entitlement",
+      "finance": "apps/mw-edge/migrations/finance",
+      "inventory": "apps/mw-edge/migrations/inventory",
+      "isp": "apps/mw-edge/migrations/isp",
+      "knowledge": "apps/mw-edge/migrations/knowledge",
+      "procurement": "apps/mw-edge/migrations/procurement",
+      "provisioning": "apps/mw-edge/migrations/provisioning",
+      "reseller": "apps/mw-edge/migrations/reseller",
+      "service": "apps/mw-edge/migrations/service",
+      "support": "apps/mw-edge/migrations/support"
+    },
+    "tracking_table": "mw_migrations",
+    "tracking_table_scope": "one tracking table inside each domain database",
+    "tracking_columns": [
+      "id",
+      "name",
+      "checksum",
+      "applied_at"
+    ],
+    "requirements": [
+      "deterministic_domain_discovery",
+      "deterministic_migration_order_per_domain",
+      "checksum",
+      "atomic_per_migration",
+      "idempotent_rerun",
+      "historical_checksum_mismatch_fail_closed",
+      "rollback_on_failure",
+      "migration_for_one_domain_must_not_mutate_another_domain_database"
+    ],
+    "commands": {
+      "all_domains": "pnpm --filter @mw/mw-edge db:migrate",
+      "single_domain_example": "pnpm --filter @mw/mw-edge db:migrate --domain billing"
+    },
+    "must_create_all_model_tables": true
+  },
+  "http_adapter": {
+    "framework": "hono",
+    "role": "development_and_internal_adapter_only",
+    "permanent_runtime_registration_v0_1": false,
+    "generic_model_api_browser_exposure": false,
+    "cockpit_rule": "Browser continues to call only mw-cockpit. Do not create direct browser-to-mw-edge dependency."
+  },
+  "security_rules": {
+    "forbidden_secret_fields_global": [
+      "password",
+      "private_key",
+      "token",
+      "bearer",
+      "session_secret",
+      "payment_secret",
+      "card_number",
+      "cvv",
+      "bank_secret",
+      "payment_token",
+      "shared_secret",
+      "chap_secret",
+      "mschap_secret"
+    ],
+    "tenant_ref_is_not_authorization": true,
+    "role_is_not_authorization": true,
+    "ui_visibility_is_not_isolation": true,
+    "authorization_ref_is_reference_to_decision": true,
+    "mw_edge_must_not_implement_competing_identity_system": true,
+    "mw_edge_must_not_implement_competing_policy_engine_v0_1": true
+  },
+  "non_overlap_rules": [
+    "Do not move or duplicate mw-cockpit TaskCache into MW Edge.",
+    "Do not create canonical task, Git, Radicle issue, patch, review, commit, or repository models in MW Edge.",
+    "Do not convert crates/mw-storage into relational persistence.",
+    "Do not turn crates/mw-api into an HTTP service.",
+    "Do not modify crates/mw-cloudflare-adapter for D1 relational access.",
+    "Do not absorb apps/webhook.",
+    "Do not create canonical identity, membership, role, or authorization-decision tables unless a later accepted architecture assigns ownership.",
+    "Do not register MW Edge in config/services.json, config/runtime-matrix.json, or config/ports.json during v0.1 without a new accepted service-boundary ADR."
+  ],
+  "test_contract": {
+    "must_use_real_models": true,
+    "fake_demo_models_do_not_satisfy_release_gate": true,
+    "required_test_groups": [
+      "model_registry",
+      "all_model_schema_creation",
+      "all_required_fields",
+      "all_enum_validation",
+      "all_local_relation_fk_validation",
+      "all_external_reference_opaque_behavior",
+      "crud_for_each_model",
+      "query_for_each_domain",
+      "ordering",
+      "pagination",
+      "transaction_commit",
+      "transaction_rollback",
+      "migration_fresh",
+      "migration_rerun",
+      "migration_checksum_mismatch",
+      "sql_injection",
+      "forbidden_secret_field_rejection",
+      "domain_negative_semantics",
+      "http_adapter_smoke",
+      "safe_error_contract",
+      "one_domain_one_database_routing",
+      "same_domain_relation_foreign_keys",
+      "cross_domain_links_are_references_not_relations",
+      "no_cross_domain_foreign_keys",
+      "no_cross_domain_sql_joins",
+      "single_domain_transaction_atomicity",
+      "cross_domain_atomic_transaction_rejected",
+      "per_domain_migration_isolation",
+      "no_drizzle_dependency",
+      "no_third_party_orm_dependency"
+    ],
+    "mandatory_negative_semantic_tests": [
+      "accepted order does not silently create subscription",
+      "payment succeeded does not silently activate subscription",
+      "payment succeeded does not silently create allocation",
+      "allocation without authorization_ref is rejected",
+      "provisioning reference does not execute provider operation",
+      "support ticket does not become incident by status change",
+      "support ticket does not become Radicle issue",
+      "tenant_ref does not imply authorization",
+      "external Reference does not auto-dereference",
+      "PPPoE credential secret cannot be persisted",
+      "payment secret fields cannot be persisted",
+      "journal entry cannot be posted if debit and credit totals are unbalanced"
+    ]
+  },
+  "implementation_order": [
+    "P0_AUDIT_REPOSITORY_GOVERNANCE_AND_EXISTING_DOMAIN_OWNERS",
+    "P1_CREATE_APPS_MW_EDGE_PACKAGE",
+    "P2_IMPLEMENT_MW_NATIVE_FIELD_REFERENCE_RELATION_SEMANTICS",
+    "P3_IMPLEMENT_DOMAIN_REGISTRY",
+    "P4_IMPLEMENT_DOMAIN_DATABASE_REGISTRY_AND_MODEL_ROUTER",
+    "P5_IMPLEMENT_NATIVE_DATABASE_ADAPTER_CONTRACT",
+    "P6_IMPLEMENT_NATIVE_SQLITE_ADAPTER_WITHOUT_DRIZZLE",
+    "P7_IMPLEMENT_PER_DOMAIN_MIGRATION_ENGINE",
+    "P8_IMPLEMENT_NATIVE_MODEL_REGISTRY_AND_QUERY_COMPILER",
+    "P9_GENERATE_ALL_MODEL_CATALOG_SOURCE_FILES",
+    "P10_GENERATE_ALL_PER_DOMAIN_DATABASE_MIGRATIONS",
+    "P11_IMPLEMENT_DOMAIN_SERVICES",
+    "P12_IMPLEMENT_SINGLE_DOMAIN_TRANSACTIONS",
+    "P13_IMPLEMENT_CROSS_DOMAIN_REFERENCE_WORKFLOWS_WITHOUT_DISTRIBUTED_ATOMICITY",
+    "P14_IMPLEMENT_INTERNAL_HONO_ADAPTER",
+    "P15_IMPLEMENT_TESTS_FOR_ALL_MODELS_AND_DATABASE_BOUNDARIES",
+    "P16_RUN_AUTOFIX_LOOP_UNTIL_GREEN",
+    "P17_ADD_FOCUSED_GITLAB_CI",
+    "P18_WRITE_APPS_MW_EDGE_README_AND_DATABASE_MAP",
+    "P19_RUN_FULL_VERIFICATION",
+    "P20_COMMIT_LOGICAL_BATCHES"
+  ],
+  "file_layout": {
+    "root": "apps/mw-edge",
+    "paths": [
+      "src/domain/business",
+      "src/domain/crm",
+      "src/domain/reseller",
+      "src/domain/catalog",
+      "src/domain/commerce",
+      "src/domain/service",
+      "src/domain/billing",
+      "src/domain/entitlement",
+      "src/domain/provisioning",
+      "src/domain/support",
+      "src/domain/knowledge",
+      "src/domain/procurement",
+      "src/domain/inventory",
+      "src/domain/finance",
+      "src/domain/isp",
+      "src/orm",
+      "src/database",
+      "src/http",
+      "src/config",
+      "test/unit",
+      "test/integration",
+      "test/database",
+      "data",
+      "migrations/billing",
+      "migrations/business",
+      "migrations/catalog",
+      "migrations/commerce",
+      "migrations/crm",
+      "migrations/entitlement",
+      "migrations/finance",
+      "migrations/inventory",
+      "migrations/isp",
+      "migrations/knowledge",
+      "migrations/procurement",
+      "migrations/provisioning",
+      "migrations/reseller",
+      "migrations/service",
+      "migrations/support"
+    ],
+    "domain_databases": {
+      "billing": "data/billing.db",
+      "business": "data/business.db",
+      "catalog": "data/catalog.db",
+      "commerce": "data/commerce.db",
+      "crm": "data/crm.db",
+      "entitlement": "data/entitlement.db",
+      "finance": "data/finance.db",
+      "inventory": "data/inventory.db",
+      "isp": "data/isp.db",
+      "knowledge": "data/knowledge.db",
+      "procurement": "data/procurement.db",
+      "provisioning": "data/provisioning.db",
+      "reseller": "data/reseller.db",
+      "service": "data/service.db",
+      "support": "data/support.db"
+    }
+  },
+  "ci_contract": {
+    "cloudflare_credentials_required": false,
+    "required_steps": [
+      "pnpm install --frozen-lockfile",
+      "mw-edge lint",
+      "mw-edge format check",
+      "mw-edge unit tests",
+      "mw-edge sqlite integration tests",
+      "mw-edge migration tests",
+      "mw-edge domain semantic tests"
+    ],
+    "must_not_break_unrelated_jobs": true
+  },
+  "documentation_contract": {
+    "required_file": "apps/mw-edge/README.md",
+    "must_document": [
+      "architecture role",
+      "ownership matrix",
+      "authority classes",
+      "all model_catalog entries",
+      "Reference vs Relation",
+      "SQLite-first configuration",
+      "migration commands",
+      "test commands",
+      "domain semantics",
+      "forbidden overlaps",
+      "Cockpit boundary",
+      "future D1 path"
+    ],
+    "must_state": [
+      "MW Edge does not own tasks, Git/Radicle records, identity, authorization, runtime, provenance storage, Cloudflare resource control, or webhook ingress.",
+      "Browser must not call MW Edge directly.",
+      "External references are opaque and are not automatically local foreign keys.",
+      "All model_catalog models are created in v0.1; provisional models must not claim stronger semantics than this spec defines."
+    ]
+  },
+  "git_policy": {
+    "destructive_history_operations_forbidden": true,
+    "force_push_forbidden": true,
+    "logical_commits_required": true,
+    "suggested_commits": [
+      "feat(mw-edge): establish MW-native business engine foundation",
+      "feat(mw-edge): add SQLite adapter and deterministic migrations",
+      "feat(mw-edge): implement full business model catalog",
+      "feat(mw-edge): add domain services and lifecycle guards",
+      "feat(mw-edge): add internal Hono adapter",
+      "test(mw-edge): add full-domain SQLite and semantic coverage",
+      "ci(mw-edge): add provider-neutral validation",
+      "docs(mw-edge): document ownership and full model catalog"
+    ]
+  },
+  "release_gate": {
+    "workspace": [
+      "apps/mw-edge exists",
+      "pnpm workspace recognizes app",
+      "no new repository created",
+      "no new Rust crate created"
+    ],
+    "models": [
+      "business.organization",
+      "business.project",
+      "crm.contact",
+      "crm.lead",
+      "crm.opportunity",
+      "reseller.relationship",
+      "reseller.commission",
+      "catalog.product",
+      "catalog.offer",
+      "commerce.order",
+      "service.subscription",
+      "billing.invoice",
+      "billing.payment",
+      "entitlement.allocation",
+      "provisioning.reference",
+      "support.sla",
+      "support.ticket",
+      "support.escalation",
+      "knowledge.article",
+      "procurement.vendor",
+      "procurement.purchase_order",
+      "procurement.purchase_order_line",
+      "inventory.item",
+      "inventory.location",
+      "inventory.stock_movement",
+      "finance.account",
+      "finance.journal_entry",
+      "finance.journal_line",
+      "isp.subscriber",
+      "isp.nas",
+      "isp.ip_pool",
+      "isp.bandwidth_profile",
+      "isp.radius_profile",
+      "isp.pppoe_account",
+      "isp.pppoe_session",
+      "isp.usage_record"
+    ],
+    "architecture": [
+      "all listed models created",
+      "all listed migrations created",
+      "Reference and Relation semantics implemented",
+      "no forbidden owner overlap",
+      "no direct browser dependency",
+      "no permanent runtime registration",
+      "MW native ORM implemented without Drizzle or third-party ORM",
+      "one bounded domain maps to exactly one logical database",
+      "same-domain Relation only",
+      "cross-domain links use Reference",
+      "no cross-domain SQL foreign keys",
+      "no cross-domain SQL joins",
+      "no cross-domain atomic transaction claim"
+    ],
+    "database": [
+      "all domain databases route correctly",
+      "SQLite memory mode works per domain",
+      "SQLite file mode works per domain",
+      "foreign_keys ON verified for every domain connection",
+      "per-domain migration checksums verified",
+      "per-domain migration rerun idempotent",
+      "per-domain rollback verified",
+      "migration isolation between domains verified",
+      "cross-domain FK absence verified"
+    ],
+    "quality": [
+      "lint green",
+      "format check green",
+      "all tests green",
+      "CI green",
+      "README matches implementation"
+    ]
+  },
+  "final_verification_commands": [
+    "pnpm install --frozen-lockfile",
+    "pnpm --filter @mw/mw-edge lint",
+    "pnpm --filter @mw/mw-edge format:check",
+    "pnpm --filter @mw/mw-edge test:unit",
+    "pnpm --filter @mw/mw-edge test:sqlite",
+    "pnpm --filter @mw/mw-edge test",
+    "pnpm --filter @mw/mw-edge db:migrate",
+    "pnpm --filter @mw/mw-edge test:db-routing",
+    "pnpm --filter @mw/mw-edge test:domain-isolation",
+    "pnpm --filter @mw/mw-edge test:orm-native"
+  ],
+  "success_condition": {
+    "status": "V0.1_READY",
+    "requirements": [
+      "every model_catalog entry exists in source and migration schema",
+      "every required model has automated CRUD and validation coverage",
+      "all approved semantic guards are tested",
+      "provisional models are clearly marked and do not claim unsupported semantics",
+      "SQLite and migrations are green",
+      "no existing MoonWitness owner boundary is violated",
+      "CI is green",
+      "documentation matches reality",
+      "MW ORM is implemented natively without Drizzle or another ORM",
+      "each bounded domain owns exactly one logical database",
+      "every model routes automatically to its domain database",
+      "all same-domain relations are local relations",
+      "all cross-domain links are opaque references",
+      "no cross-domain SQL foreign key exists",
+      "no cross-domain distributed transaction is claimed atomic"
+    ]
+  },
+  "final_response_schema": [
+    "STATUS",
+    "BASELINE",
+    "OWNERSHIP_AUDIT",
+    "MODEL_CATALOG",
+    "IMPLEMENTED_DOMAINS",
+    "DATABASE",
+    "ORM",
+    "DOMAIN_SERVICES",
+    "HTTP_ADAPTER",
+    "TESTS",
+    "CI",
+    "GOVERNANCE",
+    "FILES_CHANGED",
+    "COMMITS",
+    "DEFERRED_BY_DESIGN",
+    "REMAINING_BLOCKERS",
+    "NEXT_ARCHITECTURAL_STEP"
+  ],
+  "start_instruction": "Read the live repository first. Implement every model in model_catalog, all supporting MW-native ORM/database primitives, migrations, domain services, tests, CI, and README. Do not stop at planning. Do not replace existing canonical subsystem owners. Do not weaken semantic boundaries to make implementation easier.",
+  "domain_database_topology": {
+    "strategy": "one_bounded_domain_one_logical_database",
+    "rule": "Each bounded domain owns exactly one logical database. Models in the same domain share that database. No SQL foreign key may cross domain/database boundaries.",
+    "domain_count": 15,
+    "domains": {
+      "billing": {
+        "domain": "billing",
+        "sqlite_file": "apps/mw-edge/data/billing.db",
+        "memory_uri_for_tests": "file:billing?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/billing",
+        "future_d1_binding": "MW_EDGE_BILLING_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "business": {
+        "domain": "business",
+        "sqlite_file": "apps/mw-edge/data/business.db",
+        "memory_uri_for_tests": "file:business?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/business",
+        "future_d1_binding": "MW_EDGE_BUSINESS_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "catalog": {
+        "domain": "catalog",
+        "sqlite_file": "apps/mw-edge/data/catalog.db",
+        "memory_uri_for_tests": "file:catalog?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/catalog",
+        "future_d1_binding": "MW_EDGE_CATALOG_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "commerce": {
+        "domain": "commerce",
+        "sqlite_file": "apps/mw-edge/data/commerce.db",
+        "memory_uri_for_tests": "file:commerce?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/commerce",
+        "future_d1_binding": "MW_EDGE_COMMERCE_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "crm": {
+        "domain": "crm",
+        "sqlite_file": "apps/mw-edge/data/crm.db",
+        "memory_uri_for_tests": "file:crm?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/crm",
+        "future_d1_binding": "MW_EDGE_CRM_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "entitlement": {
+        "domain": "entitlement",
+        "sqlite_file": "apps/mw-edge/data/entitlement.db",
+        "memory_uri_for_tests": "file:entitlement?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/entitlement",
+        "future_d1_binding": "MW_EDGE_ENTITLEMENT_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "finance": {
+        "domain": "finance",
+        "sqlite_file": "apps/mw-edge/data/finance.db",
+        "memory_uri_for_tests": "file:finance?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/finance",
+        "future_d1_binding": "MW_EDGE_FINANCE_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "inventory": {
+        "domain": "inventory",
+        "sqlite_file": "apps/mw-edge/data/inventory.db",
+        "memory_uri_for_tests": "file:inventory?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/inventory",
+        "future_d1_binding": "MW_EDGE_INVENTORY_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "isp": {
+        "domain": "isp",
+        "sqlite_file": "apps/mw-edge/data/isp.db",
+        "memory_uri_for_tests": "file:isp?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/isp",
+        "future_d1_binding": "MW_EDGE_ISP_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "knowledge": {
+        "domain": "knowledge",
+        "sqlite_file": "apps/mw-edge/data/knowledge.db",
+        "memory_uri_for_tests": "file:knowledge?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/knowledge",
+        "future_d1_binding": "MW_EDGE_KNOWLEDGE_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "procurement": {
+        "domain": "procurement",
+        "sqlite_file": "apps/mw-edge/data/procurement.db",
+        "memory_uri_for_tests": "file:procurement?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/procurement",
+        "future_d1_binding": "MW_EDGE_PROCUREMENT_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "provisioning": {
+        "domain": "provisioning",
+        "sqlite_file": "apps/mw-edge/data/provisioning.db",
+        "memory_uri_for_tests": "file:provisioning?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/provisioning",
+        "future_d1_binding": "MW_EDGE_PROVISIONING_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "reseller": {
+        "domain": "reseller",
+        "sqlite_file": "apps/mw-edge/data/reseller.db",
+        "memory_uri_for_tests": "file:reseller?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/reseller",
+        "future_d1_binding": "MW_EDGE_RESELLER_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "service": {
+        "domain": "service",
+        "sqlite_file": "apps/mw-edge/data/service.db",
+        "memory_uri_for_tests": "file:service?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/service",
+        "future_d1_binding": "MW_EDGE_SERVICE_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      },
+      "support": {
+        "domain": "support",
+        "sqlite_file": "apps/mw-edge/data/support.db",
+        "memory_uri_for_tests": "file:support?mode=memory&cache=shared",
+        "migration_directory": "apps/mw-edge/migrations/support",
+        "future_d1_binding": "MW_EDGE_SUPPORT_DB",
+        "authority_scope": "domain_local",
+        "cross_domain_fk_allowed": false
+      }
+    },
+    "routing": {
+      "source": "model.domain",
+      "algorithm": "model_name -> model_registry -> domain -> domain_database_registry -> adapter",
+      "developer_must_not_select_database_manually_for_model_operations": true,
+      "example": {
+        "model": "billing.invoice",
+        "domain": "billing",
+        "sqlite_database": "apps/mw-edge/data/billing.db",
+        "future_d1_binding": "MW_EDGE_BILLING_DB"
+      }
+    },
+    "transaction_boundary": {
+      "atomic_transaction_scope": "single_domain_database",
+      "cross_domain_atomic_transaction": "forbidden_in_v0_1",
+      "cross_domain_workflow": "explicit domain orchestration using stable references; never claim distributed atomicity",
+      "failure_rule": "Partial cross-domain outcomes must remain explicit and must not be reported as one atomic commit."
+    }
+  },
+  "orm_strategy": {
+    "name": "MW Native ORM",
+    "implementation": "custom_thin_orm",
+    "public_api_owner": "apps/mw-edge/src/orm",
+    "drizzle": {
+      "allowed": false,
+      "required": false,
+      "public_api": false,
+      "internal_dependency": false
+    },
+    "other_orms": {
+      "prisma": false,
+      "typeorm": false,
+      "sequelize": false,
+      "knex_as_orm": false
+    },
+    "principles": [
+      "business-domain-first",
+      "thin SQL abstraction",
+      "parameterized SQL only",
+      "domain database routing is native",
+      "no ORM-on-ORM layering",
+      "no hidden magic required for correctness",
+      "database adapter remains replaceable",
+      "SQLite and D1 backend choice must not change domain semantics"
+    ],
+    "required_internal_components": [
+      "model_registry",
+      "domain_registry",
+      "domain_database_registry",
+      "field_registry",
+      "query_compiler",
+      "crud_executor",
+      "transaction_router",
+      "migration_runner",
+      "validation_layer"
+    ],
+    "forbidden": [
+      "Drizzle",
+      "Prisma",
+      "TypeORM",
+      "Sequelize",
+      "third-party ORM as public or internal persistence abstraction",
+      "cross-domain SQL JOIN",
+      "cross-domain SQL foreign key",
+      "distributed transaction pretending to be atomic"
+    ]
+  },
+  "validation_metadata": {
+    "json_parse_valid": true,
+    "model_count": 36,
+    "domain_count": 15,
+    "domain_databases": 15,
+    "cross_domain_relations_converted_to_references": 15,
+    "remaining_relation_fields_must_be_same_domain": true,
+    "drizzle_allowed": false,
+    "converted_relations": [
+      {
+        "model": "crm.contact",
+        "field": "organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "crm",
+        "target_domain": "business"
+      },
+      {
+        "model": "crm.lead",
+        "field": "organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "crm",
+        "target_domain": "business"
+      },
+      {
+        "model": "crm.opportunity",
+        "field": "organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "crm",
+        "target_domain": "business"
+      },
+      {
+        "model": "reseller.relationship",
+        "field": "reseller_organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "reseller",
+        "target_domain": "business"
+      },
+      {
+        "model": "reseller.commission",
+        "field": "reseller_organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "reseller",
+        "target_domain": "business"
+      },
+      {
+        "model": "commerce.order",
+        "field": "offer_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "catalog.offer",
+        "source_domain": "commerce",
+        "target_domain": "catalog"
+      },
+      {
+        "model": "service.subscription",
+        "field": "order_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "commerce.order",
+        "source_domain": "service",
+        "target_domain": "commerce"
+      },
+      {
+        "model": "billing.invoice",
+        "field": "subscription_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "service.subscription",
+        "source_domain": "billing",
+        "target_domain": "service"
+      },
+      {
+        "model": "entitlement.allocation",
+        "field": "subscription_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "service.subscription",
+        "source_domain": "entitlement",
+        "target_domain": "service"
+      },
+      {
+        "model": "provisioning.reference",
+        "field": "allocation_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "entitlement.allocation",
+        "source_domain": "provisioning",
+        "target_domain": "entitlement"
+      },
+      {
+        "model": "procurement.vendor",
+        "field": "organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "procurement",
+        "target_domain": "business"
+      },
+      {
+        "model": "procurement.purchase_order_line",
+        "field": "item_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "inventory.item",
+        "source_domain": "procurement",
+        "target_domain": "inventory"
+      },
+      {
+        "model": "isp.subscriber",
+        "field": "customer_organization_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "business.organization",
+        "source_domain": "isp",
+        "target_domain": "business"
+      },
+      {
+        "model": "isp.subscriber",
+        "field": "contact_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "crm.contact",
+        "source_domain": "isp",
+        "target_domain": "crm"
+      },
+      {
+        "model": "isp.subscriber",
+        "field": "subscription_ref",
+        "from": "Relation",
+        "to": "Reference",
+        "target_model": "service.subscription",
+        "source_domain": "isp",
+        "target_domain": "service"
+      }
+    ]
+  }
+}

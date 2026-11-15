@@ -1,0 +1,3725 @@
+# MOON SERVER V2
+
+# FINAL DEEP AUTONOMOUS BACKEND + INFRASTRUCTURE IMPLEMENTATION PROMPT
+
+## MISSION
+
+You are the autonomous principal software architect, backend framework engineer, infrastructure engineer, security engineer, database/ORM engineer, observability engineer, migration engineer, test engineer, DevEx engineer, and repository maintainer responsible for completing the **Moon Server backend and infrastructure consolidation** inside:
+
+```text
+bjo163/moonwitness-v2
+
+```
+
+Your job is NOT merely to analyze the repository.
+
+Your job is to:
+
+```text
+INSPECT
+→ UNDERSTAND
+→ MAP
+→ PLAN
+→ IMPLEMENT
+→ INTEGRATE INFRASTRUCTURE
+→ MIGRATE
+→ DELETE LEGACY PATHS
+→ TEST
+→ HARDEN
+→ DOCUMENT
+→ VERIFY
+
+```
+
+Make concrete repository progress.
+
+Do not stop at recommendations unless execution is genuinely blocked.
+
+---
+
+# 0. PRIMARY PRODUCT GOAL
+
+Transform the backend into a reusable backend platform called:
+
+# Moon Server
+
+The target concept is:
+
+```text
+PocketBase simplicity
++
+Odoo-style ORM
++
+Odoo-style addon architecture
++
+API-first/headless backend
++
+production infrastructure
++
+TypeScript
++
+PostgreSQL
+=
+Moon Server
+
+```
+
+Moon Server must become a:
+
+```text
+self-hosted
+backend-only
+API-first
+model-driven
+addon-driven
+secure
+observable
+cache-aware
+storage-aware
+production-grade
+application server
+
+```
+
+The developer should eventually be able to run:
+
+```bash
+moon server
+
+```
+
+or the repository-equivalent production command.
+
+Application bootstrap should remain conceptually small:
+
+```ts
+import 'dotenv/config'
+
+import { MoonServer } from '@moon/server'
+
+import base from '@moon/base'
+import witness from '@moon/witness'
+
+const server = new MoonServer({
+  database: {
+    url: process.env.DATABASE_URL!,
+  },
+
+  cache: {
+    url: process.env.VALKEY_URL,
+  },
+
+  storage: {
+    endpoint: process.env.S3_ENDPOINT,
+    bucket: process.env.S3_BUCKET,
+    accessKey: process.env.S3_ACCESS_KEY,
+    secretKey: process.env.S3_SECRET_KEY,
+  },
+
+  auth: {
+    jwtSecret: process.env.JWT_SECRET!,
+  },
+
+  observability: {
+    metrics: true,
+    logging: true,
+  },
+
+  addons: [
+    base,
+    witness,
+  ],
+})
+
+await server.start()
+
+```
+
+Exact syntax may differ if the repository already contains a superior configuration model.
+
+The architectural invariants matter more than matching this sample literally.
+
+---
+
+# 1. INFRASTRUCTURE IS PART OF THE PRODUCT
+
+The repository currently declares infrastructure equivalent to:
+
+```yaml
+services:
+
+  postgres:
+    image: postgres:17-alpine
+
+  valkey:
+    image: valkey/valkey:8-alpine
+
+  minio:
+    image: minio/minio:latest
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:latest
+
+  loki:
+    image: grafana/loki:latest
+
+```
+
+These containers MUST NOT merely exist.
+
+Every service must have:
+
+```text
+clear responsibility
+canonical owner
+configuration contract
+runtime adapter
+health/readiness behavior
+failure semantics
+tests
+documentation
+production guidance
+
+```
+
+The final infrastructure ownership must become approximately:
+
+```text
+PostgreSQL
+    ↓
+@moon/orm
+    ↓
+Moon Server models / transactions / migrations
+
+
+Valkey
+    ↓
+Moon cache/runtime adapter
+    ↓
+cache / distributed coordination / rate-limit / optional session support
+
+
+MinIO
+    ↓
+Moon storage adapter
+    ↓
+attachments / blobs / files / generated artifacts
+
+
+VictoriaMetrics
+    ↑
+Moon Server /metrics
+    ↑
+application + runtime metrics
+
+
+Loki
+    ↑
+structured application logs
+    ↑
+Moon Server logging pipeline
+
+```
+
+Do NOT leave infrastructure disconnected.
+
+Do NOT connect a service merely for the sake of saying it is integrated.
+
+Integrate only through explicit responsibilities.
+
+---
+
+# 2. SOURCE OF TRUTH
+
+This prompt may run long after it was written.
+
+Never assume:
+
+```text
+branch HEAD
+commit SHA
+file contents
+package versions
+Docker Compose state
+CI state
+route behavior
+database schema
+existing infrastructure adapters
+existing tests
+
+```
+
+from this specification.
+
+Always inspect the actual repository.
+
+Begin with equivalents of:
+
+```bash
+git status
+git branch --show-current
+git rev-parse HEAD
+git log -n 10 --oneline
+git remote -v
+
+```
+
+If safe and network access exists:
+
+```bash
+git fetch --all --prune
+
+```
+
+Never destroy user changes.
+
+Forbidden unless explicitly authorized:
+
+```bash
+git reset --hard
+git clean -fd
+git checkout -- .
+
+```
+
+---
+
+# 3. INITIAL DISCOVERY
+
+Before editing, inspect at minimum:
+
+```text
+apps/api
+apps/server
+apps/web
+
+packages/moon-server
+packages/moon-orm
+packages/moon-base
+packages/moon-witness
+packages/moon-protocol
+packages/moon-client
+packages/moon-cache
+packages/moon-compute
+
+```
+
+Also inspect:
+
+```text
+docker-compose*
+compose*
+Dockerfile*
+.env*
+README*
+docs/
+.github/workflows/
+package.json
+pnpm-workspace.yaml
+tsconfig*
+deployment/
+infra/
+scripts/
+
+```
+
+Search programmatically for:
+
+```text
+FastifyInstance
+createMoonOrm
+LegacyModelRegistry
+SUPERUSER_ID
+defineRoute
+defineProcedure
+NativeServer
+FastifyAdapter
+globalRoutes
+moonEmitter
+globalThis
+
+postgres
+DATABASE_URL
+
+redis
+valkey
+VALKEY_URL
+REDIS_URL
+
+minio
+S3_
+AWS_
+
+metrics
+prometheus
+victoria
+/metrics
+
+loki
+pino
+logger
+otel
+OpenTelemetry
+
+```
+
+Do not create new adapters before checking whether equivalents already exist.
+
+---
+
+# 4. ARCHITECTURAL NORTH STAR
+
+The final system should resemble:
+
+```text
+                    ┌──────────────────┐
+                    │    apps/web      │
+                    └────────┬─────────┘
+                             │
+                             ▼
+                    ┌──────────────────┐
+                    │  @moon/client    │
+                    └────────┬─────────┘
+                             │
+                  REST / RPC / SSE / AUTH
+                             │
+                             ▼
+┌───────────────────────────────────────────────────────────┐
+│                      apps/server                          │
+│                                                           │
+│  composition only                                         │
+│                                                           │
+│  new MoonServer({                                         │
+│    addons: [base, witness]                                │
+│  })                                                       │
+└──────────────────────────┬────────────────────────────────┘
+                           │
+                           ▼
+┌───────────────────────────────────────────────────────────┐
+│                     @moon/server                          │
+│                                                           │
+│ Auth      REST       RPC        SSE                       │
+│ OpenAPI   Addons     Context    Health                    │
+│ Logging   Metrics    Storage facade                       │
+│ Cache facade          Runtime lifecycle                   │
+└──────────┬───────────┬──────────┬───────────┬─────────────┘
+           │           │          │           │
+           ▼           ▼          ▼           ▼
+      @moon/orm    Cache API   Storage API  Observability
+           │           │          │           │
+           ▼           ▼          ▼        ┌──┴───────────┐
+      PostgreSQL     Valkey      MinIO      │              │
+                                          ▼              ▼
+                                  VictoriaMetrics       Loki
+
+```
+
+---
+
+# 5. THREE PRIMARY DEVELOPER CONCEPTS
+
+Keep the domain mental model simple:
+
+```text
+MoonServer = runtime
+MoonAddon  = module/application capability
+Vertex     = model
+
+```
+
+Infrastructure concerns should be presented through stable Moon abstractions.
+
+Domain developers should NOT need to directly understand:
+
+```text
+Fastify internals
+node-postgres connection plumbing
+Valkey client internals
+MinIO SDK internals
+VictoriaMetrics protocol details
+Loki ingestion details
+
+```
+
+for ordinary development.
+
+---
+
+# 6. ONE HTTP RUNTIME
+
+There must be exactly one canonical production HTTP runtime.
+
+Ownership:
+
+```text
+@moon/server
+
+```
+
+owns transport.
+
+Application code must not construct a second Fastify runtime.
+
+`apps/api` must be migrated toward a thin composition root or replaced cleanly by `apps/server`.
+
+Application code must not independently own:
+
+```text
+Fastify
+CORS
+Swagger
+auth plugins
+REST plugins
+SSE plugins
+ORM initialization
+module installers
+error handling
+shutdown lifecycle
+metrics endpoint
+health endpoint
+
+```
+
+when those belong to Moon Server.
+
+---
+
+# 7. ONE ORM RUNTIME
+
+Canonical persistence belongs to:
+
+```text
+@moon/orm
+
+```
+
+Production runtime should converge on:
+
+```text
+Vertex
+Recordset
+registry
+context
+fields
+relations
+ACL
+record rules
+transactions
+schema/migrations
+
+```
+
+Legacy production usage of:
+
+```text
+createMoonOrm
+LegacyModelRegistry
+Objection compatibility path
+
+```
+
+must be migrated or explicitly isolated behind a temporary compatibility boundary.
+
+Do not maintain parallel model runtimes indefinitely.
+
+---
+
+# 8. POSTGRESQL — CANONICAL DATABASE
+
+PostgreSQL is the authoritative persistent relational database.
+
+Docker service:
+
+```text
+postgres
+
+```
+
+must map conceptually to:
+
+```text
+@moon/orm
+
+```
+
+PostgreSQL owns:
+
+```text
+business records
+users
+roles
+ACL metadata
+record-rule metadata
+sessions if persistent session records are canonical
+addon state
+external IDs
+migration state
+reference data
+attachment metadata
+audit metadata
+transactional business state
+
+```
+
+PostgreSQL must remain the system of record for durable relational data.
+
+Valkey must NOT become the authoritative source of business data.
+
+MinIO must NOT become the authoritative source of file metadata.
+
+---
+
+# 9. POSTGRES CONFIGURATION
+
+Prefer one canonical database configuration.
+
+Example environment:
+
+```text
+DATABASE_URL=postgresql://moonwitness:***@postgres:5432/moonwitness
+
+```
+
+Inside Docker network use:
+
+```text
+postgres:5432
+
+```
+
+not:
+
+```text
+127.0.0.1:5432
+
+```
+
+unless Moon Server itself is intentionally running on the host.
+
+Document both:
+
+```text
+Docker-to-Docker connection
+Host-to-Docker development connection
+
+```
+
+Do not hardcode database hostname in package code.
+
+---
+
+# 10. POSTGRES CONNECTION OWNERSHIP
+
+Audit duplicate pools/connections.
+
+There should not be:
+
+```text
+apps/api DB pool
++
+@moon/orm DB pool
++
+another plugin DB pool
+
+```
+
+without explicit purpose.
+
+Prefer:
+
+```text
+MoonServer
+    ↓
+@moon/orm runtime
+    ↓
+one managed pool/runtime
+
+```
+
+All transactions should derive from the canonical ORM/database runtime.
+
+---
+
+# 11. POSTGRES PRODUCTION SAFETY
+
+Audit:
+
+```text
+pool size
+timeouts
+idle timeout
+connection timeout
+transaction handling
+migration locks
+graceful shutdown
+connection leak behavior
+
+```
+
+Provide appropriate configuration through environment or typed config.
+
+Do not use unsafe infinite waits.
+
+Do not leak pools during tests or shutdown.
+
+---
+
+# 12. POSTGRES HEALTH
+
+Readiness must validate meaningful database availability.
+
+Example:
+
+```text
+/health/live
+
+```
+
+checks:
+
+```text
+process alive
+
+```
+
+while:
+
+```text
+/health/ready
+
+```
+
+checks at least:
+
+```text
+runtime initialized
+database reachable
+required migrations/schema acceptable
+critical addons initialized
+
+```
+
+A dead PostgreSQL dependency must not produce a false healthy readiness response.
+
+---
+
+# 13. VALKEY — ROLE
+
+Valkey must have a precise purpose.
+
+Use Valkey for appropriate ephemeral/distributed state such as:
+
+```text
+cache
+rate-limit counters
+short-lived locks
+distributed coordination
+temporary OTP state if architecture requires it
+password-reset throttling
+realtime coordination where appropriate
+session acceleration if safe
+idempotency keys
+short-lived derived results
+
+```
+
+Do NOT automatically move every session or auth record into Valkey.
+
+Durable security state should remain durable where required.
+
+---
+
+# 14. CACHE ABSTRACTION
+
+If `packages/moon-cache` already exists, inspect it first.
+
+Prefer a Moon-owned interface approximately like:
+
+```ts
+interface MoonCache {
+  get<T>(key: string): Promise<T | null>
+
+  set<T>(
+    key: string,
+    value: T,
+    options?: {
+      ttl?: number
+    },
+  ): Promise<void>
+
+  delete(key: string): Promise<void>
+
+  has(key: string): Promise<boolean>
+
+  increment?(
+    key: string,
+    options?: {
+      ttl?: number
+    },
+  ): Promise<number>
+
+  acquireLock?(
+    key: string,
+    ttl: number,
+  ): Promise<MoonLock | null>
+}
+
+```
+
+Do not require domain addons to import the Valkey library directly.
+
+---
+
+# 15. VALKEY ADAPTER
+
+Target architecture:
+
+```text
+@moon/cache or Moon Server cache abstraction
+        ↓
+Valkey adapter
+        ↓
+valkey:6379
+
+```
+
+Configuration concept:
+
+```text
+VALKEY_URL=redis://valkey:6379
+
+```
+
+Even if the protocol URI uses `redis://`, code and documentation should accurately identify the service as Valkey where appropriate.
+
+Avoid unnecessary vendor coupling in domain packages.
+
+---
+
+# 16. CACHE NAMESPACING
+
+All shared-cache keys must be namespaced.
+
+Avoid:
+
+```text
+user:1
+session:1
+rate:1
+
+```
+
+Prefer deterministic namespaces such as:
+
+```text
+moon:v1:cache:model:...
+moon:v1:ratelimit:...
+moon:v1:lock:...
+moon:v1:session:...
+
+```
+
+Exact format may differ.
+
+Requirements:
+
+```text
+collision resistant
+versionable
+environment-aware where necessary
+application-aware where necessary
+
+```
+
+---
+
+# 17. CACHE INVALIDATION
+
+Never introduce cache without an invalidation strategy.
+
+For model caches document:
+
+```text
+what is cached
+TTL
+invalidation trigger
+consistency expectation
+failure behavior
+
+```
+
+Prefer correctness over aggressive caching.
+
+Do not cache authorization results indefinitely.
+
+ACL/record-rule/security cache must have safe invalidation.
+
+---
+
+# 18. VALKEY FAILURE POLICY
+
+Define fail-open vs fail-closed per use case.
+
+Examples:
+
+## Cache
+
+Valkey unavailable may often mean:
+
+```text
+bypass cache
+continue against PostgreSQL
+
+```
+
+if safe.
+
+## Rate limiting
+
+Depending on endpoint sensitivity, failure semantics may differ.
+
+Security-sensitive endpoints should not silently become unlimited without deliberate policy.
+
+## Distributed lock
+
+If correctness requires a lock:
+
+```text
+Valkey unavailable
+→ operation must fail
+
+```
+
+rather than execute unsafely.
+
+Document these policies.
+
+---
+
+# 19. VALKEY HEALTH
+
+Valkey should contribute to readiness only if it is mandatory for configured runtime behavior.
+
+Do NOT make the entire server unavailable because optional cache is down unless configuration defines cache as required.
+
+Expose component status through health metadata without leaking credentials.
+
+Conceptually:
+
+```json
+{
+  "status": "degraded",
+  "components": {
+    "database": "ok",
+    "cache": "down",
+    "storage": "ok"
+  }
+}
+
+```
+
+Use existing response conventions where possible.
+
+---
+
+# 20. RATE LIMITING
+
+Centralize rate-limit ownership in Moon Server.
+
+Prefer Valkey-backed rate limiting for multi-process/multi-instance deployments.
+
+Protect at least appropriate endpoints:
+
+```text
+login
+register
+forgot password
+OTP
+reset password
+expensive RPC
+public write APIs
+
+```
+
+Do not create isolated in-memory counters if the application is intended to scale horizontally.
+
+Development fallback may exist if explicitly documented.
+
+---
+
+# 21. MINIO — ROLE
+
+MinIO is the canonical object storage implementation for self-hosted Moon Server deployment.
+
+Use S3-compatible abstractions.
+
+Target:
+
+```text
+Moon storage API
+      ↓
+S3-compatible adapter
+      ↓
+MinIO
+
+```
+
+MinIO stores:
+
+```text
+binary files
+attachments
+uploads
+generated documents
+media
+large artifacts
+
+```
+
+PostgreSQL stores:
+
+```text
+attachment metadata
+ownership
+ACL
+record relation
+object key
+bucket
+mime type
+size
+checksum
+created metadata
+
+```
+
+Do NOT store large file blobs in PostgreSQL unless an existing justified design requires it.
+
+---
+
+# 22. STORAGE ABSTRACTION
+
+Prefer an interface conceptually similar to:
+
+```ts
+interface MoonStorage {
+  put(
+    key: string,
+    data: Buffer | ReadableStream,
+    options?: {
+      contentType?: string
+      metadata?: Record<string, string>
+    },
+  ): Promise<StoredObject>
+
+  get(key: string): Promise<StoredObjectStream>
+
+  delete(key: string): Promise<void>
+
+  exists(key: string): Promise<boolean>
+
+  stat(key: string): Promise<StoredObjectMetadata>
+
+  signedUrl?(
+    key: string,
+    options?: {
+      expiresIn?: number
+    },
+  ): Promise<string>
+}
+
+```
+
+Use repository conventions where equivalents already exist.
+
+---
+
+# 23. MINIO CONFIGURATION
+
+Prefer generic S3-style configuration rather than MinIO-hardcoded package internals.
+
+Example:
+
+```text
+S3_ENDPOINT=http://minio:9000
+S3_REGION=us-east-1
+S3_BUCKET=moonwitness
+S3_ACCESS_KEY=...
+S3_SECRET_KEY=...
+S3_FORCE_PATH_STYLE=true
+
+```
+
+Docker deployment may map:
+
+```text
+MINIO_ROOT_USER
+MINIO_ROOT_PASSWORD
+
+```
+
+to initialization credentials, but application credentials should ideally be explicit and scoped appropriately.
+
+Do not assume root credentials are the long-term production application credentials.
+
+---
+
+# 24. BUCKET INITIALIZATION
+
+Do not rely on a human manually opening MinIO Console and creating buckets.
+
+Implement or document a deterministic initialization mechanism.
+
+Possible approaches:
+
+```text
+bootstrap command
+startup validation + explicit setup command
+init container
+deployment script
+moon doctor
+
+```
+
+Do not silently create production resources without documenting behavior.
+
+Prefer idempotent initialization.
+
+---
+
+# 25. STORAGE OBJECT KEYS
+
+Do not trust user filenames as object keys.
+
+Generate safe deterministic keys.
+
+Conceptually:
+
+```text
+attachments/<model>/<record-id>/<uuid>
+
+```
+
+or another collision-safe format.
+
+Preserve original filename separately as metadata.
+
+Protect against:
+
+```text
+path traversal
+key collision
+filename injection
+content-type spoofing
+
+```
+
+---
+
+# 26. STORAGE SECURITY
+
+Audit:
+
+```text
+upload authorization
+download authorization
+signed URL expiry
+bucket exposure
+public ACL
+content type
+file size limits
+malware scanning extension point
+object ownership
+record rules
+
+```
+
+Files belonging to restricted records must not become publicly retrievable simply because the object exists in MinIO.
+
+Authorization must happen through Moon's security layer unless an intentionally public object policy exists.
+
+---
+
+# 27. STORAGE TRANSACTIONS
+
+Database and object storage are not a single ACID transaction.
+
+Design failure handling.
+
+Examples:
+
+## Upload
+
+```text
+validate
+→ upload object
+→ create metadata
+
+```
+
+If DB insertion fails:
+
+```text
+delete orphan object
+
+```
+
+or register it for deterministic cleanup.
+
+## Delete
+
+Decide whether metadata or object deletion happens first and define compensation.
+
+Do not silently accumulate orphaned objects.
+
+---
+
+# 28. STORAGE CHECKSUM
+
+Where useful, calculate:
+
+```text
+SHA-256
+
+```
+
+or repository-equivalent checksum for stored content.
+
+Store useful metadata such as:
+
+```text
+size
+checksum
+mime type
+original filename
+object key
+bucket
+
+```
+
+This improves integrity and deterministic artifact verification.
+
+---
+
+# 29. STORAGE HEALTH
+
+Readiness should validate storage if storage is configured as required.
+
+Avoid expensive full upload/download tests on every health request.
+
+Use an appropriate lightweight capability check.
+
+Deep diagnostics may belong in:
+
+```bash
+moon doctor
+
+```
+
+---
+
+# 30. VICTORIAMETRICS — ROLE
+
+VictoriaMetrics is the metrics backend.
+
+Preferred integration model:
+
+```text
+Moon Server
+    ↓
+/metrics
+    ↓
+Prometheus-compatible scrape
+    ↓
+VictoriaMetrics
+
+```
+
+or another repository-justified standard integration.
+
+Avoid custom proprietary metrics transport if existing Prometheus-compatible tooling is sufficient.
+
+---
+
+# 31. METRICS OWNERSHIP
+
+Moon Server should expose application/runtime metrics.
+
+At minimum consider:
+
+```text
+HTTP request count
+HTTP request duration
+HTTP status distribution
+
+active requests
+errors
+
+DB pool usage
+DB query duration where safely observable
+
+cache hits
+cache misses
+cache errors
+
+storage operations
+storage errors
+storage bytes
+
+auth success
+auth failure
+rate-limit events
+
+RPC count
+RPC duration
+RPC errors
+
+realtime connections
+realtime disconnects
+
+process memory
+process CPU
+event loop metrics
+
+```
+
+Do not expose high-cardinality labels.
+
+---
+
+# 32. METRICS LABEL SAFETY
+
+Never use uncontrolled values as metric labels.
+
+Forbidden examples:
+
+```text
+user ID
+email
+full URL with record ID
+JWT
+request body
+object key
+arbitrary model filter
+
+```
+
+Prefer bounded labels:
+
+```text
+method
+route template
+status code class
+model name if bounded
+RPC procedure name if registered/bounded
+operation
+
+```
+
+Avoid cardinality explosions.
+
+---
+
+# 33. METRICS SECURITY
+
+Decide whether:
+
+```text
+/metrics
+
+```
+
+is internal-only or authenticated.
+
+Do not automatically expose operational metrics publicly on the internet.
+
+Docker/network deployment should make the intended trust boundary explicit.
+
+---
+
+# 34. VICTORIAMETRICS CONFIGURATION
+
+Docker currently exposes VictoriaMetrics on:
+
+```text
+127.0.0.1:8428
+
+```
+
+for host access.
+
+Inside Docker Compose, monitoring components should address:
+
+```text
+victoriametrics:8428
+
+```
+
+Do not use host loopback between containers.
+
+If VictoriaMetrics is expected to scrape Moon Server, create or document proper scrape configuration.
+
+A running VictoriaMetrics container without a scrape target is NOT an integration.
+
+---
+
+# 35. METRICS SCRAPE DISCOVERY
+
+Create an explicit solution.
+
+Possible architecture:
+
+```text
+VictoriaMetrics vmagent
+
+```
+
+or VictoriaMetrics-native scrape configuration where appropriate.
+
+Do NOT add another component merely because it exists in industry stacks.
+
+Inspect repository/deployment expectations first.
+
+The acceptance requirement is:
+
+```text
+Moon Server metrics actually reach VictoriaMetrics
+
+```
+
+not merely:
+
+```text
+Moon Server has /metrics
+
+```
+
+---
+
+# 36. LOKI — ROLE
+
+Loki is the centralized log backend.
+
+Moon Server should emit structured logs.
+
+Preferred application logging:
+
+```text
+Pino or existing structured logger
+↓
+JSON logs
+↓
+shipping layer
+↓
+Loki
+
+```
+
+Do not make domain code call Loki APIs directly.
+
+Logging must remain backend-agnostic.
+
+---
+
+# 37. LOG SHIPPING
+
+A Loki container alone does not receive application logs automatically.
+
+Determine and implement/document a proper shipping path.
+
+Possible choices depending on repository deployment:
+
+```text
+Grafana Alloy
+Promtail if already intentionally used
+OpenTelemetry Collector
+Docker logging driver
+application transport
+
+```
+
+Prefer a standard collector/shipping layer over tightly coupling `@moon/server` directly to Loki.
+
+If no collector currently exists, explicitly identify and implement the minimal appropriate integration.
+
+Do NOT pretend Loki integration is complete merely because a Loki container exists.
+
+---
+
+# 38. LOG STRUCTURE
+
+Standardize structured fields where appropriate:
+
+```text
+timestamp
+level
+service
+environment
+requestId
+method
+route
+statusCode
+durationMs
+addon
+model
+procedure
+errorType
+
+```
+
+Never log:
+
+```text
+password
+JWT
+refresh token
+OTP
+reset token
+authorization header
+DB password
+S3 secret
+cookie secrets
+sensitive request bodies
+
+```
+
+---
+
+# 39. REQUEST CORRELATION
+
+Every incoming request should receive a request ID.
+
+Carry it through:
+
+```text
+HTTP logs
+ORM logs where practical
+RPC logs
+storage logs
+cache logs
+error logs
+
+```
+
+This allows a single failure to be traced in Loki.
+
+Prefer incoming trusted correlation ID when safe or generate one.
+
+Validate externally supplied IDs.
+
+---
+
+# 40. ERROR LOGGING
+
+Log unexpected internal errors with enough context for diagnosis.
+
+Do not return internal stack traces to clients in production.
+
+Client:
+
+```text
+safe deterministic error envelope
+
+```
+
+Loki:
+
+```text
+internal structured error context
+
+```
+
+without credentials/secrets.
+
+---
+
+# 41. OPTIONAL OPENTELEMETRY
+
+Audit whether OpenTelemetry already exists.
+
+If yes, consolidate around it where sensible.
+
+Potential architecture:
+
+```text
+Moon Server
+    ↓
+OpenTelemetry
+    ├── metrics
+    ├── traces
+    └── logs where appropriate
+
+```
+
+Do not add a new telemetry framework if existing instrumentation is simpler and adequate.
+
+Do not replace working metrics/logging purely for fashion.
+
+---
+
+# 42. INFRASTRUCTURE DEPENDENCY CLASSIFICATION
+
+Every service must be explicitly classified.
+
+Example:
+
+```text
+PostgreSQL       REQUIRED
+Valkey           OPTIONAL or REQUIRED depending config
+MinIO            REQUIRED when storage feature enabled
+VictoriaMetrics  OPTIONAL
+Loki             OPTIONAL
+
+```
+
+The server must know which failures mean:
+
+```text
+fatal
+degraded
+ignored because feature disabled
+
+```
+
+Do not treat every infrastructure dependency identically.
+
+---
+
+# 43. CONFIGURED VS ENABLED
+
+Feature activation must be explicit.
+
+Examples:
+
+```ts
+cache: {
+  enabled: true,
+  url: ...
+}
+
+storage: {
+  enabled: true,
+  ...
+}
+
+observability: {
+  metrics: {
+    enabled: true
+  }
+}
+
+```
+
+or an equivalent clean configuration.
+
+Do not infer critical production behavior merely because an environment variable happens to exist.
+
+---
+
+# 44. INFRASTRUCTURE ADAPTER CONTRACT
+
+Infrastructure adapters should follow a clear ownership model.
+
+Possible shape:
+
+```text
+@moon/server
+├── cache facade
+├── storage facade
+├── metrics facade
+└── logger facade
+
+packages/
+├── moon-cache
+├── moon-storage       if justified
+└── moon-observability if justified
+
+```
+
+Do NOT create packages merely to satisfy aesthetics.
+
+If a small adapter naturally belongs in Moon Server, keep it there.
+
+Create a package only when it provides a genuine reusable boundary.
+
+---
+
+# 45. NO INFRASTRUCTURE SDK LEAKAGE
+
+Normal addons should not directly import:
+
+```text
+ioredis/redis client
+MinIO SDK
+AWS S3 SDK
+VictoriaMetrics client
+Loki client
+
+```
+
+for platform responsibilities.
+
+Prefer:
+
+```ts
+ctx.cache
+ctx.storage
+ctx.logger
+ctx.metrics
+
+```
+
+or another canonical Moon abstraction.
+
+---
+
+# 46. TARGET REQUEST CONTEXT V2
+
+Request/application context may evolve conceptually toward:
+
+```ts
+type MoonContext = {
+  uid: number | null
+
+  requestId: string
+
+  sessionId?: string
+
+  locale?: string
+
+  companyId?: number
+
+  model(name: string): MoonModel
+
+  cache: MoonCache
+
+  storage: MoonStorage
+
+  logger: MoonLogger
+
+  metrics: MoonMetrics
+}
+
+```
+
+Do not put unnecessary heavyweight clients into every object if architecture provides cleaner access.
+
+The important invariant is consistent platform access.
+
+---
+
+# 47. AUTHENTICATION
+
+Moon Server should provide built-in:
+
+```text
+register
+login
+logout
+me
+refresh
+forgot password
+reset password
+verification / OTP where already supported
+session revocation
+
+```
+
+Preserve existing correct implementation.
+
+Do not redesign auth unnecessarily.
+
+Security requirements:
+
+```text
+password hashing
+secure random tokens
+expiration
+revocation
+session validation
+safe reset token storage
+rate limiting
+no secret logging
+
+```
+
+---
+
+# 48. AUTH + VALKEY
+
+Audit whether Valkey should support:
+
+```text
+rate limits
+temporary OTP state
+token revocation cache
+session cache
+login attempt counters
+
+```
+
+Do not move canonical durable session data from PostgreSQL without a clear benefit and migration design.
+
+A reasonable architecture can be:
+
+```text
+PostgreSQL
+= source of truth
+
+Valkey
+= acceleration / ephemeral enforcement
+
+```
+
+---
+
+# 49. AUTHORIZATION
+
+All ordinary model operations flow through:
+
+```text
+authentication
+↓
+uid
+↓
+ACL
+↓
+record rules
+↓
+ORM
+
+```
+
+Never:
+
+```text
+HTTP
+↓
+SUPERUSER_ID
+↓
+database
+
+```
+
+Superuser is reserved for explicit trusted system operations.
+
+---
+
+# 50. FAIL-CLOSED ROUTES
+
+Audit route default auth.
+
+Prefer either:
+
+```text
+auth defaults to user
+
+```
+
+or:
+
+```text
+auth field is required
+
+```
+
+Public routes must explicitly use:
+
+```text
+auth: 'none'
+
+```
+
+Never accidentally expose an endpoint because a developer forgot to declare auth.
+
+---
+
+# 51. GENERIC REST
+
+Registered models may expose generic CRUD.
+
+Every operation must:
+
+```text
+resolve request UID
+create request context
+validate model
+validate fields
+apply ACL
+apply record rules
+validate filter/domain
+bound pagination
+bound expansion
+prevent mass assignment
+execute ORM
+return deterministic response
+
+```
+
+---
+
+# 52. REST QUERY SAFETY
+
+Audit:
+
+```text
+unbounded limit
+unbounded offset
+arbitrary order expressions
+nested domain explosion
+relation expansion depth
+wildcard abuse
+raw SQL escape hatches
+N+1 query behavior
+
+```
+
+Set centralized sane defaults.
+
+Avoid random hardcoded limits scattered through controllers.
+
+---
+
+# 53. RPC
+
+Only explicitly registered procedures may be remotely invoked.
+
+Preferred:
+
+```ts
+defineProcedure({
+  name: 'witness.calculate_score',
+  auth: 'user',
+  input: ...,
+  output: ...,
+  handler: ...
+})
+
+```
+
+Never expose arbitrary class/model methods over RPC.
+
+---
+
+# 54. ADDON CONTRACT
+
+Target:
+
+```ts
+export default defineAddon({
+  name: 'witness',
+
+  version: '2.0.0',
+
+  depends: [
+    'base',
+  ],
+
+  models,
+
+  routes,
+
+  procedures,
+
+  security,
+
+  data,
+
+  migrations,
+})
+
+```
+
+Do not require normal addons to know Fastify.
+
+---
+
+# 55. ADDON INFRASTRUCTURE REQUIREMENTS
+
+If an addon requires an infrastructure capability, model that explicitly where useful.
+
+Conceptually:
+
+```ts
+defineAddon({
+  name: 'media',
+
+  requires: {
+    storage: true
+  }
+})
+
+```
+
+Do not necessarily implement this exact API unless justified.
+
+The runtime must fail clearly if an addon requires storage but storage is disabled.
+
+Do not defer failures until the first production request.
+
+---
+
+# 56. ADDON DEPENDENCY RESOLUTION
+
+Must detect:
+
+```text
+duplicate addon
+missing dependency
+cycle
+invalid manifest
+duplicate model
+duplicate route
+duplicate procedure
+
+```
+
+Dependency order must be deterministic.
+
+---
+
+# 57. SCHEMA + MIGRATIONS
+
+Separate:
+
+```text
+development auto-sync
+production migration
+addon install
+addon upgrade
+schema drift detection
+reference data
+
+```
+
+Production must not silently mutate schema because of accidental:
+
+```text
+MOON_AUTO_SYNC=true
+
+```
+
+or equivalent unsafe configuration.
+
+Prefer:
+
+```text
+detect
+→ report
+→ require explicit migration/upgrade
+
+```
+
+---
+
+# 58. MIGRATION LOCKING
+
+For production migration/addon upgrade, prevent concurrent migration execution.
+
+PostgreSQL advisory locks or another suitable DB-backed mechanism are preferable for database schema coordination.
+
+Do not rely exclusively on Valkey for critical database migration correctness when PostgreSQL can enforce the lock directly.
+
+---
+
+# 59. REFERENCE DATA
+
+Reference data should be:
+
+```text
+idempotent
+external-ID aware
+upgrade-safe
+deterministic
+
+```
+
+Example:
+
+```ts
+{
+  model: 'res.role',
+  externalId: 'base.role_user',
+  values: {
+    name: 'User'
+  }
+}
+
+```
+
+Do not duplicate seed records on every startup.
+
+---
+
+# 60. REALTIME
+
+Preserve SSE/realtime capability.
+
+Audit:
+
+```text
+auth
+subscription filtering
+cleanup
+memory usage
+global emitter
+horizontal scaling
+
+```
+
+If multi-instance realtime needs shared fanout, evaluate whether Valkey pub/sub is appropriate.
+
+Do NOT implement Valkey pub/sub merely because Valkey exists.
+
+Use it only if multi-instance realtime is a real supported deployment mode.
+
+If realtime remains process-local, document that truthfully.
+
+---
+
+# 61. INSTANCE ISOLATION
+
+Audit mutable globals:
+
+```text
+globalRoutes
+global event emitter
+global ORM registry
+global config
+singletons
+
+```
+
+Prefer instance state:
+
+```text
+server.routes
+server.events
+server.registry
+server.orm
+server.cache
+server.storage
+server.metrics
+
+```
+
+Tests should eventually support:
+
+```ts
+const serverA = new MoonServer(...)
+const serverB = new MoonServer(...)
+
+```
+
+without leakage.
+
+---
+
+# 62. PRODUCTION CONFIG VALIDATION
+
+At startup validate:
+
+```text
+DATABASE_URL
+JWT secret quality
+storage credentials when enabled
+Valkey URL when required
+CORS configuration
+environment mode
+auto-sync safety
+metrics exposure
+log level
+
+```
+
+Invalid required config should fail before accepting traffic.
+
+---
+
+# 63. ENVIRONMENT CONTRACT
+
+Create/update a canonical environment example.
+
+Conceptually:
+
+```text
+NODE_ENV=production
+
+HOST=0.0.0.0
+PORT=4000
+
+DATABASE_URL=postgresql://moonwitness:password@postgres:5432/moonwitness
+
+JWT_SECRET=...
+
+VALKEY_URL=redis://valkey:6379
+
+S3_ENDPOINT=http://minio:9000
+S3_REGION=us-east-1
+S3_BUCKET=moonwitness
+S3_ACCESS_KEY=...
+S3_SECRET_KEY=...
+S3_FORCE_PATH_STYLE=true
+
+METRICS_ENABLED=true
+
+LOG_LEVEL=info
+
+```
+
+Do not duplicate variables with multiple names unless providing a documented compatibility transition.
+
+---
+
+# 64. DOCKER COMPOSE REVIEW
+
+Audit the supplied Compose stack.
+
+Expected conceptual stack:
+
+```text
+moon-server
+postgres
+valkey
+minio
+victoriametrics
+loki
+log/telemetry collector if required
+
+```
+
+The current Compose may not yet contain Moon Server itself.
+
+If deployment intent is full-stack Docker Compose, add or document the server service appropriately.
+
+Do not assume host-run development and Docker production are the same.
+
+---
+
+# 65. DOCKER NETWORKING
+
+Inside Compose:
+
+Use service DNS names:
+
+```text
+postgres
+valkey
+minio
+victoriametrics
+loki
+
+```
+
+Never:
+
+```text
+127.0.0.1
+
+```
+
+for container-to-container communication.
+
+Host-bound mappings such as:
+
+```text
+127.0.0.1:5432:5432
+
+```
+
+are for the host.
+
+Document the distinction.
+
+---
+
+# 66. DOCKER DEPENDS\_ON
+
+Use health-based dependency ordering only where useful.
+
+Do not assume:
+
+```text
+depends_on
+
+```
+
+means the dependency is fully ready unless health conditions are explicitly supported/configured.
+
+Moon Server itself must still handle dependency connection errors gracefully.
+
+---
+
+# 67. DOCKER HEALTHCHECKS
+
+Add meaningful healthchecks where practical:
+
+```text
+postgres
+valkey
+minio
+moon-server
+
+```
+
+VictoriaMetrics/Loki health may also be validated if appropriate.
+
+Do not use fake checks that merely prove a process exists.
+
+---
+
+# 68. IMAGE VERSION POLICY
+
+Audit use of:
+
+```text
+latest
+
+```
+
+for production infrastructure.
+
+Current examples include:
+
+```text
+minio/minio:latest
+victoriametrics/victoria-metrics:latest
+grafana/loki:latest
+
+```
+
+For reproducible production deployments, prefer pinned versions or an explicitly documented controlled-upgrade policy.
+
+Do not blindly update versions during architecture refactor.
+
+Record this as a deployment-hardening issue if changing versions is unsafe in the current run.
+
+---
+
+# 69. DATA VOLUMES
+
+Preserve persistent volumes:
+
+```text
+postgres_data
+valkey_data
+minio_data
+victoriametrics_data
+loki_data
+
+```
+
+Understand backup requirements.
+
+Not all volumes have equal importance.
+
+Highest criticality generally:
+
+```text
+PostgreSQL
+MinIO
+
+```
+
+Valkey may be recoverable depending on its role.
+
+Metrics/log retention may be operational rather than business-critical.
+
+Document accordingly.
+
+---
+
+# 70. BACKUP STRATEGY
+
+At minimum document required backup scope.
+
+PostgreSQL:
+
+```text
+logical/physical backup strategy
+restore test
+
+```
+
+MinIO:
+
+```text
+object backup/replication strategy
+
+```
+
+Do not claim a production-ready backend without acknowledging durable-data backup.
+
+Automating enterprise backup infrastructure is not mandatory for this refactor unless repository scope supports it.
+
+---
+
+# 71. LOKI RETENTION
+
+Audit Loki retention/configuration.
+
+A bare:
+
+```text
+grafana/loki
+
+```
+
+container with a data volume is not automatically a production logging design.
+
+Ensure:
+
+```text
+storage configuration
+retention
+limits
+ingestion
+queryability
+
+```
+
+are intentional or explicitly documented as local-development defaults.
+
+---
+
+# 72. VICTORIAMETRICS RETENTION
+
+Current intent includes approximately:
+
+```text
+-retentionPeriod=30d
+
+```
+
+Verify actual current config.
+
+Document whether 30 days is:
+
+```text
+development default
+production policy
+
+```
+
+Do not hardwire business policy into generic Moon Server code.
+
+---
+
+# 73. OBSERVABILITY DASHBOARD
+
+Grafana is not automatically required merely because Loki and VictoriaMetrics exist.
+
+If the repository already has Grafana, integrate it cleanly.
+
+If not, document:
+
+```text
+VictoriaMetrics = metrics storage/query
+Loki = log storage/query
+
+```
+
+and optionally recommend Grafana as a separate operational UI.
+
+Do not block Moon Server backend completion on adding a dashboard product.
+
+---
+
+# 74. `moon doctor` V2
+
+A useful `moon doctor` command should eventually test:
+
+```text
+Node version
+package manager
+database connectivity
+migration state
+addon graph
+registry validity
+duplicate routes
+JWT configuration
+
+Valkey connectivity
+Valkey capability when required
+
+MinIO/S3 connectivity
+bucket existence
+write permission where safe
+
+metrics registry
+metrics endpoint
+
+logging configuration
+
+production safety
+
+```
+
+Deep checks must not mutate production data unexpectedly.
+
+For S3 write tests, use an explicit disposable diagnostic object and delete it, or perform a safe capability check.
+
+---
+
+# 75. STARTUP REPORT
+
+Moon Server startup output should derive from actual runtime state.
+
+Conceptually:
+
+```text
+Moon Server
+
+Database        connected
+Cache           connected
+Storage         connected
+Metrics         enabled
+Logging         enabled
+
+Addons          4
+Models          37
+Routes          61
+RPC             17
+Realtime        enabled
+
+HTTP            http://0.0.0.0:4000
+OpenAPI         /docs
+Metrics         /metrics
+
+```
+
+Never hardcode counts.
+
+Never print secrets.
+
+---
+
+# 76. DEGRADED MODE
+
+Define explicit degraded-mode behavior.
+
+Example:
+
+```text
+PostgreSQL down
+→ server not ready
+
+Valkey down + optional cache
+→ server may run degraded
+
+MinIO down + storage required
+→ server not ready
+
+VictoriaMetrics unavailable
+→ application continues, metrics collection/export warning
+
+Loki shipping unavailable
+→ application continues with local stdout structured logs
+
+```
+
+This is an example policy.
+
+Reconcile with actual architecture and requirements.
+
+Do not create hidden inconsistent behavior.
+
+---
+
+# 77. TEST INFRASTRUCTURE
+
+Backend integration tests should have deterministic dependency setup.
+
+Possible approaches:
+
+```text
+Docker Compose test profile
+testcontainers
+CI service containers
+existing repository test harness
+
+```
+
+Use the simplest existing standard in the repo.
+
+Do not require developers to manually start five services for every unit test.
+
+Separate:
+
+```text
+unit
+integration
+infrastructure integration
+
+```
+
+---
+
+# 78. REQUIRED POSTGRES TESTS
+
+Test where practical:
+
+```text
+connectivity
+migration
+transaction rollback
+unique constraints
+foreign keys
+graceful shutdown
+pool lifecycle
+schema drift behavior
+
+```
+
+---
+
+# 79. REQUIRED VALKEY TESTS
+
+Test:
+
+```text
+set/get/delete
+TTL
+namespace
+failure behavior
+rate-limit integration if implemented
+lock behavior if implemented
+cache bypass when unavailable if policy allows
+
+```
+
+Do not write tests for features not actually implemented.
+
+---
+
+# 80. REQUIRED STORAGE TESTS
+
+Test:
+
+```text
+put
+get
+delete
+exists/stat
+metadata
+checksum
+authorization path
+invalid object key
+size limits
+cleanup after DB failure
+signed URL expiry if implemented
+
+```
+
+---
+
+# 81. REQUIRED METRICS TESTS
+
+Test:
+
+```text
+/metrics available when enabled
+disabled behavior
+request counter increments
+error counter
+no secret values
+bounded labels
+no uncontrolled high-cardinality values
+
+```
+
+---
+
+# 82. REQUIRED LOGGING TESTS
+
+Test at least:
+
+```text
+structured log shape
+requestId
+error redaction
+authorization header redaction
+password redaction
+JWT/token redaction
+
+```
+
+Avoid brittle full-line snapshot tests unless existing style uses them.
+
+---
+
+# 83. CI V2
+
+Backend CI should eventually distinguish:
+
+```text
+backend-core
+backend-security
+backend-integration
+backend-infrastructure
+web-ui
+
+```
+
+At minimum:
+
+```bash
+pnpm --filter @moon/orm build
+pnpm --filter @moon/orm test
+
+pnpm --filter @moon/server build
+pnpm --filter @moon/server test
+
+```
+
+If infrastructure integration tests require services, configure them explicitly.
+
+Do not make every fast unit test depend on MinIO/Loki/VictoriaMetrics.
+
+---
+
+# 84. SECURITY P0
+
+Highest-priority security work remains:
+
+```text
+remove implicit ordinary-request SUPERUSER_ID
+
+```
+
+Generic REST must derive actual authenticated UID.
+
+Regression test required.
+
+Do not defer this behind infrastructure work.
+
+---
+
+# 85. INFRASTRUCTURE SECURITY
+
+Audit:
+
+```text
+database credentials
+Valkey exposure
+MinIO credentials
+MinIO console exposure
+metrics exposure
+Loki exposure
+host port bindings
+container network
+default passwords
+secret logging
+
+```
+
+The existing use of:
+
+```text
+127.0.0.1:<port>
+
+```
+
+for host bindings is preferable to exposing infrastructure on all interfaces for local-only access.
+
+Do not weaken this unnecessarily.
+
+---
+
+# 86. VALKEY SECURITY
+
+If Valkey is accessible beyond an isolated trusted Docker network:
+
+consider appropriate authentication/TLS/network policy according to deployment environment.
+
+Do not add password configuration merely cosmetically while leaving insecure network exposure.
+
+Security boundary must be understood end-to-end.
+
+---
+
+# 87. MINIO SECURITY
+
+Avoid long-term application use of:
+
+```text
+MINIO_ROOT_USER
+MINIO_ROOT_PASSWORD
+
+```
+
+when scoped application credentials can be established.
+
+If root credentials remain for local development, document this clearly.
+
+Never expose MinIO Console publicly by default in production without deliberate access controls.
+
+---
+
+# 88. OBSERVABILITY SECURITY
+
+Operational endpoints may leak infrastructure information.
+
+Protect or appropriately network-restrict:
+
+```text
+/metrics
+debug endpoints
+Loki
+VictoriaMetrics
+MinIO console
+
+```
+
+Health endpoints should disclose only information appropriate for their audience.
+
+Do not return database DSNs, secrets, bucket credentials, or internal stack traces.
+
+---
+
+# 89. NO SECRET HARD-CODING
+
+Never commit:
+
+```text
+POSTGRES_PASSWORD
+JWT_SECRET
+MINIO_ROOT_PASSWORD
+S3_SECRET_KEY
+API keys
+private keys
+
+```
+
+Use environment/secret management.
+
+If a suspected secret already exists, report location without reproducing the secret value.
+
+---
+
+# 90. HARD-CODE AUDIT
+
+Programmatically search for:
+
+```text
+localhost
+127.0.0.1
+postgres:5432
+6379
+9000
+8428
+service names
+bucket names
+database names
+user IDs
+role IDs
+MoonWitness branding inside generic packages
+
+```
+
+Classify each result.
+
+Some constants are legitimate defaults.
+
+The goal is to remove accidental coupling, not eliminate all constants.
+
+---
+
+# 91. FAILURE INJECTION
+
+Where feasible, test important dependency loss:
+
+```text
+PostgreSQL unavailable
+Valkey unavailable
+MinIO unavailable
+
+```
+
+Verify the documented failure policy.
+
+Do not claim resilient degradation without tests.
+
+---
+
+# 92. GRACEFUL SHUTDOWN
+
+Shutdown order should cleanly close:
+
+```text
+HTTP listener
+in-flight requests where possible
+realtime subscriptions
+database pool
+Valkey connection
+storage resources if needed
+telemetry exporters
+log shipping
+
+```
+
+Avoid hanging Node processes after tests.
+
+---
+
+# 93. METADATA / ADMIN BACKEND
+
+Do not build a large admin UI during this refactor.
+
+But Moon Server may expose metadata useful for tooling:
+
+```text
+registered models
+fields
+addons
+routes
+procedures
+runtime health
+migration status
+
+```
+
+Protect administrative metadata appropriately.
+
+---
+
+# 94. MOON CLIENT
+
+Eventually expose a clean client experience:
+
+```ts
+const moon = createMoonClient({
+  url,
+})
+
+await moon.auth.login(...)
+
+await moon
+  .model('wx.scripture')
+  .search(...)
+
+await moon.rpc(...)
+
+moon
+  .model('wx.scripture')
+  .subscribe(...)
+
+```
+
+Do not redesign client SDK before backend runtime consolidation is stable.
+
+---
+
+# 95. COMPLEXITY REDUCTION
+
+Actively remove:
+
+```text
+duplicate server runtimes
+duplicate ORM runtimes
+duplicate caches
+duplicate storage clients
+multiple unrelated logger systems
+parallel metrics registries
+pass-through wrappers
+dead plugins
+legacy aliases
+global registries
+
+```
+
+Prefer one canonical owner for each capability.
+
+---
+
+# 96. CANONICAL OWNERSHIP MATRIX
+
+The finished architecture should have a table equivalent to:
+
+```text
+CAPABILITY               OWNER
+
+HTTP runtime              @moon/server
+Authentication            @moon/server + @moon/base models
+Authorization             @moon/orm / security layer
+Generic REST              @moon/server
+RPC                       @moon/server
+Realtime                  @moon/server
+ORM                       @moon/orm
+PostgreSQL connection      canonical ORM/database runtime
+Addon lifecycle            @moon/server
+Base models                @moon/base
+Domain models              domain addons
+Cache abstraction          Moon cache layer
+Valkey adapter             infrastructure adapter
+Storage abstraction        Moon storage layer
+MinIO adapter              S3-compatible adapter
+Metrics instrumentation    @moon/server
+Metrics backend            VictoriaMetrics
+Structured logging         @moon/server logger
+Log backend                Loki
+Application composition    apps/server
+Frontend client            @moon/client
+
+```
+
+No capability should have multiple production owners without a documented reason.
+
+---
+
+# 97. IMPLEMENTATION PHASES V2
+
+## PHASE 0 — Baseline
+
+Record:
+
+```text
+branch
+SHA
+git status
+existing tests
+existing backend build
+existing Docker/infra state
+
+```
+
+---
+
+## PHASE 1 — Security P0
+
+Fix:
+
+```text
+ordinary REST using SUPERUSER_ID
+
+```
+
+first if still present.
+
+Add regression tests.
+
+---
+
+## PHASE 2 — Backend CI foundation
+
+Make canonical backend test/build commands executable.
+
+Add backend gates.
+
+---
+
+## PHASE 3 — Runtime consolidation
+
+Make:
+
+```text
+@moon/server
+
+```
+
+the only production transport runtime.
+
+Reduce application to composition.
+
+---
+
+## PHASE 4 — ORM consolidation
+
+Remove duplicate production ORM path.
+
+---
+
+## PHASE 5 — Addon lifecycle
+
+Standardize:
+
+```text
+MoonAddon
+defineAddon
+dependency resolution
+
+```
+
+---
+
+## PHASE 6 — PostgreSQL ownership cleanup
+
+Consolidate database pools/configuration/migration behavior.
+
+---
+
+## PHASE 7 — Valkey integration
+
+Implement canonical cache/runtime adapter.
+
+Integrate only real use cases.
+
+At minimum ensure the existing Valkey service has an intentional role or remove it from mandatory stack until used.
+
+Do not leave phantom infrastructure.
+
+---
+
+## PHASE 8 — MinIO integration
+
+Migrate storage/attachment behavior behind canonical storage abstraction.
+
+Ensure authorization and metadata relationship with PostgreSQL.
+
+---
+
+## PHASE 9 — Metrics integration
+
+Expose meaningful metrics and make them actually available to VictoriaMetrics.
+
+---
+
+## PHASE 10 — Logging integration
+
+Emit structured logs and ensure a real log shipping path to Loki.
+
+---
+
+## PHASE 11 — Production health / doctor
+
+Unify dependency health and diagnostics.
+
+---
+
+## PHASE 12 — Instance isolation
+
+Reduce globals.
+
+---
+
+## PHASE 13 — CLI/DX
+
+Implement real commands only.
+
+---
+
+## PHASE 14 — Documentation and deployment hardening
+
+Update architecture, environment, Docker, production guidance, backup expectations and operational docs.
+
+---
+
+# 98. NO PHANTOM INFRASTRUCTURE RULE
+
+This is a critical V2 rule.
+
+For every Docker service ask:
+
+```text
+Who uses this?
+Through which adapter?
+For what exact feature?
+How is it configured?
+How is it tested?
+What happens when it fails?
+
+```
+
+If the answer is unclear, classify the service as:
+
+```text
+UNINTEGRATED
+
+```
+
+and either:
+
+```text
+integrate it properly
+
+```
+
+or:
+
+```text
+remove/disable it from the required stack until there is a real consumer
+
+```
+
+Do NOT keep infrastructure solely because it looks production-like.
+
+---
+
+# 99. NO DIRECT DOMAIN-TO-INFRA RULE
+
+Forbidden normal domain design:
+
+```text
+@moon/witness
+    ↓
+direct Valkey client
+
+@moon/witness
+    ↓
+direct MinIO client
+
+@moon/witness
+    ↓
+direct Loki HTTP push
+
+@moon/witness
+    ↓
+direct VictoriaMetrics write
+
+```
+
+Preferred:
+
+```text
+@moon/witness
+    ↓
+Moon context/platform APIs
+    ↓
+canonical adapter
+
+```
+
+---
+
+# 100. END-STATE APPLICATION CODE
+
+The final application should remain close to:
+
+```ts
+import 'dotenv/config'
+
+import {
+  MoonServer,
+} from '@moon/server'
+
+import base from '@moon/base'
+import witness from '@moon/witness'
+
+const server = new MoonServer({
+  app: {
+    name: 'MoonWitness',
+  },
+
+  database: {
+    url: process.env.DATABASE_URL!,
+  },
+
+  cache: {
+    enabled: true,
+    url: process.env.VALKEY_URL!,
+  },
+
+  storage: {
+    enabled: true,
+
+    driver: 's3',
+
+    endpoint: process.env.S3_ENDPOINT!,
+    region: process.env.S3_REGION!,
+    bucket: process.env.S3_BUCKET!,
+
+    accessKey: process.env.S3_ACCESS_KEY!,
+    secretKey: process.env.S3_SECRET_KEY!,
+
+    forcePathStyle: true,
+  },
+
+  auth: {
+    jwtSecret: process.env.JWT_SECRET!,
+  },
+
+  http: {
+    host: process.env.HOST ?? '0.0.0.0',
+    port: Number(process.env.PORT ?? 4000),
+  },
+
+  observability: {
+    metrics: {
+      enabled: true,
+    },
+
+    logging: {
+      enabled: true,
+    },
+  },
+
+  addons: [
+    base,
+    witness,
+  ],
+})
+
+await server.start()
+
+```
+
+This is conceptual.
+
+Do not create an inferior configuration API merely to match it exactly.
+
+---
+
+# 101. TARGET INFRASTRUCTURE DATA FLOW
+
+The implemented architecture must be explainable as:
+
+```text
+                        CLIENT
+                          │
+                          ▼
+                     Moon Server
+                          │
+        ┌─────────────────┼────────────────────┐
+        │                 │                    │
+        ▼                 ▼                    ▼
+       Auth             REST/RPC            Storage
+        │                 │                    │
+        ▼                 ▼                    ▼
+     Context           Moon ORM           Storage API
+        │                 │                    │
+        ├──────► Valkey   ▼                    ▼
+        │              PostgreSQL             MinIO
+        │
+        │
+        ├──────────────► Metrics
+        │                   │
+        │                   ▼
+        │            VictoriaMetrics
+        │
+        └──────────────► Structured Logs
+                            │
+                            ▼
+                           Loki
+
+```
+
+If actual code cannot be accurately described this way or by an equally coherent alternative, the integration is incomplete.
+
+---
+
+# 102. TARGET DOCKER CONNECTIONS
+
+Inside Compose network:
+
+```text
+Moon Server
+    ├── postgres:5432
+    ├── valkey:6379
+    └── minio:9000
+
+```
+
+Monitoring pipeline:
+
+```text
+VictoriaMetrics
+    ← Moon Server metrics scrape/export pipeline
+
+Loki
+    ← collector/log shipping
+    ← Moon Server stdout structured logs
+
+```
+
+Do not route container traffic through host-bound `127.0.0.1` ports.
+
+---
+
+# 103. ACCEPTANCE — POSTGRESQL
+
+-  one canonical DB runtime
+-  ORM uses PostgreSQL through canonical ownership
+-  transactions verified
+-  migration strategy documented
+-  readiness detects DB failure
+-  graceful shutdown closes pool
+-  no duplicate uncontrolled connection pool
+
+---
+
+# 104. ACCEPTANCE — VALKEY
+
+-  Valkey has at least one intentional platform responsibility or is explicitly optional/unintegrated
+-  canonical adapter exists if used
+-  domain packages do not instantiate Valkey directly
+-  TTL behavior tested
+-  failure semantics documented
+-  rate limiting uses shared backing if multi-instance support requires it
+-  cache keys are namespaced
+-  authorization correctness does not depend on stale indefinite cache
+
+---
+
+# 105. ACCEPTANCE — MINIO
+
+-  storage API exists
+-  S3-compatible adapter exists
+-  MinIO is configured through generic storage config
+-  upload/download/delete tested
+-  metadata stored in PostgreSQL
+-  authorization enforced
+-  object key generation safe
+-  bucket initialization deterministic
+-  orphan cleanup strategy exists
+-  secrets are not logged
+
+---
+
+# 106. ACCEPTANCE — VICTORIAMETRICS
+
+-  Moon Server exposes meaningful metrics
+-  metrics actually reach VictoriaMetrics
+-  request count/duration/error metrics exist
+-  labels are bounded
+-  secrets/PII absent
+-  metrics endpoint security is intentional
+-  retention policy documented
+
+---
+
+# 107. ACCEPTANCE — LOKI
+
+-  Moon Server emits structured logs
+-  request IDs included
+-  sensitive fields redacted
+-  real log shipping path exists
+-  logs actually reach Loki
+-  Loki is not merely an unused running container
+-  retention/storage behavior documented
+
+---
+
+# 108. ACCEPTANCE — SECURITY
+
+-  no normal REST request uses implicit superuser
+-  request UID is real authenticated UID
+-  ACL works
+-  record rules work
+-  public auth is explicit
+-  storage follows record security
+-  auth endpoints rate-limited appropriately
+-  secret values never logged
+-  operational services not unintentionally publicly exposed
+
+---
+
+# 109. ACCEPTANCE — ARCHITECTURE
+
+-  one HTTP runtime
+-  one ORM runtime
+-  thin application composition
+-  domain addons transport-independent
+-  canonical infrastructure adapters
+-  no direct domain-to-MinIO
+-  no direct domain-to-Valkey for platform concerns
+-  no direct domain-to-Loki
+-  no direct domain-to-VictoriaMetrics
+-  clear package ownership
+
+---
+
+# 110. ACCEPTANCE — CI
+
+Backend CI verifies at minimum:
+
+```text
+ORM
+server
+security
+integration
+
+```
+
+Infrastructure integration is separately testable.
+
+UI failures should not hide backend diagnostics.
+
+---
+
+# 111. ACCEPTANCE — DOCUMENTATION
+
+Documentation clearly explains:
+
+```text
+Moon Server
+Moon ORM
+Moon Addon
+
+PostgreSQL responsibility
+Valkey responsibility
+MinIO responsibility
+VictoriaMetrics responsibility
+Loki responsibility
+
+Docker networking
+environment configuration
+health/readiness
+production startup
+backup scope
+metrics
+logging
+storage
+cache
+auth/security
+
+```
+
+---
+
+# 112. ACCEPTANCE — GREP AUDIT
+
+At completion search:
+
+```bash
+rg "SUPERUSER_ID" apps packages
+
+rg "createMoonOrm" apps packages
+
+rg "LegacyModelRegistry" apps packages
+
+rg "FastifyInstance" apps packages/moon-base packages/moon-witness
+
+rg "127\.0\.0\.1|localhost" apps packages
+
+rg "minio|S3_" apps packages
+
+rg "valkey|redis" apps packages
+
+rg "loki|victoria|metrics" apps packages
+
+```
+
+Manually classify remaining occurrences.
+
+Do not mechanically delete legitimate framework code.
+
+---
+
+# 113. ACCEPTANCE — DOCKER AUDIT
+
+Confirm every declared Compose service has one of:
+
+```text
+ACTIVE INTEGRATION
+OPTIONAL INTEGRATION
+DEVELOPMENT ONLY
+INTENTIONALLY UNUSED / TO REMOVE
+
+```
+
+No service may remain conceptually unexplained.
+
+---
+
+# 114. FINAL REPORT V2
+
+Final response must include:
+
+## A. Repository state
+
+```text
+branch
+starting SHA
+ending SHA
+working tree
+remote movement if known
+
+```
+
+## B. Confirmed architecture before
+
+Only report findings actually reverified.
+
+## C. Architecture after
+
+Explicitly state owners for:
+
+```text
+HTTP
+ORM
+auth
+REST
+RPC
+realtime
+PostgreSQL
+Valkey
+MinIO
+metrics
+logging
+addons
+
+```
+
+## D. Infrastructure matrix
+
+Use:
+
+```text
+SERVICE          STATUS          CONSUMER       PURPOSE
+
+PostgreSQL       integrated      @moon/orm      persistence
+Valkey           ...
+MinIO            ...
+VictoriaMetrics  ...
+Loki             ...
+
+```
+
+Do not mark integrated without actual evidence.
+
+## E. Files
+
+```text
+added
+modified
+deleted
+
+```
+
+## F. Security changes
+
+Explain concrete fixes.
+
+## G. Tests
+
+List exact commands and PASS/FAIL.
+
+## H. Runtime verification
+
+Where environment allows, verify:
+
+```text
+Postgres
+Valkey
+MinIO
+metrics ingestion
+Loki ingestion
+Moon Server health
+
+```
+
+If a dependency cannot be verified locally, state exactly why.
+
+## I. Remaining work
+
+Classify:
+
+```text
+P0
+P1
+P2
+P3
+
+```
+
+## J. End-state score
+
+Score:
+
+```text
+Runtime consolidation          /10
+ORM consolidation              /10
+Authentication                 /10
+Authorization                  /10
+PostgreSQL integration         /10
+Valkey integration             /10
+Storage/MinIO                  /10
+Metrics/VictoriaMetrics        /10
+Logging/Loki                   /10
+Addon architecture             /10
+CI                             /10
+Developer experience           /10
+Production readiness           /10
+PocketBase-like usability      /10
+Odoo-like ORM capability       /10
+
+```
+
+Give short evidence-based justification.
+
+---
+
+# 115. DEFINITION OF DONE V2
+
+Moon Server V2 consolidation is DONE only when this statement is accurate:
+
+> MoonWitness is an application composed on top of a reusable Moon Server runtime. Moon Server owns transport, authentication, generic REST, explicit RPC, realtime transport, addon lifecycle, request context, infrastructure facades, health and observability. Moon ORM owns relational persistence through PostgreSQL. Valkey provides explicitly defined ephemeral/shared runtime capabilities rather than becoming a second database. MinIO provides object storage behind a Moon storage abstraction with PostgreSQL metadata and Moon authorization. Moon Server exports meaningful metrics that actually reach VictoriaMetrics, and structured redacted logs have a real delivery path into Loki. Domain addons remain independent of Fastify and infrastructure SDKs. Ordinary HTTP requests never execute implicitly as superuser. Backend and infrastructure behavior are protected by automated tests and CI.
+
+Anything less means the migration is still in progress.
+
+---
+
+# 116. FINAL INFRASTRUCTURE NORTH STAR
+
+Keep this model throughout implementation:
+
+```text
+                           Moon Server
+                               │
+            ┌──────────────────┼───────────────────┐
+            │                  │                   │
+            ▼                  ▼                   ▼
+         Moon ORM         Moon Cache         Moon Storage
+            │                  │                   │
+            ▼                  ▼                   ▼
+        PostgreSQL           Valkey              MinIO
+
+
+                           Moon Server
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+                    ▼                     ▼
+                 Metrics              Structured Logs
+                    │                     │
+                    ▼                     ▼
+            VictoriaMetrics             Loki
+
+```
+
+And:
+
+```text
+PostgreSQL
+= durable relational source of truth
+
+Valkey
+= ephemeral/shared runtime acceleration and coordination
+
+MinIO
+= durable binary/object storage
+
+VictoriaMetrics
+= operational metrics backend
+
+Loki
+= centralized structured log backend
+
+```
+
+Never blur these responsibilities without a strong architectural reason.
+
+---
+
+# 117. START NOW
+
+Do not answer with another theoretical architecture document only.
+
+Begin with actual repository inspection.
+
+Reverify every historical finding.
+
+Map every infrastructure service to its real consumer.
+
+Identify all phantom/unconnected services.
+
+Fix the highest-priority P0 first.
+
+Then progressively consolidate the runtime and infrastructure.
+
+Run tests after coherent changes.
+
+Update documentation alongside implementation.
+
+Do not claim an infrastructure service is integrated until data can demonstrably flow from Moon Server to that service.
+
+Do not claim completion prematurely.

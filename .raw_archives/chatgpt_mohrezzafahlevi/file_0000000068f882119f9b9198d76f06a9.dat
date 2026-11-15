@@ -1,0 +1,78 @@
+# MOONWITNESS XV — Integrated Task Crosswalk & Release Path
+
+**DRAFT ONLY · NO REPO WRITE · NO NEW OFFICIAL IDS · Audit latest recheck SHA `7e8483e5973279572d6777532d15afc494a83f36` (initial baseline `4c6344625597d5fb479967db07d3b52a0ddc6147`) · 2026-10-26**
+
+This is a *proposed reconciliation overlay* on `TODO.md` (29 milestones, 203 existing task IDs). This is **not a replacement execution register**, not evidence of completion, and not authorization to create issues/branches/commits. Revalidate on latest HEAD, since a local AI may be working in parallel.
+
+## 1. Mandatory order (dependency gates, not new milestones)
+
+1. **Integrity regression gate**: frozen install and exact-HEAD CI have **PASSED at `7e8483e`, run `40296311027`**. Do NOT reimplement the resolved lockfile fix. Recheck only after new HEAD changes (M01-03, M05-07).
+2. **Boundary security**: Cockpit local API control permissions/CORS/CSRF; AI Gateway exposed unauthenticated POST + cross-provider fallback; Sentinel static credential guesses; Journey public mandates (M03-07, M21-04, M23-02). No internet/public release while unverified.
+3. **Exact source/rights**: Compare Reader hardcoded rights, plus newly added `/research` reading candidate models as public REST; filter released projections rather than raw `ADMIN_WRITE` rows (M07-04, M18-01/02/06).
+4. **Ontology/name decisions**: 8 II eras vs 8 editorial eras; GOD99 vs 99 chapters; current `moonql-*` packages vs outdated domain docs (M02-01/02/07, M06-03).
+5. **App boundaries & functional truth**: one Dock layout + IA; HQ truthful dashboard and real research reviewer; Cockpit canonical React client; ARSY rename with tests only after foundation (M19-03, M20-01/02, M28).
+6. **Visual/behavior QA**: MoonUI tokens, status model, mobile/RTL/keyboard/screenshot; optional Moonframe adapter only after core semantics (M19-01..07).
+7. **End-to-end right-sized release**: source-first Reader, one reviewed term+figure+research and consent-gated public projection + existing Radio; World/Cosmos/Journey expansions nonblocking (M18, M22, M27).
+
+## 2. Unique execution packets (under existing task IDs)
+
+These rows have **one accountable parent**. The `WP-*` names are local reading labels; DO NOT create them as a competing status index. Parent checkboxes change only when parent exit gate passes.
+
+| Local label | Parent | Priority / difficulty | Sole deliverable / executable acceptance |
+|---|---|---|---|
+| A01 | M01-03 | PASS at 7e8483e / regression-only | Frozen lockfile and full CI passed on `40296311027`; only re-open if newest HEAD fails |
+| A02 | M01-07 | P0 / D2 | Record exact SHA, CI result, failures, tests and regression deltas; do not cite old green CI as current |
+| A03 | M03-07 | P0 / D4 | Cockpit POST/DELETE APIs protected by loopback + strict Origin/Host/CSRF/auth; cross-origin unauthorized mutation tests fail closed |
+| A04 | M21-04 | P0 / D4 | AI Gateway disabled/private unless deliberately configured; per-request provider allowlist/consent; no unseen remote cascade or unauthorized request; test fail closed |
+| A05 | M03-07 | P0 / D3 | Sentinel has zero password guesses; explicit per-worker least-privilege credential; missing secrets disables polling safely |
+| A06 | M23-02 | P0 / D3 | Journey mandates private unless consented publication, no pseudonym/description public by default; guest/withdraw tests |
+| A07 | M07-04 | P0 / D3 | Remove unsupported RIGHTS_CLEARED from hardcoded Compare samples; same rights evaluator as Corpus, scoped to exact version |
+| A08 | M18-01 | P0 / D4 | Research eligibility and public publication remain separate state machines; fail closed before M18 review/signoff |
+| B01 | M02-07 | P1 / D2 | ADR errata for II era taxonomy vs editorial rewrite, GOD99 vs chapters and current package names; immutable historical references preserved |
+| B02 | M02-02 | P1 / D2 | One domain-to-package-to-entity matrix D00-D13, verified actual modules and current/planned labels |
+| B03 | M05-07 | P1 / D3 | One capability/status evidence response and typed SDK interpretation; reuse existing `@moonwitness/web-config` for Next config; never treat UI text as proof of availability |
+| B04 | M17-01 | P1 / D3 | Creative/narrative genre registry with source-specific eras, Prisms and scope labels, not 13 services |
+| B05 | M17-03 | P1 / D3 | One Story/Media owner for SHADOW project/episode/media metadata; HQ project links stop pointing at Radio models |
+| B06 | M18-06 | P1 / D3 | Content type/badge/attribution component distinguishing source/translation/interpretation/fiction/AI candidate |
+| B07 | M18-03 | P0 / D4 | `/research` may project only rights-approved released versions; currently reads public raw research models with unreviewed hypotheses. Test guest access, withdraw and candidate suppression |
+| B08 | M19-04 | P1 / D2 | ResearchExplorer case detail filters frames by `caseRef` and selectable cards use keyboard-semantic controls, no cross-case context leakage |
+| C01 | M19-03 | P1 / D2 | Remove nested Dock `SiteLayout` from 4 known routes; exactly one main/header/footer; regression test |
+| C02 | M19-03 | P1 / D3 | Dock sitemap/nav with Discover, Knowledge, **existing `/research`**, Stories, Signal; preserved old URLs, mobile and active state; no second Research Explorer |
+| C03 | M19-03 | P1 / D3 | Home/SEO/PWA update to XV Knowledge Observatory; Radio CTA intact and visible, false 'just late-night radio' removed |
+| C04 | M19-03 | P1 / D2 | Distinguish Dock Vector Studio, HQ Data Studio, future SHADOW editorial Studio; link/label intentions tested |
+| C05 | M24-05 | P1 / D3 | World Monitor sourced timestamps, `AI_TRIAGED` only when evidenced; provider stale/disabled != live |
+| D01 | M20-01 | P0 / D3 | Replace HQ static fake project progress, jobs, alerts, 14 systems, fallback-counts with measured data/demo or unavailable |
+| D02 | M20-01 | P1 / D3 | HQ IA/workspaces with source, research, SHADOW, governance, 100CENTER, Radio admin; do not build another admin app |
+| D03 | M20-02 | P1 / D3 | HQ review UI over existing M14 case/counterevidence/pilot/MIZAN endpoints, no second engine or publisher |
+| D04 | M20-07 | P1 / D4 | Right role, expired cookie and direct URL/API tests; data/actions deny where unauthorized |
+| E01 | M19-01 | P1 / D3 | Cockpit React/Vite canonical build, remove legacy only after verified fallback and routes, dedup BGM asset |
+| E02 | M28-05 | P1 / D3 | ARSY service labels and backward compatible RADIO_* aliases; no second Hub or spontaneous rename |
+| E03 | M19-01 | P1 / D3 | MoonUI/another-provider overlap audit; Moonframe *proposed* 15-skin behavior contract tested as opt-in spike, not shipped claim |
+| E04 | M19-02 | P1 / D3 | Token source/semantic roles for Reader/Research/Story/Operator, fix undefined `--m-border`, correct linter drift table |
+| E05 | M19-04 | P1 / D3 | Tabs keyboard/ARIA, mobile nav, reduced-motion and sound toggle, focus and errors |
+| E06 | M19-05 | P1 / D3 | Arabic/Hebrew/Greek, text selection, RTL, diacritics and copying verified |
+| E07 | M19-06 | P1 / D3 | Real screenshot + interaction baselines (desktop/mobile) at pinned SHA, not design-only mockups |
+| F01 | M22-07 | P0 / D3 | Frozen Radio station/listen/schedule/DENPA/WA API regression before/after cross-domain changes |
+| F02 | M27-05 | P0 / D3 | Exact rights, approved reviewers, consent and no unreviewed source/creative media on public surfaces |
+| F03 | M27-07 | P0 / D3 | Human release go/no-go with live SHA, restored backup, test evidence, unresolved risks and rollback |
+
+## 3. De-duplication decisions
+
+- Existing M08 Reader, M09 UNILEX, M10 Ontology, M11 Figures/Missions, M12 Graph, M13 research pipeline and M14 research review are **reuse or regression targets**, never a mandate to implement a second version.
+- M19 Research public page and `packages/web-config` already exist at `7e8483e`; do not build duplicate Research Explorer or web configuration package.
+- M23 Journey has real initial code (`moonql-journey`, `/patches`, `/denpa`, registries) while seven parent TODO items remain unchecked: revalidate each DoD rather than rebuilding the addon.
+- M24 World Monitor has partial infrastructure but its provider-provenance/quality release gates remain open; a radar screen is not evidence of real-world validated feeds.
+- `M28` ARSY rename is a **move**, not duplication. Do not create a separate ARSY Fastify process alongside Radio.
+- `M19` is the owner for visual component behavior and experience, `M20` for governed HQ workflow, `M17` for Story, `M18` for release, `M02` for agreed name meanings. Avoid creating cross-domain “master owner” packages.
+- The 70 `UIX-` ideas issued in the previous audit are **candidate children only**. They should be reconciled under existing milestones, not committed as 70 new root tasks plus a second `TODO`.
+
+## 4. Change risk and evidence gates for every packet
+
+Every packet's implementation handoff must include:
+`auditHeadSHA`, `currentMainSHA`, `taskParent`, `singleOwner`, `readScopes`, `writeFiles`, `historicalSourceVersion`, `rights/consent`, `risk/Priority`, `dependencies`, `positiveTests`, `negativeTests`, `acceptance`, `newCommitSHA`, `CIrun`, `rollbackPlan`, `reviewer`.
+
+Agents should avoid parallel edits to `pnpm-lock.yaml`, `packages/moonql-client/src/generated.ts`, `TODO.md`, `BLUEPRINT.md`, `apps/radio/src/addons.ts`, root manifest, Compose, or shared MoonUI tokens. Use a **single integration writer** and short-lived agreed task ownership on `main`.
+
+## 5. Non-goals at this freeze
+
+No new mobile/Story/Corpus/World/100CENTER standalone app. No separate Shadow or personal identity provider. No automatic religious certainty classification. No self-approving research/publishing AI. No required adoption of all 15 Moonframe skins. No bulk content import with unknown license. No 'AI never fails' reliability claim. No screenshots falsely described as running production verification.

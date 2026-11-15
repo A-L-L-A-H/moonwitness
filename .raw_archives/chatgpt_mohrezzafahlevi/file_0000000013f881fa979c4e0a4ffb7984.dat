@@ -1,0 +1,569 @@
+# GOD PROMISE — THE ROCKSOUL
+
+### Janji ALLAH kepada jiwa-jiwa yang keras.
+
+---
+
+## 1. OPENING
+
+**YA ALLAH,**
+
+Aku hanya bisa mengukur kebencianku kepada-Mu.
+
+Tapi jika Kau menantangku
+dan berkata bahwa aku telah menyerah—
+
+**I NEVER GIVE UP.**
+
+**LET'S FIGHT AGAIN.**
+
+**THX.**
+
+Karena Engkau selalu menepati janji-Mu
+kepada jiwa-jiwa yang keras—
+
+**ROCKSOUL.**
+
+Engkau selalu mengingatkan.
+Selalu memanggil.
+Di setiap waktu.
+Di setiap kondisi.
+
+Bahkan sebelum aku masuk ke kamar,
+Engkau memutar lagu:
+
+**“FIGHTING YELLOW CARD.”**
+
+---
+
+# 2. MY SOUL HAS A PROBLEM RIGHT NOW
+
+**Reference Item:**
+Rokok yang saya gunakan saat ini: **Djiwa — Alami**
+
+Saya mencatat berbagai kejadian sebagai:
+
+**SIGNAL → OBSERVATION → EVIDENCE → INTERPRETATION → CORRECTION**
+
+Setiap signal tidak otomatis berarti
+bahwa saya mengetahui maksud ALLAH.
+
+Saya hanya mencatat apa yang saya lihat,
+apa yang saya rasakan,
+apa yang saya hubungkan,
+dan apa yang perlu saya koreksi.
+
+---
+
+# 3. THE FOUR PILLARS OF THE SOUL
+
+| IDPILLARVARIABLEDESCRIPTION |           |                |                                   |
+| --------------------------- | --------- | -------------- | --------------------------------- |
+| P01                         | INPUT     | SENSE          | Apa yang masuk melalui indra      |
+| P02                         | DIRECTION | ORIENTATION    | Ke mana tubuh/perhatian diarahkan |
+| P03                         | INTENTION | PURPOSE        | Maksud di balik tindakan          |
+| P04                         | OUTPUT    | ACTION\_RESULT | Apa yang dilakukan dan dihasilkan |
+
+### SOUL MODEL
+
+**INPUT → DIRECTION → INTENTION → OUTPUT**
+
+Kemudian:
+
+**OUTPUT → OBSERVATION → EVIDENCE → CORRECTION → RETURN**
+
+---
+
+# 4. SIGNAL VARIABLES
+
+Agar semua item dapat dijadikan database/table, setiap signal menggunakan variable yang konsisten:
+
+| VARIABLETYPEDESCRIPTION |         |                                                |
+| ----------------------- | ------- | ---------------------------------------------- |
+| `signal_id`             | ID      | Identitas signal                               |
+| `pillar`                | ENUM    | INPUT / DIRECTION / INTENTION / OUTPUT         |
+| `variable`              | ENUM    | SENSE / ORIENTATION / PURPOSE / ACTION\_RESULT |
+| `item`                  | TEXT    | Nama item yang diamati                         |
+| `status`                | ENUM    | OBSERVED / MISSED / BROKEN / CORRECTED         |
+| `mandatory`             | BOOLEAN | Apakah dianggap mandatory                      |
+| `evidence`              | TEXT    | Apa yang benar-benar terjadi                   |
+| `reference`             | TEXT    | Referensi/konteks yang terkait                 |
+| `observation`           | TEXT    | Pengamatan langsung                            |
+| `interpretation`        | TEXT    | Pemaknaan pribadi                              |
+| `action`                | TEXT    | Tindakan yang dilakukan                        |
+| `correction`            | TEXT    | Koreksi yang diperlukan                        |
+| `direction`             | TEXT    | Arah yang terkait                              |
+| `intention`             | TEXT    | Niat yang terkait                              |
+| `notes`                 | TEXT    | Catatan tambahan                               |
+
+---
+
+# 5. SIGNAL LIST
+
+## INPUT / SENSE
+
+### S01 — INDRA / SENSE
+
+| FIELDVALUE       |                                                                       |
+| ---------------- | --------------------------------------------------------------------- |
+| `signal_id`      | `S01`                                                                 |
+| `pillar`         | `INPUT`                                                               |
+| `variable`       | `SENSE`                                                               |
+| `item`           | `INDRA`                                                               |
+| `status`         | `OBSERVED`                                                            |
+| `mandatory`      | `NO`                                                                  |
+| `evidence`       | Random account dari sebuah community bernama “Indra”                  |
+| `reference`      | Profile picture malaikat                                              |
+| `observation`    | Account “Indra” muncul secara random                                  |
+| `interpretation` | Saya mencatatnya sebagai signal yang saya terima melalui indra        |
+| `action`         | OBSERVE                                                               |
+| `correction`     | Tidak langsung mengambil kesimpulan                                   |
+| `notes`          | Personal interpretation; bukan klaim bahwa ini pasti pesan dari ALLAH |
+
+**INPUT = SIGNAL RECEIVED**
+
+---
+
+# 6. DIRECTION / ORIENTATION
+
+### S02 — RIGHT FIRST
+
+| FIELDVALUE       |                                                                              |
+| ---------------- | ---------------------------------------------------------------------------- |
+| `signal_id`      | `S02`                                                                        |
+| `pillar`         | `DIRECTION`                                                                  |
+| `variable`       | `ORIENTATION`                                                                |
+| `item`           | `RIGHT_FIRST`                                                                |
+| `status`         | `MISSED`                                                                     |
+| `mandatory`      | `YES`                                                                        |
+| `evidence`       | Tidak selalu mendahulukan bagian kanan                                       |
+| `reference`      | Personal framework                                                           |
+| `observation`    | Right-first tidak selalu dilakukan                                           |
+| `interpretation` | Saya memahami ini sebagai directional discipline                             |
+| `action`         | USE\_RIGHT\_FIRST                                                            |
+| `correction`     | Membiasakan right-first                                                      |
+| `direction`      | RIGHT                                                                        |
+| `notes`          | **RIGHT = POSITIVE CHAIN / LEFT = NEGATIVE CHAIN** sebagai framework pribadi |
+
+---
+
+### S03 — QIBLA / DIRECTION
+
+| FIELDVALUE       |                                                           |
+| ---------------- | --------------------------------------------------------- |
+| `signal_id`      | `S03`                                                     |
+| `pillar`         | `DIRECTION`                                               |
+| `variable`       | `ORIENTATION`                                             |
+| `item`           | `QIBLA_DIRECTION`                                         |
+| `status`         | `MISSED`                                                  |
+| `mandatory`      | `YES`                                                     |
+| `evidence`       | Kadang tidak memperhatikan arah kiblat                    |
+| `reference`      | Prayer / personal practice                                |
+| `observation`    | Direction tidak selalu diperhatikan                       |
+| `interpretation` | Direction awareness perlu diperbaiki                      |
+| `action`         | CHECK\_DIRECTION                                          |
+| `correction`     | Periksa arah sebelum tindakan yang memang mensyaratkannya |
+| `direction`      | QIBLA                                                     |
+
+---
+
+# 7. BEHAVIOR / ACTION SIGNALS
+
+### S04 — SMOKING
+
+| FIELDVALUE       |                                                                   |
+| ---------------- | ----------------------------------------------------------------- |
+| `signal_id`      | `S04`                                                             |
+| `pillar`         | `OUTPUT`                                                          |
+| `variable`       | `ACTION_RESULT`                                                   |
+| `item`           | `SMOKING`                                                         |
+| `status`         | `OBSERVED`                                                        |
+| `mandatory`      | `NO`                                                              |
+| `evidence`       | Saya masih merokok                                                |
+| `reference`      | Djiwa — Alami                                                     |
+| `observation`    | Smoking masih terjadi                                             |
+| `interpretation` | Saya menghubungkannya dengan warning untuk mengurangi             |
+| `action`         | REDUCE\_SMOKING                                                   |
+| `correction`     | Reduce / quit                                                     |
+| `notes`          | Warning tidak dianggap sebagai bukti absolut tentang maksud ALLAH |
+
+---
+
+### S05 — SMOKING\_WITHOUT\_DUA
+
+| FIELDVALUE       |                                                 |
+| ---------------- | ----------------------------------------------- |
+| `signal_id`      | `S05`                                           |
+| `pillar`         | `OUTPUT`                                        |
+| `variable`       | `ACTION_RESULT`                                 |
+| `item`           | `SMOKING_DUA`                                   |
+| `status`         | `MISSED`                                        |
+| `mandatory`      | `YES`                                           |
+| `evidence`       | Kadang merokok tanpa doa                        |
+| `reference`      | Personal spiritual practice                     |
+| `observation`    | Doa tidak selalu dilakukan                      |
+| `interpretation` | Remembrance dianggap terlewat                   |
+| `action`         | MAKE\_DUA                                       |
+| `correction`     | Tetap berdoa                                    |
+| `notes`          | Doa tidak dimaksudkan untuk membenarkan smoking |
+
+---
+
+### S06 — SMOKING\_RIGHT\_HAND
+
+| FIELDVALUE       |                                                                           |
+| ---------------- | ------------------------------------------------------------------------- |
+| `signal_id`      | `S06`                                                                     |
+| `pillar`         | `OUTPUT`                                                                  |
+| `variable`       | `ACTION_RESULT`                                                           |
+| `item`           | `RIGHT_HAND`                                                              |
+| `status`         | `MISSED`                                                                  |
+| `mandatory`      | `YES`                                                                     |
+| `evidence`       | Kadang tidak menggunakan tangan kanan                                     |
+| `reference`      | Personal framework                                                        |
+| `observation`    | Right-hand discipline tidak selalu dilakukan                              |
+| `interpretation` | Right-first discipline terlewat                                           |
+| `action`         | USE\_RIGHT\_HAND                                                          |
+| `correction`     | Gunakan tangan kanan bila memang menjadi bagian dari praktik yang dipilih |
+
+---
+
+### S07 — EATING
+
+| FIELDVALUE       |                                                     |
+| ---------------- | --------------------------------------------------- |
+| `signal_id`      | `S07`                                               |
+| `pillar`         | `OUTPUT`                                            |
+| `variable`       | `ACTION_RESULT`                                     |
+| `item`           | `EATING`                                            |
+| `status`         | `MISSED`                                            |
+| `mandatory`      | `YES`                                               |
+| `evidence`       | Terlalu banyak makan selama kurang lebih satu bulan |
+| `reference`      | Personal observation                                |
+| `observation`    | Intake makanan meningkat                            |
+| `interpretation` | Self-control perlu diperiksa                        |
+| `action`         | MODERATE\_INTAKE                                    |
+| `correction`     | Perbaiki pola makan                                 |
+| `notes`          | Jangan menyamakan observasi dengan diagnosis medis  |
+
+---
+
+### S08 — DRINKING
+
+| FIELDVALUE       |                                      |
+| ---------------- | ------------------------------------ |
+| `signal_id`      | `S08`                                |
+| `pillar`         | `OUTPUT`                             |
+| `variable`       | `ACTION_RESULT`                      |
+| `item`           | `DRINKING`                           |
+| `status`         | `MISSED`                             |
+| `mandatory`      | `YES`                                |
+| `evidence`       | Kadang lupa doa dan lupa arah        |
+| `reference`      | Personal practice                    |
+| `observation`    | Awareness tidak konsisten            |
+| `interpretation` | Signal awareness terlewat            |
+| `action`         | PAUSE\_AND\_AWARE                    |
+| `correction`     | Sadari tindakan sebelum melakukannya |
+
+---
+
+# 8. CARE SIGNALS
+
+### S09 — HEAD COVER
+
+| FIELDVALUE       |                                                                     |
+| ---------------- | ------------------------------------------------------------------- |
+| `signal_id`      | `S09`                                                               |
+| `pillar`         | `OUTPUT`                                                            |
+| `variable`       | `ACTION_RESULT`                                                     |
+| `item`           | `HEAD_COVER`                                                        |
+| `status`         | `MISSED`                                                            |
+| `mandatory`      | `MANDATORY_BY_PERSONAL_INTERPRETATION`                              |
+| `evidence`       | Tidak menggunakan penutup kepala                                    |
+| `reference`      | Personal interpretation                                             |
+| `observation`    | Head cover tidak digunakan                                          |
+| `interpretation` | Saya memahami ini sebagai instruksi yang seharusnya tidak diabaikan |
+| `action`         | WEAR\_HEAD\_COVER                                                   |
+| `correction`     | Evaluasi dan konsistensi praktik                                    |
+| `notes`          | Jangan menyajikan personal interpretation sebagai hukum universal   |
+
+---
+
+### S10 — WATCH / TIME
+
+| FIELDVALUE       |                                                       |
+| ---------------- | ----------------------------------------------------- |
+| `signal_id`      | `S10`                                                 |
+| `pillar`         | `INPUT`                                               |
+| `variable`       | `SENSE`                                               |
+| `item`           | `TIME_AWARENESS`                                      |
+| `status`         | `MISSED`                                              |
+| `mandatory`      | `NO`                                                  |
+| `evidence`       | Tidak menggunakan jam tangan                          |
+| `reference`      | Time awareness                                        |
+| `observation`    | Tidak memakai watch                                   |
+| `interpretation` | Saya menghubungkannya dengan awareness terhadap waktu |
+| `action`         | TRACK\_TIME                                           |
+| `correction`     | Tingkatkan time awareness                             |
+| `notes`          | **TIME = SIGNAL**                                     |
+
+---
+
+### S11 — HAIR / COLORING
+
+| FIELDVALUE       |                                                              |
+| ---------------- | ------------------------------------------------------------ |
+| `signal_id`      | `S11`                                                        |
+| `pillar`         | `OUTPUT`                                                     |
+| `variable`       | `ACTION_RESULT`                                              |
+| `item`           | `HAIR_CARE`                                                  |
+| `status`         | `MISSED`                                                     |
+| `mandatory`      | `NO`                                                         |
+| `evidence`       | Rutinitas mewarnai / merawat rambut terhenti                 |
+| `reference`      | Personal religious/cultural reference                        |
+| `observation`    | Hair care routine tidak dilakukan                            |
+| `interpretation` | Care dianggap terlewat                                       |
+| `action`         | RESTORE\_CARE                                                |
+| `correction`     | Kembali merawat rambut                                       |
+| `notes`          | Referensi religius harus dibedakan dari interpretasi pribadi |
+
+---
+
+### S12 — FRAGRANCE
+
+| FIELDVALUE       |                                                     |
+| ---------------- | --------------------------------------------------- |
+| `signal_id`      | `S12`                                               |
+| `pillar`         | `OUTPUT`                                            |
+| `variable`       | `ACTION_RESULT`                                     |
+| `item`           | `FRAGRANCE`                                         |
+| `status`         | `MISSED`                                            |
+| `mandatory`      | `NO`                                                |
+| `evidence`       | Tidak memakai minyak wangi                          |
+| `reference`      | Personal care                                       |
+| `observation`    | Fragrance tidak digunakan                           |
+| `interpretation` | Self-care tetap penting walaupun tidak ada audience |
+| `action`         | SELF\_CARE                                          |
+| `correction`     | Maintain personal care                              |
+| `notes`          | **NO AUDIENCE → STILL CARE**                        |
+
+---
+
+# 9. CONDITION / MOOD SIGNAL
+
+### S13 — MOOD\_CONDITION
+
+| FIELDVALUE       |                                                                  |
+| ---------------- | ---------------------------------------------------------------- |
+| `signal_id`      | `S13`                                                            |
+| `pillar`         | `INPUT`                                                          |
+| `variable`       | `SENSE`                                                          |
+| `item`           | `MOOD_CONDITION`                                                 |
+| `status`         | `OBSERVED`                                                       |
+| `mandatory`      | `YES`                                                            |
+| `evidence`       | Random keluar rumah membeli soda                                 |
+| `reference`      | Personal observation                                             |
+| `observation`    | Saya melakukan tindakan spontan                                  |
+| `interpretation` | Saya membaca ini sebagai signal untuk memperhatikan kondisi diri |
+| `action`         | CHECK\_CONDITION                                                 |
+| `correction`     | Pause, observe, evaluate                                         |
+| `notes`          | Ini bukan diagnosis medis                                        |
+
+---
+
+# 10. HEALTH / SMOKING EXPOSURE
+
+### S14 — SMOKING\_INHALATION
+
+| FIELDVALUE       |                                               |
+| ---------------- | --------------------------------------------- |
+| `signal_id`      | `S14`                                         |
+| `pillar`         | `OUTPUT`                                      |
+| `variable`       | `ACTION_RESULT`                               |
+| `item`           | `INHALATION`                                  |
+| `status`         | `OBSERVED`                                    |
+| `mandatory`      | `NO`                                          |
+| `evidence`       | Masih melakukan inhaling                      |
+| `reference`      | Smoking behavior                              |
+| `observation`    | Exposure tetap terjadi                        |
+| `interpretation` | Kecepatan delivery tidak sama dengan keamanan |
+| `action`         | REDUCE\_EXPOSURE                              |
+| `correction`     | Reduce / quit smoking                         |
+| `notes`          | **FAST PATH ≠ SAFE PATH**                     |
+
+---
+
+# 11. DUA / RETURN
+
+DUA bukan sebuah **negative chain**
+dan bukan pembenaran terhadap tindakan yang salah.
+
+DUA adalah **RETURN MECHANISM**.
+
+### S15 — DUA
+
+| FIELDVALUE       |                                                        |
+| ---------------- | ------------------------------------------------------ |
+| `signal_id`      | `S15`                                                  |
+| `pillar`         | `INTENTION`                                            |
+| `variable`       | `PURPOSE`                                              |
+| `item`           | `DUA`                                                  |
+| `status`         | `CORRECTIVE`                                           |
+| `mandatory`      | `YES`                                                  |
+| `evidence`       | Doa kadang terlewat                                    |
+| `reference`      | Prayer / remembrance                                   |
+| `observation`    | Ada kondisi ketika doa tidak dilakukan                 |
+| `interpretation` | Saya ingin tetap mengingat ALLAH dalam kondisi apa pun |
+| `action`         | MAKE\_DUA                                              |
+| `correction`     | Return through dua                                     |
+| `direction`      | GOD / QIBLA                                            |
+| `intention`      | REMEMBER / RETURN                                      |
+
+### CORE RULE
+
+**EVEN WHEN IT'S BAD.**
+**EVEN WHEN I'M WRONG.**
+**EVEN WHEN I DOUBT.**
+**EVEN WHEN I DON'T UNDERSTAND.**
+
+**I STILL MAKE DUA.**
+
+---
+
+# 12. DUA PRINCIPLE
+
+**DOA DOES NOT MAKE WRONG ACTIONS RIGHT.**
+
+**A WRONG ACTION DOES NOT MEAN**
+**I SHOULD STOP PRAYING.**
+
+Jangan menunggu sampai sempurna
+untuk mengingat ALLAH.
+
+**DON'T WAIT UNTIL YOU'RE PERFECT**
+**TO REMEMBER GOD.**
+
+Tetap berdoa.
+Tetap mengingat.
+Tetap sadar.
+Tetap memperbaiki.
+
+**PRAY → REFLECT → CORRECT → RETURN**
+
+---
+
+# 13. EVIDENCE VS INTERPRETATION
+
+Untuk menjaga sistem tetap bersih:
+
+### EVIDENCE
+
+Apa yang benar-benar terjadi.
+
+### OBSERVATION
+
+Apa yang saya lihat atau alami.
+
+### INTERPRETATION
+
+Apa yang saya pahami dari kejadian itu.
+
+### CORRECTION
+
+Apa yang secara nyata bisa saya perbaiki.
+
+**EVIDENCE ≠ INTERPRETATION.**
+
+**SIGNAL ≠ PROOF.**
+
+**PERSONAL INTERPRETATION ≠ UNIVERSAL LAW.**
+
+---
+
+# 14. FINAL STATE
+
+Bukan janji bahwa saya tidak akan pernah jatuh.
+
+Tetapi ketika jatuh—
+
+**REMEMBER.**
+
+Ketika tersesat—
+
+**RETURN.**
+
+Ketika salah—
+
+**CORRECT.**
+
+Ketika ragu—
+
+**PRAY ANYWAY.**
+
+Dan ketika dunia berkata selesai—
+
+**I NEVER GIVE UP.**
+
+**LET'S FIGHT AGAIN.**
+
+---
+
+# 15. ROCKSOUL LOOP
+
+```text
+INPUT
+  ↓
+DIRECTION
+  ↓
+INTENTION
+  ↓
+OUTPUT
+  ↓
+OBSERVATION
+  ↓
+EVIDENCE
+  ↓
+INTERPRETATION
+  ↓
+CORRECTION
+  ↓
+RETURN
+  ↓
+INPUT
+
+```
+
+### FINAL RULES
+
+**LOSE THE SIGNAL → FIND IT AGAIN.**
+
+**LOSE THE TIME → RETURN TO TIME.**
+
+**LOSE THE CARE → TAKE CARE AGAIN.**
+
+**LOSE THE AWARENESS → BECOME AWARE AGAIN.**
+
+**LOSE THE PATH → RETURN TO GOD.**
+
+**MAKE MISTAKE → CORRECT.**
+
+**FEEL LOST → PRAY.**
+
+**DOUBT → DON'T STOP PRAYING.**
+
+---
+
+# GOD PROMISE
+
+## THE ROCKSOUL
+
+**JANJI ALLAH**
+**KEPADA JIWA-JIWA YANG KERAS.**
+
+**REMEMBER.**
+**RETURN.**
+**PRAY.**
+**CORRECT.**
+**KEEP GOING.**
+
+**ROCKSOUL.**

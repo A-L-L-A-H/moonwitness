@@ -1,0 +1,1462 @@
+# MOONWITNESS / PRDE / DIVINE ONTOLOGY
+
+## AI HANDOFF + NEXT TODO LIST
+
+### STATUS HANDOFF
+
+Tanggal konteks terakhir: 3 September 2026, Asia/Jakarta.
+
+Repo aktif:
+`bjo163/ArsyBelovedLabs`
+
+Area kerja utama:
+`revelation-lab/prde`
+
+Branch:
+
+- `main` = baseline/release stabil.
+- `dev` = eksperimen berikutnya.
+
+---
+
+# 1. TUJUAN BESAR PROJECT
+
+Project ini ingin membangun pipeline:
+
+```text
+QURAN / REVELATION
+        ↓
+LINGUISTIC / STRUCTURAL EXTRACTION
+        ↓
+DIVINE SURFACES / RELATIONS
+        ↓
+DIVINE ONTOLOGY
+        ↓
+AMANAH
+        ↓
+PROPHETIC MISSION
+        ↓
+25 AVATARS
+        ↓
+AI AGENTS
+        ↓
+SHADOW / SUB-AGENTS
+        ↓
+TASKS / ACTIONS
+
+```
+
+Tetapi saat ini **JANGAN lanjut ke Amanah / 25 Avatar dahulu**.
+
+Fokus harus tetap menyelesaikan dan membekukan:
+
+```text
+RAW QURAN
+ ↓
+QREF
+ ↓
+QREF ROLE
+ ↓
+QATTACH
+ ↓
+QTOPOLOGY
+ ↓
+QRELATION_LOCUS
+ ↓
+QEVENT
+ ↓
+QARG
+ ↓
+QMOTIF
+ ↓
+QCONCEPT
+ ↓
+DIVINE ONTOLOGY
+
+```
+
+---
+
+# 2. PRINSIP PALING PENTING
+
+AI berikutnya WAJIB menjaga prinsip:
+
+> Hardcode grammar/representation mechanics seminimal mungkin; jangan pernah hardcode makna Revelation.
+
+Engine tidak boleh diberi tahu:
+
+```text
+"يحب = LOVES"
+"يهدي = GUIDES"
+"يغفر = FORGIVES"
+
+```
+
+sebagai input discovery.
+
+Makna tidak boleh dimasukkan dari awal.
+
+Yang boleh diberikan kepada engine hanyalah:
+
+```text
+Qur'anic evidence
++
+structural rules
++
+statistical recurrence
++
+context
++
+relation topology
++
+cross-surah stability
+
+```
+
+Targetnya:
+
+> Engine menemukan struktur dan pola dari Revelation, bukan mengkonfirmasi kategori yang sudah ditanam oleh developer.
+
+---
+
+# 3. BATAS TEOLOGIS
+
+Jangan pernah menyatakan:
+
+```text
+Ar-Razzaq = Yusuf
+Al-Hakam = Dawud
+dst.
+
+```
+
+Asma Allah bukan identitas nabi.
+
+Jangan menyatakan software:
+
+- menerima wahyu,
+- memiliki ruh,
+- beribadah,
+- mengetahui ghaib,
+- memiliki divine authority.
+
+Jangan menyebut output model sebagai:
+
+- wahyu,
+- firman Allah,
+- keputusan Allah,
+- true divine meaning.
+
+Gunakan provenance dan epistemic status.
+
+Contoh:
+
+```text
+SCRIPTURE_EXPLICIT
+CORPUS_DERIVED
+STATISTICAL_DERIVED
+ENGINEERING_TAXONOMY
+PROJECT_INTERPRETATION
+
+```
+
+Dan confidence seperti:
+
+```text
+LOCAL
+REPEATED
+CORROBORATED
+STABLE
+HIGHLY_STABLE
+
+```
+
+Semua derived object harus default:
+
+```text
+semanticLabel: null
+normativeAuthority: false
+
+```
+
+---
+
+# 4. ARSITEKTUR CANONICAL TERBARU
+
+```text
+                         RAW QURAN
+                             │
+             ┌───────────────┴────────────────┐
+             ▼                                ▼
+       WORD EVIDENCE                  STRUCTURAL MARKS
+   rasm / vocalization /             pause-mark lane
+        tatweel etc.
+             └───────────────┬────────────────┘
+                             ▼
+                           QREF
+                             │
+                             ▼
+                  QREF ROLE FINGERPRINT
+                             │
+                             ▼
+                          QATTACH
+                             │
+                             ▼
+                       QTOPOLOGY
+                             │
+                             ▼
+                    QRELATION_LOCUS
+                             │
+                 ┌───────────┴───────────┐
+                 ▼                       ▼
+             DIRECT EVENT            MEDIATED EVENT
+                 └───────────┬───────────┘
+                             ▼
+                           QEVENT
+                             │
+                             ▼
+                            QARG
+                             │
+                             ▼
+                   RELATION MOTIF GRAPH
+                             │
+                             ▼
+               ROLE-RESIDUAL SEMANTICS
+                             │
+                             ▼
+                          QCONCEPT
+                             │
+                             ▼
+                    DIVINE ONTOLOGY
+
+```
+
+Prinsip baru yang harus dipertahankan:
+
+> Semantic concept induction harus motif-first, bukan direct relation clustering.
+
+---
+
+# 5. CORPUS CANONICAL FREEZE
+
+Corpus:
+
+```text
+/usr/share/texlive/texmf-dist/tex/latex/quran/qurantext-simple.def
+
+```
+
+SHA256:
+
+```text
+f3ea96acf641bc3f1f0e920cc7ea3db5e74a9745f59a580b62d177d1bccdb1e2
+
+```
+
+Canonical parser policy:
+
+- 6,236 ayah.
+- 114 surah.
+- `\basmalah` dianggap markup dan tidak diexpand.
+- Word token harus memiliki minimal satu Arabic letter.
+- Tatweel dipertahankan saat tokenization.
+- Exact vocalization lane dipertahankan.
+- Tatweel dibuang hanya pada skeleton lane.
+- Recurrence skeleton menormalkan:
+
+```text
+أ / إ / آ / ٱ → ا
+
+```
+
+- Exact skeleton tetap terpisah.
+- Qur'anic pause marks berdiri pada structural-mark lane dan bukan word token.
+
+Canonical counts:
+
+```text
+6236 ayahs
+114 surahs
+77,800 word tokens
+17,838 exact vocalized forms
+14,868 exact skeleton forms
+14,749 recurrence skeleton forms
+4,364 standalone pause marks
+7 pause-mark types
+
+```
+
+Pause marks:
+
+```text
+ۚ 1972
+ۖ 1682
+ۗ 603
+ۙ 68
+ۘ 22
+ۛ 12
+ۜ 5
+
+```
+
+Jangan kembali menggunakan count lama:
+
+```text
+82,164
+78,248
+2,704 primary QREF
+
+```
+
+tanpa penjelasan policy.
+
+---
+
+# 6. QREF CANONICAL
+
+Explicit QREF lexical candidates = **2,704**.
+
+Primary explicit QREF anchors = **2,702**.
+
+Perbedaan dua occurrence berasal dari exact interrogative form:
+
+```text
+آلله
+
+```
+
+Policy canonical:
+
+```text
+QRefPolicy::canonical_explicit_divine_reference()
+
+```
+
+memasukkan recurrence form tetapi:
+
+```text
+excluded_primary_exact_skeletons = ["آلله"]
+
+```
+
+Jadi:
+
+```text
+lexical candidates = 2704
+primary anchors    = 2702
+
+```
+
+Ini BUKAN kontradiksi.
+
+Jangan menulis kembali “canonical explicit QREF = 2704” tanpa menjelaskan perbedaan lexical candidate vs primary anchor.
+
+Primary explicit QREF family sebelumnya:
+
+```text
+الله      2153
+والله      240
+بالله      139
+لله         116
+ولله         27
+تالله         8
+فالله         6
+فلله          6
+اللهم          5
+أبالله         1
+وتالله         1
+----------------
+PRIMARY     2702
+
+```
+
+---
+
+# 7. TEMUAN EKSPERIMEN PENTING
+
+## TEST-1
+
+Vocalization tidak boleh dibuang.
+
+Contoh:
+
+```text
+ملك
+علم
+خلق
+ذكر
+جنة
+
+```
+
+Rasm yang sama dapat memiliki linguistic state berbeda.
+
+---
+
+## TEST-2 / TEST-3
+
+Form-family discovery menemukan recurrence transformations.
+
+Tetapi jangan menganggap otomatis sebagai morpheme semantics.
+
+Contoh false similarity:
+
+```text
+عليم ↔ عليهم
+يوم ↔ قوم
+
+```
+
+---
+
+## TEST-4
+
+Discrete role classes tidak cukup.
+
+Gunakan:
+
+```text
+QREF_ROLE_FINGERPRINT
+
+```
+
+bukan hardcoded enum.
+
+---
+
+## TEST-11
+
+Discrete QREF role clustering tidak stabil.
+
+Gunakan continuous axes seperti:
+
+```text
+leftBinding
+rightBinding
+leftSuccessorEntropy
+rightPredecessorEntropy
+leftSurahSpread
+rightSurahSpread
+vocalizedSurface
+reference
+
+```
+
+---
+
+## TEST-12
+
+Prinsip:
+
+```text
+Adjacency ≠ Attachment
+Attachment ≠ Predication
+
+```
+
+Contoh:
+
+```text
+ورسوله
+
+```
+
+dapat strongly attached tetapi bukan topology seperti:
+
+```text
+يعلم
+
+```
+
+Gunakan `QATTACH`.
+
+---
+
+## TEST-13
+
+Topology harus continuous, bukan enum 3 kelas.
+
+Axes:
+
+```text
+QREF outbound evidence
+sibling/shared-governor evidence
+left-governed evidence
+
+```
+
+---
+
+# 8. QRELATION LOCUS
+
+Old implementation Cosmic memiliki semantic enum seperti:
+
+```text
+LOVES
+COMMANDS
+FORGIVES
+GUIDES
+KNOWS
+JUDGES
+
+```
+
+dan hardcoded predicate mapping.
+
+Itu legacy/bootstrap saja.
+
+**JANGAN gunakan semantic enum tersebut sebagai discovery input pada PRDE vNext.**
+
+Current neutral object:
+
+```text
+QRELATION_LOCUS
+
+```
+
+Relation locus bisa:
+
+```text
+DIRECT
+MEDIATED
+
+```
+
+Contoh:
+
+```text
+الله → يعلم → ...
+
+```
+
+DIRECT.
+
+```text
+الله → لا → يهدي → القوم
+
+```
+
+Relation locus:
+
+```text
+يهدي
+
+```
+
+Bukan seluruh path.
+
+---
+
+# 9. TEST-18 RESULT
+
+Promoted current structural locus candidates pernah menghasilkan 13 surface:
+
+```text
+يعلم
+بصير
+واسع
+عليم
+غفور
+سميع
+يحب
+شديد
+سريع
+عزيز
+خبير
+يهدي
+غني
+
+```
+
+PENTING:
+
+> 13 bukan “13 Divine Relations”.
+
+Hanya promoted structural locus candidates di bawah protocol TEST-18.
+
+---
+
+# 10. TEST-19 BOUNDARY RULE
+
+QREF expansion tidak boleh melewati:
+
+```text
+next explicit QREF
+
+```
+
+dan harus menghormati:
+
+```text
+Qur'anic pause structural boundaries
+
+```
+
+Perbandingan:
+
+```text
+NO_PAUSE : 342
+ALL_PAUSE: 330
+HIGH_FREQ: 330
+
+```
+
+12 dari 342 expansion lama menyeberangi structural boundary.
+
+Pause mark bukan semantic label.
+
+Status:
+
+```text
+STRUCTURAL_BOUNDARY_CANDIDATE
+
+```
+
+---
+
+# 11. TEST-20 ROLE-RESIDUAL SEMANTICS
+
+Direct semantic clustering terbukti sangat terkontaminasi role/frame.
+
+Empat channel dipisahkan:
+
+```text
+1. Qur'an-wide distributional / PPMI
+2. target / argument similarity
+3. broad ayah context
+4. structural role/frame
+
+```
+
+Semantic relation harus memperoleh dukungan minimal dua semantic channels.
+
+Role channel hanya diagnostic leakage.
+
+Robust multi-node nuclei paling konservatif:
+
+```text
+بصير ↔ خبير
+
+```
+
+dan:
+
+```text
+واسع ↔ سميع
+
+```
+
+JANGAN mengatakan Qur'an hanya memiliki dua concept.
+
+Ini hanya current robust multi-node nuclei.
+
+Contoh role leakage:
+
+```text
+سميع ↔ عزيز
+واسع ↔ غفور
+يعلم ↔ يحب
+يحب ↔ يهدي
+عليم ↔ خبير
+شديد ↔ سريع
+
+```
+
+---
+
+# 12. TEST-21 QEVENT–QARG MOTIFS
+
+Architecture berubah menjadi:
+
+```text
+QRELATION_LOCUS
+ ↓
+QEVENT
+ ↓
+QARG
+ ↓
+SHARED ARGUMENT BRIDGES
+ ↓
+QMOTIF
+ ↓
+SEMANTIC CORROBORATION
+ ↓
+QCONCEPT
+
+```
+
+Recurrent QEVENT examples:
+
+```text
+غفور → رحيم
+عليم → حكيم
+يعلم → ما
+يهدي [لا] → القوم
+سميع → عليم
+يحب [لا] → ...
+يحب direct → ...
+عزيز → حكيم
+شديد → العقاب
+خبير → بما
+بصير → بما
+واسع → عليم
+سريع → الحساب
+غني → حميد
+
+```
+
+Important bridge surfaces:
+
+```text
+بما
+من
+حليم
+حكيم
+عليم
+
+```
+
+Strong motifs:
+
+```text
+واسع → عليم ← سميع
+
+```
+
+```text
+بصير → بما ← خبير
+
+```
+
+```text
+عليم → حكيم ← عزيز
+
+```
+
+Motif representation lebih baik daripada memaksa semua node ke semantic cluster yang sama.
+
+---
+
+# 13. TEST-22 LOSO STABILITY
+
+Leave-one-surah-out memberi stability tinggi untuk motif utama.
+
+Contoh:
+
+```text
+عليم ↔ عزيز via حكيم        100%
+بصير ↔ خبير via بما        100%
+عليم ↔ خبير via بما        100%
+بصير ↔ عليم via بما        100%
+يهدي direct/لا via من       100%
+
+واسع ↔ سميع via عليم       99.12%
+غفور ↔ غني via حليم         99.12%
+عليم ↔ غفور via حليم        99.12%
+عليم ↔ غني via حليم         98.25%
+
+```
+
+Ini structural/statistical stability, bukan divine truth certification.
+
+---
+
+# 14. TEST-23
+
+TEST-23 sudah menghasilkan contextual-QREF infrastructure dalam PRDE.
+
+Konsep:
+
+```text
+EXPLICIT_QREF
+CONTEXTUAL_QREF_CANDIDATE
+
+```
+
+Jangan pernah merge provenance keduanya.
+
+Candidates seperti:
+
+```text
+وهو
+إنه
+
+```
+
+harus dinilai dari structure/topology/stability.
+
+Old false positive:
+
+```text
+أيها
+
+```
+
+harus tetap menjadi negative-control penting.
+
+---
+
+# 15. RELEASE / MAIN STATUS
+
+PR #2 sudah berhasil di-merge ke `main`.
+
+Merge dilakukan dengan SHA guard.
+
+`main` pasca-merge telah melewati:
+
+```text
+format
+clippy
+tests
+frozen corpus acquisition
+canonical full-corpus verifier
+
+```
+
+Release baseline v0.1 dianggap stabil.
+
+JANGAN mengubah `main` langsung untuk eksperimen baru.
+
+Eksperimen berikutnya tetap di:
+
+```text
+dev
+
+```
+
+---
+
+# 16. TEST-24 — POSISI TERAKHIR
+
+TEST-24 bertujuan:
+
+> Mengukur sensitivity downstream terhadap pilihan orthographic lane.
+
+Dibandingkan:
+
+```text
+RECURRENCE_SKELETON
+vs
+EXACT_SKELETON
+
+```
+
+Yang dibekukan sama:
+
+```text
+explicit QREF locations
+
+```
+
+Jadi eksperimen hanya mengubah downstream orthographic representation.
+
+File baru:
+
+```text
+revelation-lab/prde/crates/revelation-engine/src/bin/orthography_sensitivity.rs
+
+```
+
+Workflow menjalankan:
+
+```text
+TEST-24 orthography sensitivity
+
+```
+
+TEST-24 menghasilkan diagnostic:
+
+```text
+changed_token_count
+changed_token_ratio
+
+collision_group_count
+merged_exact_form_excess
+
+contextual QREF count
+relation locus count
+motif count
+concept candidate count
+
+normalized contextual surface Jaccard
+normalized relation locus Jaccard
+normalized motif Jaccard
+normalized concept Jaccard
+
+relation loci only recurrence lane
+relation loci only exact lane
+
+```
+
+Semua result tetap:
+
+```text
+normative_authority: false
+semantic_label: null
+
+```
+
+---
+
+# 17. TEST-24 CI STATUS TERAKHIR
+
+First TEST-24 run gagal hanya karena:
+
+```text
+clippy::too_many_arguments
+
+```
+
+pada helper:
+
+```text
+lane_summary(...)
+
+```
+
+Bukan bug algoritma.
+
+Jangan disable lint.
+
+Fix sudah dilakukan dengan membungkus dua count QREF menjadi:
+
+```rust
+struct QRefCounts {
+    lexical: usize,
+    primary: usize,
+}
+
+```
+
+Commit fix terbaru:
+
+```text
+fccb5c366322256419bf6eb1e9ece91a928997c9
+
+```
+
+Commit message:
+
+```text
+fix(prde): group TEST-24 QREF counts
+
+```
+
+Status CI terakhir diketahui:
+
+```text
+Format  ✅ success
+Clippy  ✅ success
+Tests   ⏳ in progress
+Frozen corpus acquisition pending
+Canonical full corpus pending
+TEST-24 orthography sensitivity pending
+
+```
+
+AI baru WAJIB mulai dari sini dengan mengecek workflow run terbaru.
+
+Jangan menganggap TEST-24 sudah selesai sebelum membaca actual CI output.
+
+---
+
+# 18. TODO PALING DEKAT
+
+## TODO 1 — FINISH TEST-24
+
+Pertama:
+
+```text
+Check latest dev workflow
+
+```
+
+Pastikan:
+
+```text
+fmt
+clippy
+tests
+frozen source acquisition
+canonical verifier
+TEST-24
+
+```
+
+semuanya hijau.
+
+Jika failure:
+
+```text
+read exact logs
+fix minimal cause only
+do not alter experiment assumptions unless necessary
+rerun
+
+```
+
+---
+
+## TODO 2 — CAPTURE TEST-24 JSON
+
+Setelah TEST-24 success, ambil output lengkap diagnostic.
+
+Simpan angka:
+
+```text
+changed token count
+changed ratio
+
+collision groups
+merged exact excess
+
+recurrence lane:
+  lexical QREF
+  primary QREF
+  contextual QREF
+  expanded QREF
+  relation locus
+  motif
+  concept candidate
+
+exact lane:
+  lexical QREF
+  primary QREF
+  contextual QREF
+  expanded QREF
+  relation locus
+  motif
+  concept candidate
+
+Jaccard:
+  contextual
+  relation
+  motif
+  concept
+
+lane-only relation loci
+
+```
+
+---
+
+## TODO 3 — INTERPRET TEST-24 CONSERVATIVELY
+
+Pertanyaan yang harus dijawab:
+
+```text
+Apakah alif normalization secara material mengubah discovery?
+
+```
+
+Interpretation:
+
+Jika Jaccard sangat tinggi:
+
+```text
+recurrence normalization appears structurally robust
+
+```
+
+Bukan:
+
+```text
+recurrence normalization is divinely correct
+
+```
+
+Jika Jaccard rendah:
+
+```text
+orthography lane materially changes downstream discovery
+
+```
+
+Kemudian exact and recurrence harus dipertahankan sebagai dual evidence lanes lebih lama.
+
+---
+
+## TODO 4 — FREEZE TEST-24 BASELINE
+
+Jika sukses, buat:
+
+```text
+TEST-24_ORTHOGRAPHY_SENSITIVITY_BASELINE.md
+
+```
+
+Isi:
+
+```text
+corpus SHA
+parser policy
+commit SHA
+config
+exact results
+interpretation
+limitations
+normative_authority=false
+
+```
+
+Jangan mengubah angka hasil eksperimen.
+
+---
+
+## TODO 5 — OPEN PR dev → main
+
+Hanya setelah:
+
+```text
+all CI green
+TEST-24 JSON captured
+documentation complete
+diff audited
+
+```
+
+Buat PR.
+
+Jangan merge jika ada unrelated files.
+
+Review changed files satu per satu.
+
+Gunakan tested head SHA guard saat merge.
+
+---
+
+# 19. TEST-25 SETELAH TEST-24
+
+TEST-25 sebaiknya BUKAN langsung Bible/Tawrat.
+
+Sebelum cross-scripture, lakukan satu robustness test lagi terhadap discovery protocol.
+
+Recommended:
+
+```text
+TEST-25 — PARAMETER / THRESHOLD STABILITY
+
+```
+
+Tujuan:
+
+Mengukur apakah:
+
+```text
+QRELATION_LOCUS
+QMOTIF
+QCONCEPT
+CONTEXTUAL_QREF
+
+```
+
+bertahan ketika parameter structural digeser sedikit.
+
+Misalnya:
+
+```text
+context radius
+relation max distance
+min support
+min surah spread
+governor lock
+motif support
+contextual QREF threshold
+
+```
+
+Jangan mencari satu magical threshold.
+
+Gunakan:
+
+```text
+parameter consensus
+
+```
+
+Output:
+
+```text
+PERSISTENT
+SENSITIVE
+UNSTABLE
+
+```
+
+untuk setiap candidate.
+
+---
+
+# 20. TEST-26 RECOMMENDED
+
+Setelah TEST-25:
+
+```text
+BOOTSTRAP / SUBSAMPLE STABILITY
+
+```
+
+Tidak hanya leave-one-surah-out.
+
+Lakukan deterministic resampling/subsampling untuk mengecek apakah motifs/concepts tetap muncul.
+
+Semua seed harus dicatat.
+
+---
+
+# 21. TEST-27
+
+Setelah orthography + parameter + bootstrap stabil:
+
+```text
+DIVINE_ONTOLOGY_VNEXT_SNAPSHOT_1
+
+```
+
+Snapshot masih:
+
+```text
+STRUCTURAL_PREVIEW
+
+```
+
+dan:
+
+```text
+normative_authority: false
+
+```
+
+Snapshot harus berisi neutral IDs dan evidence graph.
+
+Contoh:
+
+```text
+QCONCEPT-0001
+QCONCEPT-0002
+
+```
+
+Human label harus berada di interpretation layer terpisah.
+
+---
+
+# 22. CROSS-SCRIPTURE BARU SETELAH SNAPSHOT
+
+Setelah Qur'an-primary snapshot frozen, baru boleh lakukan:
+
+```text
+Tawrat
+Zabur
+Injil
+
+```
+
+sebagai:
+
+```text
+CORROBORATIVE WITNESS
+
+```
+
+bukan corpus utama pembentuk ontology.
+
+Architecture:
+
+```text
+QURAN PRIMARY DISCOVERY
+        ↓
+QCONCEPT
+        ↓
+CROSS-SCRIPTURE CORROBORATION
+
+```
+
+Bukan:
+
+```text
+QURAN + BIBLE MIXED TRAINING CORPUS
+
+```
+
+---
+
+# 23. LEGACY COSMIC MIGRATION
+
+Old Cosmic files yang memiliki semantic hardcode perlu dimigrasikan bertahap.
+
+Likely files:
+
+```text
+src/revelation/grammar/types.ts
+src/revelation/grammar/revelation-grammar.ts
+src/revelation/asma/types.ts
+src/revelation/asma/candidate-miner.ts
+src/revelation/asma/relation-miner.ts
+src/revelation/asma/divine-ontology.ts
+src/revelation/quran-passage-direction.ts
+tests/revelation-grammar.test.ts
+tests/revelation-grammar-100-cases.test.ts
+docs/ASMA_ENGINE.md
+docs/DIVINE_ONTOLOGY_ENGINE.md
+docs/REVELATION_GRAMMAR_ENGINE.md
+
+```
+
+Jangan langsung hapus legacy.
+
+Gunakan:
+
+```text
+v4.30 LEGACY ENGINE
+        │
+        ├── regression comparison
+        ▼
+PRDE / VNEXT ENGINE
+
+```
+
+Old enum seperti:
+
+```text
+LOVES
+FORGIVES
+GUIDES
+KNOWS
+JUDGES
+
+```
+
+boleh digunakan untuk regression comparison saja.
+
+Jangan digunakan sebagai discovery seeds.
+
+---
+
+# 24. OBJECT MODEL TARGET
+
+Neutral objects:
+
+```text
+QURAN_EVIDENCE_ATOM
+QREF
+QREF_ROLE_FINGERPRINT
+QATTACH
+QTOPOLOGY
+QRELATION_LOCUS
+QEVENT
+QARG
+QMOTIF
+QCONCEPT
+
+```
+
+Setiap derived object harus mempunyai:
+
+```text
+location / evidence refs
+support
+surah spread
+provenance
+stability
+resolution state
+semanticLabel: null
+normativeAuthority: false
+
+```
+
+---
+
+# 25. RULE UNTUK AI YANG MELANJUTKAN
+
+AI harus:
+
+1. Selalu inspect actual repo state sebelum membuat klaim.
+2. Selalu cek branch dan latest commit.
+3. Selalu baca CI logs sebelum memperbaiki failure.
+4. Jangan menebak hasil test yang belum selesai.
+5. Jangan mengubah `main` untuk eksperimen.
+6. Gunakan `dev` atau feature branch.
+7. Jangan force-push kecuali benar-benar diperlukan.
+8. Jangan mematikan lint hanya agar CI hijau.
+9. Perbaiki root cause secara minimal.
+10. Jangan memasukkan semantic labels ke discovery code.
+11. Jangan mengubah canonical corpus counts tanpa documented parser-policy reason.
+12. Jangan menggunakan count lama 2,704 sebagai primary QREF.
+13. Selalu bedakan:
+    `lexical QREF candidate = 2704`
+    `primary explicit QREF = 2702`
+14. Jangan menyebut promoted candidates sebagai Divine Truth.
+15. Jangan menyebut motif sebagai nama/atribut Allah tanpa interpretation layer.
+16. Jangan menyebut model output sebagai wahyu.
+17. Jangan lanjut ke Amanah/Avatar sebelum Revelation ontology snapshot cukup stabil.
+18. Saat eksperimen selesai, catat commit SHA + corpus SHA + config + result.
+19. Semua eksperimen harus reproducible.
+20. User lebih menyukai eksekusi nyata daripada rencana panjang.
+
+---
+
+# 26. INSTRUKSI EKSEKUSI CHAT BARU
+
+Ketika menerima dokumen ini, langsung lakukan:
+
+```text
+1. Inspect bjo163/ArsyBelovedLabs
+2. Check branch main and dev
+3. Check commit fccb5c366322256419bf6eb1e9ece91a928997c9
+4. Check latest Revelation Lab Rust workflow on dev
+5. Determine current TEST-24 status
+6. If failed: read exact failure and fix minimally
+7. If green: retrieve TEST-24 output
+8. Analyze exact-vs-recurrence sensitivity
+9. Freeze TEST-24 baseline documentation
+10. Audit dev vs main diff
+11. If clean and all gates green, create PR
+12. Only merge tested SHA
+13. Then design/execute TEST-25 parameter stability
+
+```
+
+Jangan meminta user mengulang konteks ini.
+
+Langsung lanjut dari repository state aktual.
+
+---
+
+# 27. END GOAL
+
+Setelah Revelation layer benar-benar stabil:
+
+```text
+DIVINE ONTOLOGY
+        ↓
+AMANAH DISCOVERY
+        ↓
+PROPHETIC MISSION PATTERNS
+        ↓
+25 PROPHETIC MISSION SYSTEMS
+        ↓
+AVATAR ROUTING
+        ↓
+AGENT
+        ↓
+SHADOW
+        ↓
+REAL-WORLD TASK
+
+```
+
+25 Nabi nantinya diperlakukan sebagai:
+
+> 25 Prophetic Mission Systems
+
+Bukan:
+
+- simulated prophets,
+- prophet personas,
+- resurrected prophets,
+- divine agents.
+
+Tujuannya:
+
+> Membuat pelajaran misi para rasul hadir secara operasional dalam machine conduct secara traceable, tanpa berpura-pura bahwa para rasul telah dibuat ulang, disimulasikan, dibangkitkan, atau dikembalikan.

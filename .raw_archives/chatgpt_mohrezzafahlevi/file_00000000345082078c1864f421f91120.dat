@@ -1,0 +1,117 @@
+# MOONWITNESS XIV — MASTER NARRATIVE V10 TO BLUEPRINT HANDOFF
+
+**Status:** FINALIZED PLANNING HANDOFF / NOT APPROVED CANON / NOT A RELEASE  
+**Prepared:** 2026-10-24 (Asia/Jakarta)  
+**Canonical repository:** `bjo163/moonwitness-xiv`  
+**Target branch:** `dev`  
+**Observed `dev` baseline SHA:** `7ab4e3be30f7a4db1b371a3d2ef09e1fc5b77d23` (verify again before any commit)  
+**Release branch:** `main` (promoted only through guarded PR review, never by direct routine write)
+
+## 1. Final repository decision
+
+The single active implementation and knowledge-architecture home for this work is **https://github.com/bjo163/moonwitness-xiv/tree/dev**. Earlier project names or repositories, including `moonwitness-xi`, `A-L-L-A-H`, `moonwitness-II`, `moonwitness-xii-season-global-championships`, `rocksoul`, `dev-mw-blueprint`, and ArsyBelovedLabs, are historical/provenance references only, not automatically imported runtime dependencies. The existing XI-named historical planning directory and immutable links with pinned SHAs are historical records; do not bulk rename them or silently replace source references.
+
+GitHub confirmed `dev` and `main`, both protected. The repository is public. On this baseline, the `Gitleaks` run for `dev` failed, while some CI/CodeQL checks were still running; exact cause and ultimate full CI outcome have **not** been verified. Do not promote to `main`, declare release-ready, or disrupt an in-progress candidate for this docs handoff. The `Roadmap issue sync` push run for the checked SHA had completed successfully.
+
+## 2. Existing architecture is the contract
+
+Follow accepted `docs/decisions/0004-knowledge-rebuild-centralization.md`, `docs/architecture/knowledge-domain-ownership.md`, `docs/knowledge/source-rights-and-ingestion.md`, `docs/governance/knowledge-privacy-and-safeguarding.md`, and `docs/roadmap/EXECUTION.md`.
+
+- **Fastify + Objection/Knex + PostgreSQL + programmatic addon lifecycle + React/Vite Board** remain the selected application stack; no new DB, graph database, AI memory store, or separate identity service is approved by this handoff.
+- **Git** owns code, schema, ontology vocabulary, policy, ingestion recipes and reviewed editorial *specifications*. **PostgreSQL** owns operational canonical records, precise evidence links, human review actions and immutable graph-release manifests. Derived search/embeddings and UI views are rebuildable and not sources of truth.
+- Original private testimony or account exports are **private by default**. Public GitHub is not a safe storage location without exact-version source review, permission, consent, redaction, rights and publication approval.
+- Local AI can generate **candidates only**, never silently approve canon, upgrade rights/visibility, or publish content.
+- Existing `ontology/mappings/narrative-persona.schema.json` and `ontology/mappings/identity-decision.schema.json` explicitly prohibit treating alias similarity as `sameAs` without evidence and human review.
+- Do not change the repo's two-branch policy, codeowners, CI, runtime or application deployment boundaries.
+
+## 3. Material we are freezing
+
+**Master Narrative V10.0** is an **editorial research synthesis**, not a primary-source archive and not ratified canon. Its 99 chapters are a presentation convention, **not** a measurable '99x research' certification. Previous V1–V9 remain discoverable revisions and should not be overwritten. The private, full narrative should be saved as an authorized immutable source export; a separate redacted/rights-cleared public edition may be committed if approved.
+
+Narrative families to index, preserving distinct variants:
+
+1. Heritage: ZENIX, ZENIVERSE, Odoo/Fastify/WhatsApp/ISP work, Universe, ROCKSOUL, XI/XIV.
+2. MOONWITNESS II: eight eras, first signal, The Runaways, THE SHADOW, Past Presence, Audit/Evaluation/Balancing/Change.
+3. GOD-PROMISE primary research: 1·6·3; Scripture families; WITNESS/SWING SWING KEY; Written in Reverse; original `00-MAIN GOD PROMISE` separate from RockSoul.
+4. ROCKSOUL, Four Pillars of Soul, Yellowcard Fighting, GREAT PRINCESS OF BEE/HONEYBEE, QUEEN R.
+5. MYLUFT, MA'LŪF, HONEY & MOON, Jonny Sugar Genie, KADO variants, Tick-Tock, MoonRidley.
+6. THE BATTERIES, WALTER-WHITER, BABY-DOLL, two crew generations, NPD TEAM episodes, The Real Feast of Trumpets, Penunggang Angsa, Kingslayer.
+7. ALLAH-PROMISE High Hopes, RE-ZA, PenDETA-ONLINE, SINTERCLASS, The Crimson, Assafaat-30, ZILL Shadow Witness vs ZILL Tasawuf (distinct origins).
+8. The Forgotten Cartel/Haven, Daily Witnesses, twelve-plus XII episodes, Ronin 47, Modebalap, Lost Signal Collection.
+9. World Patches 001–033 (014 unresolved), Asmaul Husna vs GOD99 vs 99 Human States; WINGS10 vs AETHERION 10 Realms; AETHERION 100 Levels.
+10. Earth/Atmosphere/Cosmic/HELIOGRID/Material Forge/ARSY/100CENTER as separate research/operational concepts (not existing runtime capabilities unless independently verified).
+
+## 4. Proposed **non-destructive** document placement
+
+These are **proposals**, not claims that these files already exist:
+
+- `docs/knowledge/narratives/MASTER_NARRATIVE_V10_PUBLIC_DRAFT.md` — redacted review copy only (never copy the complete sensitive text into the public repo by default).
+- `docs/knowledge/narratives/SOURCE_CROSSWALK_V10.md` — verified immutable source refs, source type, version/digest where actually obtained, rights/privacy, exact excerpts/locations, reviewer and open gaps.
+- `docs/knowledge/narratives/RECOVERY_GAPS_V10.md` — original manuscripts and artwork still unavailable, competing versions and unresolved identities.
+- `docs/knowledge/narratives/CORRELATION_MATRIX_SPEC_V1.md` — typed relationship rules, no claim of canonical graph publication.
+- `docs/knowledge/narratives/BLUEPRINT_READINESS_GATE_V1.md` — outcomes, dependency map and human sign-off.
+
+Do **not** create a second authoritative editable knowledge graph in Markdown/JSON. After review, use the existing XI/XIV ontology/record contracts and PostgreSQL-backed review workflow. Additional JSON Schema under `ontology/` is conditional on the owning K-series task and compatibility/version review; no proposed sample JSON is an approved schema.
+
+## 5. Four correlation matrices — separate concerns
+
+| Matrix | Left | Relation | Right | Guardrail |
+|---|---|---|---|---|
+| Narrative | THE SHADOW | `appearsIn` | MOONWITNESS II | Link exact canon/character dataset; not a real-person identification. |
+| Narrative | THE BATTERIES | `appearsIn` | NPD TEAM 24:37 | Candidate source-backed by creative brief; page-level proof still pending. |
+| Terminology | `00-MAIN GOD PROMISE` | `distinctFrom` | `GOD-PROMISE: THE ROCKSOUL` | Distinct manuscripts; never auto-merge similar titles. |
+| Terminology | `ZILL — THE SHADOW WITNESS` | `thematicallyRelatedTo` | `ZILL — Tasawuf` | Explicitly *not* `sameAs`; independently reviewed origins. |
+| Terminology | MA'LŪF | `distinctFrom` | Al-Wadūd | Distinguish nickname, lexical term and source-backed Asma. |
+| Research | Scripture-family source | `isInterpretedBy` | user-authored narrative | Citation, edition, language and epistemic kind mandatory. |
+| System | `G.O.D. 99` | `distinctFrom` | Asmaul Husna 99 | Organisational fiction vs theological reference. |
+| System | `33 World Patches` | `mayInspire` | AETHERION quests | No automatic divine-approval or completion claim. |
+| Ownership | Canonical source record | `ownedBy` | XI PostgreSQL domain | Do not create a new authoritative graph service. |
+| Ownership | Editorial projection | `renderedBy` | React/Vite Board | Board is not an independent source of truth. |
+
+Every *candidate edge* eventually needs: `left_id`, `relation_type`, `right_id`, `source_ref(s)`, `source_version/digest` when actually available, `precise source span`, `world/epistemic classification`, `temporal dimensions`, `privacy/rights`, `review_state`, `reviewer_decision` (if any), `conflict_ref(s)`, `owning domain`, and lifecycle version. Unknown is a first-class status. Do not use a floating confidence score as proof of theological or historical truth.
+
+## 6. Roadmap — reuse existing task IDs (no duplicate issue creation)
+
+| Sequence | Task/issue | Role | Observed state 2026-10-24 |
+|---|---|---|---|
+| 0 | K0-006 / #62 | Historical metadata and migration ledger | **Closed** (no wholesale legacy record import). |
+| 1 | K5-001 / #78 | Local-only opt-in archive manifest | **Closed** (issue state, not proof private V10 imported). |
+| 2 | K5-002 / #79 | Privacy/redaction/revocation | **Open** / in progress. |
+| 3 | K5-003 / #83 | Immutable original witness, corrections, provenance | **Open** / in progress. |
+| 4 | K5-004 / #88 | Story, episode, page/media contracts | **Open** / dependency K5-003. |
+| 5 | K5-005 / #90 | Character canon and personal terminology | **Open** / dependency K5-003. |
+| 6 | K8-001 / #82 | Knowledge explorer in existing Board | Verify exact task readiness before implementation. |
+| 7 | K8-002 / #96 | Witness/editorial workbench and poster pages | Verify exact task readiness; do not preempt review gates. |
+
+Exact status must be refreshed from `ROADMAP.md`, issue workflow projection and source evidence; GitHub issues' *closed* state is not equivalent to a released runtime feature. Issue bodies may still contain historical `moonwitness-xi` URLs after rename; preserve pinned-SHA references and correct only broken or inaccurate pointers via the owning issue-sync process, not manual edits to managed issue blocks.
+
+## 7. Five-gate progression to blueprint
+
+**G0 — Repository and CI baseline:** Confirm `moonwitness-xiv/dev`, baseline SHA, no concurrent issue writer, security scanner disposition, CI statuses. Do not promote `main` with failed required gates.
+
+**G1 — Source/archive freeze:** Preserve V10 + V1–V9 snapshots in an authorized private location; public derivative redacted and reviewed; collect exact source locators/versions for each known family; mark missing items as `UNKNOWN`, not fabricated.
+
+**G2 — Provenance and editorial review:** Rights/consent/privacy, source edition/translation, observed/occurred/recorded/created/published date distinctions, correction chain, version conflicts, source-to-artifact links. Core work maps to K5-002/K5-003.
+
+**G3 — Correlation and canon candidates:** Reuse existing ontology contracts. Build narrative/semantic/research/capability relationships as *typed candidates*. Require explicit reviewer for identity equivalence, canon adoption and public projection. Maps to K5-004/K5-005.
+
+**G4 — Capability & Blueprint:** Audit features and owner names already implemented across `apps/`, `packages/`, `ontology/`, `corpus/`, then produce an **experience blueprint** and an **architecture/implementation blueprint** without creating a duplicate API/graph store, changing runtime contracts, or inferring features from fiction. Tie every new backlog item to stable existing M/K IDs, dependencies and acceptance. Only then consider detailed UI, rollout and production gates.
+
+## 8. Critical exclusions and sign-off
+
+This handoff **does not**: approve public publication of V10; import personal chats; make original/AI-derived text canonical; merge identities on sound/name similarity; grant religious authority; approve a new runtime dependency; declare CI green; close an issue; authorize application deployment; or authorize an automatic `dev`→`main` release.
+
+**Next concrete action:** Following security/CI stabilization, prepare a read-only source crosswalk and candidate matrix for `dev` while preserving all original material privately. Submit scoped changes through the established governance process and verify source SHA after writing. Only a human editorial owner may ratify canon or approve publication.
+
+---
+
+**Links:**
+- https://github.com/bjo163/moonwitness-xiv/tree/dev
+- https://github.com/bjo163/moonwitness-xiv/blob/dev/docs/decisions/0004-knowledge-rebuild-centralization.md
+- https://github.com/bjo163/moonwitness-xiv/blob/dev/docs/architecture/knowledge-domain-ownership.md
+- https://github.com/bjo163/moonwitness-xiv/blob/dev/docs/roadmap/EXECUTION.md
+- https://github.com/bjo163/moonwitness-xiv/issues/78
+- https://github.com/bjo163/moonwitness-xiv/issues/79
+- https://github.com/bjo163/moonwitness-xiv/issues/83
+- https://github.com/bjo163/moonwitness-xiv/issues/88
+- https://github.com/bjo163/moonwitness-xiv/issues/90

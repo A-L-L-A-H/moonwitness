@@ -1,0 +1,42 @@
+# MoonWitness XV — MoonUI Visual Reference Set (12 Screens)
+
+> CONCEPT ONLY: each screen is a visual design reference and is not an assertion of a deployed feature, live telemetry, real transactions or approved content.
+
+**Repository:** https://github.com/bjo163/moonwitnessxv
+**Source design contracts:** `MASTER_DESIGN.md`, `docs/design/APPS.md`, `docs/design/ASSETS.md`, `BLUEPRINT.md`.
+**Visual reference:** User-supplied Mission Control screenshot; user-provided artwork fragments are used as derivative visual samples inside mockups. Review provenance/rights prior to public asset use.
+**Resolution:** 1920 × 1080, PNG, individually named, 16:9.
+
+## Screens
+01. **Dock / Lighthouse** — `01_dock_lighthouse.png`
+02. **Project Universe** — `02_project_universe.png`
+03. **Story Forge** — `03_story_forge.png`
+04. **Poster Lab** — `04_poster_lab.png`
+05. **Corpus Reader** — `05_corpus_reader.png`
+06. **UNILEX Explorer** — `06_unilex_explorer.png`
+07. **MoonLab Research** — `07_moonlab_research.png`
+08. **World Monitor** — `08_world_monitor.png`
+09. **Publishing Hub** — `09_publishing_hub.png`
+10. **Harbor Commons** — `10_harbor_commons.png`
+11. **WORKS Economy** — `11_works_economy.png`
+12. **SKYLINK Messaging** — `12_skylink_messaging.png`
+
+## Shared visual grammar
+
+- Primary background `#07060b`, surfaces `#13101d` and `#1b172a`, foreground `#f7f4ec`.
+- Accent hierarchy: pink `#ff007a` (creative focus and selected nav), cyan `#00d4ff` (navigation, trace, evidence), yellow `#ffd400` (editorial/emphasis), violet `#9d4edd` (research/secondary category), green `#00e676` (only verified positive statuses).
+- Distressed ink/grit/sticker treatment stays behind text; treat noise as decoration, never as replacement for spacing or contrast.
+- One navigation shell and typography hierarchy across all screenshots; each work surface has a different information architecture.
+- Massive italic display headings; readable editorial body text, monospace for IDs, intentional colored badges with textual labels.
+- Different evidence modes must remain distinct: source, interpretation, witness, research proposal, fictional universe, and reviewed publication.
+- Respect `id`/`en`, keyboard/focus, reduced motion, privacy, rights and semantically meaningful loading/error/empty states in actual implementation.
+- Public Dock, creative SHADOW, scholarly MoonLab, private Harbor, commercial WORKS, bounded SKYLINK require different interaction semantics even when they share tokens.
+- The graphic references do not supersede accepted ADRs or verify TODO completion.
+
+## Implementation order
+
+Preserve existing ARSY Hub and SIGNAL/RADIO runtime; reuse `@moonwitness/moonui`; build reusable shell, cards, evidence badges, data tables, creative canvases, provenance inspectors and state-led controls. Implement each page only under corresponding TODO evidence gates. Avoid new branches; project policy develops on `dev` and promotes verified changes to `main`.
+
+## Distribution
+
+12 distinct PNGs plus this guide and the contact sheet. No font files are distributed.

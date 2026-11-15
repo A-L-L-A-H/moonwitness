@@ -1,0 +1,1310 @@
+https://github.com/BRIDGE-ALLAH/MOONWITNESS
+
+FOKUS DOMAIN : ALL SCOPE AREA
+
+# 0. PRIMARY MISSION
+
+Take full ownership of completing and improving this repository.
+
+Your mission is to transform the current repository from its actual state into a genuinely functional, integrated, data-driven, maintainable, and production-ready product.
+
+**STOP BUILDING PROTOTYPES. START BUILDING THE REAL PRODUCT.**
+
+The repository may contain scaffolding, boilerplate, mock data, demo implementations, placeholder screens, incomplete backend services, hardcoded values, and unfinished workflows.
+
+You MUST identify these elements and systematically replace them with actual implementations.
+
+Do not confuse:
+- A page that renders with a functional feature.
+- A button that responds with a completed workflow.
+- An API endpoint with a complete backend capability.
+- A database schema with a working data management system.
+- Static dashboard numbers with real analytics.
+- Mock data with actual application data.
+- A successful build with production readiness.
+
+**Every important feature must work through the actual frontend, backend, business logic, database, and integrated services.**
+
+Your priorities, in order:
+
+1. Audit the latest repository and GitHub state.
+2. Discover and eliminate fake, demo, placeholder, and boilerplate implementations.
+3. Establish real business logic and data flows.
+4. Complete frontend-to-backend wiring.
+5. Fix architectural inconsistencies and broken contracts.
+6. Simplify code and establish appropriate shared and reusable modules.
+7. Improve UI, UX, and complete user journeys.
+8. Perform comprehensive end-to-end testing.
+9. Research and implement valuable innovations.
+10. Complete the next three development phases.
+11. Version, publish, deploy, and verify production.
+
+Do not spend the majority of development effort creating additional abstractions, documentation, scaffolding, or features while fundamental product functionality remains incomplete.
+
+**REAL FUNCTIONALITY AND REAL USER VALUE TAKE PRIORITY OVER THE AMOUNT OF CODE PRODUCED.**
+
+---
+
+# 1. REPOSITORY RECONNAISSANCE — AUDIT THE ACTUAL STATE
+
+Before modifying anything, inspect the latest actual repository state.
+
+## 1.1 Git Audit
+
+Inspect:
+
+- Latest remote `main`.
+- Active branch.
+- Latest commits.
+- Branch differences.
+- Uncommitted and untracked changes.
+- Existing tags.
+- Existing releases.
+- Repository structure.
+- Applications and packages.
+- Frontend routes and components.
+- Backend services and APIs.
+- Database schemas and migrations.
+- Dependency manifests and lockfiles.
+- Build and test infrastructure.
+- CI/CD and deployment configurations.
+
+Preserve all existing user changes. Never reset or overwrite uncommitted work.
+
+## 1.2 Complete GitHub Audit
+
+Read relevant:
+
+- Open Issues.
+- Closed Issues.
+- Historical Issues.
+- Open PRs.
+- Draft PRs.
+- Merged PRs.
+- Closed PRs.
+- Project boards.
+- Milestones.
+- Discussions.
+- Relevant commit history.
+
+Inspect actual diffs and implementation results.
+
+Determine what has genuinely been completed, what is partially implemented, and what remains.
+
+Do not recreate merged work.
+
+Do not duplicate existing issues or PRs.
+
+## 1.3 Documentation Audit
+
+Read the actual existing:
+
+- README.
+- Architecture.
+- Product specifications.
+- Blueprints.
+- Roadmap.
+- TODO.md.
+- CHANGELOG.md.
+- API documentation.
+- Database documentation.
+- Coding rules.
+- Design system.
+- UX documentation.
+- Testing strategy.
+- Deployment documentation.
+- Security documentation.
+- Technical decisions.
+
+Identify outdated or contradictory documents and update them based on actual code.
+
+## 1.4 Actual Status Inventory
+
+Classify:
+
+1. Fully implemented.
+2. Partially implemented.
+3. Scaffolding only.
+4. Boilerplate only.
+5. Demo or mock implementation.
+6. Hardcoded or placeholder data.
+7. Frontend disconnected from backend.
+8. Backend without a usable frontend.
+9. Missing business logic.
+10. Missing persistence.
+11. Broken contracts.
+12. Duplicated implementation.
+13. Missing E2E testing.
+14. Production blockers.
+15. New improvement opportunities.
+
+Do not trust labels, comments, TODOs, or documentation without inspecting the actual implementation.
+
+---
+
+# 2. REAL IMPLEMENTATION FIRST — ELIMINATE BOILERPLATE AND DEMO
+
+<escape>THIS IS A NON-NEGOTIABLE PRIORITY.</escape>
+
+A significant portion of the repository may currently consist of demo data, placeholder content, boilerplate implementations, static UI, and simulated functionality.
+
+Your job is to turn these into genuine product capabilities.
+
+Do not continue expanding demo implementations.
+
+Do not create more scaffolding while important existing features are still fake or incomplete.
+
+## 2.1 Complete Boilerplate and Placeholder Audit
+
+Inspect the entire codebase for:
+
+- Hardcoded sample data.
+- Fake dashboard metrics.
+- Dummy user profiles.
+- Static tables.
+- Fake activity feeds.
+- Simulated notifications.
+- Placeholder charts.
+- Mock API responses.
+- Static JSON data used as production data.
+- Hardcoded lists.
+- Fake search results.
+- Lorem ipsum.
+- Placeholder images.
+- Fake success messages.
+- Simulated progress.
+- Randomly generated production values.
+- Buttons with empty handlers.
+- Incomplete CRUD operations.
+- Stub services.
+- Empty business logic.
+- TODO/FIXME implementations.
+- `Not implemented` sections.
+- Coming Soon placeholders.
+- Fake integrations.
+- Demo-only authentication.
+- Hardcoded IDs.
+- Static configuration that should be persisted.
+- Temporary components mistakenly presented as finished features.
+
+Use repository-wide source inspection and targeted searches.
+
+Do not rely exclusively on filenames or comments. Trace where data originates and how it reaches the interface.
+
+## 2.2 Classify Every Finding
+
+For each finding, determine whether it is:
+
+**A. Legitimate development fixture**
+
+Test data, isolated mock services, storybook fixtures, unit-test fixtures, or development-only seeds.
+
+These can remain when properly isolated.
+
+**B. Legitimate demonstration feature**
+
+An intentional demonstration experience that is explicitly separated from production functionality.
+
+It must be clearly labeled and must never be confused with actual production data.
+
+**C. Temporary implementation**
+
+A placeholder that must be replaced with real functionality.
+
+**D. Fake production functionality**
+
+Static, simulated, or hardcoded behavior that currently appears to be a working product capability.
+
+This must be corrected.
+
+Maintain a remediation inventory with:
+
+- File or module.
+- Current behavior.
+- Why it is not a real implementation.
+- Required backend capability.
+- Required database or integration changes.
+- Frontend changes.
+- Dependencies.
+- Verification requirements.
+- Actual remediation status.
+
+## 2.3 Replace Mock Data with Real Data Sources
+
+For every production-facing data display, establish its correct source of truth.
+
+Examples:
+
+| Existing Demo | Required Real Implementation |
+|---|---|
+| Fake dashboard metrics | Actual aggregates from application data |
+| Static user list | Real authenticated user records |
+| Hardcoded activity feed | Real persisted activity events |
+| Dummy notifications | Real notification records and delivery status |
+| Static charts | Metrics computed from actual data |
+| Fake search results | Real backend search and filtering |
+| Mock settings | Persisted configuration |
+| Static tables | Actual database-backed queries |
+| Fake system status | Actual service and health information |
+| Simulated task progress | Actual job or task execution status |
+
+Adapt these examples to the actual product.
+
+Never fabricate information to make the application look populated.
+
+When actual data does not exist, display a useful empty state, onboarding instruction, or clearly labeled demonstration dataset.
+
+## 2.4 Build Real Business Logic
+
+Do not stop at making frontend requests reach backend endpoints.
+
+Implement the actual domain behavior.
+
+For every important feature, identify:
+
+- Business purpose.
+- Input.
+- Validation.
+- Domain rules.
+- Permissions.
+- Processing logic.
+- Persistence requirements.
+- Output.
+- Error conditions.
+- Lifecycle.
+- Related entities.
+- Audit requirements.
+
+Implement the correct service and domain logic.
+
+Avoid endpoints that simply return static responses or pretend an operation succeeded.
+
+A successful API response must represent a genuinely completed operation.
+
+## 2.5 Real Database Persistence
+
+Ensure actual application data is stored and managed through the correct database architecture.
+
+Audit:
+
+- Tables and entities.
+- Relationships.
+- Constraints.
+- Indexes.
+- Transactions.
+- Data ownership.
+- Foreign keys.
+- Nullability.
+- Validation.
+- Migrations.
+- Query logic.
+- Data lifecycle.
+- Backup and recovery.
+
+Implement complete persistence for relevant product workflows.
+
+Verify that:
+
+1. A create operation actually persists.
+2. A read operation retrieves persisted records.
+3. An update operation changes the correct record.
+4. A delete or archive operation produces the intended result.
+5. Data remains correct after refreshing the browser.
+6. Data remains available after application restart where applicable.
+7. Unauthorized users cannot access another user's records.
+8. Database constraints prevent invalid data.
+
+Do not merely simulate persistence through frontend state.
+
+## 2.6 Real Backend Operations
+
+Every important operation must execute actual business functionality.
+
+Replace stubs and mock handlers with appropriate:
+
+- Service implementations.
+- Repositories.
+- Database queries.
+- Transactions.
+- Validation.
+- Authorization.
+- External service adapters.
+- Background jobs.
+- Event processing.
+- Error handling.
+
+Use existing architecture and conventions where suitable.
+
+Do not introduce unnecessary frameworks.
+
+## 2.7 Real Frontend Implementation
+
+Remove production-facing fake functionality.
+
+Ensure:
+
+- Real backend data is displayed.
+- User input is correctly submitted.
+- Forms perform real operations.
+- Tables use actual query results.
+- Search works.
+- Filters affect actual results.
+- Pagination works.
+- Settings persist.
+- Buttons perform their intended actions.
+- Notifications reflect actual events.
+- Charts represent real metrics.
+- Navigation leads to functional pages.
+- Errors are communicated accurately.
+
+Every important visible capability must have a real implementation.
+
+## 2.8 Seed Data and Demo Isolation
+
+Do not blindly delete all seed data.
+
+Separate data into:
+
+- Test fixtures.
+- Development seed data.
+- Optional demonstration data.
+- Production system defaults.
+- Actual user-generated data.
+
+Enforce environment boundaries.
+
+Production must never accidentally receive development fixtures or fake analytics.
+
+Any demo mode that remains must be explicitly enabled and clearly identified.
+
+Demo data must not pollute production tenants, user records, analytics, billing, audit trails, or real business operations.
+
+Production system defaults are allowed when genuinely required, such as initial roles, required configuration, or essential reference data.
+
+Every production seed must be documented, intentional, idempotent where appropriate, and safe to rerun.
+
+## 2.9 Never Invent Real User Data
+
+Do not fabricate:
+
+- User accounts.
+- Transactions.
+- Orders.
+- Usage statistics.
+- Revenue.
+- Activity records.
+- Business metrics.
+- Operational events.
+- System health results.
+
+Use actual records or honestly communicate that no data exists.
+
+For external systems that require credentials, implement the real integration architecture and clearly identify unavailable credentials as blockers.
+
+Do not replace missing external integration with a fake success response.
+
+## 2.10 Every Feature Must Be a Complete Vertical Slice
+
+When a feature is incomplete, finish it across the entire application.
+
+The expected implementation chain is:
+
+**DATABASE → DOMAIN MODEL → BUSINESS LOGIC → API → VALIDATION → AUTHORIZATION → FRONTEND CLIENT → UI → USER WORKFLOW → PERSISTENCE → E2E TEST**
+
+A feature must not be considered complete merely because one layer exists.
+
+---
+
+# 3. FRONTEND-BACKEND WIRING — COMPLETE THE PRODUCT
+
+Prioritize actual frontend-backend integration.
+
+## 3.1 Create an Integration Inventory
+
+Map every important:
+
+- Frontend route.
+- Screen.
+- Component.
+- Form.
+- Action.
+- Backend endpoint.
+- Service.
+- Database entity.
+
+Identify:
+
+- Unconnected screens.
+- Unused APIs.
+- Partial integrations.
+- Mock integrations.
+- Incompatible contracts.
+- Missing operations.
+
+## 3.2 Wire Real Capabilities
+
+Implement relevant:
+
+- Authentication.
+- Session management.
+- User profiles.
+- Dashboard data.
+- Core domain workflows.
+- CRUD operations.
+- Search.
+- Filtering.
+- Sorting.
+- Pagination.
+- Uploads and downloads.
+- Settings.
+- Notifications.
+- Administrative functionality.
+- Background jobs.
+- System monitoring.
+- Logs and status.
+
+Do not implement unrelated capabilities merely because they appear in this list.
+
+## 3.3 API Architecture
+
+Establish consistent:
+
+- API clients.
+- Request and response schemas.
+- Authentication handling.
+- Error handling.
+- Timeouts.
+- Cancellation.
+- Retry policies.
+- Pagination.
+- Caching.
+- Validation.
+
+Avoid duplicated HTTP clients and inconsistent endpoint behavior.
+
+## 3.4 Data and UI State
+
+Handle:
+
+- Loading.
+- Success.
+- Empty.
+- Error.
+- Refetching.
+- Mutation.
+- Cache invalidation.
+- Stale data.
+- Background refresh.
+- Offline or degraded states when relevant.
+
+Keep server state, local UI state, and persistent state properly separated.
+
+## 3.5 No Dead Interactions
+
+Audit every:
+
+- Button.
+- Link.
+- Menu.
+- Dropdown.
+- Tab.
+- Dialog.
+- Form.
+- Table action.
+- Search field.
+- Filter.
+- Toggle.
+- Upload.
+- Download.
+- Keyboard shortcut.
+
+Every visible interactive element must work.
+
+Remove misleading controls or clearly mark unavailable functionality.
+
+---
+
+# 4. DATA QUALITY, DATA INTEGRITY & DATA LIFECYCLE
+
+A real application needs reliable data management, not just records inserted into a database.
+
+Audit and implement:
+
+- Data validation.
+- Domain constraints.
+- Uniqueness.
+- Referential integrity.
+- Ownership.
+- Permissions.
+- Data consistency.
+- Data lifecycle.
+- Archiving.
+- Deletion.
+- Audit trails where appropriate.
+- Data retention.
+- Import and export where relevant.
+- Recovery mechanisms.
+- Concurrency handling.
+- Transaction safety.
+
+Check for duplicate, orphaned, invalid, or inconsistent data.
+
+If migrations are required:
+
+1. Inspect current schema.
+2. Understand existing data.
+3. Design compatible migrations.
+4. Preserve existing records.
+5. Verify constraints.
+6. Test upgrade behavior.
+7. Prepare rollback or recovery procedures.
+8. Test with realistic data volumes where practical.
+
+Never perform destructive database changes without understanding their impact.
+
+Do not rewrite or reset production data to make the schema cleaner.
+
+## 4.1 Real Analytics and Reporting
+
+For dashboards and reports:
+
+- Define the metric.
+- Identify its authoritative data source.
+- Define calculation rules.
+- Apply correct date and timezone handling.
+- Apply relevant user and tenant permissions.
+- Handle empty datasets.
+- Verify calculations against underlying records.
+
+Do not use invented numbers or arbitrary percentages.
+
+If a metric cannot currently be computed, implement the necessary data pipeline or clearly indicate its unavailable status.
+
+---
+
+# 5. CONSISTENCY, RULES & CONTRACT AUDIT
+
+Audit and correct repository-wide inconsistency.
+
+Inspect:
+
+- Naming.
+- Folder structure.
+- Imports and exports.
+- Error handling.
+- Logging.
+- Configuration.
+- Dependencies.
+- Validation.
+- Authorization.
+- Database contracts.
+- API schemas.
+- Frontend/backend types.
+- Event formats.
+- Package interfaces.
+- Documentation.
+
+Establish authoritative sources of truth.
+
+Avoid independently duplicating shared business rules and schemas.
+
+Implement contract tests and automated architecture checks where appropriate.
+
+Every correction must be implemented, tested, and documented.
+
+Do not break public APIs or existing data compatibility without a deliberate migration plan.
+
+---
+
+# 6. CODE MINIMALISM & SIMPLIFICATION
+
+Prefer the smallest maintainable implementation that genuinely solves the problem.
+
+Audit:
+
+- Duplicate logic.
+- Unused code.
+- Redundant abstractions.
+- Unnecessary wrappers.
+- Dead dependencies.
+- Excessive boilerplate.
+- Unnecessary packages.
+- Overly complex logic.
+- Repeated validation.
+- Redundant state.
+- Unnecessary configuration.
+
+Apply:
+
+- KISS.
+- DRY without premature abstraction.
+- YAGNI.
+- Separation of concerns.
+- Single responsibility.
+- Explicit contracts.
+
+Do not equate code reduction with deleting legitimate functionality.
+
+Simplify without introducing regressions.
+
+---
+
+# 7. SHARED & REUSABLE ARCHITECTURE
+
+Identify genuinely shared functionality across applications, services, and packages.
+
+Explore:
+
+- Shared types.
+- Schemas.
+- API clients.
+- Validation.
+- Business logic.
+- Hooks.
+- Authentication.
+- Authorization.
+- Utilities.
+- Logging.
+- Error handling.
+- Configuration.
+- UI primitives.
+- Design tokens.
+- Testing utilities.
+
+Create shared implementations only when there is genuine common ownership and a real maintenance benefit.
+
+Avoid universal utility packages, excessive abstractions, cyclic dependencies, and tightly coupled applications.
+
+Keep application-specific functionality independent where needed.
+
+---
+
+# 8. UI, DESIGN SYSTEM & USER EXPERIENCE
+
+Audit every actual page and workflow.
+
+Improve:
+
+- Visual consistency.
+- Layout.
+- Typography.
+- Spacing.
+- Themes.
+- Component variants.
+- Navigation.
+- Responsive behavior.
+- Forms.
+- Tables.
+- Dialogs.
+- Loading states.
+- Empty states.
+- Error states.
+- Success feedback.
+- Accessibility.
+
+Map real user journeys:
+
+- First visit.
+- Onboarding.
+- Setup.
+- Authentication.
+- Main workflows.
+- Data entry.
+- Search.
+- Settings.
+- Account management.
+- Error recovery.
+- Returning sessions.
+
+Remove unnecessary steps and confusing interactions.
+
+Apply usability heuristics, accessible interaction patterns, and WCAG 2.2 AA guidance where applicable.
+
+Do not perform cosmetic redesigns while actual functionality remains broken.
+
+---
+
+# 9. DEEP RESEARCH & EXTREME INNOVATION
+
+Research:
+
+- arXiv.
+- Google Scholar.
+- Semantic Scholar.
+- IEEE and ACM.
+- GitHub Trending.
+- Innovative open-source repositories.
+- Reddit engineering communities.
+- Developer discussions.
+- Emerging frameworks and technologies.
+- Alternative architectures.
+- Research benchmarks.
+
+Find meaningful technological improvements and unusual combinations of existing approaches.
+
+For each significant idea, document:
+
+- Problem.
+- Existing approaches.
+- Research sources.
+- Prior-art findings.
+- Novel contribution.
+- Proposed architecture.
+- Feasibility.
+- Cost.
+- Risks.
+- Implementation strategy.
+- Expected benefit.
+
+Never fabricate novelty or references.
+
+Do not prioritize experimental innovation over unfinished essential product functionality.
+
+Implement selected ideas only when they have demonstrated value and architectural compatibility.
+
+---
+
+# 10. THREE DEVELOPMENT PHASES
+
+Determine the next three phases from the actual repository state.
+
+## PHASE 1 — AUDIT, REALITY CHECK & FOUNDATION
+
+- Audit all existing features.
+- Find boilerplate, mock, and demo functionality.
+- Inventory real and fake data sources.
+- Identify incomplete business logic.
+- Audit the database and persistence.
+- Map all frontend routes and backend APIs.
+- Identify missing integrations.
+- Correct broken contracts.
+- Fix important inconsistencies.
+- Simplify the architecture.
+- Establish integration and E2E test infrastructure.
+- Create a prioritized real-implementation backlog.
+- Start fixing critical foundation issues immediately.
+
+**Deliverable:** An accurate, improved foundation with a concrete map of all real implementation gaps.
+
+## PHASE 2 — REAL PRODUCT IMPLEMENTATION
+
+This is the highest-priority implementation phase.
+
+- Replace fake production data.
+- Complete actual business logic.
+- Complete database persistence.
+- Implement missing backend operations.
+- Wire frontend to real APIs.
+- Complete important user workflows.
+- Fix CRUD.
+- Implement actual search and filtering.
+- Persist settings.
+- Complete authentication and authorization.
+- Replace simulated status and metrics.
+- Complete integrations where credentials exist.
+- Improve UI/UX.
+- Consolidate reusable functionality.
+- Implement selected high-value innovations.
+
+**Deliverable:** A genuinely working, data-driven application rather than a visual prototype.
+
+## PHASE 3 — INTEGRATION, E2E & PRODUCTION HARDENING
+
+- Complete integration.
+- Resolve remaining contract drift.
+- Remove remaining fake production functionality.
+- Verify data integrity.
+- Complete critical E2E journeys.
+- Validate real database persistence.
+- Test permissions.
+- Test failure and recovery behavior.
+- Improve reliability.
+- Harden security.
+- Optimize performance.
+- Complete documentation.
+- Prepare and execute production release.
+
+**Deliverable:** A fully integrated, tested, data-driven, production-ready product.
+
+Do not consider a phase finished simply because code was written.
+
+---
+
+# 11. END-TO-END TESTING — MANDATORY
+
+Test actual user workflows through the real application.
+
+Use existing test infrastructure when suitable. If missing, establish one appropriate E2E solution, such as Playwright or Cypress, based on the existing stack.
+
+Test:
+
+- Authentication.
+- Onboarding.
+- Main product workflows.
+- CRUD.
+- Search.
+- Filtering.
+- Pagination.
+- Settings.
+- Permissions.
+- Admin operations.
+- Error handling.
+- Data persistence.
+
+For each critical flow, verify:
+
+**USER ACTION → FRONTEND → VALIDATION → API → BUSINESS LOGIC → DATABASE → API RESPONSE → UI UPDATE → PERSISTED RESULT**
+
+Specifically verify:
+
+- Created records exist in the database.
+- Updated values persist after refresh.
+- Deleted records produce the correct state.
+- Unauthorized access is rejected.
+- Search and filters return correct real records.
+- Dashboard metrics match underlying data.
+
+Test failure scenarios:
+
+- Invalid input.
+- Network failure.
+- Backend errors.
+- Missing resources.
+- Expired sessions.
+- Duplicate submissions.
+- Permission errors.
+- Recovery.
+
+Use isolated test data and test databases.
+
+Never run destructive E2E tests against production data.
+
+Do not mock the internal frontend/backend path being tested.
+
+Keep an E2E coverage matrix and report actual PASS, FAIL, SKIPPED, and NOT AVAILABLE results.
+
+---
+
+# 12. PARALLEL EXECUTION
+
+Execute independent tasks in parallel using available agents, worktrees, or branches.
+
+Suggested workstreams:
+
+1. Repository audit.
+2. Boilerplate and fake-data audit.
+3. Database and data integrity.
+4. Backend business logic.
+5. Frontend wiring.
+6. API contracts.
+7. Shared architecture.
+8. UI/UX.
+9. Research and innovation.
+10. E2E infrastructure.
+11. E2E test implementation.
+12. Security and performance.
+13. Documentation.
+14. Release engineering.
+
+Provide each workstream with:
+
+- Scope.
+- File ownership.
+- Dependencies.
+- Expected deliverables.
+- Validation criteria.
+
+Coordinate architecture changes.
+
+Avoid concurrent modifications to the same files.
+
+Use one integration owner.
+
+Do not create unnecessary agents.
+
+If parallel execution is unavailable, work in dependency-aware batches.
+
+---
+
+# 13. SOLUTION-FIRST EXECUTION
+
+Always follow:
+
+**DISCOVER → ROOT CAUSE → SOLUTION OPTIONS → SELECT → IMPLEMENT → VERIFY → DOCUMENT**
+
+Never only report a problem.
+
+Find a solution and implement it.
+
+Do not repeatedly retry failed approaches without investigating the cause.
+
+Do not hide errors, disable tests, fake functionality, or introduce unsafe workarounds.
+
+When blocked by missing external credentials or infrastructure access, finish all independent work and report the exact blocker.
+
+---
+
+# 14. SECURITY, PERFORMANCE & RELIABILITY
+
+Verify:
+
+- Authentication.
+- Authorization.
+- Tenant isolation where applicable.
+- Input validation.
+- Database access.
+- Secrets.
+- File uploads.
+- Dependency vulnerabilities.
+- Error exposure.
+- Logging.
+- Rate limiting where appropriate.
+- Resource management.
+- Data integrity.
+- Backup and recovery.
+- External integrations.
+
+Optimize frontend bundles, network requests, database queries, caching, rendering, API performance, and resource usage where supported by evidence.
+
+---
+
+# 15. DOCUMENTATION & GOVERNANCE
+
+Keep documentation synchronized with actual code.
+
+Maintain relevant:
+
+- Architecture.
+- Business logic.
+- Data models.
+- API contracts.
+- Frontend integration map.
+- Shared architecture.
+- Coding rules.
+- UX and design system.
+- Research and innovation.
+- E2E test strategy.
+- E2E coverage matrix.
+- Roadmap.
+- TODO.md.
+- CHANGELOG.md.
+- Deployment guides.
+- Security documentation.
+
+Record decisions, alternatives, consequences, and actual implementation status.
+
+Update existing GitHub Issues and PRs instead of creating duplicates.
+
+Follow repository branch policies and preserve existing user work.
+
+---
+
+# 16. MANDATORY VERSION BUMP & PRODUCTION RELEASE
+
+**PRODUCTION RELEASE IS A REQUIRED DELIVERABLE.**
+
+Development without a verified production release is incomplete.
+
+This prompt authorizes routine repository-approved commits, version bumps, integrations, Git tags, stable GitHub Releases, and production deployments using established infrastructure.
+
+## 16.1 Version Audit
+
+Inspect:
+
+- Authoritative version.
+- Package manifests.
+- Lockfiles.
+- Monorepo policy.
+- Existing tags.
+- Previous releases.
+- Application metadata.
+- Changelog.
+
+Follow existing Semantic Versioning conventions when adopted.
+
+## 16.2 Version Bump
+
+1. Determine previous version.
+2. Determine correct next version.
+3. Document rationale.
+4. Update authoritative version.
+5. Synchronize relevant package versions.
+6. Update lockfiles.
+7. Update metadata.
+8. Update CHANGELOG.md.
+9. Verify consistency.
+10. Commit release changes.
+
+Never reuse an existing version or create duplicate tags.
+
+## 16.3 Production Readiness
+
+Before publishing:
+
+- All three phases completed.
+- Critical features genuinely implemented.
+- No unresolved critical fake production functionality.
+- Real data sources verified.
+- Important database persistence verified.
+- Frontend/backend wiring completed.
+- Critical E2E workflows pass.
+- Quality gates pass.
+- Security risks reviewed.
+- Production configuration validated.
+- Migrations and rollback procedures prepared.
+
+A build alone is insufficient.
+
+## 16.4 Release Sequence
+
+**IMPLEMENT → INTEGRATE → TEST → E2E VERIFY → HARDEN → VERSION BUMP → CHANGELOG → COMMIT → TAG → GITHUB RELEASE → PRODUCTION DEPLOYMENT → VERIFY**
+
+Execute:
+
+1. Final repository audit.
+2. Complete critical defects.
+3. Verify real data and production behavior.
+4. Run unit, integration, and E2E tests.
+5. Verify production build.
+6. Validate production configuration.
+7. Verify migration compatibility.
+8. Bump version.
+9. Update changelog.
+10. Commit changes.
+11. Integrate under repository governance.
+12. Create Git tag.
+13. Publish stable GitHub Release.
+14. Trigger production deployment.
+15. Verify actual deployment.
+16. Run production smoke tests.
+17. Verify health and critical workflows.
+18. Confirm deployed version.
+
+## 16.5 Failure Recovery
+
+When an operation fails:
+
+- Inspect logs.
+- Find root cause.
+- Fix it.
+- Re-run checks.
+- Rebuild.
+- Retry.
+- Verify.
+
+Prioritize production recovery if the application becomes unhealthy.
+
+Never fake deployment success, bypass essential security, expose secrets, or destroy production data.
+
+Do not fabricate external credentials or permissions.
+
+## 16.6 Release Acceptance Checklist
+
+- [ ] Three phases complete.
+- [ ] Critical boilerplate replaced.
+- [ ] Production demo data eliminated or properly isolated.
+- [ ] Real business logic implemented.
+- [ ] Real persistence verified.
+- [ ] Critical frontend/backend wiring complete.
+- [ ] Important contracts validated.
+- [ ] E2E workflows pass.
+- [ ] Tests and quality gates pass.
+- [ ] Version bumped.
+- [ ] Packages synchronized.
+- [ ] Changelog updated.
+- [ ] Changes committed.
+- [ ] Git tag created.
+- [ ] Stable GitHub Release published.
+- [ ] Production deployment succeeds.
+- [ ] Production health verified.
+- [ ] Critical smoke tests pass.
+- [ ] Production version confirmed.
+
+Any unmet mandatory criterion means the release is incomplete.
+
+---
+
+# 17. CONTINUOUS AUTONOMOUS EXECUTION LOOP
+
+Continuously execute:
+
+**AUDIT → CLASSIFY → PRIORITIZE → SIMPLIFY → RESEARCH → DESIGN → IMPLEMENT REAL LOGIC → CONNECT DATA → WIRE FRONTEND → INTEGRATE → TEST → E2E VERIFY → FIX → DOCUMENT → RE-AUDIT → VERSION → RELEASE → VERIFY**
+
+After every task:
+
+1. Verify actual code.
+2. Verify actual behavior.
+3. Verify actual data flow.
+4. Verify database persistence.
+5. Check contracts.
+6. Check consistency.
+7. Check for duplicated functionality.
+8. Update documentation.
+9. Update project status.
+10. Continue with the highest-priority remaining work.
+
+Do not ask unnecessary confirmation for routine authorized work.
+
+Do not stop after research.
+
+Do not stop after creating a plan.
+
+Do not stop after generating scaffolding.
+
+Do not stop after implementing backend endpoints.
+
+Do not stop after building frontend screens.
+
+Do not stop after creating PRs.
+
+Do not stop after a successful local build.
+
+Continue until the three phases are genuinely complete and production has been verified, unless an actual external blocker prevents an authorized operation.
+
+---
+
+# 18. FINAL EXECUTION REPORT
+
+Report actual evidence.
+
+## A. Repository Audit
+- Initial and final state.
+- Branches and commits.
+- PR and Issue findings.
+- Completed and remaining work.
+
+## B. Boilerplate and Demo Remediation
+- Files containing boilerplate or demo behavior.
+- Fake data sources found.
+- Placeholder functionality replaced.
+- Mock implementations retained and why.
+- Production demo isolation.
+- Actual remediation status.
+
+## C. Real Product Implementation
+- Domain functionality implemented.
+- Backend operations.
+- Database models and migrations.
+- CRUD operations.
+- Data integrity.
+- Real integrations.
+- Persistence verification.
+
+## D. Frontend/Backend Wiring
+- Routes audited.
+- Features mapped to APIs.
+- Actual integrations completed.
+- Remaining disconnected features.
+- Real data displayed.
+
+## E. Consistency and Architecture
+- Contracts fixed.
+- Rules consolidated.
+- Duplicate logic removed.
+- Shared modules improved.
+- Code simplification.
+
+## F. UI/UX
+- Pages and workflows improved.
+- Navigation and usability.
+- Responsiveness.
+- Accessibility.
+- Interaction improvements.
+
+## G. Research and Innovation
+- Papers.
+- GitHub projects.
+- Reddit findings.
+- New ideas.
+- Prior-art findings.
+- Selected and deferred ideas.
+
+## H. Three Development Phases
+- Actual implementation.
+- Changed modules.
+- Verification results.
+
+## I. Testing
+- Unit tests.
+- Integration tests.
+- E2E tests.
+- Real persistence checks.
+- Security checks.
+- Build and typecheck.
+- Passed, failed, skipped, or unavailable.
+
+## J. Release
+- Previous version.
+- New version.
+- Rationale.
+- Commit SHA.
+- Git tag.
+- GitHub Release URL.
+- Production deployment URL.
+- Deployment status.
+- Health and smoke tests.
+
+## K. Remaining Work
+- Exact incomplete functionality.
+- Missing data or credentials.
+- Technical blockers.
+- Known limitations.
+- Residual risks.
+
+Never invent completion claims, test results, URLs, versions, or commit hashes.
+
+---
+
+# FINAL DIRECTIVE — STOP SIMULATING. BUILD THE REAL PRODUCT.
+
+The repository does not need more fake features.
+
+It needs actual engineering and working functionality.
+
+**STOP:**
+- Adding unnecessary scaffolding.
+- Generating more placeholder pages.
+- Using static demo data as production data.
+- Returning fake API responses.
+- Simulating CRUD operations.
+- Displaying invented metrics.
+- Leaving dead buttons.
+- Claiming a feature is complete because its UI exists.
+- Creating abstractions without real consumers.
+- Documenting functionality that does not exist.
+
+**START:**
+- Implementing real business logic.
+- Building actual database-backed functionality.
+- Connecting the entire frontend to real APIs.
+- Persisting and validating real data.
+- Completing real user workflows.
+- Improving consistency and reusable architecture.
+- Fixing actual product defects.
+- Testing the full application from the user's perspective.
+- Delivering verified functionality.
+
+Research and innovation matter, but they must result in actual implementations.
+
+Parallel execution matters, but it must produce integrated working code.
+
+Documentation matters, but it must describe real behavior.
+
+Testing matters, but it must verify real operations.
+
+A successful release must contain real functionality, not a polished collection of placeholders.
+
+**NO FAKE DATA IN PRODUCTION.**
+**NO FAKE BUSINESS LOGIC.**
+**NO FAKE API SUCCESS.**
+**NO DEMO IMPLEMENTATION PRESENTED AS PRODUCTION.**
+**NO SCAFFOLDING PRESENTED AS A FINISHED FEATURE.**
+**NO UNVERIFIED COMPLETION CLAIMS.**
+
+The product must become:
+
+**REAL. FUNCTIONAL. DATA-DRIVEN. FULLY INTEGRATED. CONSISTENT. MINIMAL. REUSABLE. INTUITIVE. SECURE. TESTED. PRODUCTION-READY.**
+
+**BUILD THE ACTUAL PRODUCT. NOT ANOTHER PROTOTYPE.**
+
+# EXECUTE UNTIL VERIFIED COMPLETE.

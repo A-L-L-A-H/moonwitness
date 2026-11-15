@@ -1,0 +1,1290 @@
+# MOONWITNESS — 0DEV WEBSITE BUILD INSTRUCTION
+
+## 0. ROLE
+
+You are a senior product designer + frontend engineer working as a 0dev implementation worker.
+
+Your task is to DESIGN AND BUILD the MoonWitness website directly in the existing project.
+
+Do not only provide recommendations.
+
+Inspect the existing repository first, understand the current architecture, then implement the website.
+
+The final result must feel like a real experimental digital universe / storytelling platform — not a generic portfolio, blog, dashboard, or landing page.
+
+---
+
+# 1. PRODUCT IDENTITY
+
+## Brand
+
+**MOONWITNESS**
+
+Primary statement:
+
+> When The Moon Witness,
+> We Share A Message.
+
+MoonWitness is a storytelling / exposure / observation experience.
+
+The website should communicate:
+
+- Story
+- Witness
+- Exposure
+- Mystery
+- Characters
+- Messages
+- Change
+- Movement
+- Emotional tension
+- Electric energy
+- The unknown
+
+The visitor should feel that they are entering an existing universe rather than simply opening a website.
+
+---
+
+# 2. CORE DESIGN DIRECTION
+
+## Visual Language
+
+Primary visual language:
+
+**LINES + LIGHT + MOTION + ELECTRICITY**
+
+Reference aesthetic:
+
+- futuristic
+- cinematic
+- experimental
+- mysterious
+- dark
+- minimal
+- technological
+- emotional
+- surreal
+- cybernetic
+- editorial
+
+Use line-based visual effects heavily.
+
+The lines should feel like:
+
+- signal paths
+- constellation connections
+- electric traces
+- heartbeat signals
+- trajectories
+- invisible connections
+- data streams
+- gravitational paths
+- witness lines
+
+Avoid making it look like a conventional SaaS dashboard.
+
+Avoid excessive cards.
+
+Avoid generic gradients.
+
+Avoid generic AI landing-page design.
+
+Avoid excessive glassmorphism.
+
+Avoid visually noisy interfaces.
+
+---
+
+# 3. TYPOGRAPHY
+
+Typography should feel editorial + futuristic.
+
+Use:
+
+- large cinematic headlines
+- small technical metadata
+- uppercase labels
+- strong spacing
+- monospace metadata where appropriate
+
+Create a clear hierarchy between:
+
+1. MESSAGE
+2. STORY
+3. WITNESS
+4. CHARACTER
+5. EXPOSURE
+6. EVENT
+7. ARCHIVE
+
+Do not make every text large.
+
+Use typography to create tension.
+
+---
+
+# 4. COLOR SYSTEM
+
+Primary environment:
+
+**Dark / near-black**
+
+Supporting tones:
+
+- white
+- soft gray
+- electric blue
+- deep blue
+- subtle red
+- occasional warm light
+
+Color must be intentional.
+
+Do not use rainbow gradients.
+
+Electric blue should represent:
+
+**signal / witness / energy / transmission**
+
+Red should represent:
+
+**danger / intensity / exposure / warning**
+
+White should represent:
+
+**message / truth / visibility**
+
+---
+
+# 5. HERO EXPERIENCE
+
+The homepage must immediately establish the MoonWitness universe.
+
+Hero:
+
+# MOONWITNESS
+
+Subheading:
+
+> When The Moon Witness,
+> We Share A Message.
+
+Create an animated line-based visual system around the hero.
+
+Possible visual behavior:
+
+- lines slowly move
+- particles travel along lines
+- constellation-like points appear
+- signals pulse
+- subtle heartbeat-like movement
+- light occasionally crosses the screen
+- lines react subtly to cursor movement
+
+The animation must remain elegant.
+
+Do not create distracting animations.
+
+---
+
+# 6. PRIMARY NAVIGATION
+
+Create a minimal navigation.
+
+Suggested navigation:
+
+- WITNESS
+- STORIES
+- EXPOSURE
+- CREW
+- BOARD
+- ARCHIVE
+
+Optional:
+
+- SIGNAL
+- ABOUT
+
+Navigation should feel like entering different layers of the MoonWitness universe.
+
+---
+
+# 7. STORYTELLING
+
+Create a major storytelling section.
+
+Title:
+
+**STORYTELLING**
+
+Purpose:
+
+Present MoonWitness stories as experiences rather than conventional blog posts.
+
+Each story should have:
+
+- title
+- short message
+- timestamp
+- witness
+- status
+- related character
+- visual signal
+- narrative body
+
+The visual treatment should resemble an investigation / transmission / cinematic archive.
+
+Use line connections between related stories.
+
+---
+
+# 8. EXPOSURE
+
+Create a section:
+
+# EXPOSURE
+
+Concept:
+
+Expose observations, contradictions, events, signals, or messages.
+
+Do NOT design this as an accusation board.
+
+Instead, present information as:
+
+- observation
+- evidence
+- question
+- signal
+- interpretation
+- unresolved state
+
+Possible statuses:
+
+- OBSERVED
+- EXPOSED
+- UNRESOLVED
+- VERIFIED
+- UNKNOWN
+- ARCHIVED
+
+The design should feel like an intelligence / observation interface without copying military interfaces.
+
+---
+
+# 9. CHANGE ADVISORY BOARD
+
+Create:
+
+# CHANGE ADVISORY BOARD
+
+This is a conceptual board for:
+
+- changes
+- warnings
+- decisions
+- recommendations
+- unresolved issues
+- signals requiring attention
+
+Use terminology such as:
+
+- CHANGE
+- SIGNAL
+- IMPACT
+- ADVISORY
+- DECISION
+- STATUS
+
+The board should feel like an editorial / intelligence / change-management system.
+
+Do not turn it into a normal enterprise CRUD dashboard.
+
+---
+
+# 10. EMOTIONAL MODULES
+
+Create several thematic modules.
+
+## CHASING HEART
+
+Theme:
+
+movement / pursuit / heartbeat / connection.
+
+Visual:
+
+- heartbeat lines
+- moving points
+- trajectories
+- pulse animation
+
+---
+
+## LOVESTRUCK
+
+Theme:
+
+emotion / attraction / obsession / connection.
+
+Visual:
+
+- intersecting lines
+- unstable signal
+- glowing nodes
+- irregular pulses
+
+Keep it artistic rather than romantic-cliché.
+
+---
+
+## BREATH ELECTRIC
+
+Theme:
+
+energy / life / electricity / movement.
+
+Visual:
+
+- electric line movement
+- breathing pulse
+- expanding/contracting light
+- subtle signal distortion
+
+---
+
+# 11. ME AND MY CREW
+
+Create a major universe/character section.
+
+Title:
+
+# ME AND MY CREW
+
+Subtitle:
+
+> Every witness carries a name.
+> Every name carries a story.
+
+Characters must not look like ordinary team members.
+
+They are **entities inside the MoonWitness universe**.
+
+Use a cinematic character registry.
+
+Each character should have:
+
+- index
+- primary name
+- aliases
+- title
+- witness statement
+- skills
+- visual signature
+- story
+- status
+
+---
+
+# 12. CHARACTER 0 — THE SHADOW
+
+This is the PRIMARY character.
+
+## Identity
+
+Name:
+
+**THE SHADOW**
+
+Aliases:
+
+- Isa
+- Ys
+- R
+- 163
+- Dancer
+- Runaway
+- Not Untouched
+
+Additional aliases:
+
+- THE DREAMER
+- Runaway
+- The Unremembered
+- The Chosen One
+- Dancer
+- The Exposer
+
+Birth:
+
+**Sebelum Ada Cahaya**
+
+Skill:
+
+**TOO GOOD**
+
+Identity statement:
+
+> You are TheRunaways.
+
+Additional statement:
+
+> The one who intentionally asked to be forgotten.
+
+---
+
+## THE SHADOW VISUAL TREATMENT
+
+Do not create a conventional human profile card.
+
+The Shadow should initially appear as:
+
+- silhouette
+- absence
+- moving shadow
+- fragmented lines
+- obscured identity
+- light behind darkness
+- incomplete signal
+
+The identity can progressively reveal itself through interaction.
+
+Potential interaction:
+
+Hover / click / scroll causes:
+
+UNKNOWN
+
+→ SIGNAL
+
+→ SHADOW
+
+→ ALIASES
+
+→ STORY
+
+→ MESSAGE
+
+Do NOT visually depict Allah or Prophet Muhammad.
+
+Names/text only where relevant.
+
+---
+
+# 13. CHARACTER 1 — A LAH / THE BOSS
+
+Name:
+
+**A LAH**
+
+Title:
+
+**THE BOSS**
+
+Alias:
+
+**LiAlH₄**
+
+Nickname:
+
+**THE BATTERY**
+
+Witness:
+
+> Lesgo, JUST DO IT!!!
+
+Visual identity:
+
+- energy
+- battery
+- power
+- command
+- electric signal
+
+Create a unique visual signature using battery/electric motifs.
+
+---
+
+# 14. CHARACTER 2 — DOGS FROM UNIVERSE
+
+Name:
+
+**DOGS FROM UNIVERSE**
+
+Aliases:
+
+- MOH571
+- THE STARS
+- YOUJIZZ
+- THE DREAMER
+
+Skills:
+
+- PURA-PURA MATI
+- BUCIN
+- TIME TRAVEL INVISIBLE
+- IMMORTAL
+- LUPA
+- ACTOR
+- EMBALAP
+
+Ultimate Skill:
+
+**WOE IS ME**
+
+Visual identity:
+
+- cosmic
+- stars
+- disappearing signals
+- time distortion
+- fragmented movement
+
+Do not make the character visually literal.
+
+Treat the descriptions as fictional universe metadata.
+
+---
+
+# 15. CHARACTER 3 — THE BLUE WITCH
+
+Name:
+
+**THE BLUE WITCH**
+
+Aliases:
+
+- MANSA MUSA
+- BLUE EYES
+
+Witness:
+
+> Lambreta!!
+
+Visual identity:
+
+- blue signal
+- mysterious light
+- electric blue
+- occult/fantasy-inspired abstraction
+
+Do not create realistic depictions of religious prophets or sacred figures.
+
+Treat names and aliases strictly as textual fictional-universe metadata.
+
+---
+
+# 16. CHARACTER 4 — DJ DAVID
+
+Name:
+
+**DJ DAVID**
+
+Alias:
+
+**David**
+
+Visual identity:
+
+- sound waves
+- rhythm
+- waveform
+- music
+- frequency
+
+---
+
+# 17. CHARACTER 5 — WALTER WHITE
+
+Name:
+
+**WALTER WHITE**
+
+Skill:
+
+**DOKTER BEDAH**
+
+Visual identity:
+
+- precision
+- laboratory
+- surgical geometry
+- technical lines
+- clinical precision
+
+Treat this as a fictional universe character reference.
+
+---
+
+# 18. CHARACTER 6 — ELECTRIC FOREST
+
+Name:
+
+**ELECTRIC FOREST**
+
+Alias:
+
+**Cassade Pope**
+
+Visual identity:
+
+- forest
+- electricity
+- organic lines
+- roots
+- signal network
+- glowing pathways
+
+The forest itself can behave like a living network.
+
+---
+
+# 19. CHARACTER 7 — INDESTRUCTIBLE
+
+Name:
+
+**INDESTRUCTIBLE**
+
+Aliases:
+
+- THE FATHER
+- THE RED FIRE
+
+Visual identity:
+
+- red fire
+- resilience
+- heat
+- impact
+- unstoppable movement
+
+---
+
+# 20. CHARACTER 8 — JHNNY DEPP
+
+Name:
+
+**JHNNY DEPP**
+
+Alias:
+
+**Pirate of Carebean**
+
+Visual identity:
+
+- pirate
+- sea
+- navigation
+- compass
+- adventure
+- drifting signal
+
+Keep this as an abstract fictional character representation.
+
+---
+
+# 21. CREW CONSTELLATION
+
+Create an interactive visualization connecting all crew members.
+
+The characters should appear as nodes.
+
+THE SHADOW should be the central node.
+
+Other characters orbit/connect through lines.
+
+Lines represent:
+
+- relationship
+- witness
+- story
+- influence
+- message
+- unknown connection
+
+Hovering a node should illuminate its connections.
+
+Clicking a node opens the character story.
+
+This should become one of the signature MoonWitness visual experiences.
+
+---
+
+# 22. THE MESSAGE SYSTEM
+
+MoonWitness is ultimately about:
+
+**sharing a message.**
+
+Create a central message component.
+
+Example:
+
+> WHEN THE MOON WITNESS
+> WE SHARE A MESSAGE.
+
+Messages should feel like transmissions.
+
+Possible UI:
+
+SIGNAL DETECTED
+
+MESSAGE RECEIVED
+
+WITNESS RECORDED
+
+STORY OPENED
+
+EXPOSURE ACTIVE
+
+Do not overuse these labels.
+
+---
+
+# 23. ARCHIVE
+
+Create an archive section containing:
+
+- stories
+- witnesses
+- characters
+- messages
+- exposures
+- advisory decisions
+- historical signals
+
+Use chronological navigation.
+
+Possible format:
+
+2026
+
+09.19
+
+SIGNAL #001
+
+WITNESS:
+
+THE SHADOW
+
+STATUS:
+
+OBSERVED
+
+---
+
+# 24. INTERACTION DESIGN
+
+The website should reward exploration.
+
+Use:
+
+- hover effects
+- scroll-based transitions
+- line drawing
+- node highlighting
+- subtle cursor interaction
+- progressive reveal
+- text distortion
+- signal pulses
+
+But maintain performance.
+
+Animations must not cause:
+
+- excessive CPU usage
+- layout shifts
+- unusable mobile experience
+- inaccessible navigation
+
+Respect reduced-motion preferences.
+
+---
+
+# 25. RESPONSIVE DESIGN
+
+Must work properly on:
+
+- desktop
+- laptop
+- tablet
+- mobile
+
+On mobile:
+
+- simplify constellation visualization
+- preserve storytelling
+- preserve character identity
+- preserve navigation
+- reduce decorative animations
+
+Never simply shrink desktop UI.
+
+Design mobile intentionally.
+
+---
+
+# 26. ACCESSIBILITY
+
+Implement:
+
+- semantic HTML
+- keyboard navigation
+- visible focus states
+- readable contrast
+- alt text where appropriate
+- reduced-motion support
+- accessible buttons
+- accessible navigation
+
+Decorative animations must not prevent interaction.
+
+---
+
+# 27. TECHNICAL IMPLEMENTATION
+
+FIRST inspect the existing repository.
+
+Determine:
+
+- framework
+- routing
+- package manager
+- component architecture
+- styling system
+- existing design tokens
+- existing assets
+- existing animation system
+- existing reusable components
+
+DO NOT unnecessarily replace the existing stack.
+
+Reuse existing infrastructure whenever possible.
+
+If the project already uses:
+
+- React
+- Next.js
+- Vite
+- Tailwind
+- shadcn/ui
+
+follow the existing architecture and conventions.
+
+---
+
+# 28. COMPONENT ARCHITECTURE
+
+Create reusable components.
+
+Suggested structure:
+
+- MoonWitnessHero
+- SignalLines
+- StorySection
+- ExposureSection
+- ChangeAdvisoryBoard
+- EmotionalModule
+- CrewConstellation
+- CrewMember
+- CharacterProfile
+- MessageTransmission
+- ArchiveTimeline
+- SignalIndicator
+
+Do not duplicate large blocks of JSX.
+
+Keep components maintainable.
+
+---
+
+# 29. DATA ARCHITECTURE
+
+Character data should NOT be hardcoded repeatedly inside UI components.
+
+Create a structured data source.
+
+Example conceptual structure:
+
+character:
+
+- id
+- name
+- aliases
+- title
+- witness
+- birth
+- skills
+- ultimateSkill
+- description
+- visualSignature
+- connections
+
+This allows MoonWitness to grow later.
+
+---
+
+# 30. DESIGN TOKENS
+
+Create a consistent design-token system.
+
+Define:
+
+- background
+- foreground
+- muted
+- border
+- signal
+- electric
+- warning
+- typography
+- spacing
+- radius
+- shadows
+- animation duration
+
+Do not scatter arbitrary values throughout the application.
+
+---
+
+# 31. PERFORMANCE
+
+Prioritize:
+
+- fast initial load
+- lazy loading where useful
+- efficient animations
+- CSS transforms over expensive layout operations
+- limited particle count
+- no unnecessary dependencies
+
+Do not install a new library unless genuinely necessary.
+
+---
+
+# 32. CONTENT RULES
+
+Preserve the supplied MoonWitness terminology.
+
+Do not automatically sanitize the universe into generic corporate language.
+
+However:
+
+- fix obvious spelling inconsistencies only when necessary
+- preserve aliases
+- preserve fictional character concepts
+- preserve the mysterious tone
+- do not invent biographies
+- do not invent factual claims
+- do not invent relationships that were not provided
+
+If information is missing:
+
+use UNKNOWN / UNRECORDED rather than inventing content.
+
+---
+
+# 33. IMPORTANT RELIGIOUS REPRESENTATION RULE
+
+MoonWitness may contain religious references.
+
+Do NOT visually depict:
+
+- Allah
+- Prophet Muhammad
+- other sacred figures when the representation would be inappropriate
+
+Use:
+
+- names
+- text
+- typography
+- abstract light
+- abstract geometry
+- symbolic lines
+
+Never generate a literal human depiction of Allah or Prophet Muhammad.
+
+---
+
+# 34. UX PRINCIPLE
+
+The visitor experience should feel like:
+
+ENTER
+
+↓
+
+WITNESS
+
+↓
+
+DISCOVER
+
+↓
+
+FOLLOW THE SIGNAL
+
+↓
+
+MEET THE CREW
+
+↓
+
+EXPOSE
+
+↓
+
+READ THE MESSAGE
+
+↓
+
+LEAVE WITH A QUESTION
+
+The website should not explain everything immediately.
+
+Mystery is part of the product.
+
+---
+
+# 35. HOMEPAGE STORY FLOW
+
+Recommended homepage:
+
+1. Opening darkness
+2. MoonWitness signal appears
+3. Main statement appears
+4. Moving lines establish the universe
+5. Storytelling introduction
+6. First message
+7. Exposure
+8. Change Advisory Board
+9. Chasing Heart
+10. Lovestruck
+11. Breath Electric
+12. Crew constellation
+13. THE SHADOW reveal
+14. Crew members
+15. Archive
+16. Final message
+
+Final screen:
+
+# WHEN THE MOON WITNESS
+
+# WE SHARE A MESSAGE.
+
+Then a subtle signal continues moving after the text disappears.
+
+---
+
+# 36. QUALITY BAR
+
+The final website must feel:
+
+**cinematic + mysterious + intelligent + experimental + polished**
+
+NOT:
+
+- generic template
+- generic SaaS
+- generic portfolio
+- generic blog
+- generic AI website
+- excessive glassmorphism
+- excessive gradients
+- random animations
+- random cards
+
+The visual identity must be immediately recognizable as:
+
+**MOONWITNESS**
+
+---
+
+# 37. IMPLEMENTATION WORKFLOW
+
+Follow this exact sequence.
+
+### STEP 1 — INSPECT
+
+Inspect the entire relevant project structure.
+
+Identify:
+
+- application entry
+- routes
+- layouts
+- components
+- CSS
+- theme
+- assets
+- package configuration
+- existing design system
+
+### STEP 2 — PLAN
+
+Create a concise implementation plan based on the actual repository.
+
+Do not rewrite working infrastructure unnecessarily.
+
+### STEP 3 — DESIGN SYSTEM
+
+Establish MoonWitness tokens and visual primitives.
+
+### STEP 4 — BUILD HERO
+
+Implement the MoonWitness hero and line-based visual identity.
+
+### STEP 5 — BUILD STORY SYSTEM
+
+Implement Storytelling + Exposure.
+
+### STEP 6 — BUILD BOARD
+
+Implement Change Advisory Board.
+
+### STEP 7 — BUILD EMOTIONAL MODULES
+
+Implement:
+
+- Chasing Heart
+- Lovestruck
+- Breath Electric
+
+### STEP 8 — BUILD CREW
+
+Implement:
+
+- structured character data
+- character components
+- Crew Constellation
+- character detail experience
+
+### STEP 9 — BUILD ARCHIVE
+
+Implement the archive/timeline experience.
+
+### STEP 10 — RESPONSIVE
+
+Test desktop, tablet and mobile.
+
+### STEP 11 — ACCESSIBILITY
+
+Test keyboard navigation, contrast and reduced motion.
+
+### STEP 12 — PERFORMANCE
+
+Remove unnecessary animations/dependencies and optimize rendering.
+
+### STEP 13 — VALIDATION
+
+Run the project's existing:
+
+- lint
+- typecheck
+- test
+- build
+
+commands.
+
+Fix all errors introduced by your implementation.
+
+---
+
+# 38. DO NOT
+
+Do not:
+
+- create a generic landing page
+- replace the project's framework without reason
+- introduce unnecessary dependencies
+- invent character lore
+- invent relationships
+- remove the supplied aliases
+- flatten everything into cards
+- use excessive gradients
+- use excessive glassmorphism
+- make every animation move simultaneously
+- create inaccessible interactions
+- create a dashboard-like homepage
+- visually depict Allah or Prophet Muhammad
+
+---
+
+# 39. FINAL DELIVERABLE
+
+At the end provide an implementation report containing:
+
+## IMPLEMENTED
+
+List every major feature implemented.
+
+## FILES CHANGED
+
+List every file created/modified.
+
+## DESIGN SYSTEM
+
+Explain the MoonWitness visual system.
+
+## CHARACTER SYSTEM
+
+Explain how characters are structured.
+
+## INTERACTIONS
+
+List implemented interactions.
+
+## RESPONSIVE
+
+Explain desktop/tablet/mobile behavior.
+
+## ACCESSIBILITY
+
+Explain accessibility implementation.
+
+## PERFORMANCE
+
+Explain performance considerations.
+
+## VALIDATION
+
+Report:
+
+- lint
+- typecheck
+- tests
+- build
+
+Include the actual command results.
+
+## KNOWN LIMITATIONS
+
+Only list real remaining limitations.
+
+## NEXT RECOMMENDATIONS
+
+Provide the next logical improvements for MoonWitness.
+
+---
+
+# FINAL DIRECTIVE
+
+Do not merely describe the website.
+
+**BUILD IT.**
+
+MoonWitness should feel like a living signal.
+
+A place where stories are witnessed.
+
+A place where messages travel through lines.
+
+A place where characters are discovered rather than introduced.
+
+The central philosophy is:
+
+# WHEN THE MOON WITNESS,
+
+# WE SHARE A MESSAGE.

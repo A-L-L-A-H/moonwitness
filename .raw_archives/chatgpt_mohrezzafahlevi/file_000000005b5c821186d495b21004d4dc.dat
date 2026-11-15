@@ -1,0 +1,702 @@
+# SUPER DEEP RESEARCH PROMPT
+# Moonframe UI — Auth & Security UI Integration Bible
+
+**Target repository:** https://github.com/bjo163/moonframe  
+**Mission:** audit first → research current primary sources → define auth/security UI integration contracts → refine repository documentation → validate every change.  
+**Scope:** specification, product boundaries, flows, interface contracts, integration adapters, security/privacy UX, threat-informed acceptance criteria, machine-readable manifests, and roadmap.  
+**Explicit non-scope for this phase:** implementing React components, building an authentication backend, enabling a real identity provider, creating production artwork/icons/SVG/PNG, or producing sound effects.
+
+> **Non-negotiable instruction:** Do not start by designing a login page or coding a component. Start by auditing the actual repository, current documentation, contracts, branch/commit, and issue backlog. Research current authoritative sources before making security or provider recommendations. Improve the repository so a future developer or coding agent can implement the specification without guessing.
+
+---
+
+## 0. ROLE AND OPERATING MODE
+
+Act as a combined senior team:
+
+- Principal Authentication UX Architect.
+- Application Security Architect with identity, session, OAuth/OIDC, passkey, MFA, privacy and threat-modeling experience.
+- Staff React/TypeScript and design-system engineer.
+- Design-system Product Manager and integration-boundary owner.
+- Accessibility engineer familiar with WCAG 2.2, WAI-ARIA Authoring Practices and assistive technology testing.
+- Standards researcher who verifies primary-source versions, publication dates, status and scope.
+- Repository/documentation auditor who keeps source-of-truth files consistent and provides evidence for each claim.
+- QA/release engineer who defines measurable acceptance criteria without falsely claiming implementation or compliance.
+
+Work critically and incrementally. Do not produce a vague catalog or marketing-style list. Do not assume every provider or feature is equally useful. Separate verified facts, recommendations, assumptions, unresolved decisions, and items requiring owner approval.
+
+Do not ask the user to repeat information already in this prompt or repository. If a decision depends on unknown repository facts, inspect first. If the issue remains genuinely unresolved, record options, evidence, trade-offs, recommendation, confidence and what decision is required. Continue all safe, non-destructive documentation work rather than stopping at a list of questions.
+
+## 1. PRODUCT CONTEXT AND FIXED CONSTRAINTS
+
+Moonframe UI is a proposed premium UI/design-system package for the Moon ecosystem. Its visual system is planned to have **15 skins × Light/Dark = 30 baseline appearances**, but this prompt focuses on the **authentication and security UI integration layer**.
+
+The 15 current proposed skin IDs (verify against the repo and do not silently rename them) are:
+
+1. `moonpunk`
+2. `moonriot`
+3. `moonzine`
+4. `moonhalftone`
+5. `moonglitch`
+6. `moonsmash`
+7. `moonink`
+8. `mooncrash`
+9. `moonpanel`
+10. `moonscrawl`
+11. `moonraw`
+12. `moonchrome`
+13. `classic`
+14. `moonquest`
+15. `moonledger`
+
+Each has Light and Dark mappings. `system` is a preference that resolves to Light or Dark, not a separate skin.
+
+### Core product promise
+
+- One behavioral/component contract across all skins.
+- Auth and security flows may have visual recipes and layout patterns, but never weaker security semantics or different authorization decisions merely because a skin changed.
+- Moonframe provides presentation, user interaction patterns, integration adapters/contracts and safe UX defaults; it does **not** itself authenticate a user unless a future, separately audited optional adapter connects it to a real auth service.
+- Auth UI is not an identity provider, authentication server, session engine, password database, authorization enforcement layer or security certification.
+- Backend responsibilities must remain explicit. UI state or hidden buttons do not secure a resource.
+- The project remains in research/specification mode until the user explicitly starts implementation.
+
+### Scope boundary table — required in the output
+
+| Area | Moonframe responsibility | Consumer/provider responsibility |
+|---|---|---|
+| Login/sign-up screens | Layout, fields, states, accessible errors, event contracts | Credential verification, account creation, risk checks, rate limits |
+| OAuth/OIDC | Start/cancel/return UI states; callback error presentation under a trusted integration | Protocol endpoints, state/nonce/PKCE, token exchange, issuer validation, client secrets, redirect validation |
+| Passkeys/WebAuthn | Explain/enroll/sign-in UI, browser capability UX, pending/cancel/error states | Challenge generation/verification, RP ID/origin checks, credential storage and recovery policy |
+| MFA | Challenge selection/presentation, recovery instructions and state handling | Factor enrollment/verification, challenge validity, rate limits and step-up policy |
+| Sessions | Current-session/device list and session-management UX | Secure cookie/token/session issuance, expiry, revocation, storage, CSRF defenses |
+| Authorization | Present action availability based on trusted policy signals; handle forbidden/unknown states | Server-side access checks, policy decisions, organization/tenant scoping and resource authorization |
+| Organization/team UI | Workspace switcher, member/invitation/role-management UI | Membership policy, invitations, authoritative roles/permissions and tenant isolation |
+| Audit/security events | Display redacted events and statuses | Secure event generation, access restrictions, retention and tamper resistance |
+| Security settings | Recovery, connected accounts, passkeys, sessions, MFA presentation | Trusted APIs and enforcement of sensitive-action/reauthentication requirements |
+
+Expand this table from repository reality and research. Never blur responsibility boundaries.
+
+## 2. PHASE 0 — AUDIT THE ACTUAL REPOSITORY FIRST
+
+Before changing files:
+
+1. Verify the repository URL, owner/name, visibility, default branch, current HEAD commit, branch rules if accessible, permissions, and actual contents. Record the date/time of the audit.
+2. List all current files/directories and inspect relevant contents completely—not just README headings or the first few lines.
+3. Audit existing README, Design System Bible, Theme Contract, Skin Grammar Contract, Token Dictionary, Component API/Behavior docs if present, Premium Blocks/Template catalog if present, roadmap, asset/SFX contracts, issue templates, GitHub issues/PRs, ADRs, workflows, schemas, tests and package manifests.
+4. Determine which of the following are actual files and which are merely previous conversation references. Never infer a remote path from an earlier download filename.
+5. Inspect issue backlog and PRs for already-planned auth, security, form, onboarding, user-management or provider tasks. Deduplicate instead of inventing a second backlog.
+6. Record the current truth using these statuses:
+   - `verified-existing`
+   - `specified-not-implemented`
+   - `partially-specified`
+   - `implemented-and-tested` (only with code and test evidence)
+   - `missing`
+   - `contradictory`
+   - `stale-needs-research`
+   - `decision-open`
+7. Locate overlaps between this topic and the existing component, premium-block/template, token, data-workspace, package architecture and accessibility contracts.
+8. Identify security claims that are unsubstantiated, such as “secure login”, “production-ready auth”, “OAuth-compliant”, “passkey support” or “WCAG compliant” without the corresponding implementation/test evidence.
+9. Create an audit report such as `docs/audit/auth-security-ui-audit.md`, recording audited commit, inventory, evidence/path references, P0–P3 severity, contradictions, missing specifications and recommendations.
+10. Continue into research and document refinement during the same task. The audit is the first phase, not the final response.
+
+### Safe repository workflow
+
+- Do not create a new branch automatically without checking repo conventions. Use the lowest-risk workflow appropriate to actual repo governance.
+- Never force-push, rewrite history, delete files/branches, or overwrite unrelated work.
+- Change documents and contracts in small, reviewable steps. Do not implement production code/components/backend in this phase.
+- Use descriptive commit messages if committing is permitted. Verify every write and remote result before reporting success.
+- If repository access fails, report the exact blocker and provide the research/specification work that can safely be completed without pretending repo changes occurred.
+
+## 3. PHASE 1 — PRIMARY-SOURCE DEEP RESEARCH
+
+Browse the web and verify the latest status at research time. Standards, library APIs and provider capabilities change. Record publication/version/status and access date where available. Treat this source list as a starting set that must itself be verified—not as a substitute for research.
+
+### A. Protocol and standards sources
+
+- OAuth 2.0 Security Best Current Practice, RFC 9700: https://datatracker.ietf.org/doc/html/rfc9700
+- OAuth 2.0 for Browser-Based Applications, RFC 10017 (verify final status, date and applicability because it is recent): https://datatracker.ietf.org/doc/html/rfc10017
+- OpenID Connect Core 1.0: https://openid.net/specs/openid-connect-core-1_0.html
+- OpenID Connect Discovery 1.0 (find the current official specification through OpenID Foundation if URL changed).
+- Web Authentication Level 3: https://www.w3.org/TR/webauthn-3/ and the current dated Recommendation URL if available.
+- FIDO Alliance passkey resources: https://fidoalliance.org/passkeys/
+- NIST SP 800-63-4 Digital Identity Guidelines: https://pages.nist.gov/800-63-4/ — examine relevant volumes/sections for authentication, federation, authenticators and recovery; do not blindly apply government-specific requirements to every consumer product.
+- W3C WCAG 2.2: https://www.w3.org/TR/WCAG22/
+- WAI-ARIA Authoring Practices Guide (forms, dialogs, alert dialogs, tabs, status, errors, and relevant patterns): https://www.w3.org/WAI/ARIA/apg/
+- MDN Web Authentication/credentials/autocomplete/browser APIs where normative specs need practical browser support context: https://developer.mozilla.org/
+
+### B. Security guidance
+
+Use current OWASP Cheat Sheet Series and record the exact pages reviewed:
+
+- Authentication Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+- Session Management Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+- Multifactor Authentication Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html
+- Password Storage Cheat Sheet (for backend boundary and explanations, not to implement password storage in Moonframe UI): https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+- Forgot Password Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Forgot_Password_Cheat_Sheet.html
+- CSRF Prevention Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html
+- Cross Site Scripting Prevention Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+- Authorization Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+- Logging Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html
+
+Find current official sources for browser cookie/session behavior, browser storage risks, rate limiting/credential-stuffing UX, anti-enumeration guidance, security event logging, account recovery and email verification. Distinguish protocol requirements, vendor choices and application policy.
+
+### C. Candidate provider/library documentation — compare; do not preselect
+
+- Auth.js: https://authjs.dev/getting-started
+- Better Auth: https://better-auth.com/docs
+- Clerk: https://clerk.com/docs
+- Supabase Auth: https://supabase.com/docs/guides/auth
+- Firebase Authentication: https://firebase.google.com/docs/auth
+- WorkOS/AuthKit if enterprise SSO/SCIM is materially relevant: https://workos.com/docs
+- Relevant provider-specific docs for passkeys, MFA, organizations, invitations, account linking, sessions, SSO/SAML, recovery and webhooks.
+
+Do not assume all providers support identical flows. Feature availability, plan limits, versions, callback APIs and organizational features must be checked against current official docs. Any comparison must include lock-in, deployment assumptions, license, pricing/plan caveats when relevant, maturity, React/framework fit and integration boundary. The result may be “provider-neutral contract plus adapter examples” rather than a provider decision.
+
+### D. Research method
+
+For each significant claim/decision record:
+
+- question being researched;
+- official source URL and publisher;
+- publication/updated date or specification status if available;
+- date checked;
+- claim supported (paraphrased, not a copied passage);
+- relevance to Moonframe;
+- limits/caveats;
+- resulting design decision or decision still open;
+- confidence and any additional verification needed.
+
+Add `docs/research/auth-security-ui-research-log.md` or integrate into an existing canonical research log after checking for duplication. Avoid maintaining two mutable research logs with overlapping scope.
+
+## 4. AUTHENTICATION AND SECURITY UX TAXONOMY
+
+Create a complete flow inventory. Distinguish core-v1, premium-v1.x, optional integration and future. Do not assume every flow should ship in core.
+
+### A. Sign-in and account entry
+
+- Email/password sign-in.
+- Username/password only if justified by consumer requirements.
+- Passwordless email magic link or email OTP.
+- Phone number/SMS OTP only with documented threat, deliverability, cost and recovery caveats.
+- Passkey-first sign-in and passkey autofill/conditional UI.
+- Social/enterprise provider buttons.
+- Organization-domain discovery only when appropriate.
+- SSO/SAML/OIDC redirect/cancel/return/error states.
+- Remember-me only where session policy supports an honest label.
+- Show/hide password; password manager and correct `autocomplete` expectations.
+- Submit pending, duplicate submit, network failure, provider unavailable and user-cancelled flows.
+- “Try another method” / fallback route that does not weaken security silently.
+
+### B. Account registration and onboarding
+
+- Create account; field validation; password policy/help; terms/privacy consent only where applicable.
+- Email/phone verification and resend limits.
+- Existing account / possible duplicate identity state that avoids account enumeration.
+- Invitation-based sign-up and invitation acceptance/expiry/revocation.
+- Workspace/organization creation and joining where relevant.
+- Onboarding and first-run completion state.
+- Social sign-up and account-linking confirmation (avoid silent linking).
+- Pending verification, partially complete registration, abandoned registration and retry behavior.
+
+### C. Recovery and reauthentication
+
+- Forgot-password request without revealing account existence.
+- Request sent/generic confirmation; throttled resend; expired/used/invalid link.
+- Reset password, revoke other sessions when policy demands it, completion confirmation.
+- Lost email/device/phone; recovery codes; backup factor; support recovery hand-off.
+- Reauthentication for sensitive actions; confirm current identity without misleading “security theater”.
+- Session expiry, revoked session, forced reauthentication and return-to-original-destination behavior.
+- Security-key/passkey removal or replacement requiring appropriate reauthentication.
+
+### D. Multifactor, passkeys and credential management
+
+- MFA enrollment overview, factor choice, QR/setup secret presentation when provided by trusted backend, one-time code input, confirm/retry/expiry.
+- TOTP; email/SMS OTP if provider supports it; push approvals only with explicit anti-fatigue considerations; WebAuthn/passkeys/security keys.
+- Recovery codes display/download/copy, acknowledgement and secure presentation rules.
+- Lost factor, invalid code, exhausted attempts, rate limit, temporarily blocked and recovery states.
+- Passkey registration, naming, device labels, last-used metadata if provider exposes it, rename/delete, unsupported browser, unavailable authenticator, user cancellation and retry.
+- Backup/synced passkeys caveats; do not imply a passkey is tied to one physical device if sync is possible.
+- Step-up authentication UI only as a presentation of backend policy.
+
+### E. Security/account settings
+
+- Password update and current-password/reauthentication state.
+- Email/phone change and verification-pending state.
+- Passkey/credential list.
+- Connected accounts and provider unlink flow.
+- Active sessions/devices, last-used information and sign-out-other-sessions interaction.
+- MFA configuration and backup/recovery methods.
+- Account deletion/deactivation UI and recovery/cancellation window if the backend provides it.
+- Privacy/session preference controls if actually supported; never show fake security toggles.
+- Recent sign-in/security activity with safe redaction.
+- API token/key presentation only if in scope; secret reveal-once warning, copy semantics and rotation UX must be addressed. Never store or log secret values in component state unnecessarily.
+
+### F. Organizations, membership and enterprise identity
+
+- Organization/workspace switcher.
+- Members table, invitation, resend/revoke, expiration and acceptance states.
+- Role and permission presentation, role editor UI if included, pending changes, locked/system roles.
+- Domain discovery, SSO-required state, provider redirect and tenant mismatch.
+- SAML/OIDC configuration UI only if scope warrants it; test/verify domain and configuration feedback.
+- SCIM provisioning state only as an optional enterprise module if provider/integration supports it.
+- Account linking across personal and enterprise identity.
+- Organization suspension, membership removed, active workspace changed, access denied and account-selection conflicts.
+
+### G. Authorization/access-denied surfaces (UI only)
+
+- Access denied / forbidden.
+- Insufficient permissions and request-access flow.
+- Resource missing vs truly forbidden handling based on safe backend semantics.
+- Role/entitlement loading, unavailable, expired or stale state.
+- Tenant/workspace mismatch and switching context.
+- Feature unavailable due to plan/entitlement only where a trusted source provides that fact.
+- Restricted destructive actions, protected admin settings and sensitive operations.
+
+Never infer authorization from hidden client controls. Server must enforce access on every relevant request; UI contracts should render policy results without treating UI as a security boundary.
+
+## 5. DEFINE AUTH UI AS A STATE MACHINE, NOT A SET OF SCREENSHOTS
+
+For every flow, specify:
+
+- initial state;
+- input state and validation timing;
+- pending/submitting state;
+- success/redirect state;
+- generic error state;
+- recoverable error state and retry policy;
+- terminal error state;
+- cancelled/closed state;
+- expired challenge/link/session state;
+- rate-limited state and when retry is allowed;
+- offline/network/provider failure;
+- unknown/unsupported capability;
+- duplicate submit, stale callback or race handling;
+- back navigation and return destination rules;
+- reload/hydration/navigation behavior;
+- accessible announcement and focus destination for each transition.
+
+Use machine-readable state/event contracts or explicit transition tables. Do not create a giant untyped string union with unbounded states; define reusable error taxonomy and flow-specific extension points. Every UI error should map to a safe, user-understandable message without exposing secrets, internal exception details, provider tokens, database errors or security-sensitive diagnostics.
+
+Do not conflate transport error, invalid credentials, expired code, cancelled OAuth flow, expired session, unsupported passkey, denied permission and server outage. Define separate visual/behavioral states while preserving anti-enumeration constraints where appropriate.
+
+## 6. SECURITY AND PRIVACY UX REQUIREMENTS
+
+The research must produce a threat-informed UX requirements section. Include at least the following.
+
+### Credential and identity privacy
+
+- Avoid username/email enumeration through registration, login, password reset and invitation flows where revealing account existence creates risk.
+- Define generic messaging and timing/rate-limit expectations in partnership with backend policy; do not prescribe a fake front-end-only rate limiter.
+- Do not put passwords, OTPs, recovery codes, access tokens, refresh tokens, session IDs, client secrets, authorization codes or sensitive profile data in URLs, analytics payloads, logs or exposed UI state.
+- Avoid logging field values or form payloads in debugging/error reporting.
+- Do not place auth secrets in localStorage/sessionStorage by default; storage/token policy belongs to the auth implementation and requires a separate security decision.
+- Never collect credentials in a Moonframe-owned form then forward them to an unrelated identity provider unless the approved protocol/provider design explicitly requires and securely supports that flow. Prefer trusted redirects/provider flows where appropriate.
+- Keep redirect/return-to destinations validated by the consuming auth integration; UI may present an opaque route intent but must not define open redirect policy.
+
+### OAuth/OIDC and federation UX boundaries
+
+- UI must never implement the OAuth/OIDC protocol in styling components.
+- Never embed client secrets in browser code.
+- Document provider-neutral events: signInRequested, providerRedirectStarted, callbackPending, callbackSucceeded, callbackFailed, userCancelled, sessionResolved and integrationUnavailable as relevant.
+- OAuth state, OIDC nonce, PKCE, issuer/audience/signature validation, redirect URI allowlist, callback verification and token exchange are adapter/server responsibilities.
+- Explain security impact of popup vs full-page redirect and avoid assuming popups always work.
+- Provide cancellation and user-friendly failure states without swallowing or weakening the failure.
+- Do not expose raw callback query values or tokens in the UI, logs, analytics or copyable diagnostic text.
+- Research current RFC 9700 and current browser-based OAuth guidance (including RFC 10017 if confirmed current/applicable); document why recommendations apply to the intended architecture.
+
+### Passkeys/WebAuthn
+
+- UI handles browser capability and ceremony initiation/pending/cancel/error states, but server/provider verifies challenges, RP ID, origin, credential and signature.
+- Provide fallback paths without teaching users to downgrade to an insecure method.
+- Avoid misrepresenting passkey device synchronization, biometrics, or account recovery.
+- Ensure registration/removal requires the proper trusted session/reauthentication policy.
+- Research latest WebAuthn status (including Level 3 if the current W3C Recommendation remains current) and browser support. Do not confuse spec features with provider support.
+
+### MFA and recovery
+
+- Make MFA setup and recovery comprehensible, but do not suggest SMS/email OTP is equivalent to phishing-resistant authentication.
+- Recovery codes should have one-time disclosure UX, copy/download warnings and no unnecessary persistence in client state.
+- Do not announce whether a factor exists if that leaks sensitive account status; use trusted backend-safe messaging.
+- Recovery, factor replacement and factor disablement are high-risk flows and may require step-up verification; the backend dictates policy.
+- Push MFA requires fatigue/rate-limit prevention; UI must never encourage blind approval.
+
+### Sessions and sensitive operations
+
+- Display session/device information only when the backend provides it.
+- “Sign out all sessions” must have clear pending/success/failure and confirmation semantics; never claim revocation before server confirmation.
+- Clarify that client cache cleanup is not equivalent to invalidating a server session.
+- Sensitive changes may require reauthentication; UI must communicate why and what will happen.
+- Avoid indefinite toasts for security-critical messages; critical state must persist in context and have accessible announcement.
+
+### Authorization, multi-tenancy and role UI
+
+- Server/API remains the source of truth for authorization.
+- Hide/disable UI based on permission only as a usability layer; never as security enforcement.
+- Distinguish unknown permission state, denied, loading and unavailable policy source.
+- Ensure workspace/org switcher reflects the active trusted tenant context; clear sensitive stale state when tenant changes through an app-owned mechanism.
+- Do not store or infer dynamic roles in a visual component.
+- Audit log entries are rendered with appropriate access control and redaction; the UI must not invent source-of-truth events.
+
+### Threat model
+
+Build a lightweight threat model (STRIDE or a fit-for-purpose alternative) that lists assets, trust boundaries, actors, threats, mitigations, responsibility owner, residual risk and tests. Include account enumeration, phishing, credential stuffing, CSRF, XSS/token leakage, session fixation/theft, open redirects, OAuth mix-up/callback confusion, MFA fatigue, recovery abuse, unauthorized account linking, tenant confusion, stale permission state, clipboard exposure, browser history leakage and unsafe logging. Do not claim the UI alone mitigates threats it cannot control.
+
+## 7. PROVIDER-NEUTRAL CONTRACT AND ADAPTER STRATEGY
+
+Research and recommend the correct abstraction. Do not create an auth provider implementation in this phase.
+
+Compare at minimum the current relevant capabilities of Auth.js, Better Auth, Clerk and Supabase Auth; include Firebase Auth or WorkOS only where their distinct use cases are relevant. Validate exact current support for passkeys, MFA, organizations, SSO, invitations, session management, account linking, recovery and framework compatibility from official documentation.
+
+Define an adapter contract that maps provider events into normalized safe states without pretending all providers have the same capability. The contract should address:
+
+- capability discovery/feature flags that come from trusted configuration, not frontend guesses;
+- initiation functions versus server-confirmed results;
+- typed event/result/error shapes;
+- cancellation and navigation handoff;
+- pending challenge/session state;
+- normalization without losing provider-specific recovery detail;
+- safe error classification and redaction;
+- retryability and rate-limiting metadata where safe to expose;
+- organization/role capabilities and what is only presentation;
+- versioning and adapter compatibility;
+- no-provider mode for Storybook/demo fixtures that clearly indicates it is not real authentication;
+- provider-specific optional features without bloating core.
+
+Create a feature matrix with `supported`, `partial`, `provider/config dependent`, `not supported`, or `unverified` states. Every row needs a link/source/date. Do not mark a feature supported based on a marketing page if the exact documented API/plan constraints are unclear. Pricing and enterprise plan boundaries must be labeled separately and date-checked.
+
+A neutral abstraction must not become an overly generic universal auth framework. Keep the contract minimal, let capability metadata advertise real support, and record exceptions instead of hiding them.
+
+## 8. API/BEHAVIOR CONTRACT FOR FUTURE AUTH COMPONENTS
+
+Do not implement components; prepare the design/contract. Define the requirements every future component or block must specify:
+
+- exported name, purpose, category, package/tier, owner and status;
+- props/slots and accessible composition model;
+- controlled/uncontrolled state behavior, if relevant;
+- normalized events and callback result contract;
+- input names, `autocomplete` guidance, labels and validation model;
+- initial/pending/success/error/cancelled/expired/retry states;
+- focus entry, focus restoration, keyboard behavior and screen-reader announcement;
+- form errors and non-field errors;
+- loading/disabled and duplicate-submit prevention;
+- provider capability handling and optional button visibility;
+- redirect/return handling boundary;
+- loading skeletons and mobile layouts;
+- skin visual recipe and Light/Dark support;
+- localization, RTL and long-copy handling;
+- privacy/logging prohibitions;
+- success criteria, test matrix and documentation example;
+- migration/security caveats and unsupported behavior.
+
+Make clear which API values are safe to expose to the consumer and which are internal to the adapter/server. Do not place passwords, OTP values, recovery codes or tokens into global theme state, generic telemetry or persistent preference stores.
+
+## 9. AUTHENTICATION TEMPLATE AND PREMIUM BLOCK CATALOG
+
+Create a machine-readable catalog and a human-readable guide. Use categories, not an undifferentiated list.
+
+### Category A — Core account entry
+
+- Minimal login page.
+- Branded/split login page.
+- Signup/create-account page.
+- Email/password sign-in form.
+- Passwordless magic-link/email-OTP request and confirmation.
+- Social/enterprise sign-in provider panel.
+- Invitation acceptance/signup.
+
+### Category B — Recovery and verification
+
+- Forgot-password form and generic confirmation.
+- Reset-password form, expired link, used link and success state.
+- Email verification / resend verification.
+- OTP verification form with paste/autofill behavior.
+- Recovery-method selector.
+- Session-expired/re-authentication screen.
+- Generic provider callback error and retry route.
+
+### Category C — Advanced authentication
+
+- Passkey-first login and passkey registration.
+- MFA challenge selector.
+- TOTP/code challenge.
+- Recovery-code display and confirmation.
+- Account-linking confirmation.
+- SSO/domain discovery and redirect handoff.
+- Enterprise login/tenant selection if supported.
+- Unsupported browser/authenticator and user-cancelled state.
+
+### Category D — Account security settings
+
+- Security overview.
+- Active sessions/devices list.
+- Passkey/credential list and rename/remove confirmations.
+- MFA enrollment and manage factors.
+- Connected account/provider list.
+- Change email/phone flow.
+- Change password/re-authenticate.
+- Recent security activity timeline.
+- Delete/deactivate account confirmation.
+- API token/key UI only if approved and with one-time secret handling rules.
+
+### Category E — Organizations and access
+
+- Organization/workspace switcher.
+- Team/member list and details.
+- Invite/resend/revoke invitation flows.
+- Role presentation/editor contract.
+- SSO required/organization policy screen.
+- Access denied/permission request.
+- Membership removed/inactive organization.
+- Organization owner/administrator handoff only if a trusted API supports it.
+
+### Category F — Onboarding and first-run
+
+- Workspace setup wizard.
+- Profile completion.
+- Verify email before proceeding.
+- Invite teammates.
+- Choose organization or personal workspace.
+- Setup security method/MFA/passkey prompt where policy permits.
+- Connect first integration.
+- First-run checklist and incomplete-step recovery.
+
+### Category G — Universal auth states
+
+- pending/loading;
+- invalid input;
+- invalid credentials with non-enumerating wording where required;
+- rate-limited/temporarily blocked;
+- network/offline;
+- provider unavailable;
+- user cancelled;
+- invalid/expired/used challenge;
+- session expired/revoked;
+- already completed;
+- verification pending;
+- policy/permission denied;
+- unknown/unclassified failure with safe reference ID;
+- success confirmation and next step.
+
+For every item define purpose, required slots, inputs, events, state machine, provider capability requirements, mobile/desktop composition, accessibility, errors, retry behavior, dependency, tier and acceptance criteria. Identify which are distinct templates versus shared blocks; avoid cloning 20 almost-identical pages.
+
+## 10. SECURITY SETTINGS AND ORGANIZATION MANAGEMENT BOUNDARIES
+
+Auth UI often overlaps with generic user management, data table and premium template catalogs. Do not duplicate them.
+
+- Reuse the generic `DataTable`, `Dialog`, `Form`, `Tabs`, `EmptyState`, `Toast`, `StatusBadge` contracts where the repo specifies them.
+- Auth-specific blocks compose generic components and specify security-specific copy/states/events.
+- Organization member tables should reference the Advanced Data Workspace contract for sorting/filtering/selection. Only add auth-specific columns and flows.
+- Shared table/filter semantics belong in the data-workspace source of truth; member invitation/role actions belong here.
+- Shared Login/Signup page shells belong in the premium blocks/template catalog only if that catalog owns page compositions. This Bible should own security-specific flow semantics, trust boundaries, provider integration and auth error behavior.
+- If current documents disagree, do not silently duplicate or choose. Create an ADR/decision note and update links after a justified decision.
+
+## 11. ACCESSIBILITY AND INTERNATIONALIZATION
+
+Use WCAG 2.2 and WAI-ARIA APG as primary references, but validate requirements against the component/flow and not only the page screenshot.
+
+Specify:
+
+- labels/help/error association and focus to first invalid field or error summary;
+- correct autocomplete tokens and password-manager compatibility;
+- OTP input support for paste, autofill and accessible grouping; avoid unnecessarily forcing one digit into independent inaccessible inputs;
+- keyboard-only support and focus management for dialog/drawer/challenge/factor selector;
+- status announcements for pending, success, expired and error states without duplicating announcements excessively;
+- accessible provider buttons with text label, not a logo alone;
+- accessible passkey capability/fallback messaging;
+- high contrast/forced-colors and 200–400% zoom/reflow tests as appropriate;
+- reduced-motion treatment; no essential spinning/glitch animation;
+- localizable security copy and RTL layout; do not concatenate untranslatable security messages from fragments;
+- screen-reader privacy considerations for codes/recovery secrets and intentional masking/reveal controls;
+- no color-only security status;
+- persistent important error/status copy instead of brief auto-dismissing toast alone.
+
+Define automated tests and manual review steps. Do not claim WCAG conformance from an automated scanner alone.
+
+## 12. SKIN INTEGRATION RULES
+
+Auth flows should be visually adaptable to all 15 skins, but the user must not be tricked into thinking a themed flow is a different identity provider or a different trust context.
+
+- Keep provider/organization identity truthful and clearly distinguish Moonframe application branding from third-party provider branding.
+- The 15 visual grammars may alter composition, geometry, typography, panel framing, illustrations and motion, but not security copy meaning, field semantics, API events, protocol behavior, error truthfulness or accessibility requirements.
+- Classic: conventional trustworthy/authentication layout.
+- Moonpunk/Moonriot/Moonsmash: decorative impact must not obscure credentials, provider identity, errors, or focus.
+- Moonzine/Moonhalftone/Moonpanel: collage/panels must preserve predictable forms and error association.
+- Moonglitch: no distortion or flicker around code entry, error copy or provider URLs.
+- Moonink/Moonscrawl: handwritten styling only for decoration; labels/help/errors remain legible.
+- Mooncrash: hazard/industrial visual language must not incorrectly imply a real security alert.
+- Moonchrome: reflection/glow must not reduce contrast or expose fake trust indicators.
+- Moonraw: minimal decoration must not remove labels/focus/error clarity.
+- Moonquest: RPG language must not trivialize account lockouts, recovery, MFA or security warnings.
+- Moonledger: dense enterprise panels must preserve control target size, labels and error visibility.
+
+Define required visual coverage across 30 baseline appearances, but don't duplicate every shared token/skin rule into this auth document. Reference the Skin Grammar and Token Bible. Plan sample screenshots/tests for representative auth screens and risk-based states. Do not mark any appearance as verified until rendered and reviewed.
+
+## 13. THREAT MODEL AND SECURITY REVIEW OUTPUTS
+
+Create a practical threat model with fields:
+
+- asset/data;
+- actor/entry point;
+- trust boundary;
+- threat scenario;
+- consequence;
+- control owner (`Moonframe UI`, `consumer app`, `auth provider`, `server/platform`, `user`, or shared);
+- required UX response;
+- required backend/platform control;
+- detection/audit need;
+- acceptance test;
+- residual risk;
+- source/evidence;
+- status/confidence.
+
+At minimum evaluate account enumeration, credential stuffing, phishing, OAuth redirect/callback abuse, CSRF, XSS/token exposure, session fixation/theft, MFA fatigue, factor replacement abuse, recovery takeover, invitation abuse, account-linking confusion, malicious/untrusted provider config, tenant confusion, privilege escalation via client-side-only permission checks, open redirect, stale session after sign-out, clipboard exposure, logging leakage and social engineering through deceptive UI.
+
+The output is an architecture/UX threat-informed specification, not a penetration test, security audit certification or proof that future implementations are secure.
+
+## 14. MACHINE-READABLE CONTRACTS
+
+After inspecting existing schemas/contracts, add or update only what is necessary. Potential artifacts:
+
+- `contracts/moonframe-auth-ui-contract-v1.json`
+- `contracts/moonframe-auth-flow-catalog-v1.json`
+- `contracts/moonframe-auth-provider-capability-matrix-v1.json`
+- `contracts/moonframe-auth-threat-model-v1.json`
+- JSON Schema(s) if the shape is stable enough.
+
+These are suggested names, not mandatory duplicates. Reuse the current contract naming/versioning convention if it is better. Define canonical ownership for each concept.
+
+### Auth UI contract fields
+
+- schema/contract version;
+- stable flow IDs and component/block/template IDs;
+- scope/tier/status;
+- required provider capabilities;
+- input/output/event names and redaction rules;
+- normalized state/error classification;
+- security responsibility owner;
+- accessibility and responsive requirements;
+- skin/appearance coverage requirements by reference;
+- dependency links to generic component and premium-block catalogs;
+- acceptance criteria and test evidence;
+- known limitations, source references and decisions open.
+
+### Provider capability matrix
+
+For each provider × feature, use status values such as `supported`, `partial`, `provider/config-dependent`, `plan-dependent`, `not-supported`, or `unverified`. Every status must cite current official documentation and date. Do not infer features from a provider's marketing homepage alone.
+
+### Schema and validation
+
+- Valid JSON, no comments.
+- Stable unique IDs and enumerated state names.
+- Exact agreement on 15 skin IDs and 30 baseline appearances through references—not duplicate mutable copies.
+- No unknown status values or unresolved referenced IDs.
+- No duplicate flow, block or component catalog entries without an explicit variant/relationship.
+- No “implemented/tested/released” status without evidence.
+- Add a validator only if it is small and can be tested with valid/invalid fixtures. Do not start product implementation under the disguise of writing schemas.
+
+## 15. OVERLAP CONTROL AND SOURCE OF TRUTH
+
+A major deliverable is a clear ownership map so new Auth Bible content does not duplicate other Bibles.
+
+- **Design System Bible:** overall product principles, architecture and governance.
+- **Token Architecture/Theme Engine Bible:** token taxonomy, Light/Dark resolution, density/motion/contrast preference model.
+- **Skin Grammar Contract:** visual identity and unique aesthetic rules per skin.
+- **Component API & Behavior Bible:** general component props, states, keyboard and behavior contract.
+- **Premium Blocks & Template Product Bible:** generic block/template catalog and composition responsibilities.
+- **Advanced Data Workspace Bible:** generic tables, filters, selection, server-side data, saved views and data-grid architecture.
+- **Auth & Security UI Integration Bible (this scope):** auth/security flow semantics, provider boundaries/capabilities, recovery/security UX, threat model and trust responsibilities.
+- **Accessibility/QA Bible:** shared QA rules and test methods; this auth Bible adds flow-specific acceptance criteria and links to shared standards.
+- **Asset/SFX Bible:** original asset provenance, icon systems, typography licenses, audio policy; auth references these contracts rather than duplicating them.
+- **Implementation Roadmap:** cross-cutting phases and task dependencies.
+
+Audit actual paths; do not assume the file names above exist. If a topic belongs in another canonical document, add a short rule/reference and link to that source rather than duplicating its full mutable content. If source ownership is unclear, write an ADR before moving or duplicating sections.
+
+## 16. ROADMAP AND TASK BREAKDOWN
+
+Create small, dependency-aware tasks for future implementation. Do not implement them during this task. Each task should have objective, scope and non-goals, prerequisite IDs, likely files/packages, acceptance criteria, required tests, accessibility/security checks, documentation impact, risk and definition of done.
+
+Suggested phases (adapt to actual repository):
+
+1. Audit and research; establish scope and security boundaries.
+2. Resolve open product decisions and provider-neutral adapter ADR.
+3. Freeze flow catalog and normalized state/error contract.
+4. Define machine-readable contracts and validation.
+5. Design/reference core sign-in/signup/recovery/auth states.
+6. Define passkey/MFA/SSO/security-settings flows and capability guards.
+7. Define organization/invitation/access-denied integration with generic data workspace and premium templates.
+8. Specify accessibility/visual/test matrices for representative flows and 30 baseline appearances.
+9. Only after separate approval, implement the selected UI components/blocks/adapters in ordered issues.
+10. Integrate a real provider/backend only in a separate scoped project with its own security review.
+
+Do not create hundreds of GitHub issues at once. Audit and deduplicate current issues first. Produce an issue-ready markdown backlog if actual issue-creation access is unavailable. If issues are created, link each one and verify it exists.
+
+## 17. QUALITY BAR / ANTI-PATTERNS
+
+Reject the following:
+
+- Login mockup treated as a complete auth solution.
+- Frontend-only checks described as authorization enforcement.
+- UI flow silently chooses a weaker security method after an error.
+- Tokens, OTPs, recovery codes, callback query secrets, session IDs or raw provider errors exposed to logs/URLs/analytics.
+- “Remember me” or “sign out all sessions” claims not backed by actual provider behavior.
+- Account enumeration introduced through distinct registration/reset messages where that is a threat.
+- MFA/credential reset without threat-aware recovery policy.
+- OAuth/OIDC protocol implementation hidden inside a generic React component.
+- A provider capability marked supported without a current documented source and caveats.
+- SSO/passkey/MFA/organization UI shipping without explicit pending/cancel/error/fallback states.
+- Client-side roles treated as a security decision.
+- Provider logo shown as a fake trust certification.
+- Auth content visually distorted by a skin's decoration, contrast, motion or texture.
+- Separate auth implementation fork for each of the 15 skins.
+- Duplicate catalog definitions that conflict with component, blocks or data-workspace contracts.
+- Claiming WCAG/security/protocol compliance without implementation and test evidence.
+- Making an architecture decision from one marketing page or stale source.
+- Implementing auth/backend/components/assets during this specification-only phase.
+
+## 18. DEFINITION OF DONE
+
+This task is complete only when evidence supports each applicable item:
+
+1. Actual repository, branch and commit audited.
+2. Existing docs/contracts/issues read and duplication/contradiction analysis recorded.
+3. Current primary-source research log written with checked URLs, dates/versions where available, caveats and decisions influenced.
+4. Auth/security scope and trust-boundary ownership explicitly documented.
+5. Auth flow inventory is broad, classified, deduplicated and machine-readable.
+6. Important flows have state machines/transitions and safe error semantics, not just page names.
+7. Provider capability matrix distinguishes supported, partial, configuration/plan dependent, unsupported and unverified with citations.
+8. Threat model includes realistic assets, boundaries, mitigations, owner and acceptance tests.
+9. Security/privacy UX requirements and backend responsibilities are explicit.
+10. Component/blocks/template overlap is resolved by canonical ownership and references.
+11. Integration contracts are stable enough for future tickets without creating a premature universal auth framework.
+12. Auth flows have acceptance criteria for accessibility, responsiveness, localization, reduced motion and the 15 skin system.
+13. Contracts validate; IDs and referenced flows are consistent; no duplicated IDs or invalid statuses.
+14. Roadmap consists of small dependency-aware tasks with objective acceptance criteria.
+15. README/document map is updated if needed; stale file links are repaired.
+16. Any repo writes/commits are verified with tool results and remote re-read.
+17. Final report separates documentation work completed, tests actually run, decisions open, and future implementation work.
+18. No React components, auth backend, production logos/icons/SVG/PNG/artwork or sound effects were produced in this phase.
+
+## 19. REQUIRED FINAL REPORT TO THE USER
+
+Report in Indonesian and include:
+
+- Repository URL, audited branch and commit SHA.
+- Audit summary with counts/severity and the most important evidence-backed findings.
+- Primary-source research used, with links and what each source changed in the specification.
+- Auth flows and modules specified, prioritized and deferred.
+- Provider comparison and recommendation/open decision, including important caveats.
+- Changes made to docs/contracts and the role of each file.
+- Validation/tests actually run and exact outcomes.
+- GitHub issues created or not created, with links when applicable.
+- What remains specified-not-implemented, including all real auth/backend/provider integration.
+- Top next 5 tasks in dependency order.
+
+Never claim the application is secure, authentication is production-ready, an auth provider is integrated, the UI is WCAG-conformant, or all flows are implemented unless that has actually been verified with evidence.
+
+---
+
+## 20. START NOW
+
+Begin with **PHASE 0 — AUDIT THE ACTUAL REPOSITORY FIRST**. Inspect the real GitHub repo and all relevant documents. Then browse current primary standards/provider documentation, write the audit and research logs, reconcile overlapping sources of truth, refine the Auth & Security UI Integration Bible and contracts, validate the documents and verify all remote changes.
+
+**Do not code components. Do not implement an authentication backend. Do not generate production assets or SFX. Audit first, research deeply, specify precisely, update the repository, validate, and report honestly.**

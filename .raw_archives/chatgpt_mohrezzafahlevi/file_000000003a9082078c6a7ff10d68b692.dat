@@ -1,0 +1,351 @@
+{
+  "snapshot": "DIVINE_ONTOLOGY_VNEXT_SNAPSHOT_1",
+  "status": "PRE_SEMANTIC_STRUCTURAL_SNAPSHOT",
+  "normativeAuthority": false,
+  "semanticLabels": null,
+  "protocol": "PURE_REVELATION_DISCOVERY_PROTOCOL_V1",
+  "corpus": {
+    "source": "/usr/share/texlive/texmf-dist/tex/latex/quran/qurantext-simple.def",
+    "sha256": "f3ea96acf641bc3f1f0e920cc7ea3db5e74a9745f59a580b62d177d1bccdb1e2",
+    "ayahs": 6236,
+    "surahs": 114,
+    "wordTokens": 77800,
+    "exactVocalizedForms": 17838,
+    "exactSkeletonForms": 14868,
+    "explicitQrefLexicalOccurrences": 2704,
+    "primaryQrefAnchors": 2702
+  },
+  "test27_governorInvariant": {
+    "qrefAssociatedImmediateQformFamilies": 61,
+    "governorLockedFamiliesAtDiagnosticThreshold": 26,
+    "diagnosticThreshold": 0.8,
+    "thresholdAuthority": "ENGINEERING_DIAGNOSTIC",
+    "controls": {
+      "قرضا": {
+        "governorLock": 1.0,
+        "invariant": "قرض",
+        "status": "LEFT_GOVERNED"
+      },
+      "الكذب": {
+        "governorLock": 1.0,
+        "invariant": "على",
+        "status": "LEFT_GOVERNED"
+      },
+      "كذبا": {
+        "governorLock": 1.0,
+        "invariant": "على",
+        "status": "LEFT_GOVERNED"
+      },
+      "غفور_family": {
+        "governorLock": 0.32,
+        "status": "NOT_LOCKED"
+      },
+      "عليم_family": {
+        "governorLock": 0.5581,
+        "status": "NOT_LOCKED"
+      },
+      "سميع_family": {
+        "governorLock": 0.4,
+        "status": "NOT_LOCKED"
+      },
+      "عزيز_family": {
+        "governorLock": 0.4,
+        "status": "NOT_LOCKED"
+      }
+    }
+  },
+  "test28_rareRelationJackknife": {
+    "candidates": [
+      {
+        "locusFamily": "يحكم",
+        "lane": "DIRECT",
+        "gateConsensus": 0.8,
+        "jackknifeMedian": 0.45,
+        "jackknifeMinimum": 0.45,
+        "status": "SUPPORTED_MEDIUM"
+      },
+      {
+        "locusFamily": "يهدي",
+        "lane": "MEDIATED",
+        "gateConsensus": 0.6667,
+        "jackknifeMedian": 0.6667,
+        "jackknifeMinimum": 0.6667,
+        "status": "SUPPORTED_MEDIATED"
+      },
+      {
+        "locusFamily": "يرزق",
+        "lane": "RARE_DIRECT",
+        "gateConsensus": 0.75,
+        "jackknifeMedian": 0.75,
+        "jackknifeMinimum": 0.5,
+        "status": "RARE_SUPPORTED"
+      },
+      {
+        "locusFamily": "يأمر",
+        "lane": "RARE_STRUCTURED",
+        "rareLaneConsensus": 1.0,
+        "jackknifeMedian": 0.222,
+        "jackknifeMinimum": 0.0,
+        "status": "RARE_FRAGILE"
+      },
+      {
+        "locusFamily": "يغفر",
+        "lane": "RARE_STRUCTURED",
+        "rareLaneConsensus": 1.0,
+        "jackknifeMedian": 0.444,
+        "jackknifeMinimum": 0.444,
+        "status": "RARE_MODERATE"
+      },
+      {
+        "locusFamily": "ينهى",
+        "lane": "INHERITED",
+        "support": 1,
+        "status": "FRAGILE_INHERITED",
+        "evidenceReference": "16:90"
+      },
+      {
+        "locusFamily": "يبسط",
+        "lane": "FIXED_CHAIN",
+        "status": "UNRESOLVED_FIXED_CHAIN"
+      }
+    ]
+  },
+  "test29_qmotifV2": {
+    "motifs": [
+      {
+        "a": "سميع",
+        "b": "واسع",
+        "bridge": "عليم",
+        "bridgeRole": "CO_LOCUS",
+        "strength": 0.483,
+        "losoSurvival": 1.0,
+        "status": "STRONG_CO_LOCUS_MOTIF"
+      },
+      {
+        "a": "يهدي",
+        "b": "يحب",
+        "bridge": "لا",
+        "bridgeRole": "STRUCTURAL_FRAME",
+        "strength": 0.471,
+        "losoSurvival": 1.0,
+        "status": "FRAME_SHARED_NOT_SEMANTIC_BY_ITSELF"
+      },
+      {
+        "a": "بصير",
+        "b": "خبير",
+        "bridge": "بما تعملون",
+        "bridgeRole": "STRUCTURAL_FRAME",
+        "strength": 0.333,
+        "losoSurvival": 1.0,
+        "status": "MULTI_CHANNEL_CANDIDATE"
+      },
+      {
+        "a": "عليم",
+        "b": "عزيز",
+        "bridge": "حكيم",
+        "bridgeRole": "CO_LOCUS",
+        "strength": 0.236,
+        "losoSurvival": 1.0,
+        "status": "CO_LOCUS_MOTIF"
+      },
+      {
+        "a": "حليم",
+        "b": "رحيم",
+        "bridge": "غفور",
+        "bridgeRole": "RELATION_LOCUS",
+        "strength": 0.175,
+        "losoSurvival": 1.0,
+        "status": "CHAIN_BOUND_MOTIF"
+      },
+      {
+        "a": "يأمر",
+        "b": "يغفر",
+        "bridge": "إن",
+        "bridgeRole": "STRUCTURAL_FRAME",
+        "strength": 0.447,
+        "losoSurvival": 0.9825,
+        "status": "ROLE_FRAME_LEAKAGE_WARNING"
+      },
+      {
+        "a": "يهدي",
+        "b": "يرزق",
+        "bridge": "من",
+        "bridgeRole": "STRUCTURAL_OR_ARGUMENT_FRAME",
+        "strength": 0.35,
+        "losoSurvival": 1.0,
+        "status": "MOTIF_ONLY"
+      }
+    ]
+  },
+  "coLocusEvidence": [
+    {
+      "path": [
+        "غفور",
+        "رحيم"
+      ],
+      "support": 36,
+      "status": "MIXED_CO_LOCUS_PARENT_LOCKED"
+    },
+    {
+      "path": [
+        "سميع",
+        "عليم"
+      ],
+      "support": 14,
+      "status": "STRONG_CO_LOCUS"
+    },
+    {
+      "path": [
+        "عزيز",
+        "حكيم"
+      ],
+      "support": 12,
+      "status": "STRONG_CO_LOCUS"
+    },
+    {
+      "path": [
+        "عليم",
+        "حكيم"
+      ],
+      "support": 14,
+      "status": "STRONG_CO_LOCUS"
+    },
+    {
+      "path": [
+        "واسع",
+        "عليم"
+      ],
+      "support": 7,
+      "status": "CO_LOCUS_CANDIDATE"
+    },
+    {
+      "path": [
+        "غفور",
+        "حليم"
+      ],
+      "support": 4,
+      "status": "LOW_SUPPORT_CO_LOCUS"
+    },
+    {
+      "path": [
+        "شديد",
+        "العقاب"
+      ],
+      "support": 11,
+      "status": "FIXED_CONTINUATION"
+    },
+    {
+      "path": [
+        "سريع",
+        "الحساب"
+      ],
+      "support": 7,
+      "status": "FIXED_CONTINUATION"
+    }
+  ],
+  "qconceptCandidates": [
+    {
+      "id": "QCONCEPT-CANDIDATE-001",
+      "members": [
+        "غفور",
+        "رحيم"
+      ],
+      "evidence": [
+        "SURFACE_PPMI_RESIDUAL_RANK_1",
+        "QFORM_PPMI_RESIDUAL_RANK_1",
+        "DIRECT_CHAIN_SUPPORT_36"
+      ],
+      "status": "PROVISIONAL_MULTI_CHANNEL_CHAIN_BOUND",
+      "humanLabel": null
+    },
+    {
+      "id": "QCONCEPT-CANDIDATE-002",
+      "members": [
+        "بصير",
+        "خبير"
+      ],
+      "evidence": [
+        "SURFACE_PPMI_RESIDUAL_RANK_2",
+        "QFORM_PPMI_RESIDUAL_RANK_2",
+        "SHARED_FRAME_MOTIF",
+        "LOSO_MOTIF_1.0"
+      ],
+      "status": "PROVISIONAL_MULTI_CHANNEL",
+      "humanLabel": null
+    },
+    {
+      "id": "QCONCEPT-CANDIDATE-003",
+      "members": [
+        "عليم",
+        "حكيم"
+      ],
+      "evidence": [
+        "SURFACE_PPMI_RESIDUAL_RANK_6",
+        "QFORM_PPMI_RESIDUAL_RANK_3",
+        "CO_LOCUS_CHAIN_SUPPORT_14"
+      ],
+      "status": "PROVISIONAL_MULTI_CHANNEL_CO_LOCUS",
+      "humanLabel": null
+    }
+  ],
+  "motifOnlyNotConcept": [
+    {
+      "members": [
+        "سميع",
+        "واسع"
+      ],
+      "reason": "Strong shared co-locus motif via عليم and LOSO=1.0, but role-residual distributional similarity collapses to 0.0 after QREF-near occurrences are removed; previous semantic-cluster interpretation is superseded."
+    }
+  ],
+  "invariants": {
+    "noManualPredicateListInDiscovery": true,
+    "noSemanticRelationEnumInDiscovery": true,
+    "noRootDictionaryInDiscovery": true,
+    "noSemanticStopwordListInDiscovery": true,
+    "preserveVocalizationEvidence": true,
+    "preserveTatweelDuringTokenization": true,
+    "boundaryAware": true,
+    "nextQrefStopsWindow": true,
+    "unresolvedAllowed": true
+  },
+  "boundary": "This snapshot contains corpus-derived structural and statistical candidates. It does not assert Divine meanings, a canonical number of Divine relations, Asma, or semantic domains. Human semantic labels remain null.",
+  "test30_roleResidualAudit": {
+    "surfaceResidualTop": {
+      "غفور↔رحيم": {
+        "score": 0.2836,
+        "rank": 1
+      },
+      "بصير↔خبير": {
+        "score": 0.1561,
+        "rank": 2
+      },
+      "عليم↔حكيم": {
+        "score": 0.1151,
+        "rank": 6
+      },
+      "سميع↔واسع": {
+        "score": 0.0,
+        "rank": 169
+      }
+    },
+    "qformResidualTop": {
+      "غفور↔رحيم": {
+        "score": 0.23,
+        "rank": 1
+      },
+      "بصير↔خبير": {
+        "score": 0.166,
+        "rank": 2
+      },
+      "عليم↔حكيم": {
+        "score": 0.1398,
+        "rank": 3
+      },
+      "سميع↔واسع": {
+        "score": 0.0,
+        "rank": 203
+      }
+    },
+    "conclusion": "Semantic evidence must be computed after removing QREF-near role occurrences; this downgrades role/co-predication leakage."
+  }
+}

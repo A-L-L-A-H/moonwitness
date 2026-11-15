@@ -1,0 +1,703 @@
+# SUPER-DEEP RESEARCH PROMPT
+# Moonframe UI — Package Architecture & Developer Experience Bible
+
+**Prompt type:** Repository audit + primary-source research + architecture decision support + documentation/contract refinement  
+**Target repository:** https://github.com/bjo163/moonframe  
+**Working language for reports:** Bahasa Indonesia  
+**Target product documentation:** English or Indonesian as already established in the repo; choose one policy and apply consistently.  
+**Hard scope boundary:** Do not implement React UI components, auth/backend behavior, production art assets, logos, icons, PNGs, sound effects, or a publishable package during this task. Audit, research, specify, validate documentation/contracts, and plan only.
+
+---
+
+## 0. Mission and required operating mode
+
+You are acting as a coordinated team of:
+
+- Principal package architect for React/TypeScript libraries.
+- Design-system platform engineer.
+- npm publishing and supply-chain security specialist.
+- Monorepo/build tooling researcher.
+- Frontend developer-experience (DX) product designer.
+- Tailwind CSS v4 integration specialist.
+- Documentation, registry and component-installation workflow architect.
+- CI/release engineering specialist.
+- Repository auditor and technical writer.
+
+Your mandate is to make the **Moonframe UI package and developer experience plan** coherent, auditable, and implementation-ready. Do not jump to a fashionable stack or create a large monorepo because it “looks enterprise.” Research options, identify the repository’s real starting point, quantify trade-offs, and record decisions with evidence.
+
+The user’s intended product is a premium React UI system with **15 genuinely distinct visual skins**, each supporting Light and Dark, producing **30 baseline appearances**. Skin changes must alter the visual grammar—not merely the palette. Components should share behavior/API, while skins may provide distinct layout/composition and visual recipes. The product may eventually include:
+
+- component library;
+- tokens and theme engine;
+- premium blocks and full-page templates;
+- starter layouts/examples;
+- optional data workspace, auth UI, charts, editor, calendar, or other integrations;
+- original vector/raster/icon/texture assets;
+- optional user-controlled sound-effect pack;
+- Skin Lab and design-system documentation;
+- optionally, a shadcn-like code registry or component installation workflow.
+
+These are product intentions, **not proof that any of them are implemented**. You must distinguish fact, decision, proposal, and open question in all output.
+
+### The core task
+
+Start with a repository audit; then do up-to-date primary-source research; then refine the repository’s architecture/Developer Experience Bible, ADRs, package contract, roadmap, and related machine-readable documentation. Do not implement components or produce production assets in this task.
+
+Do not stop after producing advice in chat. If GitHub access permits safe documentation edits, update the repository, validate the changes, and report exact paths/commits. If access or tooling blocks writes, be transparent and deliver ready-to-apply files or patches instead.
+
+---
+
+## 1. Phase 0 — Audit the actual repository first
+
+**Do not write or overwrite documentation before inspecting the actual remote state.**
+
+Repository: `bjo163/moonframe`.
+
+The earlier working snapshot recorded these files, but this inventory may now be stale and must be verified:
+
+- `README.md`
+- `docs/moonframe-ui-design-system-bible-v1.3.md`
+- `docs/implementation-roadmap.md`
+- `contracts/moonframe-theme-contract-v1.3.json`
+- `contracts/moonframe-skin-grammar-contract-v1.0.json`
+- `contracts/moonframe-token-dictionary-v0.1.json`
+
+### Audit procedure
+
+1. Verify repository owner/name, default branch, visibility, current HEAD SHA, latest commit, permissions, branches/PRs/issues relevant to packaging, and existing release/tag configuration.
+2. Enumerate the entire repository. Inspect hidden files and folders as possible: `package.json`, lockfiles, workspace manifests, TypeScript configs, build configs, CSS files, workflow files, issue/PR templates, docs, tests, license, contribution guide, code of conduct, security policy, release scripts, changelog, and `.npmignore`/`files` fields if present.
+3. Read the current README, master Bible, Theme Contract, Skin Grammar Contract, Token Dictionary Contract, roadmap, and any other architecture/product documents in full or in sufficient contiguous ranges. Do not infer their full content from excerpts.
+4. Inspect Git history and open issues/PRs for decisions that may not be represented in the Bible. Do not recreate already existing work under another name.
+5. Check whether a package/workspace already exists. If no package code exists, classify the product as “specification-stage” instead of pretending that runtime architecture exists.
+6. Identify current stack **only from repository evidence**: React, TypeScript, Tailwind version, Vite/framework, package manager, Node range, test stack, CI, formatting/linting and expected consumers.
+7. Check for stale links, inconsistent package names/scopes, contract IDs, repeated sources of truth, mismatch between `README` promises and actual files, and roadmap items that are duplicates or lack acceptance criteria.
+8. Record all findings with evidence: file/section/line if available, commit SHA, severity, impact, and recommended remedy.
+9. Create or update an audit report such as `docs/audit/package-architecture-dx-audit.md`.
+10. After the audit report, continue with research and safe documentation refinement. Do not ask the user to repeat known context. Use explicitly stated assumptions when non-blocking decisions remain open.
+
+### Required audit statuses
+
+Use a controlled vocabulary:
+
+- `verified-existing`
+- `specified-not-implemented`
+- `partially-specified`
+- `missing`
+- `contradictory`
+- `stale-needs-research`
+- `implemented-and-tested` (requires code and recorded test evidence)
+
+Never use “done,” “production-ready,” or “published” as a substitute for an evidence-backed status.
+
+### Git and repository safety
+
+- Follow existing repo workflow; do not automatically create a branch just because it is common practice.
+- Never force-push, rewrite history, delete branches, or make destructive changes.
+- Do not publish packages or configure secrets/accounts.
+- For documentation changes, use small, reviewable commits if supported.
+- Verify every write with a subsequent read of the remote file and commit.
+- Do not create a large batch of GitHub issues until the existing issue backlog has been inspected and deduplicated.
+
+---
+
+## 2. Phase 1 — Super-deep primary-source research
+
+Research must be current. Open official docs and check the relevant version/release/date before making recommendations. Keep a research log with source, publisher, URL, access date, publication/release date where available, evidence summary, relevance, limitations, and the decision influenced.
+
+### Required primary-source starting points
+
+Re-check current official URLs and version status before relying on them:
+
+1. npm package publishing and package metadata: https://docs.npmjs.com/cli/ and https://docs.npmjs.com/creating-and-publishing-unscoped-public-packages/
+2. npm package `package.json` fields, access, trusted publishing, and provenance: https://docs.npmjs.com/cli/v11/configuring-npm/package-json, https://docs.npmjs.com/trusted-publishers/
+3. Node package exports and resolution: https://nodejs.org/api/packages.html
+4. TypeScript package declarations and publishing: https://www.typescriptlang.org/docs/handbook/declaration-files/publishing.html
+5. Vite library mode: https://vite.dev/guide/build.html#library-mode
+6. Tailwind CSS v4 theme variables and sharing tokens across projects: https://tailwindcss.com/docs/theme
+7. pnpm workspace concepts: https://pnpm.io/workspaces
+8. npm workspaces, if relevant: https://docs.npmjs.com/cli/using-npm/workspaces
+9. Changesets versioning and publishing: https://changesets.dev/guide/versioning-and-publishing
+10. GitHub Actions security hardening: https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
+11. npm trusted publishing: https://docs.npmjs.com/trusted-publishers/
+12. shadcn/ui registry overview and setup: https://ui.shadcn.com/docs/registry and https://ui.shadcn.com/docs/registry/getting-started
+13. Storybook documentation for component-library docs: https://storybook.js.org/docs/writing-docs
+14. React and TypeScript current guidance: https://react.dev/ and https://www.typescriptlang.org/docs/
+15. Design Tokens Community Group specification, for the token package boundary: https://www.designtokens.org/tr/2025.10/ and/or the current W3C Community Group report page.
+16. GitHub Releases and release automation docs, if releases are in scope: https://docs.github.com/en/repositories/releasing-projects-on-github
+17. npm package provenance/supply-chain guidance and OpenSSF material where applicable.
+
+Also research alternatives only when relevant and supported by evidence: Yarn/Bun workspaces, Turborepo, Nx, Lage, API Extractor, tsup, Rollup, unbuild, Vitest, Playwright, Changesets, semantic-release, Registry-based installation, and static documentation tools. Do not pick every tool in this list. They are candidates to assess, not mandatory dependencies.
+
+### Research rules
+
+- Primary docs/release notes beat blogs and examples.
+- Community posts may reveal usability problems, but label them as anecdotal.
+- Verify the current generation of `shadcn` registry format/schema and whether the feature is appropriate for this repo’s intended consumers.
+- Do not assume the registry is identical to publishing a conventional npm package. Compare source-owned/installable code against runtime dependency packages as distinct distribution models.
+- Do not choose Node or npm versions by trend. Derive supported ranges from the current repo and the needs of consumers, then document evidence and migration risk.
+- Do not claim trademark clearance, npm scope availability, or legal safety. These require separate verification.
+- Record research sources in `docs/research/package-architecture-dx-research-log.md` or a suitable existing canonical file; do not duplicate research notes across many docs.
+
+---
+
+## 3. Phase 2 — Define what “Moonframe package” actually means
+
+The Bible must distinguish product dimensions that are often incorrectly bundled together.
+
+### Concepts that must be separate
+
+- **Core runtime library:** reusable React components and utilities imported by application code.
+- **Design token source:** canonical machine-readable token data and schema.
+- **Generated theme CSS:** generated output for semantic colors, dimensions, and skin recipes.
+- **Tailwind integration:** optional CSS/theme imports/utilities required by consumers using Tailwind CSS v4.
+- **Premium blocks:** reusable compositions of components.
+- **Page templates:** full screen/layout patterns, with sample data/contracts but no business domain implementation.
+- **Starter application:** a multi-route example showing integration patterns; must be clearly distinguished from the library.
+- **Optional adapters/modules:** charts, tables, calendar, editor, auth-provider UI adapters, data visualization, SFX, etc., added only when justified.
+- **Code registry:** optional way to distribute source files into consuming repos, similar in concept to shadcn registry; distinct from npm runtime package distribution.
+- **Documentation and Skin Lab:** how developers learn, preview, compare and validate the system.
+- **Asset packs:** future original brand/artwork/icon/texture files with provenance/licensing records.
+- **CLI/installer:** optional developer tooling; do not add it simply because premium products sometimes have one.
+
+Define which of these are part of the product vision, which belong in v1, which remain optional/future, and which are explicitly out of scope.
+
+### Important product boundaries
+
+Moonframe provides design-system behavior, visual recipes, components, blocks, templates, docs, theme tokens and presentation-oriented integration seams. It does **not** own Moonships infrastructure logic, Moonradio message transport, product database schemas, business-domain rules, ERP accounting, game rules, authentication backend/session security, authorization enforcement, or a consumer app’s private data.
+
+---
+
+## 4. Phase 3 — Decide package topology using evidence
+
+Do not assume that every folder needs its own npm package. Produce a decision matrix for at least the following options:
+
+### Option A — Single package first
+
+A single package such as `@moonframe/ui` with clean subpath exports for components and limited supporting modules, while keeping token source/generated CSS and docs directories separate internally.
+
+### Option B — Small multi-package workspace
+
+Potential package boundaries such as:
+
+- `@moonframe/tokens`
+- `@moonframe/theme` or `@moonframe/themes`
+- `@moonframe/ui`
+- optional `@moonframe/icons` or `@moonframe/motion`
+- optional `@moonframe/blocks` only if its publication/API lifecycle is truly distinct
+
+These names are proposals, not confirmed package names. Verify naming/scope constraints and avoid premature splitting.
+
+### Option C — Hybrid package + source registry
+
+Npm package for runtime primitives/tokens, plus a registry for source-owned blocks/templates that consumers copy into their own repositories. Assess whether the intended UX really needs both distribution models.
+
+### Option D — Monorepo with docs/Skin Lab apps and a small number of published packages
+
+Compare build/test/dependency complexity, release independence, local development, CI cost, and ease of contribution.
+
+### Required decision criteria
+
+Score options transparently against:
+
+- target consumers and installation experience;
+- package dependency graph and cycle risk;
+- release cadence and independent versioning need;
+- CSS/theme distribution and consumer override safety;
+- Tree-shaking and optional-dependency isolation;
+- type declarations and runtime resolution;
+- source ownership/registry use case;
+- local development complexity and feedback speed;
+- CI/build/test complexity;
+- docs/preview application requirements;
+- maintenance burden for a solo maintainer and coding agents;
+- future compatibility/migration cost;
+- npm/public distribution readiness;
+- security/provenance requirements.
+
+Create an ADR such as `docs/architecture/adr/ADR-001-package-topology.md` only after research. The ADR must include context, options, criteria/weights, evidence, recommendation, consequences, what is deliberately deferred, and a trigger for revisiting the decision. If repository facts do not justify a final choice, record an explicit open decision with a bounded proof-of-concept plan.
+
+---
+
+## 5. Phase 4 — Package contracts and exports
+
+Specify future package metadata and public API requirements without creating an implementation package in this task.
+
+### Audit and design
+
+For every proposed published package, define:
+
+- package ID/name proposal and purpose;
+- public import paths and supported subpath exports;
+- ESM/CJS policy if either is supported; do not promise both without consumer/build evidence;
+- browser and server entrypoints if needed;
+- `types`/declaration file strategy;
+- package `exports`, `files`, `sideEffects`, `peerDependencies`, `dependencies`, `optionalDependencies`, `engines`, `type`, `license`, `repository`, `publishConfig` and metadata policy;
+- CSS and token entrypoints;
+- whether consumers import generated CSS explicitly;
+- whether package requires Tailwind plugin/config or only CSS imports;
+- how a consumer uses the library in Vite, Next.js/SSR, or other supported setups;
+- which imports are stable public API vs internal/private;
+- how an unsupported deep import should fail;
+- dependency duplication and React peer dependency strategy;
+- minimum supported React/TypeScript/Node/browser ranges, derived from audit/research;
+- package size/bundle budget and optional-module loading;
+- source map strategy and whether source files are shipped;
+- tarball contents and inspection plan;
+- license, NOTICE/attribution and provenance policy.
+
+Do not set version numbers or engines before the audit. Do not invent the npm scope or use placeholders that appear final. Use a conspicuous `proposed` state for unresolved fields.
+
+### API stability
+
+Define rules for:
+
+- public exports vs internal files;
+- public props/types/utilities;
+- tokens/CSS custom properties;
+- skin IDs and contract schema;
+- component/recipe names;
+- registry item names and dependencies;
+- deprecations, migration warnings and removal timelines;
+- breaking vs additive changes;
+- how source-registry consumers get changed files and upgrade notes;
+- how generated files differ from canonical source.
+
+Any rename/removal of a stable skin ID or public token/API requires change classification and migration planning. Avoid silently breaking imports.
+
+---
+
+## 6. Phase 5 — Build, CSS, Tailwind, and token pipeline integration
+
+Research how Moonframe can deliver its themes reliably with Tailwind CSS v4 and CSS custom properties without forcing consumers into brittle configuration.
+
+Specify:
+
+1. canonical token source and schema location;
+2. token validation and type/alias rules;
+3. deterministic generation process;
+4. generated output path and whether committed or generated during build;
+5. CSS entrypoints for baseline styles, tokens, skin recipes and optional effects;
+6. `@theme` usage versus runtime CSS custom properties and when each is appropriate;
+7. how 15 skins and Light/Dark maps are selected at runtime;
+8. how consumers import token CSS and which styles are intentionally not auto-imported;
+9. compatibility with consumer Tailwind scanning/content detection and static utility discovery;
+10. prevention of unbounded dynamically constructed class names;
+11. CSS layer order and reset/preflight ownership;
+12. font loading and fallback strategy, including licensed-font policy;
+13. CSS isolation/namespacing and consumer override mechanisms;
+14. SSR/hydration and avoidance of flash-of-wrong-theme;
+15. no-JS/failed-asset graceful behavior;
+16. reduced-motion/forced-colors and consumer override handling;
+17. CSS size and selector/variable budget;
+18. deterministic outputs, source maps, and validation of stale generated files.
+
+Do not finalize all token values or produce theme assets here. This is package/DX architecture; refer to the Token Architecture & Theme Engine Bible and ensure this document adds only distribution/build/consumer integration aspects rather than duplicating token semantics.
+
+---
+
+## 7. Phase 6 — Consumer developer journey (DX) specification
+
+Design the entire experience of installing, using, customizing, debugging, upgrading, and contributing to Moonframe.
+
+### Consumer journeys to document
+
+- Install the core package in a fresh supported app.
+- Import Button/Input and its styles/types.
+- Setup theme/token CSS with Tailwind v4.
+- Set a skin and Light/Dark/System mode.
+- Override a token safely.
+- Use a premium block with sample props/data.
+- Add a registry block/template into a consumer-owned project, if this distribution model is approved.
+- Add an optional adapter without pulling a large dependency into core.
+- Use the library in supported SSR/hydration context.
+- Diagnose missing CSS, missing skin tokens, unresolved exports, dependency mismatch, hydration mismatch, or duplicate React.
+- Upgrade versions and understand breaking changes.
+- Contribute a component/skin/recipe and run the relevant validation locally.
+
+### Required DX artifacts
+
+Specify which guides need to exist and their acceptance criteria:
+
+- Quick start (shortest verified path from blank app to rendered component).
+- Installation by supported framework/bundler.
+- Tailwind v4/theme CSS setup.
+- Theme/skin configuration and persistence.
+- Import and tree-shaking guide.
+- Customization and extension guide.
+- Premium blocks/registry guide, if relevant.
+- Optional integrations guide.
+- SSR/hydration guide if relevant.
+- Troubleshooting/FAQ.
+- Upgrade/migration guide.
+- Component/API docs and live examples.
+- Contribution guide and test commands.
+- Architecture overview and ADR index.
+- Accessibility and skin QA guide.
+- Release/support policy.
+
+Every guide must be derived from a verified implementation later; at this stage, define the planned documentation contract and label examples as proposed/specification. Do not fabricate tested commands or claim that a quick start works before it is executed.
+
+### Developer errors and diagnostics
+
+Research and specify useful diagnostics for common failures:
+
+- token stylesheet missing;
+- unknown skin ID;
+- unresolved semantic token;
+- unsupported mode/density value;
+- multiple React versions;
+- missing peer dependency;
+- unsupported import path;
+- stale generated token outputs;
+- broken optional adapter import;
+- mismatched Tailwind version/config;
+- registry schema/version mismatch;
+- SSR theme mismatch.
+
+Define when each should be a build-time error, development warning, runtime fallback, or documentation-only warning. Avoid noisy runtime logs in production.
+
+---
+
+## 8. Phase 7 — Distribution model: npm package vs source registry
+
+Do not conflate a conventional installed component library and a shadcn-like source registry. Assess both separately.
+
+### Runtime package model
+
+Evaluate pros/cons of shipping runtime React components as a package, including controlled upgrade path, dependency constraints, theming, API stability, tree-shaking, testing, docs, and distribution.
+
+### Source-owned registry model
+
+If worthwhile, research the current official shadcn registry model/schema and describe a future source registry that might distribute:
+
+- components;
+- blocks;
+- page templates;
+- hooks/utilities;
+- token/style files;
+- examples/rules/config files, if supported by schema.
+
+Define:
+
+- registry catalog schema and item schema;
+- namespacing and item IDs;
+- dependency metadata and peer dependencies;
+- file declarations and destination paths;
+- CSS/token dependency references;
+- conflict detection and overwrite policy;
+- installation/upgrade behavior;
+- version compatibility and schema migration;
+- access/privacy concerns if private items are ever considered;
+- integrity/provenance and supply-chain checks;
+- testing generated/installed code in a disposable consumer app;
+- whether a registry CLI is required or existing CLI workflows can be used.
+
+No registry server, CLI, registry JSON or component files should be implemented in this task. Recommend a smallest useful future scope and explicitly identify what not to support in v1.
+
+### Decision output
+
+Make a side-by-side feature/cost table comparing:
+
+1. npm package only;
+2. source registry only;
+3. npm core + registry blocks/templates;
+4. deferred registry after the package is proven.
+
+Give a recommendation with evidence and revisit criteria.
+
+---
+
+## 9. Phase 8 — Documentation site and live playground
+
+Research what documentation system is justified by repository goals. Evaluate Storybook and alternative docs/site options rather than assuming every tool is needed.
+
+Specify the planned developer experience for:
+
+- component API reference;
+- component playground with variants/states;
+- Skin Lab with all 30 baseline appearances;
+- density/motion/contrast/viewport controls;
+- example app/template previews;
+- copy/install instructions for source-registry content, if approved;
+- accessibility states and known limitations;
+- token reference/search;
+- component/skin comparison;
+- changelog/version selector and migration notes;
+- code snippets that exactly match future public APIs;
+- reproducibility and versioning of examples.
+
+Document separation between docs/playground app dependencies and consumer runtime dependencies. Large chart editors, visual tooling and SFX assets should not accidentally land in the core package bundle.
+
+Define success metrics for DX, such as time-to-first-render (measured later), successful installation rate, number of special setup steps, consistency of examples, and time to diagnose common integration faults. Do not invent baselines or claim improvement without measurements.
+
+---
+
+## 10. Phase 9 — Monorepo, build graph, and dependency management
+
+Only recommend a monorepo when it creates measurable value.
+
+Research and compare appropriate options based on the actual repository: npm workspaces, pnpm workspaces, Yarn, Bun, or no workspace. Evaluate Turbo/Nx/task runners only if task dependency/caching complexity warrants them.
+
+Specify:
+
+- workspace naming and folder conventions;
+- package dependency graph and forbidden cycles;
+- single source of truth for versions/configs;
+- package scripts (build, typecheck, lint, test, validate, pack, docs, changeset/release);
+- development order and watch mode;
+- generated code/token build dependencies;
+- incremental versus full CI;
+- task caching and reproducibility where relevant;
+- local/CI Node and package-manager version pinning;
+- lockfile policy and dependency update policy;
+- dependency graph visualization/auditing;
+- how examples consume workspace packages without masking publication defects.
+
+Test planning must include a clean consumer installation from the packed tarball, not only workspace aliases. Workspace symlinks can hide missing files and wrong export maps.
+
+---
+
+## 11. Phase 10 — Versioning, releases, and supply-chain safety
+
+Research current official guidance for npm Trusted Publishing/OIDC, provenance attestations, GitHub Actions permissions, release tags, Changesets or alternatives, and dependency security.
+
+Specify:
+
+- package versioning model (single version or independent versions), with evidence;
+- conventional version/semver rules for components, tokens, theme contract schema, registry items and docs examples;
+- changeset/release note workflow;
+- changelog format and migration guide policy;
+- release candidate and smoke-test stages;
+- publish permissions and protected branch/tag policy;
+- trusted publishing vs long-lived npm tokens, current requirements and caveats;
+- provenance/SBOM/attestation requirements where justified;
+- lockfile integrity and dependency review;
+- actions pinning/permissions/secrets minimization;
+- package tarball inspection and `npm pack --dry-run`/equivalent validation;
+- npm package metadata correctness;
+- rollback, deprecation and incident response;
+- prerelease tags (`alpha`, `beta`, `rc`) and promotion rules;
+- how docs match the published package version;
+- whether package publication is v1 scope or later.
+
+Do not configure npm publishing, create secrets, run a release, or publish any package. This phase is only the policy and workflow specification. Do not claim provenance is available for a proposed package before the eligible publishing/repository configuration is verified.
+
+---
+
+## 12. Phase 11 — CI quality gates and consumer validation
+
+Specify a minimal-but-strong CI system based on actual repo tools. Do not create an overengineered matrix without an evidence-backed need.
+
+### Documentation/contract gates now
+
+- JSON and schema validation for current contracts.
+- Exactly 15 stable skin IDs; 30 baseline skin/mode combinations.
+- Exactly 105 unique unordered skin-pair entries in the grammar contract.
+- Links/paths resolve; references match existing canonical files.
+- No duplicate/contradictory package names and status labels.
+- Architecture ADR and research log contain required fields.
+- Roadmap tasks reference current docs and do not claim implementation prematurely.
+
+### Future package gates (specify only)
+
+- lint, typecheck, unit/integration tests;
+- API/export snapshot or public API review;
+- token generator determinism and stale-output checks;
+- build all supported package entrypoints;
+- React/peer dependency checks;
+- `npm pack`/package contents check;
+- install the tarball into clean Vite and any genuinely supported SSR consumer fixture;
+- verify declarations resolve under supported TypeScript versions;
+- confirm CSS/token entrypoints work in Tailwind v4;
+- confirm tree-shaking/optional modules and dependency isolation;
+- smoke test docs examples against actual versioned exports;
+- accessibility/visual regression plans tied to the other canonical QA document;
+- dependency/security/license/provenance scans where justified.
+
+Do not implement those future gates as product code now unless a small documentation-only validator is necessary and safely scoped. State exactly which validations were executed and which merely proposed.
+
+---
+
+## 13. Phase 12 — Governance and contribution experience
+
+Define the future contributor workflow for maintainers and AI coding agents:
+
+1. read the master Bible and relevant contracts;
+2. locate canonical source of truth for the change;
+3. create/choose a small issue with acceptance criteria;
+4. make scoped changes and document rationale;
+5. run relevant validation commands;
+6. update docs/contracts/examples in the same change where required;
+7. provide screenshots and accessibility evidence for visual changes;
+8. add migration note for breaking public APIs/tokens/skin IDs;
+9. request review and meet release gates.
+
+Define statuses such as `proposed`, `specified`, `implemented`, `tested`, `reviewed`, `released`. Do not compress them into a single checkbox.
+
+Specify a template for architecture decision records (ADRs), component/package change proposals, release checklists, issue templates, and pull request templates only if these templates are missing and appropriate for the repo. Avoid creating duplicate templates that conflict with existing conventions.
+
+AI agents must not invent package names, add dependencies without justification, rename stable IDs, bypass tests, or publish releases. They must report actual evidence and unimplemented work honestly.
+
+---
+
+## 14. Scope boundaries with adjacent Moonframe Bibles
+
+This work must integrate with—rather than duplicate—the following areas:
+
+- **Design System Bible:** product mission, principles, scope and 15-skin catalog.
+- **Token Architecture & Theme Engine Bible:** token semantics, source of truth, Light/Dark resolver, runtime theme behavior.
+- **Component API & Behavior Bible:** component props, interaction semantics, keyboard/ARIA contracts and state matrix.
+- **Premium Blocks & Template Product Bible:** catalog and requirements of blocks/templates.
+- **Advanced Data Workspace Bible:** detailed table/data workspace semantics and adapter contracts.
+- **Auth & Security UI Integration Bible:** auth UI flows/provider boundaries.
+- **Original Asset & Brand Bible:** asset taxonomy, originality, license and provenance.
+- **Motion, Interaction & SFX Bible:** motion recipe and audio-event semantics.
+- **Accessibility & Visual QA Bible:** accessibility and visual-regression gates.
+
+Do not copy their full catalog/details into this document. Package Architecture & DX should define **how those systems are packaged, imported, installed, documented, tested, versioned, and released**. Link to canonical docs and capture only package-level dependencies/requirements.
+
+Where adjacent Bibles do not exist or are incomplete, record a dependency/gap rather than creating a duplicate competing source of truth. Add an index or master map only if absent.
+
+---
+
+## 15. Required documentation and contract outputs
+
+Audit before creating duplicates. Adapt file paths to the repo’s conventions, then update all links. The expected outputs are:
+
+1. `docs/audit/package-architecture-dx-audit.md` — actual repo baseline, inventory, conflicts, findings and severity.
+2. `docs/research/package-architecture-dx-research-log.md` — dated primary sources and decision impact.
+3. `docs/architecture/package-architecture-dx-bible.md` — canonical packaging/distribution/developer experience architecture.
+4. `docs/architecture/adr/ADR-001-package-topology.md` — package/workspace topology decision or bounded open decision.
+5. `docs/architecture/adr/ADR-002-distribution-model.md` — npm vs source registry vs hybrid, or clearly deferred decision.
+6. A package/public-API contract (machine-readable if stable enough) defining package IDs, exports, dependency boundaries, CSS entrypoints, support ranges/status fields.
+7. A DX journey/checklist, covering install, quickstart, skin setup, customization, block use, upgrade and troubleshooting.
+8. A release and supply-chain policy, preferably incorporated into the canonical architecture Bible rather than duplicated unnecessarily.
+9. An implementation roadmap with small dependent tasks and acceptance criteria.
+10. README link/nav updates so new documents are discoverable.
+11. Optional JSON Schema or validator for package contracts if it is low-risk, useful, and tested with valid and invalid fixtures.
+
+These file names are proposals. If the repository already has equivalent files, update them instead of creating a competing version. Mark all specifications accurately as `proposed`, `specified`, or `implemented`.
+
+### Machine-readable contract requirements
+
+- Valid JSON (no comments, no trailing commas).
+- Distinguish schema version from contract version.
+- Stable IDs and enums; explicit status values.
+- Canonical references to other docs/contracts; no duplicated mutable definitions.
+- Proposed/unresolved package names cannot masquerade as final.
+- Dependencies must resolve or be explicitly `unknown/proposed`.
+- Public export paths and internal paths must be distinguishable.
+- Publish/CI steps marked as `specified-not-implemented` until verified.
+- Tests/validation status is evidence-backed.
+
+---
+
+## 16. Roadmap requirements
+
+Build a phased task roadmap small enough for developer/AI agents to execute without making broad architecture decisions. Each task must include:
+
+- stable task ID;
+- objective;
+- scope and non-goals;
+- prerequisites/dependencies;
+- likely paths affected;
+- acceptance criteria;
+- validation commands or planned validation (do not invent commands before toolchain audit);
+- docs/contracts to update;
+- accessibility/security/packaging concerns if relevant;
+- risk, rollback and migration impact;
+- definition of done and honest status.
+
+Suggested phases:
+
+1. repository audit and research;
+2. decide package topology and distribution model;
+3. define public import/export and package metadata contracts;
+4. define CSS/Tailwind/token integration;
+5. define consumer quickstart and supported frameworks;
+6. define documentation site/Skin Lab DX;
+7. define registry/CLI scope or explicit deferment;
+8. define package build/type declarations/consumer validation;
+9. define CI, release/versioning and supply-chain policy;
+10. reconcile all Bibles/contracts and prepare issue-ready backlog;
+11. implement only after a separately approved implementation phase.
+
+Do not create hundreds of GitHub issues at once. Audit and deduplicate first. If issue tooling is unavailable, provide issue-ready backlog Markdown or JSON. Claim issues were created only if each creation is verified.
+
+---
+
+## 17. Quality bar and anti-patterns
+
+Reject the following:
+
+- splitting each token family, skin, icon set, or block category into its own npm package without demonstrated need;
+- packaging all premium blocks and all optional engines into the core bundle;
+- claiming “tree-shakeable” without package metadata and consumer-bundle evidence later;
+- relying only on workspace symlinks and never testing packed tarballs;
+- shipping CSS that consumers cannot override safely;
+- mixing Tailwind v3 assumptions with v4 without explicit support policy;
+- dynamic class-name construction that Tailwind cannot detect;
+- forcing consumer applications into a proprietary build pipeline for basic usage;
+- duplicating docs/source-of-truth across multiple Bibles;
+- confusing a component npm package with a source-owning registry;
+- publishing a registry/CLI before validating the install/upgrade use case;
+- selecting tools because they are fashionable or because popular templates use them;
+- claiming current Node/npm requirements without verifying official docs and consumer constraints;
+- storing long-lived publish tokens when a supported trusted-publishing flow is appropriate;
+- configuring OIDC/provenance in documentation as if it is already enabled;
+- claiming package readiness without clean-install/tarball/consumer tests;
+- implementing UI components, auth/backend behavior, or production art/SFX during this documentation-only task;
+- marking missing test results as passing;
+- claiming all 15 skins are distinct without evidence from Skin Lab and pairwise reviews.
+
+---
+
+## 18. Definition of done for this task
+
+This task is complete only when:
+
+1. The actual GitHub repository and starting commit are verified.
+2. All relevant current files, issues/PRs and existing decisions have been audited.
+3. An audit report exists with evidence-based findings and severity.
+4. Official current documentation has been researched and logged, with source dates/version status where available.
+5. Package topology and distribution options have a researched comparison; final decision or open decision is documented honestly.
+6. Package metadata/export/CSS/TypeScript/peer-dependency and consumer compatibility requirements are specified.
+7. Tailwind v4 and token distribution requirements link clearly to the Token Architecture & Theme Engine Bible instead of duplicating it.
+8. DX journeys, docs, playground, and consumer validation have a coherent plan.
+9. npm/source registry/hybrid decision includes scope, trade-offs, security, upgrade and maintenance burden.
+10. Versioning, releases, trusted publishing/provenance, CI security, migration and rollback policies are specified at a level suitable for future implementation.
+11. Machine-readable contracts validate if a schema/validator is included.
+12. All links/paths/filenames and README navigation are checked.
+13. Existing documents have been refined rather than duplicated, or a documented reason explains the new file.
+14. A roadmap and issue-ready tasks have dependencies and acceptance criteria.
+15. Actual writes/commits are verified remotely if made; no branch push/commit is claimed without evidence.
+16. The final report separates what was completed, what was validated, what is specified only, open decisions, and out-of-scope implementation.
+
+---
+
+## 19. Required final report to the user (Bahasa Indonesia)
+
+Return a specific report containing:
+
+- repository URL, branch, starting and final commit SHAs;
+- P0/P1/P2/P3 audit findings with evidence;
+- sources researched and key decisions they informed;
+- current package topology recommendation and alternatives rejected/deferred;
+- distribution recommendation: npm, registry, hybrid or deferment;
+- list of files added/changed and why;
+- machine-readable checks run and their actual results;
+- tests/validators not run and why;
+- whether issue backlog items were created or only documented;
+- explicitly unimplemented items (runtime package, components, assets, registry, CLI, publishing, SFX);
+- open decisions, risks and dependencies;
+- recommended next 3–5 tasks in dependency order.
+
+Never claim “production-ready”, “published”, “verified consumer installation”, “trusted publishing enabled”, “all package exports work”, or “DX is proven” without direct evidence.
+
+---
+
+## 20. Start now
+
+Begin with **Phase 0 — audit the actual repository**. Do not write new architecture docs until you know what exists. Then research official current sources, create the audit report, compare package/distribution options, refine the canonical architecture/DX documentation and machine-readable contracts, validate links/schema, and verify repository writes.
+
+The outcome must be a clear, evidence-based **Package Architecture & Developer Experience Bible** that tells future developers exactly how Moonframe should be organized, consumed, customized, documented, tested, versioned, distributed and maintained—without prematurely forcing a technology or implementing the UI before the specification is ready.

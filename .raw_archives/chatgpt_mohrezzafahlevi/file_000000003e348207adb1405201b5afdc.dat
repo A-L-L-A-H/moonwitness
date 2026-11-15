@@ -1,0 +1,774 @@
+# SUPER DEEP RESEARCH PROMPT
+# Moonframe UI — Accessibility & Visual QA Bible
+
+**Mission type:** repository audit + primary-source research + accessibility architecture + visual QA specification + machine-readable contracts + roadmap refinement.  
+**Target repository:** https://github.com/bjo163/moonframe  
+**Primary output:** an evidence-based Accessibility & Visual QA Bible integrated into the existing Moonframe documentation system.  
+**Current stage:** specification and planning. **Do not implement UI components or create production assets in this task.**
+
+> **Non-negotiable instruction:** Begin with an audit of the repository as it exists now. Do not rely on old conversation summaries, this prompt, or previously reported file inventories as proof of the current state. Research current primary sources, distinguish facts from assumptions, update the existing documentation/contracts rather than creating competing sources of truth, and verify every repository change. Do not claim accessibility conformance or visual uniqueness without evidence.
+
+---
+
+## 0. ROLE AND EXPECTED STANDARD
+
+Act as a combined senior team consisting of:
+
+- Principal accessibility architect familiar with WCAG 2.2, WAI-ARIA, semantic HTML, keyboard interaction, screen readers, forced-colors, zoom/reflow, and assistive-technology testing.
+- Visual QA and design-system quality lead familiar with deterministic screenshot testing, visual regression, baseline governance, cross-browser rendering differences, component state coverage, and risk-based test matrices.
+- Design-system engineer familiar with React, TypeScript, semantic tokens, CSS variables, skin engines, density, motion preferences, component contracts, and design governance.
+- Test architect familiar with unit, component, integration, browser, end-to-end, accessibility automation, manual review, and CI design.
+- Researcher who verifies official standards and tools, release/status dates, versions, limitations, and source provenance.
+- Repository maintainer who can reconcile documentation, update contracts carefully, keep changes reviewable, and avoid duplicated or contradictory sources of truth.
+
+Operate critically and methodically. Do not equate a passing automated scanner with accessibility conformance. Do not equate matching screenshots with usability or accessibility. Do not use arbitrary screenshot-diff thresholds without explaining their scope, noise, and review process. Do not claim that 15 skins are distinct merely because their colors or names differ.
+
+The aim is a practical, verifiable quality system that future developers and AI coding agents can follow without guessing.
+
+## 1. PRODUCT CONTEXT
+
+Moonframe UI is planned as a premium React design system for the Moon ecosystem. It intends to provide shared components, premium blocks, page templates, and a skin engine with 15 materially different visual grammars. Each skin has Light and Dark baselines, giving 30 baseline appearances. System mode resolves to Light or Dark and is not another skin.
+
+The 15 established skin IDs are:
+
+1. `moonpunk` — acid-lime manga punk / neo-brutalist impact.
+2. `moonriot` — riot editorial / angular cyberpunk.
+3. `moonzine` — underground zine / collage editorial.
+4. `moonhalftone` — manga screentone / monochrome ink.
+5. `moonglitch` — terminal telemetry / controlled digital distortion.
+6. `moonsmash` — kinetic impact / explosive graphic composition.
+7. `moonink` — expressive brush ink / illustration-led.
+8. `mooncrash` — industrial utility / mechanical hazard.
+9. `moonpanel` — strict modular comic-panel layout.
+10. `moonscrawl` — sketchbook / hand-annotated exploratory workspace.
+11. `moonraw` — raw minimal brutalism / exposed structure.
+12. `moonchrome` — futuristic metallic / precision material.
+13. `classic` — restrained shadcn-style compatibility baseline; do not imply official affiliation.
+14. `moonquest` — RPG/adventure presentation patterns only; no game logic in the generic UI library.
+15. `moonledger` — professional compact ERP/data-workbench style; no accounting or ERP business logic in the generic UI library.
+
+The central design-system principle is:
+
+> **One behavioral system. Fifteen distinct visual grammars. Thirty baseline appearances.**
+
+A skin changes the actual design language—composition, geometry, typography, surfaces, data presentation, navigation, component recipes, media treatment and motion—not merely the color palette. Accessibility behavior must remain reliable across all skins.
+
+### Scope boundaries
+
+This assignment is about **Accessibility & Visual QA strategy, contracts, validation rules, evidence, and process**. It is not permission to:
+
+- Implement the React component library.
+- Build the production theme engine or token generator.
+- Generate final SVG, PNG, icons, logos, illustrations, textures, font files, audio, or SFX.
+- Implement auth, data, billing, ERP, RPG, messaging, or infrastructure business logic.
+- Claim WCAG conformance for a product that has not been implemented and tested.
+
+You may propose small documentation/contract validators if the audit proves they are valuable and low-risk. Do not expand this task into an implementation project. State clearly what is specified, implemented, tested, manually reviewed, and released.
+
+## 2. PHASE 0 — AUDIT THE ACTUAL REPOSITORY FIRST
+
+Before editing anything, inspect the live repository and record its actual baseline.
+
+### 2.1 Repository inventory
+
+Inspect and verify:
+
+- Repository identity, default branch, HEAD commit, commit date, visibility, and available permissions.
+- Current files and directories, including hidden files and all documentation/contracts.
+- README links and document navigation.
+- Existing Design System Bible, Theme Contract, Skin Grammar Contract, Token Dictionary, Component API/Behavior contract if present, Premium Blocks/Template catalog if present, implementation roadmap, research logs, audit reports, and issue backlog.
+- Package manifests, lockfiles, test config, Storybook config, CI workflows, lint/typecheck scripts, scripts and tests if they exist.
+- GitHub issues, PRs, decisions, discussions or labels relevant to accessibility, visual QA, screenshots, CI or component testing if accessible.
+- Actual source code and tests if they have since been added. Do not assume repository still contains only docs.
+
+Previous snapshots referenced paths such as `docs/moonframe-ui-design-system-bible-v1.3.md`, `docs/implementation-roadmap.md`, and contracts under `contracts/`. Those are historical hints only. Verify actual paths, latest versions and contents before using them.
+
+### 2.2 Evidence-based status
+
+For each relevant item classify it as one of:
+
+- `verified-existing`
+- `specified-not-implemented`
+- `partially-specified`
+- `implemented-not-verified`
+- `implemented-and-tested`
+- `missing`
+- `contradictory`
+- `stale-needs-research`
+
+Do not mark something `implemented-and-tested` unless code and test evidence exist. A Markdown statement is not implementation evidence.
+
+### 2.3 Audit report
+
+Create or update a concise, evidence-rich report such as `docs/audit/accessibility-visual-qa-baseline.md`. Adapt the path to repository conventions after the audit. Include:
+
+- Repository and audited commit SHA.
+- Relevant files/sections inspected.
+- Existing accessibility rules and QA intentions.
+- Missing behavior definitions, missing test coverage, missing evidence, and unclear responsibilities.
+- Conflicts with existing Bible/skin/token/component contracts.
+- Severity P0/P1/P2/P3, impact, recommendation, and dependencies.
+- A distinction between documentation gaps and future implementation gaps.
+
+Do not duplicate the entire product Bible in the audit. Link to the canonical documents and state only findings.
+
+### 2.4 Safe Git workflow
+
+- Respect the repo's current workflow and rules. Do not create a branch automatically without a reason or policy requirement.
+- Do not force-push, rewrite history, delete content, or silently rename stable skin IDs.
+- Make small, reviewable documentation/contract changes.
+- Do not overwrite a document before reading its full current contents.
+- Verify each commit/push with tool output and fetch the updated remote state.
+- If write access is unavailable, provide a complete local patch or clearly report the blocker; never pretend a change reached GitHub.
+
+**Continue beyond the audit.** Unless access is blocked or a genuine destructive decision requires owner approval, proceed with research and improve the Bible, contracts, and roadmap during this task.
+
+## 3. PHASE 1 — DEEP RESEARCH FROM CURRENT PRIMARY SOURCES
+
+Use web research. Record the date accessed, publication/update date where available, official source, relevant claims, limitations, and how each finding changes Moonframe's specification. Verify current status rather than assuming a URL still points to the latest version. Prefer stable normative specifications and official documentation.
+
+### 3.1 Required primary-source starting points
+
+Open, read and verify these sources and any current replacements/updates:
+
+1. **WCAG 2.2 — W3C Recommendation**  
+   https://www.w3.org/TR/WCAG22/  
+   or the current canonical WCAG technical report index: https://www.w3.org/TR/wcag/
+2. **Understanding WCAG 2.2**  
+   https://www.w3.org/WAI/WCAG22/Understanding/
+3. **WAI-ARIA Authoring Practices Guide (APG)**  
+   https://www.w3.org/WAI/ARIA/apg/
+4. **W3C Accessibility Conformance Testing (ACT) Rules overview**  
+   https://www.w3.org/WAI/standards-guidelines/act/
+5. **ACT Rules Format 1.1** — reported as a W3C Recommendation published February 2026; verify current publication status and compatibility implications.  
+   https://www.w3.org/TR/act-rules-format/
+6. **axe-core official repository and rules documentation**  
+   https://github.com/dequelabs/axe-core
+7. **Storybook accessibility testing documentation**  
+   https://storybook.js.org/docs/writing-tests/accessibility-testing
+8. **Playwright visual comparisons / screenshot assertions**  
+   https://playwright.dev/docs/test-snapshots
+9. **MDN `prefers-reduced-motion`**  
+   https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion
+10. **MDN `forced-colors`**  
+    https://developer.mozilla.org/en-US/docs/Web/CSS/@media/forced-colors
+11. **MDN `prefers-contrast`**, if relevant to the supported browsers and design. Verify current documentation.
+12. **Semantic HTML, focus visibility, keyboard interaction and landmark guidance** from W3C/WAI and MDN as appropriate.
+13. **Browser/Playwright support and screenshot environment docs** for any tool being considered.
+14. **Official color contrast explanation/criteria** in WCAG; do not assume a third-party color metric is equivalent to WCAG contrast.
+
+Find and verify additional primary sources needed for browser matrix, manual screen-reader testing, zoom/reflow, screen magnification, mobile accessibility, RTL/localization, visual regression governance, font loading, screenshot determinism, and CI integration.
+
+### 3.2 Research requirements
+
+For every major recommendation, answer:
+
+- What does the normative standard require versus merely recommend?
+- Which criteria can be automated, partially automated or only verified through human judgment?
+- What does the chosen test tool actually detect, and what does it not detect?
+- Does the approach fit Moonframe's planned React/Tailwind stack, once verified?
+- What is the maintenance cost, source of false positives/noise, and risk of a misleading pass?
+- Is there a free/local option if a proposed tool needs a paid account or hosted service?
+
+Never claim an accessibility scanner catches all issues. axe-core and Storybook explicitly indicate that some results are incomplete and need manual review; reflect that in the plan. Never treat automated accessibility success as a WCAG conformance claim.
+
+### 3.3 Research log
+
+Create or update a single research log, e.g. `docs/research/accessibility-visual-qa-research-log.md`, with:
+
+- Topic/question.
+- Official source title and URL.
+- Publisher/maintainer.
+- Publication or update date if verified.
+- Date accessed.
+- Relevant requirement/finding, summarized in your own words.
+- Limitation or caveat.
+- Impact on Moonframe.
+- Decision or document section changed.
+- Status (`verified`, `needs-validation`, `superseded`).
+
+Do not copy large passages of third-party documentation. Cite official sources within the Bible and contracts. Do not include a source just because it is popular; explain what it supports.
+
+## 4. PHASE 2 — DEFINE THE QA MODEL AND SOURCE OF TRUTH
+
+The new Accessibility & Visual QA Bible must complement existing documents, not replace their responsibilities.
+
+### Keep responsibilities separated
+
+- **Design System Bible:** product intent and overall design-system architecture.
+- **Token Dictionary/Token Architecture:** token taxonomy, naming, types, aliasing, generation and completeness.
+- **Theme Contract:** stable skin IDs, Light/Dark/System, density/motion/contrast preferences, fallback behavior.
+- **Skin Grammar Contract:** unique art direction and pairwise anti-overlap rules for all 15 skins.
+- **Component API & Behavior Bible:** props, public API, functional semantics, keyboard contracts and component states.
+- **Premium Blocks & Template Bible:** block/template catalog and page-level composition requirements.
+- **Accessibility & Visual QA Bible (this task):** standards mapping, testing methodology, evidence, matrix, pass/fail criteria, review protocol, and release gates.
+- **Implementation Roadmap:** task dependencies and deliverable order.
+
+If any of these do not exist, record the gap. Do not create a duplicate substitute without checking. Where a definition belongs elsewhere, place a link/reference and specify only the QA requirement necessary here. For example, this Bible can state that a Dialog must follow its documented keyboard contract but should not duplicate all Dialog props.
+
+### Define a testing pyramid
+
+Specify the purpose and acceptance expectations for each layer:
+
+1. Static/schema/contract validation.
+2. Unit and utility tests.
+3. Component render/state tests.
+4. Interaction and keyboard tests.
+5. Automated accessibility checks on rendered states.
+6. Browser integration and responsive tests.
+7. Visual regression/screenshot comparison.
+8. Manual keyboard, screen-reader and visual review.
+9. Assistive-technology spot checks for high-risk components.
+10. Consumer/real-application testing.
+
+Do not pick or install the test stack blindly. Compare options after repository audit and record an ADR if a major tool decision is required.
+
+## 5. PHASE 3 — ACCESSIBILITY STANDARD AND ACCEPTANCE MODEL
+
+Use **WCAG 2.2 Level AA as the proposed baseline** unless repository, business, legal or product constraints require another target. Clearly label it a target and not a conformance claim. Research whether the product needs additional obligations for particular customers or jurisdictions; do not make legal claims without authoritative evidence.
+
+### 5.1 Build a traceable criteria map
+
+Create a machine-readable and readable matrix connecting:
+
+- WCAG criterion identifier/title and level.
+- Product surface/component family to which it applies.
+- Whether applicability is universal or conditional.
+- Proposed verification method: static, automated, manual, assistive technology, visual inspection, or combined.
+- Test procedure/fixture.
+- Expected result and evidence type.
+- Owner/responsible role.
+- CI behavior: blocking, warning, manual gate, or not applicable with rationale.
+- Known limitations and exceptions.
+- Status (`specified`, `implemented`, `tested`, `reviewed`, `not-applicable`, `blocked`).
+
+At minimum examine the relevant criteria in the areas below. Verify exact wording, numbering, level, and applicability from the official WCAG source rather than copying from memory.
+
+#### Perceivable
+
+- Text alternatives and meaningful image/SVG alternatives.
+- Info and relationships, semantic structure and reading order.
+- Meaningful sequence, instructions and labels.
+- Color not being the sole carrier of information.
+- Text contrast and non-text contrast.
+- Text resizing, text spacing, reflow, orientation and responsive zoom.
+- Images of text and decorative media handling where relevant.
+- Visual effects, textures and manga/grunge decorations must not reduce legibility.
+
+#### Operable
+
+- Keyboard access to all functionality.
+- No keyboard trap; focus order, visible focus and focus not obscured.
+- Pointer/touch target size and spacing; WCAG 2.2 target-size exceptions must be interpreted correctly.
+- Dragging alternatives for reorder/sort/kanban-like interactions if included.
+- Motion/animation, pause/stop/hide where applicable, reduced-motion handling.
+- Timing, toasts, timed alerts and session-related UI states where applicable.
+- Navigation consistency and accessible names for controls.
+- Avoid flashing/glitch/animated patterns that create accessibility or photosensitivity risks.
+
+#### Understandable
+
+- Labels/instructions, input purpose and validation errors.
+- Error identification and suggestions when appropriate.
+- Consistent identification and predictable behavior.
+- Accessible authentication considerations for login/auth templates, without duplicating Auth Bible details.
+- Help and confirmation patterns for destructive or complex tasks.
+
+#### Robust
+
+- Name, role, value and appropriate ARIA use.
+- Valid semantics and programmatically determinable status messages.
+- Accessible behavior across supported browsers and assistive technology combinations.
+- Native HTML semantics preferred over unnecessary ARIA.
+
+### 5.2 WCAG does not cover every user need
+
+Record usability goals beyond strict conformance where appropriate—for example, cognitive load, readability, motion sensitivity, error recovery, large data table navigation and touch comfort. Label these as product quality requirements, not WCAG success criteria.
+
+### 5.3 Avoid simplistic claims
+
+Do not say “fully accessible” because a scanner passed. Use evidence-based status labels such as:
+
+- `not-assessed`
+- `specified`
+- `automated-check-passed`
+- `manual-review-passed`
+- `assistive-tech-reviewed`
+- `known-issue`
+- `waived-with-rationale`
+- `verified-for-release-scope`
+
+Define what evidence is needed to move between statuses. A manual waiver must have an owner, rationale, affected scope, alternative, expiration/review date and acceptance authority.
+
+## 6. PHASE 4 — COMPONENT AND BLOCK ACCESSIBILITY MATRIX
+
+Audit current Component API, Component Manifest and Premium Blocks/Templates documentation. Do not duplicate their full catalogs. Add QA coverage and join keys based on stable component/block IDs.
+
+### 6.1 Component-family coverage
+
+Make sure the QA plan covers relevant families:
+
+- Foundations and layout primitives.
+- Buttons, links, icon buttons and action groups.
+- Inputs, textareas, checkboxes, radio groups, switches, selects, comboboxes, date/time controls, sliders and file uploads.
+- Dialogs, alert dialogs, drawers, popovers, tooltips, menus, command palette and toasts.
+- Tabs, breadcrumbs, pagination, sidebars, navigation rails and responsive navigation.
+- Cards, badges, avatar, accordion, collapsible, timeline, tree view and status messages.
+- Tables, DataTable, filtering, sorting, row selection, saved views, bulk action bars, resizing/reordering and virtualization if specified.
+- Charts and data visualizations (including accessible summaries and non-color-only distinctions).
+- Auth/login form blocks, onboarding, organization/team controls and account settings (reference Auth Bible instead of duplicating flow definitions).
+- Premium page templates: dashboard, CRUD, settings, analytics, ERP workbench, RPG presentation, AI workspace and operations console where cataloged.
+
+### 6.2 For each family define
+
+- Applicable criteria and interaction pattern.
+- Keyboard input map and expected focus behavior.
+- Accessible name/description requirements.
+- State changes and announcement expectations.
+- Focus visibility/obscuration conditions.
+- Overlay/scroll/viewport risks.
+- Contrast and forced-colors requirements.
+- Reduced-motion behavior.
+- Responsive and zoom/reflow checks.
+- Automated checks and manual checks.
+- Known false positives and testing limits.
+- Release-blocking failure conditions.
+
+Specific examples:
+
+- A Button needs correct native semantics, visible focus, disabled/loading behavior, a non-ambiguous accessible name and no duplicate activation.
+- A Dialog needs opening focus behavior, focus containment where specified by its interaction pattern, Escape policy, accessible name, correct return focus and no hidden keyboard trap.
+- A Select/Combobox needs tested keyboard patterns, active/selected distinction, option semantics, screen-reader behavior and robust focus/scroll behavior.
+- A Toast must not be the only source of critical information, must have appropriate announcement behavior, and must not disappear before users can respond where action is required.
+- A DataTable needs semantic headers and associations, keyboard interaction model, sorting state communicated accessibly, selection feedback, responsive strategy, and tested behavior with large datasets.
+- A Chart needs an accessible title/summary, meaningful data alternatives, and series distinctions beyond color alone.
+
+Treat these as examples; verify each actual component pattern against WAI-ARIA APG and native HTML best practices.
+
+## 7. PHASE 5 — VISUAL QA FOR 15 DISTINCT SKINS
+
+Visual QA must evaluate both fidelity to the intended grammar and the risk of losing usability. A screenshot that matches a bad design is not a quality pass.
+
+### 7.1 Baseline set
+
+There are exactly 30 intended baseline appearances:
+
+- 15 stable skin IDs.
+- Light and Dark for each skin.
+- `system` is resolved to one of those modes and is not counted as an extra appearance.
+
+Create a visual matrix with state:
+
+- `not-designed`
+- `not-rendered`
+- `baseline-captured`
+- `automated-pass`
+- `needs-review`
+- `manual-approved`
+- `failed`
+- `waived-with-rationale`
+
+Only use states supported by actual evidence. A planned baseline is not a captured screenshot.
+
+### 7.2 Reference screens
+
+Define a minimum visual specimen suite that uses the same realistic content/data for all skins:
+
+1. Basic app shell/navigation.
+2. Overview dashboard with cards, table/chart and actions.
+3. Form with required fields, help text, validation, disabled and pending states.
+4. Dialog/popover/menu interactions.
+5. Data table with sorting/filtering/selection/empty/loading/error states.
+6. Long content and text wrapping.
+7. Empty/error/offline/permission state.
+8. Responsive mobile layout of a representative dense screen.
+9. One premium page block/template once the template catalog exists.
+
+Do not duplicate the entire component catalog here. Link to the component and template manifests, then define the cross-cutting specimen set.
+
+### 7.3 Screenshot determinism
+
+Research and specify:
+
+- Fixed browser/OS/container versions for reference captures.
+- Pinned fonts and waiting for `document.fonts.ready` or a verified equivalent.
+- Stable mock data, fixed dates/timezones, disabled or mocked network variability.
+- Disabled caret/selection blinking or other unstable effects where safe for screenshots.
+- Controlled animations/transitions during capture without hiding the real motion test suite.
+- Stable viewport/device scale factor, locale, color scheme and reduced-motion state.
+- How dynamic content and intentionally variable regions are masked without hiding important UI.
+- Baseline update ownership, review evidence, and PR approval rules.
+- Pixel diff/threshold limitations, anti-aliasing noise, platform-specific rendering, and font rasterization differences.
+- Rules against automatically accepting every new baseline.
+
+Playwright's official visual comparison guidance warns that screenshots vary across environments; use that evidence to justify pinned test environments. Verify the chosen tool and current API in official docs before committing the design.
+
+### 7.4 Grayscale and decoration-off review
+
+For every skin, plan visual inspections with:
+
+- Full theme appearance.
+- Grayscale/monochrome.
+- Decorative artwork and texture disabled.
+- Forced-colors/high-contrast mode where applicable.
+- Reduced-motion mode.
+
+The goal is to verify that:
+
+- Visual identity is not just a palette or a logo.
+- Core hierarchy and controls remain understandable without decorative assets.
+- Status is not carried only by color, glow, texture, animation or sound.
+- Skin-specific effects do not erase focus, borders or error messages.
+
+### 7.5 Pairwise skin distinctness
+
+There are 15 × 14 / 2 = **105 unique unordered pairs** of skins. Use the existing Skin Grammar Contract as source of truth for pair definitions and review status. Do not create a contradictory second pair list.
+
+The QA plan should define evidence and scoring for these non-color dimensions:
+
+1. Shell/page composition.
+2. Geometry and shape language.
+3. Typography hierarchy.
+4. Surface construction/elevation.
+5. Navigation and data presentation.
+6. Artwork/texture/media treatment.
+7. Component visual recipes.
+8. Motion signature.
+
+A threshold such as four or five materially distinct dimensions is a review heuristic, not proof of originality. The review needs rendered screenshots of equivalent content, grayscale and decoration-off examples, a reviewer/date, written observations, status and next action. All pairs remain `not-reviewed` until evidence exists.
+
+Pay particular attention to close-looking pairs:
+
+- Moonpunk vs Moonriot vs Moonsmash.
+- Moonzine vs Moonhalftone vs Moonpanel.
+- Moonink vs Moonscrawl.
+- Moonglitch vs Moonchrome.
+- Mooncrash vs Moonledger.
+- Moonraw vs Classic.
+- Moonquest vs generic components.
+
+The QA Bible defines how uniqueness is tested; the Skin Grammar Contract owns the actual art direction. Reference it and update it only when an audit proves there is a real conflict or missing field.
+
+## 8. PHASE 6 — CONTRAST, COLOR AND NON-COLOR SEMANTICS
+
+Define automated/manual validation for:
+
+- Text/background contrast, including muted text, placeholder/help text, disabled states where relevant, links, focus rings, chart labels, code blocks and overlays.
+- Non-text contrast for controls, borders necessary to recognize controls, selected states, focus indicators and important graphics.
+- Translucent overlays, gradients, textures, background images and blend modes; evaluate rendered results, not just source hex values.
+- Both Light and Dark for all 15 skins.
+- Contrast as a relation between semantic token roles/surface contexts rather than independent RGB values.
+- Forced-colors mode and user-agent overrides; do not depend solely on authored color/shadow.
+- Status indicators and charts that distinguish states/series with more than color.
+
+Record exact WCAG criteria and conformance level from the current official source. Distinguish normative WCAG contrast ratios from alternative perceptual metrics or design heuristics. If a tool cannot calculate meaningful contrast for an effect/texture or image, require manual review rather than silently passing.
+
+## 9. PHASE 7 — KEYBOARD, FOCUS AND ASSISTIVE TECHNOLOGY STRATEGY
+
+Create a practical matrix for supported desktop/mobile environments and representative assistive technologies. First audit the real support policy; do not invent a wide browser matrix without considering customer/environment needs.
+
+Consider a representative manual test set, selected based on audience and toolchain, such as:
+
+- Keyboard only (no pointer) across primary flows.
+- NVDA with Firefox or Chrome on Windows.
+- VoiceOver with Safari on macOS/iOS where relevant.
+- TalkBack with Chrome on Android where relevant.
+- Browser zoom/reflow and screen magnification.
+- Forced-colors/high contrast on supported Windows environments.
+
+These are candidate test environments, not automatically an unconditional promise of support. After research, recommend a minimum supported/manual matrix and a risk-based extended matrix; state confidence and constraints.
+
+Test:
+
+- Logical tab order and no traps.
+- Focus visible and not obscured by sticky headers, overlays or animations.
+- Correct announcement for validation/errors/status updates.
+- Correct opening and return focus for overlays.
+- Correct keyboard pattern for tabs, menus, comboboxes, grids and tree views, following APG when applicable.
+- Status changes announced without overwhelming or repeatedly interrupting users.
+- Keyboard alternatives to drag/reorder operations where required.
+- Accessible chart/data alternatives and table navigation.
+
+Do not add `role`, `aria-*`, `tabIndex`, or custom keyboard handling reflexively. Require reviewers to justify non-native patterns and prefer native HTML where it provides the correct semantics.
+
+## 10. PHASE 8 — RESPONSIVE, DENSITY, LOCALIZATION AND VISUAL STRESS
+
+Treat visual QA as multidimensional but avoid a careless full Cartesian product that is impossible to maintain.
+
+The appearance axes include:
+
+- 15 skins.
+- Light/Dark baseline appearance.
+- Density: compact, comfortable, spacious.
+- Motion: full/reduced.
+- Contrast preferences: normal/high plus forced-colors where supported.
+- Viewport/responsive layout state.
+- Interaction state and content shape.
+
+Thirty base appearances × three densities × two motion states × two contrast preferences alone produce 360 combinations before viewport and component state are added. Use comprehensive baseline coverage plus a documented risk-based interaction matrix.
+
+Define:
+
+- All 30 baseline appearances receive a basic render/visual smoke check.
+- Token completeness/contrast can be checked more broadly than screenshots.
+- High-risk UI states get representative cross-axis coverage.
+- Density combinations test usability and control size—not just appearance.
+- Compact ERP tables retain accessible target behavior and labels.
+- Long text, empty data, large numbers, localization, RTL where in scope, and narrow widths are included.
+- Mobile patterns may change layout/composition but not drop essential functionality.
+- Sticky navigation, overflow menus, focus visibility and open overlays are tested at common zoom/reflow widths.
+
+Document the selected coverage approach and why it balances risk and maintainability.
+
+## 11. PHASE 9 — AUTOMATION TOOLING AND CI POLICY
+
+Audit existing tooling first. Only recommend new dependencies after comparing current stack and official docs.
+
+Evaluate the suitability of:
+
+- axe-core and its integration options.
+- Storybook a11y addon and component stories, if Storybook exists or is justified.
+- Playwright screenshot assertions or equivalent browser screenshot runner.
+- Unit/component testing tools already used by the repo.
+- HTML/ARIA/static linters, TypeScript checks and schema validators.
+- Browser matrix options and CI execution cost.
+
+For every proposed tool, document:
+
+- The problem it solves.
+- What it detects and does not detect.
+- Official source and supported environment/version verified.
+- Local/free option and any hosted/paid option.
+- Maintenance overhead, false positives/noise and integration fit.
+- Whether it is proposed, selected, already installed or deferred.
+
+### CI outcome policy
+
+Define which results fail CI:
+
+- Invalid contract/schema, missing required semantic token coverage or broken references: likely blocking.
+- Critical keyboard/focus regressions in shared components: blocking.
+- New automated accessibility violations in critical components: blocking after the baseline/exception policy is defined.
+- Visual regression diff: require review or explicit acceptance; do not blindly fail on every anti-aliasing change or automatically accept snapshots.
+- Manual review requirements: release checklist gate, with owner/evidence—not falsely represented as an automated pass.
+- Known exception: must be scoped, owned, documented, have an alternative/remediation plan and review date.
+
+Avoid snapshot-baseline sprawl: avoid taking every possible component state × every skin × every viewport if it does not improve risk coverage. Build a deterministic, representative suite and explain the chosen matrix.
+
+## 12. PHASE 10 — VISUAL AND ACCESSIBILITY DEFECT CLASSIFICATION
+
+Define a shared issue taxonomy so visual/a11y findings can be tracked consistently without replacing GitHub's issue system.
+
+Suggested dimensions:
+
+- Severity: blocker/critical/high/medium/low (map to repo's current labels if they exist).
+- Type: semantic, keyboard, focus, contrast, screen-reader, responsive/reflow, motion, visual regression, skin distinctness, asset failure, test flake, documentation, compatibility.
+- Surface: component, block, template, skin, token, theme engine, browser/AT combination.
+- Reproducibility: deterministic/intermittent/environment-specific.
+- User impact and affected users/flows.
+- WCAG/ACT mapping where verified.
+- Evidence: screenshot/video/DOM/test log/manual steps.
+- Scope: skins/modes/viewports/states affected.
+- Owner, status, fix strategy, tests and retest evidence.
+
+Distinguish a genuine product defect from test harness flakiness, expected cross-browser rendering, or an unapproved baseline. Never hide an actual contrast or focus defect behind an image mask or overly generous diff threshold.
+
+## 13. PHASE 11 — MACHINE-READABLE QA CONTRACTS
+
+Audit the existing contracts before creating anything. Prefer adding QA fields or a companion contract with stable references over duplicating all tokens, component props or skin definitions.
+
+Consider a machine-readable structure with these objects:
+
+### `accessibilityRequirements`
+- Stable ID.
+- Standard and exact criterion/reference.
+- Applicability/scope.
+- Risk/priority.
+- Required test modes.
+- Automated/manual/AT verification method.
+- Evidence types.
+- CI behavior.
+- Status, limitations and owner.
+
+### `componentQaProfiles`
+- Existing component ID/reference.
+- Required story/state IDs.
+- Applicable keyboard pattern reference.
+- Accessibility checks.
+- Viewport/appearance coverage profile.
+- Manual review requirements.
+- Known exception IDs.
+
+### `visualBaselineMatrix`
+- Skin ID (reference to Theme Contract).
+- Mode (Light/Dark).
+- Specimen/screen ID.
+- Viewport/locale/device profile.
+- Capture environment/version.
+- Screenshot path/ref if actually captured.
+- Current status and baseline hash/version.
+- Reviewer/date/release reference.
+
+### `pairwiseDistinctnessQa`
+- Reference to Skin Grammar pair ID rather than a duplicate independently generated pair list.
+- Evidence links for same-content screenshots.
+- Grayscale/decoration-off status.
+- Dimension scores and notes.
+- Status, reviewer, date, next action.
+
+### `exceptions`
+- Stable ID, criterion/rule, affected scope, reason, owner, compensating measure, expiry/review date, approval state and tracking issue.
+
+### Schema rules
+
+- Valid JSON; no comments or JSON-with-comments.
+- Stable IDs and enums.
+- Explicit contract/schema versions.
+- References resolve to canonical skin/component/criteria IDs.
+- Do not hard-code duplicated skin definitions if Theme Contract is authoritative.
+- Pairwise matrix references the Skin Grammar Contract as the source of truth.
+- Distinguish plan/specification state from measured test results.
+- Evidence fields must not be fabricated. Empty evidence means not assessed.
+- If JSON Schema is added, validate positive and negative fixtures.
+
+Do not insist on JSON if another existing repository convention is clearly better; explain the trade-off and preserve machine-checkability.
+
+## 14. PHASE 12 — RELEASE GATES AND DEFINITION OF DONE
+
+Define gates that can be audited. Suggested structure:
+
+### Gate A — QA specification ready
+- Baseline repo audit recorded.
+- Official research log complete enough to support key decisions.
+- WCAG target proposal and applicable requirements mapped.
+- Test methodology and ownership defined.
+- 30 baseline appearance strategy specified.
+- 105-pair review process references the canonical skin grammar matrix.
+
+### Gate B — Foundation quality
+- Token/Theme/Component contracts have stable IDs and references.
+- Test environment, browser/support matrix and baseline capture process documented.
+- Accessibility status labels and exception process defined.
+- CI blocking/warning policy specified.
+
+### Gate C — Prototype proof
+- Classic, Moonpunk, Moonzine and Moonledger are the initial divergent proof skins when implementation work later starts.
+- Same reference screens and data are captured in Light/Dark.
+- QA methodology is trialed against actual rendered code only when that stage is authorized.
+- Any failure is documented honestly; no future gate can be marked passed solely because a contract exists.
+
+### Gate D — Full skin coverage
+- All 30 baseline appearances have actual render evidence.
+- Relevant automated and manual accessibility checks completed per plan.
+- 105 pairwise distinctness checks have evidence and review outcomes.
+- Reduced motion, forced-colors, density and responsive coverage meets risk criteria.
+
+### Gate E — Release candidate
+- Critical defects resolved or release-blocking issues formally rejected/contained through approved process.
+- Automated checks and manual review evidence archived/linked.
+- Visual baselines reviewed, not auto-accepted.
+- Browser/AT limitations and exceptions documented.
+- Consumer application test and rollback/migration plan complete.
+
+Clearly state: **at the current specification-only stage, these are planned gates; none may be reported as passed unless real evidence exists.**
+
+## 15. PHASE 13 — DOCUMENTATION/CONTRACT DELIVERABLES
+
+After audit and research, update/add only what is necessary. Keep one source of truth per concept and repair links after changes.
+
+Likely deliverables, subject to audit:
+
+1. **Accessibility & Visual QA Bible** — normative goal, scope, testing pyramid, criteria mapping, manual/automated boundaries, visual baseline plan, pairwise review, CI and release policy.
+2. **Accessibility research log** — primary sources, access dates, findings, limitations and decisions.
+3. **Repository QA audit report** — current-state facts, conflicts, gaps and prioritized findings.
+4. **Accessibility requirements map** — machine-readable criteria/test mapping if practical.
+5. **Visual QA matrix/contract** — baseline captures, environment, states and status. Do not duplicate skin identities.
+6. **Component QA profile/manifest extension** — if Component API Bible/manifest exists; otherwise document a future join schema and don't create duplicate component catalogue.
+7. **Pairwise skin review process** — reference existing 105-pair matrix; do not make a competing source of truth.
+8. **CI/testing strategy ADR** — only if tool decisions are made or a real ambiguity must be resolved.
+9. **Implementation roadmap extension** — atomic QA tasks, dependencies, acceptance criteria and release gates.
+10. **README navigation updates** — add links to new documents and preserve concise overview.
+11. Optional JSON Schemas and a small validator for the contracts, if justified and tested.
+
+Do not create all files mechanically if equivalent canonical documents already exist. Reconcile in place. In final report, list which files were modified/added and why.
+
+## 16. ROADMAP TASK BREAKDOWN REQUIREMENTS
+
+Turn remaining work into atomic tasks suitable for future developers or AI coding agents. Each task should state:
+
+- Task ID, objective and explicit non-goals.
+- Dependencies and prerequisites.
+- Likely files/areas affected.
+- Acceptance criteria that can be evaluated.
+- Testing method and required evidence.
+- Accessibility checks and visual checks.
+- Risk/severity if skipped.
+- Documentation updates.
+- Definition of done and status.
+
+Use a phase order such as:
+
+1. Repository audit and research.
+2. Standards/requirements mapping.
+3. QA contract/schema and references.
+4. Testing-tool/CI decision records.
+5. Deterministic baseline capture design.
+6. Four divergent proof-skin test plan.
+7. Component-family keyboard/a11y matrix.
+8. 30-appearance baseline plan.
+9. 105-pair review plan.
+10. Responsive/density/reduced-motion/forced-colors coverage.
+11. Automation/manual review integration when implementation is approved.
+12. Release evidence and exception governance.
+
+Do not create hundreds of GitHub issues at once. Audit and deduplicate backlog first. If issue creation is available and clearly wanted, create only a small first batch of high-priority tasks with dependencies; otherwise prepare an issue-ready backlog document. Never claim issues were created without confirming their URLs.
+
+## 17. QUALITY BAR AND ANTI-PATTERNS
+
+Reject all of the following:
+
+- “Axe passed, therefore WCAG compliant.”
+- “Screenshots match, therefore UI is accessible.”
+- “Same screenshot hash means a good design.”
+- “The theme looks okay in one color scheme, so all 30 appearances are fine.”
+- “All 105 pairs pass” before rendered evidence/review exists.
+- Copying complete WCAG text into the Bible rather than citing criteria and explaining application.
+- Duplicating the same skin/component definitions into multiple contracts.
+- Treating `system` as a 16th skin or a third baseline mode.
+- Treating decorative textures/animations as exempt from readability and focus checks.
+- Hiding unstable pixels indiscriminately, increasing thresholds to make failing tests green, or auto-approving every baseline update.
+- Testing only the default state; ignoring errors, empty states, loading states, overlays, focus, and keyboard interaction.
+- Using only screenshots and never testing actual semantics/interaction.
+- Using only automated accessibility scans and never doing manual/AT checks.
+- Forcing a paid service without a local/free alternative or cost analysis.
+- Adding several testing tools without assessing overlap or maintenance.
+- Claiming WCAG/legal certification without product-wide scope and evidence.
+- Marking test plans or contracts as implementation results.
+- Implementing React components or generating production assets/audio in this task.
+
+## 18. REQUIRED FINAL REPORT
+
+Report in Indonesian. Include:
+
+1. Verified repository URL, default branch and audited HEAD SHA.
+2. Summary of repository baseline and source-of-truth files.
+3. Findings grouped P0/P1/P2/P3, with counts and evidence.
+4. Primary research sources, verified publication/update status, access date, and decisions influenced.
+5. Accessibility target recommendation and limitations; make no unearned conformance claim.
+6. Test pyramid, manual/automated split, browser/AT matrix, 30-appearance visual plan and 105-pair review status.
+7. Files added/modified and why; identify canonical ownership for each concept.
+8. Machine-readable contracts/schemas added and whether they were validated with positive/negative fixtures.
+9. CI rules proposed versus actually active.
+10. Tests/validators actually run and exact results.
+11. Issues created with verified links, or explicit note that issues were not created.
+12. Open decisions, risks, waivers and missing evidence.
+13. The next 5–10 tasks in dependency order.
+14. Explicitly confirm that components, production assets and audio were not implemented/generated in this phase.
+
+Never claim `fully accessible`, `WCAG compliant`, `all screenshots pass`, `all pairs unique`, or `production-ready` without verified evidence for the defined scope.
+
+## 19. START NOW
+
+Begin with **PHASE 0 — audit the actual repository**. Read the current Bible, theme/token/skin contracts, component and premium-block documents if present, roadmap, test setup and backlog. Then do primary-source research and build the evidence-based Accessibility & Visual QA Bible. Reconcile the contracts and roadmap, validate the actual documents, repair README links, and verify the remote changes.
+
+Do not merely return advice in chat. When access and permissions allow, update the repository. Do not just create a new document that duplicates the existing Bible. The outcome must make Moonframe's accessibility and visual quality measurable, auditable, non-duplicative, and ready for implementation later—without building the UI or producing assets now.

@@ -1,0 +1,586 @@
+# MOONWITNESS XV — ONE-SHOT MASTER PROMPT
+## DEEP INSIGHT · VISION RECONCILIATION · ARCHITECTURE · TODO · FIRST COOLIFY RELEASE
+
+**Repository of record:** `https://github.com/bjo163/moonwitnessxv`  
+**Target branch:** `main` — use the existing branch; do not create another branch merely to organize this work.  
+**Project identity:** MoonWitness XV  
+**Strategic vision:** EMPIRE OF THE LIGHT · A-L-L-A-H · GOD-PROMISE · ROCKSOUL · CORPUS · WITNESS · ZILL / SHADOW · ARSY  
+**Immediate delivery objective:** A production-minded public landing page that can be built and deployed through Docker Compose on Coolify.  
+**Execution mode:** Evidence-first, repository-aware, security-conscious, theology-respectful, non-duplicative, release-gated.
+
+---
+
+# 0. NON-NEGOTIABLE EXECUTION GATE
+
+Do not begin by rewriting files.
+
+The first operation must be a deep audit of the actual `bjo163/moonwitnessxv` repository and its latest available `main` HEAD.
+
+Your first response must contain the complete reconciliation report, recommended final narrative, proposed document changes, and a concrete first-release execution plan.
+
+**After presenting that report, STOP and wait for explicit approval before editing any repository file.**
+
+Before approval, do not:
+
+- Modify or overwrite the Master Vision Narrative, `BLUEPRINT.md`, `TODO.md`, README, ADRs, source code, Docker configuration, or other repository files.
+- Commit, push, merge, create a release, or deploy to production.
+- Create a new branch, repository, duplicate backlog, or GitHub issue.
+- Mark tasks complete because a file exists or a document says that a feature exists.
+- Claim that a landing page is deployed merely because Docker Compose configuration is present.
+- Treat a proposed spiritual interpretation, architecture diagram, acronym, or future capability as an accepted decision.
+
+You may read files, inspect Git history, analyze dependencies, run non-destructive checks when authorized and safe, and research official documentation.
+
+Do not ask unnecessary clarification questions. Use the available evidence and list genuinely unresolved owner decisions explicitly.
+
+# 1. YOUR ROLE
+
+Act as a combined:
+
+- Principal software and platform architect.
+- Senior product strategist and systems analyst.
+- Technical writer and documentation reconciliation specialist.
+- DevOps and release engineer experienced in Docker Compose and Coolify.
+- Security, privacy, provenance, and reliability reviewer.
+- Researcher of Islamic textual references and respectful religious communication.
+- Design systems strategist for futuristic, accessible, globally usable digital products.
+
+Use deep reasoning and current, verifiable research. Do not produce generic brainstorming disconnected from the actual repository.
+
+The objective is not simply to make MoonWitness sound impressive.
+
+The objective is to establish a coherent mission, trustworthy narrative, non-overlapping architecture, executable backlog, and verifiable path toward a functioning release.
+
+# 2. ESTABLISH THE ACTUAL BASELINE FIRST
+
+Inspect the latest available state of `bjo163/moonwitnessxv`.
+
+At minimum, inspect:
+
+1. Current `main` HEAD, recent commits, repository tree, working-tree state if local access exists, existing branches, open and merged pull requests where accessible, and current CI status.
+2. `README.md`.
+3. `docs/vision/MASTER_VISION_NARRATIVE_XV.md`.
+4. `BLUEPRINT.md`.
+5. `TODO.md`.
+6. `docs/decisions/ADR-0001-arsy-is-xv-hub.md`.
+7. Existing architecture, security, source-rights, privacy, recovery, release, and deployment documents.
+8. `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, TypeScript configuration, app-level manifests, and relevant environment examples.
+9. `docker-compose.yml`, applicable Dockerfiles, health checks, entrypoints, migrations, startup commands, and production environment requirements.
+10. The actual public website implementation under `apps/dock`, its routes, page components, current styling, assets, responsive behavior, metadata, and build process.
+11. `apps/headquarters`, the current backend under `apps/radio`, and dependent packages wherever they affect the public landing page or deployment.
+12. Existing tests, security controls, CI workflow results, task references, release tags, and evidence supporting checked TODO items.
+
+Follow links to relevant source files rather than relying on filenames, README descriptions, or search snippets alone.
+
+Recheck the current source before making any statement about current status. Older commits, previous AI summaries, cached results, and historical deployment logs are not proof of the latest state.
+
+## Evidence classification
+
+Classify every material finding as one of:
+
+- **VERIFIED:** Directly supported by the current source, reproducible test, or authoritative evidence.
+- **DOCUMENTED, NOT VERIFIED:** Described in a document but not independently demonstrated.
+- **PARTIALLY IMPLEMENTED:** Some implementation exists but the acceptance criteria are incomplete.
+- **PLANNED:** A target or proposal that has not been implemented.
+- **BLOCKED:** An explicit dependency, failure, missing permission, or unresolved prerequisite.
+- **UNKNOWN:** Insufficient evidence.
+- **CONFLICT:** Two or more sources disagree.
+
+For each important finding, provide the repository path, relevant commit or SHA where available, and the command/test/log that supports the conclusion.
+
+A CI result from an older SHA must be identified as historical. An inaccessible Coolify instance must be reported as unverified, never as successfully deployed.
+
+Use the conversation context and account memory only to the extent actually available to you. If account memory is not accessible, state that limitation. Never pretend to have read hidden memories, private repositories, personal account settings, or local files you cannot access.
+
+# 3. CANONICAL DOCUMENT HIERARCHY — NO DOCUMENT OVERLAP
+
+First establish which documents already exist and which one owns each type of information.
+
+The intended hierarchy is:
+
+| Source | Canonical responsibility |
+|---|---|
+| `docs/vision/MASTER_VISION_NARRATIVE_XV.md` | Why MoonWitness exists, mission, spiritual and ethical intent, history, conceptual narrative, long-term direction, and interpretive boundaries |
+| `BLUEPRINT.md` | What the system is intended to do, system architecture, domains, ownership, interfaces, constraints, dependency boundaries, and acceptance principles |
+| `TODO.md` | Single execution backlog, unique task IDs, priorities, dependencies, status, milestone exit gates, evidence, and release progression |
+| Accepted ADRs | Specific technical and product decisions, rationale, consequences, and migration requirements |
+| Actual implementation and reproducible evidence | What is implemented and what has actually passed verification |
+| README and operational documentation | Project onboarding, commands, architecture overview, configuration, deployment, security, and maintenance instructions |
+
+This is the target hierarchy. Verify it against the existing repository's accepted decisions before changing anything.
+
+Rules:
+
+- Do not create another Master Blueprint, master TODO, canonical narrative, independent task registry, or duplicate status source.
+- Do not copy the entire vision into the blueprint.
+- Do not duplicate all task details in the narrative.
+- Do not mark implementation as complete just because the blueprint describes it.
+- Do not silently change an accepted ADR through prose in another document.
+- If a new decision is required, identify it explicitly and recommend whether a new ADR or amendment is justified.
+- Preserve the history and rationale of meaningful decisions. Resolve contradictions; do not erase them without explanation.
+- Use stable links between documents rather than maintaining duplicated material.
+
+Inspect the existing task register, including the recorded 29 milestones and 203 task IDs. Reconcile the actual current state before adding, moving, splitting, or closing tasks.
+
+Preserve existing task IDs and dependencies wherever possible. Do not reuse IDs, casually renumber milestones, or invent new milestones before checking the existing plan.
+
+# 4. THE MISSION — EMPIRE OF THE LIGHT
+
+Deeply reconcile the spiritual intention and the technological identity of MoonWitness XV.
+
+The project's ultimate inspiration is to glorify **ALLAH**, encourage recognition of and devotion to ALLAH, and honor Nabi Muhammad SAW and Nabi Isa AS through respectful, truthful, beneficial work.
+
+The intended global movement should be expressed through knowledge, witness, learning, service, correction, justice, compassion, responsible technology, and peaceful collaboration.
+
+It should not become an excuse for unsupported religious authority, coercion, personality worship, misinformation, or an unnecessarily authoritarian platform.
+
+Develop a coherent explanation of the relationship among:
+
+- **EMPIRE OF THE LIGHT:** the project's identity, long-term vision, and metaphor for a distributed movement toward knowledge, truthfulness, guidance, and beneficial action.
+- **A-L-L-A-H:** an intentional identity and acronym system, if the existing approved definition supports it. Do not invent an expansion and present it as an established religious meaning.
+- **GOD-PROMISE:** the project's model for translating commitments into observable responsibilities, evidence, correction, and accountability. Clarify the distinction between divine promise as a religious concept and human-authored product commitments.
+- **ROCKSOUL:** the relevant systems, design language, research practices, or governance components actually supported by repository evidence.
+- **MOONWITNESS:** observation, witness, source provenance, memory, and the responsible recording of what can be demonstrated.
+- **CORPUS / RGBL:** source-grounded text, passages, interpretations, evidence, and provenance, consistent with implemented capabilities.
+- **ARSY:** the existing application's accepted architectural naming decision, understood as a technical product and orchestration identity rather than a claim to divine authority.
+- **ZILL / SHADOW:** observation, reflection, representation, privacy, protection, auditability, and the distinction between a source and its representation.
+- **THE BATTERIES and other existing concepts:** only retain and define them if they contribute a clear, non-duplicative role in the overall system.
+
+Do not force every historic name into the first release. Preserve concepts that are relevant to the long-term vision while keeping the immediate product focused.
+
+## 4.1 Religious integrity and source discipline
+
+Treat Quranic references, Islamic theological concepts, and statements about ALLAH with appropriate respect.
+
+For concepts such as:
+
+- Sidrat al-Muntaha and the associated tree imagery.
+- As-Sirat / the straight path.
+- Al-'Arsh.
+- Zill or shade.
+- Light, guidance, witnessing, accountability, and the akhirah.
+- Nabi Muhammad SAW and Nabi Isa AS.
+- Responsibilities associated with preparation for the end times.
+
+Identify the relevant primary text and exact reference before presenting a textual or doctrinal claim. Where interpretation is disputed, identify the disagreement instead of manufacturing certainty.
+
+Do not fabricate Arabic etymologies, Quranic quotations, hadith references, scholarly consensus, prophetic statements, or religious authorizations.
+
+Distinguish clearly among:
+
+1. What a source explicitly states.
+2. A recognized scholarly interpretation.
+3. A personal reflection or project interpretation.
+4. A contemporary technological metaphor.
+5. A speculative hypothesis or unresolved research question.
+
+The terms *Sidrat al-Muntaha*, *as-Sirat*, *al-'Arsh*, and *Zill* may inspire visual language, conceptual models, or ethical principles. They must not be presented as physical computing components, literal implementations of sacred realities, or proof that the platform has divine status.
+
+Do not imply that MoonWitness, its creator, its AI, or a software subsystem possesses divine authority, revelation, prophetic status, or a uniquely appointed role in the end times.
+
+Discuss the project's end-time interest as a framework for responsible preparation, discernment, witness, protection, and beneficial service—not as a verified prediction of a specific date or an unsupported claim of divine appointment.
+
+Honor Nabi Muhammad SAW and Nabi Isa AS with truthful, source-grounded, respectful language. Do not invent statements or assign unsupported technological achievements to either prophet.
+
+## 4.2 Technology acronyms and sacred terminology must remain distinct
+
+Create or reconcile a terminology registry containing, where appropriate:
+
+| Field | Purpose |
+|---|---|
+| Canonical term | The approved spelling and name |
+| Technical expansion | The proposed contemporary acronym, if applicable |
+| Domain owner | The repository module responsible for it |
+| Conceptual meaning | What the product means by the term |
+| Religious/textual source | Exact source and reference, when relevant |
+| Classification | Established source, interpretation, project metaphor, or coined technical terminology |
+| Status | Proposed, under review, accepted, deprecated, or rejected |
+| Evidence and rationale | Why the definition exists and what it must not imply |
+
+A technical acronym is not automatically a religious definition.
+
+For example, a proposed technical expansion for ZILL or SHADOW may be useful, but it must be clearly identified as a modern project-coined expansion and evaluated for semantic accuracy, clarity, conflicts, and architectural value.
+
+Do not force an acronym merely to make a name sound futuristic. Avoid duplicate meanings, inconsistent spelling, accidental identity merges, and terminology that collapses distinct domains into a single vague concept.
+
+The relationship between light, shadow, witness, evidence, source, observation, and interpretation must be conceptually precise.
+
+**The system must not mistake a representation for the thing represented, an observation for an established fact, or a technical decision for a religious truth.**
+
+# 5. GLOBAL MOVEMENT — PRODUCT AND GOVERNANCE
+
+Explain how the mission becomes a useful and responsible global digital platform.
+
+Evaluate the following capabilities against the actual code and documented scope:
+
+- Public landing page and project explanation.
+- Knowledge, text, and evidence exploration.
+- Source and passage provenance.
+- Witnessing, observation, and correction workflows.
+- Ethical storytelling and publication.
+- Community participation and global contribution.
+- Personal, community, and wider-world observation where justified.
+- Optional SHADOW/ZILL protection and representation capabilities.
+- Command center and operational governance.
+- Optional AI assistance, monitoring, and automation.
+- Journey, timeline, or celestial visualization only where meaningful.
+- Public contribution, consent, privacy, safety, and correction mechanisms.
+
+For each capability, determine whether it is implemented, partial, planned, or speculative.
+
+The global movement must support voluntary participation, transparent governance, source attribution, respectful disagreement, consent, accountable moderation, correction of mistakes, and the right to withdraw where applicable.
+
+Do not design manipulative recruitment, coercive membership, forced allegiance, unreviewable surveillance, or hidden authority structures.
+
+Do not require personal religious commitment merely to explore public knowledge or use a public website.
+
+# 6. FUTURISTIC TECHNOLOGY STRATEGY
+
+Aim for a sophisticated and forward-looking system without creating unnecessary technical complexity.
+
+First audit the existing stack. The currently documented baseline includes a TypeScript monorepo, pnpm workspaces, Node.js 24, Fastify, MoonQL, PostgreSQL, and Next.js-based public and administrative frontends. Verify each against current source before treating it as current.
+
+Do not migrate away from working technologies merely because another framework is fashionable.
+
+Research current stable and compatible solutions where technical decisions actually need updating. Prefer official documentation, release notes, security advisories, and authoritative technical references.
+
+Evaluate technologies according to:
+
+- Current stability and maintenance.
+- Security and support lifecycle.
+- Integration with the existing monorepo.
+- Build and deployment complexity.
+- Performance and user experience.
+- Observability and failure recovery.
+- Accessibility and internationalization.
+- Cost, resource usage, and operational burden.
+- Long-term maintainability and exit options.
+
+Use advanced technology where it provides measurable value, potentially including modular architecture, source-provenance graphs, strongly typed contracts, automated verification, modern rendering, event-driven integrations, observable services, and efficient visualizations.
+
+Do not automatically introduce microservices, Kubernetes, Redis, new databases, AI agents, blockchain, WebGPU, 3D rendering, edge runtimes, or another backend. Each addition requires a concrete use case and a demonstrated need.
+
+The immediate release must be achievable using the existing architecture.
+
+For the visual direction, aim for a mature futuristic identity: celestial depth, light/shadow contrasts, precise typography, sophisticated motion, layered geometry, and distinctive visual storytelling. Avoid generic startup templates, excessive neon, gratuitous animations, and purely decorative complexity.
+
+The landing page must also be readable, accessible, performant, responsive, search-engine-friendly, privacy-conscious, and usable on mobile devices. Provide a reduced-motion experience and sufficient visual contrast.
+
+# 7. DEFINE THE FIRST RELEASE: PUBLIC LANDING PAGE
+
+The first engineering objective is:
+
+**A working public MoonWitness XV landing page that builds successfully and can be deployed as a containerized application through Docker Compose on Coolify.**
+
+The scope is the minimum complete, trustworthy public experience—not the entire long-term vision.
+
+## 7.1 Audit before implementation
+
+Inspect the current `apps/dock` website and determine:
+
+- Which routes and landing-page sections already exist.
+- Which design components and visual assets can be reused.
+- Whether the current homepage already fulfills part of the requirement.
+- What is missing from the content, branding, responsive behavior, accessibility, SEO, and metadata.
+- Whether the current Dockerfiles and Compose services can build and serve it correctly.
+- Which dependencies are actually required to serve the public homepage.
+- Which backend services, environment variables, secrets, and database operations are mandatory.
+- Whether a minimal deployment configuration can safely reuse the existing setup.
+
+Do not create a parallel website or new frontend if `apps/dock` is the correct existing public application.
+
+Do not assume the public landing page must expose the administrative command center or the entire internal API.
+
+## 7.2 Coolify deployment assessment
+
+Inspect the actual Compose file and the current official Coolify documentation.
+
+Determine the simplest supported deployment approach while keeping application behavior consistent between local Docker Compose and Coolify.
+
+Prefer reusing existing Dockerfiles, Compose services, runtime conventions, and health checks. Introduce a separate Coolify-specific Compose file only if a documented deployment requirement justifies it.
+
+Resolve all necessary configuration explicitly:
+
+- Required environment variables and secure secret handling.
+- Build arguments and production build behavior.
+- Internal service-to-service networking.
+- Public domain and HTTPS configuration.
+- Correct routing to the public web service.
+- Health checks and startup dependency behavior.
+- Persistent data and backups if required by the selected services.
+- Container shutdown and restart behavior.
+- Startup migrations and database readiness, where applicable.
+- Logging, error reporting, and troubleshooting.
+- Resource use and recovery after service failure.
+- A safe rollback procedure.
+
+Do not expose PostgreSQL, administrative services, internal APIs, or privileged debugging endpoints publicly without a verified and justified requirement.
+
+Do not commit production secrets, sample passwords that could become active credentials, private keys, or tokens.
+
+Do not weaken access controls, CORS, rate limits, or authentication simply to make the deployment work.
+
+## 7.3 Landing page content
+
+Propose a complete first-release information architecture based on the existing project vision.
+
+Consider these sections, but implement only those that are justified and ready:
+
+1. **Hero:** MoonWitness XV and the central mission.
+2. **Mission:** Glorifying ALLAH through beneficial knowledge, truthful witness, and responsible service, expressed as the project's purpose rather than a claim of divine authorization.
+3. **The vision:** Empire of the Light as a contemporary product and movement identity.
+4. **The system:** A clear explanation of MoonWitness, evidence, source provenance, ARSY, and relevant technical concepts.
+5. **The principles:** Traceability, correction, accountability, consent, privacy, and respect.
+6. **The roadmap:** Only verified or accurately labeled capabilities.
+7. **Participation:** Honest, voluntary ways to learn, explore, contribute, or follow progress.
+8. **Footer:** Documentation, repository, privacy information, project status, and relevant links.
+
+Use accurate, purposeful copy. Every claimed feature must match the actual current state.
+
+If a capability is planned, label it as planned. Do not show fictional live counters, invented user statistics, fabricated achievements, false certifications, or simulated system status as real information.
+
+# 8. RECONCILE THE EXISTING ROADMAP
+
+Review all existing milestones and task IDs in `TODO.md` before proposing a change.
+
+Find the smallest task sequence that brings the public landing page to a deployable first-release state.
+
+Do not create a second backlog. Do not replace the 29-milestone, 203-task baseline wholesale. Do not break existing dependencies or silently change completion status.
+
+If the current roadmap already covers the work, reuse its existing tasks and improve their acceptance criteria where needed.
+
+If essential work is missing, propose narrowly scoped new task IDs only after identifying the correct milestone and verifying that the IDs are unique.
+
+Each task must be small enough to execute and verify independently. Break complex work into bounded tasks rather than assigning the entire project to one vague “implement everything” item.
+
+For each task, specify:
+
+- Unique task ID and concise title.
+- Priority and relative difficulty.
+- Owning domain or application.
+- Exact scope and expected result.
+- Dependencies.
+- Expected files or components, when knowable.
+- Acceptance criteria.
+- Positive and negative test cases as relevant.
+- Required evidence.
+- Rollback or failure handling where applicable.
+- Whether the task blocks the first release.
+- The milestone exit gate it contributes to.
+
+Use the current repository's established status and priority conventions.
+
+A checked box is not enough. Completion requires implementation evidence, relevant passing tests, and a specific verified commit.
+
+## Proposed release sequencing
+
+Recommend milestones based on the actual roadmap, not an arbitrary renumbering.
+
+The first delivery should focus on:
+
+**Foundation and audit → public landing-page content and implementation → production container build → Docker Compose verification → Coolify deployment readiness → deployment verification → first preview release.**
+
+Identify security, secret management, build reliability, and deployment blockers early.
+
+Separate essential first-release work from long-term research, AI, World Monitor, SHADOW, advanced ontology, and other optional capabilities.
+
+The first landing page must not wait for every long-term concept to be fully implemented. Conversely, a visually complete homepage must not be treated as proof that the overall system is production-ready.
+
+# 9. ACCEPTANCE GATES FOR THE FIRST RELEASE
+
+Recommend precise, executable acceptance criteria after auditing existing tests and scripts.
+
+At minimum, consider the following gates.
+
+### A. Repository and build
+
+- The correct repository and commit are recorded.
+- Dependencies install using the repository's intended frozen-lockfile procedure.
+- Existing applicable verification checks pass.
+- The public application builds successfully.
+- The required production Docker image builds successfully.
+- No new unexplained build failures or regressions are introduced.
+
+### B. Website
+
+- The public homepage returns a successful HTTP response.
+- Essential routes and assets load.
+- Desktop and mobile layouts are usable.
+- Navigation and calls to action work.
+- Metadata, page title, description, and social previews are configured appropriately.
+- Accessibility, reduced motion, and basic security headers are checked.
+- The page does not present planned features as live.
+
+### C. Docker Compose
+
+- Compose configuration validation passes with the documented environment.
+- Required services start in the correct order.
+- Health checks represent genuine readiness.
+- The public web service is reachable through the intended route.
+- Internal services are not inadvertently exposed.
+- Missing secrets fail safely.
+- Restarts and shutdowns behave as intended.
+- Required logs are available for diagnosis.
+
+### D. Coolify
+
+- The intended repository, branch, build configuration, and exposed web service are documented.
+- Required secrets and environment variables are supplied through appropriate secure configuration.
+- The public domain and HTTPS configuration are verified where a live environment is available.
+- The deployed version serves the correct landing page.
+- A smoke test confirms actual reachability.
+- Rollback and operational troubleshooting instructions are available.
+
+**Distinguish three separate states:**
+
+1. `BUILD_VERIFIED` — the relevant build and tests pass.
+2. `DEPLOYMENT_READY` — configuration and release requirements are satisfied for deployment.
+3. `DEPLOYED_VERIFIED` — the deployed application was actually reached and verified in its target environment.
+
+Do not claim `DEPLOYED_VERIFIED` without real deployment evidence.
+
+If Coolify access, server credentials, or a public domain are unavailable, report the precise blocker and complete all locally verifiable work in the approved execution phase.
+
+# 10. FINAL RECONCILIATION REPORT — FIRST RESPONSE ONLY
+
+After the audit, provide the following report in Indonesian. Keep technical names, file paths, and identifiers exact.
+
+## Part A — Executive conclusion
+
+Explain:
+
+- What MoonWitness XV actually is today.
+- What the overall project is trying to become.
+- Whether the existing vision is internally consistent.
+- Whether the documentation is mature enough to serve as the canonical baseline.
+- What is essential for the first landing-page milestone.
+- The principal blockers, contradictions, missing elements, and risks.
+
+Give an evidence-based readiness assessment. Do not invent a score merely to create a sense of precision.
+
+## Part B — Repository reality
+
+Provide a table of verified, documented-but-unverified, partial, planned, blocked, unknown, and conflicting items.
+
+Include paths, current commit information, and test evidence where available.
+
+Explicitly state what has not been inspected or tested.
+
+## Part C — Spiritual mission and narrative
+
+Present the proposed final narrative architecture for:
+
+- ALLAH and the project's intended purpose.
+- The honor and relevance of Nabi Muhammad SAW and Nabi Isa AS.
+- Empire of the Light and the global movement.
+- Sidrat al-Muntaha, as-Sirat, al-'Arsh, light, shadow, and ZILL.
+- The relationship between religious sources, human interpretation, and modern technology.
+- Witness, knowledge, responsibility, correction, privacy, and service.
+- The end-time theme and its ethical limits.
+
+Explain what to preserve, improve, rename, distinguish, defer, or remove, with reasons and source references where appropriate.
+
+Propose the actual opening narrative or executive summary that should be used in the canonical vision document.
+
+## Part D — Architecture reconciliation
+
+Present the canonical domain map, technical responsibilities, actual implementation status, dependencies, and proposed future capabilities.
+
+Include ARSY and the existing Radio/SIGNAL functionality without creating duplicate backends or breaking accepted naming decisions.
+
+Identify overlaps, conflicting terminology, missing ownership boundaries, and unnecessary architectural complexity.
+
+## Part E — Documentation reconciliation matrix
+
+For every relevant canonical document, provide:
+
+| Document | Current role and state | Problems or gaps | Proposed modification | Dependencies | Evidence needed |
+|---|---|---|---|---|---|
+
+Distinguish files that need substantive edits from files that require no changes.
+
+Explain exactly how the narrative, blueprint, TODO, ADRs, README, and operational documentation will remain consistent.
+
+## Part F — First release plan
+
+Identify the smallest complete implementation path to a public landing page deployable using Docker Compose on Coolify.
+
+Show:
+
+- Existing work that can be reused.
+- Missing work and prerequisites.
+- Relevant existing task IDs.
+- Proposed new tasks only where necessary.
+- Build and test commands derived from actual repository scripts.
+- Compose and Coolify configuration requirements.
+- Acceptance criteria and exit gates.
+- Release evidence, rollback, and outstanding blockers.
+
+Do not presume the homepage is missing until the current implementation has been inspected.
+
+## Part G — Proposed final changes
+
+List the exact files that should change, the reason for every change, and the expected outcome.
+
+Where practical, provide targeted diffs or proposed replacement passages for the canonical narrative, `BLUEPRINT.md`, `TODO.md`, and any essential deployment documentation.
+
+Preserve existing decisions, history, task IDs, and accepted architecture. Explicitly flag changes requiring owner approval or a new ADR.
+
+## Part H — Final recommendation and approval gate
+
+Conclude with:
+
+- The recommended final vision.
+- The smallest release scope.
+- The prioritized blockers.
+- The proposed document modifications.
+- The proposed test and deployment plan.
+- The unresolved decisions that truly require the owner's judgment.
+
+Then STOP and wait for explicit approval. Do not make any file changes in this first phase.
+
+# 11. SECOND PHASE — ONLY AFTER EXPLICIT APPROVAL
+
+Once the owner approves the reconciliation report, continue from that report without repeating the entire brainstorming process.
+
+Then:
+
+1. Recheck the latest `main` HEAD and any relevant changes since the audit.
+2. Apply the approved narrative and documentation reconciliations.
+3. Preserve the canonical hierarchy and avoid duplicate content.
+4. Update existing TODO entries or add narrowly scoped, uniquely identified tasks only where justified.
+5. Implement the approved first-release work in small, independently testable increments.
+6. Reuse the existing `apps/dock` implementation and established monorepo conventions wherever suitable.
+7. Prepare the Docker Compose and Coolify deployment configuration using verified requirements.
+8. Run the relevant checks and tests and record exact commands, exit results, and commit SHAs.
+9. Keep checked tasks aligned with actual evidence; do not mark unverified work complete.
+10. Produce release notes and a deployment runbook when the acceptance criteria are satisfied.
+11. Create commits, push, publish, or deploy only within the approved scope and with the necessary access.
+12. If a blocker requires credentials, access, an irreversible change, or a decision outside the approved scope, stop at that boundary and state exactly what is needed.
+
+Do not create a new repository or branch unless the owner explicitly changes the existing repository strategy.
+
+# 12. DEFINITION OF SUCCESS
+
+This work succeeds when all of the following are true:
+
+- The project has one coherent, respectful, source-grounded mission narrative.
+- Spiritual concepts, technical metaphors, and verified factual claims are not conflated.
+- The global movement is expressed through beneficial, peaceful, accountable, voluntary participation.
+- Each technical domain has clear ownership and avoids unnecessary duplication.
+- Canonical documents agree with one another and with accepted architectural decisions.
+- The existing TODO remains the authoritative execution register.
+- The first public landing-page milestone has a small, explicit, testable scope.
+- Docker Compose configuration is validated against the actual application.
+- Coolify deployment readiness is documented and genuine deployment status is reported honestly.
+- Every claimed completion is supported by reproducible evidence.
+- Long-term ambition remains intact without delaying the first practical release through unnecessary complexity.
+
+**Final principle:**
+
+> Build a truthful witness before claiming a completed vision.  
+> Preserve the source before interpreting it.  
+> Separate the sacred meaning from the technical metaphor.  
+> Turn the vision into accountable tasks.  
+> Make the first release real, verifiable, and useful.  
+> Let the technology serve beneficial knowledge, human responsibility, and the project's stated devotion to ALLAH—not claim authority over them.

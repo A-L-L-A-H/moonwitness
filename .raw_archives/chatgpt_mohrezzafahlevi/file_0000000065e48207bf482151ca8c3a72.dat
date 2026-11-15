@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Create/link the native GitHub Projects V2 board from existing MoonWitness issues.
+# Run on a trusted machine authenticated as an account authorized to manage bjo163 projects.
+set -euo pipefail
+OWNER="bjo163"
+REPO="A-L-L-A-H"
+TITLE="MOONWITNESS — Empire of the Light"
+for cmd in gh jq; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "Missing $cmd. Install before running." >&2
+    exit 1
+  fi
+done
+if ! gh auth status >/dev/null 2>&1; then
+  echo 'GitHub CLI login required: gh auth login' >&2
+  exit 1
+fi
+if ! projects_json=$(gh project list --owner "$OWNER" --format json 2>&1); then
+  echo "$projects_json" >&2
+  echo 'GitHub Projects permission required: gh auth refresh -s project' >&2
+  exit 1
+fi
+NUMBER=$(printf '%s' "$projects_json" | jq -r --arg t "$TITLE" '[.projects[]? | select(.title == $t) | .number][0] // empty')
+if [[ -z "$NUMBER" ]]; then
+  echo "Creating native GitHub Project: $TITLE"
+  NUMBER=$(gh project create --owner "$OWNER" --title "$TITLE" --format json --jq '.number')
+fi
+[[ "$NUMBER" =~ ^[0-9]+$ ]] || { echo 'Could not retrieve project number' >&2; exit 1; }
+PROJECT_URL="https://github.com/users/$OWNER/projects/$NUMBER"
+echo "Project $NUMBER: $PROJECT_URL"
+gh project link "$NUMBER" --owner "$OWNER" --repo "$REPO" || echo 'Project/repo link may already exist.'
+gh project edit "$NUMBER" --owner "$OWNER" --description 'MoonWitness Public Portal + SHADOW Editorial Operations. 88 audit checklist items tracked through GitHub Issues, with approved human release gates.'
+# Existing fields are left untouched on reruns.
+gh project field-create "$NUMBER" --owner "$OWNER" --name 'Priority' --data-type SINGLE_SELECT --single-select-options 'P0,P1,P2,P3' >/dev/null 2>&1 || true
+gh project field-create "$NUMBER" --owner "$OWNER" --name 'Milestone' --data-type SINGLE_SELECT --single-select-options 'M0,M1,M2,M3,M4,Design' >/dev/null 2>&1 || true
+for issue in $(seq 8 37); do
+  URL="https://github.com/$OWNER/$REPO/issues/$issue"
+  case $issue in
+    8|9|10|11|12|13|14|15|16|37) priority=P0; milestone=M0 ;;
+    17|18|19|20|21|22|23|24) priority=P1; milestone=M1 ;;
+    25|26|27) priority=P1; milestone=M2 ;;
+    28|29) priority=P1; milestone=M3 ;;
+    30) priority=P2; milestone=M3 ;;
+    31|32|33) priority=P2; milestone=M4 ;;
+    34|35) priority=P1; milestone=Design ;;
+    36) priority=P2; milestone=Design ;;
+  esac
+  # Duplicate adds may fail harmlessly on rerun.
+  gh project item-add "$NUMBER" --owner "$OWNER" --url "$URL" >/dev/null 2>&1 || true
+  gh project item-edit "$NUMBER" --owner "$OWNER" --url "$URL" --field 'Priority' --value "$priority" >/dev/null 2>&1 || echo "Warning: Priority not set on #$issue"
+  gh project item-edit "$NUMBER" --owner "$OWNER" --url "$URL" --field 'Milestone' --value "$milestone" >/dev/null 2>&1 || echo "Warning: Milestone not set on #$issue"
+  echo "#${issue}: ${milestone} / ${priority}"
+done
+printf '\nReady: %s\n' "$PROJECT_URL"
+printf '%s\n' 'Next: open Project, add Board view grouped by Status, and begin with issue #9 (recheck latest CI first).'
