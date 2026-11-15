@@ -10,6 +10,7 @@ overrides:
   minimatch: "^11.0.1"
 
 allowBuilds:
+  "@scarf/scarf": false
   "@swc/core": true
   "@tailwindcss/oxide": true
   bcrypt: true
