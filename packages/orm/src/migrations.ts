@@ -6,11 +6,9 @@ export interface Migration {
   up: string;
 }
 
-const MIGRATIONS_TABLE = "_orm_schema_migrations";
-
 async function ensureMigrationsTable(): Promise<void> {
   await getDb().exec(`
-    CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (
+    CREATE TABLE IF NOT EXISTS _orm_schema_migrations (
       id TEXT PRIMARY KEY,
       checksum TEXT NOT NULL,
       applied_at TEXT NOT NULL
@@ -31,7 +29,7 @@ export async function applyMigrations(
 
   for (const migration of migrations) {
     const existing = await getDb().get<{ id: string; checksum: string }>(
-      `SELECT id, checksum FROM ${MIGRATIONS_TABLE} WHERE id = ?`,
+      "SELECT id, checksum FROM _orm_schema_migrations WHERE id = ?",
       [migration.id],
     );
     const hash = checksum(migration.up);
@@ -48,11 +46,10 @@ export async function applyMigrations(
 
     await getDb().transaction(async (tx) => {
       await tx.exec(migration.up);
-      await tx.run(`INSERT INTO ${MIGRATIONS_TABLE} (id, checksum, applied_at) VALUES (?, ?, ?)`, [
-        migration.id,
-        hash,
-        new Date().toISOString(),
-      ]);
+      await tx.run(
+        "INSERT INTO _orm_schema_migrations (id, checksum, applied_at) VALUES (?, ?, ?)",
+        [migration.id, hash, new Date().toISOString()],
+      );
     });
     applied.push(migration.id);
   }
@@ -65,6 +62,6 @@ export async function listAppliedMigrations(): Promise<
 > {
   await ensureMigrationsTable();
   return getDb().all<{ id: string; checksum: string; applied_at: string }>(
-    `SELECT id, checksum, applied_at FROM ${MIGRATIONS_TABLE} ORDER BY applied_at, id`,
+    "SELECT id, checksum, applied_at FROM _orm_schema_migrations ORDER BY applied_at, id",
   );
 }

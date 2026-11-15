@@ -7,21 +7,31 @@ import { EventCard } from "@moonwitness/ui";
 interface EventListProps {
   events: TimelineEvent[];
   total: number;
+  pageStart: number;
+  pageEnd: number;
+  page: number;
+  totalPages: number;
   view: "grid" | "list";
   selectedId: string | null;
   query: string;
   onOpen: (id: string) => void;
   onReset: () => void;
+  onPageChange: (page: number) => void;
 }
 
 export function EventList({
   events,
   total,
+  pageStart,
+  pageEnd,
+  page,
+  totalPages,
   view,
   selectedId,
   query,
   onOpen,
   onReset,
+  onPageChange,
 }: EventListProps) {
   return (
     <section aria-label="Events">
@@ -32,8 +42,8 @@ export function EventList({
             KEY MOMENTS, PROJECTS, AND SIGNALS FROM ACROSS THE EMPIRE.
           </span>
         </h2>
-        <span className="text-[11px] text-zinc-500">
-          Showing {events.length} of {total} events
+        <span className="text-[11px] text-zinc-500" aria-live="polite">
+          Showing {pageStart}–{pageEnd} of {total} events
         </span>
       </div>
       {events.length === 0 ? (
@@ -70,6 +80,29 @@ export function EventList({
             />
           ))}
         </div>
+      )}
+      {totalPages > 1 && (
+        <nav className="mt-5 flex items-center justify-center gap-4" aria-label="Timeline pages">
+          <button
+            type="button"
+            className="btn-zine btn-blue px-4 py-2 text-xs"
+            disabled={page <= 1}
+            onClick={() => onPageChange(page - 1)}
+          >
+            Previous
+          </button>
+          <span className="text-xs text-zinc-400" aria-current="page">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            type="button"
+            className="btn-zine btn-blue px-4 py-2 text-xs"
+            disabled={page >= totalPages}
+            onClick={() => onPageChange(page + 1)}
+          >
+            Next
+          </button>
+        </nav>
       )}
     </section>
   );

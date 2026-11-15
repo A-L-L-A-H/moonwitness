@@ -11,6 +11,8 @@ export interface ListTimelineEventsRequest {
   kind?: string;
   from?: string;
   to?: string;
+  q?: string;
+  sort?: "newest" | "oldest";
   limit?: number;
   offset?: number;
 }

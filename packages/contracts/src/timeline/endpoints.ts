@@ -16,6 +16,8 @@ export const TimelineListQuerySchema = z
     kind: z.string().min(1).optional(),
     from: z.string().min(1).optional(),
     to: z.string().min(1).optional(),
+    q: z.string().trim().max(200).optional(),
+    sort: z.enum(["newest", "oldest"]).optional(),
     limit: z.number().int().min(1).max(100).optional(),
     offset: z.number().int().min(0).optional(),
   })

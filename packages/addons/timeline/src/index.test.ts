@@ -28,7 +28,7 @@ afterEach(async () => {
 
 const NOW = "2024-01-01T00:00:00.000Z";
 
-async function insertEvent(id: string, era: string, date: string) {
+async function insertEvent(id: string, era: string, date: string, title = "title") {
   await getDb().run(
     `INSERT INTO timeline_events
      (id, kind, date, era, title, excerpt, body, location, tags, sources, notes, image, related,
@@ -39,7 +39,7 @@ async function insertEvent(id: string, era: string, date: string) {
       "PROJECT",
       date,
       era,
-      "title",
+      title,
       "ex",
       "body",
       "loc",
@@ -86,6 +86,23 @@ describe("timeline addon routes (addon-owned)", () => {
     const body = res.json() as { data: { total: number; byEra: Record<string, number> } };
     expect(body.data.total).toBe(2);
     expect(body.data.byEra.origins).toBe(2);
+  });
+
+  it("searches event content and sorts results before pagination", async () => {
+    await insertEvent("older", "origins", "2021-01-01", "Signal archive");
+    await insertEvent("newer", "neon", "2023-01-01", "Signal returns");
+    await insertEvent("other", "neon", "2024-01-01", "Different record");
+
+    const filtered = await app.inject({
+      method: "GET",
+      url: "/api/v1/timeline/events?q=signal&sort=newest&limit=1",
+    });
+
+    expect(filtered.statusCode).toBe(200);
+    expect(filtered.json()).toMatchObject({
+      total: 2,
+      data: [{ id: "newer", title: "Signal returns" }],
+    });
   });
 
   it("lists eras", async () => {

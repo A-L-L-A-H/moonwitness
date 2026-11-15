@@ -1,0 +1,12 @@
+const ACTIVE_BY_PATH: Record<string, string> = {
+  "/dock": "archive",
+  "/mission-control": "dashboard",
+  "/intelligence": "intelligence",
+  "/syslog": "syslog",
+  "/snmp": "snmp",
+  "/radius": "radius",
+  "/storage": "storage",
+  "/vpn": "vpn",
+  "/shadow": "settings",
+  "/id-lab": "id-lab",
+};

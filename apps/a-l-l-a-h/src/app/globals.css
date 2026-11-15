@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@source "../../../../packages/ui/src";
+
+@import "@moonwitness/ui/theme.css";
+@import "@moonwitness/ui/base.css";
+
+:root {
+  --celestial-void: #040509;
+  --celestial-obsidian: #080a12;
+  --celestial-gold-bright: #fff4d2;
+  --celestial-gold: #dfc07b;
+  --celestial-gold-deep: #9c732b;
+  --font-serif-monument: "Cinzel", "Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+}
+
+body {
+  background-color: var(--celestial-void);
+  color: #f5efe2;
+  font-family: var(--font-serif-monument);
+  overflow-x: hidden;
+}
+
+.font-serif {
+  font-family: var(--font-serif-monument);
+}
+
+/* Monumental metallic champagne-gold title treatment matching reference */
+.text-gold-monument {
+  background: linear-gradient(
+    180deg,
+    #fffdf7 0%,
+    #f9edd2 32%,
+    #dfc282 68%,
+    #b58d43 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 4px 24px rgba(0, 0, 0, 0.85))
+    drop-shadow(0 0 18px rgba(245, 223, 166, 0.28));
+}
+
+.text-gold-gradient {
+  background: linear-gradient(
+    180deg,
+    #fff8e6 0%,
+    #ebd094 55%,
+    #b88e42 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Chamfered hexagonal golden button matching EXPLORE THE WORLDS > */
+.btn-chamfer {
+  position: relative;
+  background: linear-gradient(
+    180deg,
+    rgba(16, 14, 12, 0.78) 0%,
+    rgba(8, 7, 6, 0.88) 100%
+  );
+  border: 1px solid rgba(230, 201, 135, 0.65);
+  box-shadow:
+    0 0 24px rgba(214, 180, 108, 0.16),
+    inset 0 0 14px rgba(230, 201, 135, 0.12);
+  clip-path: polygon(
+    14px 0%,
+    calc(100% - 14px) 0%,
+    100% 50%,
+    calc(100% - 14px) 100%,
+    14px 100%,
+    0% 50%
+  );
+}
+
+.btn-chamfer:hover {
+  border-color: rgba(255, 244, 210, 0.95);
+  background: linear-gradient(
+    180deg,
+    rgba(42, 34, 20, 0.82) 0%,
+    rgba(18, 15, 10, 0.92) 100%
+  );
+  box-shadow:
+    0 0 32px rgba(245, 223, 166, 0.35),
+    inset 0 0 18px rgba(245, 223, 166, 0.22);
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 48s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow {
+    animation: none;
+  }
+}

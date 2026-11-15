@@ -27,6 +27,12 @@ export function navHref(item: NavItem): string {
 const ACTIVE_BY_PATH: Record<string, string> = {
   "/dock": "archive",
   "/mission-control": "dashboard",
+  "/intelligence": "intelligence",
+  "/syslog": "syslog",
+  "/snmp": "snmp",
+  "/radius": "radius",
+  "/storage": "storage",
+  "/vpn": "vpn",
   "/shadow": "settings",
   "/id-lab": "id-lab",
 };
@@ -36,6 +42,36 @@ export function activeByPath(pathname: string): string {
 }
 
 export const navItems: NavItem[] = [
+  {
+    id: "storage",
+    label: "Storage",
+    icon: "M4 7 L12 3 L20 7 L12 11 Z M4 12 L12 16 L20 12 M4 17 L12 21 L20 17",
+    target: { kind: "route", href: "/storage" },
+  },
+  {
+    id: "radius",
+    label: "RADIUS",
+    icon: "M12 3 L20 7 L20 17 L12 21 L4 17 L4 7 Z M8 10 L16 10 M8 14 L16 14",
+    target: { kind: "route", href: "/radius" },
+  },
+  {
+    id: "snmp",
+    label: "SNMP",
+    icon: "M4 5 L20 5 L20 19 L4 19 Z M8 9 L16 9 M8 13 L16 13",
+    target: { kind: "route", href: "/snmp" },
+  },
+  {
+    id: "syslog",
+    label: "Syslog",
+    icon: "M4 5 L20 5 L20 19 L4 19 Z M8 9 L16 9 M8 13 L16 13 M8 17 L12 17",
+    target: { kind: "route", href: "/syslog" },
+  },
+  {
+    id: "vpn",
+    label: "VPN",
+    icon: "M12 3 L20 7 L20 17 L12 21 L4 17 L4 7 Z M8 10 L16 10 M8 14 L16 14",
+    target: { kind: "route", href: "/vpn" },
+  },
   {
     id: "dashboard",
     label: "Dashboard",
@@ -83,6 +119,12 @@ export const navItems: NavItem[] = [
     label: "Mission Log",
     icon: "M5 4 L19 4 L19 20 L5 20 Z M8 8 L16 8 M8 12 L16 12 M8 16 L13 16",
     target: { kind: "section", href: "/mission-control", anchor: "cc-log" },
+  },
+  {
+    id: "intelligence",
+    label: "RIOT Intelligence",
+    icon: "M12 3 L14 9 L21 12 L14 15 L12 21 L10 15 L3 12 L10 9 Z M12 9 L12 15",
+    target: { kind: "route", href: "/intelligence" },
   },
   {
     id: "id-lab",

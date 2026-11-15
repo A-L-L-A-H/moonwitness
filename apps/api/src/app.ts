@@ -11,6 +11,7 @@ import {
 } from "@moonwitness/addon-timeline";
 import { authMigrations } from "./db/migrations";
 import type { FastifyInstance } from "fastify";
+import { assertDemoSeedAllowed } from "./shared/seed-safety";
 
 export interface BootstrapOptions {
   dbPath?: string;
@@ -37,11 +38,18 @@ async function migrateAndSeed(seed: boolean): Promise<void> {
 export async function buildApp(options: BootstrapOptions = {}): Promise<FastifyInstance> {
   const dbPath = options.dbPath ?? env.DATABASE_URL ?? "./moonwitness.db";
   const prefix = options.prefix ?? env.API_PREFIX ?? "/api/v1";
+  const seed = options.seed ?? process.env.SEED === "1";
+  if (seed) {
+    assertDemoSeedAllowed({
+      nodeEnv: env.NODE_ENV,
+      allowDemoSeed: process.env.ALLOW_DEMO_SEED ?? "0",
+    });
+  }
 
   await initDb(dbPath);
   try {
     // Migrations run to completion before any addon route is reachable.
-    await migrateAndSeed(options.seed ?? process.env.SEED === "1");
+    await migrateAndSeed(seed);
 
     const { buildFastify } = await import("./infrastructure/adapters/fastify.adapter");
     const fastify = await buildFastify({ prefix });

@@ -14,6 +14,7 @@ import { radiusRoutes } from "../../interface/routes/radius.routes";
 import { storageRoutes } from "../../interface/routes/storage.routes";
 import { syslogRoutes } from "../../interface/routes/syslog.routes";
 import { snmpPollerRoutes } from "../../interface/routes/snmp-poller.routes";
+import { riotAiRoutes } from "../../interface/routes/riot-ai.routes";
 import { applyMigrations } from "@moonwitness/orm";
 import { authMigrations } from "../../db/migrations";
 import { seedBootstrapAdmin } from "../../services/user";
@@ -135,6 +136,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
         await instance.register(storageRoutes);
         await instance.register(syslogRoutes);
         await instance.register(snmpPollerRoutes);
+        await instance.register(riotAiRoutes);
       },
       { prefix: options.prefix },
     );

@@ -27,11 +27,15 @@ export interface SyslogStats {
   recent_sources: string[];
 }
 
-async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url, { credentials: "include" });
+async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  const res = await fetch(url, { credentials: "include", cache: "no-store", signal });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error ?? `HTTP ${res.status}`);
+    const body: unknown = await res.json().catch(() => null);
+    const message =
+      typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
+        ? body.error
+        : `HTTP ${res.status}`;
+    throw new Error(message);
   }
   return res.json();
 }
@@ -39,9 +43,10 @@ async function fetchJson<T>(url: string): Promise<T> {
 export function useSyslogHealth() {
   return useQuery({
     queryKey: ["syslog", "health"],
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       fetchJson<{ status: string; service: string; reachable?: boolean }>(
         `${API_BASE}/syslog/health`,
+        signal,
       ),
     staleTime: 15_000,
   });
@@ -55,17 +60,26 @@ export interface SyslogMessageFilters {
   q?: string;
 }
 
-export function useSyslogMessages(filters: SyslogMessageFilters = {}) {
+export function buildSyslogMessagesUrl(filters: SyslogMessageFilters = {}): string {
   const params = new URLSearchParams();
-  if (filters.limit) params.set("limit", String(filters.limit));
+  if (filters.limit !== undefined) params.set("limit", String(filters.limit));
   if (filters.severity !== undefined) params.set("severity", String(filters.severity));
   if (filters.hostname) params.set("hostname", filters.hostname);
   if (filters.app_name) params.set("app_name", filters.app_name);
   if (filters.q) params.set("q", filters.q);
+  return `${API_BASE}/syslog/messages?${params}`;
+}
+
+export function useSyslogMessages(
+  filters: SyslogMessageFilters = {},
+  options: { enabled?: boolean } = {},
+) {
+  const url = buildSyslogMessagesUrl(filters);
 
   return useQuery({
-    queryKey: ["syslog", "messages", params.toString()],
-    queryFn: () => fetchJson<SyslogMessage[]>(`${API_BASE}/syslog/messages?${params}`),
+    queryKey: ["syslog", "messages", url],
+    queryFn: ({ signal }) => fetchJson<SyslogMessage[]>(url, signal),
+    enabled: options.enabled,
     staleTime: 10_000,
   });
 }
@@ -73,7 +87,7 @@ export function useSyslogMessages(filters: SyslogMessageFilters = {}) {
 export function useSyslogMessage(id: string | null) {
   return useQuery({
     queryKey: ["syslog", "message", id],
-    queryFn: () => fetchJson<SyslogMessage>(`${API_BASE}/syslog/messages/${id}`),
+    queryFn: ({ signal }) => fetchJson<SyslogMessage>(`${API_BASE}/syslog/messages/${id}`, signal),
     enabled: !!id,
     staleTime: 30_000,
   });
@@ -82,7 +96,7 @@ export function useSyslogMessage(id: string | null) {
 export function useSyslogStats() {
   return useQuery({
     queryKey: ["syslog", "stats"],
-    queryFn: () => fetchJson<SyslogStats>(`${API_BASE}/syslog/stats`),
+    queryFn: ({ signal }) => fetchJson<SyslogStats>(`${API_BASE}/syslog/stats`, signal),
     staleTime: 15_000,
   });
 }

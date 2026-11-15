@@ -1,0 +1,32 @@
+{
+  "name": "@moonwitness/a-l-l-a-h",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3003",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf .next .turbo node_modules"
+  },
+  "dependencies": {
+    "@moonwitness/ui": "workspace:*",
+    "@moonwitness/types": "workspace:*",
+    "next": "^15.5.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@moonwitness/eslint-config": "workspace:*",
+    "@moonwitness/typescript-config": "workspace:*",
+    "@types/node": "^24.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^10.14.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

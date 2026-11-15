@@ -9,7 +9,16 @@ export interface LibSqlExecutor {
 }
 
 function toUrl(path: string): string {
-  if (path === ":memory:") return ":memory:";
+  // `:memory:` opens a private database per connection. libsql's
+  // `client.transaction()` detaches the live connection (`#db = null`) and lazily
+  // opens a new one, so for a bare `:memory:` every transaction commits to a
+  // throwaway database and the client is left pointing at an empty one. Rewrite
+  // it to a shared-cache in-memory URI so every connection in this process sees
+  // the same database.
+  if (path === ":memory:") {
+    return "file::memory:?cache=shared";
+  }
+  if (path.startsWith("file::memory:")) return path;
   if (path.startsWith("file:") || path.startsWith("libsql:") || path.startsWith("http")) {
     return path;
   }

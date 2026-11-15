@@ -55,6 +55,8 @@ const listQuerySchema = {
     kind: { type: "string" },
     from: { type: "string" },
     to: { type: "string" },
+    q: { type: "string", maxLength: 200 },
+    sort: { type: "string", enum: ["newest", "oldest"] },
     limit: { type: "integer", minimum: 1, maximum: MAX_LIST_LIMIT, default: DEFAULT_LIST_LIMIT },
     offset: { type: "integer", minimum: 0, default: 0 },
   },
@@ -78,6 +80,8 @@ interface ListQuery {
   kind?: string;
   from?: string;
   to?: string;
+  q?: string;
+  sort?: "newest" | "oldest";
   limit?: number;
   offset?: number;
 }

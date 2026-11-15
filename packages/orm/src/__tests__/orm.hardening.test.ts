@@ -64,6 +64,13 @@ describe("BaseRepository list/count and soft-delete consistency", () => {
 
 describe("migrations", () => {
   it("applies migrations deterministically and is idempotent on rerun", async () => {
+    await getDb().run(`
+      CREATE TABLE IF NOT EXISTS _orm_schema_migrations (
+        id TEXT PRIMARY KEY,
+        checksum TEXT NOT NULL,
+        applied_at TEXT NOT NULL
+      )
+    `);
     const migrations = [
       {
         id: "001_create_extra",

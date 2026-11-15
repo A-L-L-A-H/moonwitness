@@ -64,9 +64,22 @@ export class InMemoryEventRepository implements ITimelineRepository {
     if (filters.to) {
       result = result.filter((e) => e.date <= filters.to!);
     }
+    if (filters.q?.trim()) {
+      const query = filters.q.trim().toLowerCase();
+      result = result.filter((event) =>
+        `${event.title} ${event.excerpt} ${event.body} ${event.location} ${event.tags.join(" ")}`
+          .toLowerCase()
+          .includes(query),
+      );
+    }
 
     const offset = filters.offset ?? 0;
     const limit = filters.limit ?? result.length;
+    result.sort((left, right) =>
+      filters.sort === "newest"
+        ? right.date.localeCompare(left.date) || right.id.localeCompare(left.id)
+        : left.date.localeCompare(right.date) || left.id.localeCompare(right.id),
+    );
     return result.slice(offset, offset + limit);
   }
 
@@ -84,6 +97,14 @@ export class InMemoryEventRepository implements ITimelineRepository {
     }
     if (filters.to) {
       result = result.filter((e) => e.date <= filters.to!);
+    }
+    if (filters.q?.trim()) {
+      const query = filters.q.trim().toLowerCase();
+      result = result.filter((event) =>
+        `${event.title} ${event.excerpt} ${event.body} ${event.location} ${event.tags.join(" ")}`
+          .toLowerCase()
+          .includes(query),
+      );
     }
 
     return result.length;
