@@ -37,7 +37,7 @@
     "@moonwitness/typescript-config": "workspace:*",
     "@pact-foundation/pact": "16.0.0",
     "@types/bcrypt": "^5.0.2",
-    "@types/node": "^24.10.0",
+    "@types/node": "^26.6.6",
     "eslint": "^10.14.0",
     "eslint-plugin-import": "^2.32.0",
     "tsup": "^8.5.0",

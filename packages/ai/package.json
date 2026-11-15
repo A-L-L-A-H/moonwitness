@@ -28,7 +28,7 @@
     "@eslint/js": "^10.0.1",
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
-    "@types/node": "^24.10.0",
+    "@types/node": "^26.6.6",
     "eslint": "^10.14.0",
     "eslint-plugin-import": "^2.32.0",
     "typescript": "^5.9.3",
