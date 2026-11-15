@@ -3,8 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { HERO_LAYERS } from "@moonwitness/assets";
-import { ArrowRight, Bolt, Crown, Star4 } from "@moonwitness/ui/icons";
-import { Grain } from "@moonwitness/ui";
+import {
+  ArrowRight,
+  BarbedWire,
+  Bolt,
+  Crown,
+  SafetyPin,
+  Splatter,
+  Star4,
+} from "@moonwitness/ui/icons";
+import { DistressedSticker, Grain } from "@moonwitness/ui";
 import { AtmosphereField } from "@/components/atmosphere";
 import { useParallax } from "@/lib/motion/use-parallax";
 import { useHeroIntro } from "@/lib/motion/use-hero-intro";
@@ -48,9 +56,26 @@ export function Hero() {
         seed={7}
         className="inset-0 z-[2] mix-blend-screen opacity-30"
       />
+      <Splatter
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-12 top-20 z-[2] h-64 w-64 text-[var(--pink)] opacity-25"
+      />
+      <SafetyPin
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[38%] top-28 z-[4] h-10 w-10 -rotate-45 text-white/50"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-0 right-0 z-[4] flex overflow-hidden opacity-30"
+      >
+        {[...Array(6)].map((_, i) => (
+          <BarbedWire key={i} className="h-6 w-60 shrink-0 text-white" />
+        ))}
+      </div>
       <div className="hero-layout">
         <div className="hero-heading-placement">
           <div data-hero-headline>
+            <DistressedSticker variant="classified" className="mb-2" />
             <p className="hero-frequency font-mono">UNDERGROUND BROADCAST // 1420.4 MHz</p>
             <div className="hero-title-paper">
               <Crown aria-hidden="true" className="hero-crown" />
