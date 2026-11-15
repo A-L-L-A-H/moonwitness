@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import {
   ApiErrorSchema,
   TimelineEndpoint,
@@ -61,9 +62,9 @@ describe("timeline contracts", () => {
     const json = JSON.stringify(Object.keys(TimelineEndpoint));
     expect(json).toContain("listEvents");
     // Response schemas must be concrete Zod objects, not z.any() passthroughs.
-    expect(TimelineEndpoint.listEvents.response._def.typeName).toBe("ZodObject");
-    expect(TimelineEndpoint.getEvent.response._def.typeName).toBe("ZodObject");
-    expect(TimelineEndpoint.getStats.response._def.typeName).toBe("ZodObject");
-    expect(TimelineEndpoint.getEras.response._def.typeName).toBe("ZodObject");
+    expect(TimelineEndpoint.listEvents.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.getEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.getStats.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.getEras.response).toBeInstanceOf(z.ZodObject);
   });
 });

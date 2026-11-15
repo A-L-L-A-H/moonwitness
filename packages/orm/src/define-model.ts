@@ -6,7 +6,7 @@ import type { BaseMetadata, RecordSource, RecordStatus } from "./base-metadata.j
 import type { ActorContext } from "./actor-context.js";
 import { SYSTEM_ACTOR } from "./actor-context.js";
 
-type ZodObjectLike = z.AnyZodObject;
+type ZodObjectLike = z.ZodObject;
 
 /** A persisted row: business fields plus framework metadata columns. */
 export type ModelRecord<TBusiness extends ZodObjectLike> = z.infer<TBusiness> & BaseMetadata;
@@ -161,8 +161,8 @@ function unwrap(schema: z.ZodTypeAny): {
     } else if (current instanceof z.ZodDefault || isZodType(current, "ZodDefault")) {
       optional = true;
       current = (current as z.ZodDefault<z.ZodTypeAny>).removeDefault();
-    } else if (current instanceof z.ZodEffects || isZodType(current, "ZodEffects")) {
-      current = (current as z.ZodEffects<z.ZodTypeAny>).innerType();
+    } else if (isZodType(current, "ZodPipe")) {
+      current = (current as z.ZodPipe<z.ZodTypeAny, z.ZodTypeAny>).in;
     } else {
       return { inner: current, nullable, optional };
     }
