@@ -99,10 +99,12 @@ test("decorative spins follow motion preference changes", async ({ page }) => {
   const star = page.locator("#home svg.animate-spin");
   await expect(star).toHaveCSS("animation-name", "none");
   await expect(page.locator("[data-transmission-strip]")).toHaveCSS("animation-name", "none");
+  await expect(page.locator("#transmission svg.animate-spin")).toHaveCSS("animation-name", "none");
   await expect(page.locator("#transmission")).toHaveCSS("opacity", "1");
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await expect(star).toHaveCSS("animation-name", "spin");
   await expect(page.locator("[data-transmission-strip]")).toHaveCSS("animation-name", "strip-wipe");
+  await expect(page.locator("#transmission svg.animate-spin")).toHaveCSS("animation-name", "spin");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(star).toHaveCSS("animation-name", "none");
 });

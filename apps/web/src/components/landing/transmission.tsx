@@ -2,15 +2,21 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, CassetteTape } from "@moonwitness/ui/icons";
+import { ArrowRight, CassetteTape, Star4 } from "@moonwitness/ui/icons";
 import { DistressedSticker, Grain, Staple, TactileTape } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
+import { useScrollReveal } from "@/lib/motion/use-scroll-reveal";
 
 export function Transmission() {
+  const [ref, visible] = useScrollReveal(0.1, "0px 0px -40px 0px");
+
   return (
     <section
       id="transmission"
-      className="relative scroll-mt-20 overflow-hidden border-y-2 border-[var(--line)] bg-[var(--ink)] py-16 md:py-20"
+      ref={ref}
+      className={`relative scroll-mt-20 overflow-hidden border-y-2 border-[var(--line)] bg-[var(--ink)] py-16 transition-opacity duration-700 motion-reduce:opacity-100 motion-reduce:transition-none md:py-20 ${
+        visible ? "opacity-100" : "opacity-0"
+      }`}
     >
       <Grain />
       <div
@@ -37,6 +43,11 @@ export function Transmission() {
             </h2>
           </div>
           <DistressedSticker variant="hazard" text="FICTION" className="ml-auto" />
+          <Star4
+            aria-hidden="true"
+            className="h-6 w-6 animate-spin motion-reduce:animate-none text-[var(--pink)]"
+            style={{ animationDuration: "8s" }}
+          />
         </header>
 
         <div className="grid gap-6 md:grid-cols-[1.3fr_1fr] md:items-start">
