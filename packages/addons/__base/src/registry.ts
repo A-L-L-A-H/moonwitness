@@ -21,7 +21,7 @@ export const AddonManifestSchema = z.object({
       permissions: z.array(z.string().min(1)).default([]),
       auditActions: z.array(z.string().min(1)).default([]),
     })
-    .default({}),
+    .prefault({}),
 });
 export type AddonManifest = z.infer<typeof AddonManifestSchema>;
 

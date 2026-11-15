@@ -35,8 +35,8 @@ export type TimelineEventResponse = z.infer<typeof TimelineEventResponseSchema>;
 
 export const TimelineStatsSchema = z.object({
   total: z.number().int().nonnegative(),
-  byEra: z.record(z.number().int().nonnegative()),
-  byKind: z.record(z.number().int().nonnegative()),
+  byEra: z.record(z.string(), z.number().int().nonnegative()),
+  byKind: z.record(z.string(), z.number().int().nonnegative()),
 });
 export type TimelineStats = z.infer<typeof TimelineStatsSchema>;
 
