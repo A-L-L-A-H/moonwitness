@@ -22,10 +22,12 @@
   "devDependencies": {
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint": "^10.14.0",
+    "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "vitest": "^5.1.0"
   }
