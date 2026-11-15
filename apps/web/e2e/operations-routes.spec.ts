@@ -305,7 +305,7 @@ test.describe("Keyboard Navigation & Focus", () => {
 
     // Tab through focusable elements
     await page.keyboard.press("Tab");
-    let focused = await page.locator(":focus").first();
+    const focused = page.locator(":focus").first();
     await expect(focused).toBeVisible();
 
     // Verify focus landed somewhere (first focusable element)

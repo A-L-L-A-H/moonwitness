@@ -2,7 +2,7 @@
 // Component-level skin compositions built from variants + effects
 
 import { cva, type VariantProps } from '../lib/utils';
-import { halftone, grain, cmykSlip, duotone, tape, sticker, brushUnderline, composeEffects, effectPresets } from './effects';
+import { halftone, grain, cmykSlip, duotone, sticker, brushUnderline, composeEffects } from './effects';
 
 /**
  * EventCard skin compositions

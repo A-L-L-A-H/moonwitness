@@ -13,6 +13,8 @@ import { authMigrations } from "./db/migrations";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
+import { commandCenterRoutes } from "./interface/routes/command-center.routes";
+import { commandCenterMigrations } from "./interface/routes/command-center.persistence";
 
 export interface BootstrapOptions {
   dbPath?: string;
@@ -30,7 +32,7 @@ const BASE_MANIFEST = {
 async function migrateAndSeed(seed: boolean): Promise<void> {
   const db = getDb();
   await db.exec(timelineDdl);
-  await applyMigrations([...authMigrations]);
+  await applyMigrations([...authMigrations, ...commandCenterMigrations]);
   if (seed) {
     await seedTimeline();
   }
@@ -77,6 +79,7 @@ export async function buildApp(options: BootstrapOptions = {}): Promise<FastifyI
       },
       register: async () => {
         await fastify.register(riotAiRoutes);
+        await fastify.register(commandCenterRoutes);
       },
     });
     await registry.load();

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { EmpireShell } from "@/components/shell";
+import { OperationsShell } from "@/components/shell";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { useSyslogMessages, type SyslogMessage } from "@/lib/api/syslog";
 
@@ -51,7 +51,7 @@ function SyslogExplorer() {
   );
 
   return (
-    <EmpireShell
+    <OperationsShell
       breadcrumb="Syslog Explorer"
       search={{
         value: query,
@@ -118,7 +118,7 @@ function SyslogExplorer() {
           )}
         </OperatorSession>
       </main>
-    </EmpireShell>
+    </OperationsShell>
   );
 }
 

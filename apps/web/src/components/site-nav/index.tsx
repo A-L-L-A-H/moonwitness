@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Crown, SearchIcon, GlobeIcon } from "@moonwitness/ui/icons";
+import { Button } from "@moonwitness/ui";
 import { links } from "./links";
 import { MobileMenu } from "./mobile-menu";
 import { SearchDialog } from "./search-dialog";
@@ -101,11 +102,10 @@ export function SiteNav() {
             >
               <GlobeIcon className="h-5 w-5" />
             </Link>
-            <Link
-              href="/shadow"
-              className="btn-zine btn-paper hidden px-5 py-2 text-sm sm:inline-flex"
-            >
-              JOIN THE CREW →
+            <Link href="/shadow" className="hidden sm:block">
+              <Button variant="outline" size="sm" className="px-5 py-2 text-sm">
+                JOIN THE CREW →
+              </Button>
             </Link>
             <button
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-zinc-200 lg:hidden"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { EmpireShell } from "@/components/shell";
+import { OperationsShell } from "@/components/shell";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { normalizeRole } from "@/lib/roles";
 import {
@@ -37,7 +37,7 @@ function SnmpMonitor() {
   }, [devices.data, query]);
 
   return (
-    <EmpireShell
+    <OperationsShell
       breadcrumb="SNMP Monitor"
       search={{ value: query, onChange: setQuery, placeholder: "Search devices…" }}
     >
@@ -139,7 +139,7 @@ function SnmpMonitor() {
           </section>
         )}
       </main>
-    </EmpireShell>
+    </OperationsShell>
   );
 }
 

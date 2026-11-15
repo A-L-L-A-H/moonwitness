@@ -1,0 +1,32 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import Topbar from "./Topbar";
+
+describe("Topbar", () => {
+  it("renders repositories and triggers repository, command, and settings callbacks", () => {
+    const onRepositoryChange = vi.fn();
+    const onCommand = vi.fn();
+    const onSettings = vi.fn();
+
+    render(
+      <Topbar
+        repositories={[{ id: "repo-1", name: "moonwitness", path: "/tmp/mw", branch: "main", default_branch: "main", remote_url: "" }]}
+        selectedRepository=""
+        onRepositoryChange={onRepositoryChange}
+        onCommand={onCommand}
+        onSettings={onSettings}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText("Selected repository"), {
+      target: { value: "repo-1" },
+    });
+    expect(onRepositoryChange).toHaveBeenCalledWith("repo-1");
+
+    fireEvent.click(screen.getByRole("button", { name: /CTRL \+ K/i }));
+    expect(onCommand).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Settings" }));
+    expect(onSettings).toHaveBeenCalledTimes(1);
+  });
+});

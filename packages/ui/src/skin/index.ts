@@ -1,5 +1,7 @@
 // Moonwitness Skin Layer -- Public API
-import React, { createContext, useContext, useMemo, useCallback, ReactNode } from 'react';
+'use client';
+
+import React, { createContext, useContext, useMemo, useCallback, type ReactNode } from 'react';
 import type { SkinName } from './compositions';
 import type { SkinPreset } from './presets';
 import { skinPresets, getPreset, applyPreset } from './presets';
@@ -61,9 +63,9 @@ export function useSkin(): SkinContextValue {
   return context;
 }
 
-export function withSkin<T extends React.ComponentType<any>>(Component: T, componentName: string): React.FC<React.ComponentProps<T> & { skin?: SkinName }> {
-  return function WithSkinComponent(props: React.ComponentProps<T> & { skin?: SkinName }) {
-    const { getClasses, setSkin, skin: contextSkin } = useSkin();
+export function withSkin<P extends { className?: string; skin?: SkinName }>(Component: React.ComponentType<P>, componentName: string): React.FC<P> {
+  return function WithSkinComponent(props: P) {
+    const { getClasses, skin: contextSkin } = useSkin();
     const effectiveSkin = props.skin || contextSkin;
     const baseClassName = getClasses(componentName, {});
     const mergedClassName = [baseClassName, props.className].filter(Boolean).join(' ');
@@ -72,9 +74,9 @@ export function withSkin<T extends React.ComponentType<any>>(Component: T, compo
   };
 }
 
-export function createSkinComponent(componentName: string, skinName: SkinName): React.FC<any> {
-  return function SkinnedComponent(props: any) {
-    const { getClasses, skin: contextSkin } = useSkin();
+export function createSkinComponent(componentName: string, skinName: SkinName): React.FC<React.HTMLAttributes<HTMLElement> & { as?: React.ElementType }> {
+  return function SkinnedComponent(props: React.HTMLAttributes<HTMLElement> & { as?: React.ElementType }) {
+    const { as, ...rest } = props;
     const applied = applyPreset(skinName);
     const baseClasses: Record<string, string> = {
       button: (applied.variant || '') + ' ' + (applied.skin || '') + ' ' + (applied.size || ''),
@@ -85,8 +87,8 @@ export function createSkinComponent(componentName: string, skinName: SkinName): 
       kanbanColumn: 'skin-' + (applied.skin || '') + ' ' + (applied.compact ? 'compact' : ''),
       moduleCard: 'skin-' + (applied.skin || '') + ' size-' + (applied.moduleSize || '') + ' ' + (applied.elevated ? 'elevated' : ''),
     };
-    const className = [baseClasses[componentName] || '', props.className].filter(Boolean).join(' ');
-    return React.createElement(props.as || 'div', { ...props, className, skin: skinName });
+    const className = [baseClasses[componentName] || '', rest.className].filter(Boolean).join(' ');
+    return React.createElement(as || 'div', { ...rest, className, 'data-skin': skinName });
   };
 }
 
@@ -135,7 +137,7 @@ export const Skinned = {
   TransmissionModuleCard: createSkinComponent('moduleCard', 'transmission'),
 };
 
-export function skinCn(baseVariants: Record<string, any>, skin: SkinName, componentOverrides?: Record<string, any>): string {
+export function skinCn(baseVariants: Record<string, unknown>, skin: SkinName, componentOverrides?: Record<string, unknown>): string {
   const applied = applyPreset(skin);
   const merged = { ...baseVariants, ...applied, ...componentOverrides };
   return Object.entries(merged).filter(([, v]) => v !== undefined && v !== false && v !== '').map(([k, v]) => k + '-' + v).join(' ');
@@ -144,4 +146,3 @@ export function skinCn(baseVariants: Record<string, any>, skin: SkinName, compon
 export { skinPresets, getPreset, applyPreset, listPresets } from './presets';
 export { composeEffects, effectPresets, halftone, grain, cmykSlip, duotone, tape, sticker, brushUnderline } from './effects';
 export { eventCardVariants, kanbanColumnVariants, moduleCardVariants, buttonSkinCompositions, inputSkinCompositions, badgeSkinCompositions, cardSkinCompositions } from './compositions';
-

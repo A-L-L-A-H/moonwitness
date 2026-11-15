@@ -12,3 +12,11 @@ apps/rocksoul
 packages/ui/src/dna
 packages/ui/src/skin
 packages/ui/src/artwork
+apps/memory/data
+apps/memory/venv
+apps/memory/frontend/.next
+venv
+.venv
+docs/dna
+docs/design
+docs/legacy-harvest

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { EmpireShell } from "@/components/shell";
+import { OperationsShell } from "@/components/shell";
 import { useRadiusHealth, useRadiusLogs, useRadiusStats, type RadiusLog } from "@/lib/api/radius";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { normalizeRole } from "@/lib/roles";
@@ -37,7 +37,7 @@ function RadiusConsole() {
   }, [refetchHealth, refetchStats, refetchLogs]);
 
   return (
-    <EmpireShell
+    <OperationsShell
       breadcrumb="RADIUS Console"
       search={{ value: query, onChange: setQuery, placeholder: "Search RADIUS logs…" }}
     >
@@ -166,7 +166,7 @@ function RadiusConsole() {
 
         <RadiusUserManagement canWrite={canWrite} />
       </main>
-    </EmpireShell>
+    </OperationsShell>
   );
 }
 

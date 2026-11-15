@@ -82,8 +82,7 @@ export function generateHalftoneField(options: GenerativeOptions & { dotSize?: n
  * Generate noise texture data
  */
 export function generateNoiseTexture(options: GenerativeOptions & { scale?: number; octaves?: number } = {}) {
-  const { width = 400, height = 300, seed = Date.now(), scale = 0.01, octaves = 4 } = options;
-  const rand = mulberry32(seed);
+  const { width = 400, height = 300, scale = 0.01, octaves = 4 } = options;
   const data = new Uint8ClampedArray(width * height * 4);
 
   for (let y = 0; y < height; y++) {

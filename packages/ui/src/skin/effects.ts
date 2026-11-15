@@ -2,12 +2,12 @@
 import type { EffectToken } from '../dna/tokens';
 
 export function halftone(options: Partial<EffectToken['halftone']> = {}): string {
-  const { dotSize = '1px', spacing = '7px', opacity = 0.08, color = { hex: '#ffffff' } } = options;
+  const { dotSize = '1px', spacing = '7px', opacity: _opacity = 0.08, color = { hex: '#ffffff' } } = options;
   return 'background-image: radial-gradient(' + color.hex + '80 ' + dotSize + ', transparent ' + (parseFloat(dotSize) * 1.6) + 'px); background-size: ' + spacing + ' ' + spacing + ';';
 }
 
 export function grain(options: Partial<EffectToken['grain']> = {}): string {
-  const { opacity = 0.5, blendMode = 'overlay', size = '160px' } = options;
+  const { opacity = 0.5, blendMode = 'overlay', size: _size = '160px' } = options;
   return 'position: relative; &::after { content: "; position: absolute; inset: 0; pointer-events: none; opacity: ' + opacity + '; mix-blend-mode: ' + blendMode + '; }';
 }
 

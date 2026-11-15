@@ -2,7 +2,7 @@
 
 import type { TimelineEvent } from "@moonwitness/types";
 import { Crown } from "@moonwitness/ui/icons";
-import { EventCard } from "@moonwitness/ui";
+import { EventCard, Button, SkinProvider } from "@moonwitness/ui";
 
 interface EventListProps {
   events: TimelineEvent[];
@@ -19,7 +19,15 @@ interface EventListProps {
   onPageChange: (page: number) => void;
 }
 
-export function EventList({
+export function EventList(props: EventListProps) {
+  return (
+    <SkinProvider defaultSkin="transmission">
+      <EventListInner {...props} />
+    </SkinProvider>
+  );
+}
+
+function EventListInner({
   events,
   total,
   pageStart,
@@ -52,9 +60,9 @@ export function EventList({
           <p className="mt-2 text-sm text-zinc-500">
             Nothing matches “{query}” in this era. Try another frequency.
           </p>
-          <button onClick={onReset} className="btn-zine btn-blue mt-4 px-5 py-2 text-sm">
+          <Button onClick={onReset} className="mt-4">
             RESET FILTERS
-          </button>
+          </Button>
         </div>
       ) : view === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
@@ -83,25 +91,27 @@ export function EventList({
       )}
       {totalPages > 1 && (
         <nav className="mt-5 flex items-center justify-center gap-4" aria-label="Timeline pages">
-          <button
+          <Button
             type="button"
-            className="btn-zine btn-blue px-4 py-2 text-xs"
+            variant="outline"
+            className="px-4 py-2 text-xs"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
           >
             Previous
-          </button>
+          </Button>
           <span className="text-xs text-zinc-400" aria-current="page">
             Page {page} of {totalPages}
           </span>
-          <button
+          <Button
             type="button"
-            className="btn-zine btn-blue px-4 py-2 text-xs"
+            variant="outline"
+            className="px-4 py-2 text-xs"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
           >
             Next
-          </button>
+          </Button>
         </nav>
       )}
     </section>

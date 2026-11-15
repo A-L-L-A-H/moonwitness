@@ -1,7 +1,0 @@
-{
-  "extends": "@moonwitness/typescript-config/react-library",
-  "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src"
-  }
-}

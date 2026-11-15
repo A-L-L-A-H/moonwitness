@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { EmpireShell } from "@/components/shell";
+import { OperationsShell } from "@/components/shell";
 import {
   useCreateBucket,
   useDeleteBucket,
@@ -434,7 +434,7 @@ function StorageBrowser() {
     health.isFetching || buckets.isFetching || (selectedBucket ? objects.isFetching : false);
 
   return (
-    <EmpireShell
+    <OperationsShell
       breadcrumb="Storage Browser"
       search={{
         value: prefix,
@@ -578,7 +578,7 @@ function StorageBrowser() {
           </section>
         )}
       </main>
-    </EmpireShell>
+    </OperationsShell>
   );
 }
 

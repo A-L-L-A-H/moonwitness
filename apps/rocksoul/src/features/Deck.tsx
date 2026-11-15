@@ -1,0 +1,197 @@
+import React from "react";
+import { ArrowUpRight, GitCommitHorizontal, Plus, Radio, ShieldAlert } from "lucide-react";
+import { thumbRiotUrl } from "../assets/art";
+import { IssueRow } from "../components";
+import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
+import type { ActivityEvent, Issue, Repository } from "../lib/contracts";
+
+export interface DeckProps {
+  issues: Issue[];
+  repositories: Repository[];
+  events: ActivityEvent[];
+  dataReady: boolean;
+  loading: boolean;
+  onCreate: () => void;
+  onStatusChange: (issueId: string, status: any) => void;
+  onNavigate: (page: any) => void;
+}
+
+export default function Deck({
+  issues,
+  repositories,
+  events,
+  dataReady,
+  loading,
+  onCreate,
+  onStatusChange,
+  onNavigate,
+}: DeckProps) {
+  const activeIssues = issues.filter((item) => !["done", "closed"].includes(item.status)).slice(0, 4);
+  const unavailableMessage = loading ? "READING LOCAL WORKSPACE." : "LOCAL DATA UNAVAILABLE.";
+  return (
+    <main className="page-content deck-page">
+      <section className="deck-hero">
+        <div className="hero-copy">
+          <span className="eyebrow">
+            <i /> ROOM 03 / EXECUTION SPACE
+          </span>
+          <h1>
+            MAKE THE
+            <br />
+            <em>NEXT MOVE.</em>
+          </h1>
+          <p>LOCAL WORK / HUMAN REVIEW / CLEAR STATE.</p>
+          <div className="workbench-principles">
+            <span>
+              <small>01 / SCOPE</small>
+              <b>LOCAL</b>
+            </span>
+            <span>
+              <small>02 / CONTROL</small>
+              <b>HUMAN-DRIVEN</b>
+            </span>
+            <span>
+              <small>03 / STATUS</small>
+              <b>VISIBLE</b>
+            </span>
+          </div>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          <img className="hero-art-backdrop" src={thumbRiotUrl} alt="" />
+          <div className="hero-art-scrim" />
+          <div className="hero-art-chrome">
+            <AnarchyStarSigil className="rs-anarchy-sigil hero-sigil-svg" />
+            <span className="hero-sigil">DX</span>
+          </div>
+          <TelemetryWaveformSvg className="rs-waveform-svg hero-waveform" />
+          <div className="hero-quote">
+            HUMAN IN
+            <br />
+            THE LOOP.
+          </div>
+        </div>
+      </section>
+      <div className="deck-grid">
+        <section className="riot-panel incoming-panel">
+          <div className="panel-heading cream">
+            <span>01 / INCOMING CHAOS</span>
+            <button onClick={() => onNavigate("pit")}>
+              ALL TASKS <ArrowUpRight size={15} />
+            </button>
+          </div>
+          <div className="issue-list">
+            {!dataReady ? (
+              <div className="empty-state">
+                <b>{unavailableMessage}</b>
+                <span>Issue state will appear when local data is available.</span>
+              </div>
+            ) : activeIssues.length ? (
+              activeIssues.map((issue) => (
+                <IssueRow key={issue.id} issue={issue} compact onStatusChange={onStatusChange} />
+              ))
+            ) : (
+              <div className="empty-state">
+                <b>THE PIT IS QUIET.</b>
+                <span>Drop the first task into the machine.</span>
+                <button onClick={onCreate}>
+                  CREATE FIRST ISSUE <Plus size={14} />
+                </button>
+              </div>
+            )}
+          </div>
+          <button className="panel-footer-action" onClick={onCreate}>
+            <Plus size={15} /> ADD TO THE PILE
+          </button>
+        </section>
+        <section className="riot-panel git-panel">
+          <div className="panel-heading cream">
+            <span>02 / GIT JUNGLE</span>
+            <button onClick={() => onNavigate("git")}>
+              REPOSITORIES <ArrowUpRight size={15} />
+            </button>
+          </div>
+          {!dataReady ? (
+            <div className="empty-state compact-empty">
+              <b>{unavailableMessage}</b>
+              <span>Repository state is not available yet.</span>
+            </div>
+          ) : repositories.length ? (
+            <div className="repo-list">
+              {repositories.slice(0, 3).map((repo) => (
+                <div className="repo-row" key={repo.id}>
+                  <span className="repo-glyph">⑂</span>
+                  <div>
+                    <b>{repo.name}</b>
+                    <small>{repo.branch || repo.default_branch || "branch unknown"}</small>
+                  </div>
+                  <span className="repo-dot" />
+                  <small>LOCAL</small>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state compact-empty">
+              <b>NO REPOSITORIES YET.</b>
+              <span>Connect a local Git checkout in GIT.</span>
+              <button onClick={() => onNavigate("git")}>
+                CONNECT REPOSITORY <Plus size={14} />
+              </button>
+            </div>
+          )}
+        </section>
+        <section className="riot-panel noise-panel">
+          <div className="panel-heading purple-head">
+            <span>
+              <Radio size={15} /> 03 / NOISE TAPE
+            </span>
+            <button onClick={() => onNavigate("noise")}>
+              FULL LOG <ArrowUpRight size={15} />
+            </button>
+          </div>
+          <div className="noise-telemetry-strip" aria-hidden="true">
+            <TelemetryWaveformSvg className="rs-waveform-svg noise-waveform" />
+            <span>CH-03 // LIVE TRACE</span>
+          </div>
+          <div className="event-list">
+            {dataReady ? (
+              events.slice(0, 5).map((event) => (
+                <div className="event-row" key={event.id}>
+                  <span className="event-icon">
+                    {event.kind === "git" ? <GitCommitHorizontal /> : <ShieldAlert />}
+                  </span>
+                  <div>
+                    <b>{event.message}</b>
+                    <small>
+                      {new Date(event.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </small>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="empty-state mini-empty">
+                <b>{unavailableMessage}</b>
+                <span>Activity is shown only when real events are available.</span>
+              </div>
+            )}
+            {dataReady && !events.length && (
+              <div className="empty-state mini-empty">
+                <b>NO TRANSMISSIONS.</b>
+                <span>System events will appear here.</span>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+      <button className="create-chaos" onClick={onCreate}>
+        <span>+</span>
+        <b>
+          CREATE
+          <br />
+          ISSUE
+        </b>
+        <ArrowUpRight size={25} />
+        <small>ADD A TRACKABLE WORK ITEM.</small>
+      </button>
+    </main>
+  );
+}

@@ -1,43 +1,16 @@
-# MoonWitness Backlog - Prioritized Work Plan
+# MoonWitness Backlog — Verified Status (Consolidated Monorepo)
 
-## Current Status
+## Verified Architecture & Completed Work
 
-- **Issue #7 (P1)**: COMPLETED - All 4 dock tests passing
-- **Issue #80 (P1)**: In Progress - Stabilize CI workflow
+- **Issue #7 (P1) — Dock & Timeline UI:** COMPLETED. Verified via API + web tests.
+- **Issues #31–#34 — RIOT Intelligence (Ollama Adapter, Fastify API, Provider Persistence, `/intelligence` UX):** IMPLEMENTED across `packages/ai/src/adapters/ollama`, `apps/api/src/interface/routes/riot-ai.*`, and `apps/web/src/app/intelligence`.
+- **Issues #98–#105 — Operations Screens & Accessibility (`/syslog`, `/snmp`, `/storage`, `/radius`, `/vpn`, `/control`):** IMPLEMENTED with `OperationsShell` separation (`MW-UI-SPEC-001`), server-side SigV4 signing (`storage.routes.ts`), SNMP community redaction (`snmp-poller.routes.ts` & UI sanitizer), and authenticated role checks (`requireAuth` / `requireRole`).
+- **Issue #8 — Persistent Command Center:** IMPLEMENTED via SQLite tables (`command_center_workflows`, `command_center_alerts`), Fastify routes (`/api/v1/command-center/*`), and live client synchronization in `apps/web/src/components/command-center/use-command-center.ts`.
+- **Monorepo Consolidation:** Canonical repository at `z:\repo\isrockfeel\moonwitness` (`dev` branch), integrating `apps/rocksoul` (`rocksoul-dx`), `apps/a-l-l-a-h`, `apps/memory` (reassigned web port `3005`), and shared design system `packages/ui`.
 
-## Priority Order (Easiest to Hardest / Most Urgent First)
+## Remaining Operational / Future Milestones
 
-### Phase 1: Core RIOT Intelligence (P1 - Unblocked)
-
-| #   | Issue | Title                               | Dependencies       | Effort |
-| --- | ----- | ----------------------------------- | ------------------ | ------ |
-| 1   | #31   | Implement local inference adapter   | #27 Tasks 1-3      | Medium |
-| 2   | #32   | Integrate inference through Fastify | #31, #27 Tasks 1-4 | Medium |
-
-### Phase 2: RIOT Intelligence Completion (P2)
-
-| 3 | #33 | Persist provider configuration | #31, #32 | Small |
-| 4 | #34 | Add operator UX to Next.js | #31, #32, #33 | Medium |
-
-### Phase 3: Operations Screens (P2 - Some Blocked)
-
-| 5 | #98 | Read-only Syslog explorer | MW-0002, MW-0006 | Medium |
-| 6 | #99 | Read-only SNMP monitor | MW-0002, MW-0006 | Medium |
-| 7 | #102 | Storage bucket/object browser | MW-0002, MW-0006, MW-0012 | Large |
-| 8 | #103 | Read-only RADIUS console | MW-0002, MW-0006, MW-0008 | Medium |
-
-### Phase 4: Management UIs (P1 - All Blocked)
-
-| 9 | #100 | SNMP device/target management UI | #99 | Medium |
-| 10 | #104 | RADIUS user management UI | #103 | Medium |
-| 11 | #105 | Operations route accessibility | MW-0003 through MW-0015 | Large |
-
-### Phase 5: Platform & Production (P1-P2)
-
-| 12 | #80 | Stabilize CI workflow | (In Progress) | Large |
-| 13 | #9 | Production hardening | #80 | Large |
-| 14 | #8 | Connect Shadow Command Center | #80 | Medium |
-
-## Recommended Next Action
-
-**Start Issue #31 (RIOT Intelligence local inference adapter)** - It's P1, unblocked, and the foundation for all other RIOT work.
+| Area                  | Scope                                               | Notes                                                    |
+| --------------------- | --------------------------------------------------- | -------------------------------------------------------- |
+| CI & E2E Hardening    | Full Playwright E2E + Rust service integration      | Automated unit/typecheck/lint gates active per workspace |
+| Production Deployment | Docker Compose orchestration & secrets provisioning | Set real secrets in environment before production boot   |

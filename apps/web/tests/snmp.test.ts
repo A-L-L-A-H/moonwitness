@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { activeByPath, navItems, navHref } from "../src/components/shell/nav-items";
+import { activeByPath, navHref, operationsNavItems } from "../src/components/shell/nav-items";
 import type { SnmpDevice } from "../src/lib/api/snmp-poller";
 import { sanitizeSnmpDevices } from "../src/views/operations/security";
 
 describe("SNMP operations route", () => {
   it("registers navigation and never exposes community values to presentation", () => {
-    const snmp = navItems.find((item) => item.id === "snmp");
+    const snmp = operationsNavItems.find((item) => item.id === "snmp");
     const device: SnmpDevice = {
       id: "router-1",
       name: "Router",

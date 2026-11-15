@@ -30,7 +30,7 @@ Requirements: Windows 10/11, Docker Desktop with the Linux container engine, and
 2. Double-click `start.bat`. On first launch it creates `.env` and opens it in Notepad.
 3. Add your Gemini API key to `GEMINI_API_KEY`. Keep the rest of the defaults initially. Save the file.
 4. Double-click `start.bat` again. Docker builds and starts the local stack.
-5. Open **http://localhost:3000**. API documentation is at **http://localhost:8000/docs**.
+5. Open **http://localhost:3005**. API documentation is at **http://localhost:8000/docs**.
 
 You can also start it in PowerShell:
 

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { activeByPath, navItems, navHref } from "../src/components/shell/nav-items";
+import { activeByPath, navHref, operationsNavItems } from "../src/components/shell/nav-items";
 import { sanitizeRadiusLogs } from "../src/lib/api/radius";
 import { isWriteRole, normalizeRole } from "../src/lib/roles";
 
 describe("RADIUS operations navigation", () => {
   it("registers the read-only console route", () => {
-    const radius = navItems.find((item) => item.id === "radius");
+    const radius = operationsNavItems.find((item) => item.id === "radius");
     expect(radius && navHref(radius)).toBe("/radius");
     expect(activeByPath("/radius")).toBe("radius");
   });

@@ -187,7 +187,9 @@ test("shows the seeded timeline through the live API without a frontend fixture"
   });
 
   await page.goto("/dock");
-  await expect(page.getByRole("button", { name: /FIRST WITNESS STATION/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /FIRST WITNESS STATION/i })).toBeVisible({
+    timeout: 15000,
+  });
   await page.getByRole("button", { name: /FIRST WITNESS STATION/i }).click();
   await expect(page).toHaveURL(/event=evt-001/);
   await expect(

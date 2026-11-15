@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Crown, Splatter } from "@moonwitness/ui/icons";
-import { DistressedSticker, Staple, TactileTape } from "@moonwitness/ui";
+import { DistressedSticker, Staple, TactileTape, Button } from "@moonwitness/ui";
 import type { Project } from "@moonwitness/types";
 import { artSrc } from "@/lib/art";
 import { AtmosphereField } from "@/components/atmosphere";
@@ -57,11 +57,10 @@ export function CommandHero({ project }: { project: Project }) {
           <p className="mt-4 font-mono text-xs font-bold tracking-[0.18em] text-[var(--yellow)]">
             {project.status.toUpperCase()} // STORY WORLD
           </p>
-          <Link
-            href={`/dock?q=${encodeURIComponent(project.title)}`}
-            className="btn-zine mt-5 inline-flex min-h-11 items-center gap-2 px-5 py-2.5 text-sm"
-          >
-            OPEN PROJECT <span aria-hidden="true">→</span>
+          <Link href={`/dock?q=${encodeURIComponent(project.title)}`} className="mt-5 inline-block">
+            <Button className="min-h-11 gap-2 px-5 py-2.5 text-sm">
+              OPEN PROJECT <span aria-hidden="true">→</span>
+            </Button>
           </Link>
         </div>
         <Crown className="absolute right-[20%] top-12 h-10 w-14 -rotate-12 text-[var(--yellow)]" />

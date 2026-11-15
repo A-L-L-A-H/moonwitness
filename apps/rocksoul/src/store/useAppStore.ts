@@ -1,0 +1,132 @@
+import { create } from "zustand";
+import { call } from "../lib";
+import type {
+  ActivityEvent,
+  CreateIssueArgs,
+  CreateMilestoneArgs,
+  CreateProjectArgs,
+  Issue,
+  IssueStatus,
+  Milestone,
+  MilestoneStatus,
+  Project,
+  Repository,
+  UpdateIssueArgs,
+  UpdateMilestoneArgs,
+  UpdateProjectArgs,
+} from "../lib/contracts";
+
+export interface AppState {
+  page: "deck" | "pit" | "git" | "war-room" | "noise";
+  loading: boolean;
+  error: string;
+  stats: { active: number; blocked: number; completed: number };
+  issues: Issue[];
+  repositories: Repository[];
+  projects: Project[];
+  milestones: Milestone[];
+  events: ActivityEvent[];
+  selectedRepository: string;
+  projectFilter: string;
+  setPage: (page: AppState["page"]) => void;
+  setSelectedRepository: (selectedRepository: string) => void;
+  setProjectFilter: (projectFilter: string) => void;
+  refresh: () => Promise<void>;
+  createIssue: (payload: CreateIssueArgs) => Promise<void>;
+  editIssue: (payload: UpdateIssueArgs) => Promise<void>;
+  deleteIssue: (issueId: string) => Promise<void>;
+  updateIssue: (issueId: string, status: IssueStatus) => Promise<void>;
+  createProject: (payload: CreateProjectArgs) => Promise<void>;
+  editProject: (payload: UpdateProjectArgs) => Promise<void>;
+  deleteProject: (projectId: string) => Promise<void>;
+  createMilestone: (payload: CreateMilestoneArgs) => Promise<void>;
+  updateMilestone: (milestoneId: string, status: MilestoneStatus) => Promise<void>;
+  editMilestone: (payload: UpdateMilestoneArgs) => Promise<void>;
+  deleteMilestone: (milestoneId: string) => Promise<void>;
+  addRepository: (path: string) => Promise<Repository>;
+}
+
+export const useAppStore = create<AppState>((setState, getState) => ({
+  page: "deck",
+  loading: false,
+  error: "",
+  stats: { active: 0, blocked: 0, completed: 0 },
+  issues: [],
+  repositories: [],
+  projects: [],
+  milestones: [],
+  events: [],
+  selectedRepository: "",
+  projectFilter: "",
+  setPage: (page) => setState({ page }),
+  setSelectedRepository: (selectedRepository) => setState({ selectedRepository }),
+  setProjectFilter: (projectFilter) => setState({ projectFilter }),
+  refresh: async () => {
+    setState({ loading: true, error: "" });
+    try {
+      const dashboard = await call("get_dashboard");
+      const [projects, milestones] = await Promise.all([call("list_projects"), call("list_milestones")]);
+      setState({
+        stats: dashboard?.stats ?? { active: 0, blocked: 0, completed: 0 },
+        issues: dashboard?.issues ?? [],
+        repositories: dashboard?.repositories ?? [],
+        projects: projects ?? [],
+        milestones: milestones ?? [],
+        events: dashboard?.events ?? [],
+        selectedRepository: dashboard?.repositories?.some(
+          repository => repository.id === getState().selectedRepository,
+        )
+          ? getState().selectedRepository
+          : dashboard?.repositories?.[0]?.id || "",
+        loading: false,
+      });
+    } catch (error) {
+      setState({ loading: false, error: error instanceof Error ? error.message : String(error) });
+    }
+  },
+  createIssue: async (payload) => {
+    await call("create_issue", payload);
+    await getState().refresh();
+  },
+  editIssue: async (payload) => {
+    await call("update_issue", payload);
+    await getState().refresh();
+  },
+  deleteIssue: async (issueId) => {
+    await call("delete_issue", { issueId });
+    await getState().refresh();
+  },
+  updateIssue: async (issueId, status) => {
+    await call("set_issue_status", { issueId, status });
+    await getState().refresh();
+  },
+  createProject: async (payload) => {
+    await call("create_project", payload);
+    await getState().refresh();
+  },
+  editProject: async (payload) => {
+    await call("update_project", payload);
+    await getState().refresh();
+  },
+  deleteProject: async (projectId) => {
+    await call("delete_project", { projectId });
+    await getState().refresh();
+  },
+  createMilestone: async (payload) => {
+    await call("create_milestone", payload);
+    await getState().refresh();
+  },
+  updateMilestone: async (milestoneId, status) => {
+    await call("set_milestone_status", { milestoneId, status });
+    await getState().refresh();
+  },
+  editMilestone: async (payload) => {
+    await call("update_milestone", payload);
+    await getState().refresh();
+  },
+  deleteMilestone: async (milestoneId) => {
+    await call("delete_milestone", { milestoneId });
+    await getState().refresh();
+  },
+  addRepository: async (path) => await call("add_repository", { path }),
+}));
