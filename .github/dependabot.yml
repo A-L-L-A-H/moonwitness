@@ -11,7 +11,6 @@ updates:
       all-deps:
         patterns:
           - "*"
-        dependency-type: "all"
     open-pull-requests-limit: 10
     allow:
       - dependency-type: "direct"
