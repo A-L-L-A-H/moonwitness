@@ -1,8 +1,6 @@
 name: Auto-promote dev to main
 
-# Nyalakan promosi otomatis HANYA setelah CI sukses di branch dev.
-# PR dev -> main dibuka/diperbarui, lalu auto-merge (squash) diaktifkan
-# sehingga merge terjadi ketika required checks di main hijau.
+# Open or refresh the dev -> main PR after CI succeeds; merging remains manual.
 on:
   workflow_run:
     workflows: [CI]
@@ -16,9 +14,8 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
-  actions: read
 
 concurrency:
   group: auto-promote-dev-to-main
@@ -63,24 +60,13 @@ jobs:
 
           CI run: ${CI_RUN_URL:-manual dispatch}
 
-          Required checks on \`main\` must pass before this merges (auto-merge is enabled)."
+            The repository owner must review and manually merge after required checks pass."
             gh pr create --base main --head dev --title "chore(release): promote dev to main" --body "$body"
             number=$(gh pr list --base main --head dev --state open --json number --jq '.[0].number')
             echo "pr_number=$number" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Enable auto-merge
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
-        run: |
-          number="${{ steps.pr.outputs.pr_number }}"
-          if [ -z "$number" ]; then
-            echo "::error::No promotion PR number resolved."
-            exit 1
-          fi
-          gh pr merge --auto --squash "$number"
-
       - name: Report
         run: |
-          echo "Promotion PR #${{ steps.pr.outputs.pr_number }} ready with auto-merge."
-          echo "It merges automatically once the required checks on 'main' pass."
+            echo "Promotion PR #${{ steps.pr.outputs.pr_number }} is ready for manual review."
+            echo "This workflow does not merge to main."
