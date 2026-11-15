@@ -36,6 +36,7 @@ import {
   SIDRA_KNOWLEDGE_AXIOMS,
   WORLD_DOMAINS,
 } from "./empire-registry";
+import { LUMINOUS_NAMES_OF_ALLAH, TASBIH_PHRASES } from "./remembrance-sanctuary";
 
 describe("Empire of the Light Registry", () => {
   it("defines the five primary navigation tabs including THE CODEX", () => {
@@ -185,5 +186,38 @@ describe("Living Light Design Tokens & Visual Covenant", () => {
     expect(SACRED_VISUAL_COVENANT.requiresReducedMotionBypass).toBe(true);
     expect(SACRED_VISUAL_COVENANT.minimumInteractiveTargetPx).toBeGreaterThanOrEqual(44);
     expect(LIVING_LIGHT_TYPOGRAPHY.displayFamily).toContain("Cinzel");
+  });
+});
+
+describe("Remembrance Sanctuary Registry", () => {
+  it("defines 9 Luminous Attributes linked to valid sanctuary worlds", () => {
+    const worldIds = new Set(WORLD_DOMAINS.map((world) => world.id));
+    expect(LUMINOUS_NAMES_OF_ALLAH).toHaveLength(9);
+
+    const attributeIds = new Set(LUMINOUS_NAMES_OF_ALLAH.map((item) => item.id));
+    expect(attributeIds.size).toBe(LUMINOUS_NAMES_OF_ALLAH.length);
+
+    for (const attribute of LUMINOUS_NAMES_OF_ALLAH) {
+      expect(attribute.arabic.length).toBeGreaterThan(0);
+      expect(attribute.transliteration.length).toBeGreaterThan(0);
+      expect(attribute.meaning.length).toBeGreaterThan(0);
+      expect(attribute.worldLabel.length).toBeGreaterThan(0);
+      expect(attribute.contemplation.length).toBeGreaterThan(0);
+      expect(attribute.practicePrompt.length).toBeGreaterThan(0);
+      expect(worldIds.has(attribute.linkedWorldId)).toBe(true);
+    }
+  });
+
+  it("defines 5 Tasbih phrases standardized at 33-bead cycles", () => {
+    expect(TASBIH_PHRASES).toHaveLength(5);
+    const phraseIds = new Set(TASBIH_PHRASES.map((phrase) => phrase.id));
+    expect(phraseIds.size).toBe(TASBIH_PHRASES.length);
+
+    for (const phrase of TASBIH_PHRASES) {
+      expect(phrase.arabic.length).toBeGreaterThan(0);
+      expect(phrase.transliteration.length).toBeGreaterThan(0);
+      expect(phrase.translation.length).toBeGreaterThan(0);
+      expect(phrase.targetCount).toBe(33);
+    }
   });
 });

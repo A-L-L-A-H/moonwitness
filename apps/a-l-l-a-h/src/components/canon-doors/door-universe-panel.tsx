@@ -13,6 +13,7 @@ import {
   UNIVERSE_FOUR_LENSES,
   WORLD_PATCH_HIGHLIGHTS,
 } from "@/data/empire-canon-codex";
+import { StoryPlateGeometrySvg } from "../sacred-illustrations";
 
 export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }) {
   const [activeTrackCode, setActiveTrackCode] = useState<string>(
@@ -73,7 +74,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
       {/* 3 GOD-PROMISE Tracks + Monocentric 1-6-3 */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             THREE GOD-PROMISE TRACKS &amp; MONOCENTRIC 1·6·3
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
@@ -99,7 +100,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                   <span>{track.trackCode}</span>
                   <span>{track.anchorScripture}</span>
                 </div>
-                <div className="mt-1 font-serif text-sm tracking-[0.1em] text-[#fff6df]">
+                <div className="font-monument mt-1 text-sm tracking-[0.08em] text-[#fff6df]">
                   {track.title}
                 </div>
               </button>
@@ -138,7 +139,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
       {/* 4-Panel DX Storyboard (Abstract Architectural Plates — Zero Faces) */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             SIN CAN BE BETTER HUMAN — 4-PANEL ARCHITECTURAL STORYBOARD
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
@@ -150,15 +151,21 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
           {DX_MANGA_FOUR_PANELS.map((panel) => (
             <div
               key={panel.panelNumber}
-              className="flex flex-col justify-between border border-[#d6b46c]/25 bg-[#0a0d16] p-4"
+              className="group flex flex-col justify-between border border-[#d6b46c]/25 bg-[#0a0d16] p-4 transition-colors hover:border-[#f5dfa6]/50"
             >
               <div>
                 <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
                   <span>{panel.panelNumber}</span>
                   <span>{panel.paletteTag}</span>
                 </div>
+                <div className="mt-2.5">
+                  <StoryPlateGeometrySvg
+                    panelNumber={panel.panelNumber}
+                    accentHex={panel.accentHex}
+                  />
+                </div>
                 <div
-                  className="mt-2 font-serif text-xl tracking-[0.14em]"
+                  className="mt-2.5 font-monument text-lg tracking-[0.14em]"
                   style={{ color: panel.accentHex }}
                 >
                   {panel.japaneseSfx}
@@ -166,10 +173,12 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                 <div className="font-mono text-[10px] tracking-[0.2em] text-[#bfb59e]">
                   {panel.romajiSfx}
                 </div>
-                <h4 className="mt-2 font-serif text-sm tracking-[0.06em] text-[#fff6df]">
+                <h4 className="font-monument mt-2 text-xs tracking-[0.08em] text-[#fff6df] uppercase">
                   {panel.title}
                 </h4>
-                <p className="mt-1.5 text-xs leading-relaxed text-[#d9d0be]">{panel.meaning}</p>
+                <p className="mt-1.5 font-serif text-sm leading-relaxed text-[#e2dac7]">
+                  {panel.meaning}
+                </p>
               </div>
               <div className="mt-3 border-t border-[#d6b46c]/15 pt-2 font-mono text-[10px] text-[#9f9580]">
                 FORM: {panel.architecturalForm}
@@ -182,7 +191,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
       {/* 4 Creative Lenses across 99 Chapters */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             99-CHAPTER MASTER VISION NARRATIVE (S01–S99 · 4 LENSES)
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">SOURCE: bjo163/moonwitnessxv</span>
@@ -205,7 +214,9 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                 <div className="font-mono text-[11px] text-[#d6b46c]">
                   {lens.chapterRange} ({lens.chapterCount} Chapters)
                 </div>
-                <div className="mt-1 font-serif text-sm text-[#fff6df]">{lens.name}</div>
+                <div className="font-monument mt-1 text-xs sm:text-sm text-[#fff6df]">
+                  {lens.name}
+                </div>
               </button>
             );
           })}
@@ -213,7 +224,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
 
         <div className="mt-4 flex flex-col gap-3 border border-[#d6b46c]/20 bg-[#0a0d16] p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="font-serif text-sm text-[#fff6df]">{activeLens.name}</div>
+            <div className="font-monument text-sm text-[#fff6df]">{activeLens.name}</div>
             <p className="mt-1 text-xs text-[#d9d0be]">{activeLens.focus}</p>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -232,7 +243,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
       {/* MoonWitness II (8 Eras, 7-Step Promise, 16-Stage Loop) & XII (15 Episodes, 33 Patches) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="lg:col-span-6 border border-[#d6b46c]/25 bg-[#070910] p-5">
-          <div className="font-serif text-sm tracking-[0.18em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
+          <div className="font-monument text-sm tracking-[0.16em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
             MOONWITNESS II · 8 STORY ERAS &amp; 16-STAGE LOOP
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -241,7 +252,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                 <div className="font-mono text-[10px] text-[#d6b46c]">
                   {era.id.toUpperCase()} · {era.subtitle}
                 </div>
-                <div className="font-serif text-xs text-[#fff6df]">{era.title}</div>
+                <div className="font-monument text-xs text-[#fff6df]">{era.title}</div>
                 <div className="mt-0.5 text-[11px] text-[#bfb59e]">{era.theme}</div>
               </div>
             ))}
@@ -290,7 +301,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
 
         <div className="lg:col-span-6 border border-[#d6b46c]/25 bg-[#070910] p-5 flex flex-col justify-between">
           <div>
-            <div className="font-serif text-sm tracking-[0.18em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
+            <div className="font-monument text-sm tracking-[0.16em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
               MOONWITNESS XII · 15 STORY EPISODES &amp; 33 WORLD PATCHES
             </div>
             <div className="mt-3 flex flex-wrap gap-1.5">

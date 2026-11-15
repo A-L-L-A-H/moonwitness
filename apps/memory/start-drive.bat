@@ -34,5 +34,5 @@ if errorlevel 1 (
 
 echo.
 echo Google Drive S3 gateway: http://127.0.0.1:9000
-echo Dashboard: http://localhost:3000
-start "" "http://localhost:3000"
+echo Dashboard: http://localhost:3005
+start "" "http://localhost:3005"

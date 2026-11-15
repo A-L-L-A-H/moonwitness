@@ -282,6 +282,13 @@ export {
   type SkinContextValue,
   type SkinProviderProps,
 } from "./skin/index";
+export {
+  useThemeMode,
+  getStoredThemeMode,
+  resolveThemeMode,
+  applyThemeMode,
+  type ThemeMode,
+} from "./skin/index";
 
 /* Layout System */
 export { Grid, GridItem, Stack, VStack, HStack, ZStack, Container, Flow } from "./layout";

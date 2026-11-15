@@ -4,6 +4,17 @@ import type { MissionAlert, Workflow } from "@moonwitness/types";
 
 const API_BASE = "/api/v1";
 
+export interface CommandCenterStats {
+  workflows: number;
+  running: number;
+  queued: number;
+  paused: number;
+  succeeded: number;
+  failed: number;
+  cancelled: number;
+  alerts: number;
+}
+
 export interface CommandCenterSnapshot {
   workflows: Workflow[];
   alerts: MissionAlert[];
@@ -52,6 +63,13 @@ export function fetchCommandCenterState(signal?: AbortSignal): Promise<CommandCe
   });
 }
 
+export function fetchCommandCenterStats(signal?: AbortSignal): Promise<CommandCenterStats> {
+  return requestJson<CommandCenterStats>("/command-center/stats", {
+    method: "GET",
+    signal,
+  });
+}
+
 export async function createCommandCenterWorkflow(input: {
   name: string;
   detail: string;
@@ -68,6 +86,17 @@ export async function toggleCommandCenterWorkflow(id: string): Promise<Workflow>
   const result = await requestJson<{ workflow: Workflow }>(
     `/command-center/workflows/${encodeURIComponent(id)}/toggle`,
     { method: "PATCH" },
+  );
+  return result.workflow;
+}
+
+export async function transitionCommandCenterWorkflow(
+  id: string,
+  status: Workflow["status"],
+): Promise<Workflow> {
+  const result = await requestJson<{ workflow: Workflow }>(
+    `/command-center/workflows/${encodeURIComponent(id)}/status`,
+    { method: "PATCH", body: JSON.stringify({ status }) },
   );
   return result.workflow;
 }

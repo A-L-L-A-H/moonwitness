@@ -14,8 +14,11 @@
   --motion-celestial-io: cubic-bezier(0.65, 0, 0.35, 1);
   --scroll-progress: 0;
   --font-serif-monument:
-    var(--font-cinzel), "Cinzel", "Cormorant Garamond", "Palatino Linotype", "Book Antiqua",
-    Georgia, serif;
+    var(--font-cinzel), "Cinzel", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-serif-editorial:
+    "Palatino Linotype", "Book Antiqua", Palatino, Georgia, "Times New Roman", serif;
+  --font-sans-ui:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 }
 
 html {
@@ -26,12 +29,53 @@ html {
 body {
   background-color: var(--celestial-void);
   color: var(--celestial-ivory);
-  font-family: var(--font-serif-monument);
+  font-family: var(--font-sans-ui);
   overflow-x: clip;
 }
 
-.font-serif {
+/* Monumental uppercase Cinzel display face — reserved for headings, navigation & numerals */
+.font-monument {
   font-family: var(--font-serif-monument);
+}
+
+/* Readable classical mixed-case serif for reflective prose, folios & wisdom passages */
+.font-serif {
+  font-family: var(--font-serif-editorial);
+}
+
+.font-sans {
+  font-family: var(--font-sans-ui);
+}
+
+/* Subtle sacred girih 12-fold geometric backdrop pattern */
+.bg-girih-filigree {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(223, 192, 123, 0.08), transparent 58%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23dfc07b' stroke-opacity='0.045' stroke-width='0.75'%3E%3Cpolygon points='48,4 60,36 92,48 60,60 48,92 36,60 4,48 36,36'/%3E%3Ccircle cx='48' cy='48' r='22' stroke-dasharray='2 4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size:
+    100% 100%,
+    96px 96px;
+}
+
+/* Breathing Sakinah meditation orb pulse */
+@keyframes sakinah-breathe {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.45;
+  }
+  28% {
+    transform: scale(1.16);
+    opacity: 0.92;
+  }
+  57% {
+    transform: scale(1.16);
+    opacity: 0.85;
+  }
+}
+
+.animate-sakinah-breathe {
+  animation: sakinah-breathe 14s var(--motion-celestial-io) infinite;
 }
 
 /* Sacred accessible focus halo */
@@ -115,6 +159,49 @@ body {
   transition: opacity 280ms var(--motion-sacred-out);
 }
 
+/* Architectural chamfered octagon sanctum chamber shell */
+.octa-bevel-shell {
+  clip-path: polygon(
+    18px 0%,
+    calc(100% - 18px) 0%,
+    100% 18px,
+    100% calc(100% - 18px),
+    calc(100% - 18px) 100%,
+    18px 100%,
+    0% calc(100% - 18px),
+    0% 18px
+  );
+}
+
+/* Pointed celestial archway doorway profile for Canon Doors */
+.portal-arch-card {
+  border-top-left-radius: 56% 24px;
+  border-top-right-radius: 56% 24px;
+  border-bottom-left-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+
+@keyframes halo-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.conic-halo-ring {
+  animation: halo-orbit 28s linear infinite;
+}
+
+.hud-glass-capsule {
+  background: linear-gradient(135deg, rgba(8, 11, 20, 0.88), rgba(4, 5, 9, 0.94));
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 12px 38px rgba(0, 0, 0, 0.78),
+    inset 0 1px 0 rgba(255, 244, 210, 0.14);
+}
+
 /* Volumetric entrance & breathing light keyframes */
 @keyframes spin-slow {
   from {
@@ -182,7 +269,9 @@ body {
   }
 
   .animate-spin-slow,
-  .animate-meridian-pulse {
+  .animate-meridian-pulse,
+  .animate-sakinah-breathe,
+  .conic-halo-ring {
     animation: none !important;
   }
 

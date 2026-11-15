@@ -1272,6 +1272,91 @@ body,
   letter-spacing: 0.12em;
 }
 
+.rail-emblem-img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(229, 62, 56, 0.45));
+}
+
+.brand-crown-img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+  transform: rotate(-8deg);
+  filter: drop-shadow(0 0 8px rgba(229, 62, 56, 0.48));
+}
+
+.agent-portrait-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.workspace-title {
+  gap: 18px;
+}
+
+.workspace-title-copy {
+  min-width: 0;
+}
+
+.workspace-title-aside {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.workspace-art-plate {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  width: 196px;
+  height: 68px;
+  padding: 6px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(229, 62, 56, 0.48);
+  background: rgba(10, 10, 14, 0.88);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.52);
+}
+
+.workspace-art-plate > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  opacity: 0.82;
+  filter: contrast(1.08);
+}
+
+.workspace-art-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(7, 8, 12, 0.84) 0%, rgba(7, 8, 12, 0.32) 65%, rgba(7, 8, 12, 0.72) 100%);
+}
+
+.workspace-art-meta {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #f4eee4;
+  font: 700 8px/1 var(--mono);
+  letter-spacing: 0.12em;
+}
+
+.workspace-art-sigil {
+  width: 18px;
+  height: 18px;
+}
+
 .riot-room-shell .deck-page .create-chaos {
   width: 244px;
   height: 58px;
@@ -1526,6 +1611,8 @@ body,
   }
 
   .riot-room-shell .brand-diamond,
+  .riot-room-shell .brand-crown-img,
+  .riot-room-shell .workspace-art-plate,
   .riot-room-shell .topbar-brand small,
   .riot-room-shell .topbar-context > .context-chip:first-child,
   .riot-room-shell .system-pulse,

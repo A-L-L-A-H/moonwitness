@@ -76,20 +76,24 @@ const FRAGMENT_SHADER_SOURCE = `
     float atmosphereNoise = softNoise(v_uv * vec2(5.0, 3.0) + vec2(t * 0.02, -t * 0.015));
     float godRays = organicRays * radialAttenuation * (0.65 + 0.35 * atmosphereNoise) * 0.34;
 
-    // 3. Gate Archway Golden Core Aura
+    // 3. Gate Archway Golden Core Aura & 8-Fold Girih Standing Interference
     float portalBloom = exp(-dist * dist * 16.0) * 0.28;
+    float girihWave = sin(dist * 34.0 - t * 0.85) * 0.5 + 0.5;
+    float girihSymmetry = pow(abs(cos(angle * 4.0 + t * 0.08)), 6.0);
+    float girihHalo = exp(-abs(dist - 0.32) * 18.0) * (0.4 + 0.6 * girihSymmetry) * girihWave * 0.22;
 
     // 4. Obsidian Basin Water Caustics & Shimmer (bottom 34% of viewport)
     float waterMask = 1.0 - smoothstep(0.20, 0.37, v_uv.y);
     float mirrorDepth = max(0.37 - v_uv.y, 0.001);
     float waterWave = sin(v_uv.y * 115.0 - t * 1.35 + sin(v_uv.x * 16.0 + t * 0.4)) * 0.5 + 0.5;
     float waterCol = exp(-meridianX * meridianX * (45.0 / (0.15 + mirrorDepth * 2.5)));
-    float waterCaustics = waterMask * waterCol * (0.28 + 0.72 * waterWave) * 0.32;
+    float waterCaustics = waterMask * waterCol * (0.28 + 0.72 * waterWave) * 0.34;
 
-    // 5. Subtle Interactive Pointer Presence Halo
+    // 5. Subtle Interactive Pointer Presence Halo + Astral Crosshair Pulse
     vec2 pointerDelta = vec2((v_uv.x - u_pointer.x) * aspect, v_uv.y - (1.0 - u_pointer.y));
-    float pointerDist = dot(pointerDelta, pointerDelta);
-    float pointerGlow = exp(-pointerDist * 22.0) * 0.09;
+    float pointerDist = sqrt(dot(pointerDelta, pointerDelta));
+    float pointerGlow = exp(-pointerDist * pointerDist * 22.0) * 0.11;
+    float pointerRing = exp(-abs(pointerDist - 0.12) * 48.0) * 0.065;
 
     // Sacred Luminance Palette Blending (Luminous Gold + Warm Ivory + Midnight Accent)
     vec3 sacredGold = vec3(0.875, 0.753, 0.482);
@@ -97,16 +101,16 @@ const FRAGMENT_SHADER_SOURCE = `
     vec3 celestialSilver = vec3(0.784, 0.816, 0.871);
 
     float totalEnergy =
-      (meridianBeam + godRays + portalBloom + waterCaustics + pointerGlow) *
+      (meridianBeam + godRays + portalBloom + girihHalo + waterCaustics + pointerGlow + pointerRing) *
       radianceBoost *
       scrollAttenuation;
 
     vec3 color =
-      luminousIvory * (meridianBeam * 0.95 + portalBloom * 0.85) +
-      sacredGold * (godRays * 1.15 + waterCaustics * 0.9 + pointerGlow) +
-      celestialSilver * (godRays * 0.18);
+      luminousIvory * (meridianBeam * 0.95 + portalBloom * 0.85 + pointerRing * 1.2) +
+      sacredGold * (godRays * 1.15 + waterCaustics * 0.92 + girihHalo * 1.1 + pointerGlow) +
+      celestialSilver * (godRays * 0.18 + girihHalo * 0.25);
 
-    float alpha = clamp(totalEnergy * 0.72, 0.0, 0.52);
+    float alpha = clamp(totalEnergy * 0.74, 0.0, 0.56);
     gl_FragColor = vec4(color * alpha, alpha);
   }
 `;

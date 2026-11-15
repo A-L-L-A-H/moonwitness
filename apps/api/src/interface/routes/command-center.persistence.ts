@@ -2,8 +2,29 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { applyMigrations, getDb, type Migration } from "@moonwitness/orm";
 
-export const workflowStatusSchema = z.enum(["Running", "Queued", "Paused"]);
+export const workflowStatusSchema = z.enum([
+  "Queued",
+  "Running",
+  "Paused",
+  "Succeeded",
+  "Failed",
+  "Cancelled",
+]);
 export type WorkflowStatus = z.infer<typeof workflowStatusSchema>;
+
+/** Legal state transitions for a workflow. Absent pairs are rejected. */
+export const WORKFLOW_TRANSITIONS: Record<WorkflowStatus, WorkflowStatus[]> = {
+  Queued: ["Running", "Cancelled"],
+  Running: ["Paused", "Succeeded", "Failed", "Cancelled"],
+  Paused: ["Running", "Cancelled"],
+  Succeeded: [],
+  Failed: [],
+  Cancelled: [],
+};
+
+export function canTransitionWorkflow(current: WorkflowStatus, next: WorkflowStatus): boolean {
+  return WORKFLOW_TRANSITIONS[current]?.includes(next) ?? false;
+}
 
 export const alertLevelSchema = z.enum(["high", "medium", "low"]);
 export type AlertLevel = z.infer<typeof alertLevelSchema>;
@@ -193,6 +214,51 @@ export async function getCommandCenterState(actorId: string): Promise<{
   };
 }
 
+export interface CommandCenterStats {
+  workflows: number;
+  running: number;
+  queued: number;
+  paused: number;
+  succeeded: number;
+  failed: number;
+  cancelled: number;
+  alerts: number;
+}
+
+export async function getCommandCenterStats(actorId: string): Promise<CommandCenterStats> {
+  await seedActorDefaultsIfEmpty(actorId);
+  const workflows = await getDb().all<{ workflow_status: string }>(
+    `SELECT workflow_status FROM command_center_workflows WHERE actor_id = ?`,
+    [actorId],
+  );
+  const alerts = await getDb().get<{ count: number }>(
+    `SELECT COUNT(*) AS count FROM command_center_alerts WHERE actor_id = ? AND dismissed = 0`,
+    [actorId],
+  );
+  const counts: Record<WorkflowStatus, number> = {
+    Queued: 0,
+    Running: 0,
+    Paused: 0,
+    Succeeded: 0,
+    Failed: 0,
+    Cancelled: 0,
+  };
+  for (const row of workflows) {
+    const status = workflowStatusSchema.safeParse(String(row.workflow_status));
+    if (status.success) counts[status.data] += 1;
+  }
+  return {
+    workflows: workflows.length,
+    running: counts.Running,
+    queued: counts.Queued,
+    paused: counts.Paused,
+    succeeded: counts.Succeeded,
+    failed: counts.Failed,
+    cancelled: counts.Cancelled,
+    alerts: alerts?.count ?? 0,
+  };
+}
+
 export async function createCommandCenterWorkflow(
   actorId: string,
   input: CreateWorkflowInput,
@@ -223,9 +289,10 @@ export async function createCommandCenterWorkflow(
   };
 }
 
-export async function toggleCommandCenterWorkflow(
+export async function transitionCommandCenterWorkflow(
   actorId: string,
   workflowId: string,
+  nextStatus: WorkflowStatus,
 ): Promise<PersistedWorkflow | null> {
   await seedActorDefaultsIfEmpty(actorId);
   const row = await getDb().get<Record<string, unknown>>(
@@ -237,7 +304,13 @@ export async function toggleCommandCenterWorkflow(
   if (!row) return null;
 
   const current = workflowStatusSchema.parse(String(row.workflow_status));
-  const nextStatus: WorkflowStatus = current === "Running" ? "Paused" : "Running";
+  if (!canTransitionWorkflow(current, nextStatus)) {
+    const error = new Error(
+      `Cannot transition workflow from ${current} to ${nextStatus}`,
+    ) as Error & { statusCode?: number };
+    error.statusCode = 409;
+    throw error;
+  }
   const now = new Date().toISOString();
 
   await getDb().run(
@@ -253,6 +326,38 @@ export async function toggleCommandCenterWorkflow(
     detail: String(row.detail),
     status: nextStatus,
   };
+}
+
+export async function toggleCommandCenterWorkflow(
+  actorId: string,
+  workflowId: string,
+): Promise<PersistedWorkflow | null> {
+  await seedActorDefaultsIfEmpty(actorId);
+  const row = await getDb().get<Record<string, unknown>>(
+    `SELECT id, name, detail, workflow_status
+       FROM command_center_workflows
+      WHERE actor_id = ? AND id = ?`,
+    [actorId, workflowId],
+  );
+  if (!row) return null;
+
+  const current = workflowStatusSchema.parse(String(row.workflow_status));
+  const nextStatus: WorkflowStatus =
+    current === "Queued"
+      ? "Running"
+      : current === "Paused"
+        ? "Running"
+        : current === "Running"
+          ? "Paused"
+          : current;
+  if (nextStatus === current) {
+    const error = new Error(`Cannot toggle workflow in terminal state ${current}`) as Error & {
+      statusCode?: number;
+    };
+    error.statusCode = 409;
+    throw error;
+  }
+  return transitionCommandCenterWorkflow(actorId, workflowId, nextStatus);
 }
 
 export async function dismissCommandCenterAlert(

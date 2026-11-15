@@ -1,5 +1,6 @@
 import React from "react";
 import { GitBranch, Home, ListChecks, RadioTower, Swords } from "lucide-react";
+import { AnarchyStarSigil } from "./ui/RocksoulVectors";
 
 export interface RiotRailProps {
   page: string;
@@ -18,7 +19,7 @@ export default function RiotRail({ page, onNavigate, onSwitchboard }: RiotRailPr
   return (
     <aside className="riot-rail">
       <div className="rail-mark">
-        <span className="mark-skull">R</span>
+        <AnarchyStarSigil className="rail-emblem-img" />
         <span className="rail-brand">DX</span>
       </div>
       <nav className="rail-nav" aria-label="Main navigation">

@@ -2,7 +2,6 @@
 
 import type { Era, TimelineEvent } from "@moonwitness/types";
 import { EventDetail } from "@moonwitness/ui";
-import { Sheet, SheetContent } from "@moonwitness/ui";
 
 interface EventDetailPanelProps {
   variant: "aside" | "drawer";
@@ -42,12 +41,15 @@ export function EventDetailPanel({
     );
   }
 
-  // Drawer variant (mobile) - use Sheet from shadcn/Radix
   return (
-    <Sheet open={true} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full max-w-md xl:hidden">
-        {detail}
-      </SheetContent>
-    </Sheet>
+    <div
+      className="fixed inset-0 z-50 xl:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Event detail"
+    >
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="absolute inset-y-0 right-0 w-full max-w-md">{detail}</div>
+    </div>
   );
 }

@@ -21,11 +21,22 @@ export function useCurrentIdentity(): Session | null {
         });
         if (response.ok) {
           const data = await response.json();
+          const user: unknown = data?.user;
+          if (!user || typeof user !== "object") {
+            setSession(null);
+            return;
+          }
+          const profile = user as {
+            id?: unknown;
+            displayName?: unknown;
+            username?: unknown;
+            role?: unknown;
+          };
           setSession({
-            identity: data.user.displayName,
-            role: data.user.role,
-            username: data.user.username,
-            id: data.user.id,
+            identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
+            role: typeof profile.role === "string" ? profile.role : "viewer",
+            username: typeof profile.username === "string" ? profile.username : undefined,
+            id: typeof profile.id === "number" ? profile.id : undefined,
           });
         } else {
           setSession(null);
@@ -43,12 +54,19 @@ export function useCurrentIdentity(): Session | null {
       fetch("/api/v1/auth/me", { credentials: "include" })
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
-          if (data?.user) {
+          const user: unknown = data?.user;
+          if (user && typeof user === "object") {
+            const profile = user as {
+              id?: unknown;
+              displayName?: unknown;
+              username?: unknown;
+              role?: unknown;
+            };
             setSession({
-              identity: data.user.displayName,
-              role: data.user.role,
-              username: data.user.username,
-              id: data.user.id,
+              identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
+              role: typeof profile.role === "string" ? profile.role : "viewer",
+              username: typeof profile.username === "string" ? profile.username : undefined,
+              id: typeof profile.id === "number" ? profile.id : undefined,
             });
           } else {
             setSession(null);

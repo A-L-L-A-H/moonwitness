@@ -26,9 +26,11 @@ import {
 } from "@/lib/data";
 import {
   CommandCenterApiError,
+  type CommandCenterStats,
   createCommandCenterWorkflow,
   dismissCommandCenterAlert,
   fetchCommandCenterState,
+  fetchCommandCenterStats,
   toggleCommandCenterWorkflow,
 } from "@/lib/api/command-center";
 import type { ItemDrawerDetail } from "./item-drawer";
@@ -59,6 +61,7 @@ export interface CommandCenterState {
   onQueue: (m: Module) => void;
   onDismissAlert: (id: string) => void;
   onToggleWorkflow: (id: string) => void;
+  stats: CommandCenterStats | null;
   previousFocus: HTMLElement | null;
   setPreviousFocus: (el: HTMLElement | null) => void;
 }
@@ -69,6 +72,7 @@ export function useCommandCenter(): CommandCenterState {
   const [openModule, setOpenModule] = useState<Module | null>(null);
   const [workflows, setWorkflows] = useState<Workflow[]>(initialWorkflows);
   const [alerts, setAlerts] = useState<MissionAlert[]>(initialAlerts);
+  const [stats, setStats] = useState<CommandCenterStats | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [detail, setDetail] = useState<ItemDrawerDetail | null>(null);
@@ -81,10 +85,14 @@ export function useCommandCenter(): CommandCenterState {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchCommandCenterState(controller.signal)
-      .then((snapshot) => {
+    Promise.all([
+      fetchCommandCenterState(controller.signal),
+      fetchCommandCenterStats(controller.signal),
+    ])
+      .then(([snapshot, statsSnapshot]) => {
         setWorkflows(snapshot.workflows);
         setAlerts(snapshot.alerts);
+        setStats(statsSnapshot);
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
@@ -204,10 +212,11 @@ export function useCommandCenter(): CommandCenterState {
     void createCommandCenterWorkflow({
       name: `${m.name} Run`,
       detail: "Queued from module console…",
-      status: "Running",
+      status: "Queued",
     })
       .then((wf) => {
         setWorkflows((ws) => [wf, ...ws]);
+        setStats((s) => (s ? { ...s, workflows: s.workflows + 1, queued: s.queued + 1 } : s));
         setToast(`${m.name}: new run queued and saved.`);
       })
       .catch((error: unknown) => {
@@ -219,6 +228,7 @@ export function useCommandCenter(): CommandCenterState {
     void dismissCommandCenterAlert(id)
       .then(() => {
         setAlerts((list) => list.filter((a) => a.id !== id));
+        setStats((s) => (s ? { ...s, alerts: Math.max(0, s.alerts - 1) } : s));
         setToast("Alert dismissed.");
       })
       .catch((error: unknown) => {
@@ -230,6 +240,20 @@ export function useCommandCenter(): CommandCenterState {
     void toggleCommandCenterWorkflow(id)
       .then((updated) => {
         setWorkflows((ws) => ws.map((w) => (w.id === id ? updated : w)));
+        setStats((s) => {
+          if (!s) return s;
+          const previous = workflows.find((w) => w.id === id);
+          if (!previous) return s;
+          const statusKey = (status: Workflow["status"]) =>
+            status.charAt(0).toLowerCase() + status.slice(1);
+          const before = statusKey(previous.status) as keyof CommandCenterStats;
+          const after = statusKey(updated.status) as keyof CommandCenterStats;
+          return {
+            ...s,
+            [before]: Math.max(0, (s[before] as number) - 1),
+            [after]: (s[after] as number) + 1,
+          };
+        });
         setToast(`${updated.name}: ${updated.status}.`);
       })
       .catch((error: unknown) => {
@@ -256,6 +280,7 @@ export function useCommandCenter(): CommandCenterState {
     onQueue,
     onDismissAlert,
     onToggleWorkflow,
+    stats,
     previousFocus,
     setPreviousFocus,
   };

@@ -20,6 +20,15 @@ class Settings(BaseSettings):
     moonwitness_sync_url: str = ""
     moonwitness_sync_token: str = ""
     moonwitness_batch_size: int = 50
+    cors_origins: str = (
+        "http://localhost:3005,http://127.0.0.1:3005,"
+        "http://localhost:3000,http://127.0.0.1:3000,"
+        "http://localhost:3003,http://127.0.0.1:3003"
+    )
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     @property
     def db_path(self) -> Path:

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   DOCK_TELEMETRY_NODES,
   WORLD_DOMAINS,
@@ -13,6 +13,11 @@ import {
   triggerSacredViewTransition,
 } from "./motion-primitives";
 import { WorldEmblemById } from "./sacred-icons";
+import {
+  AstrolabeOrreryMap,
+  GatewayWaveformSvg,
+  SacredCornerBrackets,
+} from "./sacred-illustrations";
 
 type DockFilterState = "ALL" | DockNodeTelemetry["state"];
 
@@ -31,35 +36,76 @@ export function DockMatrixSection({
   readonly onLaunchWorld: (worldId: WorldIdentifier) => void;
 }) {
   const [filterState, setFilterState] = useState<DockFilterState>("ALL");
+  const [selectedNodeCode, setSelectedNodeCode] = useState<string>(
+    DOCK_TELEMETRY_NODES[0]?.nodeCode ?? "GATE-01",
+  );
 
-  const visibleNodes =
-    filterState === "ALL"
-      ? DOCK_TELEMETRY_NODES
-      : DOCK_TELEMETRY_NODES.filter((node) => node.state === filterState);
+  const visibleNodes = useMemo(
+    () =>
+      filterState === "ALL"
+        ? DOCK_TELEMETRY_NODES
+        : DOCK_TELEMETRY_NODES.filter((node) => node.state === filterState),
+    [filterState],
+  );
+
+  const visibleCodeSet = useMemo(
+    () => new Set(visibleNodes.map((node) => node.nodeCode)),
+    [visibleNodes],
+  );
+
+  const activeNode =
+    visibleNodes.find((node) => node.nodeCode === selectedNodeCode) ??
+    visibleNodes[0] ??
+    DOCK_TELEMETRY_NODES[0]!;
+
+  const matchedWorld = WORLD_DOMAINS.find((domain) => domain.id === activeNode.worldId);
+  const activeNodeIdx = Math.max(
+    0,
+    DOCK_TELEMETRY_NODES.findIndex((node) => node.nodeCode === activeNode.nodeCode),
+  );
+
+  const handleSelectFilter = (optionId: DockFilterState) => {
+    triggerSacredViewTransition(() => {
+      setFilterState(optionId);
+      const nextVisible =
+        optionId === "ALL"
+          ? DOCK_TELEMETRY_NODES
+          : DOCK_TELEMETRY_NODES.filter((node) => node.state === optionId);
+      if (nextVisible.length > 0 && !nextVisible.some((n) => n.nodeCode === selectedNodeCode)) {
+        setSelectedNodeCode(nextVisible[0]!.nodeCode);
+      }
+    }, quietMode);
+  };
+
+  const handleSelectNode = (nodeCode: string) => {
+    triggerSacredViewTransition(() => {
+      setSelectedNodeCode(nodeCode);
+    }, quietMode);
+  };
 
   return (
     <section
       id="the-dock"
       aria-labelledby="dock-heading"
-      className="relative border-t border-[#d6b46c]/25 bg-[#040509] py-24 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative overflow-x-clip border-t border-[#d6b46c]/25 bg-[#040509]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
       <div className="mx-auto max-w-7xl">
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
+            <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
               <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d6b46c]" />
               <span>CELESTIAL HORIZON BRIDGE</span>
               <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d6b46c]" />
             </div>
             <h2
               id="dock-heading"
-              className="mt-4 font-serif text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
+              className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
               THE DOCK · SOVEREIGN MATRIX
             </h2>
-            <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#d6ceb8]/85">
-              Unified gateway routing across the five realms of the Empire. Inspect protocol
-              assignments and enter any sanctuary directly from the Horizon Matrix.
+            <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
+              Interactive heliocentric astrolabe plotting the five Empire gateways around one
+              monocentric light core. Select any orbital node to lock sextant telemetry and launch.
             </p>
 
             {/* Filter by Gateway Class */}
@@ -75,14 +121,10 @@ export function DockMatrixSection({
                     key={option.id}
                     type="button"
                     aria-pressed={isActive}
-                    onClick={() =>
-                      triggerSacredViewTransition(() => {
-                        setFilterState(option.id);
-                      }, quietMode)
-                    }
+                    onClick={() => handleSelectFilter(option.id)}
                     className={`min-h-[44px] border px-4 py-1.5 font-mono text-[11px] tracking-[0.18em] uppercase transition-colors cursor-pointer ${
                       isActive
-                        ? "border-[#f8eac6] bg-[#d6b46c]/20 text-[#fff6df]"
+                        ? "border-[#f8eac6] bg-[#d6b46c]/20 text-[#fff6df] shadow-[0_0_20px_rgba(223,192,123,0.22)]"
                         : "border-[#d6b46c]/30 bg-[#080b14] text-[#c8beaa] hover:border-[#d6b46c]/65 hover:text-[#fff6df]"
                     }`}
                   >
@@ -94,76 +136,147 @@ export function DockMatrixSection({
           </div>
         </ScrollChapterReveal>
 
+        {/* Dual-Perspective Orbital Orrery Observatory + Telemetry Aperture */}
         <ScrollChapterReveal quietMode={quietMode}>
-          <div
-            className={`mt-10 grid grid-cols-1 gap-4 ${
-              visibleNodes.length >= 5
-                ? "md:grid-cols-2 lg:grid-cols-5"
-                : visibleNodes.length === 2
-                  ? "md:grid-cols-2 max-w-3xl mx-auto"
-                  : "max-w-md mx-auto"
-            }`}
-          >
-            {visibleNodes.map((telemetryNode) => {
-              const matchedWorld = WORLD_DOMAINS.find(
-                (domain) => domain.id === telemetryNode.worldId,
-              );
-              return (
-                <SpatialTiltCard key={telemetryNode.nodeCode} disabled={quietMode} maxTiltDeg={3.5}>
-                  <div className="flex h-full flex-col justify-between border border-[#d6b46c]/30 bg-[#080b14]/95 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:border-[#d6b46c]/65 transition-colors">
-                    <div>
-                      <div className="flex items-center justify-between text-[11px] font-mono text-[#d6b46c]">
-                        <span>{telemetryNode.nodeCode}</span>
-                        <span className="inline-flex items-center gap-1.5 text-[#f7dfa0]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#f7dfa0]" />
-                          {telemetryNode.state}
-                        </span>
-                      </div>
+          <div className="mt-12 grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
+            {/* Left: Astronomical Orbital Orrery Stage */}
+            <div className="lg:col-span-6 relative border border-[#d6b46c]/30 bg-gradient-to-b from-[#070a14] via-[#05070e] to-[#080b14] p-6 sm:p-8 shadow-[0_24px_65px_rgba(0,0,0,0.85)]">
+              <SacredCornerBrackets />
+              <div className="mb-3 flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-[#dfc07b] uppercase">
+                <span>ASTROLABE ORRERY // SEXTANT LOCK</span>
+                <span>
+                  {visibleNodes.length} OF {DOCK_TELEMETRY_NODES.length} ACTIVE
+                </span>
+              </div>
 
-                      <div className="mt-5 flex items-center gap-3">
-                        <WorldEmblemById
-                          worldId={telemetryNode.worldId}
-                          className="h-10 w-10 shrink-0"
+              <AstrolabeOrreryMap
+                nodes={DOCK_TELEMETRY_NODES}
+                visibleCodes={visibleCodeSet}
+                selectedCode={activeNode.nodeCode}
+                quietMode={quietMode}
+                onSelectNode={handleSelectNode}
+              />
+            </div>
+
+            {/* Right: Gateway Switcher Rail + Active Aperture Inspector */}
+            <div className="lg:col-span-6 flex flex-col gap-5">
+              {/* Compact Synchronized Gateway Selector Rail */}
+              <div
+                role="tablist"
+                aria-label="Select a Gateway Satellite"
+                className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5"
+              >
+                {visibleNodes.map((node) => {
+                  const isSelected = node.nodeCode === activeNode.nodeCode;
+                  const worldMeta = WORLD_DOMAINS.find((w) => w.id === node.worldId);
+                  return (
+                    <button
+                      key={node.nodeCode}
+                      type="button"
+                      role="tab"
+                      aria-selected={isSelected}
+                      onClick={() => handleSelectNode(node.nodeCode)}
+                      className={`min-h-[54px] border px-2.5 py-2 text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? "border-[#fff4d2] bg-[#d6b46c]/20 shadow-[0_0_24px_rgba(223,192,123,0.2)]"
+                          : "border-[#d6b46c]/25 bg-[#080b14]/90 hover:border-[#d6b46c]/55"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between font-mono text-[9.5px] text-[#dfc07b]">
+                        <span>{node.nodeCode}</span>
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full bg-[#f7dfa0] ${
+                            quietMode ? "" : "animate-pulse"
+                          }`}
                         />
-                        <div>
-                          <div className="font-serif text-base tracking-[0.16em] text-[#fff6df]">
-                            {matchedWorld?.name ?? telemetryNode.designation}
-                          </div>
-                          <div className="text-xs text-[#bfb59e]">{telemetryNode.designation}</div>
-                        </div>
                       </div>
+                      <div className="font-monument mt-1 truncate text-[11px] tracking-[0.08em] text-[#fff6df]">
+                        {worldMeta?.name ?? node.designation}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
 
-                      <dl className="mt-6 space-y-2 border-t border-[#d6b46c]/15 pt-4 text-xs font-mono">
-                        <div className="flex justify-between gap-2">
-                          <dt className="text-[#8e8572]">PROTOCOL</dt>
-                          <dd className="text-right text-[#e6decb]">{telemetryNode.protocol}</dd>
-                        </div>
-                        <div className="flex justify-between gap-2">
-                          <dt className="text-[#8e8572]">BEARING</dt>
-                          <dd className="text-right text-[#e6decb]">
-                            {telemetryNode.orbitalBearing}
-                          </dd>
-                        </div>
-                        <div className="flex justify-between gap-2">
-                          <dt className="text-[#8e8572]">SPEC TARGET</dt>
-                          <dd className="text-right text-[#f5e3b8]">
-                            {telemetryNode.integrityPercent}% · {telemetryNode.latencyMs}ms
-                          </dd>
-                        </div>
-                      </dl>
+              {/* Active Gateway Beveled Telemetry Aperture */}
+              <SpatialTiltCard disabled={quietMode} maxTiltDeg={2.8}>
+                <div className="octa-bevel-shell relative border border-[#e6c987]/45 bg-gradient-to-br from-[#0e1322] via-[#070a13] to-[#05060b] p-6 sm:p-8 shadow-[0_24px_65px_rgba(0,0,0,0.88)]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-4 font-mono text-[11px] text-[#d6b46c]">
+                    <span>TELEMETRY LOCK // {activeNode.nodeCode}</span>
+                    <span className="inline-flex items-center gap-1.5 text-[#f7dfa0]">
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full bg-[#f7dfa0] ${
+                          quietMode ? "" : "animate-pulse"
+                        }`}
+                      />
+                      {activeNode.state}
+                    </span>
+                  </div>
+
+                  <div className="mt-5 flex items-center gap-4">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#dfc07b]/40 bg-[#080b15]">
+                      <WorldEmblemById worldId={activeNode.worldId} className="h-11 w-11" />
                     </div>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-baseline gap-2.5">
+                        <h3 className="font-monument text-2xl sm:text-3xl tracking-[0.14em] text-[#fff8e6]">
+                          {matchedWorld?.name ?? activeNode.designation}
+                        </h3>
+                        {matchedWorld && (
+                          <span dir="rtl" lang="ar" className="text-lg text-[#dfc07b]">
+                            {matchedWorld.arabicEpithet}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 font-serif text-sm text-[#e0d7c4]">
+                        {activeNode.designation}
+                      </p>
+                    </div>
+                  </div>
 
+                  <div className="mt-5 border-y border-[#d6b46c]/15 py-3">
+                    <div className="mb-1.5 flex justify-between font-mono text-[10px] tracking-[0.16em] text-[#9c927d] uppercase">
+                      <span>HARMONIC CARRIER WAVE</span>
+                      <span className="text-[#f5dfa6]">
+                        {matchedWorld?.harmonicFrequency ?? "COVENANT SYNC"}
+                      </span>
+                    </div>
+                    <GatewayWaveformSvg variant={activeNodeIdx + 1} />
+                  </div>
+
+                  <dl className="mt-5 grid grid-cols-1 gap-3 font-mono text-xs sm:grid-cols-3">
+                    <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
+                      <dt className="text-[10px] text-[#8e8572]">PROTOCOL</dt>
+                      <dd className="mt-1 text-[#fff4d2] break-words">{activeNode.protocol}</dd>
+                    </div>
+                    <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
+                      <dt className="text-[10px] text-[#8e8572]">ORBITAL BEARING</dt>
+                      <dd className="mt-1 text-[#fff4d2]">{activeNode.orbitalBearing}</dd>
+                    </div>
+                    <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
+                      <dt className="text-[10px] text-[#8e8572]">SPEC TARGET</dt>
+                      <dd className="mt-1 text-[#f5e3b8]">
+                        {activeNode.integrityPercent}% · {activeNode.latencyMs}ms
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+                    <p className="font-serif text-xs text-[#c8beaa] max-w-xs">
+                      {matchedWorld?.primaryDirective ??
+                        "Enter calibrated sanctum chamber directly via Sovereign Matrix."}
+                    </p>
                     <button
                       type="button"
-                      onClick={() => onLaunchWorld(telemetryNode.worldId)}
-                      className="mt-6 min-h-[44px] w-full border border-[#d6b46c]/40 bg-[#d6b46c]/12 py-2 font-serif text-xs tracking-[0.2em] text-[#f8eac6] uppercase hover:border-[#f8eac6] hover:bg-[#d6b46c]/25 transition-all cursor-pointer"
+                      onClick={() => onLaunchWorld(activeNode.worldId)}
+                      className="btn-chamfer font-monument px-7 py-2.5 text-xs tracking-[0.2em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
                     >
-                      ENTER {matchedWorld?.name} &rsaquo;
+                      ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;
                     </button>
                   </div>
-                </SpatialTiltCard>
-              );
-            })}
+                </div>
+              </SpatialTiltCard>
+            </div>
           </div>
         </ScrollChapterReveal>
       </div>

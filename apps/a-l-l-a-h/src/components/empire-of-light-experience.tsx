@@ -12,6 +12,7 @@ import {
 } from "@/data/empire-registry";
 import { CanonCodexSanctum } from "./canon-codex-sanctum";
 import { CelestialCanvas } from "./celestial-canvas";
+import { CelestialHudCapsule } from "./celestial-hud-capsule";
 import { CinematicEntrance } from "./cinematic-entrance";
 import { CovenantAboutSection } from "./covenant-about-section";
 import { DockMatrixSection } from "./dock-matrix-section";
@@ -38,6 +39,7 @@ export function EmpireOfLightExperience() {
   const [replayCounter, setReplayCounter] = useState<number>(0);
   const [entranceActive, setEntranceActive] = useState<boolean>(false);
   const [scrollProgress, setScrollProgress] = useState<number>(0);
+  const [pageScrollFraction, setPageScrollFraction] = useState<number>(0);
 
   // Keyboard shortcut Ctrl+K / Cmd+K to open search from anywhere
   useEffect(() => {
@@ -51,15 +53,42 @@ export function EmpireOfLightExperience() {
     return () => window.removeEventListener("keydown", handleGlobalKey);
   }, []);
 
-  // Passive scroll progress for hero parallax + shader attenuation
+  // Passive scroll progress for hero parallax + sticky header glass + accurate scroll-spy
   useEffect(() => {
     let rafId = 0;
+    const sectionIds: readonly NavigationSectionId[] = [
+      "the-gate",
+      "the-worlds",
+      "the-codex",
+      "the-dock",
+      "about",
+    ];
+
     const updateScroll = () => {
       rafId = 0;
       const vh = Math.max(window.innerHeight, 1);
       const progress = Math.max(0, Math.min(1, window.scrollY / vh));
+      const maxDocScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
       setScrollProgress(progress);
+      setPageScrollFraction(Math.max(0, Math.min(1, window.scrollY / maxDocScroll)));
       document.documentElement.style.setProperty("--scroll-progress", progress.toFixed(3));
+
+      // Determine active section by viewport top threshold (~160px below fixed header)
+      const nearBottom =
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 40;
+      if (nearBottom) {
+        setActiveNavTab("about");
+        return;
+      }
+
+      let currentSection: NavigationSectionId = "the-gate";
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 180) {
+          currentSection = id;
+        }
+      }
+      setActiveNavTab(currentSection);
     };
 
     const handleScroll = () => {
@@ -72,57 +101,6 @@ export function EmpireOfLightExperience() {
     return () => {
       window.cancelAnimationFrame(rafId);
       window.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
-
-  // Scroll-spy IntersectionObserver updating active navigation tab
-  useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") {
-      return;
-    }
-
-    const sectionIds: readonly NavigationSectionId[] = [
-      "the-gate",
-      "the-worlds",
-      "the-codex",
-      "the-dock",
-      "about",
-    ];
-    const observedElements = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-
-    if (observedElements.length === 0) {
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        let bestEntry: IntersectionObserverEntry | null = null;
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            if (!bestEntry || entry.intersectionRatio > bestEntry.intersectionRatio) {
-              bestEntry = entry;
-            }
-          }
-        }
-        if (bestEntry) {
-          const id = bestEntry.target.id as NavigationSectionId;
-          setActiveNavTab(id);
-        }
-      },
-      {
-        threshold: [0.22, 0.45, 0.7],
-        rootMargin: "-10% 0px -25% 0px",
-      },
-    );
-
-    for (const element of observedElements) {
-      observer.observe(element);
-    }
-
-    return () => {
-      observer.disconnect();
     };
   }, []);
 
@@ -189,6 +167,18 @@ export function EmpireOfLightExperience() {
     [quietMode],
   );
 
+  const jumpToRemembranceSanctuary = useCallback(() => {
+    setMobileMenuOpen(false);
+    setActiveNavTab("about");
+    const sanctuaryEl = document.getElementById("remembrance-sanctuary");
+    if (sanctuaryEl) {
+      const reduced = quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      sanctuaryEl.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+    } else {
+      navigateToSection("about");
+    }
+  }, [quietMode, navigateToSection]);
+
   const handleCapabilityDetected = useCallback((tier: RenderingCapabilityTier) => {
     setRenderingTier(tier);
   }, []);
@@ -211,6 +201,8 @@ export function EmpireOfLightExperience() {
         ? "LIVING LIGHT · CANVAS 2D"
         : "QUIET CONTEMPLATIVE MODE";
 
+  const headerFrosted = scrollProgress > 0.06 || mobileMenuOpen;
+
   return (
     <div className="relative min-h-screen bg-[#040509] text-[#f5efe2] selection:bg-[#d6b46c] selection:text-[#040509]">
       {/* Non-Blocking Staged Cinematic Opening Sequence */}
@@ -220,49 +212,27 @@ export function EmpireOfLightExperience() {
         onVisibilityChange={setEntranceActive}
       />
 
-      {/* =====================================================================
-          HERO VIEWPORT — THE GATE OF LIGHT (Sacred Minimalism × Living Light)
-         ===================================================================== */}
-      <section
-        id="the-gate"
-        aria-label="A-L-L-A-H.COM — Empire of the Light Gate"
-        aria-hidden={entranceActive ? true : undefined}
-        className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden"
+      {/* Global Meridian Scroll Progress Hairline */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-[#dfc07b]/10"
       >
-        {/* Background Master Celestial Vista with Scroll-Depth Parallax */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[#040509]">
-          <div
-            className="relative h-full w-full transition-transform duration-700 ease-out"
-            style={{
-              transform: `translate3d(0, ${parallaxTranslateY}px, 0) scale(${parallaxScale.toFixed(4)})`,
-            }}
-          >
-            <Image
-              src="/art/celestial-gate-bg.jpg"
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className={`object-cover object-center transition-[filter] duration-1000 ${
-                sanctuaryRadianceActive ? "brightness-110 contrast-105" : "brightness-100"
-              }`}
-            />
-          </div>
-          {/* Legibility & Horizon Vignette Veils */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/75" />
-          <div className="absolute inset-x-0 bottom-0 h-[34%] bg-gradient-to-t from-[#040509]/92 via-[#040509]/48 to-transparent" />
-        </div>
-
-        {/* Multi-Layer WebGL2 GLSL Shader + 2D Orbital Starfield & Ripple Canvas */}
-        <CelestialCanvas
-          sanctuaryRadianceActive={sanctuaryRadianceActive}
-          quietMode={quietMode}
-          scrollProgress={scrollProgress}
-          onCapabilityDetected={handleCapabilityDetected}
+        <div
+          className="h-full bg-gradient-to-r from-[#9c732b] via-[#fff4d2] to-[#dfc07b] transition-[width] duration-150"
+          style={{ width: `${(pageScrollFraction * 100).toFixed(1)}%` }}
         />
+      </div>
 
-        {/* 1. TOP NAVIGATION BAR */}
-        <header className="relative z-30 mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 pt-4 pb-2 sm:px-8 sm:pt-6 lg:px-12">
+      {/* 1. FIXED SANCTUARY HEADER (Transparent over the Gate, Obsidian Glass on Scroll) */}
+      <header
+        aria-hidden={entranceActive ? true : undefined}
+        className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
+          headerFrosted
+            ? "border-b border-[#d6b46c]/20 bg-[#040509]/85 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.75)]"
+            : "bg-gradient-to-b from-[#040509]/70 via-[#040509]/25 to-transparent"
+        }`}
+      >
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-3 sm:px-8 sm:py-3.5 lg:px-12">
           {/* Brand Emblem & Title */}
           <a
             href="#the-gate"
@@ -272,16 +242,16 @@ export function EmpireOfLightExperience() {
             }}
             className="group flex min-h-[44px] items-center gap-2.5 sm:gap-3.5 focus:outline-none"
           >
-            <OctagramMandalaIcon className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 transition-transform duration-700 group-hover:rotate-45" />
+            <OctagramMandalaIcon className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 transition-transform duration-700 group-hover:rotate-45" />
             <div className="flex items-center gap-2.5 sm:gap-3.5 whitespace-nowrap">
-              <span className="font-serif text-sm md:text-xs lg:text-lg tracking-[0.14em] lg:tracking-[0.16em] text-[#f7efe0] font-normal">
+              <span className="font-monument text-sm md:text-xs lg:text-lg tracking-[0.14em] lg:tracking-[0.16em] text-[#f7efe0] font-normal">
                 A-L-L-A-H.COM
               </span>
               <span
                 className="hidden h-4 w-px bg-[#d6b46c]/45 lg:inline-block"
                 aria-hidden="true"
               />
-              <span className="hidden font-serif text-[10px] sm:text-xs tracking-[0.22em] text-[#dfd5c0]/85 uppercase lg:inline-block">
+              <span className="hidden font-monument text-[10px] sm:text-xs tracking-[0.22em] text-[#dfd5c0]/85 uppercase lg:inline-block">
                 EMPIRE OF THE LIGHT
               </span>
             </div>
@@ -303,7 +273,7 @@ export function EmpireOfLightExperience() {
                     navigateToSection(navTab.id);
                   }}
                   aria-current={isTabActive ? "page" : undefined}
-                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-serif text-[10px] lg:text-[13px] tracking-[0.12em] lg:tracking-[0.2em] uppercase transition-colors ${
+                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-monument text-[10px] lg:text-[13px] tracking-[0.12em] lg:tracking-[0.2em] uppercase transition-colors ${
                     isTabActive
                       ? "text-[#fff8e8] drop-shadow-[0_0_10px_rgba(248,234,198,0.65)]"
                       : "text-[#d8ceba]/80 hover:text-[#fff6df]"
@@ -386,7 +356,7 @@ export function EmpireOfLightExperience() {
               </span>
             </button>
           </div>
-        </header>
+        </div>
 
         {/* Mobile Sanctuary Drawer Navigation */}
         {mobileMenuOpen && (
@@ -394,7 +364,7 @@ export function EmpireOfLightExperience() {
             id="mobile-sanctuary-nav"
             role="region"
             aria-label="Mobile Navigation"
-            className="absolute left-4 right-4 top-[72px] z-40 border border-[#d6b46c]/45 bg-[#060810]/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-md md:hidden"
+            className="mx-4 mb-3 border border-[#d6b46c]/45 bg-[#060810]/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-md md:hidden"
           >
             <div className="grid grid-cols-2 gap-2">
               {NAVIGATION_TABS.map((navTab) => {
@@ -404,7 +374,7 @@ export function EmpireOfLightExperience() {
                     key={navTab.id}
                     type="button"
                     onClick={() => navigateToSection(navTab.id)}
-                    className={`min-h-[44px] border px-3 py-2 font-serif text-xs tracking-[0.18em] uppercase transition-colors cursor-pointer ${
+                    className={`min-h-[44px] border px-3 py-2 font-monument text-xs tracking-[0.18em] uppercase transition-colors cursor-pointer ${
                       isTabActive
                         ? "border-[#dfc07b] bg-[#dfc07b]/18 text-[#fff6df]"
                         : "border-[#d6b46c]/25 bg-[#0a0d16] text-[#d8ceba]"
@@ -434,16 +404,58 @@ export function EmpireOfLightExperience() {
             </div>
           </div>
         )}
+      </header>
+
+      {/* =====================================================================
+          HERO VIEWPORT — THE GATE OF LIGHT (Sacred Minimalism × Living Light)
+         ===================================================================== */}
+      <section
+        id="the-gate"
+        aria-label="A-L-L-A-H.COM — Empire of the Light Gate"
+        aria-hidden={entranceActive ? true : undefined}
+        className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden pt-20 sm:pt-24"
+      >
+        {/* Background Master Celestial Vista with Scroll-Depth Parallax */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[#040509]">
+          <div
+            className="relative h-full w-full transition-transform duration-700 ease-out"
+            style={{
+              transform: `translate3d(0, ${parallaxTranslateY}px, 0) scale(${parallaxScale.toFixed(4)})`,
+            }}
+          >
+            <Image
+              src="/art/celestial-gate-bg.jpg"
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className={`object-cover object-center transition-[filter] duration-1000 ${
+                sanctuaryRadianceActive ? "brightness-110 contrast-105" : "brightness-100"
+              }`}
+            />
+          </div>
+          {/* Legibility & Horizon Vignette Veils */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
+          <div className="absolute inset-x-0 bottom-0 h-[48%] sm:h-[38%] bg-gradient-to-t from-[#040509] via-[#040509]/76 to-transparent" />
+        </div>
+
+        {/* Multi-Layer WebGL2 GLSL Shader + 2D Orbital Starfield & Ripple Canvas */}
+        <CelestialCanvas
+          sanctuaryRadianceActive={sanctuaryRadianceActive}
+          quietMode={quietMode}
+          scrollProgress={scrollProgress}
+          onCapabilityDetected={handleCapabilityDetected}
+        />
 
         {/* 2. CENTRAL HERO MONUMENT & SACRED PORTAL */}
-        <div className="relative z-20 mx-auto flex w-full max-w-5xl flex-col items-center px-4 text-center mt-[3vh] sm:mt-[5vh]">
+        <div className="relative z-20 mx-auto flex w-full max-w-5xl flex-col items-center px-4 text-center mt-[2vh] sm:mt-[4vh]">
           {/* — IN THE NAME OF ALLAH — */}
           <div className="flex items-center justify-center gap-3 sm:gap-5">
             <span
               aria-hidden="true"
               className="h-px w-10 sm:w-20 bg-gradient-to-r from-transparent to-[#d6b46c]/80"
             />
-            <p className="font-serif text-[10px] sm:text-xs md:text-[13px] tracking-[0.28em] text-[#e8dfd0]/90 uppercase">
+            <p className="font-monument text-[10px] sm:text-xs md:text-[13px] tracking-[0.28em] text-[#e8dfd0]/90 uppercase">
               IN THE NAME OF ALLAH
             </p>
             <span
@@ -453,22 +465,22 @@ export function EmpireOfLightExperience() {
           </div>
 
           {/* A-L-L-A-H.COM */}
-          <h1 className="mt-2 sm:mt-3 font-serif text-4xl sm:text-6xl md:text-7xl lg:text-[5.4rem] font-normal leading-none tracking-[0.12em] text-gold-monument select-none">
+          <h1 className="font-monument mt-2 sm:mt-3 text-4xl sm:text-6xl md:text-7xl lg:text-[5.4rem] font-normal leading-none tracking-[0.12em] text-gold-monument select-none">
             A-L-L-A-H.COM
           </h1>
 
           {/* E M P I R E   O F   T H E   L I G H T */}
-          <p className="mt-2.5 sm:mt-3.5 font-serif text-xs sm:text-lg md:text-2xl tracking-[0.46em] text-[#eee5d3]/95 uppercase pl-[0.46em]">
+          <p className="font-monument mt-2.5 sm:mt-3.5 text-xs sm:text-lg md:text-2xl tracking-[0.46em] text-[#eee5d3]/95 uppercase pl-[0.46em]">
             EMPIRE OF THE LIGHT
           </p>
 
           {/* A world to witness. A world to learn. A world to build. */}
-          <p className="mt-3 sm:mt-4 font-serif text-xs sm:text-base md:text-[19px] tracking-[0.06em] text-[#f5efe2]/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+          <p className="mt-3 sm:mt-4 font-serif text-sm sm:text-base md:text-[19px] tracking-[0.04em] text-[#f5efe2]/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             A world to witness. A world to learn. A world to build.
           </p>
 
           {/* Interactive Gate Threshold with Magnetic Portal */}
-          <div className="mt-6 sm:mt-10 flex flex-col items-center">
+          <div className="mt-5 sm:mt-8 flex flex-col items-center">
             <MagneticPortal disabled={quietMode} maxOffsetPx={7}>
               <button
                 type="button"
@@ -485,21 +497,21 @@ export function EmpireOfLightExperience() {
         </div>
 
         {/* 3. FOREGROUND REFLECTIVE WATER DOCK — 5 WORLDS + CTA + FOOTER */}
-        <div className="relative z-20 mt-auto w-full pt-8 pb-4 sm:pb-6">
+        <div className="relative z-20 mt-auto w-full pt-6 pb-4 sm:pb-6">
           <div className="mx-auto max-w-[1480px] px-4 sm:px-8 lg:px-12">
             {/* Five Worlds Reflective Row */}
             <div
               role="region"
               aria-label="The Five Worlds Dock"
-              className="grid grid-cols-2 gap-y-5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-y-0"
+              className="grid grid-cols-2 gap-2.5 sm:gap-y-5 lg:grid-cols-5 lg:gap-0"
             >
               {WORLD_DOMAINS.map((worldItem, worldIdx) => {
                 const isWorldSelected = activeWorldId === worldItem.id;
                 return (
                   <div
                     key={worldItem.id}
-                    className={`relative flex flex-col items-center px-2 sm:px-4 text-center ${
-                      worldIdx === WORLD_DOMAINS.length - 1 ? "col-span-2 sm:col-span-1" : ""
+                    className={`relative flex flex-col items-center px-2 py-2 sm:px-4 sm:py-0 text-center rounded-sm bg-[#040509]/58 border border-[#d6b46c]/18 backdrop-blur-[2px] sm:rounded-none sm:bg-transparent sm:border-0 sm:backdrop-blur-none ${
+                      worldIdx === WORLD_DOMAINS.length - 1 ? "col-span-2 lg:col-span-1" : ""
                     }`}
                   >
                     {worldIdx > 0 && (
@@ -514,7 +526,7 @@ export function EmpireOfLightExperience() {
                       onClick={() => selectAndInspectWorld(worldItem.id)}
                       className="group flex min-h-[44px] flex-col items-center py-1 text-center focus:outline-none cursor-pointer"
                     >
-                      <div className="relative flex h-11 w-11 sm:h-13 sm:w-13 items-center justify-center transition-transform duration-300 group-hover:-translate-y-1">
+                      <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center transition-transform duration-300 group-hover:-translate-y-1">
                         <span
                           aria-hidden="true"
                           className={`absolute inset-0 rounded-full bg-[#f5dfa6]/18 blur-md transition-opacity duration-300 ${
@@ -523,15 +535,15 @@ export function EmpireOfLightExperience() {
                         />
                         <WorldEmblemById
                           worldId={worldItem.id}
-                          className="relative h-10 w-10 sm:h-12 sm:w-12 drop-shadow-[0_0_12px_rgba(245,223,166,0.45)]"
+                          className="relative h-9 w-9 sm:h-12 sm:w-12 drop-shadow-[0_0_12px_rgba(245,223,166,0.45)]"
                         />
                       </div>
 
-                      <span className="mt-2 font-serif text-xs sm:text-sm md:text-[15px] tracking-[0.16em] text-[#f8f1e1] group-hover:text-[#fff9e8] transition-colors">
+                      <span className="font-monument mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-[15px] tracking-[0.16em] text-[#f8f1e1] group-hover:text-[#fff9e8] transition-colors">
                         {worldItem.name}
                       </span>
 
-                      <span className="mt-1 font-serif text-[11px] sm:text-xs tracking-[0.04em] text-[#d4cbb8]/85 group-hover:text-[#efe6d2] transition-colors">
+                      <span className="mt-0.5 sm:mt-1 font-serif text-[11px] sm:text-xs tracking-[0.03em] text-[#e6decb]/90 group-hover:text-[#fff8e6] transition-colors drop-shadow-[0_1px_6px_rgba(0,0,0,0.95)]">
                         {worldItem.tagline}
                       </span>
                     </button>
@@ -541,12 +553,12 @@ export function EmpireOfLightExperience() {
             </div>
 
             {/* Center Chamfered Button with Magnetic Interaction */}
-            <div className="mt-6 sm:mt-8 flex flex-col items-center">
+            <div className="mt-5 sm:mt-8 flex flex-wrap items-center justify-center gap-3">
               <MagneticPortal disabled={quietMode} maxOffsetPx={6}>
                 <button
                   type="button"
                   onClick={() => navigateToSection("the-worlds")}
-                  className="btn-chamfer group inline-flex items-center gap-3 px-7 sm:px-10 py-2.5 sm:py-3 font-serif text-xs sm:text-sm tracking-[0.22em] text-[#f5ecd7] uppercase hover:text-white cursor-pointer"
+                  className="btn-chamfer font-monument group inline-flex items-center gap-3 px-7 sm:px-10 py-2.5 sm:py-3 text-xs sm:text-sm tracking-[0.22em] text-[#f5ecd7] uppercase hover:text-white cursor-pointer"
                 >
                   <span>EXPLORE THE WORLDS</span>
                   <span
@@ -558,19 +570,27 @@ export function EmpireOfLightExperience() {
                 </button>
               </MagneticPortal>
 
-              {/* Bottom Ornament Line with Center 4-Point Diamond Star */}
-              <div
-                aria-hidden="true"
-                className="mt-4 flex w-full max-w-md items-center justify-center gap-2.5"
+              <button
+                type="button"
+                onClick={jumpToRemembranceSanctuary}
+                className="min-h-[44px] border border-[#dfc07b]/35 bg-[#080a12]/75 px-5 py-2.5 font-monument text-[11px] tracking-[0.2em] text-[#f5dfa6] uppercase hover:border-[#fff4d2] hover:bg-[#dfc07b]/15 hover:text-white transition-all cursor-pointer"
               >
-                <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#d6b46c]/55 to-[#e6c987]/80" />
-                <DiamondStarOrnament className="h-3.5 w-3.5 text-[#f5dfa6]" />
-                <span className="h-px flex-1 bg-gradient-to-l from-transparent via-[#d6b46c]/55 to-[#e6c987]/80" />
-              </div>
+                SANCTUARY &amp; DHIKR
+              </button>
+            </div>
+
+            {/* Bottom Ornament Line with Center 4-Point Diamond Star */}
+            <div
+              aria-hidden="true"
+              className="mt-4 mx-auto flex w-full max-w-md items-center justify-center gap-2.5"
+            >
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#d6b46c]/55 to-[#e6c987]/80" />
+              <DiamondStarOrnament className="h-3.5 w-3.5 text-[#f5dfa6]" />
+              <span className="h-px flex-1 bg-gradient-to-l from-transparent via-[#d6b46c]/55 to-[#e6c987]/80" />
             </div>
 
             {/* Bottom Corner Signatures + Subtle Engine Capability Indicator */}
-            <div className="mt-2 flex flex-col items-center justify-between gap-2 text-[10px] sm:text-[11px] font-serif tracking-[0.2em] text-[#d8ceba]/80 uppercase sm:flex-row">
+            <div className="mt-2 flex flex-col items-center justify-between gap-2 text-[10px] sm:text-[11px] font-monument tracking-[0.2em] text-[#d8ceba]/80 uppercase sm:flex-row">
               <div>A-L-L-A-H.COM &middot; EMPIRE OF THE LIGHT</div>
               <div className="font-mono text-[10px] tracking-[0.18em] text-[#dfc07b]/80">
                 {capabilityStatusLabel}
@@ -584,7 +604,7 @@ export function EmpireOfLightExperience() {
       {/* =====================================================================
           INTERACTIVE SANCTUM SECTIONS BELOW THE FOLD
          ===================================================================== */}
-      <main id="main">
+      <main id="main" className="bg-girih-filigree">
         <WorldsSanctum
           activeWorldId={activeWorldId}
           quietMode={quietMode}
@@ -607,9 +627,20 @@ export function EmpireOfLightExperience() {
           capabilityStatusLabel={capabilityStatusLabel}
           onReplayEntrance={handleReplayEntrance}
           onToggleQuietMode={() => setQuietMode((prev) => !prev)}
+          onSelectWorld={(worldId) => selectAndInspectWorld(worldId)}
           onReturnToGate={() => navigateToSection("the-gate")}
         />
       </main>
+
+      {/* Floating Celestial Telemetry Observatory HUD Capsule */}
+      <CelestialHudCapsule
+        activeNavTab={activeNavTab}
+        activeWorldId={activeWorldId}
+        pageScrollFraction={pageScrollFraction}
+        onNavigateSection={navigateToSection}
+        onJumpToRemembrance={jumpToRemembranceSanctuary}
+        onOpenSearch={() => setSearchModalOpen(true)}
+      />
 
       {/* Universal Empire Search & Command Palette */}
       <UniversalSearchModal
@@ -617,6 +648,7 @@ export function EmpireOfLightExperience() {
         onClose={() => setSearchModalOpen(false)}
         onNavigateToWorld={(worldId) => selectAndInspectWorld(worldId)}
         onNavigateToDoor={(doorId) => selectAndInspectDoor(doorId)}
+        onJumpToRemembrance={jumpToRemembranceSanctuary}
       />
     </div>
   );

@@ -28,8 +28,7 @@ export const LIVING_LIGHT_PALETTE = {
 export const LIVING_LIGHT_TYPOGRAPHY = {
   displayFamily:
     'var(--font-cinzel), "Cinzel", "Cormorant Garamond", "Palatino Linotype", Georgia, serif',
-  editorialFamily:
-    'var(--font-cinzel), "Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Georgia, serif',
+  editorialFamily: '"Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
   interfaceFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   telemetryFamily:
     'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',

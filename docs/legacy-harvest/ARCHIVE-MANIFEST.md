@@ -66,3 +66,14 @@ Archive: `apps/memory/data/inbox/legacy-repo-patches-2026-11-16.zip` (gitignored
 - `local-git-hq-boilerplate-v0.1.0.zip` (45.8 KB) <- `Z:\local-git-hq-boilerplate-v0.1.0.zip`
 - `moonradio-src-backup-20261025-1728.zip` (259.7 KB) <- `Z:\project\moonradio-src-backup-20261025-1728.zip`
 - `rocksoul-forge.zip` (56.9 KB) <- `Z:\project\rocksoul-forge.zip`
+
+## GitHub Remotes Archived (`2026-11-16`)
+
+Archived (`isArchived: true`) after confirming full harvest or empty/stub status:
+
+- `A-L-L-A-H/rocksoul-dx` — 1-commit `README.md` stub (`5b59551`); consolidated into `apps/rocksoul`
+- `bjo163/moonwitness-memory` — archived (`e4cc8b9`); consolidated into `apps/memory`
+- `The-Batteries/moonwitness` — empty (`0` commits); superseded by canonical `A-L-L-A-H/moonwitness`
+- `BRIDGE-ALLAH/ui` — archived (`3ef0511`); narrative skin system merged into `packages/ui` and local diffs harvested
+
+Canonical active repos preserved (`isArchived: false`): `A-L-L-A-H/moonwitness`, `A-L-L-A-H/master-docs`, standalone R&D engines (`mw-os`, `moon-os`, `riot-os`, `riot-control`, `e-isp`, `mwx-isp`, `arsy`, `A-R-S-Y`, `EMPIRE-OF-LIGHT`, `MW-*`), and third-party forks.

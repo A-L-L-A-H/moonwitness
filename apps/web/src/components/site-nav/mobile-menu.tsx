@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button, SkinProvider } from "@moonwitness/ui";
+import { Button } from "@moonwitness/ui";
 import type { NavLink } from "./links";
 
 export interface MobileMenuProps {
@@ -30,9 +30,7 @@ export function MobileMenu({ links, active, onSelect, onClose }: MobileMenuProps
         </a>
       ))}
       <Link href="/shadow" onClick={onClose} className="mt-2 inline-block">
-        <SkinProvider defaultSkin="editorial">
-          <Button className="px-5 py-2.5 text-base">JOIN THE CREW →</Button>
-        </SkinProvider>
+        <Button className="px-5 py-2.5 text-base">JOIN THE CREW →</Button>
       </Link>
     </nav>
   );

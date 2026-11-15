@@ -2,7 +2,7 @@
 
 import type { TimelineEvent } from "@moonwitness/types";
 import { Crown } from "@moonwitness/ui/icons";
-import { EventCard, Button, SkinProvider } from "@moonwitness/ui";
+import { EventCard, Button } from "@moonwitness/ui";
 
 interface EventListProps {
   events: TimelineEvent[];
@@ -20,11 +20,7 @@ interface EventListProps {
 }
 
 export function EventList(props: EventListProps) {
-  return (
-    <SkinProvider defaultSkin="transmission">
-      <EventListInner {...props} />
-    </SkinProvider>
-  );
+  return <EventListInner {...props} />;
 }
 
 function EventListInner({

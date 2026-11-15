@@ -50,7 +50,7 @@ export function ControlGate({ children }: { children: ReactNode }) {
 
   if (me.isLoading) return <FullScreen>MEMBUKA SESI…</FullScreen>;
 
-  if (me.isError) return <ControlLogin instanceName={setup.data.instance.name} />;
+  if (me.isError) return <ControlLogin instanceName={setup.data.instance?.name} />;
 
   return <>{children}</>;
 }

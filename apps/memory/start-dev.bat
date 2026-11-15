@@ -77,12 +77,12 @@ start "MoonWitness Backend" /D "%CD%" cmd /c "venv\Scripts\python.exe -m uvicorn
 REM Give backend a moment to boot.
 timeout /t 3 /nobreak >nul
 
-REM Start frontend in background.
-start "MoonWitness Frontend" /D "%CD%\frontend" cmd /c "npm run dev"
+REM Start frontend in background on port 3005 to avoid colliding with apps/web (3000).
+start "MoonWitness Frontend" /D "%CD%\frontend" cmd /c "npm run dev -- -p 3005"
 
 echo.
 echo Development servers are starting.
 echo Backend API:  http://localhost:8000/docs
-echo Frontend:    http://localhost:3000
+echo Frontend:    http://localhost:3005
 echo.
 echo Keep this window open. Use stop-dev.bat to shut down both servers.

@@ -39,6 +39,7 @@ export function Dock() {
   const eventId = params.get("event") || null;
   const [queryInput, setQueryInput] = useState(queryFromUrl);
   const [drawerOpen, setDrawerOpen] = useState(Boolean(eventId));
+  const [isDesktopXl, setIsDesktopXl] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
   const [origin, setOrigin] = useState("");
 
@@ -72,8 +73,11 @@ export function Dock() {
   const timelineEvents = eventsQuery.data?.data ?? EMPTY_EVENTS;
   const eras = erasQuery.data?.data ?? [];
   const selectedFromList = timelineEvents[0] ?? null;
+  const selectedInList = eventId
+    ? (timelineEvents.find((event) => event.id === eventId) ?? null)
+    : null;
   const selectedDetailQuery = useTimelineEvent(eventId);
-  const selected = eventId ? (selectedDetailQuery.data?.data ?? null) : selectedFromList;
+  const selected = eventId ? (selectedDetailQuery.data?.data ?? selectedInList) : selectedFromList;
   const relatedQuery = useTimelineRelatedEvents(selected?.related ?? []);
   const relatedEvents = relatedQuery.data ?? EMPTY_EVENTS;
   const selectedEra = selected
@@ -90,6 +94,14 @@ export function Dock() {
   useEffect(() => {
     setDrawerOpen(Boolean(eventId));
   }, [eventId]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const syncViewport = () => setIsDesktopXl(mediaQuery.matches);
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
+    return () => mediaQuery.removeEventListener("change", syncViewport);
+  }, []);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
@@ -265,7 +277,7 @@ export function Dock() {
                 })
               }
             />
-            {eventId && selectedDetailQuery.isError && (
+            {eventId && !selected && selectedDetailQuery.isError && (
               <p className="mt-4 text-sm text-[var(--yellow)]" role="alert">
                 The selected event could not be loaded from the archive.
               </p>
@@ -289,7 +301,7 @@ export function Dock() {
         </div>
       </div>
 
-      {drawerOpen && selected && selectedEra && (
+      {!isDesktopXl && drawerOpen && selected && selectedEra && (
         <EventDetailPanel
           variant="drawer"
           event={selected}

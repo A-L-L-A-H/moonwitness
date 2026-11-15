@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowRight, SkullCrossbonesFunky, SprayCan } from "@moonwitness/ui/icons";
-import { DistressedSticker, Grain, Staple, Button, SkinProvider } from "@moonwitness/ui";
+import { DistressedSticker, Grain, Staple, Button } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { useTimelineEvents } from "@/lib/api/timeline";
 
@@ -61,139 +61,137 @@ export function Shadow() {
   }, []);
 
   return (
-    <SkinProvider defaultSkin="riot">
-      <section
-        ref={sectionRef}
-        id="shadow"
-        className="relative scroll-mt-20 overflow-hidden bg-[#050508] py-28"
-      >
-        <Grain />
-        <Image
-          src={artSrc("fog-voices")}
-          alt=""
-          fill
-          className="absolute inset-0 object-cover opacity-20 mix-blend-overlay"
-          sizes="100vw"
-          loading="lazy"
+    <section
+      ref={sectionRef}
+      id="shadow"
+      className="relative scroll-mt-20 overflow-hidden bg-[#050508] py-28"
+    >
+      <Grain />
+      <Image
+        src={artSrc("fog-voices")}
+        alt=""
+        fill
+        className="absolute inset-0 object-cover opacity-20 mix-blend-overlay"
+        sizes="100vw"
+        loading="lazy"
+      />
+
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#050508] via-[rgba(5,5,8,0.7)] to-[#050508]" />
+
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute h-1 w-1 rounded-full bg-[var(--pink)] opacity-20 pulse-glow"
+            style={{
+              left: `${15 + i * 15}%`,
+              top: `${20 + (i % 3) * 25}%`,
+              animationDelay: `${i * 0.7}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="mb-12 flex items-center gap-3">
+          <SkullCrossbonesFunky className="h-6 w-6 text-[var(--red)] opacity-70" />
+          <span className="font-mono text-xs font-black tracking-[0.25em] text-[var(--red)] opacity-80">
+            RESTRICTED FREQUENCY // LEVEL 4
+          </span>
+          <SprayCan className="ml-auto h-5 w-5 text-[var(--red)] opacity-50 rotate-12" />
+        </div>
+
+        <span
+          ref={wipeRef}
+          data-shadow-wipe
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 block h-40 origin-left bg-gradient-to-r from-transparent via-[rgba(255,59,59,0.35)] to-transparent opacity-0 sm:h-56"
         />
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#050508] via-[rgba(5,5,8,0.7)] to-[#050508]" />
+        <h2
+          ref={titleRef}
+          className="cmyk-slip font-brush text-5xl leading-none text-zinc-100 drop-shadow-[6px_6px_0_rgba(255,59,59,0.3)] sm:text-7xl md:text-8xl opacity-0"
+          style={{ transform: "translateY(50px) scale(0.95)" }}
+        >
+          NOT EVERYTHING
+          <br />
+          IS <span className="text-[var(--red)]">VISIBLE</span>
+          <span className="text-[var(--pink)]">.</span>
+        </h2>
 
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {[...Array(6)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute h-1 w-1 rounded-full bg-[var(--pink)] opacity-20 pulse-glow"
-              style={{
-                left: `${15 + i * 15}%`,
-                top: `${20 + (i % 3) * 25}%`,
-                animationDelay: `${i * 0.7}s`,
-              }}
-            />
-          ))}
-        </div>
+        <p
+          ref={paraRef}
+          className="mt-8 max-w-2xl font-hand text-xl leading-relaxed text-zinc-400 opacity-0"
+          style={{ transform: "translateX(-30px)" }}
+        >
+          Beneath the signals we publish lies a deeper stratum — transmissions that don&rsquo;t fit
+          standard categories, sightings that resist easy explanation, and connections between
+          witnesses that only emerge in retrospect. This is the Shadow layer of MoonWitness: where
+          the signal gets noisy, and the noise sometimes speaks back.
+        </p>
 
-        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="mb-12 flex items-center gap-3">
-            <SkullCrossbonesFunky className="h-6 w-6 text-[var(--red)] opacity-70" />
-            <span className="font-mono text-xs font-black tracking-[0.25em] text-[var(--red)] opacity-80">
-              RESTRICTED FREQUENCY // LEVEL 4
-            </span>
-            <SprayCan className="ml-auto h-5 w-5 text-[var(--red)] opacity-50 rotate-12" />
-          </div>
-
-          <span
-            ref={wipeRef}
-            data-shadow-wipe
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 block h-40 origin-left bg-gradient-to-r from-transparent via-[rgba(255,59,59,0.35)] to-transparent opacity-0 sm:h-56"
-          />
-
-          <h2
-            ref={titleRef}
-            className="cmyk-slip font-brush text-5xl leading-none text-zinc-100 drop-shadow-[6px_6px_0_rgba(255,59,59,0.3)] sm:text-7xl md:text-8xl opacity-0"
-            style={{ transform: "translateY(50px) scale(0.95)" }}
-          >
-            NOT EVERYTHING
-            <br />
-            IS <span className="text-[var(--red)]">VISIBLE</span>
-            <span className="text-[var(--pink)]">.</span>
-          </h2>
-
-          <p
-            ref={paraRef}
-            className="mt-8 max-w-2xl font-hand text-xl leading-relaxed text-zinc-400 opacity-0"
-            style={{ transform: "translateX(-30px)" }}
-          >
-            Beneath the signals we publish lies a deeper stratum — transmissions that don&rsquo;t
-            fit standard categories, sightings that resist easy explanation, and connections between
-            witnesses that only emerge in retrospect. This is the Shadow layer of MoonWitness: where
-            the signal gets noisy, and the noise sometimes speaks back.
-          </p>
-
-          <div className="mt-12 relative w-full max-w-2xl">
-            <Staple className="-top-1 left-10 -rotate-12" />
-            <div className="zine-card-rough relative overflow-hidden border-[var(--red)]/40">
-              <div className="p-5 font-mono text-xs tracking-widest text-[var(--red)]">
-                SIGNAL ARCHIVE PREVIEW
-              </div>
-              {isPending ? (
-                <p role="status" className="p-5 font-mono text-sm text-zinc-400">
-                  Loading archive preview…
-                </p>
-              ) : isError ? (
-                <div className="p-5">
-                  <p role="alert" className="font-mono text-sm text-zinc-400">
-                    Archive preview unavailable.
-                  </p>
-                  <Button
-                    variant="destructive"
-                    onClick={() => void refetch()}
-                    className="mt-4 min-h-11 min-w-11 px-4 py-3"
-                  >
-                    Retry archive preview
-                  </Button>
-                </div>
-              ) : event ? (
-                <Link
-                  href={`/dock?event=${encodeURIComponent(event.id)}`}
-                  className="block min-h-11 break-words"
-                >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-[#0a0a12]">
-                    <Image
-                      src={artSrc(event.image)}
-                      alt=""
-                      fill
-                      className="object-cover grayscale contrast-[1.3] brightness-75"
-                      style={{ objectPosition: event.imagePosition ?? "center" }}
-                      sizes="(max-width: 768px) 100vw, 720px"
-                    />
-                  </div>
-                  <div className="border-t border-[var(--red)]/30 bg-[#08080e] p-5">
-                    <span className="font-mono text-xs text-zinc-400">
-                      {event.kind} // {event.date}
-                    </span>
-                    <h3 className="mt-2 font-brush text-2xl text-white">{event.title}</h3>
-                  </div>
-                </Link>
-              ) : (
-                <p role="status" className="p-5 font-mono text-sm text-zinc-400">
-                  No timeline events available.
-                </p>
-              )}
+        <div className="mt-12 relative w-full max-w-2xl">
+          <Staple className="-top-1 left-10 -rotate-12" />
+          <div className="zine-card-rough relative overflow-hidden border-[var(--red)]/40">
+            <div className="p-5 font-mono text-xs tracking-widest text-[var(--red)]">
+              SIGNAL ARCHIVE PREVIEW
             </div>
-          </div>
-
-          <div className="mt-12 flex flex-wrap items-center gap-5">
-            <Link href="/shadow">
-              <Button variant="destructive" size="lg" className="px-8 py-4 text-xl">
-                ENTER THE SHADOW <ArrowRight className="h-5 w-5" />
-              </Button>
-            </Link>
-            <DistressedSticker variant="barcode" code="SHD-LEVEL-4" className="rotate-[-2deg]" />
+            {isPending ? (
+              <p role="status" className="p-5 font-mono text-sm text-zinc-400">
+                Loading archive preview…
+              </p>
+            ) : isError ? (
+              <div className="p-5">
+                <p role="alert" className="font-mono text-sm text-zinc-400">
+                  Archive preview unavailable.
+                </p>
+                <Button
+                  variant="destructive"
+                  onClick={() => void refetch()}
+                  className="mt-4 min-h-11 min-w-11 px-4 py-3"
+                >
+                  Retry archive preview
+                </Button>
+              </div>
+            ) : event ? (
+              <Link
+                href={`/dock?event=${encodeURIComponent(event.id)}`}
+                className="block min-h-11 break-words"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden bg-[#0a0a12]">
+                  <Image
+                    src={artSrc(event.image)}
+                    alt=""
+                    fill
+                    className="object-cover grayscale contrast-[1.3] brightness-75"
+                    style={{ objectPosition: event.imagePosition ?? "center" }}
+                    sizes="(max-width: 768px) 100vw, 720px"
+                  />
+                </div>
+                <div className="border-t border-[var(--red)]/30 bg-[#08080e] p-5">
+                  <span className="font-mono text-xs text-zinc-400">
+                    {event.kind} // {event.date}
+                  </span>
+                  <h3 className="mt-2 font-brush text-2xl text-white">{event.title}</h3>
+                </div>
+              </Link>
+            ) : (
+              <p role="status" className="p-5 font-mono text-sm text-zinc-400">
+                No timeline events available.
+              </p>
+            )}
           </div>
         </div>
-      </section>
-    </SkinProvider>
+
+        <div className="mt-12 flex flex-wrap items-center gap-5">
+          <Link href="/shadow">
+            <Button variant="destructive" size="lg" className="px-8 py-4 text-xl">
+              ENTER THE SHADOW <ArrowRight className="h-5 w-5" />
+            </Button>
+          </Link>
+          <DistressedSticker variant="barcode" code="SHD-LEVEL-4" className="rotate-[-2deg]" />
+        </div>
+      </div>
+    </section>
   );
 }

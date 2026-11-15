@@ -21,7 +21,7 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
       {/* SRGBL v8 Interactive 5-Stage Witness Pipeline */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             SRGBL v8 CANONICAL 5-STAGE WITNESS PIPELINE &amp; SYMBOLIC RGBL
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
@@ -44,7 +44,9 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
                 }`}
               >
                 <div className="font-mono text-[11px] text-[#d6b46c]">{stage.stage}</div>
-                <div className="mt-1 font-serif text-sm text-[#fff6df]">{stage.title}</div>
+                <div className="font-monument mt-1 text-xs sm:text-sm text-[#fff6df]">
+                  {stage.title}
+                </div>
                 <div className="mt-1 font-mono text-[10px] text-[#f5dfa6]">
                   {stage.symbolicLayer}
                 </div>
@@ -55,7 +57,7 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
 
         <div className="mt-4 border border-[#d6b46c]/20 bg-[#0a0d16] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-serif text-lg text-[#fff6df]">
+            <span className="font-monument text-base sm:text-lg text-[#fff6df]">
               {activeStage.stage} — {activeStage.title}
             </span>
             <span className="border border-[#d6b46c]/35 bg-[#d6b46c]/10 px-2.5 py-0.5 font-mono text-[11px] text-[#f8eac6]">
@@ -102,7 +104,7 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
       {/* 6 ROCKSOUL Domains + Correlation Layer */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             6-DOMAIN + RELATIONSHIP ROCKSOUL EPISTEMIC FEDERATION
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
@@ -121,7 +123,9 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
                   <span>{domain.code}</span>
                   <span>{domain.repoSlug}</span>
                 </div>
-                <h4 className="mt-1 font-serif text-base text-[#fff6df]">{domain.name}</h4>
+                <h4 className="font-monument mt-1 text-sm sm:text-base text-[#fff6df]">
+                  {domain.name}
+                </h4>
                 <div className="mt-0.5 text-xs text-[#f5dfa6]">{domain.domainFocus}</div>
                 <p className="mt-2 font-mono text-[11px] text-[#bfb59e]">
                   {domain.pipelineOrFamilies}
@@ -137,7 +141,7 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
         {/* Shared Case 001: Jerusalem 70 CE */}
         <div className="mt-6 border border-[#e6c987]/35 bg-[#0b0f1b] p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-serif text-base tracking-[0.14em] text-[#fff6df]">
+            <span className="font-monument text-sm sm:text-base tracking-[0.14em] text-[#fff6df]">
               {JERUSALEM_70CE_CASE_001.caseId} · {JERUSALEM_70CE_CASE_001.title}
             </span>
             <span className="border border-[#d6b46c]/40 bg-[#d6b46c]/15 px-2.5 py-0.5 font-mono text-[10px] text-[#fff4d2]">

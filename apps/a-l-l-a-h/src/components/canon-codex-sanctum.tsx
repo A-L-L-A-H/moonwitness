@@ -7,6 +7,7 @@ import { DoorSovereignPanel } from "./canon-doors/door-sovereign-panel";
 import { DoorUniversePanel } from "./canon-doors/door-universe-panel";
 import { ScrollChapterReveal, SpatialTiltCard } from "./motion-primitives";
 import { DiamondStarOrnament } from "./sacred-icons";
+import { DoorPortalGlyph } from "./sacred-illustrations";
 
 export function CanonCodexSanctum({
   activeDoorId,
@@ -40,24 +41,24 @@ export function CanonCodexSanctum({
     <section
       id="the-codex"
       aria-labelledby="codex-heading"
-      className="relative border-t border-[#d6b46c]/25 bg-gradient-to-b from-[#040509] via-[#080b13] to-[#05060a] py-24 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative border-t border-[#d6b46c]/25 bg-gradient-to-b from-[#040509]/95 via-[#080b13]/90 to-[#05060a]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
       <div className="mx-auto max-w-7xl">
         {/* Section Header */}
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
+            <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
               <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d6b46c]" />
               <span>A-L-L-A-H · {SUPREME_IDENTITY.fullExpansion}</span>
               <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d6b46c]" />
             </div>
             <h2
               id="codex-heading"
-              className="mt-4 font-serif text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
+              className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
               THE CANON CODEX
             </h2>
-            <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#d6ceb8]/85">
+            <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
               Four MoonFrame Entry Doors unifying 368+ verified remote repositories across 7 GitHub
               owners (bjo163, ArsyBelovedLabs, BRIDGE-ALLAH, zenix-id, A-L-L-A-H, The-Batteries,
               moonwitness-id) and local Z:\ archives under one monocentric covenant.
@@ -68,11 +69,11 @@ export function CanonCodexSanctum({
           </div>
         </ScrollChapterReveal>
 
-        {/* 4 Entry Doors Selector */}
+        {/* 4 Archway Portal Entry Doors Selector */}
         <div
           role="tablist"
           aria-label="Select a Canon Entry Door"
-          className="mt-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+          className="mt-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
         >
           {FOUR_ENTRY_DOORS.map((door, doorIdx) => {
             const isSelected = door.id === activeDoor.id;
@@ -84,29 +85,40 @@ export function CanonCodexSanctum({
                   aria-selected={isSelected}
                   onKeyDown={(event) => handleDoorKeyDown(event, doorIdx)}
                   onClick={() => onSelectDoor(door.id)}
-                  className={`flex h-full w-full min-h-[44px] flex-col justify-between border p-5 text-left transition-all duration-300 cursor-pointer ${
+                  className={`portal-arch-card relative flex h-full w-full min-h-[44px] flex-col justify-between border px-5 pt-7 pb-5 text-left transition-all duration-300 cursor-pointer ${
                     isSelected
-                      ? "border-[#e6c987] bg-gradient-to-b from-[#d6b46c]/18 via-[#d6b46c]/8 to-transparent shadow-[0_0_28px_rgba(214,180,108,0.16)]"
-                      : "border-[#d6b46c]/20 bg-[#0b0d16]/75 hover:border-[#d6b46c]/55 hover:bg-[#d6b46c]/8"
+                      ? "border-[#fff4d2] bg-gradient-to-b from-[#d6b46c]/22 via-[#0e1320]/90 to-[#060810] shadow-[0_0_32px_rgba(223,192,123,0.22)]"
+                      : "border-[#d6b46c]/25 bg-[#090c16]/85 hover:border-[#d6b46c]/60 hover:bg-[#d6b46c]/10"
                   }`}
                 >
                   <div>
                     <div className="flex items-center justify-between font-mono text-[11px] text-[#d6b46c]">
-                      <span>{door.numeral}</span>
+                      <div className="flex items-center gap-2.5">
+                        <DoorPortalGlyph doorId={door.id} active={isSelected} />
+                        <span>{door.numeral}</span>
+                      </div>
                       {isSelected && (
-                        <span className="inline-flex items-center gap-1 text-[10px] tracking-[0.16em] text-[#f6dd9e] uppercase">
+                        <span className="inline-flex items-center gap-1 text-[10px] tracking-[0.16em] text-[#fff4d2] uppercase">
                           <DiamondStarOrnament className="h-3 w-3" /> OPEN
                         </span>
                       )}
                     </div>
-                    <h3 className="mt-2 font-serif text-sm tracking-[0.14em] text-[#fff6df] uppercase">
+                    <h3 className="font-monument mt-3.5 text-sm tracking-[0.14em] text-[#fff6df] uppercase">
                       {door.title}
                     </h3>
-                    <p className="mt-1.5 text-xs text-[#bfb59e]">{door.subtitle}</p>
+                    <p className="mt-1.5 font-sans text-xs text-[#cfc5b0] leading-relaxed">
+                      {door.subtitle}
+                    </p>
                   </div>
-                  <div className="mt-3 border-t border-[#d6b46c]/15 pt-2 font-mono text-[10px] text-[#9f9580]">
+                  <div className="mt-4 border-t border-[#d6b46c]/15 pt-2.5 font-mono text-[10px] text-[#9f9580]">
                     {door.sourceSpec}
                   </div>
+                  {isSelected && (
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute -bottom-4 left-1/2 h-4 w-px -translate-x-1/2 bg-gradient-to-b from-[#fff4d2] to-transparent"
+                    />
+                  )}
                 </button>
               </SpatialTiltCard>
             );
@@ -115,13 +127,13 @@ export function CanonCodexSanctum({
 
         {/* Active Door Banner & Mounted Chamber */}
         <ScrollChapterReveal quietMode={quietMode}>
-          <div className="mt-8 border border-[#d6b46c]/35 bg-[#060810]/95 p-5 sm:p-8 shadow-[0_20px_60px_rgba(0,0,0,0.75)]">
+          <div className="octa-bevel-shell relative mt-8 border border-[#d6b46c]/40 bg-gradient-to-b from-[#080c17]/95 via-[#060810]/95 to-[#04060c] p-5 sm:p-8 shadow-[0_24px_70px_rgba(0,0,0,0.82)]">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-4">
               <div>
                 <div className="font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">
                   {activeDoor.numeral} // {activeDoor.title}
                 </div>
-                <p className="mt-1 font-serif text-sm text-[#e6decb]">{activeDoor.summary}</p>
+                <p className="mt-1 font-serif text-base text-[#e6decb]">{activeDoor.summary}</p>
               </div>
               <span className="border border-[#d6b46c]/35 bg-[#d6b46c]/10 px-3 py-1 font-mono text-[11px] text-[#f8eac6]">
                 SOURCE: {activeDoor.sourceSpec}

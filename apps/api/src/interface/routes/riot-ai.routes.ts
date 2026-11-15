@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { OllamaAdapter, type ChatRequest } from "@moonwitness/ai";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { createRateLimiter } from "../../infrastructure/rate-limit";
+import { createRateLimiter, resolveRateLimitKey } from "../../infrastructure/rate-limit";
 import { requireRole } from "../../middleware/auth";
 import { env, validateRiotAiRuntimeConfig } from "../../shared/env";
 import {
@@ -288,7 +288,11 @@ function getAdapterState(): { adapter: OllamaAdapter | null; misconfigured: bool
 }
 
 function parseClientAddress(request: FastifyRequest): string {
-  return request.ip;
+  return resolveRateLimitKey(
+    request.ip,
+    request.headers["x-forwarded-for"],
+    env.TRUSTED_PROXY_COUNT,
+  );
 }
 
 function setNoStore(reply: FastifyReply): void {

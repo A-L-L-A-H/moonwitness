@@ -141,4 +141,100 @@ describe("command center persistence routes", () => {
     );
     expect(remainingIds).toEqual(["a-1", "a-3"]);
   });
+
+  it("reflects created/transitioned workflows in stats after mutations", async () => {
+    const before = await app!.inject({
+      method: "GET",
+      url: "/api/v1/command-center/stats",
+      headers: authHeaders,
+    });
+    const beforeBody = before.json() as { workflows: number; queued: number; running: number };
+
+    const created = await app!.inject({
+      method: "POST",
+      url: "/api/v1/command-center/workflows",
+      headers: authHeaders,
+      payload: { name: "Signal Batch", detail: "queue -> run -> pause" },
+    });
+    const wf = (created.json() as { workflow: { id: string; status: string } }).workflow;
+
+    const stats = await app!.inject({
+      method: "GET",
+      url: "/api/v1/command-center/stats",
+      headers: authHeaders,
+    });
+    const statsBody = stats.json() as { workflows: number; queued: number; running: number };
+    expect(statsBody.workflows).toBe(beforeBody.workflows + 1);
+    expect(statsBody.queued).toBe(beforeBody.queued + 1);
+
+    await app!.inject({
+      method: "PATCH",
+      url: `/api/v1/command-center/workflows/${wf.id}/status`,
+      headers: authHeaders,
+      payload: { status: "Running" },
+    });
+    const statsAfterRun = await app!.inject({
+      method: "GET",
+      url: "/api/v1/command-center/stats",
+      headers: authHeaders,
+    });
+    const body2 = statsAfterRun.json() as { running: number; queued: number };
+    expect(body2.running).toBe(beforeBody.running + 1);
+    expect(body2.queued).toBe(beforeBody.queued);
+  });
+
+  it("exposes DB-derived stats and enforces valid workflow lifecycle transitions", async () => {
+    const stats = await app!.inject({
+      method: "GET",
+      url: "/api/v1/command-center/stats",
+      headers: authHeaders,
+    });
+    expect(stats.statusCode).toBe(200);
+
+    // Create a workflow queued by default, then run it.
+    const created = await app!.inject({
+      method: "POST",
+      url: "/api/v1/command-center/workflows",
+      headers: authHeaders,
+      payload: { name: "Signal Batch", detail: "queue -> run -> pause" },
+    });
+    const wf = (created.json() as { workflow: { id: string; status: string } }).workflow;
+    expect(wf.status).toBe("Queued");
+
+    const run = await app!.inject({
+      method: "PATCH",
+      url: `/api/v1/command-center/workflows/${wf.id}/status`,
+      headers: authHeaders,
+      payload: { status: "Running" },
+    });
+    expect(run.statusCode).toBe(200);
+    expect((run.json() as { workflow: { status: string } }).workflow.status).toBe("Running");
+
+    const pause = await app!.inject({
+      method: "PATCH",
+      url: `/api/v1/command-center/workflows/${wf.id}/status`,
+      headers: authHeaders,
+      payload: { status: "Paused" },
+    });
+    expect(pause.statusCode).toBe(200);
+    expect((pause.json() as { workflow: { status: string } }).workflow.status).toBe("Paused");
+
+    const cancel = await app!.inject({
+      method: "PATCH",
+      url: `/api/v1/command-center/workflows/${wf.id}/status`,
+      headers: authHeaders,
+      payload: { status: "Cancelled" },
+    });
+    expect(cancel.statusCode).toBe(200);
+    expect((cancel.json() as { workflow: { status: string } }).workflow.status).toBe("Cancelled");
+
+    // A terminal workflow cannot be transitioned again.
+    const illegal = await app!.inject({
+      method: "PATCH",
+      url: `/api/v1/command-center/workflows/${wf.id}/status`,
+      headers: authHeaders,
+      payload: { status: "Running" },
+    });
+    expect(illegal.statusCode).toBe(409);
+  });
 });

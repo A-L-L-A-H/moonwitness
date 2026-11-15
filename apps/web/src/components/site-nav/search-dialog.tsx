@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@moonwitness/ui";
-import { Input } from "@moonwitness/ui";
-import { Button } from "@moonwitness/ui";
-import { SkinProvider } from "@moonwitness/ui";
+import { useEffect, useRef } from "react";
+import { Button, Input } from "@moonwitness/ui";
 
 export interface SearchDialogProps {
   query: string;
@@ -19,36 +11,82 @@ export interface SearchDialogProps {
 }
 
 export function SearchDialog({ query, onQueryChange, onSubmit, onClose }: SearchDialogProps) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const dialog = formRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        (last as HTMLElement).focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        (first as HTMLElement).focus();
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    const firstInput = formRef.current?.querySelector<HTMLInputElement>("input");
+    firstInput?.focus();
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
   return (
-    <SkinProvider defaultSkin="technical">
-      <Dialog open={true} onOpenChange={onClose}>
-        <DialogContent className="w-full max-w-xl p-5 fixed top-[28%] left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-sm border-[var(--line)] shadow-[5px_5px_0_rgba(0,0,0,0.55)]">
-          <DialogHeader className="flex items-start justify-between gap-4 pb-3 border-b border-[var(--line)]">
-            <DialogTitle className="font-brush text-lg text-[var(--yellow)]">
-              SEARCH THE SIGNALS
-            </DialogTitle>
-            <Button variant="ghost" size="sm" onClick={onClose} className="min-h-11 px-3 text-sm">
-              Close search
-            </Button>
-          </DialogHeader>
-          <form onSubmit={onSubmit} className="mt-3 flex gap-2">
-            <Input
-              id="nav-search"
-              value={query}
-              onChange={(e) => onQueryChange(e.target.value)}
-              placeholder="stories, signals, people, places…"
-              className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
-              autoFocus
-            />
-            <Button type="submit" className="px-5 py-2 text-sm">
-              GO
-            </Button>
-          </form>
-          <DialogDescription className="mt-3 text-xs text-zinc-500">
-            Searches the Dock timeline chronicle.
-          </DialogDescription>
-        </DialogContent>
-      </Dialog>
-    </SkinProvider>
+    <div
+      className="fixed inset-0 z-[60] flex items-start justify-center bg-black/70 px-4 pt-28 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <form
+        ref={formRef}
+        onSubmit={onSubmit}
+        className="zine-card-rough w-full max-w-xl p-5"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Search the archive"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <label htmlFor="nav-search" className="font-brush text-lg text-[var(--yellow)]">
+            SEARCH THE SIGNALS
+          </label>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="btn-zine min-h-11 px-3 text-sm"
+          >
+            Close search
+          </Button>
+        </div>
+        <div className="mt-3 flex gap-2">
+          <Input
+            id="nav-search"
+            value={query}
+            onChange={(e) => onQueryChange(e.target.value)}
+            placeholder="stories, signals, people, places…"
+            className="rounded-md bg-[var(--background)] border-[var(--line)] px-4 py-3 text-sm focus:border-[var(--pink)] focus:ring-[var(--pink)]"
+          />
+          <Button type="submit" className="btn-zine px-5 py-2 text-sm">
+            GO
+          </Button>
+        </div>
+        <p className="mt-3 text-xs text-zinc-500">Searches the Dock timeline chronicle.</p>
+      </form>
+    </div>
   );
 }

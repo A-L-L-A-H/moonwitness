@@ -1,0 +1,568 @@
+import type { ReactNode } from "react";
+import Image from "next/image";
+import type { EntryDoorId } from "@/data/empire-canon-codex";
+import type { DockNodeTelemetry, WorldIdentifier } from "@/data/empire-registry";
+
+/**
+ * Corner hairline girih brackets giving sacred architectural framing to sanctum panels.
+ */
+export function SacredCornerBrackets() {
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-0 h-3.5 w-3.5 border-t border-l border-[#f5dfa6]/70"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 right-0 h-3.5 w-3.5 border-t border-r border-[#f5dfa6]/70"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 left-0 h-3.5 w-3.5 border-b border-l border-[#f5dfa6]/70"
+      />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-0 right-0 h-3.5 w-3.5 border-b border-r border-[#f5dfa6]/70"
+      />
+    </>
+  );
+}
+
+/**
+ * Architectural fine-art plate for the 4 DX Narrative Panels (Zero Human Faces).
+ */
+export function StoryPlateGeometrySvg({
+  panelNumber,
+  accentHex,
+}: {
+  readonly panelNumber: string;
+  readonly accentHex: string;
+}) {
+  const plateSrc = panelNumber.includes("01")
+    ? "/art/story-plate-01.png"
+    : panelNumber.includes("02")
+      ? "/art/story-plate-02.png"
+      : panelNumber.includes("03")
+        ? "/art/story-plate-03.png"
+        : "/art/story-plate-04.png";
+
+  return (
+    <div
+      aria-hidden="true"
+      className="relative aspect-[16/9] w-full overflow-hidden border border-[#d6b46c]/30 bg-[#040509] shadow-[inset_0_0_22px_rgba(0,0,0,0.85)]"
+    >
+      <Image
+        src={plateSrc}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 280px"
+        className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+      />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at 50% 42%, transparent 38%, rgba(4,5,9,0.78) 100%), linear-gradient(180deg, rgba(4,5,9,0.28) 0%, transparent 40%, rgba(4,5,9,0.82) 100%)`,
+          boxShadow: `inset 0 0 0 1px ${accentHex}26`,
+        }}
+      />
+      <span
+        className="pointer-events-none absolute top-1.5 left-1.5 h-2 w-2 border-t border-l"
+        style={{ borderColor: accentHex }}
+      />
+      <span
+        className="pointer-events-none absolute right-1.5 bottom-1.5 h-2 w-2 border-r border-b"
+        style={{ borderColor: accentHex }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Interactive 99 + 1 = 100CENTER concentric orbital artwork (Monocentric Tawhid Topology).
+ */
+export function Monocentric100CenterSvg({
+  selectedClusterIndex,
+}: {
+  readonly selectedClusterIndex: number;
+}) {
+  const ringTier = Math.min(2, Math.max(0, Math.floor(selectedClusterIndex / 3)));
+  const activeInsetClass =
+    ringTier === 0
+      ? "inset-12 border-[#fff4d2]/75"
+      : ringTier === 1
+        ? "inset-8 border-[#fff4d2]/75"
+        : "inset-3.5 border-[#fff4d2]/75";
+
+  return (
+    <div
+      role="img"
+      aria-label="100CENTER orbital artwork showing 99 ethical reflections orbiting 1 Tawhid center"
+      className="relative h-48 w-48 shrink-0 overflow-hidden rounded-full border border-[#d6b46c]/45 bg-[#05070e] shadow-[0_0_38px_rgba(223,192,123,0.16)]"
+    >
+      <Image
+        src="/art/tawhid-100center-orb.png"
+        alt="100CENTER concentric pearl orb surrounded by three rings of 99 reflections"
+        fill
+        sizes="192px"
+        className="object-cover scale-[1.08]"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_48%,rgba(5,7,14,0.68)_88%,rgba(5,7,14,0.96)_100%)]"
+      />
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute rounded-full border shadow-[0_0_18px_rgba(255,244,210,0.45)] transition-all duration-500 ${activeInsetClass}`}
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-2.5 left-1/2 -translate-x-1/2 rounded-full border border-[#d6b46c]/40 bg-[#05070e]/90 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.2em] text-[#fff4d2] uppercase whitespace-nowrap"
+      >
+        RING 0{ringTier + 1} · {selectedClusterIndex + 1}/9
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Interactive Meridian Constellation celestial horizon plate for Moonwitness Observatory corridors.
+ */
+export function MeridianConstellationMapSvg({
+  meridians,
+  activeIndex,
+  onSelectMeridian,
+}: {
+  readonly meridians: readonly {
+    readonly code: string;
+    readonly city: string;
+    readonly x: number;
+    readonly y: number;
+  }[];
+  readonly activeIndex: number;
+  readonly onSelectMeridian: (idx: number) => void;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Moonwitness Celestial Meridian Observatory Corridors"
+      className="relative h-44 sm:h-48 w-full overflow-hidden border border-[#d6b46c]/30 bg-[#060912] shadow-[inset_0_0_28px_rgba(0,0,0,0.9)]"
+    >
+      <Image
+        src="/art/meridian-sky-chart.png"
+        alt=""
+        fill
+        sizes="(max-width: 1024px) 100vw, 520px"
+        className="object-cover opacity-90"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#060912]/50 via-[#060912]/15 to-[#060912]/82"
+      />
+      <svg
+        viewBox="0 0 360 132"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 h-full w-full"
+      >
+        {meridians.map((src, idx) => {
+          const dst = meridians[(idx + 1) % meridians.length];
+          if (!dst) return null;
+          const activeSeg = idx === activeIndex;
+          return (
+            <path
+              key={`${src.code}-${dst.code}`}
+              d={`M${src.x} ${src.y} Q180 24 ${dst.x} ${dst.y}`}
+              fill="none"
+              stroke={activeSeg ? "#fff4d2" : "#dfc07b"}
+              strokeOpacity={activeSeg ? 0.8 : 0.28}
+              strokeWidth={activeSeg ? 1.3 : 0.75}
+              strokeDasharray={activeSeg ? undefined : "3 3"}
+            />
+          );
+        })}
+      </svg>
+
+      {meridians.map((node, idx) => {
+        const selected = idx === activeIndex;
+        const placePillAbove = node.y < 60;
+        return (
+          <button
+            key={node.code}
+            type="button"
+            aria-label={`Select observatory ${node.city}`}
+            aria-pressed={selected}
+            onClick={() => onSelectMeridian(idx)}
+            style={{
+              left: `${(node.x / 360) * 100}%`,
+              top: `${(node.y / 132) * 100}%`,
+            }}
+            className="group absolute z-10 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center focus:outline-none cursor-pointer"
+          >
+            <span
+              className={`relative flex h-3.5 w-3.5 items-center justify-center rounded-full border transition-all duration-300 ${
+                selected
+                  ? "scale-125 border-[#fff8e6] bg-[#fff4d2] shadow-[0_0_16px_rgba(255,244,210,0.95)]"
+                  : "border-[#060912] bg-[#dfc07b] shadow-[0_0_8px_rgba(223,192,123,0.6)] group-hover:scale-110 group-hover:bg-[#fff4d2]"
+              }`}
+            >
+              {selected && (
+                <span className="absolute -inset-2 rounded-full border border-[#fff4d2]/60 animate-ping" />
+              )}
+            </span>
+            <span
+              className={`pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-sm border px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] uppercase transition-colors backdrop-blur-sm ${
+                placePillAbove ? "bottom-[calc(50%+12px)]" : "top-[calc(50%+12px)]"
+              } ${
+                selected
+                  ? "border-[#fff4d2]/70 bg-[#060912]/90 text-[#fff8e6]"
+                  : "border-[#d6b46c]/30 bg-[#060912]/78 text-[#e2d8c3] group-hover:border-[#f5dfa6]/60"
+              }`}
+            >
+              {node.city}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Compact harmonic waveform SVG badge for Dock gateway telemetry cards.
+ */
+export function GatewayWaveformSvg({ variant = 0 }: { readonly variant?: number }) {
+  const phase = variant * 11;
+  return (
+    <svg viewBox="0 0 120 22" fill="none" aria-hidden="true" className="h-5 w-full opacity-80">
+      <line
+        x1="0"
+        y1="11"
+        x2="120"
+        y2="11"
+        stroke="#dfc07b"
+        strokeOpacity="0.18"
+        strokeWidth="0.6"
+      />
+      <path
+        d={`M0 11 Q15 ${4 + (phase % 5)} 30 11 T60 11 T90 11 T120 11`}
+        stroke="#f5dfa6"
+        strokeWidth="1.15"
+        strokeOpacity="0.75"
+      />
+      <path
+        d={`M0 11 Q15 ${17 - (phase % 4)} 30 11 T60 11 T90 11 T120 11`}
+        stroke="#dfc07b"
+        strokeWidth="0.7"
+        strokeOpacity="0.4"
+      />
+    </svg>
+  );
+}
+
+export function SanctuarySectionBackdrop({ children }: { readonly children: ReactNode }) {
+  return <div className="bg-girih-filigree relative">{children}</div>;
+}
+
+const ORRERY_BEARINGS: Record<
+  WorldIdentifier,
+  { angleDeg: number; orbitRadius: number; shortName: string }
+> = {
+  arsy: { angleDeg: 0, orbitRadius: 144, shortName: "ARSY" },
+  sidra: { angleDeg: 76, orbitRadius: 156, shortName: "SIDRA" },
+  "rocksoul-dx": { angleDeg: 142, orbitRadius: 164, shortName: "ROCKSOUL DX" },
+  qalam: { angleDeg: 180, orbitRadius: 144, shortName: "QALAM" },
+  moonwitness: { angleDeg: 284, orbitRadius: 154, shortName: "MOONWITNESS" },
+};
+
+/**
+ * Astronomical Astrolabe Orrery plotting the five gateway satellites over the fine-art brass astrolabe plate
+ * with a motorized optical sighting ray toward the active gateway.
+ */
+export function AstrolabeOrreryMap({
+  nodes,
+  visibleCodes,
+  selectedCode,
+  quietMode = false,
+  onSelectNode,
+}: {
+  readonly nodes: readonly DockNodeTelemetry[];
+  readonly visibleCodes: ReadonlySet<string>;
+  readonly selectedCode: string;
+  readonly quietMode?: boolean;
+  readonly onSelectNode: (nodeCode: string) => void;
+}) {
+  const cx = 220;
+  const cy = 220;
+  const selectedNode = nodes.find((node) => node.nodeCode === selectedCode) ?? nodes[0];
+  const activeBearing = selectedNode ? (ORRERY_BEARINGS[selectedNode.worldId]?.angleDeg ?? 0) : 0;
+
+  return (
+    <div
+      role="group"
+      aria-label="Astronomical Astrolabe Orrery of the Five Empire Gateways"
+      className="relative mx-auto aspect-square w-full max-w-[440px] select-none"
+    >
+      {/* Subtle rotating outer conic aura (clipped strictly inside circular bounds) */}
+      {!quietMode && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-full"
+        >
+          <div
+            className="conic-halo-ring h-full w-full rounded-full opacity-40"
+            style={{
+              background:
+                "conic-gradient(from 0deg, transparent 0deg, rgba(245,223,166,0.28) 24deg, transparent 78deg, rgba(223,192,123,0.16) 200deg, transparent 360deg)",
+              maskImage:
+                "radial-gradient(circle, transparent 60%, black 63%, black 72%, transparent 75%)",
+              WebkitMaskImage:
+                "radial-gradient(circle, transparent 60%, black 63%, black 72%, transparent 75%)",
+            }}
+          />
+        </div>
+      )}
+
+      {/* Hand-crafted Brass & Obsidian Astrolabe Art Dial */}
+      <div className="relative h-full w-full overflow-hidden rounded-full border border-[#d6b46c]/45 bg-[#040509] shadow-[0_0_64px_rgba(223,192,123,0.14),inset_0_0_40px_rgba(0,0,0,0.92)]">
+        <Image
+          src="/art/astrolabe-orrery-plate.png"
+          alt=""
+          fill
+          loading="eager"
+          sizes="(max-width: 640px) 92vw, 440px"
+          className="object-cover scale-[1.03] opacity-90"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,rgba(4,5,9,0.22)_18%,rgba(4,5,9,0.48)_66%,rgba(4,5,9,0.9)_98%)]"
+        />
+
+        {/* Rotating Optical Sighting Ray */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            transform: `rotate(${activeBearing}deg)`,
+            transition: quietMode ? "none" : "transform 650ms cubic-bezier(0.22, 1, 0.36, 1)",
+          }}
+        >
+          <div
+            className="absolute top-[7%] left-1/2 h-[43%] w-8 -translate-x-1/2"
+            style={{
+              background:
+                "linear-gradient(180deg, rgba(255,244,210,0.45) 0%, rgba(245,223,166,0.16) 55%, transparent 100%)",
+              clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
+            }}
+          />
+          <div className="absolute top-[7%] left-1/2 h-[33%] w-px -translate-x-1/2 bg-gradient-to-b from-[#fff8e6] via-[#f5dfa6]/70 to-transparent" />
+        </div>
+      </div>
+
+      {/* Cardinal Bearing Annotations */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 rounded-sm border border-[#d6b46c]/30 bg-[#05070e]/90 px-2 py-0.5 font-mono text-[8.5px] tracking-[0.16em] text-[#dfc07b]"
+      >
+        000° ZENITH
+      </span>
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-sm border border-[#d6b46c]/25 bg-[#05070e]/90 px-2 py-0.5 font-mono text-[8.5px] tracking-[0.16em] text-[#a79d86]"
+      >
+        180° SOUTH
+      </span>
+
+      {/* Center Monocentric Unity Hub */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-1/2 left-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-[#fff4d2]/55 bg-[#060811]/88 text-center shadow-[0_0_28px_rgba(223,192,123,0.22)] backdrop-blur-sm"
+      >
+        <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-[#fff8e6]">
+          AL-NŪR
+        </span>
+        <span className="mt-0.5 font-mono text-[7.5px] tracking-[0.14em] text-[#dfc07b] uppercase">
+          ONE SOURCE
+        </span>
+      </div>
+
+      {/* Orbiting Gateway Satellite Pin Controls */}
+      {nodes.map((node) => {
+        const spec = ORRERY_BEARINGS[node.worldId];
+        const rad = ((spec.angleDeg - 90) * Math.PI) / 180;
+        const leftPct = ((cx + Math.cos(rad) * spec.orbitRadius) / 440) * 100;
+        const topPct = ((cy + Math.sin(rad) * spec.orbitRadius) / 440) * 100;
+        const isSelected = node.nodeCode === selectedCode;
+        const isVisible = visibleCodes.has(node.nodeCode);
+        const placePillAbove = spec.angleDeg === 180;
+
+        return (
+          <button
+            key={node.nodeCode}
+            type="button"
+            aria-label={`Select ${spec.shortName} orbital gateway (${node.nodeCode})`}
+            aria-pressed={isSelected}
+            onClick={() => onSelectNode(node.nodeCode)}
+            style={{
+              left: `${leftPct.toFixed(2)}%`,
+              top: `${topPct.toFixed(2)}%`,
+              opacity: isVisible ? 1 : 0.28,
+            }}
+            className="group absolute z-20 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center transition-opacity duration-300 focus:outline-none cursor-pointer"
+          >
+            <span
+              className={`relative flex h-5 w-5 items-center justify-center rounded-full border transition-all duration-300 ${
+                isSelected
+                  ? "scale-125 border-[#fff8e6] bg-[#262012] shadow-[0_0_18px_rgba(255,244,210,0.8)]"
+                  : "border-[#dfc07b]/85 bg-[#090c16] group-hover:scale-110 group-hover:border-[#fff4d2]"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${isSelected ? "bg-[#fff8e6]" : "bg-[#dfc07b]"}`}
+              />
+            </span>
+            <span
+              className={`pointer-events-none absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-sm border px-1.5 py-0.5 font-mono text-[8.5px] tracking-[0.12em] uppercase backdrop-blur-sm transition-colors ${
+                placePillAbove ? "bottom-[calc(50%+14px)]" : "top-[calc(50%+14px)]"
+              } ${
+                isSelected
+                  ? "border-[#fff4d2]/75 bg-[#060912]/92 text-[#fff8e6]"
+                  : "border-[#d6b46c]/30 bg-[#060912]/82 text-[#dfd6c3] group-hover:border-[#f5dfa6]/60"
+              }`}
+            >
+              {spec.shortName}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Architectural miniature portal glyph for each of the four Canon Entry Doors.
+ */
+export function DoorPortalGlyph({
+  doorId,
+  active = false,
+}: {
+  readonly doorId: EntryDoorId;
+  readonly active?: boolean;
+}) {
+  const stroke = active ? "#fff6dc" : "#dfc07b";
+  if (doorId === "story-universe") {
+    return (
+      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+        <path d="M8 30 V16 C8 9 18 5 18 5 C18 5 28 9 28 16 V30" stroke={stroke} strokeWidth="1.3" />
+        <circle cx="18" cy="18" r="4.5" stroke={stroke} strokeOpacity="0.75" strokeWidth="1" />
+        <path
+          d="M18 11 L19.2 16.8 L25 18 L19.2 19.2 L18 25 L16.8 19.2 L11 18 L16.8 16.8 Z"
+          fill={stroke}
+          fillOpacity="0.7"
+        />
+      </svg>
+    );
+  }
+  if (doorId === "epistemic-corpus") {
+    return (
+      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+        <polygon points="18,4 30,18 18,32 6,18" stroke={stroke} strokeWidth="1.25" />
+        <polygon
+          points="18,9 25,18 18,27 11,18"
+          stroke={stroke}
+          strokeOpacity="0.6"
+          strokeWidth="0.9"
+        />
+        <circle cx="18" cy="18" r="2.2" fill={stroke} />
+      </svg>
+    );
+  }
+  if (doorId === "empire-organization") {
+    return (
+      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+        <circle cx="18" cy="18" r="12" stroke={stroke} strokeWidth="1.15" strokeDasharray="3 2" />
+        <circle cx="18" cy="18" r="7" stroke={stroke} strokeWidth="1.2" />
+        <circle cx="18" cy="18" r="2.4" fill={stroke} />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+      <circle cx="18" cy="18" r="12" stroke={stroke} strokeWidth="1" strokeOpacity="0.55" />
+      <ellipse
+        cx="18"
+        cy="18"
+        rx="13"
+        ry="5"
+        transform="rotate(-30 18 18)"
+        stroke={stroke}
+        strokeWidth="1.1"
+      />
+      <ellipse
+        cx="18"
+        cy="18"
+        rx="13"
+        ry="5"
+        transform="rotate(30 18 18)"
+        stroke={stroke}
+        strokeWidth="1.1"
+      />
+      <circle cx="18" cy="18" r="2.4" fill={stroke} />
+    </svg>
+  );
+}
+
+const WORLD_ART_PLATES: Record<WorldIdentifier, string> = {
+  moonwitness: "/art/meridian-sky-chart.png",
+  arsy: "/art/astrolabe-orrery-plate.png",
+  qalam: "/art/nonagram-sanctuary-dial.png",
+  sidra: "/art/sidra-lote-constellation.png",
+  "rocksoul-dx": "/art/story-plate-03.png",
+};
+
+/**
+ * Illuminated rounded antique brass astrolabe medallion seal (zero wireframe SVG).
+ */
+export function AstrolabeSealMedallion({
+  className = "h-20 w-20",
+  spin = false,
+}: {
+  readonly className?: string;
+  readonly spin?: boolean;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`relative overflow-hidden rounded-full border border-[#f5dfa6]/45 bg-[#05070e] shadow-[0_0_26px_rgba(223,192,123,0.26)] ${className}`}
+    >
+      <Image
+        src="/art/astrolabe-orrery-plate.png"
+        alt=""
+        fill
+        loading="eager"
+        sizes="120px"
+        className={`object-cover scale-[1.08] ${spin ? "animate-spin-slow" : ""}`}
+      />
+      <div className="pointer-events-none absolute inset-0 rounded-full bg-[radial-gradient(circle,transparent_45%,rgba(5,7,14,0.68)_100%)]" />
+    </div>
+  );
+}
+
+/**
+ * Whisper-quiet world-specific fine-art plate watermark inside each World Sanctum chamber.
+ */
+export function WorldChamberWatermarkSvg({ worldId }: { readonly worldId: WorldIdentifier }) {
+  const plateSrc = WORLD_ART_PLATES[worldId];
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute right-2 bottom-2 h-52 w-64 overflow-hidden opacity-[0.16] sm:h-64 sm:w-80"
+      style={{
+        maskImage: "radial-gradient(circle at 72% 72%, black 18%, transparent 74%)",
+        WebkitMaskImage: "radial-gradient(circle at 72% 72%, black 18%, transparent 74%)",
+      }}
+    >
+      <Image src={plateSrc} alt="" fill sizes="320px" className="object-cover" />
+    </div>
+  );
+}

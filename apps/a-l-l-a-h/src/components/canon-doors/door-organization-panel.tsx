@@ -11,6 +11,7 @@ import {
   WINGS_TEN_ARRAY,
   type SyafaatStateId,
 } from "@/data/empire-canon-codex";
+import { Monocentric100CenterSvg } from "../sacred-illustrations";
 
 export function DoorOrganizationPanel() {
   const [activeSyafaatState, setActiveSyafaatState] = useState<SyafaatStateId>("PRACTICING");
@@ -27,7 +28,7 @@ export function DoorOrganizationPanel() {
           <div className="font-mono text-[11px] tracking-[0.2em] text-[#d6b46c] uppercase">
             SUPREME IDENTITY &amp; LOW-PROFILE TAWHID
           </div>
-          <h4 className="mt-2 font-serif text-xl tracking-[0.1em] text-[#fff6df]">
+          <h4 className="font-monument mt-2 text-lg sm:text-xl tracking-[0.1em] text-[#fff6df]">
             A-L-L-A-H: {SUPREME_IDENTITY.fullExpansion}
           </h4>
           <p className="mt-2 font-mono text-xs text-[#f5dfa6]">
@@ -43,7 +44,7 @@ export function DoorOrganizationPanel() {
 
         <div className="lg:col-span-7 border border-[#d6b46c]/30 bg-[#070910] p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2">
-            <span className="font-serif text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
               4-LINE OWNER MANIFESTO (Z:\repo\dx\NARATION.md)
             </span>
           </div>
@@ -51,7 +52,7 @@ export function DoorOrganizationPanel() {
             {OWNER_FOUR_LINE_MANIFESTO.map((item) => (
               <div key={item.index} className="border border-[#d6b46c]/20 bg-[#0a0d16] p-3.5">
                 <div className="font-mono text-[10px] text-[#d6b46c]">LINE {item.index}</div>
-                <div className="mt-1 font-serif text-sm tracking-[0.06em] text-[#fff6df]">
+                <div className="font-monument mt-1 text-xs sm:text-sm tracking-[0.06em] text-[#fff6df]">
                   {item.line}
                 </div>
                 <p className="mt-1 text-xs text-[#bfb59e]">{item.interpretation}</p>
@@ -64,7 +65,7 @@ export function DoorOrganizationPanel() {
       {/* 100CENTER (99 G.O.D. Stewardship Nodes + 1 Tawhid Center) & Syafaat 6 States */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             100CENTER STEWARDSHIP TOPOLOGY &amp; SYAFAAT 6-STATE ENGINE
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
@@ -96,29 +97,38 @@ export function DoorOrganizationPanel() {
           {SYAFAAT_BASE_STATES.find((s) => s.state === activeSyafaatState)?.description}
         </p>
 
-        <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:grid-cols-3">
-          {CENTER_100_STEWARDSHIP_CLUSTERS.map((cluster, idx) => {
-            const selected = idx === selectedClusterIdx;
-            return (
-              <button
-                key={cluster.clusterCode}
-                type="button"
-                onClick={() => setSelectedClusterIdx(idx)}
-                className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
-                  selected
-                    ? "border-[#e6c987] bg-[#d6b46c]/15"
-                    : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/50"
-                }`}
-              >
-                <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
-                  <span>{cluster.clusterCode}</span>
-                  <span>{cluster.rangeLabel}</span>
-                </div>
-                <div className="mt-1 font-serif text-sm text-[#fff6df]">{cluster.title}</div>
-                <div className="mt-0.5 text-[11px] text-[#bfb59e]">{cluster.humanEthicalFocus}</div>
-              </button>
-            );
-          })}
+        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="flex justify-center">
+            <Monocentric100CenterSvg selectedClusterIndex={selectedClusterIdx} />
+          </div>
+          <div className="flex-1 grid grid-cols-1 gap-2.5 sm:grid-cols-3 lg:grid-cols-3">
+            {CENTER_100_STEWARDSHIP_CLUSTERS.map((cluster, idx) => {
+              const selected = idx === selectedClusterIdx;
+              return (
+                <button
+                  key={cluster.clusterCode}
+                  type="button"
+                  onClick={() => setSelectedClusterIdx(idx)}
+                  className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
+                    selected
+                      ? "border-[#e6c987] bg-[#d6b46c]/15"
+                      : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/50"
+                  }`}
+                >
+                  <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+                    <span>{cluster.clusterCode}</span>
+                    <span>{cluster.rangeLabel}</span>
+                  </div>
+                  <div className="font-monument mt-1 text-xs text-[#fff6df] uppercase">
+                    {cluster.title}
+                  </div>
+                  <div className="mt-1 font-sans text-xs text-[#cfc5b0]">
+                    {cluster.humanEthicalFocus}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-3 border border-[#d6b46c]/20 bg-[#0a0d16] p-3.5 flex flex-wrap items-center justify-between gap-2">
@@ -141,7 +151,7 @@ export function DoorOrganizationPanel() {
       {/* WINGS 10 Operational Array & THE PRIME CODE PC01-PC09 */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="lg:col-span-7 border border-[#d6b46c]/25 bg-[#070910] p-5">
-          <div className="font-serif text-sm tracking-[0.18em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
+          <div className="font-monument text-xs sm:text-sm tracking-[0.16em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
             WINGS 10 OPERATIONAL ARRAY (W01 SKYLINK – W10 HAVEN · PROPOSED_NOT_ASSIGNED)
           </div>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -151,7 +161,9 @@ export function DoorOrganizationPanel() {
                   <span>{wing.code}</span>
                   <span>{wing.domainRole}</span>
                 </div>
-                <div className="mt-0.5 font-serif text-sm text-[#fff6df]">{wing.callsign}</div>
+                <div className="font-monument mt-0.5 text-xs sm:text-sm text-[#fff6df]">
+                  {wing.callsign}
+                </div>
                 <p className="mt-0.5 text-[11px] text-[#bfb59e]">{wing.architecturalDuty}</p>
               </div>
             ))}
@@ -159,7 +171,7 @@ export function DoorOrganizationPanel() {
         </div>
 
         <div className="lg:col-span-5 border border-[#d6b46c]/25 bg-[#070910] p-5">
-          <div className="font-serif text-sm tracking-[0.18em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
+          <div className="font-monument text-xs sm:text-sm tracking-[0.16em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
             THE PRIME CODE (PC01–PC09) &amp; 14 SYSTEM CONCEPTS
           </div>
           <div className="mt-3 space-y-2 max-h-[380px] overflow-y-auto pr-1">

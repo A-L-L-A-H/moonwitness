@@ -7,7 +7,10 @@ import {
   dismissCommandCenterAlert,
   ensureCommandCenterSchema,
   getCommandCenterState,
+  getCommandCenterStats,
   toggleCommandCenterWorkflow,
+  transitionCommandCenterWorkflow,
+  workflowStatusSchema,
 } from "./command-center.persistence";
 
 function actorIdFor(request: FastifyRequest): string | null {
@@ -28,6 +31,18 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
       await ensureCommandCenterSchema();
       const state = await getCommandCenterState(actorId);
       return reply.code(200).send(state);
+    },
+  );
+
+  fastify.get(
+    "/command-center/stats",
+    { preHandler: authenticate },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const actorId = actorIdFor(request);
+      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
+      await ensureCommandCenterSchema();
+      const stats = await getCommandCenterStats(actorId);
+      return reply.code(200).send(stats);
     },
   );
 
@@ -65,6 +80,43 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
         return reply.code(404).send({ error: "Workflow not found" });
       }
       return reply.code(200).send({ workflow });
+    },
+  );
+
+  fastify.patch<{ Params: { id: string }; Body: { status?: string } }>(
+    "/command-center/workflows/:id/status",
+    { preHandler: authenticate },
+    async (request, reply) => {
+      const actorId = actorIdFor(request);
+      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
+      const params = commandCenterIdParamSchema.safeParse(request.params);
+      if (!params.success) {
+        return reply.code(400).send({ error: "Invalid workflow identifier" });
+      }
+      const parsedStatus = workflowStatusSchema.safeParse(request.body?.status);
+      if (!parsedStatus.success) {
+        return reply.code(400).send({ error: "Invalid workflow status" });
+      }
+      await ensureCommandCenterSchema();
+      try {
+        const workflow = await transitionCommandCenterWorkflow(
+          actorId,
+          params.data.id,
+          parsedStatus.data,
+        );
+        if (!workflow) {
+          return reply.code(404).send({ error: "Workflow not found" });
+        }
+        return reply.code(200).send({ workflow });
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          (error as Error & { statusCode?: number }).statusCode === 409
+        ) {
+          return reply.code(409).send({ error: error.message });
+        }
+        throw error;
+      }
     },
   );
 

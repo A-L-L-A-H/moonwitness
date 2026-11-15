@@ -15,6 +15,7 @@ import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "./interface/routes/command-center.routes";
 import { commandCenterMigrations } from "./interface/routes/command-center.persistence";
+import { memoryRoutes } from "./interface/routes/memory.routes";
 
 export interface BootstrapOptions {
   dbPath?: string;
@@ -80,6 +81,7 @@ export async function buildApp(options: BootstrapOptions = {}): Promise<FastifyI
       register: async () => {
         await fastify.register(riotAiRoutes);
         await fastify.register(commandCenterRoutes);
+        await fastify.register(memoryRoutes);
       },
     });
     await registry.load();

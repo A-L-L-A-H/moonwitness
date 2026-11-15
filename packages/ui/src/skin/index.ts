@@ -31,9 +31,22 @@ export interface SkinProviderProps {
 }
 
 export function SkinProvider({ defaultSkin = 'default', children, onSkinChange }: SkinProviderProps) {
-  const [skin, setSkinState] = React.useState<SkinName>(defaultSkin);
+  const [skin, setSkinState] = React.useState<SkinName>(() => {
+    if (typeof window === 'undefined') return defaultSkin;
+    try {
+      const stored = window.localStorage.getItem('mw-skin');
+      if (stored && isValidSkin(stored)) return stored as SkinName;
+    } catch { /* ignore */ }
+    return defaultSkin;
+  });
   const preset = getPreset(skin);
-  const setSkin = useCallback((newSkin: SkinName) => { setSkinState(newSkin); onSkinChange?.(newSkin); }, [onSkinChange]);
+  const setSkin = useCallback((newSkin: SkinName) => {
+    setSkinState(newSkin);
+    if (typeof window !== 'undefined') {
+      try { window.localStorage.setItem('mw-skin', newSkin); } catch { /* ignore */ }
+    }
+    onSkinChange?.(newSkin);
+  }, [onSkinChange]);
   const getClasses = useCallback((component: string, overrides?: Record<string, unknown>): string => {
     const applied = applyPreset(skin);
     const baseClasses: Record<string, string> = {
@@ -56,6 +69,62 @@ export function SkinProvider({ defaultSkin = 'default', children, onSkinChange }
   const value = useMemo(() => ({ skin, preset, setSkin, getClasses, effects }), [skin, preset, setSkin, getClasses, effects]);
   return React.createElement(SkinContext.Provider, { value }, children);
 }
+
+/* ── Theme (dark/light) ─────────────────────────────────────────── */
+
+export type ThemeMode = 'dark' | 'light' | 'system';
+
+const THEME_KEY = 'mw-theme';
+
+export function getStoredThemeMode(): ThemeMode {
+  if (typeof window === 'undefined') return 'system';
+  try {
+    const stored = window.localStorage.getItem(THEME_KEY);
+    if (stored === 'dark' || stored === 'light' || stored === 'system') return stored;
+  } catch { /* ignore */ }
+  return 'system';
+}
+
+export function resolveThemeMode(mode: ThemeMode): 'dark' | 'light' {
+  if (mode === 'system') {
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  }
+  return mode;
+}
+
+export function applyThemeMode(mode: ThemeMode): void {
+  if (typeof document === 'undefined') return;
+  const resolved = resolveThemeMode(mode);
+  document.documentElement.setAttribute('data-theme', resolved);
+  try { window.localStorage.setItem(THEME_KEY, mode); } catch { /* ignore */ }
+}
+
+export function useThemeMode(): {
+  mode: ThemeMode;
+  resolved: 'dark' | 'light';
+  setMode: (mode: ThemeMode) => void;
+} {
+  const [mode, setModeState] = React.useState<ThemeMode>(getStoredThemeMode);
+
+  React.useEffect(() => {
+    applyThemeMode(mode);
+  }, [mode]);
+
+  const setMode = React.useCallback((next: ThemeMode) => {
+    setModeState(next);
+    applyThemeMode(next);
+  }, []);
+
+  const resolved = resolveThemeMode(mode);
+
+  return { mode, resolved, setMode };
+}
+
+function isValidSkin(value: string): boolean {
+  return ['default', 'riot', 'editorial', 'technical', 'archive', 'transmission'].includes(value);
+}
+
+export { isValidSkin };
 
 export function useSkin(): SkinContextValue {
   const context = useContext(SkinContext);

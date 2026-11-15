@@ -1,5 +1,6 @@
 import React from "react";
 import { Activity, ChevronDown, Command, FolderGit2, Settings2 } from "lucide-react";
+import { CrimsonCrownSvg } from "./ui/RocksoulVectors";
 import type { Repository } from "../lib/contracts";
 
 export interface TopbarProps {
@@ -20,7 +21,7 @@ export default function Topbar({
   return (
     <header className="topbar">
       <div className="topbar-brand">
-        <span className="brand-diamond">▶</span>
+        <CrimsonCrownSvg className="brand-crown-img" />
         <span>
           ROCKSOUL <b>- DX</b>
         </span>

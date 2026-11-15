@@ -24,7 +24,7 @@ export function DoorSovereignPanel() {
       {/* OX-DX 7 Zones x 7 Levels = 49 Canonical Levels */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             OX-DX UNIVERSAL ONTOLOGY PYRAMID (7 ZONES × 7 LEVELS = 49 LEVELS)
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
@@ -47,7 +47,7 @@ export function DoorSovereignPanel() {
                 }`}
               >
                 <div className="font-mono text-[10px] text-[#d6b46c]">LVL {zone.levelRange}</div>
-                <div className="mt-0.5 font-serif text-xs text-[#fff6df]">
+                <div className="font-monument mt-0.5 text-[11px] text-[#fff6df]">
                   {zone.zoneName.replace(/^ZONE 0\d · /, "")}
                 </div>
               </button>
@@ -56,7 +56,9 @@ export function DoorSovereignPanel() {
         </div>
 
         <div className="mt-4 border border-[#d6b46c]/20 bg-[#0a0d16] p-4">
-          <div className="font-serif text-sm text-[#fff6df]">{activeZone.zoneName}</div>
+          <div className="font-monument text-xs sm:text-sm text-[#fff6df]">
+            {activeZone.zoneName}
+          </div>
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
             {activeZone.levels.map((levelLabel) => (
               <div
@@ -77,7 +79,7 @@ export function DoorSovereignPanel() {
             <span>{SOVEREIGN_ENGINE_SPECS.mTime.repo}</span>
             <span>{SOVEREIGN_ENGINE_SPECS.mTime.version}</span>
           </div>
-          <h4 className="mt-1 font-serif text-base text-[#fff6df]">
+          <h4 className="font-monument mt-1 text-sm sm:text-base text-[#fff6df]">
             {SOVEREIGN_ENGINE_SPECS.mTime.name}
           </h4>
           <p className="mt-1 text-xs text-[#d9d0be]">{SOVEREIGN_ENGINE_SPECS.mTime.purpose}</p>
@@ -106,7 +108,7 @@ export function DoorSovereignPanel() {
             <span>{SOVEREIGN_ENGINE_SPECS.aqel.repo}</span>
             <span>ARABIC-FIRST AST ENGINE</span>
           </div>
-          <h4 className="mt-1 font-serif text-base text-[#fff6df]">
+          <h4 className="font-monument mt-1 text-sm sm:text-base text-[#fff6df]">
             {SOVEREIGN_ENGINE_SPECS.aqel.name}
           </h4>
           <p className="mt-1 text-xs text-[#d9d0be]">{SOVEREIGN_ENGINE_SPECS.aqel.purpose}</p>
@@ -123,7 +125,7 @@ export function DoorSovereignPanel() {
             <span>{SOVEREIGN_ENGINE_SPECS.dhgs.repo}</span>
             <span>{SOVEREIGN_ENGINE_SPECS.dhgs.version}</span>
           </div>
-          <h4 className="mt-1 font-serif text-base text-[#fff6df]">
+          <h4 className="font-monument mt-1 text-sm sm:text-base text-[#fff6df]">
             {SOVEREIGN_ENGINE_SPECS.dhgs.name}
           </h4>
           <p className="mt-1 text-xs text-[#d9d0be]">{SOVEREIGN_ENGINE_SPECS.dhgs.purpose}</p>
@@ -144,7 +146,7 @@ export function DoorSovereignPanel() {
             <span>{SOVEREIGN_ENGINE_SPECS.ageCode.repo}</span>
             <span>CROSS-CIVILIZATION CORPUS</span>
           </div>
-          <h4 className="mt-1 font-serif text-base text-[#fff6df]">
+          <h4 className="font-monument mt-1 text-sm sm:text-base text-[#fff6df]">
             {SOVEREIGN_ENGINE_SPECS.ageCode.name}
           </h4>
           <p className="mt-1 text-xs text-[#d9d0be]">{SOVEREIGN_ENGINE_SPECS.ageCode.purpose}</p>
@@ -157,7 +159,7 @@ export function DoorSovereignPanel() {
       {/* 368-Repo Cross-Organization Topology Atlas */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
             CROSS-REPOSITORY TOPOLOGY ATLAS ({totalRepos} VERIFIED GITHUB REPOS · 7 OWNERS + LOCAL
             WORKSPACE)
           </span>
@@ -181,7 +183,9 @@ export function DoorSovereignPanel() {
                 }`}
               >
                 <div className="font-mono text-[11px] text-[#d6b46c]">{org.repoCount} REPOS</div>
-                <div className="mt-0.5 font-serif text-sm text-[#fff6df]">{org.orgName}/*</div>
+                <div className="font-monument mt-0.5 text-xs sm:text-sm text-[#fff6df]">
+                  {org.orgName}/*
+                </div>
               </button>
             );
           })}
@@ -189,7 +193,7 @@ export function DoorSovereignPanel() {
 
         <div className="mt-4 border border-[#d6b46c]/20 bg-[#0a0d16] p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="font-serif text-lg text-[#fff6df]">
+            <span className="font-monument text-base text-[#fff6df]">
               {activeOrg.orgName}/* ({activeOrg.repoCount} Repositories)
             </span>
             <span className="font-mono text-[11px] text-[#f5dfa6]">{activeOrg.roleInEmpire}</span>

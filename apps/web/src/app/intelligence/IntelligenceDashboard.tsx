@@ -10,6 +10,7 @@ import {
   type RiotAiUsageOverview,
   type RiotAiConfigHistoryEntry,
 } from "@/lib/api/riot-ai";
+import { ArchiveMemoryBridge } from "./ArchiveMemoryBridge";
 
 interface IntelligenceDashboardProps {
   models: RiotAiModel[];
@@ -587,6 +588,14 @@ export function IntelligenceDashboard({
             )}
         </div>
       </section>
+
+      <ArchiveMemoryBridge
+        onAttachContext={(snippet) =>
+          setDraft((previous) =>
+            previous.trim() ? `${previous.trimEnd()}\n\n${snippet}` : snippet,
+          )
+        }
+      />
 
       <section className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.5fr)]">
         <div className="border-2 border-[var(--line)] bg-[var(--panel)]">

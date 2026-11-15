@@ -42,6 +42,6 @@ if errorlevel 1 (
 
 echo.
 echo MOONWITNESS MEMORY BRIDGE is starting.
-echo Dashboard: http://localhost:3000
+echo Dashboard: http://localhost:3005
 echo API docs:  http://localhost:8000/docs
-start "" "http://localhost:3000"
+start "" "http://localhost:3005"

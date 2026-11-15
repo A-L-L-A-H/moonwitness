@@ -226,7 +226,7 @@ export function Onboarding() {
               <div className="border border-[var(--line)] bg-black/30 p-3 text-[11px] text-zinc-500">
                 Versi arsy <span className="text-zinc-300">{status.data?.version ?? "—"}</span> ·
                 Instance ID{" "}
-                <span className="font-mono text-zinc-400">{status.data?.instance.id}</span>
+                <span className="font-mono text-zinc-400">{status.data?.instance?.id ?? "—"}</span>
               </div>
               <div className="flex justify-end">
                 <Button onClick={() => setStep("account")} className="btn-zine px-5 py-3 text-sm">

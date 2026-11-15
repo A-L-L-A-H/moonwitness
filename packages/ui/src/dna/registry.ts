@@ -58,7 +58,54 @@ export function generateCSSVariables(theme: DNATokens = defaultTheme, prefix = '
       lines.push('  ' + cssVar + ': ' + (value ? '1' : '0') + ';');
     }
   }
+
+  // Also generate shadcn/ui compatible HSL variables
+  const shadcnMap = generateShadcnHSLVars(theme);
+  for (const [name, hsl] of Object.entries(shadcnMap)) {
+    lines.push('  --' + name + ': ' + hsl + ';');
+  }
+
   return ':root {\n' + lines.join('\n') + '\n}';
+}
+
+function generateShadcnHSLVars(theme: DNATokens): Record<string, string> {
+  const vars: Record<string, string> = {};
+  const sem = theme.colors?.semantic;
+  if (!sem) return vars;
+
+  const map: Record<string, keyof typeof sem> = {
+    background: 'background',
+    foreground: 'foreground',
+    card: 'card',
+    'card-foreground': 'cardForeground',
+    popover: 'popover',
+    'popover-foreground': 'popoverForeground',
+    primary: 'primary',
+    'primary-foreground': 'primaryForeground',
+    secondary: 'secondary',
+    'secondary-foreground': 'secondaryForeground',
+    muted: 'muted',
+    'muted-foreground': 'mutedForeground',
+    accent: 'accent',
+    'accent-foreground': 'accentForeground',
+    destructive: 'destructive',
+    'destructive-foreground': 'destructiveForeground',
+    border: 'border',
+    input: 'input',
+    ring: 'ring',
+  };
+
+  for (const [cssName, tokenKey] of Object.entries(map)) {
+    const token = sem[tokenKey];
+    if (token && typeof token === 'object' && 'hsl' in token) {
+      vars[cssName] = (token as ColorToken).hsl!;
+    }
+  }
+
+  // radius
+  if (theme.radius) vars.radius = String(theme.radius);
+
+  return vars;
 }
 
 /** Apply a theme by injecting CSS variables into the document */

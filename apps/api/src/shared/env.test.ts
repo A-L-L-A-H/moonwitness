@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertProductionEnv,
   parseCorsOrigins,
+  validateMemoryRuntimeConfig,
   validateProductionEnv,
   validateRiotAiRuntimeConfig,
   env,
@@ -23,12 +24,14 @@ const base = {
   STORAGE_SECRET_KEY: "test-storage-secret",
   SYSLOG_URL: "http://127.0.0.1:8093",
   SNMP_POLLER_URL: "http://127.0.0.1:8094",
+  TRUSTED_PROXY_COUNT: 0,
   RIOT_AI_MODEL: undefined,
   RIOT_AI_TIMEOUT_MS: 30_000,
   RIOT_AI_MAX_REQUEST_BYTES: 65_536,
   RIOT_AI_RATE_LIMIT_MAX: 20,
   RIOT_AI_RATE_LIMIT_WINDOW_MS: 60_000,
   RIOT_AI_USAGE_RETENTION_DAYS: 90,
+  MEMORY_API_TIMEOUT_MS: 10_000,
 };
 
 describe("parseCorsOrigins", () => {
@@ -71,6 +74,35 @@ describe("validateProductionEnv", () => {
     ).toContain("RIOT_AI_BASE_URL must not contain query parameters or fragments.");
     expect(env.RIOT_AI_TIMEOUT_MS).toBeGreaterThan(0);
     expect(env.RIOT_AI_USAGE_RETENTION_DAYS).toBe(90);
+  });
+
+  it("blocks inference endpoints that resolve to private or metadata networks", () => {
+    expect(validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "http://127.0.0.1:11434" })).toEqual([]);
+    expect(validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "http://10.0.0.5:11434" })).toContain(
+      "RIOT_AI_BASE_URL must use HTTPS except for a loopback local runtime.",
+    );
+    expect(
+      validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "http://169.254.169.254:80" }),
+    ).toContain(
+      "RIOT_AI_BASE_URL must not target private, link-local, or metadata network ranges.",
+    );
+    expect(
+      validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "http://192.168.10.4:11434" }),
+    ).toContain(
+      "RIOT_AI_BASE_URL must not target private, link-local, or metadata network ranges.",
+    );
+    expect(validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "http://[::1]:11434" })).toEqual([]);
+    expect(validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "http://[fd00::1]:11434" })).toContain(
+      "RIOT_AI_BASE_URL must not target private, link-local, or metadata network ranges.",
+    );
+    expect(
+      validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: "https://inference.example/v1" }),
+    ).toEqual([]);
+    expect(validateMemoryRuntimeConfig({ MEMORY_API_URL: "http://127.0.0.1:8000" })).toEqual([]);
+    expect(
+      validateMemoryRuntimeConfig({ MEMORY_API_URL: "http://169.254.169.254:8000" }),
+    ).toContain("MEMORY_API_URL must not target private, link-local, or metadata network ranges.");
+    expect(validateMemoryRuntimeConfig({ MEMORY_API_URL: "https://memory.example" })).toEqual([]);
   });
 
   it("ignores non-production environments", () => {

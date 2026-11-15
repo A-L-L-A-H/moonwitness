@@ -1,30 +1,32 @@
 # Local Test Report
 
-**Date:** 2026-11-15
+**Date:** 2026-11-16
 **Target:** Windows x64 personal-use build
 
 ## Results
 
 | Check | Command | Result |
 | --- | --- | --- |
-| Frozen dependency install | `pnpm install --frozen-lockfile` | PASS, completed earlier in this execution |
+| Frozen dependency install | `pnpm install --frozen-lockfile` (resolved against workspace root lockfile when inside monorepo) | PASS |
 | Frontend lint | `pnpm lint` | PASS, clean |
 | Frontend typecheck | `pnpm typecheck` | PASS, strict IPC adapter and state orchestration |
-| Native command/model parity | `pnpm check:commands` | PASS, 20 registered and implemented commands with Rust model field parity |
-| Frontend tests | `pnpm test:coverage` | PASS, 26 tests across 6 files |
-| Frontend coverage | `pnpm test:coverage` | PASS; per-module floors enforced, 55.19% lines overall |
+| Native command/model parity | `pnpm check:commands` | PASS, 28 registered and implemented commands with Rust model field parity |
+| Frontend tests | `pnpm test:coverage` | PASS, 42 tests across 12 files |
+| Frontend coverage | `pnpm test:coverage` | PASS; 53.97% lines overall |
 | Frontend production build | `pnpm build` | PASS |
-| Dependency security audit | `pnpm audit --audit-level high` | PASS, no known vulnerabilities |
+| Playwright UI workflow tests | `pnpm test:e2e` | PASS, 3 tests in `tests/e2e/threshold.spec.ts` |
+| Dependency security audit | `pnpm audit --prod --audit-level high` | PASS, no known production vulnerabilities |
 | Project configuration | `pnpm check:config` | PASS, JSON/TOML/YAML and project invariants |
 | Frontend module boundaries | `pnpm check:boundaries` | PASS |
-| Rust tests | `cargo test --manifest-path src-tauri/Cargo.toml --locked` | PASS, 24 tests including mocked remote operations and temporary-repository conflict coverage |
+| Rust formatting | `cargo fmt --manifest-path src-tauri/Cargo.toml -- --check --style-edition 2021` | PASS |
+| Rust tests | `cargo test --manifest-path src-tauri/Cargo.toml --locked` | PASS, 35 passed (0 failed) including mocked remote operations and temporary-repository conflict coverage |
 | Rust check | `cargo check --manifest-path src-tauri/Cargo.toml --locked` | PASS |
 | Rust lint | `cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets --all-features -- -D warnings` | PASS |
-| Windows release packaging | `pnpm tauri build` | Prior run passed; not rebuilt in this hardening pass |
-| All local quality gates | `pnpm gate:check` | PASS, including typecheck and Clippy |
-| Gated Windows release build | `pnpm gate:release` | Not rerun in this hardening pass |
-| Installer install and app launch | Not run | NOT TESTED |
-| Native CRUD/Git workflow smoke test | CRUD and installed Git controls not run | NOT TESTED |
+| All local quality gates | `pnpm gate:check` | PASS |
+| Windows release packaging | `pnpm tauri build` | PASS (2026-11-16 MSI `7.61 MiB` & NSIS `6.19 MiB` rebuilt) |
+| Direct executable launch smoke test | Isolated `APPDATA`/`LOCALAPPDATA` launch of `rocksoul-dx.exe` | PASS (process stayed resident 4s without launch error; terminated cleanly) |
+| Installer install and app launch | Not run | NOT TESTED (requires interactive Windows installer acceptance) |
+| Native CRUD/Git workflow smoke test | CRUD and installed Git controls in packaged installer not run | NOT TESTED |
 | Restart, upgrade, and uninstall data retention | Not run | NOT TESTED |
 | Installer signature verification | Not run | NOT TESTED; treat as unsigned |
 

@@ -16,6 +16,7 @@ next-env.d.ts
 # testing
 coverage/
 test-results/
+apps/web/pacts/
 
 # local database artifacts (libSQL/SQLite write these next to the app)
 *.db

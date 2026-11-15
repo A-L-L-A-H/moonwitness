@@ -68,7 +68,7 @@ export interface Project {
   imagePosition: string;
 }
 
-export type WorkflowStatus = "Running" | "Queued" | "Paused";
+export type WorkflowStatus = "Queued" | "Running" | "Paused" | "Succeeded" | "Failed" | "Cancelled";
 
 export interface Workflow {
   id: string;

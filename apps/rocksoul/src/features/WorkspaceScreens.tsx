@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Activity, ArrowUpRight, GitBranch, Pencil, Plus, RefreshCw, Trash2, Workflow, X } from "lucide-react";
+import { thumbArchiveUrl, thumbRiotUrl, thumbSignalUrl, thumbStudioUrl } from "../assets/art";
 import { IssueRow } from "../components";
+import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
 import { call } from "../lib";
 import type {
   ActivityEvent,
@@ -54,6 +56,8 @@ export function Pit({
         kicker="01 / WORK QUEUE"
         title="THE PIT"
         subtitle="Every loose end. Every sharp edge. One place to throw down."
+        artSrc={thumbRiotUrl}
+        artCode="SECTOR 01 // THE PIT"
         action={
           <button className="riot-button" onClick={onCreate}>
             <Plus size={16} /> NEW ISSUE
@@ -212,6 +216,8 @@ export function Git({ repositories, onAddRepository, onRefresh }: GitProps) {
         kicker="03 / SOURCE CONTROL"
         title="GIT JUNGLE"
         subtitle="Your checkouts. Your branches. No remote dependency required."
+        artSrc={thumbArchiveUrl}
+        artCode="SECTOR 03 // GIT JUNGLE"
         action={
           <button className="outline-button" onClick={onRefresh}>
             <RefreshCw size={15} /> REFRESH
@@ -600,6 +606,8 @@ export function WarRoom({
         kicker="04 / STRATEGY & MILESTONES"
         title="WAR ROOM"
         subtitle="Turn the big idea into small moves that can actually ship."
+        artSrc={thumbStudioUrl}
+        artCode="SECTOR 04 // WAR ROOM"
       />
       <form className="riot-panel project-create" onSubmit={submitProject}>
         <div className="panel-heading cream">
@@ -877,6 +885,8 @@ export function Noise({ events }: NoiseProps) {
         kicker="05 / EVENT INTELLIGENCE"
         title="NOISE TAPE"
         subtitle="The machine remembers. A readable trail of what happened and when."
+        artSrc={thumbSignalUrl}
+        artCode="SECTOR 05 // NOISE TAPE"
       />
       <div className="riot-panel noise-log">
         <div className="panel-heading purple-head">
@@ -884,6 +894,10 @@ export function Noise({ events }: NoiseProps) {
             <Activity size={15} /> LOCAL EVENT STREAM
           </span>
           <span className="micro-label">APPEND-ONLY JOURNAL</span>
+        </div>
+        <div className="noise-telemetry-strip" aria-hidden="true">
+          <TelemetryWaveformSvg className="rs-waveform-svg noise-waveform" />
+          <span>CH-05 // APPEND TRACE</span>
         </div>
         {events.map((event) => (
           <article className="noise-log-row" key={event.id}>
@@ -908,18 +922,32 @@ interface PageTitleProps {
   kicker: string;
   title: string;
   subtitle: string;
+  artSrc?: string;
+  artCode?: string;
   action?: React.ReactNode;
 }
 
-function PageTitle({ kicker, title, subtitle, action }: PageTitleProps) {
+function PageTitle({ kicker, title, subtitle, artSrc, artCode, action }: PageTitleProps) {
   return (
     <header className="workspace-title">
-      <div>
+      <div className="workspace-title-copy">
         <span className="eyebrow">{kicker}</span>
         <h1>{title}</h1>
         <p>{subtitle}</p>
       </div>
-      {action}
+      <div className="workspace-title-aside">
+        {artSrc && (
+          <div className="workspace-art-plate" aria-hidden="true">
+            <img src={artSrc} alt="" loading="lazy" />
+            <div className="workspace-art-scrim" />
+            <div className="workspace-art-meta">
+              <AnarchyStarSigil className="rs-anarchy-sigil workspace-art-sigil" />
+              <span>{artCode || "LOCAL // DX"}</span>
+            </div>
+          </div>
+        )}
+        {action}
+      </div>
     </header>
   );
 }

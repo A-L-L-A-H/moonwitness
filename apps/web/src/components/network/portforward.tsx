@@ -1,15 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Input, Card, Badge, SkinProvider } from "@moonwitness/ui";
+import { Input, Card, Badge } from "@moonwitness/ui";
 import { useCreatePortForward, useDeletePortForward, usePortForwards } from "@/lib/api/portforward";
 
 export function PortForwardPanel() {
-  return (
-    <SkinProvider defaultSkin="technical">
-      <PortForwardPanelInner />
-    </SkinProvider>
-  );
+  return <PortForwardPanelInner />;
 }
 
 function PortForwardPanelInner() {

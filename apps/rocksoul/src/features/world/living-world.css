@@ -185,9 +185,12 @@
   color: #efe7da;
 }
 
+.rs-barcode-stamp img,
 .rs-barcode-stamp svg {
+  display: block;
   width: 104px;
   height: 17px;
+  object-fit: cover;
 }
 
 .rs-barcode-stamp span {
@@ -200,12 +203,24 @@
   display: block;
   width: 100%;
   height: 44px;
+  object-fit: cover;
 }
 
 .rs-waveform-mini {
   display: block;
   width: 72px;
   height: 18px;
+  object-fit: cover;
+}
+
+.awakening-mark img,
+.awakening-mark svg,
+.universe-brand-mark img,
+.universe-brand-mark svg {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
 }
 
 /* === THRESHOLD HEADER === */
@@ -883,21 +898,23 @@
   }
 
   .universe-header {
-    min-height: 56px;
+    min-height: 52px;
     margin: 0 -14px;
-    padding: 8px 14px;
+    padding: 6px 14px;
     gap: 8px;
+    flex-wrap: nowrap;
   }
 
   .universe-brand {
     min-width: 0;
+    flex: 1;
     gap: 7px;
   }
 
   .universe-brand-mark {
-    width: 29px;
-    height: 29px;
-    flex-basis: 29px;
+    width: 28px;
+    height: 28px;
+    flex-basis: 28px;
   }
 
   .universe-brand-copy {
@@ -905,8 +922,8 @@
   }
 
   .universe-brand-copy small {
-    font-size: 7px;
-    letter-spacing: 0.045em;
+    font-size: 6.5px;
+    letter-spacing: 0.03em;
     white-space: nowrap;
   }
 
@@ -917,14 +934,15 @@
 
   .universe-header-actions {
     gap: 5px;
+    flex-shrink: 0;
   }
 
   .universe-icon-button,
   .world-motion-control {
-    width: 44px;
-    min-width: 44px;
-    height: 44px;
-    min-height: 44px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
     padding: 0;
     justify-content: center;
     font-size: 0;

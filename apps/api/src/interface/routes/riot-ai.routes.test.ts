@@ -630,4 +630,49 @@ describe("RIOT Intelligence inference routes", () => {
       }),
     ).toContain("RIOT_AI_BASE_URL must use HTTPS except for a loopback local runtime.");
   });
+
+  it("keys the inference rate limit by the socket peer so forwarded headers cannot mint buckets", async () => {
+    const previousLimit = env.RIOT_AI_RATE_LIMIT_MAX;
+    try {
+      const server = await createRateLimitedApp();
+      const headers = await authorizedHeaders();
+      const attempts = [];
+      for (let index = 0; index < 2; index += 1) {
+        attempts.push(
+          await server.inject({
+            method: "POST",
+            url: "/riot-ai/chat",
+            headers: {
+              ...headers,
+              "x-forwarded-for": `198.51.100.${index + 1}`,
+            },
+            payload: {
+              requestId: `forwarded-${index}`,
+              messages: [{ role: "user", content: "hello" }],
+            },
+          }),
+        );
+      }
+      expect(attempts[0]!.statusCode).toBe(503);
+      expect(attempts[1]!.statusCode).toBe(429);
+    } finally {
+      env.RIOT_AI_RATE_LIMIT_MAX = previousLimit;
+    }
+  });
+
+  it("refuses an inference runtime endpoint that resolves to the metadata service", async () => {
+    const { validateProductionEnv } = await import("../../shared/env");
+    const problems = validateProductionEnv({
+      ...env,
+      NODE_ENV: "production",
+      DATABASE_URL: "file:prod.db",
+      CORS_ORIGINS: "https://moonwitness.example",
+      STORAGE_ACCESS_KEY: "configured",
+      STORAGE_SECRET_KEY: "configured",
+      RIOT_AI_BASE_URL: "http://169.254.169.254:80",
+    });
+    expect(problems).toContain(
+      "RIOT_AI_BASE_URL must not target private, link-local, or metadata network ranges.",
+    );
+  });
 });

@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DiamondStarOrnament, PortalAstrolabeIcon } from "./sacred-icons";
+import { DiamondStarOrnament } from "./sacred-icons";
+import { AstrolabeSealMedallion } from "./sacred-illustrations";
 
 const ENTRANCE_SESSION_KEY = "allah-entrance-witnessed";
 
@@ -147,7 +148,10 @@ export function CinematicEntrance({
             aria-hidden="true"
             className="absolute h-36 w-36 rounded-full bg-[#dfc07b]/15 blur-2xl"
           />
-          <PortalAstrolabeIcon className="relative h-24 w-24 sm:h-28 sm:w-28 animate-spin-slow drop-shadow-[0_0_24px_rgba(255,244,210,0.45)]" />
+          <AstrolabeSealMedallion
+            className="relative h-24 w-24 sm:h-28 sm:w-28 drop-shadow-[0_0_24px_rgba(255,244,210,0.45)]"
+            spin={!quietMode}
+          />
         </div>
       </div>
 
@@ -157,21 +161,28 @@ export function CinematicEntrance({
           stage >= 2 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         }`}
       >
+        <div
+          dir="rtl"
+          lang="ar"
+          className="mb-2 text-lg sm:text-2xl text-[#f5dfa6]/95 tracking-wide drop-shadow-[0_0_16px_rgba(223,192,123,0.45)]"
+        >
+          بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
+        </div>
         <div className="flex items-center justify-center gap-3 sm:gap-5">
           <span className="h-px w-10 sm:w-16 bg-gradient-to-r from-transparent to-[#dfc07b]/80" />
-          <p className="font-serif text-[11px] sm:text-xs tracking-[0.32em] text-[#e8dfd0] uppercase">
+          <p className="font-monument text-[11px] sm:text-xs tracking-[0.32em] text-[#e8dfd0] uppercase">
             IN THE NAME OF ALLAH
           </p>
           <span className="h-px w-10 sm:w-16 bg-gradient-to-l from-transparent to-[#dfc07b]/80" />
         </div>
 
-        <h2 className="mt-4 font-serif text-3xl sm:text-5xl md:text-6xl tracking-[0.16em] text-gold-monument">
+        <h2 className="font-monument mt-4 text-3xl sm:text-5xl md:text-6xl tracking-[0.16em] text-gold-monument">
           A-L-L-A-H.COM
         </h2>
 
         <div className="mt-3 flex items-center gap-3">
           <DiamondStarOrnament className="h-3.5 w-3.5 text-[#dfc07b]" />
-          <p className="font-serif text-xs sm:text-sm tracking-[0.42em] text-[#dfd5c0] uppercase pl-[0.42em]">
+          <p className="font-monument text-xs sm:text-sm tracking-[0.42em] text-[#dfd5c0] uppercase pl-[0.42em]">
             EMPIRE OF THE LIGHT
           </p>
           <DiamondStarOrnament className="h-3.5 w-3.5 text-[#dfc07b]" />

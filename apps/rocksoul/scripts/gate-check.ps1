@@ -2,12 +2,14 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 
 $projectRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
+$workspaceRoot = Resolve-Path (Join-Path $projectRoot "..\..")
+$lockfileDir = if (Test-Path (Join-Path $projectRoot "pnpm-lock.yaml")) { $projectRoot } elseif (Test-Path (Join-Path $workspaceRoot "pnpm-lock.yaml")) { $workspaceRoot } else { $projectRoot }
 Push-Location $projectRoot
 
 try {
     $checks = @(
-        @{ Name = "Frozen dependency install"; Command = "pnpm.cmd"; Arguments = @("install", "--frozen-lockfile") },
-        @{ Name = "Dependency security audit"; Command = "pnpm.cmd"; Arguments = @("audit", "--audit-level", "high") },
+        @{ Name = "Frozen dependency install"; Command = "pnpm.cmd"; Arguments = @("install", "--frozen-lockfile"); WorkingDirectory = $lockfileDir },
+        @{ Name = "Dependency security audit"; Command = "pnpm.cmd"; Arguments = @("audit", "--prod", "--audit-level", "high"); WorkingDirectory = $lockfileDir },
         @{ Name = "Project configuration validation"; Command = "pnpm.cmd"; Arguments = @("check:config") },
         @{ Name = "Frontend dependency boundaries"; Command = "pnpm.cmd"; Arguments = @("check:boundaries") },
         @{ Name = "Native command contract parity"; Command = "pnpm.cmd"; Arguments = @("check:commands") },
@@ -24,9 +26,21 @@ try {
 
     foreach ($check in $checks) {
         Write-Host "`n=== $($check.Name) ===" -ForegroundColor Cyan
-        & $check.Command @($check.Arguments)
-        if ($LASTEXITCODE -ne 0) {
-            throw "$($check.Name) failed with exit code $LASTEXITCODE."
+        $pushedCheckDir = $false
+        if ($check.ContainsKey("WorkingDirectory") -and $check.WorkingDirectory) {
+            Push-Location $check.WorkingDirectory
+            $pushedCheckDir = $true
+        }
+        try {
+            & $check.Command @($check.Arguments)
+            if ($LASTEXITCODE -ne 0) {
+                throw "$($check.Name) failed with exit code $LASTEXITCODE."
+            }
+        }
+        finally {
+            if ($pushedCheckDir) {
+                Pop-Location
+            }
         }
     }
 
