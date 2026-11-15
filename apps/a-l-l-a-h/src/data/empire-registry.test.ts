@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  LIVING_LIGHT_MOTION,
+  LIVING_LIGHT_PALETTE,
+  LIVING_LIGHT_TYPOGRAPHY,
+  SACRED_VISUAL_COVENANT,
+} from "./design-tokens";
+import {
   COVENANT_PILLARS,
   DOCK_TELEMETRY_NODES,
   NAVIGATION_TABS,
@@ -52,5 +58,39 @@ describe("Empire of the Light Registry", () => {
       "A WORLD TO LEARN",
       "A WORLD TO BUILD",
     ]);
+  });
+});
+
+describe("Living Light Design Tokens & Visual Covenant", () => {
+  it("defines coherent cosmic obsidian, warm ivory, and sacred gold palette tokens", () => {
+    expect(LIVING_LIGHT_PALETTE.cosmicBlack).toBe("#040509");
+    expect(LIVING_LIGHT_PALETTE.midnightBlue).toBe("#080a12");
+    expect(LIVING_LIGHT_PALETTE.warmIvory).toBe("#f5efe2");
+    expect(LIVING_LIGHT_PALETTE.sacredGold).toBe("#dfc07b");
+    expect(LIVING_LIGHT_PALETTE.luminousGold).toBe("#fff4d2");
+    expect(LIVING_LIGHT_PALETTE.softWhiteLight).toBe("#fffdf7");
+    expect(LIVING_LIGHT_PALETTE.subtleSilver).toBe("#c8d0de");
+  });
+
+  it("defines bounded spring physics and progressive capability tiers", () => {
+    expect(LIVING_LIGHT_MOTION.durationsMs.instant).toBe(0);
+    expect(LIVING_LIGHT_MOTION.durationsMs.entrance).toBe(2200);
+    expect(LIVING_LIGHT_MOTION.springs.magnetic.maxDisplacementPx).toBeLessThanOrEqual(10);
+    expect(LIVING_LIGHT_MOTION.springs.spatialTilt.maxDisplacementPx).toBeLessThanOrEqual(8);
+    expect(LIVING_LIGHT_MOTION.capabilityTiers).toEqual([
+      "webgl2-full",
+      "canvas-2d",
+      "reduced-motion",
+    ]);
+  });
+
+  it("enforces sacred visual boundaries and accessibility target minimums", () => {
+    expect(SACRED_VISUAL_COVENANT.depictionOfAllahForbidden).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.humanFacesForbidden).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.cartoonAndAnimeForbidden).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.decorativeSacredTextTexturesForbidden).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.requiresReducedMotionBypass).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.minimumInteractiveTargetPx).toBeGreaterThanOrEqual(44);
+    expect(LIVING_LIGHT_TYPOGRAPHY.displayFamily).toContain("Cinzel");
   });
 });

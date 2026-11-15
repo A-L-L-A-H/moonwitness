@@ -84,7 +84,8 @@ export function UniversalSearchModal({
           <button
             type="button"
             onClick={onClose}
-            className="border border-[#d6b46c]/35 px-2.5 py-1 text-[11px] font-mono text-[#d6b46c] hover:border-[#f8eac6] hover:text-[#fff6df] cursor-pointer"
+            aria-label="Close Search"
+            className="min-h-[44px] min-w-[44px] border border-[#d6b46c]/35 px-3 py-1 text-[11px] font-mono text-[#d6b46c] hover:border-[#f8eac6] hover:text-[#fff6df] cursor-pointer"
           >
             ESC
           </button>

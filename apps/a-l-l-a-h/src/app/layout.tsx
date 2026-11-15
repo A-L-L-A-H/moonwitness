@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { SkipLink } from "@moonwitness/ui";
 import "./globals.css";
 
 const cinzel = localFont({
@@ -26,7 +25,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" className={`min-h-screen antialiased ${cinzel.variable}`}>
       <body className="min-h-screen antialiased bg-[#040509] text-[#f5efe2]">
-        <SkipLink />
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border focus:border-[#dfc07b] focus:bg-[#040509] focus:px-4 focus:py-2 focus:font-serif focus:text-xs focus:tracking-[0.2em] focus:text-[#fff6df] focus:uppercase"
+        >
+          Skip to main content
+        </a>
         {children}
       </body>
     </html>
