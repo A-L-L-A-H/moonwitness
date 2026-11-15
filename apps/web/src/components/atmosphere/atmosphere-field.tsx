@@ -2,6 +2,7 @@
 
 import { useMemo, useRef } from "react";
 import type { MapCity } from "@moonwitness/types";
+import { useMotionPaused } from "@/lib/motion/motion-pause";
 import { useP5, useReducedMotion } from "./use-p5";
 import { makeFactory, type AtmosphereVariant } from "./sketches";
 
@@ -29,20 +30,17 @@ export function AtmosphereField({
 }: AtmosphereFieldProps) {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
-  // Disable p5 on mobile to reduce main thread blocking
-  const isMobile = useMemo(() => {
-    if (typeof window === "undefined") return false;
-    return window.innerWidth < 768;
-  }, []);
+  const paused = useMotionPaused();
   const factory = useMemo(
     () => makeFactory(variant, { seed, interactive, density, cities }),
     [variant, seed, interactive, density, cities],
   );
   useP5(ref, factory, {
-    enabled: !reduced && !isMobile,
+    enabled: !reduced,
     continuous: variant !== "brush",
     interactive,
     seed,
+    paused,
   });
 
   return (

@@ -1,5 +1,8 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
+import FastifyCors from "@fastify/cors";
+import { initDb, closeDb, applyMigrations } from "@moonwitness/orm";
+import { authMigrations } from "../../db/migrations";
 
 async function loadRoutes(max: string) {
   vi.resetModules();
@@ -12,8 +15,10 @@ describe("control routes auth rate limiting", () => {
   const envBackup = { ...process.env };
   let app: FastifyInstance | null = null;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     process.env = { ...envBackup };
+    await initDb("file::memory:?cache=shared");
+    await applyMigrations(Array.from(authMigrations));
   });
 
   afterEach(async () => {
@@ -24,17 +29,15 @@ describe("control routes auth rate limiting", () => {
     process.env = { ...envBackup };
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    await closeDb();
   });
 
   it("menolak permintaan auth setelah batas per-IP terlampaui", async () => {
-    // Upstream arsy tidak tersedia -> forwardAuth berakhir 502, bukan 429.
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
-
     const { controlRoutes } = await loadRoutes("2");
     app = Fastify({ logger: false });
     await app.register(controlRoutes);
     await app.ready();
-
     const inject = () =>
       app!.inject({
         method: "POST",
@@ -42,12 +45,10 @@ describe("control routes auth rate limiting", () => {
         payload: { email: "a@b.c" },
         remoteAddress: "10.1.2.3",
       });
-
     const first = await inject();
     const second = await inject();
     expect(first.statusCode).toBe(502);
     expect(second.statusCode).toBe(502);
-
     const third = await inject();
     expect(third.statusCode).toBe(429);
     expect(third.json().message).toContain("terlalu banyak");
@@ -55,12 +56,10 @@ describe("control routes auth rate limiting", () => {
 
   it("mengirim header rate limit pada respons auth", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
-
     const { controlRoutes } = await loadRoutes("5");
     app = Fastify({ logger: false });
     await app.register(controlRoutes);
     await app.ready();
-
     const res = await app.inject({
       method: "GET",
       url: "/control/auth/me",
@@ -77,8 +76,6 @@ describe("control routes auth rate limiting", () => {
     app = Fastify({ logger: false });
     await app.register(controlRoutes);
     await app.ready();
-
-    // Route di luar scope auth tetap dijangkau berulang tanpa 429.
     for (let i = 0; i < 3; i += 1) {
       const res = await app.inject({
         method: "GET",
@@ -87,5 +84,29 @@ describe("control routes auth rate limiting", () => {
       });
       expect(res.statusCode).not.toBe(429);
     }
+  });
+
+  it("allows CORS preflight for DELETE on control routes", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    const { controlRoutes } = await loadRoutes("1");
+    app = Fastify({ logger: false });
+    await app.register(FastifyCors, {
+      origin: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      credentials: true,
+    });
+    await app.register(controlRoutes);
+    await app.ready();
+    const deletePreflight = await app.inject({
+      method: "OPTIONS",
+      url: "/control/portforwards",
+      headers: {
+        origin: "http://localhost:3000",
+        "access-control-request-method": "DELETE",
+        "access-control-request-headers": "content-type",
+      },
+    });
+    expect([200, 204]).toContain(deletePreflight.statusCode);
+    expect(deletePreflight.headers["access-control-allow-methods"]).toContain("DELETE");
   });
 });

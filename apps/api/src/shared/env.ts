@@ -13,6 +13,13 @@ const envSchema = {
   RATE_LIMIT_MAX: z.string().default("120"),
   /** Rate-limit window in milliseconds. */
   RATE_LIMIT_WINDOW_MS: z.string().default("60000"),
+  /** Upstream Rust service base URLs (proxied by this API). */
+  RADIUS_URL: z.string().default("http://127.0.0.1:8090"),
+  STORAGE_URL: z.string().default("http://127.0.0.1:8091"),
+  STORAGE_ACCESS_KEY: z.string().optional(),
+  STORAGE_SECRET_KEY: z.string().optional(),
+  SYSLOG_URL: z.string().default("http://127.0.0.1:8093"),
+  SNMP_POLLER_URL: z.string().default("http://127.0.0.1:8094"),
 };
 
 export const env = parseEnv(envSchema);
@@ -47,6 +54,14 @@ export function validateProductionEnv(config: typeof env): string[] {
   }
   if (config.CORS_ORIGINS && parseCorsOrigins(config.CORS_ORIGINS).includes("*")) {
     problems.push("CORS_ORIGINS must not use '*' in production.");
+  }
+  if (!config.STORAGE_ACCESS_KEY?.trim()) {
+    problems.push("STORAGE_ACCESS_KEY must be set for server-side Storage signing in production.");
+  }
+  if (!config.STORAGE_SECRET_KEY?.trim()) {
+    problems.push("STORAGE_SECRET_KEY must be set for server-side Storage signing in production.");
+  } else if (config.STORAGE_SECRET_KEY.trim() === "change-me-storage-secret") {
+    problems.push("STORAGE_SECRET_KEY must not use the example placeholder in production.");
   }
 
   return problems;

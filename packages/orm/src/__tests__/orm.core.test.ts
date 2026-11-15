@@ -113,6 +113,16 @@ describe("defineModel", () => {
       }),
     ).toThrow(/Unsupported schema type/);
   });
+
+  it("uses the input field shape for transformed Zod schemas", () => {
+    const transformedModel = defineModel({
+      name: "test.transformed",
+      table: "test_transformed",
+      schema: z.object({ title: z.string().transform((value) => value.trim()) }),
+    });
+
+    expect(transformedModel.ddl).toContain('"title" TEXT NOT NULL');
+  });
 });
 
 describe("BaseRepository", () => {
@@ -258,6 +268,28 @@ describe("BaseRepository", () => {
       /Invalid column/,
     );
     await expect(taskModel.repository.find({ nope: 1 })).rejects.toThrow(/Unknown column/);
+  });
+
+  it("filters nullable columns by null", async () => {
+    const withNull = await taskModel.repository.create(sample({ note: null }));
+    await taskModel.repository.create(sample({ title: "with note", note: "hello" }));
+
+    const found = await taskModel.repository.find({ note: null });
+    expect(found.map((row) => row.id)).toEqual([withNull.id]);
+    expect(found[0]?.note).toBeNull();
+    expect(await taskModel.repository.count({ note: null })).toBe(1);
+  });
+
+  it("ignores undefined filter values instead of coercing them to null", async () => {
+    await taskModel.repository.create(sample({ id: "with-title", title: "t1" }));
+    await taskModel.repository.create(sample({ id: "with-title-2", title: "t2" }));
+
+    const found = await taskModel.repository.find({ title: undefined });
+    expect(found).toHaveLength(2);
+    expect(await taskModel.repository.count({ title: undefined })).toBe(2);
+
+    const onlyOne = await taskModel.repository.find({ title: undefined, id: "with-title" });
+    expect(onlyOne.map((row) => row.id)).toEqual(["with-title"]);
   });
 
   it("persists across close and reopen of the same file", async () => {

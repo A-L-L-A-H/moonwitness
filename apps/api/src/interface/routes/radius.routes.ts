@@ -1,9 +1,12 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { requireAuth, requireRole } from "../../middleware/auth";
 
 const RADIUS_URL = process.env.RADIUS_URL ?? "http://127.0.0.1:8090";
 
 // Write endpoints dikunci di balik env, sama seperti control.routes.ts.
-const RADIUS_PROXY_ADMIN = process.env.RADIUS_PROXY_ADMIN === "1";
+function radiusProxyAdminEnabled(): boolean {
+  return process.env.RADIUS_PROXY_ADMIN === "1";
+}
 
 function forwardHeaders(request: FastifyRequest): Record<string, string> {
   const headers: Record<string, string> = {};
@@ -22,7 +25,10 @@ async function forward(
     upstream = await fetch(`${RADIUS_URL}${target}`, {
       method,
       headers: forwardHeaders(request),
-      body: request.body ? JSON.stringify(request.body) : undefined,
+      body: (() => {
+        const b = request.body;
+        return typeof b === "string" || b instanceof Buffer ? b : b ? JSON.stringify(b) : undefined;
+      })(),
       signal: AbortSignal.timeout(15_000),
     });
   } catch (error) {
@@ -39,7 +45,7 @@ async function forward(
 }
 
 function requireAdmin(reply: FastifyReply): boolean {
-  if (!RADIUS_PROXY_ADMIN) {
+  if (!radiusProxyAdminEnabled()) {
     reply.code(403).send({
       error: "aksi tulis radius dimatikan; set RADIUS_PROXY_ADMIN=1 untuk mengaktifkan",
     });
@@ -49,6 +55,8 @@ function requireAdmin(reply: FastifyReply): boolean {
 }
 
 export async function radiusRoutes(fastify: FastifyInstance) {
+  fastify.addHook("preHandler", requireAuth());
+
   fastify.get("/radius/health", async (request, reply) =>
     forward(request, reply, "/health", "GET"),
   );
@@ -61,13 +69,14 @@ export async function radiusRoutes(fastify: FastifyInstance) {
     forward(request, reply, `/api/users/${encodeURIComponent(request.params.username)}`, "GET"),
   );
 
-  fastify.post("/radius/users", async (request, reply) => {
+  fastify.post("/radius/users", { preHandler: requireRole("admin") }, async (request, reply) => {
     if (!requireAdmin(reply)) return reply;
     return forward(request, reply, "/api/users", "POST");
   });
 
   fastify.put<{ Params: { username: string } }>(
     "/radius/users/:username",
+    { preHandler: requireRole("admin") },
     async (request, reply) => {
       if (!requireAdmin(reply)) return reply;
       return forward(
@@ -81,6 +90,7 @@ export async function radiusRoutes(fastify: FastifyInstance) {
 
   fastify.delete<{ Params: { username: string } }>(
     "/radius/users/:username",
+    { preHandler: requireRole("admin") },
     async (request, reply) => {
       if (!requireAdmin(reply)) return reply;
       return forward(

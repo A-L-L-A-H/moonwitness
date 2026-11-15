@@ -26,6 +26,29 @@ affected versions, and impact. Expect an acknowledgement before any public discl
 - If a secret is committed, rotate it first, then remove it from history. Deleting the commit is
   not enough.
 
+## Application authentication
+
+- API passwords are stored as bcrypt hashes; the browser receives identity only from the API and
+  stores the session in an HTTP-only, SameSite=Lax cookie (Secure in production).
+- On an empty user database, configure `MW_BOOTSTRAP_ADMIN_USERNAME`,
+  `MW_BOOTSTRAP_ADMIN_EMAIL`, and `MW_BOOTSTRAP_ADMIN_PASSWORD` before starting the API.
+  Bootstrap passwords must be 12–72 UTF-8 bytes. No built-in demo users or passwords are created.
+- The bootstrap values are read only while the user table is empty; remove the bootstrap password
+  from the runtime environment after the initial account is created.
+- Password recovery is disabled until a real delivery and verification flow exists. Do not display
+  a successful recovery message without performing recovery.
+- Public timeline reads remain anonymous. Authenticated timeline requests use the verified session
+  to create their ORM `ActorContext`; caller-provided identity or role headers are not trusted.
+- Every Rust-service proxy route, including health endpoints, requires the server-verified `mw_session`
+  cookie. `viewer`, `editor`, and `admin` may read; service mutations require `admin`. RADIUS writes
+  also require the `RADIUS_PROXY_ADMIN=1` operational switch.
+- SNMP community strings and other secret-like response fields are omitted from operator responses.
+  Service session cookies and caller-provided authorization headers are never forwarded upstream.
+- Storage requests are signed by the API with server-only `STORAGE_ACCESS_KEY` and
+  `STORAGE_SECRET_KEY`; the browser must not receive or persist these values. The Storage service
+  requires both credentials and rejects unsigned requests unless its local-only anonymous mode is
+  explicitly enabled for development.
+
 ## Dependency policy
 
 - Direct dependencies are added deliberately; prefer the standard library or an existing
@@ -39,6 +62,17 @@ Release tags are created by Release Please from reviewed commits on `main`. SBOM
 attestation are not produced yet: they require a build/publish pipeline with a package or image
 artifact to attest. Do not claim them until that pipeline exists.
 
+## Storage service (`services/storage`)
+
+- S3-compatible object storage (Rust) with filesystem-backed blobs and SQLite metadata.
+- Authentication: AWS Signature V4 (header and presigned URL). For local development only,
+  `STORAGE_ALLOW_ANONYMOUS=true` disables signature verification and must never be used in
+  production.
+- Path safety: object keys are validated and resolved against `STORAGE_ROOT` to prevent traversal
+  outside the storage root.
+- Transport/TLS and at-rest encryption are deployment responsibilities (reverse proxy/infra); do not
+  expose the service directly without appropriate controls.
+
 ## Known gaps
 
 These are owner decisions, not oversights:
@@ -48,3 +82,20 @@ These are owner decisions, not oversights:
    emergency change still goes through a PR.
 3. **`pnpm audit` is a point-in-time check** and depends on the registry being reachable. When the
    registry is unreachable the gate reports `BLOCKED`, not `PASS`.
+
+## Rust services
+
+The `services/` directory contains standalone Rust services (storage/S3, syslog, snmp-poller,
+radius) that run independently of the Node API. They are proxied by `apps/api` and are not
+exposed directly to browsers.
+
+- **Storage (S3)**: Supports SigV4 header and presigned-URL authentication. Anonymous access is
+  dev-only (`ANONYMOUS=1`); production requires credentials. Path traversal is blocked by
+  canonicalising keys against `STORAGE_ROOT`.
+- **Syslog**: Listens on unprivileged ports (5140/5514) by default. Messages are stored in SQLite
+  with configurable retention. No authentication on the ingest listeners — restrict network access
+  at the infrastructure layer.
+- **SNMP poller**: Polls devices over SNMP (v1/v2c). Community strings are stored in plaintext in
+  SQLite — use SNMPv3 with auth+priv in production or restrict database access.
+- **RADIUS**: Authentication and accounting proxy. Shared secrets are stored in SQLite; restrict
+  database access and use TLS for HTTP endpoints in production.
