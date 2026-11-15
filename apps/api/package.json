@@ -35,7 +35,7 @@
     "@eslint/js": "^10.0.1",
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
-    "@pact-foundation/pact": "16.0.0",
+    "@pact-foundation/pact": "17.1.4",
     "@types/bcrypt": "^5.0.2",
     "@types/node": "^24.10.0",
     "eslint": "^10.14.0",
