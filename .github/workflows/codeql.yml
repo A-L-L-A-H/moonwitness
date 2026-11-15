@@ -9,8 +9,8 @@ on:
     - cron: "27 3 * * 1"
 
 permissions:
+  actions: read
   contents: read
-  security-events: write
 
 concurrency:
   group: codeql-${{ github.ref }}
@@ -39,6 +39,18 @@ jobs:
         uses: github/codeql-action/autobuild@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
 
       - name: Analyze
+        id: analyze
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: "/language:${{ matrix.language }}"
+          output: codeql-results
+          upload: never
+
+      - name: Upload CodeQL SARIF results
+        if: always() && steps.analyze.outputs.sarif-output != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-sarif-${{ matrix.language }}
+          path: codeql-results/*.sarif
+          if-no-files-found: error
+          retention-days: 30
