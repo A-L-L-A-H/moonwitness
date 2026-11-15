@@ -23,8 +23,8 @@
     "@tanstack/react-query": "^5.60.0",
     "@tanstack/react-query-devtools": "^5.60.0",
     "gsap": "^3.15.1",
-    "next": "^15.5.6",
-    "p5": "2.3.4",
+    "next": "^16.4.6",
+    "p5": "2.4.0",
     "p5.brush": "3.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
@@ -32,18 +32,18 @@
   "devDependencies": {
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
-    "@lhci/cli": "0.15.1",
+    "@lhci/cli": "0.16.1",
     "@playwright/test": "^1.40.0",
-    "@pact-foundation/pact": "16.0.0",
+    "@pact-foundation/pact": "17.1.4",
     "@tailwindcss/postcss": "^4.1.17",
     "@types/gsap": "^3.0.0",
-    "@types/node": "^24.10.0",
+    "@types/node": "^26.6.6",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "eslint": "^10.14.0",
     "tailwindcss": "^4.1.17",
     "tsx": "^4.19.0",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vitest": "^5.1.0"
   }
 }

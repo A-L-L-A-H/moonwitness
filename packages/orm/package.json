@@ -14,7 +14,7 @@
     "clean": "rm -rf .turbo node_modules"
   },
   "dependencies": {
-    "@libsql/client": "^0.15.15",
+    "@libsql/client": "^0.18.0",
     "@moonwitness/types": "workspace:*",
     "zod": "^4.6.7"
   },
@@ -22,12 +22,12 @@
     "@eslint/js": "^10.0.1",
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
-    "@types/node": "^24.10.0",
+    "@types/node": "^26.6.6",
     "eslint": "^10.14.0",
     "eslint-plugin-import": "^2.32.0",
     "tsx": "^4.19.0",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "typescript-eslint": "^8.72.2",
-    "vitest": "^4.1.12"
+    "vitest": "^5.1.0"
   }
 }
