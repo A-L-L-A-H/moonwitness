@@ -6,6 +6,29 @@ import {
   SACRED_VISUAL_COVENANT,
 } from "./design-tokens";
 import {
+  CENTER_100_STEWARDSHIP_CLUSTERS,
+  CODEX_SEARCH_INDEX,
+  CROSS_REPO_TOPOLOGY_ATLAS,
+  DX_MANGA_FOUR_PANELS,
+  EIGHT_STORY_ERAS,
+  EPISTEMIC_FEDERATION_DOMAINS,
+  FIFTEEN_STORY_EPISODES,
+  FOUR_ENTRY_DOORS,
+  GOD_PROMISE_THREE_TRACKS,
+  ORIGINAL_CREW_ARCHETYPES,
+  OWNER_FOUR_LINE_MANIFESTO,
+  OX_DX_SEVEN_ZONES,
+  PRIME_CODE_AXIOMS,
+  SEVEN_STEP_PROMISE,
+  SIXTEEN_STAGE_LOOP,
+  SRGBL_V8_STAGES,
+  SWING_SWING_KEY_ROTATIONS,
+  SYAFAAT_BASE_STATES,
+  SYSTEM_CONCEPTS_14,
+  UNIVERSE_FOUR_LENSES,
+  WINGS_TEN_ARRAY,
+} from "./empire-canon-codex";
+import {
   COVENANT_PILLARS,
   DOCK_TELEMETRY_NODES,
   NAVIGATION_TABS,
@@ -14,10 +37,11 @@ import {
 } from "./empire-registry";
 
 describe("Empire of the Light Registry", () => {
-  it("defines the four primary navigation tabs", () => {
+  it("defines the five primary navigation tabs including THE CODEX", () => {
     expect(NAVIGATION_TABS.map((tab) => tab.label)).toEqual([
       "THE GATE",
       "THE WORLDS",
+      "THE CODEX",
       "THE DOCK",
       "ABOUT",
     ]);
@@ -58,6 +82,58 @@ describe("Empire of the Light Registry", () => {
       "A WORLD TO LEARN",
       "A WORLD TO BUILD",
     ]);
+  });
+});
+
+describe("Cross-Repo Master Canon Codex", () => {
+  it("encodes the exact 4-line owner manifesto, 4 DX panels, and 3 GOD-PROMISE tracks", () => {
+    expect(OWNER_FOUR_LINE_MANIFESTO).toHaveLength(4);
+    expect(DX_MANGA_FOUR_PANELS).toHaveLength(4);
+    expect(GOD_PROMISE_THREE_TRACKS).toHaveLength(3);
+  });
+
+  it("unifies MoonWitness II and XII narrative structures across 99 chapters", () => {
+    expect(FOUR_ENTRY_DOORS).toHaveLength(4);
+    expect(UNIVERSE_FOUR_LENSES).toHaveLength(4);
+    const totalChapters = UNIVERSE_FOUR_LENSES.reduce((sum, lens) => sum + lens.chapterCount, 0);
+    expect(totalChapters).toBe(99);
+    expect(SEVEN_STEP_PROMISE).toHaveLength(7);
+    expect(SIXTEEN_STAGE_LOOP).toHaveLength(16);
+    expect(EIGHT_STORY_ERAS).toHaveLength(8);
+    expect(ORIGINAL_CREW_ARCHETYPES).toHaveLength(15);
+    expect(FIFTEEN_STORY_EPISODES).toHaveLength(15);
+  });
+
+  it("defines the 6+1 ROCKSOUL epistemic federation, SRGBL v8 stages, and 7 rotations", () => {
+    expect(EPISTEMIC_FEDERATION_DOMAINS).toHaveLength(7);
+    expect(SRGBL_V8_STAGES.map((stage) => stage.letter)).toEqual(["S", "R", "G", "B", "L"]);
+    expect(SWING_SWING_KEY_ROTATIONS).toHaveLength(7);
+  });
+
+  it("enforces Prime Code PC01-PC09, WINGS 10, 100CENTER stewardship (99+1=100), and 14 concepts", () => {
+    expect(PRIME_CODE_AXIOMS).toHaveLength(9);
+    expect(WINGS_TEN_ARRAY).toHaveLength(10);
+    expect(SYAFAAT_BASE_STATES).toHaveLength(6);
+    const total100CenterNodes = CENTER_100_STEWARDSHIP_CLUSTERS.reduce(
+      (sum, cluster) => sum + cluster.nodeCount,
+      0
+    );
+    expect(total100CenterNodes).toBe(100);
+    expect(SYSTEM_CONCEPTS_14).toHaveLength(14);
+  });
+
+  it("models all 49 OX-DX levels across 7 zones and indexes 194+ GitHub repos", () => {
+    expect(OX_DX_SEVEN_ZONES).toHaveLength(7);
+    const totalOxLevels = OX_DX_SEVEN_ZONES.reduce((sum, zone) => sum + zone.levels.length, 0);
+    expect(totalOxLevels).toBe(49);
+
+    const totalRepos = CROSS_REPO_TOPOLOGY_ATLAS.reduce((sum, org) => sum + org.repoCount, 0);
+    expect(totalRepos).toBe(194);
+
+    const validDoorIds = new Set(FOUR_ENTRY_DOORS.map((door) => door.id));
+    for (const item of CODEX_SEARCH_INDEX) {
+      expect(validDoorIds.has(item.doorId)).toBe(true);
+    }
   });
 });
 

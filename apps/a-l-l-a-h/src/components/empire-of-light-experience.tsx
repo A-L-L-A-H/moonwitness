@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
+import type { EntryDoorId } from "@/data/empire-canon-codex";
 import type { RenderingCapabilityTier } from "@/data/design-tokens";
 import {
   NAVIGATION_TABS,
@@ -9,6 +10,7 @@ import {
   type NavigationSectionId,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { CanonCodexSanctum } from "./canon-codex-sanctum";
 import { CelestialCanvas } from "./celestial-canvas";
 import { CinematicEntrance } from "./cinematic-entrance";
 import { CovenantAboutSection } from "./covenant-about-section";
@@ -27,6 +29,7 @@ import { WorldsSanctum } from "./worlds-sanctum";
 export function EmpireOfLightExperience() {
   const [activeNavTab, setActiveNavTab] = useState<NavigationSectionId>("the-gate");
   const [activeWorldId, setActiveWorldId] = useState<WorldIdentifier>("qalam");
+  const [activeDoorId, setActiveDoorId] = useState<EntryDoorId>("story-universe");
   const [sanctuaryRadianceActive, setSanctuaryRadianceActive] = useState<boolean>(false);
   const [quietMode, setQuietMode] = useState<boolean>(false);
   const [renderingTier, setRenderingTier] = useState<RenderingCapabilityTier>("canvas-2d");
@@ -81,6 +84,7 @@ export function EmpireOfLightExperience() {
     const sectionIds: readonly NavigationSectionId[] = [
       "the-gate",
       "the-worlds",
+      "the-codex",
       "the-dock",
       "about",
     ];
@@ -157,6 +161,32 @@ export function EmpireOfLightExperience() {
     (worldId: WorldIdentifier) => {
       triggerSacredViewTransition(() => {
         setActiveWorldId(worldId);
+      }, quietMode);
+    },
+    [quietMode]
+  );
+
+  const selectAndInspectDoor = useCallback(
+    (doorId: EntryDoorId) => {
+      setMobileMenuOpen(false);
+      triggerSacredViewTransition(() => {
+        setActiveDoorId(doorId);
+        setActiveNavTab("the-codex");
+      }, quietMode);
+      const codexElement = document.getElementById("the-codex");
+      if (codexElement) {
+        const reduced =
+          quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        codexElement.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+      }
+    },
+    [quietMode]
+  );
+
+  const handleDoorSelectOnly = useCallback(
+    (doorId: EntryDoorId) => {
+      triggerSacredViewTransition(() => {
+        setActiveDoorId(doorId);
       }, quietMode);
     },
     [quietMode]
@@ -250,7 +280,7 @@ export function EmpireOfLightExperience() {
           >
             <OctagramMandalaIcon className="h-9 w-9 sm:h-11 sm:w-11 shrink-0 transition-transform duration-700 group-hover:rotate-45" />
             <div className="flex items-center gap-2.5 sm:gap-3.5 whitespace-nowrap">
-              <span className="font-serif text-sm sm:text-lg tracking-[0.16em] text-[#f7efe0] font-normal">
+              <span className="font-serif text-sm md:text-xs lg:text-lg tracking-[0.14em] lg:tracking-[0.16em] text-[#f7efe0] font-normal">
                 A-L-L-A-H.COM
               </span>
               <span
@@ -266,7 +296,7 @@ export function EmpireOfLightExperience() {
           {/* Center Navigation Tabs (Desktop & Tablet Large) */}
           <nav
             aria-label="Primary Empire Navigation"
-            className="hidden md:flex items-center gap-4 lg:gap-10"
+            className="hidden md:flex items-center gap-3 lg:gap-8"
           >
             {NAVIGATION_TABS.map((navTab) => {
               const isTabActive = activeNavTab === navTab.id;
@@ -279,7 +309,7 @@ export function EmpireOfLightExperience() {
                     navigateToSection(navTab.id);
                   }}
                   aria-current={isTabActive ? "page" : undefined}
-                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-serif text-[11px] lg:text-[13px] tracking-[0.14em] lg:tracking-[0.2em] uppercase transition-colors ${
+                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-serif text-[10px] lg:text-[13px] tracking-[0.12em] lg:tracking-[0.2em] uppercase transition-colors ${
                     isTabActive
                       ? "text-[#fff8e8] drop-shadow-[0_0_10px_rgba(248,234,198,0.65)]"
                       : "text-[#d8ceba]/80 hover:text-[#fff6df]"
@@ -571,6 +601,12 @@ export function EmpireOfLightExperience() {
           onSelectWorld={handleWorldSelectOnly}
         />
 
+        <CanonCodexSanctum
+          activeDoorId={activeDoorId}
+          quietMode={quietMode}
+          onSelectDoor={handleDoorSelectOnly}
+        />
+
         <DockMatrixSection
           quietMode={quietMode}
           onLaunchWorld={(worldId) => selectAndInspectWorld(worldId)}
@@ -590,6 +626,7 @@ export function EmpireOfLightExperience() {
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}
         onNavigateToWorld={(worldId) => selectAndInspectWorld(worldId)}
+        onNavigateToDoor={(doorId) => selectAndInspectDoor(doorId)}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 export type WorldIdentifier = "moonwitness" | "arsy" | "qalam" | "sidra" | "rocksoul-dx";
 
-export type NavigationSectionId = "the-gate" | "the-worlds" | "the-dock" | "about";
+export type NavigationSectionId = "the-gate" | "the-worlds" | "the-codex" | "the-dock" | "about";
 
 export interface WorldArtifactRecord {
   readonly code: string;
@@ -62,6 +62,7 @@ export const NAVIGATION_TABS: readonly {
 }[] = [
   { id: "the-gate", label: "THE GATE" },
   { id: "the-worlds", label: "THE WORLDS" },
+  { id: "the-codex", label: "THE CODEX" },
   { id: "the-dock", label: "THE DOCK" },
   { id: "about", label: "ABOUT" },
 ] as const;

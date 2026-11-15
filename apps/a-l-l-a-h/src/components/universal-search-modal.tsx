@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CODEX_SEARCH_INDEX, type EntryDoorId } from "@/data/empire-canon-codex";
 import {
   SIDRA_KNOWLEDGE_AXIOMS,
   WORLD_DOMAINS,
@@ -12,10 +13,12 @@ export function UniversalSearchModal({
   isOpen,
   onClose,
   onNavigateToWorld,
+  onNavigateToDoor,
 }: {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onNavigateToWorld: (worldId: WorldIdentifier) => void;
+  readonly onNavigateToDoor: (doorId: EntryDoorId) => void;
 }) {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
@@ -48,6 +51,15 @@ export function UniversalSearchModal({
       domain.architecturalDescription.toLowerCase().includes(normalizedQuery)
   );
 
+  const matchingCodex = CODEX_SEARCH_INDEX.filter(
+    (entry) =>
+      !normalizedQuery ||
+      entry.title.toLowerCase().includes(normalizedQuery) ||
+      entry.category.toLowerCase().includes(normalizedQuery) ||
+      entry.subtitle.toLowerCase().includes(normalizedQuery) ||
+      entry.repoSource.toLowerCase().includes(normalizedQuery)
+  );
+
   const matchingAxioms = SIDRA_KNOWLEDGE_AXIOMS.filter(
     (axiom) =>
       !normalizedQuery ||
@@ -76,7 +88,7 @@ export function UniversalSearchModal({
               autoFocus
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search worlds, chronicles, frequencies, or axioms..."
+              placeholder="Search worlds, SRGBL v8, 100CENTER, OX-DX, M-Time, AQEL..."
               aria-label="Search query"
               className="w-full bg-transparent font-serif text-base text-[#fff6df] placeholder-[#857d6b] focus:outline-none"
             />
@@ -114,6 +126,32 @@ export function UniversalSearchModal({
                     </div>
                     <div className="text-[11px] text-[#bfb59e]">{worldEntry.tagline}</div>
                   </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+              CANON CODEX DOORS ({matchingCodex.length})
+            </div>
+            <div className="mt-2 space-y-2">
+              {matchingCodex.map((codexItem) => (
+                <button
+                  key={codexItem.id}
+                  type="button"
+                  onClick={() => {
+                    onNavigateToDoor(codexItem.doorId);
+                    onClose();
+                  }}
+                  className="w-full border border-[#d6b46c]/20 bg-[#0b0e18] p-3 text-left hover:border-[#e6c987] transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[#d6b46c]">
+                    <span>{codexItem.category}</span>
+                    <span>{codexItem.repoSource}</span>
+                  </div>
+                  <div className="mt-0.5 font-serif text-sm text-[#fff6df]">{codexItem.title}</div>
+                  <p className="mt-0.5 text-xs text-[#bfb59e]">{codexItem.subtitle}</p>
                 </button>
               ))}
             </div>
