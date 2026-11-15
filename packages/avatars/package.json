@@ -15,7 +15,7 @@
     "clean": "rm -rf .turbo node_modules coverage"
   },
   "dependencies": {
-    "@dicebear/core": "^9.2.4"
+    "@dicebear/core": "^10.7.0"
   },
   "devDependencies": {
     "@moonwitness/eslint-config": "workspace:*",
