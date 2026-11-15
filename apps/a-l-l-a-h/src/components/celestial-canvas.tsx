@@ -14,6 +14,14 @@ interface CelestialParticle {
   hueGold: boolean;
 }
 
+interface Ripple {
+  x: number;
+  y: number;
+  radius: number;
+  maxRadius: number;
+  alpha: number;
+}
+
 export function CelestialCanvas({
   sanctuaryRadianceActive,
 }: {
@@ -35,7 +43,7 @@ export function CelestialCanvas({
     let width = (canvasElement.width = window.innerWidth);
     let height = (canvasElement.height = window.innerHeight);
 
-    const particleCount = 72;
+    const particleCount = 88;
     const particles: CelestialParticle[] = Array.from({ length: particleCount }, (_, index) => {
       const inCenterColumn = index % 4 === 0;
       return {
@@ -53,12 +61,25 @@ export function CelestialCanvas({
       };
     });
 
+    const ripples: Ripple[] = [];
+
     let pointerX = width * 0.5;
     let pointerY = height * 0.52;
 
     const handlePointerMove = (event: PointerEvent) => {
       pointerX = event.clientX;
       pointerY = event.clientY;
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      // In water or hero area, trigger a celestial expanding ring
+      ripples.push({
+        x: event.clientX,
+        y: event.clientY,
+        radius: 4,
+        maxRadius: Math.min(width, height) * 0.35,
+        alpha: 0.65,
+      });
     };
 
     const handleResize = () => {
@@ -70,6 +91,7 @@ export function CelestialCanvas({
     };
 
     window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerdown", handlePointerDown, { passive: true });
     window.addEventListener("resize", handleResize);
 
     let frameId = 0;
@@ -105,6 +127,28 @@ export function CelestialCanvas({
       ctx.beginPath();
       ctx.arc(pointerX, pointerY, 180, 0, Math.PI * 2);
       ctx.fill();
+
+      // Render interactive click ripples
+      for (let i = ripples.length - 1; i >= 0; i -= 1) {
+        const ripple = ripples[i]!;
+        ripple.radius += 3.2;
+        ripple.alpha *= 0.96;
+
+        ctx.strokeStyle = `rgba(255, 242, 204, ${ripple.alpha * 0.45})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        // Elliptical reflection if in bottom water realm
+        if (ripple.y > height * 0.65) {
+          ctx.ellipse(ripple.x, ripple.y, ripple.radius, ripple.radius * 0.35, 0, 0, Math.PI * 2);
+        } else {
+          ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
+        }
+        ctx.stroke();
+
+        if (ripple.radius >= ripple.maxRadius || ripple.alpha < 0.02) {
+          ripples.splice(i, 1);
+        }
+      }
 
       // Twinkling celestial motes
       for (const particle of particles) {
@@ -144,6 +188,7 @@ export function CelestialCanvas({
     return () => {
       window.cancelAnimationFrame(frameId);
       window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("resize", handleResize);
     };
   }, [sanctuaryRadianceActive]);

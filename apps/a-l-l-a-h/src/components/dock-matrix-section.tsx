@@ -1,8 +1,10 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   DOCK_TELEMETRY_NODES,
   WORLD_DOMAINS,
+  type DockNodeTelemetry,
   type WorldIdentifier,
 } from "@/data/empire-registry";
 import { WorldEmblemById } from "./sacred-icons";
@@ -12,6 +14,29 @@ export function DockMatrixSection({
 }: {
   readonly onLaunchWorld: (worldId: WorldIdentifier) => void;
 }) {
+  const [telemetryState, setTelemetryState] = useState<readonly DockNodeTelemetry[]>(
+    DOCK_TELEMETRY_NODES
+  );
+  const [syncPulse, setSyncPulse] = useState<number>(0);
+
+  // Micro-fluctuations in live latency to reflect real-time active carrier telemetry
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSyncPulse((prev) => prev + 1);
+      setTelemetryState((currentList) =>
+        currentList.map((node) => {
+          const jitter = (Math.random() - 0.5) * 1.2;
+          const newLatency = Math.max(1, Math.min(9, Math.round((node.latencyMs + jitter) * 10) / 10));
+          return {
+            ...node,
+            latencyMs: newLatency,
+          };
+        })
+      );
+    }, 2800);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section
       id="the-dock"
@@ -35,11 +60,15 @@ export function DockMatrixSection({
             Real-time synchronization across the five gateways of the Empire. Every dock terminal
             maintains optical and cryptographic coherence with the Central Gate.
           </p>
+          <div className="mt-3 inline-flex items-center gap-2 border border-[#d6b46c]/30 bg-[#080b14] px-3.5 py-1 text-xs font-mono text-[#d6b46c]">
+            <span className="h-2 w-2 rounded-full bg-[#3ddc84] animate-ping" />
+            <span>TELEMETRY PULSE: CYCLE 1448.{syncPulse} · QUIC/SIGV4 ENCRYPTED</span>
+          </div>
         </div>
 
         <div className="mt-12 overflow-hidden border border-[#d6b46c]/30 bg-[#080b14]/90 shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
           <div className="grid grid-cols-1 divide-y divide-[#d6b46c]/20 md:grid-cols-5 md:divide-y-0 md:divide-x">
-            {DOCK_TELEMETRY_NODES.map((telemetryNode) => {
+            {telemetryState.map((telemetryNode) => {
               const matchedWorld = WORLD_DOMAINS.find(
                 (domain) => domain.id === telemetryNode.worldId
               );

@@ -11,7 +11,7 @@
   --celestial-gold-bright: #fff4d2;
   --celestial-gold: #dfc07b;
   --celestial-gold-deep: #9c732b;
-  --font-serif-monument: "Cinzel", "Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-serif-monument: var(--font-cinzel), "Cinzel", "Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Georgia, serif;
 }
 
 body {
