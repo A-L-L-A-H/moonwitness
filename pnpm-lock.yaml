@@ -324,7 +324,7 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@7.3.8(@types/node@24.19.2)(jiti@2.7.0)(lightningcss@1.33.0)(tsx@4.23.15)(yaml@2.9.1))
 
-  apps/rocksoul-dx:
+  apps/rocksoul:
     dependencies:
       '@fontsource/barlow-condensed':
         specifier: ^5.2.6

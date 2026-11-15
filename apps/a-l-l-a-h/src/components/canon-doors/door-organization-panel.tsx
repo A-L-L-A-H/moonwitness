@@ -142,7 +142,7 @@ export function DoorOrganizationPanel() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         <div className="lg:col-span-7 border border-[#d6b46c]/25 bg-[#070910] p-5">
           <div className="font-serif text-sm tracking-[0.18em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
-            WINGS 10 OPERATIONAL ARRAY (W01 JIBRIL – W10 RIDWAN)
+            WINGS 10 OPERATIONAL ARRAY (W01 SKYLINK – W10 HAVEN · PROPOSED_NOT_ASSIGNED)
           </div>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {WINGS_TEN_ARRAY.map((wing) => (

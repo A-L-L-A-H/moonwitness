@@ -23,9 +23,7 @@ export function CovenantAboutSection({
   readonly onToggleQuietMode?: () => void;
   readonly onReturnToGate: () => void;
 }) {
-  const [focusedPillar, setFocusedPillar] = useState<string>(
-    COVENANT_PILLARS[0]?.numeral ?? "I"
-  );
+  const [focusedPillar, setFocusedPillar] = useState<string>(COVENANT_PILLARS[0]?.numeral ?? "I");
 
   return (
     <section
@@ -61,11 +59,7 @@ export function CovenantAboutSection({
             {COVENANT_PILLARS.map((pillarEntry) => {
               const isFocused = focusedPillar === pillarEntry.numeral;
               return (
-                <SpatialTiltCard
-                  key={pillarEntry.numeral}
-                  disabled={quietMode}
-                  maxTiltDeg={3.5}
-                >
+                <SpatialTiltCard key={pillarEntry.numeral} disabled={quietMode} maxTiltDeg={3.5}>
                   <button
                     type="button"
                     aria-pressed={isFocused}

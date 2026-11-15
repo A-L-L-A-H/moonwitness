@@ -30,8 +30,7 @@ export const LIVING_LIGHT_TYPOGRAPHY = {
     'var(--font-cinzel), "Cinzel", "Cormorant Garamond", "Palatino Linotype", Georgia, serif',
   editorialFamily:
     'var(--font-cinzel), "Cormorant Garamond", "Palatino Linotype", "Book Antiqua", Georgia, serif',
-  interfaceFamily:
-    'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  interfaceFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
   telemetryFamily:
     'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
   scale: {

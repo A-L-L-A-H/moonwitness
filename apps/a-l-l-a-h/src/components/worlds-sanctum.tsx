@@ -69,7 +69,7 @@ export function WorldsSanctum({
 
   // Moonwitness / Artifact state (derived fallback ensures automatic sync across worlds)
   const [selectedArtifactCode, setSelectedArtifactCode] = useState<string>(
-    activeWorld.artifacts[0]?.code ?? "MW-0114"
+    activeWorld.artifacts[0]?.code ?? "MW-0114",
   );
 
   // Arsy Web Audio state
@@ -89,7 +89,7 @@ export function WorldsSanctum({
 
   // Sidra Knowledge Graph state
   const [selectedAxiomId, setSelectedAxiomId] = useState<string>(
-    SIDRA_KNOWLEDGE_AXIOMS[0]?.id ?? "noor-optics"
+    SIDRA_KNOWLEDGE_AXIOMS[0]?.id ?? "noor-optics",
   );
 
   // Rocksoul DX Generative Mandala state
@@ -223,7 +223,7 @@ export function WorldsSanctum({
         4,
         centerX,
         centerY,
-        baseRadius * 1.35
+        baseRadius * 1.35,
       );
       radialGlow.addColorStop(0, "rgba(255, 241, 200, 0.24)");
       radialGlow.addColorStop(0.55, "rgba(214, 180, 108, 0.08)");
@@ -243,15 +243,7 @@ export function WorldsSanctum({
         ctx.strokeStyle = "rgba(238, 208, 142, 0.55)";
         ctx.lineWidth = 1.15;
         ctx.beginPath();
-        ctx.ellipse(
-          baseRadius * 0.48,
-          0,
-          baseRadius * 0.48,
-          baseRadius * 0.2,
-          0,
-          0,
-          Math.PI * 2
-        );
+        ctx.ellipse(baseRadius * 0.48, 0, baseRadius * 0.48, baseRadius * 0.2, 0, 0, Math.PI * 2);
         ctx.stroke();
 
         const nextAngle = ((i + 2) * Math.PI * 2) / symmetryPoints;
@@ -260,7 +252,7 @@ export function WorldsSanctum({
         ctx.moveTo(baseRadius, 0);
         ctx.lineTo(
           Math.cos(nextAngle - angle) * baseRadius,
-          Math.sin(nextAngle - angle) * baseRadius
+          Math.sin(nextAngle - angle) * baseRadius,
         );
         ctx.stroke();
 
@@ -314,7 +306,7 @@ export function WorldsSanctum({
 
   const handleTabKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
-    currentIndex: number
+    currentIndex: number,
   ) => {
     if (event.key === "ArrowRight") {
       event.preventDefault();
@@ -322,8 +314,7 @@ export function WorldsSanctum({
       if (next) onSelectWorld(next.id);
     } else if (event.key === "ArrowLeft") {
       event.preventDefault();
-      const prev =
-        WORLD_DOMAINS[(currentIndex - 1 + WORLD_DOMAINS.length) % WORLD_DOMAINS.length];
+      const prev = WORLD_DOMAINS[(currentIndex - 1 + WORLD_DOMAINS.length) % WORLD_DOMAINS.length];
       if (prev) onSelectWorld(prev.id);
     }
   };
@@ -532,9 +523,7 @@ export function WorldsSanctum({
                         <span className="font-serif text-sm tracking-[0.2em] text-[#f5e3b8] uppercase">
                           MOONWITNESS MERIDIAN OBSERVATORY
                         </span>
-                        <span className="font-mono text-xs text-[#d6b46c]">
-                          ORBITAL SYNC: 100%
-                        </span>
+                        <span className="font-mono text-xs text-[#d6b46c]">ORBITAL SYNC: 100%</span>
                       </div>
                       <p className="mt-3 text-xs text-[#bfb59e]">
                         Active witness corridors linking stories, nocturnal archives, and human
@@ -735,7 +724,7 @@ export function WorldsSanctum({
                             {SIDRA_KNOWLEDGE_AXIOMS.map((axiomNode) =>
                               axiomNode.connectedIds.map((targetId) => {
                                 const targetNode = SIDRA_KNOWLEDGE_AXIOMS.find(
-                                  (candidate) => candidate.id === targetId
+                                  (candidate) => candidate.id === targetId,
                                 );
                                 if (!targetNode) {
                                   return null;
@@ -755,7 +744,7 @@ export function WorldsSanctum({
                                     strokeOpacity={isHighlighted ? "0.85" : "0.4"}
                                   />
                                 );
-                              })
+                              }),
                             )}
                             {SIDRA_KNOWLEDGE_AXIOMS.map((axiomNode) => {
                               const isCurrent = axiomNode.id === selectedAxiom.id;

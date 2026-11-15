@@ -49,7 +49,12 @@ export function ProfileMenu({
           </span>
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="zine-card w-56 p-2 min-w-[12rem]" side="top" align="end" sideOffset={8}>
+      <DropdownMenuContent
+        className="zine-card w-56 p-2 min-w-[12rem]"
+        side="top"
+        align="end"
+        sideOffset={8}
+      >
         <div className="border-b border-[var(--line)] px-3 py-2">
           <p className="truncate text-xs font-bold text-white">{identity}</p>
           <p className="text-[10px] text-zinc-500">Authorized crew</p>
@@ -74,7 +79,10 @@ export function ProfileMenu({
           Public site
         </Link>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={onExit} className="text-[var(--pink)] hover:bg-[var(--panel-2)]">
+        <DropdownMenuItem
+          onSelect={onExit}
+          className="text-[var(--pink)] hover:bg-[var(--panel-2)]"
+        >
           Exit the shadow →
         </DropdownMenuItem>
       </DropdownMenuContent>

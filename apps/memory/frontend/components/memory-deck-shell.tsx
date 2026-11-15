@@ -20,12 +20,13 @@ type Props = {
   children: ReactNode;
 };
 
-const modes: Array<{ id: DeckMode; index: string; label: string; detail: string; icon: IconName }> = [
-  { id: "overview", index: "01", label: "Deck", detail: "Overview", icon: "grid" },
-  { id: "vault", index: "02", label: "Tape library", detail: "Archives", icon: "archive" },
-  { id: "queue", index: "03", label: "Transfer", detail: "Work queue", icon: "activity" },
-  { id: "knowledge", index: "04", label: "Memory index", detail: "Knowledge", icon: "brain" },
-];
+const modes: Array<{ id: DeckMode; index: string; label: string; detail: string; icon: IconName }> =
+  [
+    { id: "overview", index: "01", label: "Deck", detail: "Overview", icon: "grid" },
+    { id: "vault", index: "02", label: "Tape library", detail: "Archives", icon: "archive" },
+    { id: "queue", index: "03", label: "Transfer", detail: "Work queue", icon: "activity" },
+    { id: "knowledge", index: "04", label: "Memory index", detail: "Knowledge", icon: "brain" },
+  ];
 
 export function MemoryDeckShell({
   activeMode,
@@ -42,10 +43,14 @@ export function MemoryDeckShell({
 }: Props) {
   return (
     <div className="memory-deck">
-      <a className="skip-link" href="#active-workspace">Skip to active workspace</a>
+      <a className="skip-link" href="#active-workspace">
+        Skip to active workspace
+      </a>
       <header className="deck-fascia">
         <div className="deck-brand">
-          <span className="deck-brand__mark" aria-hidden="true">MW</span>
+          <span className="deck-brand__mark" aria-hidden="true">
+            MW
+          </span>
           <span className="deck-brand__type">
             <strong>MOONWITNESS</strong>
             <small>HOW U REMIND ME / MEMORY DECK</small>
@@ -53,11 +58,17 @@ export function MemoryDeckShell({
         </div>
 
         <div className="deck-fascia__status">
-          <span className={"deck-power" + (apiOnline === false ? " is-offline" : apiOnline ? " is-online" : "")}>
+          <span
+            className={
+              "deck-power" + (apiOnline === false ? " is-offline" : apiOnline ? " is-online" : "")
+            }
+          >
             <i aria-hidden="true" />
             <span>API {apiOnline ? "ONLINE" : apiOnline === false ? "OFFLINE" : "CHECKING"}</span>
           </span>
-          <span className="deck-fascia__sync">{lastUpdated ? "LAST READ " + lastUpdated : "WAITING FOR API"}</span>
+          <span className="deck-fascia__sync">
+            {lastUpdated ? "LAST READ " + lastUpdated : "WAITING FOR API"}
+          </span>
         </div>
 
         <div className="deck-fascia__actions">
@@ -71,7 +82,14 @@ export function MemoryDeckShell({
           >
             <Icon name={theme === "dark" ? "sun" : "moon"} size={18} />
           </button>
-          <a className="deck-icon-button" href={apiDocsHref} target="_blank" rel="noreferrer" aria-label="Open API documentation" title="Open API documentation">
+          <a
+            className="deck-icon-button"
+            href={apiDocsHref}
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Open API documentation"
+            title="Open API documentation"
+          >
             <Icon name="terminal" size={17} />
           </a>
         </div>
@@ -90,16 +108,30 @@ export function MemoryDeckShell({
             <Icon name={mode.icon} size={18} />
             <span className="deck-mode__label">{mode.label}</span>
             <span className="deck-mode__detail">{mode.detail}</span>
-            {modeCounts[mode.id] !== undefined && <span className="deck-mode__count">{modeCounts[mode.id]?.toLocaleString()}</span>}
+            {modeCounts[mode.id] !== undefined && (
+              <span className="deck-mode__count">{modeCounts[mode.id]?.toLocaleString()}</span>
+            )}
           </button>
         ))}
       </nav>
 
-      <section className="crt-frame" id="active-workspace" aria-label={modes.find((mode) => mode.id === activeMode)?.label + " workspace"}>
+      <section
+        className="crt-frame"
+        id="active-workspace"
+        aria-label={modes.find((mode) => mode.id === activeMode)?.label + " workspace"}
+      >
         <div className="crt-frame__brandline">
           <span>MW / 01</span>
           <span>LOCAL MEMORY SYSTEM</span>
-          <span className={"crt-frame__signal" + (apiOnline ? " is-online" : apiOnline === false ? " is-offline" : "")}><i aria-hidden="true" /> {apiOnline ? "API CONNECTED" : apiOnline === false ? "API UNAVAILABLE" : "CHECKING API"}</span>
+          <span
+            className={
+              "crt-frame__signal" +
+              (apiOnline ? " is-online" : apiOnline === false ? " is-offline" : "")
+            }
+          >
+            <i aria-hidden="true" />{" "}
+            {apiOnline ? "API CONNECTED" : apiOnline === false ? "API UNAVAILABLE" : "CHECKING API"}
+          </span>
         </div>
         <div className="crt-screen">
           <div className="crt-screen__scanlines" aria-hidden="true" />

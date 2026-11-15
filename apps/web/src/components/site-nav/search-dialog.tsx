@@ -1,6 +1,12 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@moonwitness/ui";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@moonwitness/ui";
 import { Input } from "@moonwitness/ui";
 import { Button } from "@moonwitness/ui";
 
@@ -19,7 +25,12 @@ export function SearchDialog({ query, onQueryChange, onSubmit, onClose }: Search
           <DialogTitle className="font-brush text-lg text-[var(--yellow)]">
             SEARCH THE SIGNALS
           </DialogTitle>
-          <Button variant="ghost" size="sm" onClick={onClose} className="btn-zine min-h-11 px-3 text-sm">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="btn-zine min-h-11 px-3 text-sm"
+          >
             Close search
           </Button>
         </DialogHeader>

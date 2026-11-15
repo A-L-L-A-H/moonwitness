@@ -124,7 +124,9 @@ a {
   border: 1px solid var(--case-edge);
   border-radius: 7px;
   background: var(--case);
-  box-shadow: 0 22px 68px rgb(0 0 0 / 30%), inset 0 1px rgb(255 255 255 / 8%);
+  box-shadow:
+    0 22px 68px rgb(0 0 0 / 30%),
+    inset 0 1px rgb(255 255 255 / 8%);
 }
 
 .memory-deck::before,
@@ -311,7 +313,11 @@ a {
   border-radius: 2px;
   background: var(--display-raised);
   color: var(--ink);
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease;
 }
 
 .deck-load:hover:not(:disabled),
@@ -503,7 +509,12 @@ a {
   z-index: 1;
   inset: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(to bottom, transparent 0, transparent 3px, rgb(0 0 0 / 16%) 4px);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 3px,
+    rgb(0 0 0 / 16%) 4px
+  );
   opacity: 0.3;
 }
 
@@ -773,7 +784,9 @@ a {
   border: 2px solid #716952;
   border-radius: 5px;
   background: #302d23;
-  box-shadow: 5px 6px 0 rgb(0 0 0 / 24%), inset 0 1px rgb(255 255 255 / 7%);
+  box-shadow:
+    5px 6px 0 rgb(0 0 0 / 24%),
+    inset 0 1px rgb(255 255 255 / 7%);
 }
 
 .memory-cassette__screw {
@@ -1200,7 +1213,9 @@ a {
   border: 1px dashed var(--line-strong);
   background: var(--field);
   cursor: pointer;
-  transition: border-color 140ms ease, background-color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
 }
 
 .drop-zone:hover,
@@ -1779,7 +1794,10 @@ a {
   background: var(--display);
   color: var(--ink);
   text-align: left;
-  transition: transform 140ms ease, border-color 140ms ease, background-color 140ms ease;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background-color 140ms ease;
 }
 
 .knowledge-card:hover {
@@ -2043,7 +2061,10 @@ a {
   border-radius: 2px;
   background: var(--display);
   color: var(--ink);
-  transition: background-color 140ms ease, border-color 140ms ease, transform 140ms ease;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
 }
 
 .soundtrack-player__keys button:hover:not(:disabled) {

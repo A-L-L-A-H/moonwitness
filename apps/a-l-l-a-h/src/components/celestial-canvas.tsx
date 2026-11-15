@@ -164,7 +164,7 @@ export function CelestialCanvas({
           centerX,
           height * 0.06,
           centerX,
-          height * 0.72
+          height * 0.72,
         );
         pillarGradient.addColorStop(0, `rgba(255, 244, 212, ${0.1 * intensityMultiplier})`);
         pillarGradient.addColorStop(0.5, `rgba(226, 191, 118, ${0.05 * intensityMultiplier})`);
@@ -181,7 +181,7 @@ export function CelestialCanvas({
             2,
             smoothPointerX,
             smoothPointerY,
-            175
+            175,
           );
           auraGradient.addColorStop(0, `rgba(255, 240, 198, ${0.065 * intensityMultiplier})`);
           auraGradient.addColorStop(1, "rgba(255, 240, 198, 0)");
@@ -201,15 +201,7 @@ export function CelestialCanvas({
           ctx.lineWidth = 1.15;
           ctx.beginPath();
           if (ripple.y > height * 0.65) {
-            ctx.ellipse(
-              ripple.x,
-              ripple.y,
-              ripple.radius,
-              ripple.radius * 0.34,
-              0,
-              0,
-              Math.PI * 2
-            );
+            ctx.ellipse(ripple.x, ripple.y, ripple.radius, ripple.radius * 0.34, 0, 0, Math.PI * 2);
           } else {
             ctx.arc(ripple.x, ripple.y, ripple.radius, 0, Math.PI * 2);
           }

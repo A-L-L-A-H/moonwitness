@@ -21,17 +21,41 @@ export function MemoryTape({ label, status, detail }: Props) {
         <strong title={label}>{label}</strong>
         <div className="memory-cassette__sticker-foot">
           <span>{detail}</span>
-          <span className={"cassette-status cassette-status--" + statusClass(status)}>{status ? status.replaceAll("_", " ") : "AWAITING ARCHIVE"}</span>
+          <span className={"cassette-status cassette-status--" + statusClass(status)}>
+            {status ? status.replaceAll("_", " ") : "AWAITING ARCHIVE"}
+          </span>
         </div>
       </div>
       <div className="memory-cassette__window" aria-hidden="true">
-        <div className="memory-cassette__reel"><i /><b /><i /><b /><i /><b /><i /><b /></div>
+        <div className="memory-cassette__reel">
+          <i />
+          <b />
+          <i />
+          <b />
+          <i />
+          <b />
+          <i />
+          <b />
+        </div>
         <span className="memory-cassette__tape-path" />
-        <div className="memory-cassette__reel"><i /><b /><i /><b /><i /><b /><i /><b /></div>
+        <div className="memory-cassette__reel">
+          <i />
+          <b />
+          <i />
+          <b />
+          <i />
+          <b />
+          <i />
+          <b />
+        </div>
       </div>
       <div className="memory-cassette__lower" aria-hidden="true">
         <span>ORIGINAL SOURCE / PRESERVED</span>
-        <i /><i /><i /><i /><i />
+        <i />
+        <i />
+        <i />
+        <i />
+        <i />
       </div>
     </div>
   );

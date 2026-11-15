@@ -71,7 +71,7 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
         <div className="mt-6 border-t border-[#d6b46c]/20 pt-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-mono text-[11px] tracking-[0.18em] text-[#d6b46c] uppercase">
-              SWING SWING KEY · 7 ANALYTICAL ROTATIONS (POSITIVE CORRECTION · QS 5:48)
+              SWING SWING KEY · 7 RESEARCH OPERATORS (MAX 3 HOPS · CANDIDATE ROTATIONS ONLY)
             </span>
             <span className="font-mono text-[11px] text-[#f5dfa6]">
               ACTIVE ROTATION {activeRotationIdx + 1} / 7

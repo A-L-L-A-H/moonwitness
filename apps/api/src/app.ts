@@ -12,6 +12,7 @@ import {
 import { authMigrations } from "./db/migrations";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
+import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 
 export interface BootstrapOptions {
   dbPath?: string;
@@ -65,6 +66,17 @@ export async function buildApp(options: BootstrapOptions = {}): Promise<FastifyI
       manifest: timelineManifest,
       register: async () => {
         await registerTimelineAddon(fastify, { prefix: prefix + timelineRoutesPrefix });
+      },
+    });
+    registry.add({
+      manifest: {
+        name: "riot-ai",
+        version: "0.1.0",
+        depends: [],
+        provides: { routes: ["riot-ai"], models: [] as string[] },
+      },
+      register: async () => {
+        await fastify.register(riotAiRoutes);
       },
     });
     await registry.load();

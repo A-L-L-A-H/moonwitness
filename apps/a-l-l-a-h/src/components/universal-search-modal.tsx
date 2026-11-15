@@ -48,7 +48,7 @@ export function UniversalSearchModal({
       !normalizedQuery ||
       domain.name.toLowerCase().includes(normalizedQuery) ||
       domain.tagline.toLowerCase().includes(normalizedQuery) ||
-      domain.architecturalDescription.toLowerCase().includes(normalizedQuery)
+      domain.architecturalDescription.toLowerCase().includes(normalizedQuery),
   );
 
   const matchingCodex = CODEX_SEARCH_INDEX.filter(
@@ -57,7 +57,7 @@ export function UniversalSearchModal({
       entry.title.toLowerCase().includes(normalizedQuery) ||
       entry.category.toLowerCase().includes(normalizedQuery) ||
       entry.subtitle.toLowerCase().includes(normalizedQuery) ||
-      entry.repoSource.toLowerCase().includes(normalizedQuery)
+      entry.repoSource.toLowerCase().includes(normalizedQuery),
   );
 
   const matchingAxioms = SIDRA_KNOWLEDGE_AXIOMS.filter(
@@ -65,7 +65,7 @@ export function UniversalSearchModal({
       !normalizedQuery ||
       axiom.title.toLowerCase().includes(normalizedQuery) ||
       axiom.discipline.toLowerCase().includes(normalizedQuery) ||
-      axiom.exposition.toLowerCase().includes(normalizedQuery)
+      axiom.exposition.toLowerCase().includes(normalizedQuery),
   );
 
   return (

@@ -87,20 +87,20 @@ Practical capacity still depends on disk space, ZIP structure, the size of a sin
 
 ## Dashboard and API
 
-| Endpoint | Purpose |
-|---|---|
-| `GET /health` | API health |
-| `GET /api/system` | Local configuration status without exposing secrets |
-| `GET /api/dashboard` | Archive/message/knowledge/job counts |
-| `GET /api/archives` | Imported archives and Drive status |
-| `POST /api/archives` | Stream a ZIP or JSON upload |
-| `POST /api/archives/{id}/backup` | Queue a Drive backup |
-| `GET /api/jobs` | Processing queue and checkpoints |
-| `POST /api/jobs/{id}/resume` | Resume a waiting or failed job |
-| `GET /api/knowledge` | Extracted knowledge records |
-| `GET /api/knowledge/{id}/sources` | Original messages behind a knowledge record |
-| `GET /api/search?q=...` | Hybrid keyword + semantic search |
-| `GET /api/export.ndjson` | Stream the full knowledge corpus for another system |
+| Endpoint                          | Purpose                                             |
+| --------------------------------- | --------------------------------------------------- |
+| `GET /health`                     | API health                                          |
+| `GET /api/system`                 | Local configuration status without exposing secrets |
+| `GET /api/dashboard`              | Archive/message/knowledge/job counts                |
+| `GET /api/archives`               | Imported archives and Drive status                  |
+| `POST /api/archives`              | Stream a ZIP or JSON upload                         |
+| `POST /api/archives/{id}/backup`  | Queue a Drive backup                                |
+| `GET /api/jobs`                   | Processing queue and checkpoints                    |
+| `POST /api/jobs/{id}/resume`      | Resume a waiting or failed job                      |
+| `GET /api/knowledge`              | Extracted knowledge records                         |
+| `GET /api/knowledge/{id}/sources` | Original messages behind a knowledge record         |
+| `GET /api/search?q=...`           | Hybrid keyword + semantic search                    |
+| `GET /api/export.ndjson`          | Stream the full knowledge corpus for another system |
 
 OpenAPI UI: **http://localhost:8000/docs**. Full request/response details and the future-consumer contract are in [API.md](docs/API.md).
 

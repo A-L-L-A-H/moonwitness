@@ -106,14 +106,10 @@ export function DockMatrixSection({
           >
             {visibleNodes.map((telemetryNode) => {
               const matchedWorld = WORLD_DOMAINS.find(
-                (domain) => domain.id === telemetryNode.worldId
+                (domain) => domain.id === telemetryNode.worldId,
               );
               return (
-                <SpatialTiltCard
-                  key={telemetryNode.nodeCode}
-                  disabled={quietMode}
-                  maxTiltDeg={3.5}
-                >
+                <SpatialTiltCard key={telemetryNode.nodeCode} disabled={quietMode} maxTiltDeg={3.5}>
                   <div className="flex h-full flex-col justify-between border border-[#d6b46c]/30 bg-[#080b14]/95 p-6 shadow-[0_20px_50px_rgba(0,0,0,0.8)] hover:border-[#d6b46c]/65 transition-colors">
                     <div>
                       <div className="flex items-center justify-between text-[11px] font-mono text-[#d6b46c]">
@@ -125,7 +121,10 @@ export function DockMatrixSection({
                       </div>
 
                       <div className="mt-5 flex items-center gap-3">
-                        <WorldEmblemById worldId={telemetryNode.worldId} className="h-10 w-10 shrink-0" />
+                        <WorldEmblemById
+                          worldId={telemetryNode.worldId}
+                          className="h-10 w-10 shrink-0"
+                        />
                         <div>
                           <div className="font-serif text-base tracking-[0.16em] text-[#fff6df]">
                             {matchedWorld?.name ?? telemetryNode.designation}

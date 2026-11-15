@@ -8,6 +8,7 @@ export function cn(...inputs: ClassValue[]): string {
 
 export { cva, type VariantProps };
 
-export type HTMLMoonwitnessProps<T extends React.ElementType> = React.ComponentPropsWithoutRef<T> & {
-  asChild?: boolean;
-};
+export type HTMLMoonwitnessProps<T extends React.ElementType> =
+  React.ComponentPropsWithoutRef<T> & {
+    asChild?: boolean;
+  };

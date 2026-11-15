@@ -40,7 +40,7 @@ const NavigationMenuTrigger = React.forwardRef<
     ref={ref}
     className={cn(
       "group inline-flex h-10 w-max items-center justify-center rounded-md bg-[var(--background)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus:bg-[var(--muted)] focus:text-[var(--foreground)] focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-[var(--muted)]/50 data-[state=open]:bg-[var(--muted)]/50",
-      className
+      className,
     )}
     {...props}
   >
@@ -61,7 +61,7 @@ const NavigationMenuContent = React.forwardRef<
     ref={ref}
     className={cn(
       "left-0 top-0 w-full data-[motion=from-start]:animate-in data-[motion=from-start]:fade-in data-[motion=from-start]:zoom-in-95 data-[motion=from-start]:slide-in-from-left-52 data-[motion=from-end]:animate-in data-[motion=from-end]:fade-in data-[motion=from-end]:zoom-in-95 data-[motion=from-end]:slide-in-from-right-52",
-      className
+      className,
     )}
     {...props}
   />
@@ -78,7 +78,7 @@ const NavigationMenuViewport = React.forwardRef<
     ref={ref}
     className={cn(
       "absolute left-0 top-full flex justify-center overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90",
-      className
+      className,
     )}
     {...props}
   >
@@ -95,7 +95,7 @@ const NavigationMenuIndicator = React.forwardRef<
     ref={ref}
     className={cn(
       "flex h-1.5 items-center justify-center overflow-hidden bg-[var(--pink)] data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
-      className
+      className,
     )}
     {...props}
   >

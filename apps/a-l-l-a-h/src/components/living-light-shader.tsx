@@ -114,7 +114,7 @@ const FRAGMENT_SHADER_SOURCE = `
 function compileShader(
   gl: WebGLRenderingContext,
   type: number,
-  source: string
+  source: string,
 ): WebGLShader | null {
   const shader = gl.createShader(type);
   if (!shader) {
@@ -241,11 +241,7 @@ export function LivingLightShader({
 
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-      gl.STATIC_DRAW
-    );
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
 
     const posLocation = gl.getAttribLocation(program, "a_position");
     const uResolution = gl.getUniformLocation(program, "u_resolution");
@@ -296,7 +292,7 @@ export function LivingLightShader({
             (entries) => {
               intersectionVisible = entries[0]?.isIntersecting ?? true;
             },
-            { threshold: 0.05 }
+            { threshold: 0.05 },
           )
         : null;
     observer?.observe(canvas);

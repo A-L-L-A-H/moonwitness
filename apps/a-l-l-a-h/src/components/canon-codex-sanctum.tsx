@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  FOUR_ENTRY_DOORS,
-  SUPREME_IDENTITY,
-  type EntryDoorId,
-} from "@/data/empire-canon-codex";
+import { FOUR_ENTRY_DOORS, SUPREME_IDENTITY, type EntryDoorId } from "@/data/empire-canon-codex";
 import { DoorEpistemicPanel } from "./canon-doors/door-epistemic-panel";
 import { DoorOrganizationPanel } from "./canon-doors/door-organization-panel";
 import { DoorSovereignPanel } from "./canon-doors/door-sovereign-panel";
@@ -26,7 +22,7 @@ export function CanonCodexSanctum({
 
   const handleDoorKeyDown = (
     event: React.KeyboardEvent<HTMLButtonElement>,
-    currentIndex: number
+    currentIndex: number,
   ) => {
     if (event.key === "ArrowRight") {
       event.preventDefault();
@@ -62,8 +58,9 @@ export function CanonCodexSanctum({
               THE CANON CODEX
             </h2>
             <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#d6ceb8]/85">
-              Four MoonFrame Entry Doors unifying 194+ repositories across bjo163/*, A-L-L-A-H/*,
-              BRIDGE-ALLAH/*, and The-Batteries/* under one monocentric covenant.
+              Four MoonFrame Entry Doors unifying 368+ verified remote repositories across 7 GitHub
+              owners (bjo163, ArsyBelovedLabs, BRIDGE-ALLAH, zenix-id, A-L-L-A-H, The-Batteries,
+              moonwitness-id) and local Z:\ archives under one monocentric covenant.
             </p>
             <div className="mt-3 font-mono text-[11px] tracking-[0.16em] text-[#f5dfa6]">
               {SUPREME_IDENTITY.creativeFormula}

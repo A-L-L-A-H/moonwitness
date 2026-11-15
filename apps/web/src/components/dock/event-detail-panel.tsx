@@ -45,10 +45,7 @@ export function EventDetailPanel({
   // Drawer variant (mobile) - use Sheet from shadcn/Radix
   return (
     <Sheet open={true} onOpenChange={onClose}>
-      <SheetContent
-        side="right"
-        className="w-full max-w-md xl:hidden"
-      >
+      <SheetContent side="right" className="w-full max-w-md xl:hidden">
         {detail}
       </SheetContent>
     </Sheet>

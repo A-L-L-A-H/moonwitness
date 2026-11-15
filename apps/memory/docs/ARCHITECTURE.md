@@ -25,6 +25,7 @@ The original upload is never modified. Duplicate archives are detected by SHA-25
 ## Knowledge contract
 
 Each knowledge record retains:
+
 - stable record ID and type/kind;
 - title, summary and content;
 - tags and entities;

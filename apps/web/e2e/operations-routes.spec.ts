@@ -240,7 +240,6 @@ test("SNMP viewer role sees no management controls", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
 });
 
-
 // ============================================================
 // ADDED: Accessibility & Regression Coverage (MW-0016 #105)
 // ============================================================
@@ -257,7 +256,15 @@ test.describe("Navigation & Active-Route", () => {
     test(`${path} loads and sidebar highlights active route`, async ({ page }) => {
       await page.route("**/api/v1/control/auth/me", async (route) => {
         await route.fulfill({
-          json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } },
+          json: {
+            user: {
+              id: "1",
+              name: "Operator",
+              email: "op@test",
+              role: "admin",
+              created_at: "2026-01-01T00:00:00Z",
+            },
+          },
         });
       });
       // stub child APIs to avoid 404 noise
@@ -278,7 +285,17 @@ test.describe("Navigation & Active-Route", () => {
 test.describe("Keyboard Navigation & Focus", () => {
   test("Syslog page has logical tab order and visible focus styles", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/syslog/**", async (route) => {
       await route.fulfill({ json: [] });
@@ -303,7 +320,17 @@ test.describe("Reduced Motion", () => {
   for (const path of routes) {
     test(`${path} respects prefers-reduced-motion`, async ({ page }) => {
       await page.route("**/api/v1/control/auth/me", async (route) => {
-        await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+        await route.fulfill({
+          json: {
+            user: {
+              id: "1",
+              name: "Operator",
+              email: "op@test",
+              role: "admin",
+              created_at: "2026-01-01T00:00:00Z",
+            },
+          },
+        });
       });
       await page.route("**/api/v1/**", async (route) => {
         await route.fulfill({ json: [] });
@@ -321,11 +348,23 @@ test.describe("Reduced Motion", () => {
 test.describe("ARIA Live Regions & Accessible Status", () => {
   test("Syslog announces loading state via role=status", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
 
-    let resolveRoute = (value) => { };
-    const routePromise = new Promise((resolve) => { resolveRoute = resolve; });
+    let resolveRoute: (value?: unknown) => void = () => {};
+    const routePromise = new Promise((resolve) => {
+      resolveRoute = resolve;
+    });
 
     await page.route("**/api/v1/syslog/messages**", async (route) => {
       await routePromise;
@@ -355,10 +394,22 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
 
   test("Empty state is announced for SNMP devices", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/snmp/stats", async (route) => {
-      await route.fulfill({ json: { total_devices: 0, enabled_devices: 0, total_targets: 0, total_samples: 0 } });
+      await route.fulfill({
+        json: { total_devices: 0, enabled_devices: 0, total_targets: 0, total_samples: 0 },
+      });
     });
     await page.route("**/api/v1/snmp/devices", async (route) => {
       await route.fulfill({ json: [] });
@@ -372,7 +423,17 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
 
   test("Error state is announced for failed API calls", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/syslog/messages**", async (route) => {
       await route.fulfill({ status: 500, json: { error: "Internal Server Error" } });
@@ -385,7 +446,17 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
 
   test("Denied state is announced for unauthorized mutations", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "viewer", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "viewer",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/radius/users", async (route) => {
       await route.fulfill({ json: [] });
@@ -398,7 +469,9 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
 
     await page.goto("/radius");
     // Viewer should see denied message
-    await expect(page.getByText(/cannot manage|tidak dapat mengelola|denied|ditolak/i)).toBeVisible();
+    await expect(
+      page.getByText(/cannot manage|tidak dapat mengelola|denied|ditolak/i),
+    ).toBeVisible();
   });
 });
 
@@ -417,7 +490,17 @@ test.describe("Viewport - No Horizontal Overflow", () => {
         await page.setViewportSize({ width: vp.width, height: vp.height });
 
         await page.route("**/api/v1/control/auth/me", async (route) => {
-          await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+          await route.fulfill({
+            json: {
+              user: {
+                id: "1",
+                name: "Operator",
+                email: "op@test",
+                role: "admin",
+                created_at: "2026-01-01T00:00:00Z",
+              },
+            },
+          });
         });
         await page.route("**/api/v1/**", async (route) => {
           await route.fulfill({ json: [] });
@@ -440,10 +523,22 @@ test.describe("Viewport - No Horizontal Overflow", () => {
 test.describe("Mutation Failure States", () => {
   test("SNMP device creation shows error toast on API failure", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/snmp/stats", async (route) => {
-      await route.fulfill({ json: { total_devices: 0, enabled_devices: 0, total_targets: 0, total_samples: 0 } });
+      await route.fulfill({
+        json: { total_devices: 0, enabled_devices: 0, total_targets: 0, total_samples: 0 },
+      });
     });
     await page.route("**/api/v1/snmp/devices", async (route) => {
       if (route.request().method() === "POST") {
@@ -464,7 +559,17 @@ test.describe("Mutation Failure States", () => {
 
   test("RADIUS user creation shows error toast on API failure", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/radius/users", async (route) => {
       if (route.request().method() === "POST") {
@@ -480,12 +585,24 @@ test.describe("Mutation Failure States", () => {
     await page.getByLabel("Password").fill("password123");
     await page.getByRole("button", { name: "Create user" }).click();
 
-    await expect(page.getByRole("alert").or(page.getByText(/error|gagal|failed|duplicate/i))).toBeVisible();
+    await expect(
+      page.getByRole("alert").or(page.getByText(/error|gagal|failed|duplicate/i)),
+    ).toBeVisible();
   });
 
   test("Storage mutation failure shows error state", async ({ page }) => {
     await page.route("**/api/v1/control/auth/me", async (route) => {
-      await route.fulfill({ json: { user: { id: "1", name: "Operator", email: "op@test", role: "admin", created_at: "2026-01-01T00:00:00Z" } } });
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
     });
     await page.route("**/api/v1/storage/**", async (route) => {
       if (route.request().method() !== "GET") {
@@ -498,9 +615,11 @@ test.describe("Mutation Failure States", () => {
     await page.goto("/storage");
     // Attempt any mutation if available (e.g., create bucket, upload)
     const createBtn = page.getByRole("button", { name: /create|add|upload/i }).first();
-    if (await createBtn.count() > 0) {
+    if ((await createBtn.count()) > 0) {
       await createBtn.click();
-      await expect(page.getByRole("alert").or(page.getByText(/error|gagal|failed|unavailable/i))).toBeVisible();
+      await expect(
+        page.getByRole("alert").or(page.getByText(/error|gagal|failed|unavailable/i)),
+      ).toBeVisible();
     }
   });
 });

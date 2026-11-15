@@ -12,10 +12,7 @@ interface DocumentWithViewTransition {
  * Progressively enhances discrete UI/world transitions with the browser's View Transitions API
  * when supported and when motion is enabled.
  */
-export function triggerSacredViewTransition(
-  updateState: () => void,
-  quietMode = false
-): void {
+export function triggerSacredViewTransition(updateState: () => void, quietMode = false): void {
   if (typeof document === "undefined" || typeof window === "undefined") {
     updateState();
     return;
@@ -79,8 +76,7 @@ export function MagneticPortal({
 
       element.style.transform = `translate3d(${currentX.toFixed(2)}px, ${currentY.toFixed(2)}px, 0)`;
 
-      const settled =
-        Math.abs(targetX - currentX) < 0.05 && Math.abs(targetY - currentY) < 0.05;
+      const settled = Math.abs(targetX - currentX) < 0.05 && Math.abs(targetY - currentY) < 0.05;
       if (!settled) {
         frameId = window.requestAnimationFrame(tick);
       } else {
@@ -291,7 +287,7 @@ export function ScrollChapterReveal({
           }
         }
       },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" }
+      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" },
     );
 
     observer.observe(element);

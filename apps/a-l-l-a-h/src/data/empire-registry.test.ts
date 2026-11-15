@@ -26,6 +26,7 @@ import {
   SYAFAAT_BASE_STATES,
   SYSTEM_CONCEPTS_14,
   UNIVERSE_FOUR_LENSES,
+  WORLD_PATCH_HIGHLIGHTS,
   WINGS_TEN_ARRAY,
 } from "./empire-canon-codex";
 import {
@@ -99,36 +100,52 @@ describe("Cross-Repo Master Canon Codex", () => {
     expect(totalChapters).toBe(99);
     expect(SEVEN_STEP_PROMISE).toHaveLength(7);
     expect(SIXTEEN_STAGE_LOOP).toHaveLength(16);
+    expect(SIXTEEN_STAGE_LOOP[2]).toBe("03 EVENT");
+    expect(SIXTEEN_STAGE_LOOP[13]).toBe("14 SANITY'S LAST BREATH");
     expect(EIGHT_STORY_ERAS).toHaveLength(8);
+    expect(EIGHT_STORY_ERAS[1]?.title).toBe("THE ARRIVAL");
     expect(ORIGINAL_CREW_ARCHETYPES).toHaveLength(15);
     expect(FIFTEEN_STORY_EPISODES).toHaveLength(15);
+    expect(FIFTEEN_STORY_EPISODES[1]?.title).toContain("KALAUTIDAKSALAH");
+    expect(WORLD_PATCH_HIGHLIGHTS.find((p) => p.patchNumber === "#007")?.title).toBe("MAROON 5");
+    expect(WORLD_PATCH_HIGHLIGHTS.find((p) => p.patchNumber === "#014")?.title).toContain(
+      "FAMILY WITHOUT FEAR",
+    );
   });
 
   it("defines the 6+1 ROCKSOUL epistemic federation, SRGBL v8 stages, and 7 rotations", () => {
     expect(EPISTEMIC_FEDERATION_DOMAINS).toHaveLength(7);
     expect(SRGBL_V8_STAGES.map((stage) => stage.letter)).toEqual(["S", "R", "G", "B", "L"]);
     expect(SWING_SWING_KEY_ROTATIONS).toHaveLength(7);
+    expect(SWING_SWING_KEY_ROTATIONS[0]).toContain("Direction Reversal");
   });
 
   it("enforces Prime Code PC01-PC09, WINGS 10, 100CENTER stewardship (99+1=100), and 14 concepts", () => {
     expect(PRIME_CODE_AXIOMS).toHaveLength(9);
+    expect(PRIME_CODE_AXIOMS[0]?.title).toBe("SOURCE INTEGRITY");
     expect(WINGS_TEN_ARRAY).toHaveLength(10);
+    expect(WINGS_TEN_ARRAY[0]?.callsign).toContain("SKYLINK");
+    expect(WINGS_TEN_ARRAY[9]?.callsign).toContain("HAVEN");
     expect(SYAFAAT_BASE_STATES).toHaveLength(6);
     const total100CenterNodes = CENTER_100_STEWARDSHIP_CLUSTERS.reduce(
       (sum, cluster) => sum + cluster.nodeCount,
-      0
+      0,
     );
     expect(total100CenterNodes).toBe(100);
     expect(SYSTEM_CONCEPTS_14).toHaveLength(14);
+    expect(SYSTEM_CONCEPTS_14[0]).toContain("MoonWitness OS");
   });
 
-  it("models all 49 OX-DX levels across 7 zones and indexes 194+ GitHub repos", () => {
+  it("models all 49 OX-DX levels across 7 zones and indexes 368 verified GitHub repos across 7 owners", () => {
     expect(OX_DX_SEVEN_ZONES).toHaveLength(7);
+    expect(OX_DX_SEVEN_ZONES[0]?.zoneName).toContain("EXISTENCE");
+    expect(OX_DX_SEVEN_ZONES[6]?.zoneName).toContain("REPRESENTATION");
     const totalOxLevels = OX_DX_SEVEN_ZONES.reduce((sum, zone) => sum + zone.levels.length, 0);
     expect(totalOxLevels).toBe(49);
 
+    expect(CROSS_REPO_TOPOLOGY_ATLAS).toHaveLength(7);
     const totalRepos = CROSS_REPO_TOPOLOGY_ATLAS.reduce((sum, org) => sum + org.repoCount, 0);
-    expect(totalRepos).toBe(194);
+    expect(totalRepos).toBe(368);
 
     const validDoorIds = new Set(FOUR_ENTRY_DOORS.map((door) => door.id));
     for (const item of CODEX_SEARCH_INDEX) {

@@ -5,7 +5,14 @@ export function OctagramMandalaIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
       <defs>
-        <linearGradient id="octagram-gold" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="octagram-gold"
+          x1="0"
+          y1="0"
+          x2="64"
+          y2="64"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#fff3d1" />
           <stop offset="50%" stopColor="#d9b56c" />
           <stop offset="100%" stopColor="#8c6523" />
@@ -19,14 +26,7 @@ export function OctagramMandalaIcon(props: SVGProps<SVGSVGElement>) {
         fill="rgba(217, 181, 108, 0.08)"
       />
       {/* Interlocking Rub el Hizb squares */}
-      <rect
-        x="14"
-        y="14"
-        width="36"
-        height="36"
-        stroke="url(#octagram-gold)"
-        strokeWidth="1.2"
-      />
+      <rect x="14" y="14" width="36" height="36" stroke="url(#octagram-gold)" strokeWidth="1.2" />
       <rect
         x="14"
         y="14"
@@ -37,7 +37,14 @@ export function OctagramMandalaIcon(props: SVGProps<SVGSVGElement>) {
         strokeWidth="1.2"
       />
       {/* Inner sacred rings and star */}
-      <circle cx="32" cy="32" r="14" stroke="url(#octagram-gold)" strokeWidth="1" strokeDasharray="2 2" />
+      <circle
+        cx="32"
+        cy="32"
+        r="14"
+        stroke="url(#octagram-gold)"
+        strokeWidth="1"
+        strokeDasharray="2 2"
+      />
       <circle cx="32" cy="32" r="9.5" stroke="url(#octagram-gold)" strokeWidth="1.1" />
       <path
         d="M32 20 L34.4 29.6 L44 32 L34.4 34.4 L32 44 L29.6 34.4 L20 32 L29.6 29.6 Z"
@@ -53,7 +60,14 @@ export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 120 120" fill="none" aria-hidden="true" {...props}>
       <defs>
-        <linearGradient id="astrolabe-gold" x1="12" y1="12" x2="108" y2="108" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="astrolabe-gold"
+          x1="12"
+          y1="12"
+          x2="108"
+          y2="108"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#fff7df" />
           <stop offset="50%" stopColor="#dfc07c" />
           <stop offset="100%" stopColor="#9e7632" />
@@ -66,7 +80,14 @@ export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
       </defs>
       <circle cx="60" cy="60" r="56" fill="url(#astrolabe-glow)" />
       <circle cx="60" cy="60" r="50" stroke="url(#astrolabe-gold)" strokeWidth="1.2" />
-      <circle cx="60" cy="60" r="46" stroke="url(#astrolabe-gold)" strokeWidth="0.75" strokeDasharray="3 3" />
+      <circle
+        cx="60"
+        cy="60"
+        r="46"
+        stroke="url(#astrolabe-gold)"
+        strokeWidth="0.75"
+        strokeDasharray="3 3"
+      />
       {/* 12-pointed sacred polygon */}
       <polygon
         points="60,10 85,17 103,35 110,60 103,85 85,103 60,110 35,103 17,85 10,60 17,35 35,17"
@@ -74,16 +95,8 @@ export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
         strokeWidth="0.9"
       />
       {/* Dual interlocking hexagrams */}
-      <polygon
-        points="60,12 101.5,84 18.5,84"
-        stroke="url(#astrolabe-gold)"
-        strokeWidth="1"
-      />
-      <polygon
-        points="60,108 101.5,36 18.5,36"
-        stroke="url(#astrolabe-gold)"
-        strokeWidth="1"
-      />
+      <polygon points="60,12 101.5,84 18.5,84" stroke="url(#astrolabe-gold)" strokeWidth="1" />
+      <polygon points="60,108 101.5,36 18.5,36" stroke="url(#astrolabe-gold)" strokeWidth="1" />
       {/* Rotated hexagram */}
       <g transform="rotate(30 60 60)">
         <polygon
@@ -100,8 +113,24 @@ export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
         />
       </g>
       {/* Inner rings & meridian arcs */}
-      <ellipse cx="60" cy="60" rx="48" ry="22" stroke="url(#astrolabe-gold)" strokeWidth="0.8" strokeOpacity="0.75" />
-      <ellipse cx="60" cy="60" rx="22" ry="48" stroke="url(#astrolabe-gold)" strokeWidth="0.8" strokeOpacity="0.75" />
+      <ellipse
+        cx="60"
+        cy="60"
+        rx="48"
+        ry="22"
+        stroke="url(#astrolabe-gold)"
+        strokeWidth="0.8"
+        strokeOpacity="0.75"
+      />
+      <ellipse
+        cx="60"
+        cy="60"
+        rx="22"
+        ry="48"
+        stroke="url(#astrolabe-gold)"
+        strokeWidth="0.8"
+        strokeOpacity="0.75"
+      />
       <circle cx="60" cy="60" r="24" stroke="url(#astrolabe-gold)" strokeWidth="1.1" />
       <path
         d="M60 32 L63.5 56.5 L88 60 L63.5 63.5 L60 88 L56.5 63.5 L32 60 L56.5 56.5 Z"
@@ -159,7 +188,14 @@ export function ArsyTowerIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
       <defs>
-        <linearGradient id="arsy-gold" x1="12" y1="6" x2="52" y2="58" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="arsy-gold"
+          x1="12"
+          y1="6"
+          x2="52"
+          y2="58"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#fff7df" />
           <stop offset="55%" stopColor="#dfc07b" />
           <stop offset="100%" stopColor="#997029" />
@@ -221,7 +257,14 @@ export function QalamNibIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
       <defs>
-        <linearGradient id="qalam-gold" x1="12" y1="52" x2="54" y2="10" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="qalam-gold"
+          x1="12"
+          y1="52"
+          x2="54"
+          y2="10"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#fff8e3" />
           <stop offset="50%" stopColor="#e2c37e" />
           <stop offset="100%" stopColor="#9c722a" />
@@ -258,7 +301,14 @@ export function SidraPolyhedronIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
       <defs>
-        <linearGradient id="sidra-gold" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="sidra-gold"
+          x1="10"
+          y1="8"
+          x2="54"
+          y2="56"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#fff7df" />
           <stop offset="55%" stopColor="#dfc07b" />
           <stop offset="100%" stopColor="#997029" />
@@ -302,7 +352,14 @@ export function RocksoulCubeIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
       <defs>
-        <linearGradient id="cube-gold" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="cube-gold"
+          x1="10"
+          y1="8"
+          x2="54"
+          y2="56"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop offset="0%" stopColor="#fff7df" />
           <stop offset="55%" stopColor="#dfc07b" />
           <stop offset="100%" stopColor="#997029" />
@@ -352,7 +409,12 @@ export function SearchLensIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" {...props}>
       <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.7" />
-      <path d="M15.5 15.5 L20.5 20.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path
+        d="M15.5 15.5 L20.5 20.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }

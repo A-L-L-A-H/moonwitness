@@ -16,11 +16,11 @@ import {
 
 export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }) {
   const [activeTrackCode, setActiveTrackCode] = useState<string>(
-    GOD_PROMISE_THREE_TRACKS[0]!.trackCode
+    GOD_PROMISE_THREE_TRACKS[0]!.trackCode,
   );
   const [activeLensId, setActiveLensId] = useState<string>(UNIVERSE_FOUR_LENSES[0]!.id);
   const [activeEpisodeCode, setActiveEpisodeCode] = useState<string>(
-    FIFTEEN_STORY_EPISODES[0]!.code
+    FIFTEEN_STORY_EPISODES[0]!.code,
   );
   const [noiseSilenceMode, setNoiseSilenceMode] = useState<"SILENCE" | "NOISE">("SILENCE");
 
@@ -77,7 +77,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
             THREE GOD-PROMISE TRACKS &amp; MONOCENTRIC 1·6·3
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
-            SOURCE: bjo163/GOD-PROMISE · moonwitness-xiv
+            SOURCE: A-L-L-A-H/master-docs · bjo163/moonwitnessxv
           </span>
         </div>
 
@@ -185,9 +185,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
           <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
             99-CHAPTER MASTER VISION NARRATIVE (S01–S99 · 4 LENSES)
           </span>
-          <span className="font-mono text-[11px] text-[#d6b46c]">
-            SOURCE: bjo163/moonwitnessxv
-          </span>
+          <span className="font-mono text-[11px] text-[#d6b46c]">SOURCE: bjo163/moonwitnessxv</span>
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">

@@ -114,7 +114,7 @@ export function EmpireOfLightExperience() {
       {
         threshold: [0.22, 0.45, 0.7],
         rootMargin: "-10% 0px -25% 0px",
-      }
+      },
     );
 
     for (const element of observedElements) {
@@ -132,12 +132,11 @@ export function EmpireOfLightExperience() {
       setActiveNavTab(sectionId);
       const targetElement = document.getElementById(sectionId);
       if (targetElement) {
-        const reduced =
-          quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduced = quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         targetElement.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
       }
     },
-    [quietMode]
+    [quietMode],
   );
 
   const selectAndInspectWorld = useCallback(
@@ -149,12 +148,11 @@ export function EmpireOfLightExperience() {
       }, quietMode);
       const worldsElement = document.getElementById("the-worlds");
       if (worldsElement) {
-        const reduced =
-          quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduced = quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         worldsElement.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
       }
     },
-    [quietMode]
+    [quietMode],
   );
 
   const handleWorldSelectOnly = useCallback(
@@ -163,7 +161,7 @@ export function EmpireOfLightExperience() {
         setActiveWorldId(worldId);
       }, quietMode);
     },
-    [quietMode]
+    [quietMode],
   );
 
   const selectAndInspectDoor = useCallback(
@@ -175,12 +173,11 @@ export function EmpireOfLightExperience() {
       }, quietMode);
       const codexElement = document.getElementById("the-codex");
       if (codexElement) {
-        const reduced =
-          quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduced = quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         codexElement.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
       }
     },
-    [quietMode]
+    [quietMode],
   );
 
   const handleDoorSelectOnly = useCallback(
@@ -189,7 +186,7 @@ export function EmpireOfLightExperience() {
         setActiveDoorId(doorId);
       }, quietMode);
     },
-    [quietMode]
+    [quietMode],
   );
 
   const handleCapabilityDetected = useCallback((tier: RenderingCapabilityTier) => {
@@ -233,10 +230,7 @@ export function EmpireOfLightExperience() {
         className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden"
       >
         {/* Background Master Celestial Vista with Scroll-Depth Parallax */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-0 bg-[#040509]"
-        >
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[#040509]">
           <div
             className="relative h-full w-full transition-transform duration-700 ease-out"
             style={{
@@ -505,9 +499,7 @@ export function EmpireOfLightExperience() {
                   <div
                     key={worldItem.id}
                     className={`relative flex flex-col items-center px-2 sm:px-4 text-center ${
-                      worldIdx === WORLD_DOMAINS.length - 1
-                        ? "col-span-2 sm:col-span-1"
-                        : ""
+                      worldIdx === WORLD_DOMAINS.length - 1 ? "col-span-2 sm:col-span-1" : ""
                     }`}
                   >
                     {worldIdx > 0 && (
@@ -526,9 +518,7 @@ export function EmpireOfLightExperience() {
                         <span
                           aria-hidden="true"
                           className={`absolute inset-0 rounded-full bg-[#f5dfa6]/18 blur-md transition-opacity duration-300 ${
-                            isWorldSelected
-                              ? "opacity-100"
-                              : "opacity-0 group-hover:opacity-100"
+                            isWorldSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
                           }`}
                         />
                         <WorldEmblemById

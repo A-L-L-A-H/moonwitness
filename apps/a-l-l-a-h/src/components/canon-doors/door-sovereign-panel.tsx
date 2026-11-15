@@ -46,9 +46,7 @@ export function DoorSovereignPanel() {
                     : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/45"
                 }`}
               >
-                <div className="font-mono text-[10px] text-[#d6b46c]">
-                  LVL {zone.levelRange}
-                </div>
+                <div className="font-mono text-[10px] text-[#d6b46c]">LVL {zone.levelRange}</div>
                 <div className="mt-0.5 font-serif text-xs text-[#fff6df]">
                   {zone.zoneName.replace(/^ZONE 0\d · /, "")}
                 </div>
@@ -156,14 +154,15 @@ export function DoorSovereignPanel() {
         </div>
       </div>
 
-      {/* 194-Repo Cross-Organization Topology Atlas */}
+      {/* 368-Repo Cross-Organization Topology Atlas */}
       <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
           <span className="font-serif text-base tracking-[0.18em] text-[#f5e3b8] uppercase">
-            CROSS-REPOSITORY TOPOLOGY ATLAS ({totalRepos}+ GITHUB REPOS &amp; 40+ LOCAL CLONES)
+            CROSS-REPOSITORY TOPOLOGY ATLAS ({totalRepos} VERIFIED GITHUB REPOS · 7 OWNERS + LOCAL
+            WORKSPACE)
           </span>
           <span className="font-mono text-[11px] text-[#d6b46c]">
-            4 FEDERATED ORGANIZATIONS CONVERGING INTO A-L-L-A-H.COM
+            7 GITHUB OWNERS CONVERGING INTO A-L-L-A-H.COM (+ LOCAL WORKSPACE)
           </span>
         </div>
 

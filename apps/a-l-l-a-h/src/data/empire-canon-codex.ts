@@ -1,18 +1,10 @@
 import type { WorldIdentifier } from "./empire-registry";
 
 export type EntryDoorId =
-  | "story-universe"
-  | "epistemic-corpus"
-  | "empire-organization"
-  | "sovereign-runtimes";
+  "story-universe" | "epistemic-corpus" | "empire-organization" | "sovereign-runtimes";
 
 export type SyafaatStateId =
-  | "UNEXPLORED"
-  | "DISCOVERED"
-  | "PRACTICING"
-  | "REFLECTED"
-  | "SUSTAINING"
-  | "REVISIT";
+  "UNEXPLORED" | "DISCOVERED" | "PRACTICING" | "REFLECTED" | "SUSTAINING" | "REVISIT";
 
 export interface EntryDoorMeta {
   readonly id: EntryDoorId;
@@ -140,7 +132,14 @@ export interface OxDxZoneEntry {
 }
 
 export interface RepoOrgCluster {
-  readonly orgName: "A-L-L-A-H" | "bjo163" | "BRIDGE-ALLAH" | "The-Batteries";
+  readonly orgName:
+    | "A-L-L-A-H"
+    | "bjo163"
+    | "ArsyBelovedLabs"
+    | "BRIDGE-ALLAH"
+    | "zenix-id"
+    | "The-Batteries"
+    | "moonwitness-id";
   readonly repoCount: number;
   readonly roleInEmpire: string;
   readonly localClones: readonly string[];
@@ -162,7 +161,8 @@ export const SUPREME_IDENTITY = {
   tawhidPrinciple:
     "LĀ ILĀHA ILLALLĀH — Zero Kultus Individu, Zero Klaim Kenabian, Zero Klaim Wahyu Baru.",
   tawhidMotto: "Only You. Your Deeds. And ALLAH.",
-  monocentricFormula: "1 = ONE GOD (Tawhid) · 6 = CREATION (Six Ayyām) · 3 = HIZAB (Hijab, Hudud, Barzakh)",
+  monocentricFormula:
+    "1 = ONE GOD (Tawhid) · 6 = CREATION (Six Ayyām) · 3 = HIZAB (Hijab, Hudud, Barzakh)",
   creativeFormula: "INPUT = OUTPUT · SIN CAN BE BETTER HUMAN · OFFSIDE → ONSIDE",
 } as const;
 
@@ -180,12 +180,14 @@ export const OWNER_FOUR_LINE_MANIFESTO: readonly ManifestoLine[] = [
   {
     index: "03",
     line: "COULD BE RIGHT. COULD BE WRONG.",
-    interpretation: "Intellectual honesty and openness to Positive Correction (QS Al-Mā'idah 5:48).",
+    interpretation:
+      "Intellectual honesty and openness to Positive Correction (QS Al-Mā'idah 5:48).",
   },
   {
     index: "04",
     line: 'BUT I KNOW WHO SAID: "I\'LL FINISH IT."',
-    interpretation: "Unshakeable trust in Allah's promise (QS Al-Qasas 28:7–8) as anchor of action.",
+    interpretation:
+      "Unshakeable trust in Allah's promise (QS Al-Qasas 28:7–8) as anchor of action.",
   },
 ] as const;
 
@@ -197,7 +199,8 @@ export const DX_MANGA_FOUR_PANELS: readonly MangaPanelSpec[] = [
     romajiSfx: "GOGOGO...",
     paletteTag: "Grunge Obsidian",
     accentHex: "#9e8862",
-    meaning: "Zero mask of false holiness. Entering honestly from scars, failure, and noisy reality.",
+    meaning:
+      "Zero mask of false holiness. Entering honestly from scars, failure, and noisy reality.",
     architecturalForm: "Fractured basalt monolith under turbulent shadow lines",
   },
   {
@@ -300,20 +303,20 @@ export const FOUR_ENTRY_DOORS: readonly EntryDoorMeta[] = [
     numeral: "DOOR III",
     title: "100CENTER & EMPIRE ORGANIZATION",
     subtitle: "Prime Code PC01–PC09 · WINGS 10 · 99 G.O.D. Stewardship · 25 Amanah",
-    sourceSpec: "bjo163/A-L-L-A-H · The-Batteries/100CENTER · dhgs",
+    sourceSpec: "bjo163/empire-of-the-light · A-L-L-A-H/master-docs · dhgs",
     linkedWorldId: "qalam",
     summary:
-      "Inspect constitutional axioms, the 10 Guardian Wings, Syafaat 6-state human ethical reflection across 99 stewardship nodes, and DHGS.",
+      "Inspect constitutional axioms, the 10 proposed Guardian Wings (W01 SKYLINK – W10 HAVEN), Syafaat 6-state reflection across 99 stewardship nodes, and DHGS.",
   },
   {
     id: "sovereign-runtimes",
     numeral: "DOOR IV",
-    title: "SOVEREIGN ECOSYSTEM & 194-REPO ATLAS",
-    subtitle: "OX-DX 49 Levels · M-Time Antikythera · AQEL · 4 GitHub Orgs",
-    sourceSpec: "universal-ontology-engine · antikythera-time · AQEL · 194+ Repos",
+    title: "SOVEREIGN ECOSYSTEM & 368-REPO ATLAS",
+    subtitle: "OX-DX 49 Levels · M-Time Antikythera · AQEL · 7 GitHub Owners",
+    sourceSpec: "universal-ontology-engine · antikythera-time · AQEL · 368+ Repos",
     linkedWorldId: "arsy",
     summary:
-      "Explore the 7×7 OX-DX ontology pyramid, MCLOCK-1 astronomical engine, Arabic-first AQEL syntax, and the 194-repository federation.",
+      "Explore the 7×7 OX-DX ontology pyramid (01 UNIVERSE → 49 BIT), MCLOCK-1 astronomical engine, Arabic-first AQEL syntax, and the 368-repository federation.",
   },
 ] as const;
 
@@ -365,31 +368,81 @@ export const SEVEN_STEP_PROMISE = [
 export const SIXTEEN_STAGE_LOOP = [
   "01 THE MOON",
   "02 WITNESS",
-  "03 THE SPARK",
-  "04 THE CODE",
-  "05 THE SIGNAL",
-  "06 THE BRIDGE",
-  "07 THE FORGE",
-  "08 THE SHIELD",
-  "09 THE COMPASS",
-  "10 THE ARCHIVE",
-  "11 THE ECHO",
-  "12 THE CROWN",
-  "13 THE HORIZON",
-  "14 THE SANCTUARY",
-  "15 THE COVENANT",
+  "03 EVENT",
+  "04 MESSAGE",
+  "05 SEDUCTION",
+  "06 FAULT LINE",
+  "07 EXPOSURE",
+  "08 PAST PRESENCE",
+  "09 AUDIT",
+  "10 EVALUATION",
+  "11 BALANCING",
+  "12 PROMOTING",
+  "13 CONFLICT",
+  "14 SANITY'S LAST BREATH",
+  "15 CHANGE",
   "16 NEXT ERA",
 ] as const;
 
 export const EIGHT_STORY_ERAS: readonly StoryEraEntry[] = [
-  { id: "era_00", order: 0, title: "BEFORE LIGHT", subtitle: "Pre-Signal Silence", theme: "Pure latent potential before witness awakens." },
-  { id: "era_01", order: 1, title: "FIRST SIGNAL", subtitle: "The Initial Spark", theme: "Recognition of testimony and accountability." },
-  { id: "era_02", order: 2, title: "FRACTURED MIRROR", subtitle: "Collision with Noise", theme: "Scars, deviance auditing, and testing resolve." },
-  { id: "era_03", order: 3, title: "FORGE OF ROCKSOUL", subtitle: "Discipline in Chaos", theme: "Converting scars into craft and music." },
-  { id: "era_04", order: 4, title: "CONVERGENCE OF 163", subtitle: "Monocentric Alignment", theme: "Binding 1·6·3 ontology into unified code." },
-  { id: "era_05", order: 5, title: "CITADEL OF THE MOON", subtitle: "The Five Worlds", theme: "Moonwitness, Arsy, Qalam, Sidra, Rocksoul DX." },
-  { id: "era_06", order: 6, title: "GLOBAL CHAMPIONSHIPS", subtitle: "33 Patches & 15 Episodes", theme: "Public deployment, Unity Agreement, Syafaat RPG." },
-  { id: "era_07", order: 7, title: "NEXT PHASE", subtitle: "Sovereign Horizon", theme: "Open-book civilization infrastructure." },
+  {
+    id: "era_00",
+    order: 0,
+    title: "BEFORE LIGHT",
+    subtitle: "moonwitness-II · Published",
+    theme:
+      "The unlit beginning: before the story has a public shape, before the signal has a name.",
+  },
+  {
+    id: "era_01",
+    order: 1,
+    title: "THE ARRIVAL",
+    subtitle: "moonwitness-II · Draft",
+    theme: "Something enters the field of attention. Presence becomes movement.",
+  },
+  {
+    id: "era_02",
+    order: 2,
+    title: "THE WITNESS",
+    subtitle: "moonwitness-II · Draft",
+    theme: "Observation becomes a record. The story acquires a witness.",
+  },
+  {
+    id: "era_03",
+    order: 3,
+    title: "THE RUNAWAYS",
+    subtitle: "moonwitness-II · Draft",
+    theme:
+      "Identities split, disappear, return, and move through the universe under changing names.",
+  },
+  {
+    id: "era_04",
+    order: 4,
+    title: "THE EXPOSURE",
+    subtitle: "moonwitness-II · Draft",
+    theme: "Signals, relationships, and hidden pressure become visible enough to be examined.",
+  },
+  {
+    id: "era_05",
+    order: 5,
+    title: "THE CHANGE",
+    subtitle: "moonwitness-II · Draft",
+    theme: "The old frame shifts. What was witnessed begins to alter what comes next.",
+  },
+  {
+    id: "era_06",
+    order: 6,
+    title: "END OF AN ERA",
+    subtitle: "moonwitness-II · Draft",
+    theme: "A narrative frame closes while witness, memory, trace, and selected meaning remain.",
+  },
+  {
+    id: "era_07",
+    order: 7,
+    title: "NEXT PHASE",
+    subtitle: "moonwitness-II · Draft",
+    theme: "The next phase is intentionally open: a destination to be discovered, not pre-written.",
+  },
 ] as const;
 
 export const ORIGINAL_CREW_ARCHETYPES: readonly string[] = [
@@ -411,36 +464,167 @@ export const ORIGINAL_CREW_ARCHETYPES: readonly string[] = [
 ] as const;
 
 export const FIFTEEN_STORY_EPISODES: readonly StoryEpisodeEntry[] = [
-  { code: "EP-01", number: 1, title: "DIGIMON JOGRESS", arcFocus: "Dual-Agent Fusion", coreQuestion: "When two distinct protocols combine without losing identity." },
-  { code: "EP-02", number: 2, title: "BROTHERHOOD", arcFocus: "Loyal Fellowship", coreQuestion: "Holding the line together across silence and storm." },
-  { code: "EP-03", number: 3, title: "RESONANCE PROTOCOL", arcFocus: "Harmonic Alignment", coreQuestion: "Tuning fragmented teams to a single meridian." },
-  { code: "EP-04", number: 4, title: "MANUSIA PULPEN", arcFocus: "Authorship Over Weapons", coreQuestion: "Writing permanent truth in an age of ephemeral noise." },
-  { code: "EP-05", number: 5, title: "ANGEL WITH SHOTGUN", arcFocus: "Law & Moral Defense", coreQuestion: "Distinguishing written statute from living justice." },
-  { code: "EP-06", number: 6, title: "NOISE × SILENCE", arcFocus: "Cognitive Clarity", coreQuestion: "Separating signal from high-frequency distraction." },
-  { code: "EP-07", number: 7, title: "THE BATTERY AWAKENING", arcFocus: "Latent Energy", coreQuestion: "How small cells sustain an entire ecosystem." },
-  { code: "EP-08", number: 8, title: "GREAT PRINCESS OF BEE", arcFocus: "Order in nature", coreQuestion: "Precision hive coordination as social architecture." },
-  { code: "EP-09", number: 9, title: "LOST THE SIGNAL", arcFocus: "Valley of Testing", coreQuestion: "Navigational fidelity when telemetry goes dark." },
-  { code: "EP-10", number: 10, title: "THE POSITIVE CORRECTION", arcFocus: "QS 5:48 Audit", coreQuestion: "Refuting falsehood through superior constructive craft." },
-  { code: "EP-11", number: 11, title: "MFTL: MYTH TO LEGEND", arcFocus: "Historical Verification", coreQuestion: "Tracing oral legend back to verifiable evidence." },
-  { code: "EP-12", number: 12, title: "KINGSLAYER PACT", arcFocus: "Unity Agreement", coreQuestion: "Dissolving ego-thrones to serve the shared Covenant." },
-  { code: "EP-13", number: 13, title: "AETHERION ASCENT", arcFocus: "10 Realms / 100 Levels", coreQuestion: "Iterative mastery through structured ethical trials." },
-  { code: "EP-14", number: 14, title: "FAITH TO ACTION", arcFocus: "KopiHitam — Siaceng", coreQuestion: "Turning late-night resolve into shipped public reality." },
-  { code: "EP-15", number: 15, title: "FUTURE IS NOW", arcFocus: "The Open Gate", coreQuestion: "Stepping into accountable civilization building today." },
+  {
+    code: "EP-01",
+    number: 1,
+    title: "DIGIMON JOGRESS — THE BOUNDARY",
+    arcFocus: "Faith & Scripture · Al-A'raf 7:46 (Editorial Synopsis)",
+    coreQuestion:
+      "Two sides, one boundary: reading Al-A'raf as a call to humility when judging others.",
+  },
+  {
+    code: "EP-02",
+    number: 2,
+    title: "KALAUTIDAKSALAH — THE BREATH",
+    arcFocus: "Faith & Scripture · Daniel 5:22–23 (Editorial Synopsis)",
+    coreQuestion:
+      "Daniel reproving Belshazzar on breath, borrowed time, humility, and human responsibility.",
+  },
+  {
+    code: "EP-03",
+    number: 3,
+    title: "DROPLETS — THE LOCAL RAIN",
+    arcFocus: "Personal Witness · Yohanes 7:38–39 (Editorial Synopsis)",
+    coreQuestion:
+      "Personal night testimony of 'local rain' and hope for spiritual renewal (unverified externally).",
+  },
+  {
+    code: "EP-04",
+    number: 4,
+    title: "THE BLOW — LENTERA BERSINAR",
+    arcFocus: "Personal Witness · 09:19 WIB (Editorial Synopsis)",
+    coreQuestion:
+      "Morning light, daily craft, and prayer framed with musical humor and 'Lentera Bersinar'.",
+  },
+  {
+    code: "EP-05",
+    number: 5,
+    title: "TICK-TOCK ON THE CLOCK",
+    arcFocus: "Personal Witness · Date Disputed (Editorial Synopsis)",
+    coreQuestion:
+      "A wall clock reported stopped despite new batteries, framed with TikTok humor (date unverified).",
+  },
+  {
+    code: "EP-06",
+    number: 6,
+    title: "THE FAMILY MEETS IN THE SKY",
+    arcFocus: "MoonWitness Universe · An-Nahl Motif (Editorial Synopsis)",
+    coreQuestion:
+      "Planetary motifs (Moon, Mars, Jupiter, Galaxy) as narrative brotherhood symbols, never literal persons.",
+  },
+  {
+    code: "EP-07",
+    number: 7,
+    title: "DREAMS OF DRAGON'S FIRE",
+    arcFocus: "Personal Witness · Al-Anfal 8:42 (Editorial Synopsis)",
+    coreQuestion:
+      "Dream testimony and dragon-fire metaphor about light in darkness, choice, and responsibility.",
+  },
+  {
+    code: "EP-08",
+    number: 8,
+    title: "THEY CALL IT KARMA",
+    arcFocus: "Faith & Scripture · Az-Zalzalah 99:7–8 (Editorial Synopsis)",
+    coreQuestion: "Every atom of action carries moral consequence across time.",
+  },
+  {
+    code: "EP-09",
+    number: 9,
+    title: "BEAT IT — LIE IS STILL A LIE",
+    arcFocus: "Integrity · Al-Ahzab 33:70–71 (Editorial Synopsis)",
+    coreQuestion: "Straight speech versus rationalized falsehood under accountability.",
+  },
+  {
+    code: "EP-10",
+    number: 10,
+    title: "SIMPLEPLAN — JETLAG",
+    arcFocus: "Daily Life · Temporal Distance (Editorial Synopsis)",
+    coreQuestion: "Staying anchored in patience across distance and misaligned schedules.",
+  },
+  {
+    code: "EP-11",
+    number: 11,
+    title: "BURAQ — MODE BALAP",
+    arcFocus: "Ancient Witness · Velocity Motif (Editorial Synopsis)",
+    coreQuestion: "Velocity paired with ethical restraint in service of trustworthy transmission.",
+  },
+  {
+    code: "EP-12",
+    number: 12,
+    title: "ALLAH-PROMISE — SIGNAL COLLECTION",
+    arcFocus: "Series Index · QS. 94:8 (Editorial Synopsis)",
+    coreQuestion:
+      "Collecting scattered signals under the promise anchor without claiming new revelation.",
+  },
+  {
+    code: "EP-13",
+    number: 13,
+    title: "TUTORIAL MAHDI — RESPONSIBILITY",
+    arcFocus: "Five-Page Narrative · Stewardship (Editorial Synopsis)",
+    coreQuestion: "Replacing passive waiting with ordinary, accountable human responsibility.",
+  },
+  {
+    code: "EP-14",
+    number: 14,
+    title: "RONIN 47 — BOYS OF SUMMER",
+    arcFocus: "Ensemble Story · Brotherhood (Editorial Synopsis)",
+    coreQuestion: "Dissolving rival pride into disciplined collective service.",
+  },
+  {
+    code: "EP-15",
+    number: 15,
+    title: "FUTURE IS NOW — SECOND CHANCE PRAYER",
+    arcFocus: "Registry Anchor · Bug #008 (Editorial Synopsis)",
+    coreQuestion: "Stepping forward in honest repentance and practical rebuilding today.",
+  },
 ] as const;
 
 export const WORLD_PATCH_HIGHLIGHTS: readonly WorldPatchHighlight[] = [
-  { patchNumber: "#001", title: "AEGIS PROTECTION", category: "Boundary Shield", summary: "Foundational integrity shield guarding the Gate against distortion." },
-  { patchNumber: "#007", title: "SYAFAAT BASE STATES", category: "Ethical Progression", summary: "Six non-judgmental states of human ethical reflection and practice." },
+  {
+    patchNumber: "#001",
+    title: "AEGIS PROTECTION",
+    category: "Registered in Chat",
+    summary:
+      "Previously reported in earlier chat; verbatim original submission details pending recovery.",
+    provenanceNote: "0 externally verified divine approvals",
+  },
+  {
+    patchNumber: "#007",
+    title: "MAROON 5",
+    category: "Registered in Chat",
+    summary:
+      "Registered chat slot #007; verbatim original submission text awaits primary recovery.",
+  },
   {
     patchNumber: "#014",
-    title: "DUAL-DRAFT RECONCILIATION PATCH",
-    category: "Provenance Audit",
-    summary: "Tracks divergence between XII Championship draft variants pending canonical lock.",
-    provenanceNote: "DISCLOSED DUAL-DRAFT CONFLICT · Requires final author sign-off",
+    title: "FAMILY WITHOUT FEAR / THE WRONG WAY — HELLROAD",
+    category: "Number Conflict",
+    summary:
+      "Two distinct #014 draft concepts preserved side by side without conflation or silent renumbering.",
+    provenanceNote: "DISCLOSED #014 CONFLICT · Primary resolution pending owner selection",
   },
-  { patchNumber: "#019", title: "OFFSIDE → ONSIDE FRAME", category: "Semantic Guard", summary: "Redirects misframed claims onto verifiable premise chains (QS 37:30)." },
-  { patchNumber: "#027", title: "KINGSLAYER UNITY AGREEMENT", category: "Governance Pact", summary: "5-poster series dissolving zero-sum rivalry into federated mission." },
-  { patchNumber: "#033", title: "KOPIHITAM — SIACENG / FAITH TO ACTION", category: "Final Season Patch", summary: "Culminating patch bridging spiritual stillness directly into daily output." },
+  {
+    patchNumber: "#019",
+    title: "THE HONEST WITNESS",
+    category: "Editorial Proposal",
+    summary:
+      "Editorial blueprint proposal for truthful testimony; not formally dispatched externally.",
+  },
+  {
+    patchNumber: "#027",
+    title: "CRISIS READY",
+    category: "Editorial Proposal",
+    summary:
+      "Editorial blueprint proposal for resilient humanitarian preparedness; not dispatched.",
+  },
+  {
+    patchNumber: "#033",
+    title: "KOPIHITAM - SIACENG (FAITH TO ACTION concept)",
+    category: "User Submitted in Chat",
+    summary:
+      "Global Humanity 5-domain / 7-step concept logged in chat; earlier THE FINAL AUDIT preserved unnumbered.",
+    provenanceNote: "user_submitted_in_chat · 0 externally verified divine approvals",
+  },
 ] as const;
 
 export const FEATURED_GATE_TRANSMISSIONS: readonly FeaturedTransmission[] = [
@@ -465,7 +649,8 @@ export const FEATURED_GATE_TRANSMISSIONS: readonly FeaturedTransmission[] = [
     title: "KINGSLAYER: The Unity Agreement",
     format: "5-Poster Series · MoonWitness XII",
     domainOrigin: "CHAOS MEDIC × THE BATTERIES",
-    premise: " Five sequential proclamations dethroning ego to unite scattered guilds under one Light.",
+    premise:
+      " Five sequential proclamations dethroning ego to unite scattered guilds under one Light.",
     signatureQuote: "Slay the false crown within; protect the Covenant without.",
   },
 ] as const;
@@ -476,7 +661,7 @@ export const EPISTEMIC_FEDERATION_DOMAINS: readonly EpistemicDomainNode[] = [
     name: "TEXT · SRGBL v8",
     repoSlug: "bjo163/moonwitness-corpus",
     domainFocus: "Scriptural & Textual Hermeneutics",
-    pipelineOrFamilies: "5 Stages (S1–S5) + 7 Swing Swing Key Rotations",
+    pipelineOrFamilies: "5 Stages (S1–L5) + 7 Swing Operators (Max 3 Hops)",
     coreInvariant: "Direct source grounding with zero unverified extrapolation.",
   },
   {
@@ -568,13 +753,13 @@ export const SRGBL_V8_STAGES: readonly SrgblStageSpec[] = [
 ] as const;
 
 export const SWING_SWING_KEY_ROTATIONS: readonly string[] = [
-  "01 · Lexical Root Rotation (Semantic Core)",
-  "02 · Historical Horizon Rotation (When & Where)",
-  "03 · Structural Mirror Rotation (Ring Composition)",
-  "04 · Legal Boundary Rotation (Hudud & Scope)",
-  "05 · Cross-Tradition Echo Rotation (UNILEX)",
-  "06 · Positive Correction Rotation (QS 5:48 Audit)",
-  "07 · Living Action Rotation (Input → Output)",
+  "01 · Direction Reversal (Question, Never Proven Inverse)",
+  "02 · Polarity Reversal (Candidate Counterclaim)",
+  "03 · Subject/Object Role Shift (Grammar & Genre Checked)",
+  "04 · Cause/Effect Reexamination (Never Auto-Reversed)",
+  "05 · Perspective / Recipient Rotation",
+  "06 · Temporal Viewpoint Rotation",
+  "07 · Semantic Opposition Candidate",
 ] as const;
 
 export const JERUSALEM_70CE_CASE_001 = {
@@ -582,36 +767,141 @@ export const JERUSALEM_70CE_CASE_001 = {
   title: "Jerusalem 70 CE — Multi-Domain Correlation Benchmark",
   strands: [
     { domain: "TEXT (SRGBL)", evidence: "Mark 13:2 prophetic statement on temple stones" },
-    { domain: "STORY / EVENT (MFTL/LEGEND)", evidence: "Flavius Josephus, Wars of the Jews eyewitness account" },
-    { domain: "ARTIFACT (ARCHAEOLOGY)", evidence: "Arch of Titus relief depicting second-temple vessels" },
-    { domain: "LAW (AWS)", evidence: "Roman siege martial law & provincial jurisdiction transition" },
+    {
+      domain: "STORY / EVENT (MFTL/LEGEND)",
+      evidence: "Flavius Josephus, Wars of the Jews eyewitness account",
+    },
+    {
+      domain: "ARTIFACT (ARCHAEOLOGY)",
+      evidence: "Arch of Titus relief depicting second-temple vessels",
+    },
+    {
+      domain: "LAW (AWS)",
+      evidence: "Roman siege martial law & provincial jurisdiction transition",
+    },
   ],
   verdict: "CONVERGENT ONSIDE CORRELATION — Text, eyewitness chronicle, relief, and statute align.",
 } as const;
 
 export const PRIME_CODE_AXIOMS: readonly PrimeCodeAxiom[] = [
-  { code: "PC01", title: "Tawhid Sovereign Axis", statement: "Zero partnership with the Creator; zero cult of builders or tools." },
-  { code: "PC02", title: "Input = Output Honesty", statement: "No claimed insight is valid until manifested in measurable, helpful work." },
-  { code: "PC03", title: "Positive Correction (QS 5:48)", statement: "Answer distortion by shipping cleaner truth, never sterile outrage." },
-  { code: "PC04", title: "Legal Text ≠ Applicable Law", statement: "Every norm requires verified jurisdiction, context, and humane review." },
-  { code: "PC05", title: "Low-Profile Stewardship", statement: "Serve quietly in the light; seek utility over applause." },
-  { code: "PC06", title: "Progressive Graceful Fallback", statement: "Craft advanced systems that never exclude modest human hardware." },
-  { code: "PC07", title: "Zero Fake Telemetry", statement: "Never fabricate metrics, witnesses, or provenance." },
-  { code: "PC08", title: "Cross-Domain Falsifiability", statement: "Text, story, event, person, and law must cross-verify each other." },
-  { code: "PC09", title: "Mercy as Structural Load", statement: "Rahmah is not ornament; it is the load-bearing beam of architecture." },
+  {
+    code: "PC01",
+    title: "SOURCE INTEGRITY",
+    statement: "Distinguish original source, edition, witness and interpretation.",
+  },
+  {
+    code: "PC02",
+    title: "TRUTH & EVIDENCE",
+    statement: "Attribute claims, verify and show uncertainties.",
+  },
+  {
+    code: "PC03",
+    title: "HUMAN AGENCY",
+    statement: "Protect free choice, informed consent and revocation.",
+  },
+  {
+    code: "PC04",
+    title: "TRUST & RESPONSIBILITY",
+    statement: "Every mission has named, bounded accountable humans.",
+  },
+  {
+    code: "PC05",
+    title: "CONSULTATION",
+    statement: "Affected stakeholders may question and appeal decisions.",
+  },
+  {
+    code: "PC06",
+    title: "FAIRNESS & JUSTICE",
+    statement: "Evaluate procedures with human-auditable criteria.",
+  },
+  {
+    code: "PC07",
+    title: "COMPASSION & PROTECTION",
+    statement: "Prevent avoidable harm and prioritize dignity.",
+  },
+  {
+    code: "PC08",
+    title: "RESTORATION & RENEWAL",
+    statement: "Support correction, repair and responsive oversight.",
+  },
+  {
+    code: "PC09",
+    title: "CONTINUITY",
+    statement: "Preserve knowledge, ownership, succession and rollback.",
+  },
 ] as const;
 
 export const WINGS_TEN_ARRAY: readonly WingStewardEntry[] = [
-  { code: "W01", callsign: "JIBRIL", domainRole: "Transmission & Truth Delivery", architecturalDuty: "Zero-distortion canonical message pipelines and provenance signing." },
-  { code: "W02", callsign: "MIKAIL", domainRole: "Sustenance & Resource Allocation", architecturalDuty: "Balanced compute, energy, and mutual-aid distribution." },
-  { code: "W03", callsign: "ISRAFIL", domainRole: "Signal & Epochal Broadcast", architecturalDuty: "Harmonic Arsy relays, alerts, and global cadence synchronization." },
-  { code: "W04", callsign: "IZRAIL", domainRole: "Lifecycle Sealing & Deprecation", architecturalDuty: "Graceful archival shutdown, immutable snapshots, and memory hygiene." },
-  { code: "W05", callsign: "MUNKAR", domainRole: "Anomaly & Intrusion Detection", architecturalDuty: "Detecting foreign injection, drift, or manipulated framing." },
-  { code: "W06", callsign: "NAKIR", domainRole: "Adversarial Verification", architecturalDuty: "Rigorous interrogation of proofs, schemas, and claims." },
-  { code: "W07", callsign: "RAQIB", domainRole: "Constructive Action Ledger", architecturalDuty: "Immutable recording of verified builds and benevolent deeds." },
-  { code: "W08", callsign: "ATID", domainRole: "Deviance & Fault Audit", architecturalDuty: "Recording regressions, debt, and offside reasoning for correction." },
-  { code: "W09", callsign: "MALIK", domainRole: "Containment & Gate Defense", architecturalDuty: "Quarantining harmful inputs and enforcing strict visual/ethical bounds." },
-  { code: "W10", callsign: "RIDWAN", domainRole: "Sanctuary Hospitality & Peace", architecturalDuty: "Welcoming learners into tranquil, legible, dignified interfaces." },
+  {
+    code: "W01",
+    callsign: "SKYLINK · SIGNAL COURIERS",
+    domainRole: "Transmission & Knowledge (TRUTH_GUIDANCE · Lead: GOD-049)",
+    architecturalDuty:
+      "Inspired by Jibril / Gabriel · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W02",
+    callsign: "RAINMAKERS · LIFELINE CREW",
+    domainRole: "Resources & Sustenance (RENEWAL · Lead: GOD-017)",
+    architecturalDuty:
+      "Inspired by Mikail / Michael · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W03",
+    callsign: "LAST SIGNAL · SIREN SQUAD",
+    domainRole: "Alerts & Readiness (PATHFINDING · Lead: GOD-043)",
+    architecturalDuty:
+      "Inspired by Israfil · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W04",
+    callsign: "SOFT LANDING · TRANSITION CREW",
+    domainRole: "Life Transitions (PROTECTION · Lead: GOD-061)",
+    architecturalDuty:
+      "Inspired by Malak al-Mawt / Izrail · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W05",
+    callsign: "QUESTION ZERO · INQUIRY UNIT",
+    domainRole: "Inquiry & Investigation (TRUTH_GUIDANCE · Lead: GOD-031)",
+    architecturalDuty:
+      "Inspired by Munkar · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W06",
+    callsign: "DOUBLE CHECK · SECOND OPINION",
+    domainRole: "Independent Verification (TRUTH_GUIDANCE · Lead: GOD-074)",
+    architecturalDuty:
+      "Inspired by Nakir · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W07",
+    callsign: "ECHOLOG · FIELD RECORDERS",
+    domainRole: "Observation & Documentation (TRUTH_GUIDANCE · Lead: GOD-050)",
+    architecturalDuty:
+      "Inspired by Raqib (Quran 50:18 descriptor) · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W08",
+    callsign: "LEDGER PUNK · AUDIT REBELS",
+    domainRole: "Accountability & Audit (RENEWAL · Lead: GOD-040)",
+    architecturalDuty:
+      "Inspired by Atid (Quran 50:18 descriptor) · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W09",
+    callsign: "FIREWALL · REDLINE GUARD",
+    domainRole: "Safety & Containment (PROTECTION · Lead: GOD-077)",
+    architecturalDuty:
+      "Inspired by Malik · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
+  {
+    code: "W10",
+    callsign: "HAVEN · PEACEKEEPERS",
+    domainRole: "Care & Sanctuary (PROTECTION · Lead: GOD-068)",
+    architecturalDuty:
+      "Inspired by Ridwan (popular name) · PROPOSED_NOT_ASSIGNED · HUMAN_OPERATIONS_WING · NO_SUPERNATURAL_OR_DIVINE_AUTHORITY.",
+  },
 ] as const;
 
 export const SYAFAAT_BASE_STATES: readonly {
@@ -632,8 +922,13 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     title: "Mercy, Peace & Sanctity",
     rangeLabel: "11 Nodes",
     nodeCount: 11,
-    humanEthicalFocus: "Practicing compassion (Raḥmah), conflict de-escalation, and inner truthfulness.",
-    representativeReflections: ["Steward of Gentle Speech", "Peacemaker in Dispute", "Protector of the Vulnerable"],
+    humanEthicalFocus:
+      "Practicing compassion (Raḥmah), conflict de-escalation, and inner truthfulness.",
+    representativeReflections: [
+      "Steward of Gentle Speech",
+      "Peacemaker in Dispute",
+      "Protector of the Vulnerable",
+    ],
   },
   {
     clusterCode: "C12–C22",
@@ -641,7 +936,11 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     rangeLabel: "11 Nodes",
     nodeCount: 11,
     humanEthicalFocus: "Building durable public goods without waste or exploitation.",
-    representativeReflections: ["Clean Engineering Craft", "Fair Wage & Exchange", "Ecological Conservation"],
+    representativeReflections: [
+      "Clean Engineering Craft",
+      "Fair Wage & Exchange",
+      "Ecological Conservation",
+    ],
   },
   {
     clusterCode: "C23–C33",
@@ -649,7 +948,11 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     rangeLabel: "11 Nodes",
     nodeCount: 11,
     humanEthicalFocus: "Upholding impartial weights (Al-Mīzān) even when inconvenient to self.",
-    representativeReflections: ["Unbiased Evidence Audit", "Transparent Attribution", "Refusal of False Witness"],
+    representativeReflections: [
+      "Unbiased Evidence Audit",
+      "Transparent Attribution",
+      "Refusal of False Witness",
+    ],
   },
   {
     clusterCode: "C34–C44",
@@ -657,7 +960,11 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     rangeLabel: "11 Nodes",
     nodeCount: 11,
     humanEthicalFocus: "Enduring setbacks without bitterness; answering hardship with steadiness.",
-    representativeReflections: ["Zero-Self-Pity Discipline", "Daily Shukr Practice", "Forbearance Under Critique"],
+    representativeReflections: [
+      "Zero-Self-Pity Discipline",
+      "Daily Shukr Practice",
+      "Forbearance Under Critique",
+    ],
   },
   {
     clusterCode: "C45–C55",
@@ -665,14 +972,19 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     rangeLabel: "11 Nodes",
     nodeCount: 11,
     humanEthicalFocus: "Preserving history honestly and mentoring learners generously.",
-    representativeReflections: ["Primary Source Fidelity", "Open Documentation", "Humility Before the Unknown"],
+    representativeReflections: [
+      "Primary Source Fidelity",
+      "Open Documentation",
+      "Humility Before the Unknown",
+    ],
   },
   {
     clusterCode: "C56–C66",
     title: "Accountability & Living Law",
     rangeLabel: "11 Nodes",
     nodeCount: 11,
-    humanEthicalFocus: "Keeping covenants and accepting personal responsibility before blaming systems.",
+    humanEthicalFocus:
+      "Keeping covenants and accepting personal responsibility before blaming systems.",
     representativeReflections: ["Hisab Self-Audit", "Contract Integrity", "Restorative Apology"],
   },
   {
@@ -681,7 +993,11 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     rangeLabel: "11 Nodes",
     nodeCount: 11,
     humanEthicalFocus: "Refusing celebrity worship while strengthening community bonds.",
-    representativeReflections: ["Anti-Cult Vigilance", "Shared Credit Distribution", "Quiet Service"],
+    representativeReflections: [
+      "Anti-Cult Vigilance",
+      "Shared Credit Distribution",
+      "Quiet Service",
+    ],
   },
   {
     clusterCode: "C78–C88",
@@ -689,77 +1005,142 @@ export const CENTER_100_STEWARDSHIP_CLUSTERS: readonly CenterStewardshipCluster[
     rangeLabel: "11 Nodes",
     nodeCount: 11,
     humanEthicalFocus: "Turning dark seasons into lanterns for fellow travelers.",
-    representativeReflections: ["Positive Correction", "Constructive Critique", "Mentoring New Builders"],
+    representativeReflections: [
+      "Positive Correction",
+      "Constructive Critique",
+      "Mentoring New Builders",
+    ],
   },
   {
     clusterCode: "C89–C99 + 100",
     title: "Trusteeship + 1 Tawhid Center",
     rangeLabel: "11 Nodes + 1 Center",
     nodeCount: 12,
-    humanEthicalFocus: "99 human stewardship duties strictly orbiting 1 Creator Center (non-anthropomorphic Tawhid).",
-    representativeReflections: ["99 Ethical Reflections", "+ 1 Singular Tawhid Axis", "= 100CENTER Holistic Orbit"],
+    humanEthicalFocus:
+      "99 human stewardship duties strictly orbiting 1 Creator Center (non-anthropomorphic Tawhid).",
+    representativeReflections: [
+      "99 Ethical Reflections",
+      "+ 1 Singular Tawhid Axis",
+      "= 100CENTER Holistic Orbit",
+    ],
   },
 ] as const;
 
 export const SYSTEM_CONCEPTS_14: readonly string[] = [
-  "MWX-SYS-001 · Monocentric 1·6·3 Axis",
-  "MWX-SYS-002 · Low-Profile Tawhid Guardrail",
-  "MWX-SYS-003 · SRGBL v8 5-Stage Lens",
-  "MWX-SYS-004 · Swing Swing 7-Key Rotation",
-  "MWX-SYS-005 · OFFSIDE → ONSIDE Semantic Frame",
-  "MWX-SYS-006 · 6-Domain + Relationship Correlation",
-  "MWX-SYS-007 · Syafaat 99-Dimension State Engine",
-  "MWX-SYS-008 · 100CENTER Stewardship Topology",
-  "MWX-SYS-009 · WINGS 10 Operational Array",
-  "MWX-SYS-010 · OX-DX 49-Level Ontology Pyramid",
-  "MWX-SYS-011 · M-Time Antikythera Clockworks",
-  "MWX-SYS-012 · AQEL Arabic-First AST Engine",
-  "MWX-SYS-013 · DHGS Mizan & Hisab Ledger",
-  "MWX-SYS-014 · MoonFrame 4-Door Sanctuary Gate",
+  "MWX-SYS-001 · MoonWitness OS",
+  "MWX-SYS-002 · Semantic Engine",
+  "MWX-SYS-003 · FURQAN Evidence Gate",
+  "MWX-SYS-004 · MIZAN Consistency & Impact Review",
+  "MWX-SYS-005 · AMANAH Responsibility & Access",
+  "MWX-SYS-006 · SHURA Deliberation",
+  "MWX-SYS-007 · 100CENTER Human Decision Layer",
+  "MWX-SYS-008 · KITAB Change & Evidence Ledger",
+  "MWX-SYS-009 · SIDRA TREE Knowledge Graph",
+  "MWX-SYS-010 · Divine Command Center Hub",
+  "MWX-SYS-011 · Atmosphere OS",
+  "MWX-SYS-012 · HELIOGRID Energy System",
+  "MWX-SYS-013 · ARSY Compute & Research Orchestration",
+  "MWX-SYS-014 · Material Forge & Experimental R&D",
 ] as const;
 
 export const OX_DX_SEVEN_ZONES: readonly OxDxZoneEntry[] = [
   {
     zoneIndex: 1,
-    zoneName: "ZONE 01 · COSMIC MACROSTRUCTURE",
+    zoneName: "ZONE 01 · EXISTENCE",
     levelRange: "01 – 07",
-    levels: ["01 UNIVERSE", "02 SUPERCLUSTER", "03 GALAXY", "04 STAR SYSTEM", "05 PLANET", "06 BIOSPHERE", "07 ECOSYSTEM"],
+    levels: [
+      "01 UNIVERSE",
+      "02 CREATION",
+      "03 ORDER",
+      "04 REALITY",
+      "05 REALM",
+      "06 WORLD",
+      "07 DOMAIN",
+    ],
   },
   {
     zoneIndex: 2,
-    zoneName: "ZONE 02 · CIVILIZATION & POLITY",
+    zoneName: "ZONE 02 · CONTEXT",
     levelRange: "08 – 14",
-    levels: ["08 HUMANITY", "09 CIVILIZATION", "10 NATION", "11 INSTITUTION", "12 COMMUNITY", "13 HOUSEHOLD", "14 PERSON"],
+    levels: [
+      "08 ECOSYSTEM",
+      "09 ORGANIZATION",
+      "10 COMMUNITY",
+      "11 REGION",
+      "12 ENVIRONMENT",
+      "13 NETWORK",
+      "14 CONTEXT",
+    ],
   },
   {
     zoneIndex: 3,
-    zoneName: "ZONE 03 · CONSCIOUSNESS & ETHICS",
+    zoneName: "ZONE 03 · INTENT",
     levelRange: "15 – 21",
-    levels: ["15 CONSCIENCE", "16 INTENTION (NIYYAH)", "17 WITNESS (SHAHADAH)", "18 REASON (AQL)", "19 MEMORY", "20 LANGUAGE", "21 INSCRIPTION"],
+    levels: [
+      "15 PURPOSE",
+      "16 MISSION",
+      "17 OBJECTIVE",
+      "18 PROGRAM",
+      "19 PROJECT",
+      "20 PRODUCT",
+      "21 SYSTEM",
+    ],
   },
   {
     zoneIndex: 4,
-    zoneName: "ZONE 04 · EPISTEMIC ARCHITECTURE",
+    zoneName: "ZONE 04 · STRUCTURE",
     levelRange: "22 – 28",
-    levels: ["22 TEXT CORPUS", "23 NARRATIVE", "24 EVENT RECORD", "25 AGENT PROFILE", "26 LEGAL NORM", "27 CORRELATION", "28 VERIFIED KNOWLEDGE"],
+    levels: [
+      "22 REPOSITORY",
+      "23 SOURCE",
+      "24 UNIT",
+      "25 MODULE",
+      "26 SUBSYSTEM",
+      "27 COMPONENT",
+      "28 ELEMENT",
+    ],
   },
   {
     zoneIndex: 5,
-    zoneName: "ZONE 05 · SYSTEMS & COMPUTATION",
+    zoneName: "ZONE 05 · SEMANTIC",
     levelRange: "29 – 35",
-    levels: ["29 ARCHITECTURE", "30 PROTOCOL", "31 SERVICE", "32 MODULE", "33 FUNCTION", "34 ALGORITHM", "35 AST NODE"],
+    levels: [
+      "29 SYMBOL",
+      "30 ENTITY",
+      "31 PROPERTY",
+      "32 RELATION",
+      "33 OPERATION",
+      "34 FUNCTION",
+      "35 BEHAVIOR",
+    ],
   },
   {
     zoneIndex: 6,
-    zoneName: "ZONE 06 · MATTER & ENERGY",
+    zoneName: "ZONE 06 · DYNAMIC",
     levelRange: "36 – 42",
-    levels: ["36 PHOTON FIELD", "37 MOLECULE", "38 ATOM", "39 NUCLEUS", "40 PROTON / HADRON", "41 QUARK", "42 QUANTUM FIELD"],
+    levels: [
+      "36 STATE",
+      "37 EVENT",
+      "38 PROCESS",
+      "39 FLOW",
+      "40 TRANSITION",
+      "41 ACTION",
+      "42 EXECUTION",
+    ],
   },
   {
     zoneIndex: 7,
-    zoneName: "ZONE 07 · SUBSTRATE INFORMATION",
+    zoneName: "ZONE 07 · REPRESENTATION",
     levelRange: "43 – 49",
-    levels: ["43 WAVEFUNCTION", "44 ENTROPY", "45 SYMMETRY GROUP", "46 LOGIC GATE", "47 REGISTER", "48 BYTE", "49 BIT"],
+    levels: [
+      "43 INSTRUCTION",
+      "44 EXPRESSION",
+      "45 VALUE",
+      "46 DATA",
+      "47 TOKEN",
+      "48 CHARACTER",
+      "49 BIT",
+    ],
   },
 ] as const;
 
@@ -768,29 +1149,45 @@ export const SOVEREIGN_ENGINE_SPECS = {
     name: "M-Time · Virtual Antikythera (MCLOCK-1)",
     repo: "bjo163/antikythera-time",
     version: "v0.16.0",
-    standards: ["JPL DE440 Ephemeris", "IERS Earth Orientation", "IAU 2006/2000A Precession-Nutation"],
+    standards: [
+      "JPL DE440 Ephemeris",
+      "IERS Earth Orientation",
+      "IAU 2006/2000A Precession-Nutation",
+    ],
     hijriCriteria: ["MABIMS_ID_2026 (3° altitude · 6.4° elongation)", "DIYANET_1978_VISIBILITY"],
-    purpose: "Astronomical timekeeping unifying lunar crescent visibility and solar ephemeris under one auditable dial.",
+    purpose:
+      "Astronomical timekeeping unifying lunar crescent visibility and solar ephemeris under one auditable dial.",
   },
   aqel: {
     name: "AQEL · Arabic-First Reasoning Language",
     repo: "bjo163/AQEL",
-    keywords: ["عرّف (Define)", "حقيقة (Truth)", "قاعدة (Rule)", "اسأل (Query)", "استنتج (Infer)", "تحقق (Verify)", "اشرح (Explain)"],
+    keywords: [
+      "عرّف (Define)",
+      "حقيقة (Truth)",
+      "قاعدة (Rule)",
+      "اسأل (Query)",
+      "استنتج (Infer)",
+      "تحقق (Verify)",
+      "اشرح (Explain)",
+    ],
     sampleSnippet: `عرّف شاهد = "Moonwitness"\nحقيقة أمانة = (المدخلات == المخرجات)\nتحقق أمانة\nاشرح "Input equals verifiable accountable output"`,
-    purpose: "Native Arabic symbolic logic language treating epistemic verification as a first-class syntax primitive.",
+    purpose:
+      "Native Arabic symbolic logic language treating epistemic verification as a first-class syntax primitive.",
   },
   dhgs: {
     name: "DHGS · Divine–Human Governance System",
     repo: "bjo163/dhgs",
     version: "v15.1.0",
     primitives: ["Shadow Audit", "Mizan Balance", "Hisab Ledger", "Open Book", "@dhgs/orm"],
-    purpose: "Accountable governance ORM modeling institutional obligations, balances, and transparent public review.",
+    purpose:
+      "Accountable governance ORM modeling institutional obligations, balances, and transparent public review.",
   },
   ageCode: {
     name: "AGE CODE & UNILEX",
     repo: "bjo163/A-L-L-A-H",
     matrix: "12 Traditions × 6 Historical Epochs × 12 Thematic Clusters",
-    purpose: "Comparative lexical and chronological map tracing shared ethical archetypes across civilizations.",
+    purpose:
+      "Comparative lexical and chronological map tracing shared ethical archetypes across civilizations.",
   },
 } as const;
 
@@ -798,33 +1195,43 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
   {
     orgName: "A-L-L-A-H",
     repoCount: 12,
-    roleInEmpire: "Constitutional Core, Master Docs, Kernel OS, Desktop Universe & Harness",
-    localClones: ["Z:\\repo\\dx (A-L-L-A-H/dx)", "Z:\\repo\\A-L-L-A-H\\rocksoul-dx", "Z:\\repo\\A-L-L-A-H\\memory"],
+    roleInEmpire: "Constitutional Core, Master Docs, Kernel OS, Desktop Sanctuary & Harness",
+    localClones: [
+      "Z:\\repo\\dx (BRIDGE-ALLAH/MOONWITNESS)",
+      "Z:\\repo\\A-L-L-A-H\\rocksoul-dx",
+      "Z:\\repo\\A-L-L-A-H\\memory",
+      "Z:\\repo\\isrockfeel\\moonwitness (active dev workspace)",
+    ],
     flagshipRepos: [
       "A-L-L-A-H/master-docs",
-      "A-L-L-A-H/moonwitness",
       "A-L-L-A-H/rocksoul-dx",
-      "A-L-L-A-H/mw-os",
+      "A-L-L-A-H/moonwitness",
       "A-L-L-A-H/dx",
+      "A-L-L-A-H/moonwitness-os",
+      "A-L-L-A-H/mw-os",
       "A-L-L-A-H/e-isp",
     ],
   },
   {
     orgName: "bjo163",
-    repoCount: 150,
-    roleInEmpire: "Main R&D Foundry — 6-Domain Federation, V10/XII Codices, OX-DX, M-Time, AQEL, DHGS",
+    repoCount: 280,
+    roleInEmpire:
+      "Primary R&D Foundry — II/XII/XV Codices, Empire of the Light, SRGBL Corpus, OX-DX, M-Time, AQEL & DHGS",
     localClones: [
       "Z:\\project\\rocksoul-dx (bjo163/A-L-L-A-H.COM)",
       "Z:\\project\\moonwitness-corpus",
-      "Z:\\project\\moonstranaut",
-      "Z:\\project\\moonframe",
+      "Z:\\project\\moonradio (bjo163/moonwitnessxv)",
+      "Z:\\project\\moonwitness-xi (bjo163/moonwitness-xiv)",
     ],
     flagshipRepos: [
       "bjo163/A-L-L-A-H.COM",
       "bjo163/A-L-L-A-H",
+      "bjo163/moonwitness-II",
+      "bjo163/moonwitness-xii-season-global-championships",
       "bjo163/moonwitnessxv",
       "bjo163/moonwitness-corpus",
-      "bjo163/rocksoul-correlation",
+      "bjo163/empire-of-the-light",
+      "bjo163/ALLAH-CRAYON-RGBL-ENGINE",
       "bjo163/universal-ontology-engine",
       "bjo163/antikythera-time",
       "bjo163/AQEL",
@@ -832,32 +1239,79 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
     ],
   },
   {
+    orgName: "ArsyBelovedLabs",
+    repoCount: 27,
+    roleInEmpire:
+      "Gen2 Enterprise Architecture Freeze — 196-Entry Blueprint, ADRs 021–027 & Multi-Service Cores",
+    localClones: ["Synchronized into bjo163/moonwitness-corpus & Z:\\project\\moonwitness-corpus"],
+    flagshipRepos: [
+      "ArsyBelovedLabs/moonwitness-blueprint",
+      "ArsyBelovedLabs/moonwitness-platform-foundation",
+      "ArsyBelovedLabs/moonwitness-core",
+      "ArsyBelovedLabs/mw-core",
+      "ArsyBelovedLabs/moonwitness-corpus",
+      "ArsyBelovedLabs/rocksoul-orchestrator",
+    ],
+  },
+  {
     orgName: "BRIDGE-ALLAH",
     repoCount: 24,
-    roleInEmpire: "Multi-Target Bridges (OS, AI Engine, SDK, CLI, Web, Mobile, Desktop, IoT, Security)",
-    localClones: ["Mapped across Z:\\project\\moonframe & Z:\\repo\\A-L-L-A-H\\ui"],
+    roleInEmpire:
+      "Rust & OS Consolidation Wave — MWX, EMPIRE-OF-LIGHT Temps Binary, ARSY & MoonFrame Targets",
+    localClones: [
+      "Z:\\repo\\dx (BRIDGE-ALLAH/MOONWITNESS)",
+      "Mapped across Z:\\project\\moonframe",
+    ],
     flagshipRepos: [
+      "BRIDGE-ALLAH/MWX",
       "BRIDGE-ALLAH/EMPIRE-OF-LIGHT",
-      "BRIDGE-ALLAH/CORE-PHILOSOPHY",
-      "BRIDGE-ALLAH/SYSTEM-ARCHITECTURE",
-      "BRIDGE-ALLAH/DESIGN-SYSTEM",
-      "BRIDGE-ALLAH/AI-ENGINE",
-      "BRIDGE-ALLAH/SDK",
+      "BRIDGE-ALLAH/MOONWITNESS",
+      "BRIDGE-ALLAH/MOONWITNESSxx",
+      "BRIDGE-ALLAH/A-R-S-Y",
+      "BRIDGE-ALLAH/MW-IDE",
+      "BRIDGE-ALLAH/MW-UI",
+      "BRIDGE-ALLAH/ROCKSOUL",
+    ],
+  },
+  {
+    orgName: "zenix-id",
+    repoCount: 16,
+    roleInEmpire: "2024–2025 Docker, RADIUS, OpenVPN & Network Infrastructure Substrate",
+    localClones: ["Network & ISP telemetry lineages carried into A-L-L-A-H/e-isp & bjo163/mwx-isp"],
+    flagshipRepos: [
+      "zenix-id/cosmos",
+      "zenix-id/mars",
+      "zenix-id/saturnus",
+      "zenix-id/orbit",
+      "zenix-id/toughradius2",
+      "zenix-id/n8n",
     ],
   },
   {
     orgName: "The-Batteries",
     repoCount: 8,
-    roleInEmpire: "Operational Stewardship Guilds — 100CENTER, World Monitor, Sentinel & Asmaul-Husna",
-    localClones: ["Stewardship specifications synchronized into 100CENTER & WINGS 10"],
-    flagshipRepos: [
-      "The-Batteries/100CENTER",
-      "The-Batteries/THE-BATTERIES",
-      "The-Batteries/WORLD-MONITOR",
-      "The-Batteries/CONTINUUM",
-      "The-Batteries/SENTINEL",
-      "The-Batteries/ASMAUL-HUSNA",
+    roleInEmpire:
+      "Creative & Infrastructure Collective (6 public + 2 private repos: riot-os, A-R-S-Y, mycocolink)",
+    localClones: [
+      "Stewardship architecture synchronized with bjo163/empire-of-the-light (PC01–PC09, WINGS 10, G.O.D. 99)",
     ],
+    flagshipRepos: [
+      "The-Batteries/riot-os",
+      "The-Batteries/A-R-S-Y",
+      "The-Batteries/mycocolink",
+      "The-Batteries/dev-start-g",
+      "The-Batteries/moonwitness",
+      "The-Batteries/moon-os",
+    ],
+  },
+  {
+    orgName: "moonwitness-id",
+    repoCount: 1,
+    roleInEmpire: "Canonical Private V9.5 Monorepo Anchor (MOONWITNESS OS V9.5)",
+    localClones: [
+      "Mirrors bjo163/moonwitness (Z:\\repo\\moonwitness); distinct from A-L-L-A-H/moonwitness (Z:\\repo\\isrockfeel\\moonwitness)",
+    ],
+    flagshipRepos: ["moonwitness-id/moonwitness"],
   },
 ] as const;
 
@@ -868,7 +1322,7 @@ export const CODEX_SEARCH_INDEX: readonly CodexSearchEntry[] = [
     category: "SRGBL v8 · 5-Stage Pipeline",
     title: "SRGBL v8 & Symbolic RGBL",
     subtitle: "S1 Source & Sense → R2 Reality → G3 Governing Order → B4 Being → L5 Light",
-    repoSource: "bjo163/moonwitness-corpus",
+    repoSource: "bjo163/moonwitness-corpus · bjo163/ALLAH-CRAYON-RGBL-ENGINE",
   },
   {
     id: "cx-monocentric-163",
@@ -876,15 +1330,15 @@ export const CODEX_SEARCH_INDEX: readonly CodexSearchEntry[] = [
     category: "GOD-PROMISE · Ontology",
     title: "Monocentric 1·6·3 & 3 Promise Tracks",
     subtitle: "1 Tawhid · 6 Creation Ayyām · 3 Hizab + INPUT = OUTPUT",
-    repoSource: "bjo163/GOD-PROMISE",
+    repoSource: "A-L-L-A-H/master-docs · bjo163/moonwitnessxv",
   },
   {
     id: "cx-dx-manga",
     doorId: "story-universe",
-    category: "DX Storyboard · Low-Profile Tawhid",
-    title: "SIN CAN BE BETTER HUMAN (4 Panels)",
-    subtitle: "GOGOGO → SHUUU → BAAAN → DODODO + 4-Line Owner Manifesto",
-    repoSource: "Z:\\repo\\dx\\NARATION.md",
+    category: "DX Storyboard · Owner Manifesto",
+    title: "SIN CAN BE BETTER HUMAN & 4-Line Owner Manifesto",
+    subtitle: "GOGOGO → SHUUU → BAAAN → DODODO + NOISE × SILENCE 4-Line Copy",
+    repoSource: "BRIDGE-ALLAH/MOONWITNESS (Z:\\repo\\dx\\NARATION.md) · A-L-L-A-H/master-docs",
   },
   {
     id: "cx-manusia-pulpen",
@@ -906,17 +1360,17 @@ export const CODEX_SEARCH_INDEX: readonly CodexSearchEntry[] = [
     id: "cx-100center",
     doorId: "empire-organization",
     category: "Empire Organization · Stewardship",
-    title: "100CENTER & Syafaat 99 Dimensions",
-    subtitle: "99 Human Ethical Stewardship Nodes orbiting 1 Tawhid Center",
-    repoSource: "The-Batteries/100CENTER",
+    title: "100CENTER & G.O.D. 99 Unassigned Personas",
+    subtitle: "99 Human Ethical Stewardship Nodes (9 Depts × 11) orbiting 1 Tawhid Center",
+    repoSource: "bjo163/empire-of-the-light · A-L-L-A-H/master-docs",
   },
   {
     id: "cx-wings-10",
     doorId: "empire-organization",
     category: "Empire Organization · WINGS 10",
-    title: "WINGS 10 Operational Array (Jibril – Ridwan)",
-    subtitle: "10 canonical guardian functions & Prime Code PC01–PC09",
-    repoSource: "bjo163/A-L-L-A-H",
+    title: "WINGS 10 Operational Array (W01 SKYLINK – W10 HAVEN)",
+    subtitle: "10 proposed guardian functions (PROPOSED_NOT_ASSIGNED) & Prime Code PC01–PC09",
+    repoSource: "bjo163/empire-of-the-light",
   },
   {
     id: "cx-oxdx-49",

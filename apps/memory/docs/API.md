@@ -6,20 +6,20 @@ Interactive OpenAPI documentation is available at `/docs`. The API is intended f
 
 ## Endpoints
 
-| Method | Path | Description |
-|---|---|---|
-| GET | `/health` | Health status |
-| GET | `/api/system` | Configured feature flags; never returns secrets |
-| GET | `/api/dashboard` | Summary counts |
-| GET | `/api/archives?limit=100` | Imported archive metadata and backup status |
-| POST | `/api/archives` | Upload raw ZIP/JSON body; set `X-Archive-Filename` |
-| POST | `/api/archives/{archive_id}/backup` | Queue Drive backup |
-| GET | `/api/jobs?limit=100` | Worker queue and checkpoints |
-| POST | `/api/jobs/{job_id}/resume` | Resume a waiting/failed job |
-| GET | `/api/knowledge?limit=100` | Knowledge records |
-| GET | `/api/knowledge/{knowledge_id}/sources` | Original message provenance |
-| GET | `/api/search?q=...` | Keyword + vector search |
-| GET | `/api/export.ndjson` | Full corpus as NDJSON download |
+| Method | Path                                    | Description                                        |
+| ------ | --------------------------------------- | -------------------------------------------------- |
+| GET    | `/health`                               | Health status                                      |
+| GET    | `/api/system`                           | Configured feature flags; never returns secrets    |
+| GET    | `/api/dashboard`                        | Summary counts                                     |
+| GET    | `/api/archives?limit=100`               | Imported archive metadata and backup status        |
+| POST   | `/api/archives`                         | Upload raw ZIP/JSON body; set `X-Archive-Filename` |
+| POST   | `/api/archives/{archive_id}/backup`     | Queue Drive backup                                 |
+| GET    | `/api/jobs?limit=100`                   | Worker queue and checkpoints                       |
+| POST   | `/api/jobs/{job_id}/resume`             | Resume a waiting/failed job                        |
+| GET    | `/api/knowledge?limit=100`              | Knowledge records                                  |
+| GET    | `/api/knowledge/{knowledge_id}/sources` | Original message provenance                        |
+| GET    | `/api/search?q=...`                     | Keyword + vector search                            |
+| GET    | `/api/export.ndjson`                    | Full corpus as NDJSON download                     |
 
 ### Upload example
 
@@ -80,6 +80,7 @@ Delivery runs as a separate `sync_only` worker job. A failed delivery is retried
 ### Receiver contract
 
 The receiving endpoint must:
+
 1. Accept `POST application/json` with `source=moonwitness-memory`, `schema_version=1`, and a `records` array.
 2. Validate the Bearer token using constant-time comparison.
 3. Validate each record and preserve `id`, `archive_id`, `conversation_id`, `source_message_ids`, `confidence`, and timestamps.

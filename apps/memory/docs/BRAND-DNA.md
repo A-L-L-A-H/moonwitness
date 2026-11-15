@@ -25,17 +25,17 @@ The writing and artwork are original. General ideas such as memory, reflection, 
 
 ## Palette and materials
 
-| Token | Dark theme | Light theme | Usage |
-|---|---|---|---|
-| Token | Dark theme | Light theme | Usage |
-|---|---|---|---|
-| Surrounding asphalt | `#100E0B` | `#E0D9CA` | Space around the machine |
-| Deck chassis | `#292720` | `#BDB39F` | Physical shell and hardware |
-| CRT glass | `#171912` | `#EDE8D8` | The single active workspace |
-| Worn yellow | `#E7D96B` | `#816900` | Primary actions and healthy states |
-| Signal red | `#F08B72` | `#8D3325` | Errors, warnings, and editorial interruptions |
-| Paper | `#F0EADC` | `#241F17` | Main interface text |
-| Muted | `#B2AA95` | `#625A4C` | Secondary labels and metadata |
+| Token               | Dark theme | Light theme | Usage                                         |
+| ------------------- | ---------- | ----------- | --------------------------------------------- |
+| Token               | Dark theme | Light theme | Usage                                         |
+| ---                 | ---        | ---         | ---                                           |
+| Surrounding asphalt | `#100E0B`  | `#E0D9CA`   | Space around the machine                      |
+| Deck chassis        | `#292720`  | `#BDB39F`   | Physical shell and hardware                   |
+| CRT glass           | `#171912`  | `#EDE8D8`   | The single active workspace                   |
+| Worn yellow         | `#E7D96B`  | `#816900`   | Primary actions and healthy states            |
+| Signal red          | `#F08B72`  | `#8D3325`   | Errors, warnings, and editorial interruptions |
+| Paper               | `#F0EADC`  | `#241F17`   | Main interface text                           |
+| Muted               | `#B2AA95`  | `#625A4C`   | Secondary labels and metadata                 |
 
 Use yellow for the active mode, primary action, and healthy states; reserve red for warnings and interruption. The light theme remains a piece of hardware rather than becoming a generic white dashboard.
 

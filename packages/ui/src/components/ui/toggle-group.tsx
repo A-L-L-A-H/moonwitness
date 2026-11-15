@@ -22,7 +22,7 @@ const ToggleGroupItem = React.forwardRef<
     ref={ref}
     className={cn(
       "inline-flex items-center justify-center rounded-md border border-[var(--line)] bg-[var(--background)] px-3 py-2 text-sm font-medium ring-offset-[var(--background)] transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-[var(--pink)] data-[state=on]:border-[var(--pink)] data-[state=on]:text-[var(--ink)]",
-      className
+      className,
     )}
     {...props}
   />

@@ -48,7 +48,10 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
 
           <form onSubmit={submit} className="mt-7 space-y-5" noValidate>
             <div>
-              <Label htmlFor="control-email" className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300">
+              <Label
+                htmlFor="control-email"
+                className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300"
+              >
                 EMAIL
               </Label>
               <Input
@@ -62,7 +65,10 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
               />
             </div>
             <div>
-              <Label htmlFor="control-password" className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300">
+              <Label
+                htmlFor="control-password"
+                className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300"
+              >
                 PASSWORD
               </Label>
               <Input

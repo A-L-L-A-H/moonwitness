@@ -20,17 +20,16 @@ const Pagination = ({ className, ...props }: React.ComponentProps<"nav">) => (
   </nav>
 );
 
-const PaginationContent = React.forwardRef<HTMLUListElement, React.HTMLAttributes<HTMLUListElement>>(
-  ({ className, ...props }, ref) => (
-    <ul ref={ref} className={cn("flex items-center space-x-1", className)} {...props} />
-  )
-);
+const PaginationContent = React.forwardRef<
+  HTMLUListElement,
+  React.HTMLAttributes<HTMLUListElement>
+>(({ className, ...props }, ref) => (
+  <ul ref={ref} className={cn("flex items-center space-x-1", className)} {...props} />
+));
 PaginationContent.displayName = "PaginationContent";
 
 const PaginationItem = React.forwardRef<HTMLLIElement, React.HTMLAttributes<HTMLLIElement>>(
-  ({ className, ...props }, ref) => (
-    <li ref={ref} className={cn("", className)} {...props} />
-  )
+  ({ className, ...props }, ref) => <li ref={ref} className={cn("", className)} {...props} />,
 );
 PaginationItem.displayName = "PaginationItem";
 
@@ -44,7 +43,7 @@ const PaginationLink = ({
     className={cn(
       "flex h-9 w-9 items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 hover:bg-[var(--muted)] hover:text-[var(--foreground)]",
       isActive && "bg-[var(--pink)] text-[var(--ink)]",
-      className
+      className,
     )}
     {...props}
   />
@@ -55,7 +54,7 @@ const PaginationPrevious = ({ className, ...props }: React.ComponentProps<"butto
   <button
     className={cn(
       "flex h-9 w-9 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--background)] text-sm font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      className
+      className,
     )}
     {...props}
   >
@@ -69,7 +68,7 @@ const PaginationNext = ({ className, ...props }: React.ComponentProps<"button">)
   <button
     className={cn(
       "flex h-9 w-9 items-center justify-center rounded-md border border-[var(--line)] bg-[var(--background)] text-sm font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-      className
+      className,
     )}
     {...props}
   >
@@ -81,7 +80,10 @@ PaginationNext.displayName = "PaginationNext";
 
 const PaginationEllipsis = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => (
   <span
-    className={cn("flex h-9 w-9 items-center justify-center text-sm text-[var(--muted-foreground)]", className)}
+    className={cn(
+      "flex h-9 w-9 items-center justify-center text-sm text-[var(--muted-foreground)]",
+      className,
+    )}
     {...props}
   >
     <span aria-hidden="true">&hellip;</span>

@@ -5,11 +5,13 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "How U Remind Me — a MoonWitness product",
-  description: "Search chat exports, find useful knowledge, and trace each record to its source messages.",
+  description:
+    "Search chat exports, find useful knowledge, and trace each record to its source messages.",
   applicationName: "How U Remind Me by MoonWitness",
   openGraph: {
     title: "How U Remind Me — a MoonWitness product",
-    description: "Search chat exports, find useful knowledge, and trace each record to its source messages.",
+    description:
+      "Search chat exports, find useful knowledge, and trace each record to its source messages.",
     type: "website",
     siteName: "MoonWitness",
   },
@@ -32,7 +34,8 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           id="howu-remind-me-theme-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: 'try { const saved = localStorage.getItem("mw-memory-theme"); document.documentElement.dataset.theme = saved === "light" ? "light" : "dark"; } catch { document.documentElement.dataset.theme = "dark"; }',
+            __html:
+              'try { const saved = localStorage.getItem("mw-memory-theme"); document.documentElement.dataset.theme = saved === "light" ? "light" : "dark"; } catch { document.documentElement.dataset.theme = "dark"; }',
           }}
         />
         {children}

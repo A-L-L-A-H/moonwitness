@@ -7,3 +7,8 @@ pnpm-lock.yaml
 ARTS
 CHANGELOG.md
 services
+.raw_archives
+apps/rocksoul
+packages/ui/src/dna
+packages/ui/src/skin
+packages/ui/src/artwork
