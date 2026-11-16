@@ -30,11 +30,11 @@ A reliable personal-use desktop app for Windows 11 x64, with local work manageme
 - [x] Windows x64 MSI and NSIS package configuration
 - [x] Local application icon assets
 - [x] Fresh frontend and Rust validation after current changes
-- [ ] Install and launch the generated package
-- [ ] Verify workflows and persistence across restart
-- [ ] Verify upgrade preserves existing user data
-- [ ] Verify normal uninstall preserves user data
-- [ ] Verify Git write workflows in the installed app
+- [x] Install and launch the generated package (verified NSIS `ROCKSOUL - DX_0.1.0_x64-setup.exe /S`)
+- [x] Verify workflows and persistence across restart
+- [x] Verify upgrade preserves existing user data
+- [x] Verify normal uninstall preserves user data
+- [ ] Verify Git write workflows interactively in the installed app UI (automated Rust temp-repo suite passes 35/35)
 
 ### M5 — Optional Drive storage experiment
 - [x] Encrypted Google Drive database backup

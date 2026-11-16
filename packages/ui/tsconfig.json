@@ -1,5 +1,5 @@
 {
   "extends": "@moonwitness/typescript-config/react-library.json",
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "src/dna", "src/skin"]
+  "exclude": ["node_modules", "dist"]
 }

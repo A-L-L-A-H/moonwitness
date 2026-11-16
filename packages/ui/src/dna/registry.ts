@@ -122,8 +122,12 @@ export function applyTheme(theme: DNATokens = defaultTheme, prefix = 'mw'): void
   styleEl.textContent = css;
 }
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
+
 /** Create a new theme by merging overrides with the default theme */
-export function createTheme(overrides: Partial<DNATokens>): DNATokens {
+export function createTheme(overrides: DeepPartial<DNATokens>): DNATokens {
   return deepMerge(defaultTheme as unknown as Record<string, unknown>, overrides as unknown as Record<string, unknown>) as unknown as DNATokens;
 }
 
