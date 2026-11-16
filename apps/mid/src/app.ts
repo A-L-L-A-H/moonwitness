@@ -52,6 +52,35 @@ function resolveValidatedScopes(requested: string | null, client: OidcClient): s
   return Array.from(new Set(tokens)).join(" ");
 }
 
+function isRedirectUriAllowed(client: OidcClient, candidate: string): boolean {
+  if (client.redirectUris.includes(candidate)) return true;
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    return false;
+  }
+  if (
+    parsed.protocol !== "http:" ||
+    (parsed.hostname !== "127.0.0.1" && parsed.hostname !== "localhost")
+  ) {
+    return false;
+  }
+  return client.redirectUris.some((registered) => {
+    try {
+      const regUrl = new URL(registered);
+      return (
+        regUrl.protocol === "http:" &&
+        regUrl.hostname === parsed.hostname &&
+        regUrl.port === "" &&
+        regUrl.pathname === parsed.pathname
+      );
+    } catch {
+      return false;
+    }
+  });
+}
+
 function appendQueryParams(
   baseUri: string,
   params: Record<string, string | null | undefined>,
@@ -258,7 +287,7 @@ async function handleAuthorizeGet(
   const promptParam = requestUrl.searchParams.get("prompt") ?? "";
 
   const client = await findOidcClient(env.DB, clientId);
-  if (!client || !client.redirectUris.includes(redirectUri)) {
+  if (!client || !isRedirectUriAllowed(client, redirectUri)) {
     return oauthError("invalid_request", "Unknown client_id or unregistered redirect_uri", 400);
   }
   if (responseType !== "code") {
@@ -337,7 +366,7 @@ async function handleAuthorizePost(
   const scope = client ? resolveValidatedScopes(body.scope ?? "openid", client) : null;
   if (
     !client ||
-    !client.redirectUris.includes(redirectUri) ||
+    !isRedirectUriAllowed(client, redirectUri) ||
     codeChallengeMethod !== "S256" ||
     !scope
   ) {
