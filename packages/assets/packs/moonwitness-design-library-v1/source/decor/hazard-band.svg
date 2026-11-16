@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="128" viewBox="0 0 1024 128" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="128" viewBox="0 0 1024 128" fill="none" color="#f4eede" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-rough="1"><defs><filter id="rough-hazard-band" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="34.19" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/></filter></defs><g filter="url(#rough-hazard-band)">
   <g stroke-width="3" stroke-linecap="square">
-    <path d="M4 12 L1020 108" stroke="#ff2d78"/>
-    <path d="M4 28 L1020 124" stroke="#ff2d78"/>
-    <path d="M4 32 L1020 116" stroke="#ff2d78"/>
-    <path d="M4 20 L1020 104" stroke="#ff2d78"/>
-    <path d="M4 24 L1020 96" stroke="#ff2d78"/>
-    <path d="M4 28 L1020 92" stroke="#ff2d78"/>
-    <path d="M4 16 L1020 84" stroke="#ff2d78"/>
+    <path d="M4.19 12.12 L1019.45 108.35" stroke="#ff2d78"/>
+    <path d="M4.19 28.12 L1019.45 124.35" stroke="#ff2d78"/>
+    <path d="M4.19 32.12 L1019.45 116.35" stroke="#ff2d78"/>
+    <path d="M4.19 20.12 L1019.45 104.35" stroke="#ff2d78"/>
+    <path d="M4.19 24.12 L1019.45 96.35" stroke="#ff2d78"/>
+    <path d="M4.19 28.12 L1019.45 92.35" stroke="#ff2d78"/>
+    <path d="M4.19 16.12 L1019.45 84.35" stroke="#ff2d78"/>
   </g>
   <rect x="4" y="4" width="1016" height="120" stroke="currentColor" stroke-width="2" fill="none"/>
-</svg>
+<g opacity="0.45" stroke="currentColor" stroke-width="1" fill="none"><path d="M20 20 l40 8"/><path d="M80 40 l-30 12"/></g></g></svg>

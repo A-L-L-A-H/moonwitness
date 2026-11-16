@@ -138,7 +138,7 @@ test("CTA is keyboard usable from render without JavaScript enhancement", async 
     viewport: { width: 1440, height: 900 },
   });
   const page = await context.newPage();
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "domcontentloaded" });
   const cta = page.locator("[data-hero-cta]");
   await expect(cta).toBeVisible();
   await cta.focus();

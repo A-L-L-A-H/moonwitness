@@ -1,3 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-  <path d="M3 4h18M7 10h10M11 16h2"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" data-rough="1"><defs>
+  <filter id="rough-filter" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="42" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="ink-filter" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" seed="78" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="0.6"/>
+  </filter>
+</defs><g clip-path="inset(1px round 2px)" transform="translate(12,12) scale(0.92) translate(-12,-12)" filter="url(#rough-filter)" stroke="currentColor">
+  <path d="M2.99 4.26h17.75M7.06 10.29h10.1M11.21 15.98h1.75"/>
+</g><g opacity="0.55" stroke="currentColor" stroke-width="0.7" fill="none">
+    <path d="M3 5 l3 1"/>
+    <path d="M19 17 l-2 2"/>
+    <path d="M4 19 l2 -1"/>
+  </g></svg>

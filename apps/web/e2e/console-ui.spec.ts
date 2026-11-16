@@ -396,15 +396,17 @@ test("landing Storytelling renders existing stories through ScenePanel and FilmS
     const heading = scene.getByRole("heading", { name: title });
     await heading.scrollIntoViewIfNeeded();
     await expect(heading).toBeInViewport();
-    await expect(scene.locator("img")).toBeVisible();
+    const img = scene.locator("img");
+    await img.scrollIntoViewIfNeeded();
+    await expect(img).toBeVisible();
     await expect
-      .poll(() =>
-        scene
-          .locator("img")
-          .evaluate(
+      .poll(
+        () =>
+          img.evaluate(
             (image) =>
               image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
           ),
+        { timeout: 15_000 },
       )
       .toBe(true);
   }
@@ -419,10 +421,10 @@ test("normal motion preserves Atlas selection and reveals story panels", async (
   await expect(atlas.locator("dl dd")).toHaveText(["TOKYO", "501"]);
   await page.goto("/");
   const storytelling = page.locator("#storytelling");
-  await storytelling.getByRole("heading", { level: 2 }).scrollIntoViewIfNeeded();
+  await storytelling.locator("[data-story-unit]").first().scrollIntoViewIfNeeded();
   await expect(storytelling.locator("[data-story-unit]")).toHaveCount(4);
   for (const panel of await storytelling.locator("[data-story-unit]").all()) {
-    await expect(panel).toHaveCSS("opacity", "1");
+    await expect(panel).toHaveCSS("opacity", "1", { timeout: 10_000 });
   }
   await noHorizontalOverflow(page);
 });

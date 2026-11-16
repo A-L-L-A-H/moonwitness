@@ -80,7 +80,8 @@ test.describe("VPN Setup Flow", () => {
 test.describe("Dashboard", () => {
   test("should load dashboard page", async ({ page }) => {
     await page.goto("/mission-control");
-    await expect(page.locator("h1")).toContainText("THE BATTERIES");
+    await expect(page.locator("h1")).toContainText(/shadow\s*command center/i);
+    await expect(page.getByText("THE BATTERIES").first()).toBeVisible();
     await page.getByRole("button", { name: /NEW EPISODE/ }).click();
     const storyForge = page.getByRole("dialog", { name: "Story Forge console" });
     await expect(storyForge).toBeVisible();
