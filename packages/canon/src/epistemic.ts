@@ -1,6 +1,7 @@
 import type {
   CorpusAuthorityEntry,
   EpistemicDomainNode,
+  FourCorpusConcordanceTheme,
   KeyWitnessFamily,
   SrgblStageSpec,
 } from "./types";
@@ -239,6 +240,69 @@ export const FOUR_CORPUS_POLICY = {
     },
   ] as readonly CorpusAuthorityEntry[],
 } as const;
+
+export const FOUR_CORPUS_CONCORDANCE: readonly FourCorpusConcordanceTheme[] = [
+  {
+    id: "justice-measure",
+    title: "Justice & Honest Measure",
+    arabicRoot: "Al-Qisṭ · Al-Mīzān (Balanced Equity)",
+    tauratWitness:
+      "Commands impartial weights and equal protection in court for resident and stranger alike (Mūsā).",
+    zaburWitness:
+      "Calls rulers and judges to deliver justice honestly without bowing to wealth or power (Dāwūd).",
+    injilWitness:
+      "Measures inner integrity beyond outward ritual display, siding with humble righteousness (ʿĪsā).",
+    quranWitness:
+      "Ordains upholding justice firmly as witnesses for ALLAH, even against oneself or kin (QS 4:135 · QS 55:7–9).",
+    livedPractice:
+      "Refuse hidden favoritism, inflated numbers, and deceptive pricing in engineering, commerce, and daily speech.",
+  },
+  {
+    id: "mercy-vulnerable",
+    title: "Care for the Vulnerable",
+    arabicRoot: "Ar-Raḥmah · Iḥsān (Compassionate Stewardship)",
+    tauratWitness:
+      "Protects the orphan, widow, laborer, and wayfarer from exploitation and delayed wages (Mūsā).",
+    zaburWitness:
+      "Praises the Creator as refuge for the brokenhearted and defender of the oppressed (Dāwūd).",
+    injilWitness:
+      "Elevates unseen charity, mercy to enemies of pride, and tender healing for outcasts (ʿĪsā).",
+    quranWitness:
+      "Links true reverence directly to sheltering the orphan, feeding the poor, and freeing the burdened (QS 90:12–17).",
+    livedPractice:
+      "Give quietly without cameras, ease someone's burden first, and build accessible technology that respects every device.",
+  },
+  {
+    id: "truthful-witness",
+    title: "Truthful Witness & Anti-Idolatry",
+    arabicRoot: "Aṣ-Ṣidq · Tawḥīd (Undivided Accountability)",
+    tauratWitness:
+      "Prohibits bearing false witness and rejects sculpting earthly idols in place of the Creator (Mūsā).",
+    zaburWitness:
+      "Seeks truth in the inward parts and refuses flatterers who disguise deceit (Dāwūd).",
+    injilWitness:
+      "Declares plain truthfulness ('Yes' be Yes, 'No' be No) while warning against theatrical piety (ʿĪsā).",
+    quranWitness:
+      "Bans mixing truth with falsehood knowingly and forbids elevating scholars or leaders into objects of worship (QS 2:42 · QS 9:31).",
+    livedPractice:
+      "Never fabricate telemetry, never accept cult titles, and separate proven sources cleanly from personal hypothesis.",
+  },
+  {
+    id: "conscience-zero-coercion",
+    title: "Conscience Without Compulsion",
+    arabicRoot: "Lā Ikrāha · Free Accountability",
+    tauratWitness:
+      "Places clear covenant choices before every adult soul so obedience springs from conscience rather than coercion (Mūsā).",
+    zaburWitness:
+      "Invites willing praise from a steadfast heart rather than forced conformity (Dāwūd).",
+    injilWitness:
+      "Rejects ruling faith by sword-triumphalism, inviting inward humility and peace (ʿĪsā).",
+    quranWitness:
+      "Establishes the constitutional decree: there is zero compulsion in religion, and diversity of nations is for knowing one another in noble conduct (QS 2:256 · QS 49:13).",
+    livedPractice:
+      "Serve all neighbors with equal fairness regardless of creed, defending peaceful coexistence without sectarian superiority.",
+  },
+] as const;
 
 export const WHCMT_VS_BASSHUNTER_SPEC = {
   whcmt: {

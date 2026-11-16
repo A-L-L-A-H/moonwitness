@@ -39,14 +39,18 @@ export function ChamberWingTabs<T extends string>({
             role="tab"
             aria-selected={isActive}
             onClick={() => onSelectWing(wing.id)}
-            className={`min-h-[44px] border px-3.5 py-2.5 text-left cursor-pointer ${transitionClass} ${
-              isActive
-                ? "border-[#fff4d2] bg-[#d6b46c]/20 text-[#fff8e6] shadow-[0_0_20px_rgba(223,192,123,0.18)]"
-                : "border-[#d6b46c]/25 bg-[#090c16] text-[#d8ceba] hover:border-[#d6b46c]/55 hover:text-[#fff6df]"
+            className={`btn-luxe-secondary px-4 py-2.5 text-left cursor-pointer ${transitionClass} ${
+              isActive ? "text-[#fff8e6]" : "text-[#d8ceba] hover:text-[#fff6df]"
             }`}
           >
-            <div className="font-mono text-[10px] tracking-[0.16em] text-[#dfc07b]">
-              {wing.code}
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#dfc07b]">
+              <span>{wing.code}</span>
+              {isActive && (
+                <span
+                  aria-hidden="true"
+                  className="h-1.5 w-1.5 rotate-45 bg-[#fff4d2] shadow-[0_0_8px_#fff4d2]"
+                />
+              )}
             </div>
             <div className="font-monument mt-0.5 text-xs tracking-[0.08em] uppercase">
               {wing.label}

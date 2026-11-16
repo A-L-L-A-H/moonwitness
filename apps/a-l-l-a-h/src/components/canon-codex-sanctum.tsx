@@ -127,7 +127,7 @@ export function CanonCodexSanctum({
 
         {/* Active Door Banner & Mounted Chamber */}
         <ScrollChapterReveal quietMode={quietMode}>
-          <div className="octa-bevel-shell relative mt-8 border border-[#d6b46c]/40 bg-gradient-to-b from-[#080c17]/95 via-[#060810]/95 to-[#04060c] p-5 sm:p-8 shadow-[0_24px_70px_rgba(0,0,0,0.82)]">
+          <div className="octa-bevel-shell relative mt-8 p-6 sm:p-9">
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-4">
               <div>
                 <div className="font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">

@@ -345,10 +345,8 @@ export function EmpireOfLightExperience() {
                   ? "Restore Living Light Shaders & Motion"
                   : "Enable Quiet Contemplative Mode (Low Motion)"
               }
-              className={`hidden lg:inline-flex min-h-[44px] items-center border px-3 text-[10px] font-mono tracking-[0.18em] uppercase transition-colors cursor-pointer ${
-                quietMode
-                  ? "border-[#fff4d2]/75 bg-[#dfc07b]/20 text-[#fff4d2]"
-                  : "border-[#d6b46c]/30 bg-[#080a12]/60 text-[#dfd5c0]/80 hover:border-[#dfc07b]/65 hover:text-[#fff6df]"
+              className={`btn-luxe-secondary hidden lg:inline-flex items-center px-3.5 text-[10px] font-mono tracking-[0.18em] uppercase cursor-pointer ${
+                quietMode ? "text-[#fff4d2]" : "text-[#dfd5c0]/85 hover:text-[#fff6df]"
               }`}
             >
               {quietMode ? "QUIET" : "LIGHT"}
@@ -361,7 +359,7 @@ export function EmpireOfLightExperience() {
               aria-controls="mobile-sanctuary-nav"
               aria-label="Toggle Empire Navigation Menu"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center border border-[#d6b46c]/35 bg-[#080a12]/80 text-[#f5efe2] md:hidden cursor-pointer"
+              className="btn-luxe-secondary flex min-w-[44px] items-center justify-center text-[#f5efe2] md:hidden cursor-pointer"
             >
               <span className="font-mono text-xs tracking-widest">
                 {mobileMenuOpen ? "✕" : "☰"}
@@ -385,11 +383,10 @@ export function EmpireOfLightExperience() {
                   <button
                     key={navTab.id}
                     type="button"
+                    data-active={isTabActive ? "true" : "false"}
                     onClick={() => navigateToSection(navTab.id)}
-                    className={`min-h-[44px] border px-3 py-2 font-monument text-xs tracking-[0.18em] uppercase transition-colors cursor-pointer ${
-                      isTabActive
-                        ? "border-[#dfc07b] bg-[#dfc07b]/18 text-[#fff6df]"
-                        : "border-[#d6b46c]/25 bg-[#0a0d16] text-[#d8ceba]"
+                    className={`btn-luxe-secondary px-3 py-2 font-monument text-xs tracking-[0.18em] uppercase cursor-pointer ${
+                      isTabActive ? "text-[#fff6df]" : "text-[#d8ceba]"
                     }`}
                   >
                     {navTab.label}
@@ -402,14 +399,14 @@ export function EmpireOfLightExperience() {
                 type="button"
                 aria-pressed={quietMode}
                 onClick={() => setQuietMode((prev) => !prev)}
-                className="min-h-[44px] flex-1 border border-[#d6b46c]/35 bg-[#0a0d16] px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#dfc07b] uppercase cursor-pointer"
+                className="btn-luxe-secondary flex-1 px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#dfc07b] uppercase cursor-pointer"
               >
                 {quietMode ? "RESTORE LIVING LIGHT" : "QUIET MODE"}
               </button>
               <button
                 type="button"
                 onClick={handleReplayEntrance}
-                className="min-h-[44px] flex-1 border border-[#d6b46c]/35 bg-[#0a0d16] px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#f5efe2] uppercase cursor-pointer"
+                className="btn-luxe-secondary flex-1 px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#f5efe2] uppercase cursor-pointer"
               >
                 REPLAY ENTRANCE
               </button>
@@ -569,17 +566,18 @@ export function EmpireOfLightExperience() {
             </div>
 
             {/* Center Chamfered Button with Magnetic Interaction */}
-            <div className="mt-5 sm:mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-5 sm:mt-8 flex flex-wrap items-center justify-center gap-3.5">
               <MagneticPortal disabled={quietMode} maxOffsetPx={6}>
                 <button
                   type="button"
                   onClick={() => navigateToSection("the-worlds")}
-                  className="btn-chamfer font-monument group inline-flex items-center gap-3 px-7 sm:px-10 py-2.5 sm:py-3 text-xs sm:text-sm tracking-[0.22em] text-[#f5ecd7] uppercase hover:text-white cursor-pointer"
+                  className="btn-chamfer font-monument group inline-flex items-center gap-3 px-8 sm:px-11 py-3 text-xs sm:text-sm tracking-[0.22em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
                 >
+                  <DiamondStarOrnament className="h-3 w-3 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
                   <span>EXPLORE THE WORLDS</span>
                   <span
                     aria-hidden="true"
-                    className="text-[#e6c987] transition-transform duration-300 group-hover:translate-x-1"
+                    className="text-[#f5dfa6] transition-transform duration-300 group-hover:translate-x-1"
                   >
                     &rsaquo;
                   </span>
@@ -589,9 +587,10 @@ export function EmpireOfLightExperience() {
               <button
                 type="button"
                 onClick={jumpToFourScriptures}
-                className="min-h-[44px] border border-[#dfc07b]/35 bg-[#080a12]/75 px-5 py-2.5 font-monument text-[11px] tracking-[0.2em] text-[#f5dfa6] uppercase hover:border-[#fff4d2] hover:bg-[#dfc07b]/15 hover:text-white transition-all cursor-pointer"
+                className="btn-luxe-secondary group inline-flex items-center gap-2.5 px-6 py-2.5 font-monument text-[11px] tracking-[0.2em] text-[#f5dfa6] uppercase hover:text-white cursor-pointer"
               >
-                FOUR SCRIPTURES · COVENANT
+                <DiamondStarOrnament className="h-2.5 w-2.5 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-90" />
+                <span>FOUR SCRIPTURES · COVENANT</span>
               </button>
             </div>
 

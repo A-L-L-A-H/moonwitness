@@ -13,6 +13,14 @@ import { DiamondStarOrnament } from "./sacred-icons";
 import { AstrolabeSealMedallion, SacredCornerBrackets } from "./sacred-illustrations";
 
 const TASBIH_STORAGE_KEY = "allah-tasbih-state-v1";
+const MUHASABAH_STORAGE_KEY = "allah-muhasabah-v1";
+
+const MUHASABAH_PLEDGES = [
+  { id: "restitution", label: "Fulfill trust & settle any debt owed" },
+  { id: "gentle-speech", label: "Guard tongue from mockery or falsehood" },
+  { id: "hidden-mercy", label: "Offer unseen kindness without applause" },
+  { id: "honest-craft", label: "Deliver clean, verifiable work as worship" },
+] as const;
 
 interface PersistedTasbihState {
   readonly phraseId: string;
@@ -37,6 +45,7 @@ export function RemembranceSanctuary({
   const [breathActive, setBreathActive] = useState<boolean>(false);
   const [breathPhaseIndex, setBreathPhaseIndex] = useState<number>(0);
   const [justCompletedCycle, setJustCompletedCycle] = useState<boolean>(false);
+  const [pledgeIds, setPledgeIds] = useState<readonly string[]>([]);
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
@@ -84,7 +93,33 @@ export function RemembranceSanctuary({
     } catch {
       // Ignore storage access failures in private browsing contexts
     }
+
+    try {
+      const savedPledges = window.localStorage.getItem(MUHASABAH_STORAGE_KEY);
+      if (savedPledges) {
+        const parsedPledges = JSON.parse(savedPledges) as unknown;
+        if (Array.isArray(parsedPledges)) {
+          setPledgeIds(parsedPledges.filter((item): item is string => typeof item === "string"));
+        }
+      }
+    } catch {
+      // Ignore storage access failures in private browsing contexts
+    }
   }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(MUHASABAH_STORAGE_KEY, JSON.stringify(pledgeIds));
+    } catch {
+      // Ignore storage quota or restricted context
+    }
+  }, [pledgeIds]);
+
+  const toggleMuhasabahPledge = (id: string) => {
+    setPledgeIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
 
   useEffect(() => {
     try {
@@ -370,7 +405,7 @@ export function RemembranceSanctuary({
                   <button
                     type="button"
                     onClick={() => onNavigateToWorld(selectedName.linkedWorldId)}
-                    className="min-h-[44px] border border-[#d6b46c]/35 bg-[#0b0e18] px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f8eac6] uppercase hover:border-[#fff4d2] hover:bg-[#d6b46c]/20 transition-colors cursor-pointer"
+                    className="btn-luxe-secondary px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
                   >
                     {selectedName.worldLabel} &rsaquo;
                   </button>
@@ -381,7 +416,7 @@ export function RemembranceSanctuary({
         </div>
 
         {/* Right: Orbital Tasbih Counter & Sakinah Breath Guide */}
-        <div className="octa-bevel-shell lg:col-span-5 border border-[#dfc07b]/35 bg-gradient-to-b from-[#0b0f1c] via-[#070a13] to-[#05060b] p-5 sm:p-6 flex flex-col justify-between shadow-[0_20px_55px_rgba(0,0,0,0.85)]">
+        <div className="octa-bevel-shell lg:col-span-5 p-6 sm:p-7 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
               <span className="font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">
@@ -392,10 +427,8 @@ export function RemembranceSanctuary({
                   type="button"
                   aria-pressed={chimeEnabled}
                   onClick={() => setChimeEnabled((prev) => !prev)}
-                  className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer transition-colors ${
-                    chimeEnabled
-                      ? "border-[#fff4d2] bg-[#d6b46c]/25 text-[#fff8e6]"
-                      : "border-[#d6b46c]/25 text-[#bfb59e] hover:border-[#d6b46c]/55"
+                  className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer ${
+                    chimeEnabled ? "text-[#fff8e6]" : "text-[#bfb59e] hover:text-[#fff6df]"
                   }`}
                 >
                   {chimeEnabled ? "CHIME: 528HZ" : "CHIME: MUTE"}
@@ -404,10 +437,8 @@ export function RemembranceSanctuary({
                   type="button"
                   aria-pressed={breathActive}
                   onClick={() => setBreathActive((prev) => !prev)}
-                  className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer transition-colors ${
-                    breathActive
-                      ? "border-[#fff4d2] bg-[#d6b46c]/25 text-[#fff8e6]"
-                      : "border-[#d6b46c]/25 text-[#bfb59e] hover:border-[#d6b46c]/55"
+                  className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer ${
+                    breathActive ? "text-[#fff8e6]" : "text-[#bfb59e] hover:text-[#fff6df]"
                   }`}
                 >
                   {breathActive ? "BREATH: ON" : "BREATH: GUIDE"}
@@ -416,18 +447,17 @@ export function RemembranceSanctuary({
             </div>
 
             {/* Phrase Selector Pills */}
-            <div className="mt-4 flex flex-wrap gap-1.5">
+            <div className="mt-4 flex flex-wrap gap-2">
               {TASBIH_PHRASES.map((phrase) => {
                 const active = phrase.id === activePhrase.id;
                 return (
                   <button
                     key={phrase.id}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => handleSelectPhrase(phrase.id)}
-                    className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase transition-colors cursor-pointer ${
-                      active
-                        ? "border-[#fff4d2] bg-[#d6b46c]/20 text-[#fff6df]"
-                        : "border-[#d6b46c]/20 bg-[#0b0e18] text-[#bfb59e] hover:border-[#d6b46c]/50"
+                    className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase cursor-pointer ${
+                      active ? "text-[#fff6df]" : "text-[#bfb59e] hover:text-[#fff6df]"
                     }`}
                   >
                     {phrase.transliteration}
@@ -542,9 +572,45 @@ export function RemembranceSanctuary({
             </div>
           </div>
 
+          {/* Quiet On-Device Private Muhasabah Checklist */}
+          <div className="mt-5 border-t border-[#d6b46c]/20 pt-4">
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#dfc07b] uppercase">
+              <span>PRIVATE MUḤĀSABAH · ON-DEVICE ONLY</span>
+              <span>
+                {pledgeIds.length}/{MUHASABAH_PLEDGES.length}
+              </span>
+            </div>
+            <div className="mt-2.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {MUHASABAH_PLEDGES.map((item) => {
+                const checked = pledgeIds.includes(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={checked}
+                    onClick={() => toggleMuhasabahPledge(item.id)}
+                    className={`btn-luxe-secondary flex items-center gap-2 px-3 py-1.5 text-left text-[11px] leading-snug cursor-pointer ${
+                      checked ? "text-[#fff8e6]" : "text-[#cfc5b0] hover:text-[#fff6df]"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`inline-block h-2 w-2 shrink-0 rotate-45 border ${
+                        checked
+                          ? "border-[#fff4d2] bg-[#fff4d2]"
+                          : "border-[#dfc07b]/60 bg-transparent"
+                      }`}
+                    />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div
             aria-live="polite"
-            className="mt-5 flex items-center justify-between border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
+            className="mt-4 flex items-center justify-between border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
           >
             <span>CYCLES: {cyclesCompleted}</span>
             <span>TOTAL REMEMBRANCES: {totalWitnessed}</span>
@@ -554,7 +620,7 @@ export function RemembranceSanctuary({
                 setBeadCount(0);
                 setJustCompletedCycle(false);
               }}
-              className="min-h-[44px] border border-[#d6b46c]/25 px-3 py-1 hover:border-[#f5dfa6] hover:text-[#fff6df] cursor-pointer"
+              className="btn-luxe-secondary px-3.5 py-1 hover:text-[#fff6df] cursor-pointer"
             >
               RESET RING
             </button>

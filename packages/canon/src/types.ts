@@ -169,6 +169,17 @@ export interface CorpusAuthorityEntry {
   readonly invariant: string;
 }
 
+export interface FourCorpusConcordanceTheme {
+  readonly id: string;
+  readonly title: string;
+  readonly arabicRoot: string;
+  readonly tauratWitness: string;
+  readonly zaburWitness: string;
+  readonly injilWitness: string;
+  readonly quranWitness: string;
+  readonly livedPractice: string;
+}
+
 export interface EcosystemEdgeNode {
   readonly id: "sanctuary" | "codex-edge" | "community";
   readonly hostname: string;

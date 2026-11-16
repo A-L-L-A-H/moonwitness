@@ -3,28 +3,31 @@ import Image from "next/image";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import type { DockNodeTelemetry, WorldIdentifier } from "@/data/empire-registry";
 
+function CornerFiligreeGlyph({ className }: { readonly className: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={`pointer-events-none absolute h-6 w-6 text-[#f5dfa6] ${className}`}
+    >
+      <path d="M1 14V4.5L4.5 1H14" stroke="currentColor" strokeWidth="1.2" strokeOpacity="0.85" />
+      <path d="M5 10V6L6 5H10" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.45" />
+      <polygon points="4.5,2.5 6.5,4.5 4.5,6.5 2.5,4.5" fill="#fff8e6" fillOpacity="0.9" />
+    </svg>
+  );
+}
+
 /**
- * Corner hairline girih brackets giving sacred architectural framing to sanctum panels.
+ * Corner astrolabe brass filigree brackets giving architectural framing to sanctum panels.
  */
 export function SacredCornerBrackets() {
   return (
     <>
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-0 h-3.5 w-3.5 border-t border-l border-[#f5dfa6]/70"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute top-0 right-0 h-3.5 w-3.5 border-t border-r border-[#f5dfa6]/70"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 left-0 h-3.5 w-3.5 border-b border-l border-[#f5dfa6]/70"
-      />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute bottom-0 right-0 h-3.5 w-3.5 border-b border-r border-[#f5dfa6]/70"
-      />
+      <CornerFiligreeGlyph className="top-1.5 left-1.5" />
+      <CornerFiligreeGlyph className="top-1.5 right-1.5 -scale-x-100" />
+      <CornerFiligreeGlyph className="bottom-1.5 left-1.5 -scale-y-100" />
+      <CornerFiligreeGlyph className="bottom-1.5 right-1.5 -scale-100" />
     </>
   );
 }

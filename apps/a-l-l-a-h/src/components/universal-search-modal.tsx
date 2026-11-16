@@ -102,7 +102,7 @@ export function UniversalSearchModal({
       onClick={onClose}
     >
       <div
-        className="octa-bevel-shell w-full max-w-2xl border border-[#d6b46c]/55 bg-gradient-to-b from-[#0b0f1b] via-[#070910] to-[#05060b] p-5 sm:p-6 shadow-[0_25px_90px_rgba(0,0,0,0.95)]"
+        className="octa-bevel-shell w-full max-w-2xl p-6 sm:p-7"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between gap-2 border-b border-[#d6b46c]/25 pb-3">
@@ -122,7 +122,7 @@ export function UniversalSearchModal({
             type="button"
             onClick={onClose}
             aria-label="Close Search"
-            className="min-h-[44px] min-w-[44px] border border-[#d6b46c]/35 px-3 py-1 text-[11px] font-mono text-[#d6b46c] hover:border-[#f8eac6] hover:text-[#fff6df] transition-colors cursor-pointer"
+            className="btn-luxe-secondary min-w-[54px] px-3.5 py-1 text-[11px] font-mono text-[#d6b46c] hover:text-[#fff6df] cursor-pointer"
           >
             ESC
           </button>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FOUR_CORPUS_POLICY } from "@/data/empire-canon-codex";
+import { FOUR_CORPUS_CONCORDANCE, FOUR_CORPUS_POLICY } from "@/data/empire-canon-codex";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
@@ -19,9 +19,13 @@ export function FourScripturesSanctum({
 }) {
   const [selectedCode, setSelectedCode] =
     useState<(typeof FOUR_CORPUS_POLICY.corpora)[number]["code"]>("SRC-TOR");
+  const [selectedThemeId, setSelectedThemeId] = useState<string>(FOUR_CORPUS_CONCORDANCE[0]!.id);
   const selectedCorpus =
     FOUR_CORPUS_POLICY.corpora.find((entry) => entry.code === selectedCode) ??
     FOUR_CORPUS_POLICY.corpora[0]!;
+  const selectedTheme =
+    FOUR_CORPUS_CONCORDANCE.find((theme) => theme.id === selectedThemeId) ??
+    FOUR_CORPUS_CONCORDANCE[0]!;
 
   return (
     <div
@@ -137,12 +141,76 @@ export function FourScripturesSanctum({
               <button
                 type="button"
                 onClick={onInspectCorpusDoor}
-                className="min-h-[44px] w-full border border-[#d6b46c]/40 bg-[#0d1220] px-4 py-2 font-mono text-[11px] tracking-[0.16em] text-[#fff4d2] uppercase hover:border-[#fff4d2] hover:bg-[#d6b46c]/20 transition-colors cursor-pointer"
+                className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.16em] text-[#fff4d2] uppercase hover:text-white cursor-pointer"
               >
                 INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
               </button>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Shared Moral Roots · Four-Scripture Ethical Concordance */}
+      <div className="mt-6 border border-[#d6b46c]/30 bg-[#080c15]/90 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
+          <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] text-[#dfc07b] uppercase">
+            <DiamondStarOrnament className="h-3.5 w-3.5 text-[#f5dfa6]" />
+            <span>SHARED MORAL ROOTS · FOUR-CORPUS CONCORDANCE</span>
+          </div>
+          <span className="font-mono text-[10.5px] text-[#cfc5b0]">{selectedTheme.arabicRoot}</span>
+        </div>
+
+        <div
+          role="tablist"
+          aria-label="Select a Shared Ethical Theme across all Four Scriptures"
+          className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4"
+        >
+          {FOUR_CORPUS_CONCORDANCE.map((theme) => {
+            const active = theme.id === selectedTheme.id;
+            return (
+              <button
+                key={theme.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                onClick={() =>
+                  triggerSacredViewTransition(() => {
+                    setSelectedThemeId(theme.id);
+                  }, quietMode)
+                }
+                className={`btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] tracking-[0.1em] uppercase cursor-pointer ${
+                  active ? "text-[#fff8e6]" : "text-[#d8ceba] hover:text-[#fff6df]"
+                }`}
+              >
+                {theme.title}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { code: "TAURAT", body: selectedTheme.tauratWitness },
+            { code: "ZABUR", body: selectedTheme.zaburWitness },
+            { code: "INJĪL", body: selectedTheme.injilWitness },
+            { code: "AL-QUR’ĀN", body: selectedTheme.quranWitness },
+          ].map((witness) => (
+            <div
+              key={witness.code}
+              className="border border-[#d6b46c]/20 bg-[#0b101d]/90 p-3.5 shadow-[inset_0_1px_0_rgba(255,244,210,0.08)]"
+            >
+              <div className="font-monument text-xs tracking-[0.16em] text-[#f5dfa6]">
+                {witness.code}
+              </div>
+              <p className="mt-1.5 font-serif text-xs leading-relaxed text-[#e6decb]">
+                {witness.body}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-3 border-t border-[#d6b46c]/15 pt-3 font-mono text-[11px] text-[#e0d7c4]">
+          <span className="text-[#dfc07b]">LIVED STEWARDSHIP:</span> {selectedTheme.livedPractice}
         </div>
       </div>
     </div>

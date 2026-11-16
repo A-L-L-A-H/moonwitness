@@ -124,9 +124,10 @@ export function CovenantAboutSection({
             <button
               type="button"
               onClick={onReturnToGate}
-              className="btn-chamfer font-monument px-8 py-3 text-xs sm:text-sm tracking-[0.25em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
+              className="btn-chamfer font-monument group inline-flex items-center gap-3 px-9 py-3 text-xs sm:text-sm tracking-[0.25em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
             >
-              ASCEND TO THE GATE &uarr;
+              <DiamondStarOrnament className="h-3 w-3 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
+              <span>ASCEND TO THE GATE &uarr;</span>
             </button>
           </MagneticPortal>
 
@@ -135,7 +136,7 @@ export function CovenantAboutSection({
               <button
                 type="button"
                 onClick={onReplayEntrance}
-                className="min-h-[44px] border border-[#d6b46c]/35 bg-[#080a12]/80 px-5 py-2 font-mono text-[11px] tracking-[0.18em] text-[#e6decb] uppercase hover:border-[#f8eac6] hover:text-white transition-colors cursor-pointer"
+                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[#e6decb] uppercase hover:text-white cursor-pointer"
               >
                 REPLAY ENTRANCE
               </button>
@@ -145,7 +146,7 @@ export function CovenantAboutSection({
                 type="button"
                 aria-pressed={quietMode}
                 onClick={onToggleQuietMode}
-                className="min-h-[44px] border border-[#d6b46c]/35 bg-[#080a12]/80 px-5 py-2 font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase hover:border-[#f8eac6] hover:text-white transition-colors cursor-pointer"
+                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase hover:text-white cursor-pointer"
               >
                 {quietMode ? "ENABLE LIVING LIGHT SHADERS" : "QUIET CONTEMPLATIVE MODE"}
               </button>

@@ -14,6 +14,7 @@ import {
   EIGHT_STORY_ERAS,
   EPISTEMIC_FEDERATION_DOMAINS,
   FIFTEEN_STORY_EPISODES,
+  FOUR_CORPUS_CONCORDANCE,
   FOUR_CORPUS_POLICY,
   FOUR_ENTRY_DOORS,
   GOD_PROMISE_THREE_TRACKS,
@@ -231,6 +232,7 @@ describe("Remembrance Sanctuary Registry", () => {
       "AL-QURAN",
     ]);
     expect(FOUR_CORPUS_POLICY.neutralityPrinciple.toLowerCase()).toContain("zero ranking");
+    expect(FOUR_CORPUS_CONCORDANCE).toHaveLength(4);
     expect(ECOSYSTEM_RUNTIME_CATALOG.liveEdges.some((e) => e.hostname === "a-l-l-a-h.com")).toBe(
       true,
     );

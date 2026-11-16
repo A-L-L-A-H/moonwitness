@@ -12,6 +12,7 @@ import {
   EIGHT_STORY_ERAS,
   EPISTEMIC_FEDERATION_DOMAINS,
   FIFTEEN_STORY_EPISODES,
+  FOUR_CORPUS_CONCORDANCE,
   FOUR_CORPUS_POLICY,
   FOUR_ENTRY_DOORS,
   GOD_99_DEPARTMENTS,
@@ -94,6 +95,13 @@ describe("@moonwitness/canon SSOT invariants", () => {
       "SRC-QUR",
     ]);
     expect(FOUR_CORPUS_POLICY.neutralityPrinciple.toLowerCase()).toContain("zero ranking");
+    expect(FOUR_CORPUS_CONCORDANCE).toHaveLength(4);
+    for (const theme of FOUR_CORPUS_CONCORDANCE) {
+      expect(theme.tauratWitness.length).toBeGreaterThan(20);
+      expect(theme.zaburWitness.length).toBeGreaterThan(20);
+      expect(theme.injilWitness.length).toBeGreaterThan(20);
+      expect(theme.quranWitness.length).toBeGreaterThan(20);
+    }
     expect(ECOSYSTEM_RUNTIME_CATALOG.liveEdges.length).toBeGreaterThanOrEqual(3);
     expect(ECOSYSTEM_RUNTIME_CATALOG.workspaceNodes.length).toBeGreaterThanOrEqual(6);
     expect(WHCMT_VS_BASSHUNTER_SPEC.bassHunter.scoringStatus).toBe("UNKNOWN");

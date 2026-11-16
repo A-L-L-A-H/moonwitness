@@ -23,7 +23,7 @@ const MOONWITNESS_MERIDIANS = [
     code: "MERIDIAN 01",
     city: "Cairo",
     fullLabel: "Cairo · Al-Qāhirah",
-    stats: "412 Verified Oral Chronicles",
+    stats: "Nile Witness Chain · Heritage Focus",
     bearing: "30.0444° N · 31.2357° E",
     note: "Observatory of nocturnal lanterns preserving Mediterranean & Nile scholarly chains.",
     x: 68,
@@ -33,9 +33,9 @@ const MOONWITNESS_MERIDIANS = [
     code: "MERIDIAN 02",
     city: "Samarkand",
     fullLabel: "Samarkand · Ulugh",
-    stats: "289 Star Catalogue Folios",
+    stats: "Meridian Sextant Table · Heritage Focus",
     bearing: "39.6542° N · 66.9597° E",
-    note: "High-precision celestial meridian sextant Tables illuminating Eurasian astronavigation.",
+    note: "High-precision celestial meridian sextant tables illuminating Eurasian astronavigation.",
     x: 180,
     y: 48,
   },
@@ -43,7 +43,7 @@ const MOONWITNESS_MERIDIANS = [
     code: "MERIDIAN 03",
     city: "Nusantara",
     fullLabel: "Nusantara · Archipelago",
-    stats: "518 Maritime Witness Logs",
+    stats: "Maritime Oral Tradition · Heritage Focus",
     bearing: "6.2088° S · 106.8456° E",
     note: "Equatorial ocean corridor uniting oral wisdom, calligraphy, and monsoon celestial navigation.",
     x: 292,
@@ -588,7 +588,7 @@ export function WorldsSanctum({
 
         {/* Active World Beveled Sanctum Chamber */}
         <ScrollChapterReveal quietMode={quietMode}>
-          <div className="octa-bevel-shell relative mt-10 overflow-hidden border border-[#d6b46c]/40 bg-gradient-to-br from-[#0a0d17]/95 via-[#070a12]/95 to-[#05060b] p-6 sm:p-10 shadow-[0_24px_70px_rgba(0,0,0,0.84)]">
+          <div className="octa-bevel-shell relative mt-10 p-6 sm:p-10">
             <WorldChamberWatermarkSvg worldId={activeWorld.id} />
 
             {/* Architectural Meridian & Harmonic Resonance 3-Col Strip */}

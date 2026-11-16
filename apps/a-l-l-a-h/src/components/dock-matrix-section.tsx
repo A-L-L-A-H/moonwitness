@@ -14,7 +14,7 @@ import {
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { WorldEmblemById } from "./sacred-icons";
+import { DiamondStarOrnament, WorldEmblemById } from "./sacred-icons";
 import {
   AstrolabeOrreryMap,
   GatewayWaveformSvg,
@@ -134,10 +134,8 @@ export function DockMatrixSection({
                     type="button"
                     aria-pressed={isActive}
                     onClick={() => handleSelectFilter(option.id)}
-                    className={`min-h-[44px] border px-4 py-1.5 font-mono text-[11px] tracking-[0.18em] uppercase transition-colors cursor-pointer ${
-                      isActive
-                        ? "border-[#f8eac6] bg-[#d6b46c]/20 text-[#fff6df] shadow-[0_0_20px_rgba(223,192,123,0.22)]"
-                        : "border-[#d6b46c]/30 bg-[#080b14] text-[#c8beaa] hover:border-[#d6b46c]/65 hover:text-[#fff6df]"
+                    className={`btn-luxe-secondary px-4.5 py-1.5 font-mono text-[11px] tracking-[0.18em] uppercase cursor-pointer ${
+                      isActive ? "text-[#fff6df]" : "text-[#c8beaa] hover:text-[#fff6df]"
                     }`}
                   >
                     {option.label}
@@ -188,11 +186,7 @@ export function DockMatrixSection({
                       role="tab"
                       aria-selected={isSelected}
                       onClick={() => handleSelectNode(node.nodeCode)}
-                      className={`min-h-[54px] border px-2.5 py-2 text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-[#fff4d2] bg-[#d6b46c]/20 shadow-[0_0_24px_rgba(223,192,123,0.2)]"
-                          : "border-[#d6b46c]/25 bg-[#080b14]/90 hover:border-[#d6b46c]/55"
-                      }`}
+                      className="btn-luxe-secondary min-h-[54px] px-3 py-2 text-left cursor-pointer"
                     >
                       <div className="flex items-center justify-between font-mono text-[9.5px] text-[#dfc07b]">
                         <span>{node.nodeCode}</span>
@@ -212,7 +206,7 @@ export function DockMatrixSection({
 
               {/* Active Gateway Beveled Telemetry Aperture */}
               <SpatialTiltCard disabled={quietMode} maxTiltDeg={2.8}>
-                <div className="octa-bevel-shell relative border border-[#e6c987]/45 bg-gradient-to-br from-[#0e1322] via-[#070a13] to-[#05060b] p-6 sm:p-8 shadow-[0_24px_65px_rgba(0,0,0,0.88)]">
+                <div className="octa-bevel-shell relative p-6 sm:p-8">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-4 font-mono text-[11px] text-[#d6b46c]">
                     <span>TELEMETRY LOCK // {activeNode.nodeCode}</span>
                     <span className="inline-flex items-center gap-1.5 text-[#f7dfa0]">
@@ -281,9 +275,10 @@ export function DockMatrixSection({
                     <button
                       type="button"
                       onClick={() => onLaunchWorld(activeNode.worldId)}
-                      className="btn-chamfer font-monument px-7 py-2.5 text-xs tracking-[0.2em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
+                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs tracking-[0.2em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
                     >
-                      ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;
+                      <DiamondStarOrnament className="h-2.5 w-2.5 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
+                      <span>ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;</span>
                     </button>
                   </div>
 
@@ -311,7 +306,7 @@ export function DockMatrixSection({
                           type="button"
                           onClick={telemetry.refresh}
                           disabled={telemetry.refreshing}
-                          className="min-h-[30px] border border-[#d6b46c]/35 bg-[#080b14] px-2.5 py-0.5 font-mono text-[10px] text-[#f5dfa6] hover:border-[#fff4d2] hover:text-white disabled:opacity-50 cursor-pointer"
+                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[#f5dfa6] hover:text-white disabled:opacity-50 cursor-pointer"
                         >
                           {telemetry.refreshing ? "PROBING…" : "REFRESH"}
                         </button>
@@ -413,7 +408,7 @@ export function DockMatrixSection({
                             href={`${CONFIGURED_WEB_URL ?? "http://localhost:3000"}${link.href}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex min-h-[44px] items-center border border-[#d6b46c]/25 bg-[#080b14] px-3 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase transition-colors hover:border-[#f8eac6] hover:text-[#fff6df]"
+                            className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase hover:text-[#fff6df]"
                           >
                             {link.label} ↗
                           </a>
