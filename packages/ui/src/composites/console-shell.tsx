@@ -1,10 +1,10 @@
 // Moonwitness Console Shell (Living Story Console L1 — HUD Console)
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import { CommandStrip, SideRail, TopRail } from '../primitives/hud-chrome';
-import type { HudLinkComponent, HudNavItem } from '../primitives/hud-chrome';
-import { cn } from '../lib/utils';
+import type { ReactNode } from "react";
+import { CommandStrip, SideRail, TopRail } from "../primitives/hud-chrome";
+import type { HudLinkComponent, HudNavItem } from "../primitives/hud-chrome";
+import { cn } from "../lib/utils";
 
 export interface ConsoleShellProps {
   title: string;
@@ -43,9 +43,9 @@ export function ConsoleShell({
   className,
   children,
 }: ConsoleShellProps) {
-  const NavLink = linkAs ?? 'a';
+  const NavLink = linkAs ?? "a";
   return (
-    <div className={cn('flex min-h-screen', className)}>
+    <div className={cn("flex min-h-screen", className)}>
       <div className="fixed inset-y-0 left-0 z-40 hidden w-16 lg:block">
         <SideRail
           items={items}
@@ -79,7 +79,7 @@ export function ConsoleShell({
       {/* Mobile: rail jadi strip ikon horizontal di bawah layar */}
       <div className="fixed inset-x-0 bottom-0 z-40 lg:hidden">
         <nav
-          aria-label={navLabel ?? 'Empire'}
+          aria-label={navLabel ?? "Empire"}
           className="hud-panel hud-edge-top flex items-stretch justify-around overflow-x-auto"
         >
           {items.map((item) => {
@@ -89,11 +89,11 @@ export function ConsoleShell({
                 key={item.id}
                 href={item.href}
                 onClick={() => onNavigate?.()}
-                aria-current={isActive ? 'page' : undefined}
+                aria-current={isActive ? "page" : undefined}
                 title={item.label}
                 className={cn(
-                  'flex min-h-12 min-w-12 flex-1 items-center justify-center text-zinc-300',
-                  isActive && 'text-[var(--pink)]',
+                  "flex min-h-12 min-w-12 flex-1 items-center justify-center text-zinc-300",
+                  isActive && "text-[var(--pink)]",
                 )}
               >
                 <svg

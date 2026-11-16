@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest';
-import { renderToStaticMarkup } from 'react-dom/server';
-import { ConsoleShell, type ConsoleShellProps } from './console-shell';
-import type { HudNavItem } from '../primitives/hud-chrome';
+import { describe, expect, it } from "vitest";
+import { renderToStaticMarkup } from "react-dom/server";
+import { ConsoleShell, type ConsoleShellProps } from "./console-shell";
+import type { HudNavItem } from "../primitives/hud-chrome";
 
 const ITEMS: HudNavItem[] = [
-  { id: 'dashboard', label: 'Dashboard', iconPath: 'M4 4 L20 4', href: '/mission-control' },
+  { id: "dashboard", label: "Dashboard", iconPath: "M4 4 L20 4", href: "/mission-control" },
 ];
 
 function shell(overrides: Partial<ConsoleShellProps> = {}) {
@@ -15,18 +15,18 @@ function shell(overrides: Partial<ConsoleShellProps> = {}) {
   );
 }
 
-describe('ConsoleShell', () => {
-  it('renders header, nav, main landmark and footer strip', () => {
+describe("ConsoleShell", () => {
+  it("renders header, nav, main landmark and footer strip", () => {
     const html = shell();
-    expect(html).toContain('<header');
-    expect(html).toContain('<nav');
-    expect(html).toContain('<main');
-    expect(html).toContain('<footer');
-    expect(html).toContain('body-content');
-    expect(html).toContain('Shadow Command Center');
+    expect(html).toContain("<header");
+    expect(html).toContain("<nav");
+    expect(html).toContain("<main");
+    expect(html).toContain("<footer");
+    expect(html).toContain("body-content");
+    expect(html).toContain("Shadow Command Center");
   });
 
-  it('maps slots into rails', () => {
+  it("maps slots into rails", () => {
     const html = shell({
       headerActions: <span data-slot="actions" />,
       railFooter: <span data-slot="rail-footer" />,
@@ -39,16 +39,16 @@ describe('ConsoleShell', () => {
     expect(html).toContain('data-slot="cmd-right"');
   });
 
-  it('keeps scroll area shrinkable (min-h-0 chain for flex overflow)', () => {
+  it("keeps scroll area shrinkable (min-h-0 chain for flex overflow)", () => {
     const html = shell();
-    expect(html).toContain('min-h-0');
-    expect(html).toContain('min-w-0');
+    expect(html).toContain("min-h-0");
+    expect(html).toContain("min-w-0");
   });
 
-  it('renders mobile bottom rail with the same items', () => {
+  it("renders mobile bottom rail with the same items", () => {
     const html = shell();
     const navs = html.match(/<nav /g) ?? [];
     expect(navs.length).toBeGreaterThanOrEqual(2);
-    expect(html).toContain('fixed inset-x-0 bottom-0');
+    expect(html).toContain("fixed inset-x-0 bottom-0");
   });
 });

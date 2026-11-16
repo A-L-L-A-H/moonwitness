@@ -1,16 +1,16 @@
 // Moonwitness HUD chrome primitives (Living Story Console L1)
-'use client';
+"use client";
 
-import type { ComponentType, ReactNode } from 'react';
-import { Crown } from '../icons';
-import { cn } from '../lib/utils';
+import type { ComponentType, ReactNode } from "react";
+import { Crown } from "../icons";
+import { cn } from "../lib/utils";
 
 /** Link injector: default 'a'. Consumer Next.js bisa melewati next/link. */
 export type HudLinkComponent = ComponentType<{
   href: string;
   className?: string;
   onClick?: () => void;
-  'aria-current'?: 'page' | undefined;
+  "aria-current"?: "page" | undefined;
   title?: string;
   children?: ReactNode;
 }>;
@@ -25,7 +25,7 @@ export interface HudNavItem {
 
 export function TopRail({
   title,
-  brandHref = '/',
+  brandHref = "/",
   subtitle,
   start,
   actions,
@@ -40,11 +40,11 @@ export function TopRail({
   linkAs?: HudLinkComponent;
   className?: string;
 }) {
-  const BrandLink = linkAs ?? 'a';
+  const BrandLink = linkAs ?? "a";
   return (
     <header
       className={cn(
-        'hud-panel hud-edge-bottom sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 px-4',
+        "hud-panel hud-edge-bottom sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 px-4",
         className,
       )}
     >
@@ -74,7 +74,7 @@ export function SideRail({
   active,
   activeSection,
   onNavigate,
-  navLabel = 'Empire',
+  navLabel = "Empire",
   footer,
   linkAs,
   className,
@@ -88,9 +88,9 @@ export function SideRail({
   linkAs?: HudLinkComponent;
   className?: string;
 }) {
-  const NavLink = linkAs ?? 'a';
+  const NavLink = linkAs ?? "a";
   return (
-    <nav aria-label={navLabel} className={cn('hud-panel flex h-full flex-col', className)}>
+    <nav aria-label={navLabel} className={cn("hud-panel flex h-full flex-col", className)}>
       <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto p-2">
         {items.map((item) => {
           const isActive = item.id === active || item.id === activeSection;
@@ -99,11 +99,12 @@ export function SideRail({
               key={item.id}
               href={item.href}
               onClick={() => onNavigate?.()}
-              aria-current={isActive ? 'page' : undefined}
+              aria-current={isActive ? "page" : undefined}
               title={item.label}
               className={cn(
-                'flex min-h-11 items-center justify-center gap-2 border border-transparent px-2 py-2 text-zinc-300 transition-colors hover:border-[var(--line)] hover:bg-[var(--panel)] hover:text-white',
-                isActive && 'hud-edge-left border-[var(--line)] bg-[var(--panel)] text-[var(--pink)]',
+                "flex min-h-11 items-center justify-center gap-2 border border-transparent px-2 py-2 text-zinc-300 transition-colors hover:border-[var(--line)] hover:bg-[var(--panel)] hover:text-white",
+                isActive &&
+                  "hud-edge-left border-[var(--line)] bg-[var(--panel)] text-[var(--pink)]",
               )}
             >
               <svg
@@ -139,7 +140,7 @@ export function CommandStrip({
   return (
     <footer
       className={cn(
-        'hud-panel hud-edge-top flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-[10px] tracking-wider text-zinc-500',
+        "hud-panel hud-edge-top flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-[10px] tracking-wider text-zinc-500",
         className,
       )}
     >
@@ -156,45 +157,45 @@ export function CornerBrackets({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn('hud-bracket', className)}>{children}</div>;
+  return <div className={cn("hud-bracket", className)}>{children}</div>;
 }
 
 const TONE_TEXT: Record<string, string> = {
-  pink: 'text-[var(--pink)]',
-  blue: 'text-[var(--blue)]',
-  yellow: 'text-[var(--yellow)]',
+  pink: "text-[var(--pink)]",
+  blue: "text-[var(--blue)]",
+  yellow: "text-[var(--yellow)]",
 };
 const TONE_BAR: Record<string, string> = {
-  pink: 'bg-[var(--pink)]',
-  blue: 'bg-[var(--blue)]',
-  yellow: 'bg-[var(--yellow)]',
+  pink: "bg-[var(--pink)]",
+  blue: "bg-[var(--blue)]",
+  yellow: "bg-[var(--yellow)]",
 };
 
 export function Gauge({
   label,
   value,
-  tone = 'pink',
+  tone = "pink",
   percent,
   className,
 }: {
   label: string;
   value: string;
-  tone?: 'pink' | 'blue' | 'yellow';
+  tone?: "pink" | "blue" | "yellow";
   percent?: number;
   className?: string;
 }) {
   const clamped = percent === undefined ? null : Math.max(0, Math.min(100, percent));
   return (
-    <div className={cn('min-w-0', className)}>
+    <div className={cn("min-w-0", className)}>
       <div className="flex items-baseline justify-between gap-2">
         <span className="truncate font-mono text-[10px] tracking-[0.18em] text-zinc-500">
           {label}
         </span>
-        <span className={cn('font-mono text-sm font-bold', TONE_TEXT[tone])}>{value}</span>
+        <span className={cn("font-mono text-sm font-bold", TONE_TEXT[tone])}>{value}</span>
       </div>
       {clamped !== null ? (
         <div className="mt-1 h-1 w-full bg-[var(--line)]" role="presentation">
-          <div className={cn('h-full', TONE_BAR[tone])} style={{ width: clamped + '%' }} />
+          <div className={cn("h-full", TONE_BAR[tone])} style={{ width: clamped + "%" }} />
         </div>
       ) : null}
     </div>
