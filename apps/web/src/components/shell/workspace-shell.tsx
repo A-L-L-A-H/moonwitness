@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSavedAvatar } from "@/lib/avatar-store";
 import { useCurrentIdentity } from "@/lib/session";
 import { Crown } from "@moonwitness/ui/icons";
@@ -10,6 +10,7 @@ import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { Notifications } from "./notifications";
 import { ProfileMenu } from "./profile-menu";
+import { useActiveSection } from "./use-active-section";
 
 export interface WorkspaceShellProps {
   breadcrumb: string;
@@ -49,8 +50,8 @@ export function WorkspaceShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string | null>(null);
   const popRef = useRef<HTMLDivElement>(null);
+  const activeSection = useActiveSection(items, pathname);
   const session = useCurrentIdentity();
   const identity = session?.identity ?? "Creator // Empire";
   const role = session?.role ?? "Empire crew";
@@ -66,36 +67,6 @@ export function WorkspaceShell({
     document.addEventListener("mousedown", onClick);
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
-
-  const sectionAnchors = useMemo(
-    () =>
-      items
-        .filter((i) => i.target.kind === "section" && i.target.href === pathname)
-        .map((i) => ({ id: i.id, anchor: (i.target as { anchor: string }).anchor })),
-    [items, pathname],
-  );
-
-  useEffect(() => {
-    if (sectionAnchors.length === 0) {
-      setActiveSection(null);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const hit = sectionAnchors.find((i) => i.anchor === entry.target.id);
-          if (hit) setActiveSection(hit.id);
-        }
-      },
-      { rootMargin: "-40% 0px -55% 0px" },
-    );
-    for (const item of sectionAnchors) {
-      const el = document.getElementById(item.anchor);
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, [sectionAnchors]);
 
   function exitShadow() {
     fetch("/api/v1/auth/logout", {
