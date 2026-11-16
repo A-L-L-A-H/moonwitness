@@ -34,5 +34,6 @@
     "STORAGE_URL": "https://storage-edge.moonwitness.biz.id",
     "SYSLOG_URL": "https://syslog-edge.moonwitness.biz.id",
     "SNMP_POLLER_URL": "https://snmp-edge.moonwitness.biz.id",
+    "MID_ISSUER_URL": "https://id.moonwitness.biz.id",
   },
 }

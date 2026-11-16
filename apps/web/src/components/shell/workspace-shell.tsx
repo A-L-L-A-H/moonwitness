@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSavedAvatar } from "@/lib/avatar-store";
+import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { Crown } from "@moonwitness/ui/icons";
 import { activeByPath, type NavItem } from "./nav-items";
@@ -69,6 +70,7 @@ export function WorkspaceShell({
   }, []);
 
   function exitShadow() {
+    clearStoredMidSession();
     fetch("/api/v1/auth/logout", {
       method: "POST",
       credentials: "include",

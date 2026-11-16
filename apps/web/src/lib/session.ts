@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
+import { getStoredMidAccessToken } from "./mid-oidc";
 
 export interface Session {
   identity: string;
   role: string;
   username?: string;
   id?: number;
+}
+
+function buildAuthFetchInit(): RequestInit {
+  const token = getStoredMidAccessToken();
+  return token
+    ? { credentials: "include", headers: { authorization: `Bearer ${token}` } }
+    : { credentials: "include" };
 }
 
 /**
@@ -16,9 +24,7 @@ export function useCurrentIdentity(): Session | null {
   useEffect(() => {
     async function fetchSession() {
       try {
-        const response = await fetch("/api/v1/auth/me", {
-          credentials: "include",
-        });
+        const response = await fetch("/api/v1/auth/me", buildAuthFetchInit());
         if (response.ok) {
           const data = await response.json();
           const user: unknown = data?.user;
@@ -51,7 +57,7 @@ export function useCurrentIdentity(): Session | null {
 
   useEffect(() => {
     function onSessionChange() {
-      fetch("/api/v1/auth/me", { credentials: "include" })
+      fetch("/api/v1/auth/me", buildAuthFetchInit())
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           const user: unknown = data?.user;
