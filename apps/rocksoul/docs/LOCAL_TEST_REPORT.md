@@ -36,7 +36,7 @@
 - `src-tauri/target/release/bundle/nsis/ROCKSOUL - DX_0.1.0_x64-setup.exe`
 - `src-tauri/target/release/rocksoul-dx.exe`
 
-Artifacts listed above were generated in the prior release run on 2026-11-15 and were not rebuilt during this hardening pass. The user reports that install and uninstall of the previous build succeeded; the current native workflow smoke test remains unverified.
+Artifacts listed above were rebuilt on 2026-11-16 via `pnpm tauri build`, and `rocksoul-dx.exe` passed an isolated `APPDATA`/`LOCALAPPDATA` launch smoke test. Interactive MSI/NSIS installation, packaged CRUD/Git workflow verification, and restart/upgrade/uninstall data retention remain NOT TESTED.
 
 ## Data safety
 
