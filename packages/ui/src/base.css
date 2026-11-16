@@ -246,6 +246,48 @@ body {
     transform: translateY(-3px) rotate(0.4deg);
   }
 
+  /* ---- HUD console chrome (Living Story Console L1) ---- */
+  .hud-panel {
+    position: relative;
+    background: var(--panel-2);
+    border: 2px solid var(--line);
+  }
+  .hud-edge-top {
+    border-top: 2px solid var(--pink);
+  }
+  .hud-edge-bottom {
+    border-bottom: 2px solid var(--pink);
+  }
+  .hud-edge-left {
+    border-left: 2px solid var(--pink);
+  }
+  .hud-edge-right {
+    border-right: 2px solid var(--pink);
+  }
+  .hud-bracket {
+    position: relative;
+  }
+  .hud-bracket::before,
+  .hud-bracket::after {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+  }
+  .hud-bracket::before {
+    top: -2px;
+    left: -2px;
+    border-top: 2px solid var(--blue);
+    border-left: 2px solid var(--blue);
+  }
+  .hud-bracket::after {
+    bottom: -2px;
+    right: -2px;
+    border-bottom: 2px solid var(--blue);
+    border-right: 2px solid var(--blue);
+  }
+
   /* ---- riot grunge effects ---- */
   .cmyk-slip {
     position: relative;
