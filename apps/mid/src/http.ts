@@ -181,8 +181,8 @@ export async function readFormOrJson(request: Request): Promise<Record<string, s
   }
   const params = new URLSearchParams(await request.text());
   const normalized: Record<string, string> = {};
-  for (const [key, val] of params.entries()) {
+  params.forEach((val, key) => {
     normalized[key] = val;
-  }
+  });
   return normalized;
 }
