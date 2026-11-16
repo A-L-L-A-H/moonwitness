@@ -1,8 +1,3 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
-
 export type ServiceHealthState = "online" | "degraded" | "offline";
 
 export interface EcosystemServiceStatus {
@@ -70,7 +65,19 @@ function buildProbeTargets(): readonly ProbeTarget[] {
 }
 
 async function defaultGitRunner(args: readonly string[]): Promise<string | null> {
+  if (
+    typeof process === "undefined" ||
+    !process.versions?.node ||
+    typeof process.cwd !== "function"
+  ) {
+    return null;
+  }
   try {
+    const [{ execFile }, { promisify }] = await Promise.all([
+      import("node:child_process"),
+      import("node:util"),
+    ]);
+    const execFileAsync = promisify(execFile);
     const { stdout } = await execFileAsync("git", [...args], {
       cwd: process.cwd(),
       timeout: PROBE_TIMEOUT_MS,
