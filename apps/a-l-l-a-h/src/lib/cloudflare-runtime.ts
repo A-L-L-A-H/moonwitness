@@ -31,6 +31,8 @@ export interface SanctuaryWorkerEnv {
   readonly CACHE_KV?: KVNamespaceLike;
   readonly WEB_INTERNAL_URL?: string;
   readonly API_INTERNAL_URL?: string;
+  readonly ARSY_URL?: string;
+  readonly MEMORY_API_URL?: string;
 }
 
 /**

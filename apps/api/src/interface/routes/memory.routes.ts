@@ -59,7 +59,11 @@ type MemoryBridgeResolution =
   | { configured: true; baseUrl: string; error?: string };
 
 function resolveMemoryBridge(): MemoryBridgeResolution {
-  const rawUrl = env.MEMORY_API_URL?.trim();
+  const envValue =
+    typeof process !== "undefined" && process.env.MEMORY_API_URL !== undefined
+      ? process.env.MEMORY_API_URL
+      : env.MEMORY_API_URL;
+  const rawUrl = envValue?.trim();
   if (!rawUrl) {
     return { configured: false, baseUrl: null };
   }

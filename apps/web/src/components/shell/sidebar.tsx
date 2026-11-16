@@ -7,11 +7,7 @@ import { navHref, type NavItem } from "./nav-items";
 import { Crown, Smiley } from "@moonwitness/ui/icons";
 import { Stack } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
-
-const IMPERIUM_GATE_URL = (process.env.NEXT_PUBLIC_ALLAH_URL ?? "http://localhost:3003").replace(
-  /\/+$/,
-  "",
-);
+import { IMPERIUM_GATE_URL } from "@/lib/sanctuary-url";
 
 interface SidebarProps {
   items: NavItem[];

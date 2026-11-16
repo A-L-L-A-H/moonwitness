@@ -7,11 +7,7 @@ import {
   SEVEN_STEP_PROMISE,
   WORLD_PATCHES_REGISTRY,
 } from "@moonwitness/canon";
-
-const IMPERIUM_GATE_URL = (process.env.NEXT_PUBLIC_ALLAH_URL ?? "http://localhost:3003").replace(
-  /\/+$/,
-  "",
-);
+import { IMPERIUM_GATE_URL } from "@/lib/sanctuary-url";
 
 export function CanonLorePanel() {
   const [patchSearch, setPatchSearch] = useState("");

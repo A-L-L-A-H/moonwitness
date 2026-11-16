@@ -114,6 +114,9 @@ describe("ecosystem-probe", () => {
       if (url.startsWith("https://moonwitness-radio.bjo163.workers.dev")) {
         return new Response("ok", { status: 200 });
       }
+      if (url.startsWith("https://igate.moonwitness.biz.id")) {
+        return new Response("ok", { status: 200 });
+      }
       throw new Error("connection refused");
     };
 
@@ -129,6 +132,7 @@ describe("ecosystem-probe", () => {
       ["codex-edge", "online", 200],
       ["community", "online", 200],
       ["radio", "online", 200],
+      ["igate", "online", 200],
     ]);
   });
 
@@ -154,6 +158,7 @@ describe("ecosystem-probe", () => {
         "https://codex.a-l-l-a-h.com/health",
         "https://community.moonwitness.biz.id/",
         "https://moonwitness-radio.bjo163.workers.dev/health",
+        "https://igate.moonwitness.biz.id/health",
       ]);
       expect(
         snapshot.services.every((svc) => svc.status === "offline" && svc.httpStatus === null),
@@ -245,12 +250,16 @@ describe("ecosystem-probe", () => {
       cfEnv: {
         WEB_INTERNAL_URL: "https://moonwitness.biz.id/",
         API_INTERNAL_URL: "https://api.moonwitness.biz.id/",
+        ARSY_URL: "https://arsy.example.invalid/",
+        MEMORY_API_URL: "https://memory.example.invalid/",
       },
     });
 
     expect(requestedUrls).toContain("https://moonwitness.biz.id");
     expect(requestedUrls).toContain("https://api.moonwitness.biz.id/api/v1/healthz");
     expect(requestedUrls).toContain("https://api.moonwitness.biz.id/api/v1/readyz");
+    expect(requestedUrls).toContain("https://arsy.example.invalid/v1/health");
+    expect(requestedUrls).toContain("https://memory.example.invalid/health");
     expect(snapshot.runtimeMode).toBe("cloudflare-edge");
     expect(snapshot.status).toBe("online");
     expect(snapshot.databaseStatus).toBe("ok");
@@ -262,6 +271,16 @@ describe("ecosystem-probe", () => {
     });
     expect(snapshot.services.find((svc) => svc.id === "api")).toMatchObject({
       status: "online",
+      httpStatus: 200,
+    });
+    expect(snapshot.services.find((svc) => svc.id === "arsy")).toMatchObject({
+      status: "online",
+      url: "https://arsy.example.invalid",
+      httpStatus: 200,
+    });
+    expect(snapshot.services.find((svc) => svc.id === "memory")).toMatchObject({
+      status: "online",
+      url: "https://memory.example.invalid",
       httpStatus: 200,
     });
   });

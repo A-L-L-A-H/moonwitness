@@ -455,17 +455,24 @@ export function DockMatrixSection({
                     {(CONFIGURED_WEB_URL ||
                       telemetry.services.find((s) => s.id === "web")?.status === "online") && (
                       <div className="flex flex-wrap items-center gap-1.5">
-                        {LOCAL_WEB_ROUTES.map((link) => (
-                          <a
-                            key={link.href}
-                            href={`${CONFIGURED_WEB_URL ?? "http://localhost:3000"}${link.href}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase hover:text-[#fff6df]"
-                          >
-                            {link.label} ↗
-                          </a>
-                        ))}
+                        {LOCAL_WEB_ROUTES.map((link) => {
+                          const resolvedWebBase = (
+                            CONFIGURED_WEB_URL ??
+                            telemetry.services.find((s) => s.id === "web")?.url ??
+                            "http://localhost:3000"
+                          ).replace(/\/+$/, "");
+                          return (
+                            <a
+                              key={link.href}
+                              href={`${resolvedWebBase}${link.href}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase hover:text-[#fff6df]"
+                            >
+                              {link.label} ↗
+                            </a>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

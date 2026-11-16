@@ -18,7 +18,7 @@ export interface EcosystemServiceStatus {
 }
 
 export interface EcosystemEdgeStatus {
-  readonly id: "codex-edge" | "community" | "radio";
+  readonly id: "codex-edge" | "community" | "radio" | "igate";
   readonly name: string;
   readonly url: string;
   readonly status: ServiceHealthState;
@@ -109,25 +109,39 @@ function isLoopbackUrl(url: string): boolean {
   return /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/i.test(url);
 }
 
+function resolveServiceUrl(
+  cfValue: string | undefined,
+  envValue: string | undefined,
+  fallback: string,
+): string {
+  const candidate = (cfValue ?? envValue)?.trim();
+  const normalized = candidate && candidate.length > 0 ? candidate : fallback;
+  return normalized.replace(/\/+$/, "");
+}
+
 function buildProbeTargets(
   cfEnv?: SanctuaryWorkerEnv | null,
 ): readonly ProbeTarget<EcosystemServiceStatus["id"]>[] {
-  const webBase = (
-    cfEnv?.WEB_INTERNAL_URL ??
-    process.env.WEB_INTERNAL_URL ??
-    "http://127.0.0.1:3000"
-  )
-    .trim()
-    .replace(/\/+$/, "");
-  const apiBase = (
-    cfEnv?.API_INTERNAL_URL ??
-    process.env.API_INTERNAL_URL ??
-    "http://127.0.0.1:3002"
-  )
-    .trim()
-    .replace(/\/+$/, "");
-  const arsyBase = (process.env.ARSY_URL ?? "http://127.0.0.1:8787").replace(/\/+$/, "");
-  const memoryBase = (process.env.MEMORY_API_URL ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
+  const webBase = resolveServiceUrl(
+    cfEnv?.WEB_INTERNAL_URL,
+    process.env.WEB_INTERNAL_URL,
+    "http://127.0.0.1:3000",
+  );
+  const apiBase = resolveServiceUrl(
+    cfEnv?.API_INTERNAL_URL,
+    process.env.API_INTERNAL_URL,
+    "http://127.0.0.1:3002",
+  );
+  const arsyBase = resolveServiceUrl(
+    cfEnv?.ARSY_URL,
+    process.env.ARSY_URL,
+    "http://127.0.0.1:8787",
+  );
+  const memoryBase = resolveServiceUrl(
+    cfEnv?.MEMORY_API_URL,
+    process.env.MEMORY_API_URL,
+    "http://127.0.0.1:8000",
+  );
 
   return [
     { id: "web", name: "Web Portal", displayUrl: webBase, probeUrl: webBase },
@@ -166,6 +180,12 @@ function buildEdgeTargets(): readonly ProbeTarget<EcosystemEdgeStatus["id"]>[] {
       name: "MoonWitness Radio",
       displayUrl: "https://moonwitness-radio.bjo163.workers.dev",
       probeUrl: "https://moonwitness-radio.bjo163.workers.dev/health",
+    },
+    {
+      id: "igate",
+      name: "Rocksoul iGate",
+      displayUrl: "https://igate.moonwitness.biz.id",
+      probeUrl: "https://igate.moonwitness.biz.id/health",
     },
   ];
 }
