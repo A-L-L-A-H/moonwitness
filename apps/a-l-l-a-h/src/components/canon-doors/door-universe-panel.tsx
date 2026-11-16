@@ -14,6 +14,11 @@ import {
   WORLD_PATCH_HIGHLIGHTS,
 } from "@/data/empire-canon-codex";
 import { StoryPlateGeometrySvg } from "../sacred-illustrations";
+import {
+  AetherionParadiseAtlas,
+  PlatformFunctionsCharactersPanel,
+  WorldPatchesRegistryPanel,
+} from "./universe-atlas-modules";
 
 export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }) {
   const [activeTrackCode, setActiveTrackCode] = useState<string>(
@@ -383,6 +388,15 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
           </div>
         </div>
       </div>
+
+      {/* AETHERION 10 Realms × 100 Levels & PARADISE V3 */}
+      <AetherionParadiseAtlas quietMode={quietMode} />
+
+      {/* Complete 33 World Patches + Dual #014 Conflict Disclosure */}
+      <WorldPatchesRegistryPanel quietMode={quietMode} />
+
+      {/* 13 Core Platform Functions & 9 Characters vs 4 Faceless Guides */}
+      <PlatformFunctionsCharactersPanel />
     </div>
   );
 }

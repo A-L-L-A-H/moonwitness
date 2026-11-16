@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: [
+    "@moonwitness/canon",
     "@moonwitness/ui",
     "@moonwitness/core",
     "@moonwitness/types",

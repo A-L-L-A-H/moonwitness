@@ -7,6 +7,7 @@ import {
   SOVEREIGN_ENGINE_SPECS,
   type RepoOrgCluster,
 } from "@/data/empire-canon-codex";
+import { DhgsAndMTimeSimulator, QuarantinedLedgerPanel } from "./sovereign-assurance-modules";
 
 export function DoorSovereignPanel() {
   const [selectedZoneIdx, setSelectedZoneIdx] = useState<number>(0);
@@ -232,6 +233,12 @@ export function DoorSovereignPanel() {
           </div>
         </div>
       </div>
+
+      {/* DHGS 13-Step Assurance Loop & MCLOCK-1 Inspector */}
+      <DhgsAndMTimeSimulator />
+
+      {/* Quarantined Ambiguity & Provenance Ledger (Section VII) */}
+      <QuarantinedLedgerPanel />
     </div>
   );
 }

@@ -22,6 +22,8 @@
     "web:dev": "next dev",
     "web:build": "next build",
     "web:start": "next start",
+    "ui:test": "pnpm --filter @moonwitness/ui test",
+    "ui:contrast": "pnpm --filter @moonwitness/ui run ui:contrast",
     "gate:quick": "node scripts/gatecheck.mjs quick",
     "gate:local": "node scripts/gatecheck.mjs local",
     "gate:push": "node scripts/gatecheck.mjs push",

@@ -88,12 +88,19 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           available.
         </p>
       ) : !bridgeConfigured ? (
-        <p className="mt-4 text-xs text-zinc-400">
-          Set <code className="font-mono text-zinc-200">MEMORY_API_URL</code> (for example{" "}
-          <code className="font-mono text-zinc-200">http://127.0.0.1:8000</code>) on{" "}
-          <code className="font-mono text-zinc-200">@moonwitness/api</code> to enable archive
-          knowledge search from this console.
-        </p>
+        <div className="mt-4 space-y-2 text-xs text-zinc-400">
+          <p>
+            Set <code className="font-mono text-zinc-200">MEMORY_API_URL</code> (for example{" "}
+            <code className="font-mono text-zinc-200">http://127.0.0.1:8000</code>) on{" "}
+            <code className="font-mono text-zinc-200">@moonwitness/api</code> to enable archive
+            knowledge search from this console.
+          </p>
+          <p className="font-mono text-[11px] text-zinc-500">
+            Vault ingest: launch <span className="text-zinc-300">apps/memory</span> stack (port 3005
+            / API 8000) and upload{" "}
+            <span className="text-zinc-300">chatgpt_mohrezzafahlevi.zip</span>.
+          </p>
+        </div>
       ) : !bridgeReachable ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-[var(--yellow)]">

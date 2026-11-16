@@ -7,6 +7,7 @@ import {
   SRGBL_V8_STAGES,
   SWING_SWING_KEY_ROTATIONS,
 } from "@/data/empire-canon-codex";
+import { FourCorpusAndWhcmtPanel, P18KeyWitnessInspector } from "./epistemic-lab-modules";
 
 export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean }) {
   const [activeStageLetter, setActiveStageLetter] = useState<"S" | "R" | "G" | "B" | "L">("S");
@@ -161,6 +162,12 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
           </div>
         </div>
       </div>
+
+      {/* P18 Key Witness v0 Spine, 20 Controlled Keys & 12 Relations */}
+      <P18KeyWitnessInspector quietMode={quietMode} />
+
+      {/* Four-Corpus Policy & WHCMT 2x4 vs BASS-HUNTER Boundary */}
+      <FourCorpusAndWhcmtPanel />
     </div>
   );
 }

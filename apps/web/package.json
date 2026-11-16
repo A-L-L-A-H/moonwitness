@@ -19,6 +19,7 @@
   "dependencies": {
     "@moonwitness/assets": "workspace:*",
     "@moonwitness/avatars": "workspace:*",
+    "@moonwitness/canon": "workspace:*",
     "@moonwitness/core": "workspace:*",
     "@moonwitness/types": "workspace:*",
     "@moonwitness/ui": "workspace:*",

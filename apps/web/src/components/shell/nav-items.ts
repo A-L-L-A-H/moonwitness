@@ -36,6 +36,7 @@ const ACTIVE_BY_PATH: Record<string, string> = {
   "/vpn": "vpn",
   "/shadow": "settings",
   "/id-lab": "id-lab",
+  "/skin-lab": "skin-lab",
 };
 
 export function activeByPath(pathname: string): string {
@@ -147,6 +148,12 @@ export const navItems: NavItem[] = [
     label: "ID Lab",
     icon: "M12 11 A4 4 0 1 0 12 3 A4 4 0 1 0 12 11 M4 21 Q4 15 12 15 Q20 15 20 21 M17 4 L18 2 L19 4 L21 5 L19 6 L18 8 L17 6 L15 5 Z",
     target: { kind: "route", href: "/id-lab" },
+  },
+  {
+    id: "skin-lab",
+    label: "Skin Lab",
+    icon: "M12 3 L21 7.5 L12 12 L3 7.5 Z M3 12 L12 16.5 L21 12 M3 16.5 L12 21 L21 16.5",
+    target: { kind: "route", href: "/skin-lab" },
   },
   {
     id: "archive",

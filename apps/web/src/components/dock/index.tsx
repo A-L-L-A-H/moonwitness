@@ -10,6 +10,7 @@ import { DockHero } from "./hero";
 import { FilterBar, type SortKey } from "./filter-bar";
 import { EventList } from "./event-list";
 import { EventDetailPanel } from "./event-detail-panel";
+import { CanonLorePanel } from "./CanonLorePanel";
 import {
   useTimelineEras,
   useTimelineEvent,
@@ -40,6 +41,7 @@ export function Dock() {
   const [queryInput, setQueryInput] = useState(queryFromUrl);
   const [drawerOpen, setDrawerOpen] = useState(Boolean(eventId));
   const [isDesktopXl, setIsDesktopXl] = useState(false);
+  const [dockTab, setDockTab] = useState<"chronicle" | "canon">("chronicle");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [origin, setOrigin] = useState("");
 
@@ -145,53 +147,11 @@ export function Dock() {
     void statsQuery.refetch();
   };
 
-  if (eventsQuery.isError || erasQuery.isError || statsQuery.isError) {
-    return (
-      <EmpireShell
-        breadcrumb="Dock / Lighthouse"
-        search={{
-          value: queryInput,
-          onChange: setQueryInput,
-          placeholder: "Search timeline events…",
-        }}
-      >
-        <div className="flex h-[60vh] flex-col items-center justify-center gap-4 text-center">
-          <p className="font-brush text-xl text-[var(--pink)]">THE ARCHIVE SIGNAL WAS LOST…</p>
-          <p className="text-sm text-zinc-400">
-            We couldn&apos;t load the timeline. Check your connection and try again.
-          </p>
-          <button type="button" onClick={retryAll} className="btn-zine btn-blue px-5 py-2 text-sm">
-            Retry
-          </button>
-        </div>
-      </EmpireShell>
-    );
-  }
-
-  if (eventsQuery.isLoading || erasQuery.isLoading || statsQuery.isLoading) {
-    return (
-      <EmpireShell
-        breadcrumb="Dock / Lighthouse"
-        search={{
-          value: queryInput,
-          onChange: setQueryInput,
-          placeholder: "Search timeline events…",
-        }}
-      >
-        <div
-          className="flex h-[60vh] items-center justify-center font-brush text-xl text-[var(--pink)]"
-          role="status"
-          aria-live="polite"
-        >
-          LOADING THE DOCK…
-        </div>
-      </EmpireShell>
-    );
-  }
-
   const stats = statsQuery.data?.data;
   const pageStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const pageEnd = Math.min(page * PAGE_SIZE, total);
+  const chronicleError = eventsQuery.isError || erasQuery.isError || statsQuery.isError;
+  const chronicleLoading = eventsQuery.isLoading || erasQuery.isLoading || statsQuery.isLoading;
 
   return (
     <EmpireShell
@@ -205,103 +165,160 @@ export function Dock() {
       <DockHero visibleCount={timelineEvents.length} total={total} />
 
       <div className="space-y-5 px-4 py-6 sm:px-8">
-        <section
-          aria-label="Timeline archive statistics"
-          className="grid grid-cols-3 gap-3 text-center"
-        >
-          <div className="zine-card-rough p-3">
-            <p className="font-brush text-2xl text-[var(--yellow)]">{stats?.total ?? "—"}</p>
-            <p className="text-[10px] tracking-widest text-zinc-400">ARCHIVE EVENTS</p>
-          </div>
-          <div className="zine-card-rough p-3">
-            <p className="font-brush text-2xl text-[var(--blue)]">{eras.length}</p>
-            <p className="text-[10px] tracking-widest text-zinc-400">ERAS</p>
-          </div>
-          <div className="zine-card-rough p-3">
-            <p className="font-brush text-2xl text-[var(--pink)]">
-              {Object.keys(stats?.byKind ?? {}).length}
+        <div role="tablist" aria-label="Dock view mode" className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={dockTab === "chronicle"}
+            onClick={() => setDockTab("chronicle")}
+            className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
+              dockTab === "chronicle"
+                ? "border-[var(--pink)] bg-[var(--pink)]/15 text-white"
+                : "border-[var(--line)] bg-[var(--panel)] text-zinc-400 hover:text-white"
+            }`}
+          >
+            CHRONICLE EVENTS
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={dockTab === "canon"}
+            onClick={() => setDockTab("canon")}
+            className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
+              dockTab === "canon"
+                ? "border-[var(--blue)] bg-[var(--blue)]/15 text-white"
+                : "border-[var(--line)] bg-[var(--panel)] text-zinc-400 hover:text-white"
+            }`}
+          >
+            CANON LORE ARCHIVE
+          </button>
+        </div>
+
+        {dockTab === "canon" ? (
+          <CanonLorePanel />
+        ) : chronicleError ? (
+          <div className="flex h-[45vh] flex-col items-center justify-center gap-4 text-center">
+            <p className="font-brush text-xl text-[var(--pink)]">THE ARCHIVE SIGNAL WAS LOST…</p>
+            <p className="text-sm text-zinc-400">
+              We couldn&apos;t load the timeline. Check your connection and try again.
             </p>
-            <p className="text-[10px] tracking-widest text-zinc-400">EVENT TYPES</p>
+            <button
+              type="button"
+              onClick={retryAll}
+              className="btn-zine btn-blue px-5 py-2 text-sm"
+            >
+              Retry
+            </button>
           </div>
-        </section>
+        ) : chronicleLoading ? (
+          <div
+            className="flex h-[45vh] items-center justify-center font-brush text-xl text-[var(--pink)]"
+            role="status"
+            aria-live="polite"
+          >
+            LOADING THE DOCK…
+          </div>
+        ) : (
+          <>
+            <section
+              aria-label="Timeline archive statistics"
+              className="grid grid-cols-3 gap-3 text-center"
+            >
+              <div className="zine-card-rough p-3">
+                <p className="font-brush text-2xl text-[var(--yellow)]">{stats?.total ?? "—"}</p>
+                <p className="text-[10px] tracking-widest text-zinc-400">ARCHIVE EVENTS</p>
+              </div>
+              <div className="zine-card-rough p-3">
+                <p className="font-brush text-2xl text-[var(--blue)]">{eras.length}</p>
+                <p className="text-[10px] tracking-widest text-zinc-400">ERAS</p>
+              </div>
+              <div className="zine-card-rough p-3">
+                <p className="font-brush text-2xl text-[var(--pink)]">
+                  {Object.keys(stats?.byKind ?? {}).length}
+                </p>
+                <p className="text-[10px] tracking-widest text-zinc-400">EVENT TYPES</p>
+              </div>
+            </section>
 
-        <FilterBar
-          eras={eras}
-          era={era}
-          onEraChange={(nextEra) =>
-            updateSearchParams({
-              era: nextEra === "all" ? null : nextEra,
-              page: null,
-            })
-          }
-          sort={sort}
-          onSortChange={(nextSort) =>
-            updateSearchParams({
-              sort: nextSort === "newest" ? null : nextSort,
-              page: null,
-            })
-          }
-          view={view}
-          onViewChange={setView}
-        />
-
-        <EraBand
-          eras={eras}
-          active={era}
-          onSelect={(nextEra) =>
-            updateSearchParams({
-              era: nextEra === "all" ? null : nextEra,
-              page: null,
-            })
-          }
-        />
-
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div>
-            <EventList
-              events={timelineEvents}
-              total={total}
-              pageStart={pageStart}
-              pageEnd={pageEnd}
-              page={page}
-              totalPages={totalPages}
-              view={view}
-              selectedId={selectedListId}
-              query={queryFromUrl}
-              onOpen={selectEvent}
-              onReset={resetFilters}
-              onPageChange={(nextPage) =>
+            <FilterBar
+              eras={eras}
+              era={era}
+              onEraChange={(nextEra) =>
                 updateSearchParams({
-                  page: nextPage > 1 ? String(nextPage) : null,
-                  event: null,
+                  era: nextEra === "all" ? null : nextEra,
+                  page: null,
+                })
+              }
+              sort={sort}
+              onSortChange={(nextSort) =>
+                updateSearchParams({
+                  sort: nextSort === "newest" ? null : nextSort,
+                  page: null,
+                })
+              }
+              view={view}
+              onViewChange={setView}
+            />
+
+            <EraBand
+              eras={eras}
+              active={era}
+              onSelect={(nextEra) =>
+                updateSearchParams({
+                  era: nextEra === "all" ? null : nextEra,
+                  page: null,
                 })
               }
             />
-            {eventId && !selected && selectedDetailQuery.isError && (
-              <p className="mt-4 text-sm text-[var(--yellow)]" role="alert">
-                The selected event could not be loaded from the archive.
-              </p>
-            )}
-          </div>
 
-          {selected && selectedEra ? (
-            <EventDetailPanel
-              variant="aside"
-              event={selected}
-              era={selectedEra}
-              relatedEvents={relatedEvents}
-              shareUrl={shareUrl}
-              onRelated={selectEvent}
-            />
-          ) : eventId && selectedDetailQuery.isLoading ? (
-            <p className="p-5 text-sm text-zinc-400" role="status">
-              Loading event details…
-            </p>
-          ) : null}
-        </div>
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div>
+                <EventList
+                  events={timelineEvents}
+                  total={total}
+                  pageStart={pageStart}
+                  pageEnd={pageEnd}
+                  page={page}
+                  totalPages={totalPages}
+                  view={view}
+                  selectedId={selectedListId}
+                  query={queryFromUrl}
+                  onOpen={selectEvent}
+                  onReset={resetFilters}
+                  onPageChange={(nextPage) =>
+                    updateSearchParams({
+                      page: nextPage > 1 ? String(nextPage) : null,
+                      event: null,
+                    })
+                  }
+                />
+                {eventId && !selected && selectedDetailQuery.isError && (
+                  <p className="mt-4 text-sm text-[var(--yellow)]" role="alert">
+                    The selected event could not be loaded from the archive.
+                  </p>
+                )}
+              </div>
+
+              {selected && selectedEra ? (
+                <EventDetailPanel
+                  variant="aside"
+                  event={selected}
+                  era={selectedEra}
+                  relatedEvents={relatedEvents}
+                  shareUrl={shareUrl}
+                  onRelated={selectEvent}
+                />
+              ) : eventId && selectedDetailQuery.isLoading ? (
+                <p className="p-5 text-sm text-zinc-400" role="status">
+                  Loading event details…
+                </p>
+              ) : null}
+            </div>
+          </>
+        )}
       </div>
 
-      {!isDesktopXl && drawerOpen && selected && selectedEra && (
+      {!isDesktopXl && dockTab === "chronicle" && drawerOpen && selected && selectedEra && (
         <EventDetailPanel
           variant="drawer"
           event={selected}

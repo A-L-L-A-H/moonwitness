@@ -7,6 +7,7 @@ import {
   type DockNodeTelemetry,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { useEcosystemTelemetry } from "@/lib/use-ecosystem-telemetry";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
@@ -18,6 +19,20 @@ import {
   GatewayWaveformSvg,
   SacredCornerBrackets,
 } from "./sacred-illustrations";
+
+const WEB_APP_BASE_URL = (process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000").replace(
+  /\/+$/,
+  "",
+);
+
+const WEB_PORTAL_LINKS: readonly { readonly href: string; readonly label: string }[] = [
+  { href: "/dock", label: "Chronicle Dock" },
+  { href: "/mission-control", label: "Command Center" },
+  { href: "/intelligence", label: "RIOT Intelligence" },
+  { href: "/skin-lab", label: "7-DNA Skin Lab" },
+  { href: "/id-lab", label: "ID Lab" },
+  { href: "/control", label: "Control Plane" },
+];
 
 type DockFilterState = "ALL" | DockNodeTelemetry["state"];
 
@@ -35,6 +50,7 @@ export function DockMatrixSection({
   readonly quietMode?: boolean;
   readonly onLaunchWorld: (worldId: WorldIdentifier) => void;
 }) {
+  const telemetry = useEcosystemTelemetry();
   const [filterState, setFilterState] = useState<DockFilterState>("ALL");
   const [selectedNodeCode, setSelectedNodeCode] = useState<string>(
     DOCK_TELEMETRY_NODES[0]?.nodeCode ?? "GATE-01",
@@ -273,6 +289,40 @@ export function DockMatrixSection({
                     >
                       ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;
                     </button>
+                  </div>
+
+                  {/* Live API Bridge Status & Cross-Portal Links to @moonwitness/web */}
+                  <div className="mt-5 border-t border-[#d6b46c]/20 pt-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
+                      <span className="text-[#d6b46c]">ECOSYSTEM API BRIDGE (/api/v1)</span>
+                      <span
+                        className={`border px-2 py-0.5 ${
+                          telemetry.status === "online"
+                            ? "border-[#e6c987]/55 bg-[#d6b46c]/15 text-[#fff6df]"
+                            : "border-[#d6b46c]/25 bg-[#080a12] text-[#bfb59e]"
+                        }`}
+                      >
+                        {telemetry.status === "checking"
+                          ? "CHECKING LIVE API…"
+                          : telemetry.status === "online"
+                            ? `ONLINE · DB:${(telemetry.databaseStatus ?? "OK").toUpperCase()} · ${telemetry.timelineTotal ?? 0} EVENTS · ${telemetry.erasCount ?? 0} ERAS`
+                            : "CANON SPEC MODE · LIVE API (:3002) OFFLINE"}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {WEB_PORTAL_LINKS.map((link) => (
+                        <a
+                          key={link.href}
+                          href={`${WEB_APP_BASE_URL}${link.href}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex min-h-[44px] items-center border border-[#d6b46c]/25 bg-[#080b14] px-3 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase transition-colors hover:border-[#f8eac6] hover:text-[#fff6df]"
+                        >
+                          {link.label} ↗
+                        </a>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </SpatialTiltCard>

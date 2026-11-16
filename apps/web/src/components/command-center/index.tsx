@@ -17,6 +17,7 @@ import { Studios } from "./studios";
 import { UniverseMap } from "./map";
 import { UniverseStatus } from "./status";
 import { Workspace } from "./workspace";
+import { StewardshipPanel } from "./StewardshipPanel";
 import { useCommandCenter } from "./use-command-center";
 
 export function CommandCenter() {
@@ -77,6 +78,8 @@ export function CommandCenter() {
             onToggleWorkflow={cc.onToggleWorkflow}
           />
         </div>
+
+        <StewardshipPanel />
       </div>
 
       {cc.openModule && (

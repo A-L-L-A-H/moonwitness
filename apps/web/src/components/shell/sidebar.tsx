@@ -6,6 +6,11 @@ import { navHref, type NavItem } from "./nav-items";
 import { Crown, Smiley } from "@moonwitness/ui/icons";
 import { Stack } from "@moonwitness/ui";
 
+const IMPERIUM_GATE_URL = (process.env.NEXT_PUBLIC_ALLAH_URL ?? "http://localhost:3003").replace(
+  /\/+$/,
+  "",
+);
+
 interface SidebarProps {
   items: NavItem[];
   active: string;
@@ -83,6 +88,15 @@ export function Sidebar({
         </Stack>
       </nav>
       <div className="border-t-2 border-[var(--line)] p-4">
+        <a
+          href={IMPERIUM_GATE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mb-3 flex min-h-10 items-center justify-between border border-[var(--line)] bg-black/25 px-3 py-1.5 font-mono text-[11px] tracking-wider text-[var(--yellow)] transition-colors hover:border-[var(--yellow)] hover:text-white"
+        >
+          <span>IMPERIUM GATE</span>
+          <span>↗</span>
+        </a>
         {footerSlot ?? (
           <>
             <div className="sticker -rotate-2 px-3 py-2 font-hand text-base font-bold leading-tight">

@@ -13,6 +13,7 @@
     "clean": "rm -rf .next .turbo node_modules"
   },
   "dependencies": {
+    "@moonwitness/canon": "workspace:*",
     "@moonwitness/ui": "workspace:*",
     "@moonwitness/types": "workspace:*",
     "next": "^15.5.6",

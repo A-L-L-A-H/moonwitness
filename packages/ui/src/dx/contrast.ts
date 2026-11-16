@@ -1,0 +1,81 @@
+import { listDnaWorlds, type MasterDnaWorldSpec } from "../skin/dna-worlds";
+
+export interface ContrastPairResult {
+  readonly pairName: string;
+  readonly foreground: string;
+  readonly background: string;
+  readonly ratio: number;
+  readonly minimumRequired: number;
+  readonly passed: boolean;
+}
+
+export interface ContrastAuditResult {
+  readonly dnaId: string;
+  readonly dnaName: string;
+  readonly passed: boolean;
+  readonly pairs: readonly ContrastPairResult[];
+}
+
+export function hexToRgb(hex: string): readonly [number, number, number] {
+  const clean = hex.replace(/^#/, "");
+  const normalized =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((ch) => ch + ch)
+          .join("")
+      : clean;
+  const num = Number.parseInt(normalized, 16);
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+
+export function relativeLuminance(hex: string): number {
+  const [r, g, b] = hexToRgb(hex).map((channel) => {
+    const srgb = channel / 255;
+    return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+  }) as [number, number, number];
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+export function measureContrastRatio(fgHex: string, bgHex: string): number {
+  const l1 = relativeLuminance(fgHex);
+  const l2 = relativeLuminance(bgHex);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return Number(((lighter + 0.05) / (darker + 0.05)).toFixed(2));
+}
+
+export function auditDnaContrast(world: MasterDnaWorldSpec): ContrastAuditResult {
+  const p = world.palette;
+  const checks: readonly [string, string, string, number][] = [
+    ["text on canvas", p.text, p.canvas, 4.5],
+    ["text on surface", p.text, p.surface, 4.5],
+    ["mutedText on surface", p.mutedText, p.surface, 4.5],
+    ["accentForeground on accent", p.accentForeground, p.accent, 4.5],
+    ["focus on canvas", p.focus, p.canvas, 3.0],
+    ["focus on surface", p.focus, p.surface, 3.0],
+  ];
+
+  const pairs: ContrastPairResult[] = checks.map(([pairName, foreground, background, minReq]) => {
+    const ratio = measureContrastRatio(foreground, background);
+    return {
+      pairName,
+      foreground,
+      background,
+      ratio,
+      minimumRequired: minReq,
+      passed: ratio >= minReq,
+    };
+  });
+
+  return {
+    dnaId: world.id,
+    dnaName: world.name,
+    passed: pairs.every((pair) => pair.passed),
+    pairs,
+  };
+}
+
+export function auditAllDnaWorlds(): readonly ContrastAuditResult[] {
+  return listDnaWorlds().map(auditDnaContrast);
+}

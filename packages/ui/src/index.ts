@@ -24,6 +24,7 @@ export {
   type DistressedStickerProps,
   type DistressedStickerVariant,
 } from "./primitives/distressed-sticker";
+export { ComicPanel, type ComicPanelProps, type ComicPanelTone } from "./primitives/comic-panel";
 
 export { kindColors, defaultKindColors } from "./composites/kind-colors";
 export {
@@ -289,6 +290,21 @@ export {
   applyThemeMode,
   type ThemeMode,
 } from "./skin/index";
+export {
+  MASTER_DNA_IDS,
+  MASTER_DNA_WORLDS,
+  getDnaWorld,
+  listDnaWorlds,
+  dnaWorldCssVariables,
+  useDnaWorld,
+  SkinScope,
+  SkinRoot,
+  type MasterDnaId,
+  type DnaWorldPalette,
+  type MasterDnaWorldSpec,
+  type SkinScopeProps,
+  type SkinRootProps,
+} from "./skin/dna-worlds";
 
 /* Layout System */
 export { Grid, GridItem, Stack, VStack, HStack, ZStack, Container, Flow } from "./layout";
@@ -296,10 +312,18 @@ export { Grid, GridItem, Stack, VStack, HStack, ZStack, Container, Flow } from "
 /* Artwork System */
 export * from "./artwork/vector";
 export * from "./artwork/generative";
+export * from "./artwork/compositions";
 
 /* DX Layer */
 export { TokenInspector, type TokenInspectorProps } from "./dx/inspector";
 export { SkinPlayground, type SkinPlaygroundProps } from "./dx/playground";
+export {
+  measureContrastRatio,
+  auditDnaContrast,
+  auditAllDnaWorlds,
+  type ContrastPairResult,
+  type ContrastAuditResult,
+} from "./dx/contrast";
 export {
   generateTokenDocs,
   generateSkinDocs,

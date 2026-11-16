@@ -12,6 +12,7 @@ import {
   type SyafaatStateId,
 } from "@/data/empire-canon-codex";
 import { Monocentric100CenterSvg } from "../sacred-illustrations";
+import { Amanah25AtlasPanel, God99DirectoryExplorer } from "./organization-directory-modules";
 
 export function DoorOrganizationPanel() {
   const [activeSyafaatState, setActiveSyafaatState] = useState<SyafaatStateId>("PRACTICING");
@@ -201,6 +202,12 @@ export function DoorOrganizationPanel() {
           </div>
         </div>
       </div>
+
+      {/* Full Interactive G.O.D. 99 Directory (D01-D09) */}
+      <God99DirectoryExplorer />
+
+      {/* 25 Bidang Amanah Pedagogical Atlas */}
+      <Amanah25AtlasPanel />
     </div>
   );
 }
