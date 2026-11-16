@@ -181,7 +181,7 @@ export interface FourCorpusConcordanceTheme {
 }
 
 export interface EcosystemEdgeNode {
-  readonly id: "sanctuary" | "web" | "api" | "codex-edge" | "community" | "radio";
+  readonly id: "sanctuary" | "web" | "api" | "codex-edge" | "community" | "radio" | "igate";
   readonly hostname: string;
   readonly url: string;
   readonly workerName: string;

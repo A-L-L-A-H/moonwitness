@@ -455,6 +455,15 @@ export const ECOSYSTEM_RUNTIME_CATALOG = {
       layer: "Cloudflare Workers · Audio Broadcast",
       role: "MoonWitness Acoustic Broadcast & Contemplative Radio Telemetry Edge",
     },
+    {
+      id: "igate",
+      hostname: "igate.moonwitness.biz.id",
+      url: "https://igate.moonwitness.biz.id",
+      workerName: "rocksoul-igate-worker",
+      healthPath: "/health",
+      layer: "Cloudflare Workers · D1 Edge",
+      role: "Rocksoul Identity Gateway & Provisioning Edge Health Broker",
+    },
   ] as readonly EcosystemEdgeNode[],
   workspaceNodes: [
     {

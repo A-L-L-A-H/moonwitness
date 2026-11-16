@@ -259,5 +259,14 @@ describe("@moonwitness/canon SSOT invariants", () => {
     );
     expect(aqel.statements).toHaveLength(3);
     expect(aqel.diagnostics).toHaveLength(0);
+    expect(ECOSYSTEM_RUNTIME_CATALOG.liveEdges.map((edge) => edge.id)).toEqual([
+      "sanctuary",
+      "web",
+      "api",
+      "codex-edge",
+      "community",
+      "radio",
+      "igate",
+    ]);
   });
 });

@@ -6,11 +6,10 @@ import {
   hasCallerSignatureQuery,
   signStorageRequest,
 } from "../../services/storage-sigv4";
-
-const STORAGE_URL = process.env.STORAGE_URL ?? "http://127.0.0.1:8091";
+import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 
 export function resolveStorageTarget(target: string): URL {
-  const baseUrl = new URL(STORAGE_URL);
+  const baseUrl = new URL(resolveUpstreamServiceUrl("STORAGE_URL", "http://127.0.0.1:8091"));
   const queryStart = target.indexOf("?");
   const rawPath = queryStart === -1 ? target : target.slice(0, queryStart);
   const rawQuery = queryStart === -1 ? "" : target.slice(queryStart + 1);
@@ -80,6 +79,10 @@ async function forward(
     }
 
     upstreamUrl = resolveStorageTarget(target);
+    const edgeGuard = getEdgeLoopbackErrorPayload("storage", "STORAGE_URL", upstreamUrl.origin);
+    if (edgeGuard) {
+      return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
+    }
     if (sign) {
       const rawQuery = upstreamUrl.search.slice(1);
       if (hasCallerSignatureQuery(rawQuery)) {

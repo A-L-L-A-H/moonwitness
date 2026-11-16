@@ -1,7 +1,10 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth, requireRole } from "../../middleware/auth";
+import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 
-const SNMP_POLLER_URL = process.env.SNMP_POLLER_URL ?? "http://127.0.0.1:8094";
+function getSnmpPollerUrl(): string {
+  return resolveUpstreamServiceUrl("SNMP_POLLER_URL", "http://127.0.0.1:8094");
+}
 const SENSITIVE_FIELD =
   /community|pass(?:word|phrase)|secret|credential|access.?key|auth.?key|priv.?key|token/i;
 
@@ -28,9 +31,15 @@ async function forward(
   target: string,
   method: string,
 ) {
+  const baseUrl = getSnmpPollerUrl();
+  const edgeGuard = getEdgeLoopbackErrorPayload("snmp-poller", "SNMP_POLLER_URL", baseUrl);
+  if (edgeGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
+  }
+
   let upstream: Response;
   try {
-    upstream = await fetch(`${SNMP_POLLER_URL}${target}`, {
+    upstream = await fetch(`${baseUrl}${target}`, {
       method,
       headers: forwardHeaders(request),
       body: (() => {

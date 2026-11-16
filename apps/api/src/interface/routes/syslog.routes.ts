@@ -1,7 +1,10 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth } from "../../middleware/auth";
+import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 
-const SYSLOG_URL = process.env.SYSLOG_URL ?? "http://127.0.0.1:8093";
+function getSyslogUrl(): string {
+  return resolveUpstreamServiceUrl("SYSLOG_URL", "http://127.0.0.1:8093");
+}
 
 function forwardHeaders(request: FastifyRequest): Record<string, string> {
   const headers: Record<string, string> = {};
@@ -15,9 +18,15 @@ async function forward(
   target: string,
   method: string,
 ) {
+  const baseUrl = getSyslogUrl();
+  const edgeGuard = getEdgeLoopbackErrorPayload("syslog", "SYSLOG_URL", baseUrl);
+  if (edgeGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
+  }
+
   let upstream: Response;
   try {
-    upstream = await fetch(`${SYSLOG_URL}${target}`, {
+    upstream = await fetch(`${baseUrl}${target}`, {
       method,
       headers: forwardHeaders(request),
       body: (() => {

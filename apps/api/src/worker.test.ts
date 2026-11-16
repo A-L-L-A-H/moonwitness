@@ -166,5 +166,43 @@ describe("API Cloudflare Worker adapter", () => {
       env,
     );
     expect(authCc.status).toBe(200);
+
+    for (const path of [
+      "/api/v1/control/health",
+      "/api/v1/radius/health",
+      "/api/v1/storage/health",
+      "/api/v1/syslog/health",
+      "/api/v1/snmp/health",
+    ]) {
+      const edgeRes = await worker.fetch(
+        new Request(`https://api.moonwitness.biz.id${path}`, {
+          headers: { cookie: cookieHeader },
+        }),
+        env,
+      );
+      expect(edgeRes.status).toBe(503);
+      const edgeJson = (await edgeRes.json()) as {
+        reachable: boolean;
+        configured: boolean;
+        mode: string;
+      };
+      expect(edgeJson).toMatchObject({
+        reachable: false,
+        configured: false,
+        mode: "cloudflare-edge",
+      });
+    }
+
+    const memoryStatusRes = await worker.fetch(
+      new Request("https://api.moonwitness.biz.id/api/v1/memory/status", {
+        headers: { cookie: cookieHeader },
+      }),
+      env,
+    );
+    expect(memoryStatusRes.status).toBe(200);
+    expect(await memoryStatusRes.json()).toMatchObject({
+      configured: false,
+      reachable: false,
+    });
   });
 });

@@ -1,10 +1,18 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import rateLimit from "@fastify/rate-limit";
 import { requireAuth, requireRole } from "../../middleware/auth";
+import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 
-const ARSY_URL = process.env.ARSY_URL ?? "http://127.0.0.1:8787";
-const ARSY_TOKEN_READONLY = process.env.ARSY_TOKEN_READONLY ?? "";
-const ARSY_TOKEN_ADMIN = process.env.ARSY_TOKEN_ADMIN ?? "";
+function getArsyUrl(): string {
+  return resolveUpstreamServiceUrl("ARSY_URL", "http://127.0.0.1:8787");
+}
+
+function getArsyTokens(): { readonlyToken: string; adminToken: string } {
+  return {
+    readonlyToken: process.env.ARSY_TOKEN_READONLY ?? "",
+    adminToken: process.env.ARSY_TOKEN_ADMIN ?? "",
+  };
+}
 
 // Endpoint auth/setup meneruskan kredensial ke control plane, jadi dibatasi
 // per-IP untuk mempersempit brute force (login) dan penyalahgunaan setup.
@@ -97,7 +105,12 @@ function forwardCookies(reply: FastifyReply, upstream: Response) {
 
 async function forwardAuth(request: FastifyRequest, reply: FastifyReply, subPath: string) {
   const query = request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
-  const target = `${ARSY_URL}/v1/${subPath}${query}`;
+  const arsyUrl = getArsyUrl();
+  const edgeGuard = getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", arsyUrl);
+  if (edgeGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
+  }
+  const target = `${arsyUrl}/v1/${subPath}${query}`;
 
   let upstream: Response;
   try {
@@ -126,7 +139,8 @@ async function forwardAuth(request: FastifyRequest, reply: FastifyReply, subPath
 
 async function forward(request: FastifyRequest, reply: FastifyReply, subPath: string) {
   const query = request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
-  const target = `${ARSY_URL}/v1/${subPath}${query}`;
+  const arsyUrl = getArsyUrl();
+  const target = `${arsyUrl}/v1/${subPath}${query}`;
 
   // Data control diteruskan dengan cookie sesi pengguna. Token server-side
   // hanya dipakai bila pemanggil tidak membawa sesi (integrasi non-manusia).
@@ -134,11 +148,17 @@ async function forward(request: FastifyRequest, reply: FastifyReply, subPath: st
   const headers = upstreamHeaders(request);
   if (!headers.cookie) {
     const isWrite = request.method !== "GET" && request.method !== "HEAD";
-    const fallback = isWrite ? ARSY_TOKEN_ADMIN : ARSY_TOKEN_READONLY || ARSY_TOKEN_ADMIN;
+    const { readonlyToken, adminToken } = getArsyTokens();
+    const fallback = isWrite ? adminToken : readonlyToken || adminToken;
     if (!fallback) {
       return reply.code(401).send({ error: "butuh login" });
     }
     headers.authorization = `Bearer ${fallback}`;
+  }
+
+  const edgeGuard = getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", arsyUrl);
+  if (edgeGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
   }
 
   let response: Response;
@@ -219,12 +239,20 @@ export async function controlRoutes(fastify: FastifyInstance) {
     protectedScope.addHook("preHandler", requireAuth());
 
     protectedScope.get("/control/status", async (request, reply) => {
+      const arsyUrl = getArsyUrl();
+      const edgeGuard = getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", arsyUrl);
+      if (edgeGuard) {
+        return reply
+          .code(503)
+          .header("cache-control", "no-store")
+          .send({ ...edgeGuard, arsyUrl });
+      }
       const headers = upstreamHeaders(request);
       const [hostRes, metricsRes] = await Promise.all([
-        fetch(`${ARSY_URL}/v1/host`, { headers, signal: AbortSignal.timeout(5_000) }).catch(
+        fetch(`${arsyUrl}/v1/host`, { headers, signal: AbortSignal.timeout(5_000) }).catch(
           () => null,
         ),
-        fetch(`${ARSY_URL}/v1/metrics`, { headers, signal: AbortSignal.timeout(10_000) }).catch(
+        fetch(`${arsyUrl}/v1/metrics`, { headers, signal: AbortSignal.timeout(10_000) }).catch(
           () => null,
         ),
       ]);
@@ -232,7 +260,7 @@ export async function controlRoutes(fastify: FastifyInstance) {
       if (!hostRes?.ok || !metricsRes?.ok) {
         return reply
           .code(502)
-          .send({ error: "arsy tidak dapat dihubungi", arsyUrl: ARSY_URL, reachable: false });
+          .send({ error: "arsy tidak dapat dihubungi", arsyUrl, reachable: false });
       }
       return reply.send({
         reachable: true,

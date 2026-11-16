@@ -1,7 +1,10 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth, requireRole } from "../../middleware/auth";
+import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 
-const RADIUS_URL = process.env.RADIUS_URL ?? "http://127.0.0.1:8090";
+function getRadiusUrl(): string {
+  return resolveUpstreamServiceUrl("RADIUS_URL", "http://127.0.0.1:8090");
+}
 
 // Write endpoints dikunci di balik env, sama seperti control.routes.ts.
 function radiusProxyAdminEnabled(): boolean {
@@ -20,9 +23,15 @@ async function forward(
   target: string,
   method: string,
 ) {
+  const baseUrl = getRadiusUrl();
+  const edgeGuard = getEdgeLoopbackErrorPayload("radius", "RADIUS_URL", baseUrl);
+  if (edgeGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
+  }
+
   let upstream: Response;
   try {
-    upstream = await fetch(`${RADIUS_URL}${target}`, {
+    upstream = await fetch(`${baseUrl}${target}`, {
       method,
       headers: forwardHeaders(request),
       body: (() => {

@@ -1,13 +1,63 @@
 import { initDb, closeDb, getDb } from "@moonwitness/orm";
-import { seedTimeline, timelineDdl } from "@moonwitness/addon-timeline";
+import { eras, events, seedTimeline, timelineDdl } from "@moonwitness/addon-timeline";
 import { env } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
+
+function sqlString(value: string): string {
+  return `'${value.replaceAll("'", "''")}'`;
+}
+
+function buildD1SeedSql(now: string): string {
+  const lines: string[] = [];
+  for (const era of eras) {
+    lines.push(
+      `INSERT OR IGNORE INTO timeline_eras (id, name, years, tagline, color, create_date, write_date, source) VALUES (${[
+        sqlString(era.id),
+        sqlString(era.name),
+        sqlString(era.years),
+        sqlString(era.tagline),
+        sqlString(era.color),
+        sqlString(now),
+        sqlString(now),
+        "'seed'",
+      ].join(", ")});`,
+    );
+  }
+  for (const ev of events) {
+    lines.push(
+      `INSERT OR IGNORE INTO timeline_events (id, kind, date, era, title, excerpt, body, location, tags, sources, notes, image, imagePosition, related, create_date, write_date, source) VALUES (${[
+        sqlString(ev.id),
+        sqlString(ev.kind),
+        sqlString(ev.date),
+        sqlString(ev.era),
+        sqlString(ev.title),
+        sqlString(ev.excerpt),
+        sqlString(ev.body),
+        sqlString(ev.location),
+        sqlString(JSON.stringify(ev.tags)),
+        String(ev.sources),
+        String(ev.notes),
+        sqlString(ev.image),
+        ev.imagePosition ? sqlString(ev.imagePosition) : "NULL",
+        sqlString(JSON.stringify(ev.related)),
+        sqlString(now),
+        sqlString(now),
+        "'seed'",
+      ].join(", ")});`,
+    );
+  }
+  return lines.join("\n");
+}
 
 async function main() {
   assertDemoSeedAllowed({
     nodeEnv: env.NODE_ENV,
     allowDemoSeed: process.env.ALLOW_DEMO_SEED ?? "0",
   });
+  if (process.argv.includes("--sql")) {
+    process.stdout.write(`${buildD1SeedSql(new Date().toISOString())}\n`);
+    return;
+  }
   const dbPath = process.env.DATABASE_URL ?? "./moonwitness.db";
   await initDb(dbPath);
   await getDb().exec(timelineDdl);

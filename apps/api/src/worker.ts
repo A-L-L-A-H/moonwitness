@@ -17,6 +17,11 @@ export interface ApiWorkerEnv {
   RADIUS_URL?: string;
   SYSLOG_URL?: string;
   SNMP_POLLER_URL?: string;
+  ARSY_URL?: string;
+  ARSY_TOKEN_READONLY?: string;
+  ARSY_TOKEN_ADMIN?: string;
+  ARSY_AUTH_RATE_MAX?: string;
+  ARSY_AUTH_RATE_WINDOW_MS?: string;
   RIOT_AI_BASE_URL?: string;
   RIOT_AI_MODEL?: string;
   MEMORY_API_URL?: string;
