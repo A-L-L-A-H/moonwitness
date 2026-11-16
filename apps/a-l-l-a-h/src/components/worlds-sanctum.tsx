@@ -2,18 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { DiamondStarOrnament } from "@moonwitness/ui/imperium";
 import {
   SIDRA_KNOWLEDGE_AXIOMS,
   WORLD_DOMAINS,
   type WorldDomainEntry,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament, WorldEmblemById } from "./sacred-icons";
+import { WorldEmblemById } from "./sacred-icons";
 import { MeridianConstellationMapSvg, WorldChamberWatermarkSvg } from "./sacred-illustrations";
 
 const QALAM_STORAGE_KEY = "allah-qalam-folios-v1";
@@ -23,7 +25,7 @@ const MOONWITNESS_MERIDIANS = [
     code: "MERIDIAN 01",
     city: "Cairo",
     fullLabel: "Cairo · Al-Qāhirah",
-    stats: "412 Verified Oral Chronicles",
+    stats: "Nile Witness Chain · Heritage Focus",
     bearing: "30.0444° N · 31.2357° E",
     note: "Observatory of nocturnal lanterns preserving Mediterranean & Nile scholarly chains.",
     x: 68,
@@ -33,9 +35,9 @@ const MOONWITNESS_MERIDIANS = [
     code: "MERIDIAN 02",
     city: "Samarkand",
     fullLabel: "Samarkand · Ulugh",
-    stats: "289 Star Catalogue Folios",
+    stats: "Meridian Sextant Table · Heritage Focus",
     bearing: "39.6542° N · 66.9597° E",
-    note: "High-precision celestial meridian sextant Tables illuminating Eurasian astronavigation.",
+    note: "High-precision celestial meridian sextant tables illuminating Eurasian astronavigation.",
     x: 180,
     y: 48,
   },
@@ -43,7 +45,7 @@ const MOONWITNESS_MERIDIANS = [
     code: "MERIDIAN 03",
     city: "Nusantara",
     fullLabel: "Nusantara · Archipelago",
-    stats: "518 Maritime Witness Logs",
+    stats: "Maritime Oral Tradition · Heritage Focus",
     bearing: "6.2088° S · 106.8456° E",
     note: "Equatorial ocean corridor uniting oral wisdom, calligraphy, and monsoon celestial navigation.",
     x: 292,
@@ -107,6 +109,7 @@ export function WorldsSanctum({
   readonly quietMode?: boolean;
   readonly onSelectWorld: (worldId: WorldIdentifier) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const activeWorld: WorldDomainEntry =
     WORLD_DOMAINS.find((domain) => domain.id === activeWorldId) ?? WORLD_DOMAINS[0]!;
 
@@ -523,11 +526,12 @@ export function WorldsSanctum({
               id="worlds-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              THE WORLDS OF LIGHT
+              {locale === "id" ? "ALAM-ALAM CAHAYA" : "THE WORLDS OF LIGHT"}
             </h2>
             <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
-              Five interconnected sanctuaries rising around the Central Gate—each dedicated to a
-              noble pillar of witness, infrastructure, authorship, wisdom, and creation.
+              {locale === "id"
+                ? "Lima ruang karya terhubung mengelilingi Gerbang Utama—masing-masing berkhidmat pada kesaksian jujur, infrastruktur terbuka, penulisan, hikmah, dan penciptaan."
+                : "Five interconnected sanctuaries rising around the Central Gate—each dedicated to a noble pillar of witness, infrastructure, authorship, wisdom, and creation."}
             </p>
           </div>
         </ScrollChapterReveal>
@@ -588,7 +592,7 @@ export function WorldsSanctum({
 
         {/* Active World Beveled Sanctum Chamber */}
         <ScrollChapterReveal quietMode={quietMode}>
-          <div className="octa-bevel-shell relative mt-10 overflow-hidden border border-[#d6b46c]/40 bg-gradient-to-br from-[#0a0d17]/95 via-[#070a12]/95 to-[#05060b] p-6 sm:p-10 shadow-[0_24px_70px_rgba(0,0,0,0.84)]">
+          <div className="octa-bevel-shell relative mt-10 p-6 sm:p-10">
             <WorldChamberWatermarkSvg worldId={activeWorld.id} />
 
             {/* Architectural Meridian & Harmonic Resonance 3-Col Strip */}
@@ -964,7 +968,7 @@ export function WorldsSanctum({
                             className="relative h-60 sm:h-64 w-full overflow-hidden border border-[#d6b46c]/30 bg-[#060912] shadow-[inset_0_0_28px_rgba(0,0,0,0.88)]"
                           >
                             <Image
-                              src="/art/sidra-lote-constellation.png"
+                              src="/art/sidra-lote-constellation.webp"
                               alt=""
                               fill
                               sizes="(max-width: 768px) 100vw, 480px"
@@ -1170,6 +1174,12 @@ export function WorldsSanctum({
                             />
                           </div>
                         </div>
+                      </div>
+                      <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#cfc5b0]">
+                        <span className="text-[#f5dfa6]">
+                          DESKTOP WORKBENCH · LOCAL SQLITE ENGINE · SPATIAL STAGE
+                        </span>
+                        <span>SSOT: @MOONWITNESS/CANON</span>
                       </div>
                     </div>
                   )}

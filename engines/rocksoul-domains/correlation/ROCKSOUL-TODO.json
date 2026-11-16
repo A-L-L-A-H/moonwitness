@@ -1,0 +1,16 @@
+{
+  "schema": "rocksoul.todo.v1",
+  "repository_id": "rocksoul-correlation",
+  "tasks": [
+    {
+      "id": "CORRELATION-001",
+      "title": "Maintain repository control contract and local TODO",
+      "status": "VERIFIED",
+      "scope": "repository",
+      "github_issue": "https://github.com/bjo163/rocksoul-correlation/issues/8",
+      "evidence": [
+        "npm run ci; PASS: correlation validation passed (5 cases, 8 edges, 12 canonical refs, 4 candidate refs); 13 tests passed, 0 failed; verified_at=2026-09-09"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "rocksoul.todo.v1",
+  "repository_id": "rocksoul-crayon",
+  "tasks": [
+    {
+      "id": "CRAYON-001",
+      "title": "Maintain repository control contract and local TODO",
+      "status": "VERIFIED",
+      "scope": "repository",
+      "github_issue": "https://github.com/bjo163/rocksoul-crayon/issues/16",
+      "evidence": [
+        "node scripts/validate-rocksoul-contract.mjs => PASS: rocksoul-crayon contract; tasks=1",
+        ".github/workflows/rocksoul-contract.yml provides workflow_dispatch validation via Node 22"
+      ]
+    }
+  ]
+}

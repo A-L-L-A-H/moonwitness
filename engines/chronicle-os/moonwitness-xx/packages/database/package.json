@@ -1,0 +1,25 @@
+{
+  "name": "@moonwitness/database",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./entities": "./src/entities.js"
+  },
+  "scripts": {
+    "migrate": "mikro-orm migration:up --config ./mikro-orm.config.js",
+    "create-migration": "mikro-orm migration:create --config ./mikro-orm.config.js",
+    "check": "node --check src/entities.js && node --check src/orm.js && node --check src/audit.js && node --check src/outbox.js && node --check mikro-orm.config.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@mikro-orm/core": "catalog:",
+    "@mikro-orm/migrations": "catalog:",
+    "@mikro-orm/postgresql": "catalog:",
+    "@moonwitness/config": "workspace:*",
+    "@moonwitness/contracts": "workspace:*"
+  },
+  "devDependencies": {
+    "@mikro-orm/cli": "catalog:"
+  }
+}

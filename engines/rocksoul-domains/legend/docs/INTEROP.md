@@ -1,0 +1,200 @@
+# Rocksoul Research Interoperability
+
+## Research-domain model
+
+```text
+MFTL      STORY        What was told?
+LEGEND    EVENT        What happened?
+SUPERHERO PERSON       Who was involved?
+RGBL      TEXT         What does the source text say?
+AWS       LAW          Was it legally applicable?
+JIZZ      PERSPECTIVE  How is the record observed or framed?
+```
+
+`rocksoul-correlation` is the separate RELATIONSHIP layer for reviewed cross-domain edges.
+
+## Identifier grammar
+
+```text
+EVT-*  event
+SRC-*  source
+CLM-*  claim
+EVD-*  evidence
+REL-*  LEGEND-local relationship
+PLC-*  place reference
+ART-*  artifact reference
+PER-*  person reference owned by SUPERHERO
+```
+
+### Narrative IDs
+
+The existing MFTL corpus already owns canonical IDs such as:
+
+```text
+MYTH-MES-INANA-DESCENT-000001
+```
+
+LEGEND therefore accepts **`MYTH-*` as the current MFTL narrative namespace**.
+`NAR-*` is only reserved for a possible future generic narrative namespace.
+LEGEND must not require MFTL to rename existing canonical records.
+
+## Cross-repository rule
+
+Do not copy the full foreign object. Store a stable reference plus an evidence-backed relationship.
+
+```json
+{
+  "narrative_id": "MYTH-...",
+  "relation": "possibly_correlates_with",
+  "status": "hypothesis",
+  "confidence": 0.62,
+  "basis": ["chronological_match", "geographic_match"],
+  "counterpoints": ["large transmission gap"]
+}
+```
+
+## Ownership test
+
+- **What was told?** → MFTL.
+- **What happened?** → LEGEND.
+- **Who acted, witnessed, recorded, translated, transmitted, interpreted, or disputed it?** → SUPERHERO.
+- **What does the exact scripture/source passage say?** → RGBL.
+- **Was it legally applicable?** → AWS.
+- **How is the record observed, framed, or situated?** → JIZZ.
+
+## First live cross-repository link
+
+LEGEND's first canonical event is:
+
+`EVT-COL-GUATAVITA-OFFERINGS`
+
+It links to the existing MFTL research candidate:
+
+`CAND-COL-MUISCA-EL-DORADO-GUATAVITA-000001`
+
+through:
+
+`REL-COL-GUATAVITA-MFTL-CAND-000001`
+
+The relation is `associated_with`, not `origin_of`. A canonical `MYTH-*` link remains a later milestone after the MFTL candidate itself is reviewed and promoted.
+
+## SUPERHERO integration
+
+The actor/transmission repository is now:
+
+`bjo163/rocksoul-superhero`
+
+Its first canonical person is:
+
+`PER-COL-JUAN-RODRIGUEZ-FREYLE`
+
+and it references this LEGEND event:
+
+`EVT-COL-GUATAVITA-OFFERINGS`
+
+without moving event ownership out of LEGEND.
+
+## Qualified ecosystem notation
+
+Existing LEGEND v0.1 data uses native unqualified IDs such as:
+
+`EVT-COL-GUATAVITA-OFFERINGS`
+
+For explicit cross-repository notation, the ecosystem may qualify the owner:
+
+```text
+mftl:MYTH-...
+legend:EVT-...
+superhero:PER-...
+rgbl:mw:...
+aws:LAW-...
+jizz:PERSP-...
+correlation:CORR-...
+```
+
+No migration of existing LEGEND IDs is required.
+
+The existing relationship `REL-COL-GUATAVITA-MFTL-CAND-000001` intentionally preserves its v0.1 unqualified external target for backward compatibility. New documentation should prefer qualified notation when ambiguity is possible.
+
+## Validation boundary
+
+LEGEND validates local graph integrity and recognizes external namespaces, but does not remotely dereference every foreign target during each CI run. Cross-repository existence is verified during research/audit so repository builds remain independent.
+
+## RGBL integration
+
+`bjo163/rocksoul-rgbl` is the scripture/text reference layer. LEGEND may use RGBL passages or scoped assertions as textual evidence/context, but RGBL does not decide whether a historical event occurred.
+
+```text
+RGBL passage / assertion
+        ↓ textual evidence
+LEGEND historical claim
+        ↓
+historicity assessment
+```
+
+A source text reporting an event is **textual attestation**, not automatic proof of the event.
+
+Qualified external notation may use:
+
+```text
+rgbl:mw:work:...
+rgbl:mw:passage:...
+```
+
+without renaming RGBL's native `mw:*` IDs.
+
+## Artifact / place / text overlap
+
+The same physical or documentary referent may appear in more than one repository for different purposes.
+
+Use functional ownership:
+
+```text
+LEGEND ART-*
+→ material evidence relevant to an event / historical core
+
+RGBL mw:resource:* / textual artifact
+→ edition / manuscript / digital artifact in the text-provenance supply chain
+
+MFTL object/entity
+→ narrative or symbolic meaning of the artifact/place
+```
+
+Do not auto-merge these records from title, shelfmark, or name similarity. Crosswalk them explicitly when evidence establishes that they refer to the same underlying artifact.
+
+Likewise, an RGBL passage reporting an event is textual evidence; LEGEND still owns the historical-event assessment.
+
+## AWS boundary
+
+`rocksoul-aws` owns **LAW / applicability / legal assessment**. AWS may reference LEGEND events as foreign records; a legal conclusion never becomes the historical-event verdict.
+
+```text
+FOREIGN REFERENCE ≠ OWNERSHIP
+LEGAL APPLICABILITY ≠ HISTORICAL FACT
+LEGAL RESULT ≠ MIZAN
+```
+
+## JIZZ boundary
+
+`rocksoul-jizz` owns **PERSPECTIVE** records. A perspective can observe or frame an EVENT, but it cannot mutate the canonical LEGEND event record or its historicity assessment.
+
+```text
+legend:EVT-...
+        ↓ observed / framed by
+jizz:PERSP-...
+```
+
+`PERSPECTIVE ≠ EVENT` and `PERSPECTIVE ≠ HISTORICITY`.
+
+## LEGEND relationships vs global Correlation
+
+LEGEND `REL-*` records are event-local graph objects required to preserve EVENT evidence/context. They remain canonical **inside LEGEND only**.
+
+Reviewed cross-domain relationship semantics, explainability, freshness and targeted re-analysis belong to `rocksoul-correlation`:
+
+```text
+LEGEND REL-*                  local EVENT graph integrity
+rocksoul-correlation CORR-*   reviewed ecosystem relationship
+```
+
+A LEGEND `REL-*` object must not be advertised as the global cross-domain relationship owner, and Correlation must not copy or replace the underlying LEGEND EVENT record.

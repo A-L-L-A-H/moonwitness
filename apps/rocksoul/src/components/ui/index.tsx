@@ -2,6 +2,7 @@
 // React wrappers around design-system primitives
 
 import React from "react";
+import { OWNER_FOUR_LINE_MANIFESTO } from "@moonwitness/canon";
 import {
   Archive,
   ArrowLeft,
@@ -581,12 +582,11 @@ export interface UniverseCopyProps {
   manifesto?: string[];
 }
 
-export function UniverseCopy({ kicker = "THE LIVING UNIVERSE / ENTRY 01", subtitle = "A PRIVATE DESKTOP WORLD FOR REAL WORK", manifesto = [
-  "01 — NO CLUE WHAT'S COMING.",
-  "02 — NO IDEA HOW THIS ENDS.",
-  "03 — COULD BE RIGHT. COULD BE WRONG.",
-  "04 — BUT I KNOW WHO SAID: \"I'LL FINISH IT.\""
-] }: UniverseCopyProps) {
+const CANON_MANIFESTO_LINES = OWNER_FOUR_LINE_MANIFESTO.map(
+  (entry) => `${entry.index} — ${entry.line}`,
+);
+
+export function UniverseCopy({ kicker = "THE LIVING UNIVERSE / ENTRY 01", subtitle = "A PRIVATE DESKTOP WORLD FOR REAL WORK", manifesto = CANON_MANIFESTO_LINES }: UniverseCopyProps) {
   return (
     <>
       <div className="universe-title-lockup">
@@ -609,9 +609,11 @@ export function UniverseCopy({ kicker = "THE LIVING UNIVERSE / ENTRY 01", subtit
 export interface AwakeningProps {
   onEnter: () => void;
   reducedMotion: boolean;
+  onQuickWorkbench?: (() => void) | undefined;
+  onQuickMonitor?: (() => void) | undefined;
 }
 
-export function Awakening({ onEnter, reducedMotion }: AwakeningProps) {
+export function Awakening({ onEnter, reducedMotion, onQuickWorkbench, onQuickMonitor }: AwakeningProps) {
   const [opening, setOpening] = React.useState(false);
   const entryTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -653,6 +655,30 @@ export function Awakening({ onEnter, reducedMotion }: AwakeningProps) {
           <span>{opening ? "THE GATE IS OPENING" : "ENTER THE UNKNOWN"}</span>
           <ArrowRight size={20} aria-hidden="true" />
         </button>
+        {(onQuickWorkbench || onQuickMonitor) && (
+          <div className="awakening-quick-actions">
+            {onQuickWorkbench && (
+              <button
+                type="button"
+                className="awakening-quick-btn"
+                onClick={onQuickWorkbench}
+                disabled={opening}
+              >
+                DIRECT WORKBENCH
+              </button>
+            )}
+            {onQuickMonitor && (
+              <button
+                type="button"
+                className="awakening-quick-btn"
+                onClick={onQuickMonitor}
+                disabled={opening}
+              >
+                AGENT MONITOR
+              </button>
+            )}
+          </div>
+        )}
         <div className="awakening-manifesto" aria-label="ROCKSOUL manifesto">
           <p>01 — NO CLUE WHAT&apos;S COMING.</p>
           <p>02 — NO IDEA HOW THIS ENDS.</p>
@@ -719,7 +745,6 @@ export function PreviewRoom({ roomId, onReturn, onNavigate, reducedMotion, syste
   const Icon = room.symbol;
   const roomDistrict = roomId as ArtworkDistrictId;
   const sceneArt = ROOM_SCENE_ART[roomDistrict];
-  const thumbArt = DISTRICT_THUMBNAILS[roomDistrict];
 
   return (
     <main className={`living-universe preview-room preview-room--${roomId}`} data-reduced-motion={reducedMotion}>
@@ -752,11 +777,6 @@ export function PreviewRoom({ roomId, onReturn, onNavigate, reducedMotion, syste
           <div className="room-viewport-frame">
             <img className="room-scene-artwork" src={sceneArt} alt="" />
             <div className="room-viewport-vignette" />
-            {thumbArt && (
-              <div className="room-viewport-inset">
-                <img src={thumbArt} alt="" />
-              </div>
-            )}
           </div>
           <div className="room-viewport-telemetry">
             <TelemetryWaveformSvg className="rs-waveform-svg room-telemetry-wave" />

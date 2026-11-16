@@ -1,0 +1,13 @@
+{
+  "name": "@repo/assets",
+  "version": "0.0.1",
+  "private": true,
+  "files": [
+    "creative",
+    "images",
+    "*.png",
+    "*.svg",
+    "*.jpg"
+  ]
+}
+

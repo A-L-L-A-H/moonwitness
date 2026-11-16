@@ -1,0 +1,51 @@
+{
+  "version": "2.0",
+  "policy": "QURAN_CORE_MUHAIMIN_THREE_BOOKS_SUPPLEMENT",
+  "sources": [
+    {
+      "id": "quran",
+      "book": "AL-QURAN",
+      "priority": 1,
+      "role": "CORE_MUHAIMIN",
+      "reference_scheme": "surah:ayah",
+      "text_policy": "references_and_short_verified_excerpts_only",
+      "claim_guardrail": "Quranic evidence is never inferred from a supplementary corpus."
+    },
+    {
+      "id": "taurat",
+      "book": "TAURAT",
+      "priority": 2,
+      "role": "SUPPLEMENT",
+      "working_witness": "Torah/Pentateuch textual witness",
+      "reference_scheme": "book chapter:verse",
+      "text_policy": "references_and_short_excerpts_only",
+      "claim_guardrail": "Extant textual witness remains source-labeled."
+    },
+    {
+      "id": "zabur",
+      "book": "ZABUR",
+      "priority": 3,
+      "role": "SUPPLEMENT",
+      "working_witness": "Psalms textual witness",
+      "reference_scheme": "psalm:verse",
+      "text_policy": "references_and_short_excerpts_only",
+      "claim_guardrail": "Attribution and textual context are preserved."
+    },
+    {
+      "id": "injil",
+      "book": "INJIL",
+      "priority": 4,
+      "role": "SUPPLEMENT",
+      "working_witness": "Canonical Gospel textual witness",
+      "reference_scheme": "gospel chapter:verse",
+      "text_policy": "references_and_short_excerpts_only",
+      "claim_guardrail": "Extant Gospel witness remains distinct from reconstructed original Injil."
+    }
+  ],
+  "allowed_source_ids": [
+    "quran",
+    "taurat",
+    "zabur",
+    "injil"
+  ]
+}

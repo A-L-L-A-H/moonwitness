@@ -1,0 +1,36 @@
+name: Storybook Showcase Artifact
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: storybook-showcase
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24.20.0
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm build-storybook
+      - name: Upload Storybook static showcase
+        uses: actions/upload-artifact@v4
+        with:
+          name: moonwitness-storybook-static
+          path: storybook-static
+          if-no-files-found: error
+          retention-days: 14

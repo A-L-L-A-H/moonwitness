@@ -1,0 +1,21 @@
+{
+  "name": "@moonwitness/auth",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./password": "./src/password.js",
+    "./service": "./src/service.js",
+    "./authorization": "./src/authorization.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/service.js && node --check src/password.js && node --check src/authorization.js",
+    "bootstrap-owner": "node src/bootstrap-owner.js"
+  },
+  "dependencies": {
+    "@moonwitness/database": "workspace:*",
+    "argon2": "catalog:",
+    "@moonwitness/contracts": "workspace:*"
+  }
+}

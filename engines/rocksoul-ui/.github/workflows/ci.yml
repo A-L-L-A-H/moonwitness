@@ -1,0 +1,120 @@
+name: UI CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+      - main
+  pull_request:
+    branches:
+      - dev
+      - main
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ui-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - name: Upgrade npm
+        run: npm install --global npm@11.6.0
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      # prepare/build runs during npm ci. Feature PRs may temporarily drift from tracked dist;
+      # dev/main pushes remain the authoritative generated-artifact release gates.
+      - name: Check tracked dist reproducibility
+        id: dist_check
+        continue-on-error: true
+        run: |
+          git diff --stat -- dist
+          git diff -- dist
+          git diff --exit-code -- dist
+      - name: Upload generated dist on drift
+        if: ${{ steps.dist_check.outcome == 'failure' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: generated-dist-${{ github.run_id }}
+          path: dist/**
+          if-no-files-found: error
+          retention-days: 3
+      - name: Enforce tracked dist reproducibility
+        if: ${{ steps.dist_check.outcome == 'failure' && github.event_name != 'pull_request' }}
+        run: exit 1
+      - name: Strict repository consistency audit
+        run: npm run audit:repository
+      - name: Run canonical repository CI contract
+        run: npm run ci
+      - name: Upload Quanta audit evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: quanta-audit-${{ github.run_id }}
+          path: artifacts/audit/**
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser accessibility + responsive QA
+        run: npm run test:browser
+      - name: Upload browser QA evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: browser-qa-${{ github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
+          if-no-files-found: warn
+          retention-days: 14
+
+  visual-regression:
+    needs: verify
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - name: Upgrade npm
+        run: npm install --global npm@11.6.0
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Enforce tracked dist reproducibility
+        if: ${{ github.event_name != 'pull_request' }}
+        run: git diff --exit-code -- dist
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium
+      - name: Visual snapshot gate
+        run: npm run test:visual
+      - name: Upload visual evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: visual-regression-${{ github.run_id }}
+          path: |
+            test-results/**
+            playwright-report/**
+          if-no-files-found: warn
+          retention-days: 14

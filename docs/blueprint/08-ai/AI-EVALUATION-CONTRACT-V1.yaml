@@ -1,0 +1,27 @@
+version: 1
+status: baseline
+pipeline:
+  - retrieval
+  - context-assembly
+  - model-execution
+  - tool-execution
+  - result-validation
+  - provenance-recording
+  - evaluation
+required_metadata:
+  - model_provider
+  - model_id
+  - model_version_or_snapshot
+  - prompt_or_template_id
+  - retrieval_snapshot_id
+  - tool_allowlist_version
+  - latency_ms
+  - token_usage
+  - estimated_cost
+  - correlation_id
+rules:
+  - provider_sdks_stay_behind_adapters
+  - model_output_is_untrusted_input
+  - tools_require_explicit_allowlist
+  - research_claims_require_evidence_linkage
+  - evaluation_must_separate_quality_from_system_health

@@ -1,0 +1,50 @@
+<div id="tab-logs" class="tab-content">
+  <div class="filter-bar">
+    <span style="font-size: 13px; color: var(--text-muted);">Log Level Breakdown:</span>
+    <% Object.entries(data.logStats || {}).forEach(function([lvl, count]) { %>
+      <span class="badge <%= lvl === 'error' || lvl === 'fatal' ? 'badge-rose' : lvl === 'warn' ? 'badge-amber' : 'badge-green' %>">
+        <%= lvl.toUpperCase() %>: <%= count %>
+      </span>
+    <% }); %>
+  </div>
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Level</th>
+          <th>Method</th>
+          <th>Path</th>
+          <th>Status</th>
+          <th>Latency</th>
+          <th>Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (data.recentLogs.length === 0) { %>
+          <tr><td colspan="7" style="text-align:center; padding: 24px; color: var(--text-dim);">No logs recorded in SQLite yet.</td></tr>
+        <% } else { %>
+          <% data.recentLogs.forEach(function(l) { %>
+            <tr>
+              <td class="mono" style="color: var(--text-dim);"><%= l.createdAt ? l.createdAt.split('T')[1]?.substring(0, 8) : '-' %></td>
+              <td>
+                <span class="badge <%= l.level === 'error' || l.level === 'fatal' ? 'badge-rose' : l.level === 'warn' ? 'badge-amber' : 'badge-green' %>">
+                  <%= l.level ? l.level.toUpperCase() : 'INFO' %>
+                </span>
+              </td>
+              <td class="mono" style="font-weight: 700;"><%= l.method || '-' %></td>
+              <td class="mono"><%= l.url || '-' %></td>
+              <td>
+                <% if (l.statusCode) { %>
+                  <span class="badge <%= l.statusCode >= 500 ? 'badge-rose' : l.statusCode >= 400 ? 'badge-amber' : 'badge-green' %>"><%= l.statusCode %></span>
+                <% } else { %>-<% } %>
+              </td>
+              <td class="mono"><%= l.responseTime ? l.responseTime + 'ms' : '-' %></td>
+              <td style="color: var(--text-muted);"><%= l.message %></td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

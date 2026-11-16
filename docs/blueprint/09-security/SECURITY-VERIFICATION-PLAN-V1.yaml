@@ -1,0 +1,37 @@
+version: 1
+status: design-locked
+identity_classes:
+  - user
+  - service
+  - worker
+  - agent
+authorization_model: deny-by-default
+verification:
+  authentication:
+    required: true
+    evidence: [valid-credential, invalid-credential, expired-credential]
+  authorization:
+    required: true
+    evidence: [allow, deny, cross-tenant-deny, resource-scope-deny]
+  session:
+    required: true
+    evidence: [creation, rotation, revocation, expiry]
+  secrets:
+    required: true
+    evidence: [source-control-scan, runtime-injection, no-secret-log]
+  supply_chain:
+    required: true
+    evidence: [lockfile, dependency-audit, provenance]
+  ai_tools:
+    required: true
+    evidence: [allowlist, denied-tool, scoped-credential]
+stop_conditions:
+  - default_allow
+  - tenant_data_leak
+  - privilege_escalation
+  - secret_exposure
+  - unauditable_sensitive_action
+certification:
+  policy: COMPLETE
+  executable_tests: PENDING_IMPLEMENTATION
+  threat_model_evidence: PENDING_IMPLEMENTATION

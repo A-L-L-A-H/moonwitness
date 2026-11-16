@@ -1,0 +1,38 @@
+{
+  "name": "@arsybelovedlabs/moonwitness-crayon",
+  "version": "0.1.0",
+  "description": "Methodology, measurement, and research computation.",
+  "private": false,
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": "24.20.0",
+    "pnpm": "11.24.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "lint": "node scripts/lint.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && node --test tests/*.test.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "architecture": "node scripts/architecture-check.mjs",
+    "security": "node scripts/security-check.mjs"
+  },
+  "dependencies": {
+    "@arsybelovedlabs/moonwitness-core": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

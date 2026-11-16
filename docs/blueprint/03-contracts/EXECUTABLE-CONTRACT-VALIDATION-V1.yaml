@@ -1,0 +1,32 @@
+version: 1
+status: design-locked
+purpose: Define the executable validation obligations for canonical contracts before Genesis.
+inputs:
+  schemas_glob: 03-contracts/schemas/*.schema.json
+  fixtures: 03-contracts/fixtures/contract-fixtures.yaml
+  registry: 03-contracts/CONTRACT-REGISTRY.yaml
+checks:
+  - schema_parse
+  - schema_dialect
+  - required_fields
+  - enum_constraints
+  - example_validation
+  - fixture_validation
+  - registry_owner_exists
+  - consumer_public_export_only
+  - semver_compatibility_rules
+  - no_duplicate_contract_ids
+failure_policy:
+  any_required_check_fail: BLOCK_GENESIS
+  fixture_mismatch: BLOCK_GENESIS
+  owner_mismatch: BLOCK_GENESIS
+  duplicate_contract: BLOCK_GENESIS
+runtime_requirements:
+  validator: json-schema-2020-12-compatible
+  deterministic: true
+  reproducible: true
+  no_network_required_for_schema_validation: true
+certification:
+  design: COMPLETE
+  executable_runner: PENDING_IMPLEMENTATION
+  ci_proof: PENDING_IMPLEMENTATION

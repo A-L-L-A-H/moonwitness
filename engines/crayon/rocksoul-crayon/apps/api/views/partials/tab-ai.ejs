@@ -1,0 +1,60 @@
+<div id="tab-ai" class="tab-content">
+  <div class="grid-2" style="margin-bottom: 24px;">
+    <div class="box-card">
+      <div class="box-header">
+        <h3 class="box-title">🤖 Registered Autonomous Agents</h3>
+        <span class="badge badge-green"><%= data.aiEngine.agents.length %> Agents</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Agent Name</th>
+            <th>Status</th>
+            <th>Capabilities</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.aiEngine.agents.forEach(function(a) { %>
+            <tr>
+              <td>
+                <strong style="color: #fff;"><%= a.name %></strong>
+                <div style="font-size: 11px; color: var(--text-dim); font-family: var(--font-mono);"><%= a.id %></div>
+              </td>
+              <td><span class="badge badge-cyan"><%= a.status %></span></td>
+              <td>
+                <% (a.capabilities || []).forEach(function(cap) { %>
+                  <span class="badge badge-blue mono" style="margin-right: 4px;"><%= cap %></span>
+                <% }); %>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box-card">
+      <div class="box-header">
+        <h3 class="box-title">🛠️ Tool Registry & Policy</h3>
+        <span class="badge badge-blue"><%= data.aiEngine.tools.length %> Tools</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Tool Name</th>
+            <th>Policy</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.aiEngine.tools.forEach(function(t) { %>
+            <tr>
+              <td class="mono" style="font-weight: 700; color: #fff;"><%= t.name %></td>
+              <td><span class="badge badge-green"><%= t.policy %></span></td>
+              <td style="font-size: 12px; color: var(--text-muted);"><%= t.description %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

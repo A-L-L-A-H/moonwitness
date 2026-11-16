@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export const worldDestinations = ["archive", "studio", "riot-deck", "signal-room"] as const;
-export const pageRoutes = ["deck", "pit", "git", "war-room", "noise"] as const;
+export const pageRoutes = ["deck", "monitor", "pit", "git", "war-room", "noise"] as const;
 export type WorldDestination = (typeof worldDestinations)[number];
 export type PageRoute = (typeof pageRoutes)[number];
 export type WorldRoute = "awakening" | "threshold" | WorldDestination | PageRoute;
@@ -21,7 +21,8 @@ function isPageRoute(path: string): path is PageRoute {
 export function useWorldRouter() {
   const location = useLocation();
   const navigate = useNavigate();
-  const path = location.pathname.replace(/^\/+|\/+$/g, "");
+  const rawPath = location.pathname.replace(/^\/+|\/+$/g, "");
+  const path = rawPath === "issues" ? "pit" : rawPath;
   const isValidRoute = path.length === 0 || path === "awakening" || path === "threshold" || isWorldDestination(path) || isPageRoute(path);
   const destination: WorldRoute = path.length === 0 || path === "awakening"
     ? "awakening"

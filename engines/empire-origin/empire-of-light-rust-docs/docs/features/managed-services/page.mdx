@@ -1,0 +1,648 @@
+export const metadata = {
+  title: 'Managed Services',
+  description: 'Provision and manage PostgreSQL, MariaDB, Redis, and S3 storage directly within Temps—no third-party services required.',
+  alternates: {
+    canonical: '/docs/managed-services',
+  },
+}
+
+export const sections = [
+  { title: 'Available Services', id: 'available-services' },
+  { title: 'PostgreSQL Database', id: 'postgresql-database' },
+  { title: 'MariaDB Database', id: 'mariadb-database' },
+  { title: 'Redis Caching', id: 'redis-caching' },
+  { title: 'S3 Object Storage', id: 's3-object-storage' },
+  { title: 'Service Management', id: 'service-management' },
+  { title: 'Security Best Practices', id: 'security-best-practices' },
+  { title: 'Pricing & Resource Limits', id: 'pricing-resource-limits' },
+  { title: 'Comparison with Other Platforms', id: 'comparison-with-other-platforms' },
+]
+
+# Managed Services
+
+Temps provides fully managed database and storage services that you can provision and link to your projects in seconds. Unlike platforms like Vercel that require external services, Temps includes everything you need. {{ className: 'lead' }}
+
+<Note>
+**Competitive Advantage**: While platforms like Vercel require third-party database providers (Vercel Postgres, Vercel KV), Temps includes managed PostgreSQL, MariaDB, Redis, and S3 storage out of the box—no additional accounts or billing required.
+</Note>
+
+---
+
+## Available Services {{ anchor: true, id: 'available-services' }}
+
+<Row>
+  <Col>
+    Temps offers managed services that integrate seamlessly with your projects:
+
+    - **PostgreSQL** — Production-ready relational database
+    - **MariaDB** — MySQL-compatible relational database
+    - **Redis** — High-performance caching and pub/sub
+    - **S3 Storage** — Object storage compatible with AWS S3 SDKs
+
+    All services are provisioned on your infrastructure, giving you complete control over your data.
+  </Col>
+  <Col>
+    ```bash {{ title: 'Quick provision via CLI' }}
+    # Service types this server offers, and the parameters of one
+    temps services types
+    temps services types info postgres
+
+    # Create a PostgreSQL database with default settings
+    temps services create --type postgres --name my-db --yes
+
+    # Create a MariaDB database
+    temps services create --type mariadb --name my-mysql-db --yes
+
+    # Create a Redis instance
+    temps services create --type redis --name my-cache --yes
+
+    # Create S3-compatible storage
+    temps services create --type s3 --name my-storage --yes
+    ```
+
+    Override a default with `--set key=value` (repeatable). The keys are the
+    parameters listed by `temps services types info <type>`.
+  </Col>
+</Row>
+
+---
+
+## PostgreSQL Database {{ anchor: true, id: 'postgresql-database' }}
+
+### Creating a PostgreSQL Instance
+
+Provision a production-ready PostgreSQL database with automatic backups and high availability:
+
+<Row>
+  <Col>
+    **Via Dashboard:**
+    1. Navigate to **Services** → **Create Service**
+    2. Select **PostgreSQL**
+    3. Choose version (13, 14, 15, or 16)
+    4. Configure storage size and instance resources
+    5. Click **Create Database**
+
+    **Via CLI:**
+    ```bash
+    temps services create --type postgres --name production-db \
+      --set database=app \
+      --set username=app \
+      --set max_connections=200
+    ```
+
+    Passing `--set` creates the service without prompting. A password is
+    generated when you don't set one.
+  </Col>
+  <Col>
+    **Configuration Options:**
+
+    | Option | Description | Default |
+    |--------|-------------|---------|
+    | `docker_image` | PostgreSQL image | `gotempsh/postgres-walg:18-bookworm` |
+    | `database` | Initial database name | see `services types info postgres` |
+    | `username` | Database user | see `services types info postgres` |
+    | `password` | Database password | Generated |
+    | `port` | Host port | Auto-assigned from 5432 |
+    | `max_connections` | Maximum connections | see `services types info postgres` |
+  </Col>
+</Row>
+
+### Connecting to PostgreSQL
+
+Once created, Temps generates a connection string you can use in your applications:
+
+```javascript {{ title: 'Node.js/TypeScript' }}
+import { Pool } from 'pg';
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: true
+  }
+});
+
+// Query example
+const result = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+```
+
+```python {{ title: 'Python' }}
+import psycopg2
+
+conn = psycopg2.connect(
+    os.environ['DATABASE_URL'],
+    sslmode='require'
+)
+
+cursor = conn.cursor()
+cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+```
+
+<Note>
+**Connection String Format**: `postgresql://username:password@host:5432/database?sslmode=require`
+
+The connection string is automatically injected as `DATABASE_URL` when you link the service to a project.
+</Note>
+
+### Linking to Projects
+
+Link your PostgreSQL database to one or more projects:
+
+<CodeGroup title="Link database to project">
+```bash {{ title: 'CLI' }}
+# Find the service ID
+temps services list
+
+# Link the database to a project (all of its environments)
+temps services link --id 12 --project my-app
+
+# Show the variables the project receives from it
+temps services env --id 12 --project my-app
+```
+
+```javascript {{ title: 'Access in your app' }}
+// Automatically available as environment variable
+const databaseUrl = process.env.DATABASE_URL;
+
+// Connection is injected when linked via dashboard or CLI
+const db = new Database(databaseUrl);
+```
+</CodeGroup>
+
+### Database Migrations
+
+Run migrations during deployment by configuring build hooks:
+
+```json {{ title: 'temps.json' }}
+{
+  "build": {
+    "command": "npm run build",
+    "beforeDeploy": [
+      "npm run db:migrate"
+    ]
+  }
+}
+```
+
+---
+
+## MariaDB Database {{ anchor: true, id: 'mariadb-database' }}
+
+Create a MariaDB service when your application expects a MySQL-compatible database. Temps uses MariaDB images by default, but keeps Temps' own internal database on PostgreSQL with TimescaleDB.
+
+<Row>
+  <Col>
+    **Via Dashboard:**
+    1. Navigate to **Services** -> **Create Service**
+    2. Select **MariaDB**
+    3. Choose the default `mariadb:lts` image or provide a compatible image
+    4. Pick a size profile for the host
+    5. Click **Create Database**
+
+    **Via CLI:**
+    ```bash
+    temps services create --type mariadb --name app-db --yes
+    ```
+  </Col>
+  <Col>
+    **Configuration Options:**
+
+    | Option | Description | Default |
+    |--------|-------------|---------|
+    | `docker_image` | MariaDB-compatible image | `mariadb:lts` |
+    | `port` | Host port binding | Auto-assigned from 3306 |
+    | `size_profile` | Memory/connection tuning profile | `small` |
+    | `database` | Initial database | `app` |
+    | `username` | Application user | `app` |
+  </Col>
+</Row>
+
+When linked to a project, one MariaDB service creates a separate database for each project/environment pair. The service is shared by default, so a small VPS can run one MariaDB container instead of one database daemon per project.
+
+<Note>
+MariaDB is opt-in. A fresh Temps install does not pull or start MariaDB. The container is created only when you create or import a MariaDB external service.
+</Note>
+
+Temps injects `DATABASE_URL`, `MYSQL_URL`, `MYSQL_*`, `MARIADB_URL`, and `MARIADB_*` variables. The connection URL uses the `mysql://` scheme because most frameworks and drivers connect to MariaDB through MySQL-compatible drivers.
+
+---
+
+## Redis Caching {{ anchor: true, id: 'redis-caching' }}
+
+### Creating a Redis Instance
+
+Provision a high-performance Redis instance for caching, sessions, or pub/sub:
+
+<Row>
+  <Col>
+    **Via Dashboard:**
+    1. Navigate to **Services** → **Create Service**
+    2. Select **Redis**
+    3. Choose version (6 or 7)
+    4. Configure memory allocation
+    5. Click **Create Cache**
+
+    **Via CLI:**
+    ```bash
+    temps services create --type redis --name session-store --yes
+    ```
+  </Col>
+  <Col>
+    **Configuration Options:**
+
+    | Option | Description | Default |
+    |--------|-------------|---------|
+    | `docker_image` | Redis image | `gotempsh/redis-walg:8-bookworm` |
+    | `password` | Redis password | Generated |
+    | `port` | Host port | Auto-assigned from 6379 |
+  </Col>
+</Row>
+
+### Connecting to Redis
+
+```javascript {{ title: 'Node.js with ioredis' }}
+import Redis from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
+
+// Set a value
+await redis.set('session:123', JSON.stringify(sessionData), 'EX', 3600);
+
+// Get a value
+const data = await redis.get('session:123');
+```
+
+```python {{ title: 'Python with redis-py' }}
+import redis
+import os
+
+r = redis.from_url(os.environ['REDIS_URL'])
+
+# Set with expiration
+r.setex('session:123', 3600, json.dumps(session_data))
+
+# Get value
+data = r.get('session:123')
+```
+
+<Note>
+**Connection String Format**: `redis://username:password@host:6379/0`
+
+When linked to a project, Redis connection details are available as `REDIS_URL`, `REDIS_HOST`, `REDIS_PORT`, and `REDIS_PASSWORD`.
+</Note>
+
+### Common Use Cases
+
+<Properties>
+  <Property name="Session Storage">
+    Store user sessions with automatic expiration:
+    ```javascript
+    await redis.set(`session:${userId}`, sessionData, 'EX', 86400); // 24 hours
+    ```
+  </Property>
+  <Property name="Rate Limiting">
+    Implement rate limiting with Redis counters:
+    ```javascript
+    const count = await redis.incr(`rate:${ipAddress}`);
+    if (count === 1) await redis.expire(`rate:${ipAddress}`, 60); // 60 seconds
+    if (count > 100) throw new Error('Rate limit exceeded');
+    ```
+  </Property>
+  <Property name="Caching">
+    Cache expensive queries or API responses:
+    ```javascript
+    const cached = await redis.get(`cache:${key}`);
+    if (cached) return JSON.parse(cached);
+
+    const data = await fetchExpensiveData();
+    await redis.set(`cache:${key}`, JSON.stringify(data), 'EX', 300); // 5 minutes
+    ```
+  </Property>
+  <Property name="Pub/Sub">
+    Real-time messaging between services:
+    ```javascript
+    // Publisher
+    await redis.publish('notifications', JSON.stringify(message));
+
+    // Subscriber
+    redis.subscribe('notifications', (message) => {
+      console.log('Received:', JSON.parse(message));
+    });
+    ```
+  </Property>
+</Properties>
+
+---
+
+## S3 Object Storage {{ anchor: true, id: 's3-object-storage' }}
+
+### Creating S3 Storage
+
+Provision S3-compatible object storage for files, backups, and assets:
+
+<Row>
+  <Col>
+    **Via Dashboard:**
+    1. Navigate to **Services** → **Create Service**
+    2. Select **S3 Storage**
+    3. Configure storage size
+    4. Set bucket policy (private/public)
+    5. Click **Create Storage**
+
+    **Via CLI:**
+    ```bash
+    temps services create --type s3 --name media-storage --yes
+    ```
+  </Col>
+  <Col>
+    **Configuration Options:**
+
+    | Option | Description | Default |
+    |--------|-------------|---------|
+    | `backend` | Storage engine: `rustfs` or `garage` (read-only after creation) | `rustfs` |
+    | `buckets` | Buckets created for every environment that links the service | none (one bucket per environment) |
+    | `docker_image` | Image for the selected engine | Engine's pinned image |
+    | `access_key` / `secret_key` | Credentials | Generated |
+    | `region` | Region reported to clients | see `services types info s3` |
+    | `port` | Host port | Auto-assigned |
+  </Col>
+</Row>
+
+### Storage backends, buckets and credentials
+
+Choose the engine when you create the service. It cannot be changed afterwards;
+to switch, create a second service and [migrate](#migrate-between-backends).
+
+| | RustFS (default) | Garage |
+|---|---|---|
+| Best for | General S3 workloads, the largest feature surface, a web console | Small footprint, simple operation, single-node self-hosting |
+| Image | `rustfs/rustfs` (pinned) | `dxflrs/garage` (pinned) |
+| Console | Yes | No (S3 API only) |
+| Credentials | Per-environment access key with a bucket-scoped policy | Per-environment access key granted read/write on its buckets only |
+
+```bash
+# RustFS is the default
+temps services create --type s3 --name media
+
+# Garage, with two buckets for every environment
+temps services create --type s3 --name media --backend garage \
+  --bucket uploads --bucket exports
+```
+
+Existing services created before `backend` existed keep running as RustFS, and
+legacy MinIO services keep working; new MinIO services are not accepted.
+
+Each environment that links the service gets **its own access key**, scoped to
+that environment's buckets. A key can read and write its own buckets and nothing
+else, including the same logical bucket of another environment. Bucket names
+are `<project>-<environment>-<name>`. If you declare no buckets, the
+environment gets the single bucket `<project>-<environment>`.
+
+| Variable | Value |
+|---|---|
+| `S3_BUCKET` | First declared bucket |
+| `S3_BUCKET_<NAME>` | One per bucket, `NAME` upper-snake-cased (`exports` → `S3_BUCKET_EXPORTS`) |
+| `S3_ENDPOINT`, `AWS_ENDPOINT_URL` | Service endpoint on the Docker network |
+| `S3_ACCESS_KEY`, `AWS_ACCESS_KEY_ID` | The environment's access key |
+| `S3_SECRET_KEY`, `AWS_SECRET_ACCESS_KEY` | The environment's secret key |
+| `AWS_REGION` | Region reported by the service |
+
+Unlinking a project revokes its environments' keys. Buckets and their objects
+are kept; deleting data is always a separate action. If a key cannot be revoked
+(for example the storage container is down, or a worker node is offline), the
+unlink fails and the link is kept, so a credential is never left active behind
+a link you believed was removed. Revoking keys on a worker node needs a worker
+agent that is up to date. A key is left in place while another project still
+links the same bucket scope.
+
+Two projects cannot link one service with the same project and environment
+scope, or with scopes that resolve to the same physical bucket name; the second
+link is refused with a message naming the project that holds the scope.
+
+### Migrate between backends {{ anchor: true, id: 'migrate-between-backends' }}
+
+To move from RustFS to Garage (or back), create the target service, then copy
+the data across. The source is only read, so you can re-run the copy to pick up
+late writes before pointing applications at the new service.
+
+```bash
+curl -X POST "$TEMPS_URL/api/external-services/$TARGET_ID/migrate-s3" \
+  -H "Authorization: Bearer $TEMPS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{\"source_service_id\": $SOURCE_ID}"
+```
+
+Both services must run on the control-plane host, and Garage services cannot
+be created on a worker node yet. Zero-byte objects are copied with direct
+requests, because the bulk-copy client uploads them in a way Garage rejects.
+
+Garage is available for S3 storage only; Blob services cannot use it.
+
+Backups of a managed S3 service are plain object copies. Restoring one into a
+new service creates a service on the same engine as the source.
+
+Declared bucket names are 3-32 characters of lower-case letters, digits and
+hyphens, duplicates are dropped, and a service declares at most 16. A Garage
+service's own key cannot create buckets, so it cannot be registered directly as
+a backup destination; use a RustFS service or an external S3 bucket for that.
+
+### Connecting to S3
+
+Temps S3 is compatible with AWS S3 SDKs:
+
+```javascript {{ title: 'Node.js with AWS SDK v3' }}
+import { S3Client, PutObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+
+const s3 = new S3Client({
+  endpoint: process.env.S3_ENDPOINT,
+  region: 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.S3_ACCESS_KEY,
+    secretAccessKey: process.env.S3_SECRET_KEY,
+  },
+});
+
+// Upload a file
+await s3.send(new PutObjectCommand({
+  Bucket: 'media-storage',
+  Key: 'uploads/image.jpg',
+  Body: fileBuffer,
+  ContentType: 'image/jpeg',
+}));
+
+// Download a file
+const response = await s3.send(new GetObjectCommand({
+  Bucket: 'media-storage',
+  Key: 'uploads/image.jpg',
+}));
+```
+
+```python {{ title: 'Python with boto3' }}
+import boto3
+import os
+
+s3 = boto3.client(
+    's3',
+    endpoint_url=os.environ['S3_ENDPOINT'],
+    aws_access_key_id=os.environ['S3_ACCESS_KEY'],
+    aws_secret_access_key=os.environ['S3_SECRET_KEY'],
+)
+
+# Upload file
+s3.upload_file('local-file.jpg', 'media-storage', 'uploads/image.jpg')
+
+# Download file
+s3.download_file('media-storage', 'uploads/image.jpg', 'downloaded.jpg')
+```
+
+### Public URLs
+
+Generate pre-signed URLs for temporary access:
+
+
+```javascript
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const command = new GetObjectCommand({
+  Bucket: 'media-storage',
+  Key: 'uploads/private-document.pdf',
+});
+
+// URL expires in 1 hour
+const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+```
+
+---
+
+## Service Management {{ anchor: true, id: 'service-management' }}
+
+### Monitoring Service Health
+
+<Row>
+  <Col>
+    View service metrics and health status in the dashboard:
+
+    - **CPU & Memory Usage**: Real-time resource consumption
+    - **Connection Count**: Active database/cache connections
+    - **Storage Usage**: Disk space utilization
+    - **Uptime**: Service availability percentage
+    - **Query Performance**: Slow query detection (PostgreSQL)
+  </Col>
+  <Col>
+    ```bash {{ title: 'CLI monitoring' }}
+    # Service details and state
+    temps services show --id 12
+
+    # Last 100 log lines from the past hour
+    temps services logs --id 12 --tail 100 --from 1h
+
+    # Latest metrics (connections, memory, …)
+    temps services metrics latest --id 12
+
+    # Slowest PostgreSQL queries
+    temps services slow-queries --id 12
+    ```
+
+    If `metrics latest` returns nothing, check collection with
+    `temps services metrics status --id 12` and turn it on with
+    `temps services metrics enable --id 12`. `slow-queries` needs
+    `pg_stat_statements`; `temps services enable-pg-stat-statements --id 12`
+    turns it on (it restarts the container briefly).
+  </Col>
+</Row>
+
+### Backups
+
+Services are backed up to an S3-compatible destination on the schedules you configure; see [Backups](/docs/backups) for setting up destinations and schedules.
+
+```bash {{ title: 'Backup management' }}
+# Back up one service now, to S3 source 1
+temps backups run-service --id 12 --s3-source-id 1
+
+# Backups stored on that source
+temps services list-backups --s3-source-id 1
+
+# Restore a backup into a new service, leaving the original untouched
+temps services restore --id 12 --backup-id <backup-id> --new-service
+```
+
+There is no download command; backups are objects in your bucket, and `temps backups show --id <backup-id>` prints where.
+
+### Upgrading Services
+
+Move a service to a newer image:
+
+```bash {{ title: 'Upgrade a service' }}
+temps services upgrade --id 12 --version <newer-image>
+```
+
+For PostgreSQL the server only accepts images on its allowlist, and it rejects an upgrade to the image the service already runs; the error message gives the reason.
+
+Managed services run as a single container. Changing storage size, memory limits or replica counts from the CLI is not supported.
+
+---
+
+## Security Best Practices {{ anchor: true, id: 'security-best-practices' }}
+
+<Properties>
+  <Property name="Connection Security">
+    - Always use SSL/TLS connections (`sslmode=require` for PostgreSQL)
+    - Store credentials in environment variables, never in code
+    - Use the Temps-provided connection strings (automatically secured)
+  </Property>
+  <Property name="Network Access">
+    - Services are only accessible from projects within your Temps instance
+    - Configure IP allowlists for external access if needed
+    - Use private networking for service-to-service communication
+  </Property>
+  <Property name="Credential Rotation">
+    The CLI has no credential-rotation command. Keep service credentials
+    out of source control and read them from the variables Temps injects
+    into linked projects.
+  </Property>
+  <Property name="Audit Logging">
+    All service access is logged for security auditing:
+    - Connection attempts (successful/failed)
+    - Query execution (optional for PostgreSQL)
+    - Object access (S3 operations)
+    - Configuration changes
+  </Property>
+</Properties>
+
+---
+
+## Pricing & Resource Limits {{ anchor: true, id: 'pricing-resource-limits' }}
+
+<Note>
+**Self-Hosted Advantage**: Since Temps is self-hosted, managed services run on your infrastructure. There are no per-GB storage charges, no connection limits, and no metered bandwidth fees like other platforms.
+</Note>
+
+**Recommended Resource Allocation:**
+
+| Use Case | PostgreSQL | MariaDB | Redis | S3 Storage |
+|----------|-----------|---------|-------|------------|
+| **Small Project** | 1GB RAM, 10GB storage | Small profile | 256MB | 10GB |
+| **Medium Project** | 2GB RAM, 50GB storage | Standard profile | 1GB | 100GB |
+| **Large Project** | 4GB+ RAM, 200GB+ storage | Dedicated profile | 4GB+ | 500GB+ |
+
+---
+
+## Comparison with Other Platforms {{ anchor: true, id: 'comparison-with-other-platforms' }}
+
+| Feature | Temps | Vercel | Netlify | Railway |
+|---------|-------|--------|---------|---------|
+| **PostgreSQL** | ✅ Built-in | ⚠️ Vercel Postgres (extra) | ❌ External only | ✅ Built-in |
+| **MariaDB / MySQL-compatible** | ✅ Built-in | ❌ External only | ❌ External only | ✅ Built-in |
+| **Redis** | ✅ Built-in | ⚠️ Vercel KV (extra) | ❌ External only | ✅ Built-in |
+| **S3 Storage** | ✅ S3-compatible | ⚠️ Vercel Blob (extra) | ❌ External only | ❌ External only |
+| **Connection Limits** | ❌ No limits | ✅ Metered/capped | ✅ Metered/capped | ⚠️ Plan-based |
+| **Storage Cost** | ❌ Your infrastructure | ✅ $0.15/GB/month | ✅ $0.10/GB/month | ✅ Pay per GB |
+| **Backups** | ✅ Automatic | ⚠️ Enterprise only | ⚠️ Add-on | ✅ Automatic |
+
+---
+
+## Next Steps
+
+- [Configure Environment Variables](/docs/environment-variables) to inject service credentials
+- [Set up Resource Limits](/docs/resources) to allocate CPU and memory
+- [Enable Monitoring](/docs/monitoring) to track service health
+- [Configure Backups](/docs/backups) to customize backup retention

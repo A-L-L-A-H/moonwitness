@@ -1,0 +1,37 @@
+name: m-time-compatibility
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "crates/**"
+      - "reference-python/**"
+      - "include/**"
+      - "scripts/run_conformance.sh"
+      - "spec/schemas/**"
+      - "sdk/**"
+      - ".github/workflows/compatibility.yml"
+jobs:
+  rust-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run legacy Rust/Python reference
+        run: python reference-python/mtime_reference.py
+      - name: Run independent MTS-2 / Antikythera conformance
+        run: python reference-python/mtime2_reference.py
+      - name: Run public Python SDK tests
+        run: python sdk/python/test_mtime_sdk.py
+      - name: Build C ABI
+        run: cargo build -p mtime-ffi --release
+      - name: Parse public JSON schemas
+        run: |
+          set -euo pipefail
+          for schema in spec/schemas/*.json; do
+            python -m json.tool "$schema" >/dev/null
+          done
+      - name: Public conformance runner
+        run: bash scripts/run_conformance.sh

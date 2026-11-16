@@ -1,0 +1,30 @@
+<div id="tab-database" class="tab-content">
+  <div class="filter-bar">
+    <input type="text" class="search-input" id="tableSearch" placeholder="Search tables..." onkeyup="filterTables()">
+    <span style="font-size: 13px; color: var(--text-muted);">Database Target: <strong class="mono" style="color: #fff;"><%= data.database.target %></strong></span>
+  </div>
+  <div class="table-box">
+    <table id="tablesTable">
+      <thead>
+        <tr>
+          <th>Table Name</th>
+          <th>Row Count</th>
+          <th>Column Count</th>
+          <th>Columns Schema</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.database.tables.forEach(function(t) { %>
+          <tr>
+            <td class="mono" style="font-weight: 700; color: #818cf8;"><%= t.name %></td>
+            <td class="mono"><span class="badge <%= t.rowCount > 0 ? 'badge-green' : 'badge-blue' %>"><%= t.rowCount.toLocaleString() %> rows</span></td>
+            <td class="mono"><%= t.columnCount %> cols</td>
+            <td class="mono" style="font-size: 11px; color: var(--text-muted); max-width: 500px; word-break: break-word;">
+              <%= t.columns.join(', ') %>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>

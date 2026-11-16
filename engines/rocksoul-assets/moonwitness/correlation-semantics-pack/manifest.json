@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "pack": "MoonWitness Correlation Semantics Pack",
+  "version": "1.3",
+  "canonicalFormat": "svg",
+  "generatedFormat": "png",
+  "renderPng": true,
+  "count": 24,
+  "root": "svg",
+  "assets": [
+    "node-story",
+    "node-event",
+    "node-person",
+    "node-text",
+    "node-law",
+    "node-case",
+    "node-source",
+    "node-location",
+    "node-claim",
+    "node-evidence",
+    "edge-supports",
+    "edge-contradicts",
+    "edge-references",
+    "edge-derived-from",
+    "edge-same-identity",
+    "edge-temporal-before",
+    "edge-temporal-after",
+    "edge-located-at",
+    "edge-legal-basis",
+    "edge-reviewed-by",
+    "edge-submitted-by",
+    "edge-inferred",
+    "edge-uncertain",
+    "edge-unresolved"
+  ],
+  "visualSystemVersion": 2,
+  "lifecycle": "canonical",
+  "surfacePersonalities": [
+    "operator",
+    "forensic"
+  ],
+  "grammarFamily": "graph-v2",
+  "semanticRole": "relationship-semantic",
+  "typographyRoles": [
+    "mono"
+  ],
+  "paletteBehavior": "semantic-boundary-plus-neutral"
+}

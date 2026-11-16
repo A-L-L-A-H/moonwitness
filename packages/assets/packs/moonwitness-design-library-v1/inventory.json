@@ -1,0 +1,649 @@
+{
+  "schemaVersion": 1,
+  "packId": "moonwitness-design-library-v1",
+  "status": "draft",
+  "createdAt": "2026-11-16",
+  "executionAuthorization": "Owner requested plan-executor execution in this conversation on 2026-11-16; sample production authorized, batch sample approval pending.",
+  "batchApproval": null,
+  "counts": {
+    "icons": 24,
+    "png": 12,
+    "wallpaperDesigns": 4,
+    "wallpaperRatioTreatments": 8,
+    "logoIdentities": 1,
+    "logoLayouts": 4,
+    "decor": 8,
+    "uniqueNonLogoDesigns": 48
+  },
+  "palette": {
+    "ink": "#0b0b10",
+    "paper": "#f4eede",
+    "pink": "#ff2d78",
+    "blue": "#2ea8ff",
+    "yellow": "#ffd21f"
+  },
+  "prerequisites": {
+    "rasterProvider": {
+      "status": "blocked",
+      "reason": "Previous ImageGen request returned HTTP403/pricing; no renewed access or alternate-provider authorization. No generation call during this execution.",
+      "nativeSupportedSizes": null
+    },
+    "wallpaperResolution": {
+      "status": "blocked",
+      "reason": "Native 2560x1440 and 1440x2560 availability unverified. No upscaling authorized."
+    },
+    "logo": {
+      "status": "blocked",
+      "candidate": "packages/ui/src/icons/index.tsx:3-14 + apps/web/src/components/site-nav/index.tsx:60-69",
+      "geometry": "48x32 crown plus Saksi Marker wordmark used in current UI",
+      "reason": "Current-use candidate found; canonical master and derivative rights not confirmed. Font license is not logo ownership evidence."
+    },
+    "localAssets": {
+      "status": "available",
+      "method": "Authored SVG icons/HUD; native pixel-generated PNG halftone and tape. No external image provider; never described as AI-generated illustration."
+    }
+  },
+  "contracts": {
+    "icons": {
+      "sourceSize": [24, 24],
+      "stroke": 2,
+      "exportVariant": "paper",
+      "exportSizes": [
+        [24, 24],
+        [48, 48],
+        [96, 96]
+      ],
+      "alpha": "mixed",
+      "origin": "authored-vector"
+    },
+    "png": {
+      "sourceTargetSize": [1024, 1024],
+      "exportSize": [512, 512],
+      "alpha": "mixed",
+      "origin": "generated-raster",
+      "upscaling": false
+    },
+    "wallpapers": {
+      "desktop": [2560, 1440],
+      "mobile": [1440, 2560],
+      "safeAreas": {
+        "desktop": { "x": 0, "y": 0, "width": 0.22, "height": 1 },
+        "mobile": { "x": 0, "y": 0, "width": 1, "height": 0.22 }
+      },
+      "safeAreaMeaning": "Protected low-detail rectangle outside focal subjects",
+      "upscaling": false
+    },
+    "logos": {
+      "sourceTargetViewBoxes": {
+        "symbol": [48, 32],
+        "horizontal-lockup": [320, 48],
+        "stacked-lockup": [160, 128],
+        "wordmark": [280, 48]
+      },
+      "geometryApproval": "pending; dimensions are proposed layout bounds, not approved logo geometry",
+      "variants": ["paper", "ink"],
+      "widths": [512, 1024],
+      "alpha": "mixed"
+    },
+    "decor": {
+      "corner-brackets": [512, 320],
+      "panel-frame": [512, 320],
+      "filmstrip": [1024, 256],
+      "torn-paper": [1024, 256],
+      "tape-strip": [1024, 256],
+      "halftone": [512, 512],
+      "ink-grain": [512, 512],
+      "hazard-band": [1024, 128],
+      "alpha": "mixed",
+      "tiling": ["halftone", "ink-grain"]
+    }
+  },
+  "assets": [
+    {
+      "id": "command",
+      "category": "icons",
+      "sample": true,
+      "source": "source/icons/command.svg",
+      "exports": [
+        "icons/command--paper--24x24.png",
+        "icons/command--paper--48x48.png",
+        "icons/command--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "atlas",
+      "category": "icons",
+      "sample": true,
+      "source": "source/icons/atlas.svg",
+      "exports": [
+        "icons/atlas--paper--24x24.png",
+        "icons/atlas--paper--48x48.png",
+        "icons/atlas--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "dock",
+      "category": "icons",
+      "sample": true,
+      "source": "source/icons/dock.svg",
+      "exports": [
+        "icons/dock--paper--24x24.png",
+        "icons/dock--paper--48x48.png",
+        "icons/dock--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "story",
+      "category": "icons",
+      "sample": true,
+      "source": "source/icons/story.svg",
+      "exports": [
+        "icons/story--paper--24x24.png",
+        "icons/story--paper--48x48.png",
+        "icons/story--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "archive",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/archive.svg",
+      "exports": [
+        "icons/archive--paper--24x24.png",
+        "icons/archive--paper--48x48.png",
+        "icons/archive--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "crew",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/crew.svg",
+      "exports": [
+        "icons/crew--paper--24x24.png",
+        "icons/crew--paper--48x48.png",
+        "icons/crew--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "studio",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/studio.svg",
+      "exports": [
+        "icons/studio--paper--24x24.png",
+        "icons/studio--paper--48x48.png",
+        "icons/studio--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "project",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/project.svg",
+      "exports": [
+        "icons/project--paper--24x24.png",
+        "icons/project--paper--48x48.png",
+        "icons/project--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "collection",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/collection.svg",
+      "exports": [
+        "icons/collection--paper--24x24.png",
+        "icons/collection--paper--48x48.png",
+        "icons/collection--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "signal",
+      "category": "icons",
+      "sample": true,
+      "source": "source/icons/signal.svg",
+      "exports": [
+        "icons/signal--paper--24x24.png",
+        "icons/signal--paper--48x48.png",
+        "icons/signal--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "search",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/search.svg",
+      "exports": [
+        "icons/search--paper--24x24.png",
+        "icons/search--paper--48x48.png",
+        "icons/search--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "filter",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/filter.svg",
+      "exports": [
+        "icons/filter--paper--24x24.png",
+        "icons/filter--paper--48x48.png",
+        "icons/filter--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "notification",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/notification.svg",
+      "exports": [
+        "icons/notification--paper--24x24.png",
+        "icons/notification--paper--48x48.png",
+        "icons/notification--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "settings",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/settings.svg",
+      "exports": [
+        "icons/settings--paper--24x24.png",
+        "icons/settings--paper--48x48.png",
+        "icons/settings--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "profile",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/profile.svg",
+      "exports": [
+        "icons/profile--paper--24x24.png",
+        "icons/profile--paper--48x48.png",
+        "icons/profile--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "upload",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/upload.svg",
+      "exports": [
+        "icons/upload--paper--24x24.png",
+        "icons/upload--paper--48x48.png",
+        "icons/upload--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "download",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/download.svg",
+      "exports": [
+        "icons/download--paper--24x24.png",
+        "icons/download--paper--48x48.png",
+        "icons/download--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "play",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/play.svg",
+      "exports": [
+        "icons/play--paper--24x24.png",
+        "icons/play--paper--48x48.png",
+        "icons/play--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "pause",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/pause.svg",
+      "exports": [
+        "icons/pause--paper--24x24.png",
+        "icons/pause--paper--48x48.png",
+        "icons/pause--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "check",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/check.svg",
+      "exports": [
+        "icons/check--paper--24x24.png",
+        "icons/check--paper--48x48.png",
+        "icons/check--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "warning",
+      "category": "icons",
+      "sample": true,
+      "source": "source/icons/warning.svg",
+      "exports": [
+        "icons/warning--paper--24x24.png",
+        "icons/warning--paper--48x48.png",
+        "icons/warning--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "offline",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/offline.svg",
+      "exports": [
+        "icons/offline--paper--24x24.png",
+        "icons/offline--paper--48x48.png",
+        "icons/offline--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "location",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/location.svg",
+      "exports": [
+        "icons/location--paper--24x24.png",
+        "icons/location--paper--48x48.png",
+        "icons/location--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "route",
+      "category": "icons",
+      "sample": false,
+      "source": "source/icons/route.svg",
+      "exports": [
+        "icons/route--paper--24x24.png",
+        "icons/route--paper--48x48.png",
+        "icons/route--paper--96x96.png"
+      ]
+    },
+    {
+      "id": "lunar-disc",
+      "category": "png",
+      "sample": true,
+      "source": "source/png/lunar-disc.png",
+      "exports": ["png/lunar-disc--original--1024x1024.png", "png/lunar-disc--preview--512x512.png"]
+    },
+    {
+      "id": "crescent",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/crescent.png",
+      "exports": ["png/crescent--original--1024x1024.png", "png/crescent--preview--512x512.png"]
+    },
+    {
+      "id": "witness-silhouette",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/witness-silhouette.png",
+      "exports": [
+        "png/witness-silhouette--original--1024x1024.png",
+        "png/witness-silhouette--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "rooftop-antenna",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/rooftop-antenna.png",
+      "exports": [
+        "png/rooftop-antenna--original--1024x1024.png",
+        "png/rooftop-antenna--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "cassette-recorder",
+      "category": "png",
+      "sample": true,
+      "source": "source/png/cassette-recorder.png",
+      "exports": [
+        "png/cassette-recorder--original--1024x1024.png",
+        "png/cassette-recorder--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "signal-radio",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/signal-radio.png",
+      "exports": [
+        "png/signal-radio--original--1024x1024.png",
+        "png/signal-radio--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "industrial-battery",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/industrial-battery.png",
+      "exports": [
+        "png/industrial-battery--original--1024x1024.png",
+        "png/industrial-battery--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "city-block",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/city-block.png",
+      "exports": ["png/city-block--original--1024x1024.png", "png/city-block--preview--512x512.png"]
+    },
+    {
+      "id": "satellite-dish",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/satellite-dish.png",
+      "exports": [
+        "png/satellite-dish--original--1024x1024.png",
+        "png/satellite-dish--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "transit-sign",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/transit-sign.png",
+      "exports": [
+        "png/transit-sign--original--1024x1024.png",
+        "png/transit-sign--preview--512x512.png"
+      ]
+    },
+    {
+      "id": "cable-coil",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/cable-coil.png",
+      "exports": ["png/cable-coil--original--1024x1024.png", "png/cable-coil--preview--512x512.png"]
+    },
+    {
+      "id": "lunar-rock",
+      "category": "png",
+      "sample": false,
+      "source": "source/png/lunar-rock.png",
+      "exports": ["png/lunar-rock--original--1024x1024.png", "png/lunar-rock--preview--512x512.png"]
+    },
+    {
+      "id": "lunar-rooftop",
+      "category": "wallpapers",
+      "sample": true,
+      "sources": [
+        "source/wallpapers/lunar-rooftop-desktop.png",
+        "source/wallpapers/lunar-rooftop-mobile.png"
+      ],
+      "exports": [
+        "wallpapers/lunar-rooftop--desktop--2560x1440.png",
+        "wallpapers/lunar-rooftop--mobile--1440x2560.png"
+      ]
+    },
+    {
+      "id": "signal-city",
+      "category": "wallpapers",
+      "sample": false,
+      "sources": [
+        "source/wallpapers/signal-city-desktop.png",
+        "source/wallpapers/signal-city-mobile.png"
+      ],
+      "exports": [
+        "wallpapers/signal-city--desktop--2560x1440.png",
+        "wallpapers/signal-city--mobile--1440x2560.png"
+      ]
+    },
+    {
+      "id": "atlas-orbit",
+      "category": "wallpapers",
+      "sample": false,
+      "sources": [
+        "source/wallpapers/atlas-orbit-desktop.png",
+        "source/wallpapers/atlas-orbit-mobile.png"
+      ],
+      "exports": [
+        "wallpapers/atlas-orbit--desktop--2560x1440.png",
+        "wallpapers/atlas-orbit--mobile--1440x2560.png"
+      ]
+    },
+    {
+      "id": "night-transmission",
+      "category": "wallpapers",
+      "sample": false,
+      "sources": [
+        "source/wallpapers/night-transmission-desktop.png",
+        "source/wallpapers/night-transmission-mobile.png"
+      ],
+      "exports": [
+        "wallpapers/night-transmission--desktop--2560x1440.png",
+        "wallpapers/night-transmission--mobile--1440x2560.png"
+      ]
+    },
+    {
+      "id": "symbol",
+      "category": "logos",
+      "sample": true,
+      "variantOf": "moonwitness-identity",
+      "source": "source/logos/symbol.svg",
+      "exports": [
+        "logos/symbol--paper--512x341.png",
+        "logos/symbol--paper--1024x683.png",
+        "logos/symbol--ink--512x341.png",
+        "logos/symbol--ink--1024x683.png",
+        "logos/symbol--paper--32x32.png",
+        "logos/symbol--paper--64x64.png"
+      ]
+    },
+    {
+      "id": "horizontal-lockup",
+      "category": "logos",
+      "sample": true,
+      "variantOf": "moonwitness-identity",
+      "source": "source/logos/horizontal-lockup.svg",
+      "exports": [
+        "logos/horizontal-lockup--paper--512x77.png",
+        "logos/horizontal-lockup--paper--1024x154.png",
+        "logos/horizontal-lockup--ink--512x77.png",
+        "logos/horizontal-lockup--ink--1024x154.png"
+      ]
+    },
+    {
+      "id": "stacked-lockup",
+      "category": "logos",
+      "sample": true,
+      "variantOf": "moonwitness-identity",
+      "source": "source/logos/stacked-lockup.svg",
+      "exports": [
+        "logos/stacked-lockup--paper--512x410.png",
+        "logos/stacked-lockup--paper--1024x819.png",
+        "logos/stacked-lockup--ink--512x410.png",
+        "logos/stacked-lockup--ink--1024x819.png"
+      ]
+    },
+    {
+      "id": "wordmark",
+      "category": "logos",
+      "sample": true,
+      "variantOf": "moonwitness-identity",
+      "source": "source/logos/wordmark.svg",
+      "exports": [
+        "logos/wordmark--paper--512x88.png",
+        "logos/wordmark--paper--1024x176.png",
+        "logos/wordmark--ink--512x88.png",
+        "logos/wordmark--ink--1024x176.png"
+      ]
+    },
+    {
+      "id": "corner-brackets",
+      "category": "decor",
+      "sample": true,
+      "source": "source/decor/corner-brackets.svg",
+      "exports": ["decor/corner-brackets--paper--512x320.png"]
+    },
+    {
+      "id": "panel-frame",
+      "category": "decor",
+      "sample": false,
+      "source": "source/decor/panel-frame.svg",
+      "exports": ["decor/panel-frame--paper--512x320.png"]
+    },
+    {
+      "id": "filmstrip",
+      "category": "decor",
+      "sample": true,
+      "source": "source/decor/filmstrip.svg",
+      "exports": ["decor/filmstrip--paper--1024x256.png"]
+    },
+    {
+      "id": "torn-paper",
+      "category": "decor",
+      "sample": false,
+      "source": "source/decor/torn-paper.png",
+      "exports": ["decor/torn-paper--paper--1024x256.png"]
+    },
+    {
+      "id": "tape-strip",
+      "category": "decor",
+      "sample": true,
+      "source": "source/decor/tape-strip.png",
+      "exports": ["decor/tape-strip--paper--1024x256.png"]
+    },
+    {
+      "id": "halftone",
+      "category": "decor",
+      "sample": true,
+      "source": "source/decor/halftone.png",
+      "exports": ["decor/halftone--ink--512x512.png"]
+    },
+    {
+      "id": "ink-grain",
+      "category": "decor",
+      "sample": false,
+      "source": "source/decor/ink-grain.png",
+      "exports": ["decor/ink-grain--ink--512x512.png"]
+    },
+    {
+      "id": "hazard-band",
+      "category": "decor",
+      "sample": false,
+      "source": "source/decor/hazard-band.svg",
+      "exports": ["decor/hazard-band--paper--1024x128.png"]
+    }
+  ],
+  "sampleSheets": [
+    "samples/icons.png",
+    "samples/png.png",
+    "samples/wallpapers.png",
+    "samples/logos.png",
+    "samples/decor.png"
+  ],
+  "metadataFiles": [
+    "inventory.json",
+    "prompts.json",
+    "manifest.json",
+    "preview.html",
+    "verification.json"
+  ],
+  "approvalRecords": []
+}

@@ -1,0 +1,18 @@
+version: 1
+status: hardening
+canonical_format: json-schema-2020-12
+http_format: openapi-3.2
+compatibility:
+  patch: additive-only-nonbreaking
+  minor: backward-compatible-additions
+  major: breaking-contract-change
+  package_versioning: semver
+  api_versioning: explicit-v1-v2-style-only-when-break-required
+rules:
+  - schema_id_is_stable
+  - required_fields_cannot_be_removed_in_minor_or_patch
+  - enum_values_cannot_be_removed_in_minor_or_patch
+  - consumers_must_tolerate_unknown_response_fields
+  - request_restrictions_must_not_be_tightened_without_major_change
+  - examples_and_fixtures_are_contract-tests
+  - generated_consumers_do_not_edit_canonical_schema

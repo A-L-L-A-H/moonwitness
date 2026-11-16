@@ -1,0 +1,9 @@
+{
+  "topic": "Core Revelation Mapping",
+  "rows": [
+    {"tradition":"Quranic","figure":"Musa","revelation":"Taurat","modern_candidate":"Torah/Pentateuch","identification_status":"TO_BE_VERIFIED"},
+    {"tradition":"Quranic","figure":"Dawud","revelation":"Zabur","modern_candidate":"Psalms","identification_status":"TO_BE_VERIFIED"},
+    {"tradition":"Quranic","figure":"Isa","revelation":"Injil","modern_candidate":"Four Canonical Gospels","identification_status":"TO_BE_VERIFIED"},
+    {"tradition":"Quranic","figure":"Muhammad","revelation":"Al-Quran","modern_candidate":"Quran corpus","identification_status":"QURAN_CORPUS_AVAILABLE"}
+  ]
+}

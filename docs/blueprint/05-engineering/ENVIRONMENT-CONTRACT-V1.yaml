@@ -1,0 +1,34 @@
+version: 1
+status: locked
+environments:
+  local:
+    purpose: developer_workstation
+    data_policy: synthetic_or_local_only
+  development:
+    provider: vercel
+    database: neon_or_supabase
+    data_policy: isolated_nonproduction
+  preview:
+    provider: vercel
+    database: neon_or_supabase
+    data_policy: isolated_per_preview_or_safe_shared_nonproduction
+  staging:
+    provider: docker_or_vercel_compatible
+    database: dedicated_nonproduction
+    data_policy: production_like_nonproduction
+  production:
+    provider: docker-compose-on-vps
+    database: managed_postgres_or_approved_production_store
+    data_policy: production
+config:
+  public:
+    prefixed_client_safe_only: true
+  secret:
+    secret_manager_or_platform_secret: true
+  required_validation: startup_or_request_boundary
+rules:
+  - no_secret_committed
+  - no_production_credentials_in_preview
+  - environment_names_are_stable
+  - provider_specific_configuration_stays_outside_domain_packages
+  - missing_required_config_fails_fast_with_safe_error

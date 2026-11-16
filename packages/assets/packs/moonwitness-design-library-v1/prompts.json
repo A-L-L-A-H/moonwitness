@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "packId": "moonwitness-design-library-v1",
+  "rightsStatus": "internal-only",
+  "ownerVisualApproval": null,
+  "direction": "Lunar-industrial manga and riso print. Existing ink/paper palette with restrained signal accents. Small icons are clean, angular and optically aligned; wear belongs to larger decorative surfaces. No generic glow, new palette, unrelated logos or invented named characters.",
+  "reference": "vibe_images/mockup-game-hud_1794816742457_f41d47d2.png (visual inspection only, not copied or uploaded)",
+  "briefs": [
+    {
+      "category": "icons",
+      "ids": ["command", "atlas", "dock", "story", "signal", "warning"],
+      "method": "authored-vector",
+      "provider": null,
+      "prompt": "Draw six original 24-unit, 2-unit-stroke symbols with square line caps and angular joints. Command: four aiming corners enclosing a single control square. Atlas: folded map with a continuous traverse. Dock: industrial docking cradle with descending cargo marker. Story: three asymmetric comic panels. Signal: antenna transmitting through two pairs of arcs. Warning: clipped industrial warning plate with exclamation. Use generous negative space. No distressed noise at 24px.",
+      "status": "ready-for-review"
+    },
+    {
+      "category": "png",
+      "ids": ["lunar-disc", "cassette-recorder"],
+      "method": "generated-raster",
+      "provider": null,
+      "prompt": "Individual isolated MoonWitness object cutout, not a sheet. Native 1024x1024 RGBA PNG, silhouette entirely within 8 percent margin. Object is either cratered lunar disc or worn cassette recorder, generated separately. Manga ink outlines and stippled riso shading, paper/ink dominant, restrained pink or blue detailing. Genuine transparent background, no checkerboard, text, watermark or backdrop. Preserve internal highlights and holes.",
+      "status": "blocked",
+      "reason": "Prior ImageGen HTTP403/pricing. New authorized access is required; no call made."
+    },
+    {
+      "category": "wallpapers",
+      "ids": ["lunar-rooftop"],
+      "method": "generated-raster",
+      "provider": null,
+      "prompt": "MoonWitness lunar rooftop at night with industrial skyline and a large textured moon, drawn as a manga/riso environment. Ink and paper dominate; small pink/blue city signals. No text, UI, watermark or logo. Art-direct two compositions independently: desktop 2560x1440 with left 22 percent low-detail protected space, mobile 1440x2560 with top 22 percent low-detail clock space. Native dimensions required; do not upscale or merely crop a horizontal scene into portrait.",
+      "status": "blocked",
+      "reason": "Provider access and target native resolutions unverified."
+    },
+    {
+      "category": "logos",
+      "ids": ["symbol", "horizontal-lockup", "stacked-lockup", "wordmark"],
+      "method": "derived-existing",
+      "provider": null,
+      "prompt": "Reproduce only owner-confirmed existing MoonWitness identity as symbol and three wordmark layouts. No rebranding or redrawing into a different mark. Verify the current 48x32 UI crown and Saksi Marker wordmark first; source evidence alone is not owner approval. Do not distribute font files.",
+      "status": "blocked",
+      "reason": "Canonical-source and derivative-rights confirmation pending."
+    },
+    {
+      "category": "decor",
+      "ids": ["corner-brackets", "filmstrip"],
+      "method": "authored-vector",
+      "provider": null,
+      "prompt": "Draw four clipped industrial corners on a transparent 512x320 canvas, leaving the center completely open. Draw a transparent 1024x256 filmstrip with two solid perforated rails and four open frame windows. No text, automatic overlays or baked background.",
+      "status": "ready-for-review"
+    },
+    {
+      "category": "decor",
+      "ids": ["tape-strip", "halftone"],
+      "method": "procedural-raster",
+      "provider": null,
+      "prompt": "Create native RGBA raster textures locally, not AI-generated illustrations. Tape: 1024x256, translucent warm paper fibers, deterministic grain, irregular torn ends and clear margins. Halftone: 512x512 ink-colored transparent dot tile, exact 32px periodic cell, gently antialiased circular dots, seamless both axes. Do not flatten onto a background.",
+      "recipe": {
+        "tapeSeed": 17948167,
+        "halftoneCell": 32,
+        "halftoneRadius": 4.8,
+        "colorSpace": "sRGB"
+      },
+      "status": "ready-for-review"
+    }
+  ],
+  "productionRecords": []
+}

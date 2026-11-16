@@ -1,0 +1,251 @@
+<!-- TAB: ROCKSOUL-ASSETS PROGRAMMATIC VISUAL REGISTRY -->
+<div id="tab-assets" class="tab-content">
+  <!-- Top Banner -->
+  <div class="box-card" style="margin-bottom: 20px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(236, 72, 153, 0.05));">
+    <div class="box-header" style="flex-wrap: wrap; gap: 12px; margin-bottom: 10px;">
+      <div class="box-title">
+        <span style="font-size: 20px;">🎨</span>
+        <div>
+          <div>Programmatic Asset Registry &mdash; <code>rocksoul-assets</code></div>
+          <div style="font-size: 12px; font-weight: normal; color: var(--text-muted); margin-top: 2px;">
+            Canonical visual source of truth dynamically consumed from: <code><%= data.assets.baseUrl %></code>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+        <span class="badge badge-green">12 UI Surfaces Verified</span>
+        <span class="badge badge-blue">6 Asset Packs</span>
+        <a href="/api/v1/assets" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 5px 12px;">
+          ⚡ JSON API (/api/v1/assets)
+        </a>
+        <a href="https://github.com/bjo163/rocksoul-assets" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 5px 12px;">
+          ↗ GitHub Assets Repo
+        </a>
+      </div>
+    </div>
+    <p style="font-size: 13px; color: var(--text-muted); max-width: 900px; line-height: 1.6;">
+      CRAYON consumes, mirrors, and programmatically implements canonical vector assets from <code>rocksoul-assets</code>. 
+      Headings, brand grammar, Mizan provenance, and application shell surfaces adhere strictly to this source without forking.
+    </p>
+  </div>
+
+  <!-- Brand Assets Section -->
+  <div class="box-card" style="margin-bottom: 20px;">
+    <div class="box-header">
+      <div class="box-title">
+        <span>💎</span> Canonical Brand System
+      </div>
+      <span class="badge badge-blue">moonwitness/brand/*</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+      <!-- Horizontal Logo -->
+      <div style="background: #18181f; border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">
+            Horizontal Logo (Primary)
+          </div>
+          <div style="background: #09090c; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px 16px; display: flex; align-items: center; justify-content: center; min-height: 100px;">
+            <img src="<%= data.assets.brand.logoHorizontal %>" alt="MoonWitness Horizontal" style="max-width: 100%; max-height: 48px; object-fit: contain;" />
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span class="mono" style="font-size: 11px; color: var(--text-dim);">logo-horizontal.svg</span>
+          <a href="<%= data.assets.brand.logoHorizontal %>" target="_blank" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">View SVG</a>
+        </div>
+      </div>
+
+      <!-- Ecosystem Lockup -->
+      <div style="background: #18181f; border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">
+            Ecosystem Lockup
+          </div>
+          <div style="background: #09090c; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px 16px; display: flex; align-items: center; justify-content: center; min-height: 100px;">
+            <img src="<%= data.assets.brand.lockup %>" alt="Rocksoul Lockup" style="max-width: 100%; max-height: 52px; object-fit: contain;" />
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span class="mono" style="font-size: 11px; color: var(--text-dim);">rocksoul-lockup.svg</span>
+          <a href="<%= data.assets.brand.lockup %>" target="_blank" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">View SVG</a>
+        </div>
+      </div>
+
+      <!-- Stacked Logo -->
+      <div style="background: #18181f; border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">
+            Stacked Mark
+          </div>
+          <div style="background: #09090c; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px 16px; display: flex; align-items: center; justify-content: center; min-height: 100px;">
+            <img src="<%= data.assets.brand.logoStacked %>" alt="MoonWitness Stacked" style="max-width: 100%; max-height: 60px; object-fit: contain;" />
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span class="mono" style="font-size: 11px; color: var(--text-dim);">logo-stacked.svg</span>
+          <a href="<%= data.assets.brand.logoStacked %>" target="_blank" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">View SVG</a>
+        </div>
+      </div>
+
+      <!-- Monochrome Logo -->
+      <div style="background: #18181f; border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">
+            Monochrome Silhouette
+          </div>
+          <div style="background: #09090c; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px 16px; display: flex; align-items: center; justify-content: center; min-height: 100px;">
+            <img src="<%= data.assets.brand.logoMonochrome %>" alt="MoonWitness Monochrome" style="max-width: 100%; max-height: 48px; object-fit: contain; filter: brightness(1.2);" />
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span class="mono" style="font-size: 11px; color: var(--text-dim);">logo-monochrome.svg</span>
+          <a href="<%= data.assets.brand.logoMonochrome %>" target="_blank" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">View SVG</a>
+        </div>
+      </div>
+
+      <!-- Wordmark -->
+      <div style="background: #18181f; border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">
+            Typography Wordmark
+          </div>
+          <div style="background: #09090c; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px 16px; display: flex; align-items: center; justify-content: center; min-height: 100px;">
+            <img src="<%= data.assets.brand.wordmark %>" alt="MoonWitness Wordmark" style="max-width: 100%; max-height: 38px; object-fit: contain;" />
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span class="mono" style="font-size: 11px; color: var(--text-dim);">wordmark.svg</span>
+          <a href="<%= data.assets.brand.wordmark %>" target="_blank" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">View SVG</a>
+        </div>
+      </div>
+
+      <!-- Favicon -->
+      <div style="background: #18181f; border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px;">
+            Favicon & Square Mark
+          </div>
+          <div style="background: #09090c; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 24px 16px; display: flex; align-items: center; justify-content: center; min-height: 100px;">
+            <img src="<%= data.assets.brand.favicon %>" alt="Favicon" style="max-width: 100%; max-height: 48px; object-fit: contain;" />
+          </div>
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+          <span class="mono" style="font-size: 11px; color: var(--text-dim);">favicon.svg</span>
+          <a href="<%= data.assets.brand.favicon %>" target="_blank" class="btn btn-secondary" style="font-size: 11px; padding: 4px 8px;">View SVG</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI v2 Canonical Surfaces Section -->
+  <div class="box-card" style="margin-bottom: 20px;">
+    <div class="box-header">
+      <div class="box-title">
+        <span>🖥️</span> Canonical UI v2 Surfaces (17 &ndash; 27 + Shell)
+      </div>
+      <span class="badge badge-green"><%= data.assets.surfaces.length %> Vector Surfaces</span>
+    </div>
+
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 18px;">
+      These vectors define the authoritative interactive product surfaces for CRAYON, including application shell, AI workspace, authorization UX, and telemetry dashboard.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 20px;">
+      <% data.assets.surfaces.forEach(function(surface) { %>
+        <div style="background: #14141a; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+          <div style="padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #181822;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="badge badge-blue">#<%= surface.surfaceNumber %></span>
+              <span style="font-weight: 700; font-size: 14px;"><%= surface.name %></span>
+            </div>
+            <span class="badge badge-cyan"><%= surface.role %></span>
+          </div>
+
+          <div style="background: #0a0a0e; padding: 12px; display: flex; align-items: center; justify-content: center; min-height: 220px; border-bottom: 1px solid var(--border); cursor: pointer;" onclick="previewAssetModal('<%= surface.url %>', '<%= surface.name %>')">
+            <img src="<%= surface.url %>" alt="<%= surface.name %>" loading="lazy" style="max-width: 100%; max-height: 200px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);" />
+          </div>
+
+          <div style="padding: 14px 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;"><%= surface.description %></p>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; pt-2; border-top: 1px solid rgba(255,255,255,0.04);">
+              <span class="mono" style="font-size: 11px; color: var(--text-dim);"><%= surface.filename %></span>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" onclick="previewAssetModal('<%= surface.url %>', '<%= surface.name %>')" class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;">
+                  🔍 Inspect
+                </button>
+                <a href="<%= surface.url %>" target="_blank" class="btn btn-primary" style="font-size: 11px; padding: 4px 10px;">
+                  Open SVG ↗
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+
+  <!-- Asset Packs Section -->
+  <div class="box-card">
+    <div class="box-header">
+      <div class="box-title">
+        <span>📦</span> Canonical Asset Packs
+      </div>
+      <span class="badge badge-amber">moonwitness/*</span>
+    </div>
+
+    <div class="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Pack Name</th>
+            <th>Path in rocksoul-assets</th>
+            <th>Asset Count</th>
+            <th>Format</th>
+            <th>Purpose / Usage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% data.assets.packs.forEach(function(pack) { %>
+            <tr>
+              <td style="font-weight: 700; color: #fff;"><%= pack.name %></td>
+              <td class="mono" style="color: #818cf8;"><%= pack.path %></td>
+              <td><span class="badge badge-cyan"><%= pack.count %> assets</span></td>
+              <td><span class="badge badge-blue"><%= pack.format %></span></td>
+              <td style="color: var(--text-muted); font-size: 12px;"><%= pack.description %></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Asset Full Inspection -->
+<div id="assetInspectionModal" class="modal-backdrop" style="display: none;" onclick="closeModal('assetInspectionModal')">
+  <div class="modal-card" style="max-width: 1080px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div id="modalAssetTitle" class="modal-title">Canonical Asset Preview</div>
+      <button class="modal-close" onclick="closeModal('assetInspectionModal')">&times;</button>
+    </div>
+    <div style="flex: 1; overflow: auto; padding: 16px; background: #08080a; display: flex; justify-content: center; align-items: center; min-height: 400px;">
+      <img id="modalAssetImg" src="" alt="Asset Preview" style="max-width: 100%; max-height: 75vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);" />
+    </div>
+    <div style="padding: 12px 18px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: #121216;">
+      <span id="modalAssetUrlText" class="mono" style="font-size: 11px; color: var(--text-dim);"></span>
+      <a id="modalAssetOpenLink" href="#" target="_blank" class="btn btn-primary" style="font-size: 12px; padding: 6px 14px;">
+        Open Full Raw Vector ↗
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function previewAssetModal(url, title) {
+    document.getElementById('modalAssetTitle').textContent = title || 'Asset Inspection';
+    document.getElementById('modalAssetImg').src = url;
+    document.getElementById('modalAssetUrlText').textContent = url;
+    document.getElementById('modalAssetOpenLink').href = url;
+    openModal('assetInspectionModal');
+  }
+</script>

@@ -14,10 +14,12 @@ import sprayTagUrl from "./spray-tag.png";
 import studioSceneUrl from "./studio-scene.jpg";
 import telemetryWaveUrl from "./telemetry-wave.png";
 import thresholdSceneUrl from "./threshold-scene.jpg";
-import thumbArchiveUrl from "./thumb-archive.png";
-import thumbRiotUrl from "./thumb-riot.png";
-import thumbSignalUrl from "./thumb-signal.png";
-import thumbStudioUrl from "./thumb-studio.png";
+
+/** Card art reuses the full 1376x768 scenes so no 240px thumbnail is ever upscaled. */
+const thumbArchiveUrl = archiveSceneUrl;
+const thumbRiotUrl = riotdeckSceneUrl;
+const thumbSignalUrl = signalSceneUrl;
+const thumbStudioUrl = studioSceneUrl;
 
 export {
   archiveSceneUrl,

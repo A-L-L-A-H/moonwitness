@@ -1,0 +1,37 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/mtime-core",
+  "crates/mtime-timescales",
+  "crates/mtime-eop",
+  "crates/mtime-jpl",
+  "crates/mtime-spk",
+  "crates/mtime-antikythera",
+  "crates/mtime-temporal",
+  "crates/mtime-clock",
+  "crates/mtime-uncertainty",
+  "crates/mtime-ffi",
+  "crates/mtime-astro",
+  "crates/mtime-hijri",
+  "crates/mtime-hilal",
+  "crates/mtime-profile",
+  "crates/mtime-geospatial",
+  "crates/mtime-worship",
+  "crates/mtime-observation",
+  "crates/mtime-integrity",
+  "crates/mtime-authority",
+  "crates/mtime-explain",
+  "crates/mtime-cosmology",
+  "crates/mtime-revelation",
+  "crates/mtime-cli",
+  "crates/mtime-wasm",
+]
+
+[workspace.package]
+version = "0.16.0"
+edition = "2021"
+license = "MIT"
+rust-version = "1.75"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"

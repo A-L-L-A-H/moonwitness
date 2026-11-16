@@ -1,0 +1,23 @@
+version: "0.1"
+
+# Composition only. Canonical entities live in their dedicated datasets.
+event: event_001
+witness: witness_001
+message: msg_001
+seduction: seduction_001
+fault_line: fault_001
+exposure: exposure_001
+past_presence: past_presence_001
+promoting: promoting_001
+conflict: conflict_001
+sanity_last_breath: sanity_last_breath_001
+villain: villain_001
+change_advisory_board: cab_001
+
+transition:
+  audit: "What is actually here?"
+  evaluation: "What matters?"
+  balancing: "What should be kept, changed, reduced, restored, or released?"
+  promoting: "What deserves to continue?"
+
+change: change_001

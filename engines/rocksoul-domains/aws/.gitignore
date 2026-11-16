@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+
+# Build and test output
+dist/
+.next/
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Local runtime state
+.data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+*.log
+.wrangler/
+
+# Temporary files
+.tmp/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+packages/*/dist-test/
+docs-link-errors.txt

@@ -1,4 +1,3 @@
-import { createClient } from "@libsql/client";
 import type { Client, ResultSet, Transaction } from "@libsql/client";
 
 export interface LibSqlExecutor {
@@ -47,6 +46,7 @@ export class LibSqlDriver implements LibSqlExecutor {
     if (this.client) {
       throw new Error("Database already initialized. Close it before re-initializing.");
     }
+    const { createClient } = await import("@libsql/client");
     this.client = createClient({ url: toUrl(dbPath) });
     await this.client.execute("PRAGMA journal_mode = WAL");
     await this.client.execute("PRAGMA foreign_keys = ON");

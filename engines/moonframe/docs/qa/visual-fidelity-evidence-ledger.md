@@ -1,0 +1,647 @@
+# Visual fidelity reference evidence ledger
+
+Updated 2026-10-26. This is an intake inventory, not visual approval, an import record, or a license grant.
+
+## Mockup parity owner decision record (MF-VF-446)
+
+Create one record for each parity claim submitted for an owner decision. Keep disposition `pending` until the named owner actually reviews the linked evidence; an implementer or automated check cannot fill the decision fields on the owner's behalf. A waiver documents an accepted deviation only after the owner records it; missing evidence is not a waiver.
+
+| Claim / reference or skin pair | Candidate screenshot paths and SHA-256s | Source commit; fixture/content; viewport, mode and render environment | Reviewer name and review date | Concrete matches and material differences | Issues resolved / open | Waiver rationale (or `none`) | Owner disposition and decision date |
+|---|---|---|---|---|---|---|---|
+| pending | pending | pending | pending | pending | pending | pending | pending |
+
+Allowed dispositions: `pending`, `approved`, `approved-with-waiver`, or `rejected`. Use `approved-with-waiver` only with a specific deviation, rationale, and owner decision date. Link immutable screenshot artifacts and record their digests; do not infer parity from task status, automated scores, a capture path alone, or a review protocol. A rejected or waived claim must retain the unresolved findings and scope of the decision.
+
+## Four-reference-zone human review sheet (MF-VF-436)
+
+Use one record per zone and candidate capture. Keep every field pending until an actual candidate capture and human comparison exist. Reference digests below come from the canonical creative-reference contract; the source bytes are absent from this checkout, so the digest cannot be recomputed here. A recorded digest is not a reuse license. Do not record a review disposition or approval by inference.
+
+| Zone | Reference / recorded SHA-256 / dimensions | Candidate screenshot / SHA-256 | Source commit; fixture/content; viewport/mode; render environment | Human reviewer / date | Composition observations | Typography observations | Asset observations | Semantic/accessibility observations | Disposition / unresolved issues |
+|---|---|---|---|---|---|---|---|---|---|
+| R01 mission control | MWX-REF-001 / `31829877f5499480ef8ebbfd2e0b103016917216c3ac70a69d0595b2bf2efa04` / 1672×941 | pending | pending | pending | pending | pending | pending | pending | pending; source bytes absent, comparison blocked |
+| R02 editorial landing | MWX-REF-002 / `1de1d94a2d251901503dd7edc5bc42aff77b65251dde6e29fd4b5455b7376167` / 1024×576 | pending | pending | pending | pending | pending | pending | pending | pending; source bytes absent, comparison blocked |
+| R03 campaign poster | MWX-REF-003 / `326ebd139769e13da396a2e02f25322a6b8f9b2036d303f0d61fd63b98452dff` / 682×1024 | pending | pending | pending | pending | pending | pending | pending | pending; source bytes absent, comparison blocked |
+| R04 sign-in | MWX-REF-004 / `9d565501a1aa681f1122d666cb01dbdfad4b8fd8dd89f9648b676d652080eb90` / 1024×576 | pending | pending | pending | pending | pending | pending | pending | pending; source bytes absent, comparison blocked |
+
+For a usable comparison, attach or link the candidate capture and record its SHA-256, exact source commit, stable fixture/content identity, viewport and mode, and browser/render environment. Reviewer notes should describe concrete matches, material differences, and unresolved questions in all four observation columns. Use only `pending`, `reviewed-with-deltas`, or `ready-for-owner-decision`; the latter is not acceptance. If source bytes remain unavailable, retain the blocker and do not substitute a textual description for visual inspection.
+
+## Per-skin source asset inventory (MF-VF-289)
+
+Inventory scope: standalone files under `assets/source/skins/<skin-id>/` at source HEAD `528a127c58e7b13c9c3bf88e29f0fdd9e89e1e96`. “Present” means a checked-in source file exists in that directory; it does not mean integrated, optically reviewed, licensed, or approved. “No standalone source files” is an explicit empty inventory, not a claim that the skin has no runtime styling or inline assets. Hashes below are SHA-256 values computed from the listed repository files during this inventory. Rights/creator records and further asset plans remain governed by the asset manifest and asset briefs; no rights are inferred here.
+
+| Canonical skin ID | Standalone source assets present | SHA-256 | Inventory state |
+|---|---|---|---|
+| classic | none | — | no standalone source files recorded |
+| moonchrome | none | — | no standalone source files recorded |
+| mooncrash | none | — | no standalone source files recorded |
+| moonglitch | `motif.svg`, `pattern.svg` | `motif.svg` `5D7CF0CC15FE00DDB914F3188F50912C47383FA7C8E846D8435E32B91908017E`; `pattern.svg` `B2B8C726C4D6516A55974F3459150EA509DAE373FE6ECF09E9D07D0CD589735C` | files present; rights/review pending |
+| moonhalftone | `edition.svg`, `hero.svg`, `motif.svg`, `pattern.svg` | `edition.svg` `1158DAA144A8D5A151B75AF46A399772E3574DB82A03BD54F288128C17D12518`; `hero.svg` `295E77CDD53ABD5CFDB390EACBAB08873F816A9F3A745B29280D81B0EA1B2B6B`; `motif.svg` `094ED437C2ECCAD1C5BCA16A62CE9CC670EDAC48DF0EC01BADA0E35E677E3781`; `pattern.svg` `BE45E07E3BF9FCBDDFE8A8BC59BA580EC657A68921404CCD5212A5E855E3514E` | files present; rights/review pending |
+| moonink | none | — | no standalone source files recorded |
+| moonledger | none | — | no standalone source files recorded |
+| moonpanel | none | — | no standalone source files recorded |
+| moonpunk | `edition.svg`, `hero.svg`, `pattern.svg` | `edition.svg` `CB686696F24B5EC02F456AF0A467AEAD2EA14FE1648B9EAE876AAF24F0A9C9AA`; `hero.svg` `25CE3FE8CC0F852EA35671CA3DF015CDBABE7A9BEE7C9BFCEF01BFCCC436D106`; `pattern.svg` `F9C698844A2E9D6D7BAB8EF108208B8B0539660C0E58E6CA26679EA39DCB7242` | files present; rights/review pending |
+| moonquest | none | — | no standalone source files recorded |
+| moonraw | none | — | no standalone source files recorded |
+| moonriot | `edition.svg`, `hero.svg`, `motif.svg`, `pattern.svg` | `edition.svg` `57D4B99C0E48C9CD672D9B1A2AC309B1A3075EC4451DC14C5038D6135CBFB635`; `hero.svg` `3C144367A1ECC95320745F0268F08A1196846C952E24EAD373C424B44879AAD4`; `motif.svg` `F76DAD45E7A6EAF2E6C82582F9D1E1A2B96A5226471926DD6476A30D2A4EF560`; `pattern.svg` `F5337BB7A5042B9FE07DE093C060720089469A94B85CBAA40F159A90FFD3A168` | files present; rights/review pending |
+| moonscrawl | none | — | no standalone source files recorded |
+| moonsmash | none | — | no standalone source files recorded |
+| moonzine | `edition.svg`, `hero.svg`, `motif.svg`, `pattern.svg` | `edition.svg` `BEE1A2D3485FEE115669C7776909AC3CD26F21557ED8886281837396E5DCC663`; `hero.svg` `24324426AA4751A94501781FEF08628F7CB162B9071F1E71CBCCDE95D75FAD60`; `motif.svg` `7C620FF39F56A19BA44503B08A8616D4D0F7D6A6623DAD1B9B8DDE5A5DE44918`; `pattern.svg` `5CCBEC714D66920B6D7859F71B967840AAE85EEFF2E09E43461166B42B36D51B` | files present; rights/review pending |
+This is a point-in-time source inventory; rerun/reconcile it when files change. It complements the captured-appearance tables below and does not replace normative asset provenance or rights evidence.
+
+## Human design-reference comparison threshold (MF-VF-404)
+
+A captured screenshot establishes only that a render was produced from the recorded source and fixture. It does not establish design fidelity, visual quality, or acceptance. A reference comparison is reviewable only when the reviewer can inspect the reference and candidate at their intended dimensions and has the candidate's source commit, fixture/content identity, viewport, mode, browser/render environment, and screenshot digest. If the original reference bytes are unavailable, record that comparison as blocked; metadata or a textual description cannot substitute for the pixels.
+
+For each review, record the reference identifier and digest (or the exact missing-source blocker), candidate screenshot path and SHA-256, source commit, fixture and content identity, viewport/mode, reviewer identity and date, and a concise list of observed matches, material differences, and unresolved questions. Compare like-for-like content and viewport where the design allows it; record unavoidable differences such as unavailable fonts or assets. The reviewer records a qualitative disposition such as `pending`, `reviewed-with-deltas`, or `ready-for-owner-decision`; no percentage, aggregate fidelity score, automated similarity threshold, or implied owner approval is permitted. `ready-for-owner-decision` remains distinct from accepted.
+
+This threshold defines evidence fields and review states only. It does not claim that any current screenshot has passed human review, that source artwork may be redistributed, or that a task has been accepted. A reviewer may conclude that evidence is insufficient and request a new capture without changing the underlying source artifact.
+
+## Four user-provided creative references
+
+Canonical metadata lives in `contracts/moonframe-creative-reference-contract-v0.1.json`. It records SHA-256 values and dimensions as received in the original chat upload inventory:
+
+| ID | Attachment name | Recorded SHA-256 | Dimensions | Repository source bytes | Rights status |
+|---|---|---|---|---|---|
+| MWX-REF-001 | `image.png` | `31829877f5499480ef8ebbfd2e0b103016917216c3ac70a69d0595b2bf2efa04` | 1672 × 941 | absent | owner-supplied reference; not a reuse license |
+| MWX-REF-002 | `image(1).png` | `1de1d94a2d251901503dd7edc5bc42aff77b65251dde6e29fd4b5455b7376167` | 1024 × 576 | absent | owner-supplied reference; not a reuse license |
+| MWX-REF-003 | `image(2).png` | `326ebd139769e13da396a2e02f25322a6b8f9b2036d303f0d61fd63b98452dff` | 682 × 1024 | absent | owner-supplied reference; not a reuse license |
+| MWX-REF-004 | `image(3).png` | `9d565501a1aa681f1122d666cb01dbdfad4b8fd8dd89f9648b676d652080eb90` | 1024 × 576 | absent | owner-supplied reference; not a reuse license |
+
+A repository scan for `.png`, `.jpg`, `.jpeg`, and `.webp` returned zero files. The four SHA-256 strings are transcribed from canonical contract metadata and structurally have 64 hexadecimal characters; they could not be recomputed against source bytes because those bytes are not present in the repository/workspace. No reference image was imported, redistributed, or treated as production artwork. Pixel review remains blocked until source binaries are supplied and approved for review; matching a digest alone does not establish reuse rights or visual approval.
+
+## Captured Moonframe skin appearances
+
+Capture run: source commit 15cb218fdd221115bafb9981a869999be015769f; render-input fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183. Fixture: /lab default PropsPlayground (Button / primary / md / Explore Moonframe) plus the fixed Northstar Studio dashboard, five-item workspace navigation, five-row task table and Workspace profile form. Profile: desktop 1440×960, tablet 768×1024 and phone 360×800 CSS px; en-US, LTR, UTC, frozen at 2026-10-25T12:00:00.000Z; document.fonts.ready awaited. Chromium 156.0.8078.4 on Windows; runtime CSS font stack is environment provided and font status loaded. Full-page screenshots have Playwright animations disabled. Every row is machine-captured evidence only; pixels remain pending human visual review.
+
+| Skin | Mode | Fixture / viewport | Screenshot path | PNG SHA-256 | Source commit | Reviewer | Status | Exception |
+|---|---|---|---|---|---|---|---|---|
+| classic | dark | /lab default / 1440x960 | `artifacts/skins/classic-dark-1440x960-default.png` | `c4812192b1664dd5844ca6ed2c14f897f2778dda689b00ffc57f1c29d647503e` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| classic | light | /lab default / 1440x960 | `artifacts/skins/classic-light-1440x960-default.png` | `581b07281f49b5061867f520b1fe3b17f0a1f16ae47f76b1bf565b04b7b6979a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonchrome | dark | /lab default / 1440x960 | `artifacts/skins/moonchrome-dark-1440x960-default.png` | `ff588d463b51a1589461bdc9641c07a58e9b81452efb4874269940ab39d1a8ca` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonchrome | light | /lab default / 1440x960 | `artifacts/skins/moonchrome-light-1440x960-default.png` | `0817b93ba3ee3deda3c331d40f1fe9349f4dae7d7d04cada7df099774e4ab57b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| mooncrash | dark | /lab default / 1440x960 | `artifacts/skins/mooncrash-dark-1440x960-default.png` | `73c566321b54742c8d18362f4f12da661c8ba669d82b358b3947319bd192092e` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| mooncrash | light | /lab default / 1440x960 | `artifacts/skins/mooncrash-light-1440x960-default.png` | `ce72500abfca85fb2cf65b6f69b6fc24c72d99e1a7545fc8761c283f76c2d816` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonglitch | dark | /lab default / 1440x960 | `artifacts/skins/moonglitch-dark-1440x960-default.png` | `fe277a908f4fa0761ff89e34b19190d13a1b2bc9aa6f66c88ccd74789ebb4034` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonglitch | light | /lab default / 1440x960 | `artifacts/skins/moonglitch-light-1440x960-default.png` | `b53a6c6515ec00ceb5fa1065a8747f9dc7bef7a18e215a38734cbee57adf6c73` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonhalftone | dark | /lab default / 1440x960 | `artifacts/skins/moonhalftone-dark-1440x960-default.png` | `ff232e9101af346aed5c7ebaa701ce0830d6965210b760a0a90509a315f11950` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonhalftone | light | /lab default / 1440x960 | `artifacts/skins/moonhalftone-light-1440x960-default.png` | `ee0d14c624ea1362121c66dfbf4de67f6551cc38241b7d7d9f5cd43786007992` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonink | dark | /lab default / 1440x960 | `artifacts/skins/moonink-dark-1440x960-default.png` | `ccf23947d589bb379388757b5ddda06596ccda7fdd7e8d8c24b2c9e977118db9` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonink | light | /lab default / 1440x960 | `artifacts/skins/moonink-light-1440x960-default.png` | `555467bc6fb353f8d9203f7633deed3df4be35b7b166686dcadaf0f5f6e68063` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonledger | dark | /lab default / 1440x960 | `artifacts/skins/moonledger-dark-1440x960-default.png` | `f3ec36136d2de53aaecae3f6a7d477d1ebff98be20a317eb798a9ee3530ff7e5` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonledger | light | /lab default / 1440x960 | `artifacts/skins/moonledger-light-1440x960-default.png` | `5caa3da7051174e2b4eb3d93e2e80e596e0ab6bb20f353de92c502e53d310247` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpanel | dark | /lab default / 1440x960 | `artifacts/skins/moonpanel-dark-1440x960-default.png` | `61e25235ced93384e6e9d95d3003a8bc8703604ef58a6318be38bbd173f7f1ce` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpanel | light | /lab default / 1440x960 | `artifacts/skins/moonpanel-light-1440x960-default.png` | `76cbb0e2e1116f989b266ddf424c60022e3d578b12916af54c344bce72ca6c08` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpunk | dark | /lab default / 1440x960 | `artifacts/skins/moonpunk-dark-1440x960-default.png` | `7f634577b669086e7a205b1d69794c70685267d8eeb83633159a494cde4a57b4` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpunk | light | /lab default / 1440x960 | `artifacts/skins/moonpunk-light-1440x960-default.png` | `3110de6ce20624cd8ef9a373ce47f66d75db8a5a0a14fd24476c157fb1bcb101` | `31f2c0282ebe94097ef9047e87236d766f337e64` | pending | captured-structural | Pixel/human visual review pending; provenance sidecar records Chromium 156 and loaded fonts |
+| moonquest | dark | /lab default / 1440x960 | `artifacts/skins/moonquest-dark-1440x960-default.png` | `bde09ff88d8e56e1349b6045ea21b85f9882c4598fd77be0199332333705aca9` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonquest | light | /lab default / 1440x960 | `artifacts/skins/moonquest-light-1440x960-default.png` | `145cb606c6e22fdba0561a4dd69999f0724e173967389995fda8c0a620b96e6f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonraw | dark | /lab default / 1440x960 | `artifacts/skins/moonraw-dark-1440x960-default.png` | `f1923b5da2cfc271d8b09e7b45667140307b960e936eefc8ebfdef02cbe5ca17` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonraw | light | /lab default / 1440x960 | `artifacts/skins/moonraw-light-1440x960-default.png` | `7999bfc9966326485ec155413615c0e305e9f107653e2b7b41bc9235475987da` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonriot | dark | /lab default / 1440x960 | `artifacts/skins/moonriot-dark-1440x960-default.png` | `a23ab76eb83283cbfdb74efa5550fbf522981413a56c8ae4b01923c23ca1106f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonriot | light | /lab default / 1440x960 | `artifacts/skins/moonriot-light-1440x960-default.png` | `eb4e0c80b9c0e0e61830173c16d9e8d1285807b970cd42d17098aa7194638dde` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonscrawl | dark | /lab default / 1440x960 | `artifacts/skins/moonscrawl-dark-1440x960-default.png` | `5d803280834c0a36f9383df24e9a6821c7ac88ab8a27b758941349258d39d36f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonscrawl | light | /lab default / 1440x960 | `artifacts/skins/moonscrawl-light-1440x960-default.png` | `93bd51792c277207ba0c6e0f268d31b9958e7fceb9509c0d9a5e53474e7f0584` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonsmash | dark | /lab default / 1440x960 | `artifacts/skins/moonsmash-dark-1440x960-default.png` | `949c353b3a131d1bf1202980213a8640541a4b015be46991ddf25d6669bcb0df` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonsmash | light | /lab default / 1440x960 | `artifacts/skins/moonsmash-light-1440x960-default.png` | `54ef22ac454667e3993089eb0962f66bffc952b8af49d4d21eb220a472f62305` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonzine | dark | /lab default / 1440x960 | `artifacts/skins/moonzine-dark-1440x960-default.png` | `3013aa05f2a1753e2c7a255a5dc65388e75cb101a44d9ed73ca12b0445dcea13` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonzine | light | /lab default / 1440x960 | `artifacts/skins/moonzine-light-1440x960-default.png` | `ebbc1ca674ad5ea7773b62222547a55a26399d4da3379b0aeed52685f56f6a7c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+
+
+## Tablet screenshot captures (MF-VF-018)
+
+Capture run: source commit 15cb218fdd221115bafb9981a869999be015769f; render-input fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183. Same fixed dashboard, navigation, task table and profile form as desktop, rendered at a real 768×1024 CSS px browser viewport after resizing; checked for horizontal overflow, not resized from desktop. Machine evidence only; human visual review remains pending.
+
+| Skin | Mode | Fixture / viewport | Screenshot path | PNG SHA-256 | Source commit | Reviewer | Status | Exception |
+|---|---|---|---|---|---|---|---|---|
+| classic | dark | /lab default / 768x1024 | `artifacts/skins/classic-dark-768x1024-default.png` | `0a57fb4d1a24e4c65c35b206792290ee0ad8a515c842090df9a122b2d4f07964` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| classic | light | /lab default / 768x1024 | `artifacts/skins/classic-light-768x1024-default.png` | `754a87cbd92e241d33f1eed21a85c88c028d20405e52900d40aab9cf2337713c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonchrome | dark | /lab default / 768x1024 | `artifacts/skins/moonchrome-dark-768x1024-default.png` | `a30363bcd47f3eed80f69adc4d0efe62a7e3285160ac8ad0b93816aeae40f056` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonchrome | light | /lab default / 768x1024 | `artifacts/skins/moonchrome-light-768x1024-default.png` | `9c30ec8a20d469105901474acac297fd448e7dd12386a5f7aa33b6927034dc3b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| mooncrash | dark | /lab default / 768x1024 | `artifacts/skins/mooncrash-dark-768x1024-default.png` | `d1712af9c2b4d00f2db2cabeb26ac43964b2b62f92164ca105c76977806114aa` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| mooncrash | light | /lab default / 768x1024 | `artifacts/skins/mooncrash-light-768x1024-default.png` | `6875eafaa367a6c4e928a69760b204c95d80dfa6a431b21a4061eaff54957963` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonglitch | dark | /lab default / 768x1024 | `artifacts/skins/moonglitch-dark-768x1024-default.png` | `bed922d3f5b34201b61cc8dbd46ca2a4d58a7d315c979e9d75cd3177730a0239` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonglitch | light | /lab default / 768x1024 | `artifacts/skins/moonglitch-light-768x1024-default.png` | `fe610263b37693b2dd59383d275ee5357afcbb449f1ce8af0435d5a401e08935` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonhalftone | dark | /lab default / 768x1024 | `artifacts/skins/moonhalftone-dark-768x1024-default.png` | `3e2de633284a4dcd78e749c1445285874599ac1c89c19126c5a56e8acebec61e` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonhalftone | light | /lab default / 768x1024 | `artifacts/skins/moonhalftone-light-768x1024-default.png` | `a8692dd80f8d9cccb497c08f047329e9025368410ef87bab4fc7a9145e2dacb9` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonink | dark | /lab default / 768x1024 | `artifacts/skins/moonink-dark-768x1024-default.png` | `be40197889981f3eaf84d88ec5b918a067cabb9646a8832f7d2b23c8f3bfd23f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonink | light | /lab default / 768x1024 | `artifacts/skins/moonink-light-768x1024-default.png` | `c6aafb7b683a60572e3244d235e9df0ba3d6a0555a5ddc6eded295b860b2a916` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonledger | dark | /lab default / 768x1024 | `artifacts/skins/moonledger-dark-768x1024-default.png` | `5f4c720e2867ee830c29b4eb30e70a6402a9e288896cb513e7679d137bd8f63b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonledger | light | /lab default / 768x1024 | `artifacts/skins/moonledger-light-768x1024-default.png` | `330cfdcd32b211515f1bea151f986b05d124a8eac36d67a6cb4c3d91f48281c8` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpanel | dark | /lab default / 768x1024 | `artifacts/skins/moonpanel-dark-768x1024-default.png` | `f01c45a2d1f697240647bff29d15d5f3b982c4396771a006240f394951a36299` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpanel | light | /lab default / 768x1024 | `artifacts/skins/moonpanel-light-768x1024-default.png` | `febb1dd962a6ba781d4273f85f19ab67ffa69419929f4769ef6b23bce30e53a2` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpunk | dark | /lab default / 768x1024 | `artifacts/skins/moonpunk-dark-768x1024-default.png` | `a7a8bc8aff10f4f8db8f2ce7e33d6ffbf33e5fb8f95822d78d82fa07c9bf0a2e` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpunk | light | /lab default / 768x1024 | `artifacts/skins/moonpunk-light-768x1024-default.png` | `6fb2f9ea92f2eb04c1c65392f7df36fb2a825480cfb8eb2f79c10c52c9526172` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonquest | dark | /lab default / 768x1024 | `artifacts/skins/moonquest-dark-768x1024-default.png` | `f23e9683a5b1f1dc4b92947759e545483af9bf3e7178f659ae932b2c3f719c99` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonquest | light | /lab default / 768x1024 | `artifacts/skins/moonquest-light-768x1024-default.png` | `14bb744648d0897be7ebfa6fac8c506fb093a0a556b898728ee4086aba7112c1` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonraw | dark | /lab default / 768x1024 | `artifacts/skins/moonraw-dark-768x1024-default.png` | `655dbe54e2fe4e3e32d0ace6c3438bd97f3813b903a05dc7b3b3ae3767999138` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonraw | light | /lab default / 768x1024 | `artifacts/skins/moonraw-light-768x1024-default.png` | `116894f53bb416102721c8a9a925396a156d61cf447e9f32b051c647883115b3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonriot | dark | /lab default / 768x1024 | `artifacts/skins/moonriot-dark-768x1024-default.png` | `e169de4aefb0dcc8e6a3e3f8782598318735600de2c0009cedbe5152b55eaff9` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonriot | light | /lab default / 768x1024 | `artifacts/skins/moonriot-light-768x1024-default.png` | `16c3873313fe395be3c73dc970a5e613d8719b2cfe4a19c45d5c33221449c8af` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonscrawl | dark | /lab default / 768x1024 | `artifacts/skins/moonscrawl-dark-768x1024-default.png` | `70a435c4eb383649038b70bee954998e42d6861cd7f49a48ade16235aa058415` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonscrawl | light | /lab default / 768x1024 | `artifacts/skins/moonscrawl-light-768x1024-default.png` | `b391c0b6fb39e1a1f3caa453c88064bf97908344668b3c142d698e7ca0b4fa81` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonsmash | dark | /lab default / 768x1024 | `artifacts/skins/moonsmash-dark-768x1024-default.png` | `1962f3f67466a7b1b8bbe4423339cf54f7bafbc4a49f88d5661c747d0045faee` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonsmash | light | /lab default / 768x1024 | `artifacts/skins/moonsmash-light-768x1024-default.png` | `6c9d715e520a3d9fab4a51c6387efbb18e5a4a073f89b5f68771e00e8f80da2f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonzine | dark | /lab default / 768x1024 | `artifacts/skins/moonzine-dark-768x1024-default.png` | `42dddcda68e8e7ea1daa9313dec50d4bc018f1fbf024059df9487d47ae9087a6` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonzine | light | /lab default / 768x1024 | `artifacts/skins/moonzine-light-768x1024-default.png` | `0cf48c496dda180fc264d528fd37ff0f3b92c5bcf0f70c493f74fb54d8237bc1` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+
+
+## Phone screenshot captures (MF-VF-019)
+
+Capture run: source commit 15cb218fdd221115bafb9981a869999be015769f; render-input fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183. Same fixed dashboard, navigation, task table and profile form as desktop, rendered at a real 360×800 CSS px browser viewport; checked for horizontal overflow, not resized from desktop. Machine evidence only; human visual review remains pending.
+
+| Skin | Mode | Fixture / viewport | Screenshot path | PNG SHA-256 | Source commit | Reviewer | Status | Exception |
+|---|---|---|---|---|---|---|---|---|
+| classic | dark | /lab default / 360x800 | `artifacts/skins/classic-dark-360x800-default.png` | `38618bc6cf6dcff4c9f9d5cd3f7a750e4a3c343441b6c278dcf6e96a9a5da63b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| classic | light | /lab default / 360x800 | `artifacts/skins/classic-light-360x800-default.png` | `aabd53445a74185c22deda2bcccb51ab7bc499a2b7a16caf249eafe553aa8139` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonchrome | dark | /lab default / 360x800 | `artifacts/skins/moonchrome-dark-360x800-default.png` | `1a2311c09aabdf5c86984836a7f3908592817e853e8dfa44d51375c3a78b0b22` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonchrome | light | /lab default / 360x800 | `artifacts/skins/moonchrome-light-360x800-default.png` | `3f26cf90c074e3ef6c821a3d6dc47f112abdaabff8f0eceaa7c3ecb7ff1f626e` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| mooncrash | dark | /lab default / 360x800 | `artifacts/skins/mooncrash-dark-360x800-default.png` | `e66c0f6d74ef2d399600c9dbe03d51e8e948f783d5a6aaf4b34e02e8fa4cdb21` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| mooncrash | light | /lab default / 360x800 | `artifacts/skins/mooncrash-light-360x800-default.png` | `4399cc3095a01dda3ab7daba27882a6131a52f93780ffd9a7a4b1df3bf60d16c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonglitch | dark | /lab default / 360x800 | `artifacts/skins/moonglitch-dark-360x800-default.png` | `70c36a5e308fc06996d8ec0c23c4bb08d912ae624cf39e6aedbf991cb2145bf1` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonglitch | light | /lab default / 360x800 | `artifacts/skins/moonglitch-light-360x800-default.png` | `3ba0bb5b9ebdd1a5e6c503e7c0d180f8f1d556eb7262e3f7036fe27ebe9d665a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonhalftone | dark | /lab default / 360x800 | `artifacts/skins/moonhalftone-dark-360x800-default.png` | `7e2a8257a93fc49f396926b46693ff95189241791bd83fce283d141f997de2fe` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonhalftone | light | /lab default / 360x800 | `artifacts/skins/moonhalftone-light-360x800-default.png` | `8301d58f1ea50b3a8615d604a79bed7b282cb77adb6c787574d545d6cb4ad27c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonink | dark | /lab default / 360x800 | `artifacts/skins/moonink-dark-360x800-default.png` | `168d3e185820351944c63aef5e9b38be3d11d3dbd77306ffc2e2dc0dbb84eb9d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonink | light | /lab default / 360x800 | `artifacts/skins/moonink-light-360x800-default.png` | `597bbaec2e54d1261100bc9b3bf6b2073fd8d688d6bfc22ad4db402b709690ad` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonledger | dark | /lab default / 360x800 | `artifacts/skins/moonledger-dark-360x800-default.png` | `9df1b7fba5b23060e4fba4a14d23ba56fd847a0a9c18616a2eb8c2ad93a1d0ab` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonledger | light | /lab default / 360x800 | `artifacts/skins/moonledger-light-360x800-default.png` | `d93b74842fda04c489d0521488a65030a2fc8f01be5aa55884cabf5586cb055b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpanel | dark | /lab default / 360x800 | `artifacts/skins/moonpanel-dark-360x800-default.png` | `feb20e770a16a288bad5a5901e831de54a2d6bdecf7065c4af15d51e26288da7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpanel | light | /lab default / 360x800 | `artifacts/skins/moonpanel-light-360x800-default.png` | `1d23e5efe2d5d721d80e7fece474aa753ce85d7015dd12437eda633f0da1fe0a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpunk | dark | /lab default / 360x800 | `artifacts/skins/moonpunk-dark-360x800-default.png` | `a55be31172008960df89da775b8332e95d8f19d4caf07315b635268a543896e7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonpunk | light | /lab default / 360x800 | `artifacts/skins/moonpunk-light-360x800-default.png` | `723b67f09cde7cfaef4cc182d7fdfc14e74dfbe20c59790fbd384ede7abe7f57` | `31f2c0282ebe94097ef9047e87236d766f337e64` | pending | captured-structural | Pixel/human visual review pending; provenance sidecar records Chromium 156 and loaded fonts |
+| moonquest | dark | /lab default / 360x800 | `artifacts/skins/moonquest-dark-360x800-default.png` | `ffa7c26fea4af57d086effe653764331fecc6b8ec19cb09f0c3096fa6ff851a6` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonquest | light | /lab default / 360x800 | `artifacts/skins/moonquest-light-360x800-default.png` | `555f570251007a835ed429fd5ac7b674a12ac74b1f35554c3daf39f5827a41f6` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonraw | dark | /lab default / 360x800 | `artifacts/skins/moonraw-dark-360x800-default.png` | `b84648f501b97aa83187b1abab5e12323b680861cf74373b82b06b2843b215dd` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonraw | light | /lab default / 360x800 | `artifacts/skins/moonraw-light-360x800-default.png` | `39e201e0eded3f5b64e09b992339ddcefc8bf85928542d0fb4f4be8934be85a8` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonriot | dark | /lab default / 360x800 | `artifacts/skins/moonriot-dark-360x800-default.png` | `993bbe5976d5ded0cf3452616b1d6b75aa3b37d27ffe74cfe5d527a1e04e46a3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonriot | light | /lab default / 360x800 | `artifacts/skins/moonriot-light-360x800-default.png` | `97965183927ec9f2409cfe2ff3a9db3e447aaadd8a09f3f510b86936dce057c5` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonscrawl | dark | /lab default / 360x800 | `artifacts/skins/moonscrawl-dark-360x800-default.png` | `4763416d725939b38e65d0d7b9d03e076a41b389045a6016bd9d8790e482a98b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonscrawl | light | /lab default / 360x800 | `artifacts/skins/moonscrawl-light-360x800-default.png` | `bc1f71e9ae742f135a723b152d02853eeb9d37d1af6a6c56ff8c2234c330cc8a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonsmash | dark | /lab default / 360x800 | `artifacts/skins/moonsmash-dark-360x800-default.png` | `d6745d9b83563afd100701c367e8542397eda9814e644192f9812362efa63ed2` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonsmash | light | /lab default / 360x800 | `artifacts/skins/moonsmash-light-360x800-default.png` | `4862cffb740ea579a32f554ce11812bbb03f18a201f8fc55da96dbc32bac4501` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonzine | dark | /lab default / 360x800 | `artifacts/skins/moonzine-dark-360x800-default.png` | `db0fd3bd7ea49b2b95bef6ba2059c2371ecae755c4722055869a0a970e2d9737` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+| moonzine | light | /lab default / 360x800 | `artifacts/skins/moonzine-light-360x800-default.png` | `6212322f7ae82e55ac977d006a97bcaae6c92f80a23d6ee792821f1ccce7e0e2` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | pending | captured-structural | Pixel/human visual review pending |
+
+Verification at source commit 15cb218fdd221115bafb9981a869999be015769f: pnpm run test:browser — 55/55 passed; pnpm test — 13/13 passed; pnpm run typecheck — passed; production build — passed (88 routes); pnpm run audit:pairs — 105 pair records and 30/30 each for desktop, tablet and phone capture provenance. Navigation order/current state and restoration, form states, and phone overflow were asserted across all 30 skin/mode combinations. A separate deterministic open-dialog capture is indexed below. All screenshots remain pending human visual review.
+
+## Deterministic dialog capture (MF-VF-023)
+
+- `/lab/behavior?fixture=archive-task` opens the T-1045 archive dialog with the canonical title/body and both actions visible. The browser test verifies Escape, opening from the row action, focus return, and the Keep task action.
+- Capture: [`artifacts/skins/archive-task-dialog.png`](../../artifacts/skins/archive-task-dialog.png) · PNG SHA-256 `8aacb2ccf92282c16f293df81a4df3cefd95500074a0495493ecfb99b4837408` · source commit `15cb218fdd221115bafb9981a869999be015769f` · fingerprint `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` · 1440×960 · Chromium 156.0.8078.4 · en-US · LTR · UTC · frozen at `2026-10-25T12:00:00.000Z`.
+- Status: machine-captured structural evidence; reviewer pending. Screenshot is not visual approval.
+
+## MF-VF-024 — Common workspace navigation
+
+- The shared fixture navigation is named `Workspace sections` and presents Overview, Projects, Tasks, Reports, Settings in that order. Overview is selected by default; the browser test changes to Reports then restores Overview before each capture.
+- `pnpm run test:browser` — 55/55 passed with these navigation assertions in all 15 skins × 2 modes. Desktop/tablet/phone screenshots were refreshed to source commit `e3cfe15da3ec5b82c0ea8eb703a1a4e90be791f2`; all 90 provenance records match current source and PNG hashes. Human visual review remains pending.
+
+
+## MF-VF-017 — Pin desktop screenshot layout
+
+- Source commit: `ac5df6cccb2b19f5d99185458b7cd6b52e7b1e41`.
+- Fixed Playwright desktop viewport to 1440×960, locale to `en-US`, timezone to UTC, and browser time to `2026-10-25T12:00:00.000Z`. Captures wait for document fonts and write current browser version, user agent, font stack/load status, fixture description, locale, direction, viewport and time into each provenance sidecar.
+- `pnpm test` — 13/13 passed. `pnpm run typecheck` — passed. `pnpm run build` — passed; 88 routes generated. `pnpm run test:browser` — 54/54 passed. `pnpm run audit:pairs` — 30/30 current-source captures verified; human visual review remains pending. `node scripts/validate-contracts.mjs` and `node scripts/verify-m13-handoff.mjs` — passed; existing generic SFX playback-truth and missing-LICENSE warnings remain. `git diff --check` — passed.
+- Font rendering remains environment-provided; no bundled production font or cross-OS pixel identity is claimed. Rollback: revert commit `ac5df6cccb2b19f5d99185458b7cd6b52e7b1e41`.
+## MF-VF-019 — Pin phone screenshot layout 360x800
+
+- Phone-profile and focus-bound implementation commits: `7f78909625c7f8a227338a8e96f987e5f4e9f600` and `49cfac474c4de0bbb6bf75bc9472ae4a98235788`; latest capture refresh including dashboard, navigation, task table, profile form and dialog fixture: `f0cd752f1bd13c61708173c06aa0a8acd2d61115`.
+- Added actual 360×800 browser screenshots for all 15 skins in light and dark mode, with viewport assertion and no-horizontal-overflow check; each PNG has a source fingerprint and image SHA-256 sidecar. The 30 phone rows are indexed above.
+- `pnpm run test:browser` — 54/54 passed. `pnpm run audit:pairs` — 30/30 desktop, 30/30 tablet, and 30/30 phone captures match their source fingerprint and PNG digest. Contract and M13 handoff validators passed; existing SFX playback-truth and missing-LICENSE warnings remain. Human visual review remains pending.
+- Rollback: revert commit `70d1598eb5c0e8db2b8c6bef636c6efe01405dff`.
+## MF-VF-020 — Add same-data dashboard specimen
+
+- Implementation commit: `70d1598eb5c0e8db2b8c6bef636c6efe01405dff`.
+- Added the fixed Northstar Studio dashboard to `/lab`: Overview heading, Northstar Studio name, Sunday October 25 2026 date, KPIs (Open tasks 12; In progress 4; Completed this week 18), five activity entries, visible textual statuses and the exact long-copy probe. Browser assertions check these values under every skin and mode.
+- `pnpm test` — 13/13 passed; `pnpm run typecheck` — passed; `pnpm run build` — passed, 88 routes; `pnpm run test:browser` — 54/54 passed; `pnpm run audit:pairs` — 105 pair records and 30/30 current-source captures at each of 1440×960, 768×1024 and 360×800; contract and M13 handoff validators passed with existing SFX playback-truth and missing-LICENSE warnings. No human visual approval claimed.
+- Rollback: revert commit `70d1598eb5c0e8db2b8c6bef636c6efe01405dff`.
+
+## MF-VF-021 — Add same-data table specimen
+
+- Implementation commit: `701d5aea3c1147e844a183da5a5036f84cee7db4`.
+- Added five fixed Northstar Studio task rows with semantic columns for task, owner, status, due date and estimate. Search and stable due-date/task-name sorting are local fixture state; the browser asserts exact rows and controls for all 15 skins in both modes.
+- Fixed existing browser assertions to scope project rows and dashboard activity after adding the second table and repeated task names.
+- `pnpm test` — 13/13 passed; `pnpm run typecheck` — passed; `pnpm run build` — passed, 88 routes; `pnpm run test:browser` — 54/54 passed; `pnpm run audit:pairs` — 105 pair records plus 30/30 each desktop, tablet and phone captures with current source and PNG provenance. Contract and M13 handoff validators passed with existing generic SFX playback-truth and missing-LICENSE warnings. Human visual review remains pending.
+- Rollback: revert commit `701d5aea3c1147e844a183da5a5036f84cee7db4`.
+
+## MF-VF-022 — Add same-data form specimen
+
+- Implementation commit: `c68f93ff648d07d73c679b49a280419830ac536e`.
+- Added a fixed Workspace profile form with the exact six-field fixture values, visible UTC label, helper copy, URL error connected through `aria-describedby`, and local pending/success feedback. Cancel restores the original fixture values; no backend submission occurs.
+- `pnpm test` — 13/13 passed; `pnpm run typecheck` — passed; `pnpm run build` — passed, 88 routes; `pnpm run test:browser` — 54/54 passed, including assertions across all 15 skins × 2 modes; `pnpm run audit:pairs` — 30/30 desktop, tablet and phone captures after refresh. Contract and handoff validators passed; human visual review remains pending.
+- Rollback: revert commit `c68f93ff648d07d73c679b49a280419830ac536e`.
+
+## Decoration-off captures (MF-VF-025)
+
+The optional **Hide decorative elements** switch removes ornamental marks while retaining fixture labels, controls, selection and form state. The browser regression verifies the switch and semantics across all 15 skins × 2 modes; screenshots are separate desktop 1440×960 captures. Each sidecar binds the PNG SHA-256 to source commit 15cb218fdd221115bafb9981a869999be015769f and render-input fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183. The table records machine-captured structural evidence only; human visual review remains pending.
+
+| Skin | Mode | Screenshot | PNG SHA-256 | Source commit | Render fingerprint | Viewport | Reviewer | Status | Evidence class |
+|---|---|---|---|---|---|---|---|---|---|
+| moonpunk | light | `artifacts/skins/moonpunk-light-1440x960-decoration-off.png` | `040c1e948a063f01d73fdee669d085df3fb45691a1735cd71096902dd386ea29` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpunk | dark | `artifacts/skins/moonpunk-dark-1440x960-decoration-off.png` | `591f54a7544d4dabf1a36140247bc5fbd61e7ecb768c4794f4f14275eebffd20` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonriot | light | `artifacts/skins/moonriot-light-1440x960-decoration-off.png` | `cbd30895b3bf625c47cbfa5cdf5499c3c3829ded2fd571f263c019380c570e9f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonriot | dark | `artifacts/skins/moonriot-dark-1440x960-decoration-off.png` | `f7dd7da30bbc44aa2fa5d0650db4c46ea578e1d484e09bc251f60e4abb7b858c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonzine | light | `artifacts/skins/moonzine-light-1440x960-decoration-off.png` | `5b143ecaa0412c558a2f6b0de58ff6efe982023bea05bb9be8734122e2bff1cd` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonzine | dark | `artifacts/skins/moonzine-dark-1440x960-decoration-off.png` | `cfc555b7c0fd68deb98aaa298b7dd6bed6eee315aeed1e55804886e9c569efaa` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonhalftone | light | `artifacts/skins/moonhalftone-light-1440x960-decoration-off.png` | `d8712257482c5ba8c3e1b06c4e428789e117cc4a5c00258c89f83a502ebd794a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonhalftone | dark | `artifacts/skins/moonhalftone-dark-1440x960-decoration-off.png` | `c129b84ff19960c2bc88ca6b46059ef18caea98e39a4f3a59722ca5012390d41` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonglitch | light | `artifacts/skins/moonglitch-light-1440x960-decoration-off.png` | `6229815492c6e1642ed445dc518ece2fe15e949a6f1cac5022869b15b538ef2d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonglitch | dark | `artifacts/skins/moonglitch-dark-1440x960-decoration-off.png` | `fe5e29be1e8e7ea0e7b19164abc4a970c1659597e856748a74d6c0170b46b026` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonsmash | light | `artifacts/skins/moonsmash-light-1440x960-decoration-off.png` | `2224e9120002feff69aae827f9098a54443e1a29398dd5c54037c098baac7d1d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonsmash | dark | `artifacts/skins/moonsmash-dark-1440x960-decoration-off.png` | `b996ea3383d23175dfd9a87aa1af43924d893a2d9dbe79ea36db439bbe17cd76` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonink | light | `artifacts/skins/moonink-light-1440x960-decoration-off.png` | `8a83da30ad167b6adedacde036e91942edffac1fa4397728b73f7019b91d7a9b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonink | dark | `artifacts/skins/moonink-dark-1440x960-decoration-off.png` | `27e76a10272747ba7fa8af57a0852913df8023084f3da29b6d8608a53901b5c0` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| mooncrash | light | `artifacts/skins/mooncrash-light-1440x960-decoration-off.png` | `f6b58d089c3d705a857d6ee0607362d1bcef049492980dc755c050fbb9b29963` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| mooncrash | dark | `artifacts/skins/mooncrash-dark-1440x960-decoration-off.png` | `65729a507f38998eb72112dcf4bdeb57f569fa387fd5f6a3e3ca87c5df52fc25` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpanel | light | `artifacts/skins/moonpanel-light-1440x960-decoration-off.png` | `b600519790e711d418ba06fda17abf63244c283e39c62cfdccff92fb43f8781a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpanel | dark | `artifacts/skins/moonpanel-dark-1440x960-decoration-off.png` | `2e29f5afbafd1fce88fd1f2d4f8bf1f5fd7b72ed9fe790743283fad74b226d6f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonscrawl | light | `artifacts/skins/moonscrawl-light-1440x960-decoration-off.png` | `3ba8ec8ec9cb48837ea7c5a379dd0b16df713415f51eb466347a8520e3df6d47` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonscrawl | dark | `artifacts/skins/moonscrawl-dark-1440x960-decoration-off.png` | `c6015cbd8a221404d8239c713a40f392974f475a5695489bb8c3036682b65287` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonraw | light | `artifacts/skins/moonraw-light-1440x960-decoration-off.png` | `f0b19c71acdb7eedcddd2af3a7ed6163f4f6a42502f8b47a584edad663ea2b92` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonraw | dark | `artifacts/skins/moonraw-dark-1440x960-decoration-off.png` | `7eb3ebda33fb1df43a60feb80acab4347b4db5e011bc00dd96d946f23dc7f198` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonchrome | light | `artifacts/skins/moonchrome-light-1440x960-decoration-off.png` | `71c16f0b21534854a47e1960851395f5ab42c2252f698caedede7f12c35d02de` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonchrome | dark | `artifacts/skins/moonchrome-dark-1440x960-decoration-off.png` | `0310a3a461404ed3452ac1e00b36c495bea4a41d41729a0040632656cece0390` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| classic | light | `artifacts/skins/classic-light-1440x960-decoration-off.png` | `e2df021cdaf9ab2dc2d7bffbb0c1b26b022fe133520fbd341b903448158a0c05` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| classic | dark | `artifacts/skins/classic-dark-1440x960-decoration-off.png` | `b5c86bcd97dd8ad0d39f1ace270bfe587675d6a0efad67a5349a967625403cd5` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonquest | light | `artifacts/skins/moonquest-light-1440x960-decoration-off.png` | `45636b51c436f827ffa475d33b7ab4bf03ec44690f0ec415480ffbab0a620075` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonquest | dark | `artifacts/skins/moonquest-dark-1440x960-decoration-off.png` | `ae6de35de77dfb130f866ce9cb67c33d2c7c32787fdc6357516eb24bce5689d3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonledger | light | `artifacts/skins/moonledger-light-1440x960-decoration-off.png` | `38adf8aa0337d63f039671d2c82093931fc0979f62d2fd5b61ec28b3bc4b7dbf` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonledger | dark | `artifacts/skins/moonledger-dark-1440x960-decoration-off.png` | `436bc7a37a666d314197c0f98455d92284bf6dcc08202d17d1444c4b187ac35b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+
+## Grayscale captures (MF-VF-026)
+
+Each screenshot uses the same fixed fixture, skin, mode, 1440×960 viewport, locale, direction, timezone and frozen time as the standard capture, with a temporary full-page CSS grayscale filter. The browser test checks the filter is active and verifies fixture content remains present before capture, then removes the filter before the standard responsive captures. Each PNG is SHA-256-bound to source commit 15cb218fdd221115bafb9981a869999be015769f and render-input fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183. Evidence is machine-captured; human visual comparison remains pending.
+
+| Skin | Mode | Screenshot | PNG SHA-256 | Source commit | Render fingerprint | Viewport | Reviewer | Status | Evidence class |
+|---|---|---|---|---|---|---|---|---|---|
+| moonpunk | light | `artifacts/skins/moonpunk-light-1440x960-grayscale.png` | `40927fb2e50e12f0918c49042fc59cb1e376e23814d99b88b88e37a4cfa3b12f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpunk | dark | `artifacts/skins/moonpunk-dark-1440x960-grayscale.png` | `233ef65b54c1dbd05dd5e3a82b22a10486f6cffd2141875291acd1621a83a0a4` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonriot | light | `artifacts/skins/moonriot-light-1440x960-grayscale.png` | `6d45b586040bad11530535261a18cf6354d8fd3ccf3306420813fed496542b98` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonriot | dark | `artifacts/skins/moonriot-dark-1440x960-grayscale.png` | `fec182c1d7c31a80597757f77c20bba6b8f24d42b9834c2eb167bdc61ef60e7a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonzine | light | `artifacts/skins/moonzine-light-1440x960-grayscale.png` | `bdc4389117db0fe68f450f28a4d48dcaf05ed80de33ac3efebf734db227a9639` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonzine | dark | `artifacts/skins/moonzine-dark-1440x960-grayscale.png` | `4bccdfc3ecd19daa09ca45423655785af804842acc9fa897cfe2f8494ba399f9` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonhalftone | light | `artifacts/skins/moonhalftone-light-1440x960-grayscale.png` | `f514c4ebb99aed8d703391e4fa50c8c904b203899b3f47cd4c569176e3724c7d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonhalftone | dark | `artifacts/skins/moonhalftone-dark-1440x960-grayscale.png` | `475376b2011ff21ffe735292fe21763903c96f6a358c4eaeba224026759922cb` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonglitch | light | `artifacts/skins/moonglitch-light-1440x960-grayscale.png` | `02e8e2579cf3acc700de4cc7b872ddfd366e5b5a362312c1e0cea050883d5faa` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonglitch | dark | `artifacts/skins/moonglitch-dark-1440x960-grayscale.png` | `6c3dfdc974402f4324680970b4a0eb13e3eda846805d6fc0a6201813f9bbb4a3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonsmash | light | `artifacts/skins/moonsmash-light-1440x960-grayscale.png` | `726a722af34442065e041af52f23fea9a8cbd7585e606748677f1f4b4192ea4b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonsmash | dark | `artifacts/skins/moonsmash-dark-1440x960-grayscale.png` | `93bcc8ac8e4d7a318e726f97fd8f3aca97c03ad96aaae1803b0db304092f86a8` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonink | light | `artifacts/skins/moonink-light-1440x960-grayscale.png` | `5902214f20a2279694f53090f4245d89023424ca56f0321036f98345a557aaac` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonink | dark | `artifacts/skins/moonink-dark-1440x960-grayscale.png` | `a376ef7cc6d65717e658447803f80ced36c410f19a5a777fea6da7231bec954d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| mooncrash | light | `artifacts/skins/mooncrash-light-1440x960-grayscale.png` | `6d60b5817938c8c1d8f4e056bdc90389f0eccdd4fa6bcecd4915a0b818e970b7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| mooncrash | dark | `artifacts/skins/mooncrash-dark-1440x960-grayscale.png` | `f1a141163652368f9ca22932fb55d0d8e3ec27515cc5c6b0f90907cf243e75ff` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpanel | light | `artifacts/skins/moonpanel-light-1440x960-grayscale.png` | `5847847d83907ca7a7b4fe80eab5c0de046629f6b1ddbedc50f645d5a1130d29` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpanel | dark | `artifacts/skins/moonpanel-dark-1440x960-grayscale.png` | `06f9a31ca8ad1b7dcb9479895c02758bcea91e984e85758d44b44ea53e6a522a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonscrawl | light | `artifacts/skins/moonscrawl-light-1440x960-grayscale.png` | `ade624a21845335903f886824d261ec2c3594be5f5708aad2a32db6238be4a6c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonscrawl | dark | `artifacts/skins/moonscrawl-dark-1440x960-grayscale.png` | `50fb328c62774dbfb6cecdade33bcf821b5555b14665a16a79be3f0d81126bb2` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonraw | light | `artifacts/skins/moonraw-light-1440x960-grayscale.png` | `59fbae74d4e3701c4bfd50ca54c12388ea4ddfba4d992c6b8f89c6cc8daca71b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonraw | dark | `artifacts/skins/moonraw-dark-1440x960-grayscale.png` | `2728b4ae09bbdf94dfa7cdd9917587852a5f4599fb294ac7bfe4573dff513cc7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonchrome | light | `artifacts/skins/moonchrome-light-1440x960-grayscale.png` | `0368f37056f43a6e7378efae876a7a506b3c4bb6f572f41d40d92bd0e1eb5560` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonchrome | dark | `artifacts/skins/moonchrome-dark-1440x960-grayscale.png` | `b462ac01b52cda0280174e8968644dd0e2d1f266bd003b024c4df954a4a04dfd` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| classic | light | `artifacts/skins/classic-light-1440x960-grayscale.png` | `877a9116003c2c67a1c36191148fc3bba58c5d47f07dcd3a636cb899e3f4ce16` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| classic | dark | `artifacts/skins/classic-dark-1440x960-grayscale.png` | `51e7bb45626d5909ef21b7d2a0ce4d616dc4e47a37a9f8323c797636d18fd1f8` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonquest | light | `artifacts/skins/moonquest-light-1440x960-grayscale.png` | `a58621a9c5deae42eca19b33c7a7c4659bfa6bd80ca65eb807a97a7234407178` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonquest | dark | `artifacts/skins/moonquest-dark-1440x960-grayscale.png` | `958c753e2aa06513699e444416cf245aa79d78ee79227a9f0a6f76895bfe4e96` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonledger | light | `artifacts/skins/moonledger-light-1440x960-grayscale.png` | `281fc17989b53486fee0e98bcf5287fd0aae0d30eca5df2102be448bd8c19ac7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonledger | dark | `artifacts/skins/moonledger-dark-1440x960-grayscale.png` | `22e92d10a02fda08f498c73a690303d76b0edae0334caead8fa23e4c7a0eb8b6` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+
+## MF-VF-027 — Fonts-ready capture guarantee
+
+The browser fixture awaits `document.fonts.ready` and asserts `document.fonts.status === "loaded"` before every decoration-off, standard desktop, grayscale, tablet and phone screenshot. Each of the 150 fixture screenshots has a sidecar recording font status `loaded`, source commit e3cfe15da3ec5b82c0ea8eb703a1a4e90be791f2, render-input fingerprint b675fb5c5d64e36af1dcd17b162186b495f05d8002e9e4a80529b0d4bea65556, and an image SHA-256 that matches the PNG. The app uses an environment-provided CSS font stack; no specific font binary or cross-platform pixel identity is claimed. Human visual review remains pending.
+
+## MF-VF-028 — Stable capture filenames
+
+Skin captures use the stable identity pattern `{skin}-{mode}-{viewport}-{state}.png`: desktop default, desktop grayscale, desktop decoration-off, tablet default, and phone default. The browser test enumerates the full 15-skin × 2-mode × 5-profile matrix and asserts all 150 output names are unique and encode every identity dimension. The pair audit now consumes the explicit desktop/tablet/phone default names. All 150 new PNGs and sidecars were produced from commit 8755d17e41bd17b88a20b40ca44afae4eed808f6; each SHA-256, fingerprint ee9d471d31c6c4b61ed1994408f5a411a519f453351687f5f05b65f19082e218, and font-ready marker was verified. Stable IDs intentionally reproduce the same output path for the same exact capture profile on a later rerun; distinct profiles never share a filename. Human visual review remains pending.
+
+## Reduced-motion captures (MF-VF-029)
+
+The browser emulates the operating-system reduced-motion preference, confirms the product root reports `data-motion="reduced"`, and asserts transition durations are zero. It verifies the Overview heading, Open tasks metric, selected navigation, all five task rows including the Blocked status, and workspace profile remain visible before capture. The preference is restored to no-preference before standard tablet and phone captures. Each image is tied to source commit 15cb218fdd221115bafb9981a869999be015769f, render-input fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183, `motionPreference: reduce`, font status `loaded`, and its SHA-256. This is machine-captured structural evidence; human visual review remains pending.
+
+| Skin | Mode | Screenshot | PNG SHA-256 | Source commit | Render fingerprint | Viewport | Reviewer | Status | Evidence class |
+|---|---|---|---|---|---|---|---|---|---|
+| moonpunk | light | `artifacts/skins/moonpunk-light-1440x960-reduced-motion.png` | `40927fb2e50e12f0918c49042fc59cb1e376e23814d99b88b88e37a4cfa3b12f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpunk | dark | `artifacts/skins/moonpunk-dark-1440x960-reduced-motion.png` | `233ef65b54c1dbd05dd5e3a82b22a10486f6cffd2141875291acd1621a83a0a4` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonriot | light | `artifacts/skins/moonriot-light-1440x960-reduced-motion.png` | `6d45b586040bad11530535261a18cf6354d8fd3ccf3306420813fed496542b98` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonriot | dark | `artifacts/skins/moonriot-dark-1440x960-reduced-motion.png` | `fec182c1d7c31a80597757f77c20bba6b8f24d42b9834c2eb167bdc61ef60e7a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonzine | light | `artifacts/skins/moonzine-light-1440x960-reduced-motion.png` | `bdc4389117db0fe68f450f28a4d48dcaf05ed80de33ac3efebf734db227a9639` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonzine | dark | `artifacts/skins/moonzine-dark-1440x960-reduced-motion.png` | `4bccdfc3ecd19daa09ca45423655785af804842acc9fa897cfe2f8494ba399f9` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonhalftone | light | `artifacts/skins/moonhalftone-light-1440x960-reduced-motion.png` | `f514c4ebb99aed8d703391e4fa50c8c904b203899b3f47cd4c569176e3724c7d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonhalftone | dark | `artifacts/skins/moonhalftone-dark-1440x960-reduced-motion.png` | `475376b2011ff21ffe735292fe21763903c96f6a358c4eaeba224026759922cb` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonglitch | light | `artifacts/skins/moonglitch-light-1440x960-reduced-motion.png` | `02e8e2579cf3acc700de4cc7b872ddfd366e5b5a362312c1e0cea050883d5faa` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonglitch | dark | `artifacts/skins/moonglitch-dark-1440x960-reduced-motion.png` | `6c3dfdc974402f4324680970b4a0eb13e3eda846805d6fc0a6201813f9bbb4a3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonsmash | light | `artifacts/skins/moonsmash-light-1440x960-reduced-motion.png` | `726a722af34442065e041af52f23fea9a8cbd7585e606748677f1f4b4192ea4b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonsmash | dark | `artifacts/skins/moonsmash-dark-1440x960-reduced-motion.png` | `93bcc8ac8e4d7a318e726f97fd8f3aca97c03ad96aaae1803b0db304092f86a8` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonink | light | `artifacts/skins/moonink-light-1440x960-reduced-motion.png` | `5902214f20a2279694f53090f4245d89023424ca56f0321036f98345a557aaac` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonink | dark | `artifacts/skins/moonink-dark-1440x960-reduced-motion.png` | `a376ef7cc6d65717e658447803f80ced36c410f19a5a777fea6da7231bec954d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| mooncrash | light | `artifacts/skins/mooncrash-light-1440x960-reduced-motion.png` | `6d60b5817938c8c1d8f4e056bdc90389f0eccdd4fa6bcecd4915a0b818e970b7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| mooncrash | dark | `artifacts/skins/mooncrash-dark-1440x960-reduced-motion.png` | `f1a141163652368f9ca22932fb55d0d8e3ec27515cc5c6b0f90907cf243e75ff` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpanel | light | `artifacts/skins/moonpanel-light-1440x960-reduced-motion.png` | `5847847d83907ca7a7b4fe80eab5c0de046629f6b1ddbedc50f645d5a1130d29` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonpanel | dark | `artifacts/skins/moonpanel-dark-1440x960-reduced-motion.png` | `06f9a31ca8ad1b7dcb9479895c02758bcea91e984e85758d44b44ea53e6a522a` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonscrawl | light | `artifacts/skins/moonscrawl-light-1440x960-reduced-motion.png` | `ade624a21845335903f886824d261ec2c3594be5f5708aad2a32db6238be4a6c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonscrawl | dark | `artifacts/skins/moonscrawl-dark-1440x960-reduced-motion.png` | `50fb328c62774dbfb6cecdade33bcf821b5555b14665a16a79be3f0d81126bb2` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonraw | light | `artifacts/skins/moonraw-light-1440x960-reduced-motion.png` | `59fbae74d4e3701c4bfd50ca54c12388ea4ddfba4d992c6b8f89c6cc8daca71b` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonraw | dark | `artifacts/skins/moonraw-dark-1440x960-reduced-motion.png` | `2728b4ae09bbdf94dfa7cdd9917587852a5f4599fb294ac7bfe4573dff513cc7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonchrome | light | `artifacts/skins/moonchrome-light-1440x960-reduced-motion.png` | `0368f37056f43a6e7378efae876a7a506b3c4bb6f572f41d40d92bd0e1eb5560` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonchrome | dark | `artifacts/skins/moonchrome-dark-1440x960-reduced-motion.png` | `b462ac01b52cda0280174e8968644dd0e2d1f266bd003b024c4df954a4a04dfd` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| classic | light | `artifacts/skins/classic-light-1440x960-reduced-motion.png` | `877a9116003c2c67a1c36191148fc3bba58c5d47f07dcd3a636cb899e3f4ce16` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| classic | dark | `artifacts/skins/classic-dark-1440x960-reduced-motion.png` | `51e7bb45626d5909ef21b7d2a0ce4d616dc4e47a37a9f8323c797636d18fd1f8` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonquest | light | `artifacts/skins/moonquest-light-1440x960-reduced-motion.png` | `a58621a9c5deae42eca19b33c7a7c4659bfa6bd80ca65eb807a97a7234407178` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonquest | dark | `artifacts/skins/moonquest-dark-1440x960-reduced-motion.png` | `958c753e2aa06513699e444416cf245aa79d78ee79227a9f0a6f76895bfe4e96` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonledger | light | `artifacts/skins/moonledger-light-1440x960-reduced-motion.png` | `281fc17989b53486fee0e98bcf5287fd0aae0d30eca5df2102be448bd8c19ac7` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+| moonledger | dark | `artifacts/skins/moonledger-dark-1440x960-reduced-motion.png` | `22e92d10a02fda08f498c73a690303d76b0edae0334caead8fa23e4c7a0eb8b6` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183` | 1440×960 | pending | captured-structural |
+
+## MF-VF-029 — Reduced-motion fixture
+
+Thirty desktop captures cover every skin × light/dark mode with the real reduced-motion preference active. Before each capture, the test confirms motion is reduced, transition duration is zero, and key information/controls retain their state. Capture names encode `1440x960-reduced-motion`; provenance binds the media preference, exact fixture, source commit 15cb218fdd221115bafb9981a869999be015769f, fingerprint ec03aecb534d3e475d2337d60a4a1a835dc00576925b9549bad44385f4560183, font-ready state and PNG digest. Human visual review remains pending.
+
+
+## Forced-colors captures (MF-VF-030)
+
+Thirty desktop captures cover every skin × light/dark mode with the forced-colors preference active and Workspace name focused. Browser checks assert the preference, visible focus outline, appearance selector, navigation, search/sort controls, five task rows, Blocked status and profile name. Sidecars record `state: forced-colors`, `forcedColors: active`, `focusedControl: workspaceName`, loaded fonts, source commit and fingerprint, and PNG SHA-256. This is machine-captured structural evidence; human visual review remains pending.
+
+| Skin | Mode | Screenshot | PNG SHA-256 | Source commit | Render fingerprint | Viewport | Reviewer | Status | Evidence class |
+|---|---|---|---|---|---|---|---|---|---|
+| classic | dark | `artifacts/skins/classic-dark-1440x960-forced-colors.png` | `14345175552ede64aa1d1edba0ccbf20cb895669bd62fc5ab5227ec6633153c4` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| classic | light | `artifacts/skins/classic-light-1440x960-forced-colors.png` | `ccd80b5f69db5039f133e2b39f5abf0ad6a48fc51612ff19cda6c210bb6cf40d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonchrome | dark | `artifacts/skins/moonchrome-dark-1440x960-forced-colors.png` | `2bb34d870de5e5d29e4e24f4f92a296cf95903f3987dd5794953caa72d587dea` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonchrome | light | `artifacts/skins/moonchrome-light-1440x960-forced-colors.png` | `16d5956c41f3da6f1cb5999ebfafacde2efd71063309450f1c6f2213f449a261` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| mooncrash | dark | `artifacts/skins/mooncrash-dark-1440x960-forced-colors.png` | `0ff4b5945575d09d54f7d5bf747c07d9de7de05af1c57399b39b8928541fa2da` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| mooncrash | light | `artifacts/skins/mooncrash-light-1440x960-forced-colors.png` | `9249664956fb662ac94a33cf9e14988ce600251a8a66295bb36e1b7da3850a54` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonglitch | dark | `artifacts/skins/moonglitch-dark-1440x960-forced-colors.png` | `ce9499a35f48fa44740346354bd6dacbd48ecb68360a7daaa837e74d02c00cd6` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonglitch | light | `artifacts/skins/moonglitch-light-1440x960-forced-colors.png` | `eadc033f0e632306beaa782bef67c3bb19e39c303d1feb2ff6eb36637ba9cf3f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonhalftone | dark | `artifacts/skins/moonhalftone-dark-1440x960-forced-colors.png` | `806bd24e09ed10bcc208327d2a4c27e69823ab020a5742b73b7effc9a64d1dc3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonhalftone | light | `artifacts/skins/moonhalftone-light-1440x960-forced-colors.png` | `d14710f12e1895c1bd1afdb1ccad9a8fccd4092e83f4c395ecf90215e6999f17` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonink | dark | `artifacts/skins/moonink-dark-1440x960-forced-colors.png` | `e7e8743ab6b2b9c16fe0d41a582c76c1034274ee9da7ca3483eac7ef6819af47` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonink | light | `artifacts/skins/moonink-light-1440x960-forced-colors.png` | `dca7d67dc02fbd0e8b001cbbb5820ce7a7f5334326a75d7aea9f792d5864bfdf` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonledger | dark | `artifacts/skins/moonledger-dark-1440x960-forced-colors.png` | `896b65c3b0df3692fb3dbad0ef595dd362c8a64874e3af65a43bf491c27ec040` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonledger | light | `artifacts/skins/moonledger-light-1440x960-forced-colors.png` | `d3d54fd23a63600fac918eb9993d257353384bb02328646fb1f438c34c0a3188` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonpanel | dark | `artifacts/skins/moonpanel-dark-1440x960-forced-colors.png` | `ccd3a6ec7015eb8f41b6c822da0dd0e3f75382653244e7429653782e2ce44dbc` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonpanel | light | `artifacts/skins/moonpanel-light-1440x960-forced-colors.png` | `9d8809d9314ff7ae8015574b1fc59eb0b469081a39f4ef8afae5a45497849741` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonpunk | dark | `artifacts/skins/moonpunk-dark-1440x960-forced-colors.png` | `81b9be5d1bbcce680303a9441e5d57b6e014a0047ab10584a8dc0a749862b012` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonpunk | light | `artifacts/skins/moonpunk-light-1440x960-forced-colors.png` | `4d87e3b8361418ca6f223acbcf33822540b43883de209e1871d73ac78bfd4fe3` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonquest | dark | `artifacts/skins/moonquest-dark-1440x960-forced-colors.png` | `b1e873298c8516b9a75e91bda6a13455a0deda88bb9593e2eb4b6c55f0aab31d` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonquest | light | `artifacts/skins/moonquest-light-1440x960-forced-colors.png` | `69fc75d0dc950cc5ab20762a0ac50355b500c8e3232f3d27441dfdd20a283b4f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonraw | dark | `artifacts/skins/moonraw-dark-1440x960-forced-colors.png` | `6bf5999a5313e4d3042a9e21915682fcc1b5f2699910f4f998345b485e6bbf1f` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonraw | light | `artifacts/skins/moonraw-light-1440x960-forced-colors.png` | `069d4765d0c9a081c29a0b2363c85f7d2ff56ecbd151aeb16a7c1a32daaa9ca5` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonriot | dark | `artifacts/skins/moonriot-dark-1440x960-forced-colors.png` | `4710baf6d51a136ffea71f8314cf2363fb674077a85c03268b7583c526dfedae` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonriot | light | `artifacts/skins/moonriot-light-1440x960-forced-colors.png` | `c2618f1ea7d309e247d4b34004c8ad1b9b1ef212c0f5f663a18d97e6c7c1a554` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonscrawl | dark | `artifacts/skins/moonscrawl-dark-1440x960-forced-colors.png` | `fe83caf92c2041af6caf4262b5edaa75f1fc6ff530529c4524cc97e3deab8e30` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonscrawl | light | `artifacts/skins/moonscrawl-light-1440x960-forced-colors.png` | `13429964eb906d0db3208d8eadd2ce41c2ce035898fd831b68c7a14f4725ab44` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonsmash | dark | `artifacts/skins/moonsmash-dark-1440x960-forced-colors.png` | `4f4c9ec0e346e3c5852b7f71f385dddda7845b7a6c38104de081582355faa571` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonsmash | light | `artifacts/skins/moonsmash-light-1440x960-forced-colors.png` | `956b4c9bb35b211486be914b7bebcdf790a40486b017fa4e19bcf29c46d6134c` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonzine | dark | `artifacts/skins/moonzine-dark-1440x960-forced-colors.png` | `35364ee294c1cde019533524c4e5ff1b4b6a6c1cc70be50c9d08aa93a16c9e31` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+| moonzine | light | `artifacts/skins/moonzine-light-1440x960-forced-colors.png` | `f57f74fb2e28e53daa2ac41f74e40c403e62833047bf24f77f461c74d815bd68` | `9cb668c55cc6c5512417cd2147c6f4ed86d14fbe` | `03bf44ac5ab067909ed2aae9ae41d63e23ff1f5bbd3f118071e792b5d9527b5b` | 1440×960 | pending | captured-structural |
+
+## Pilot visual review worksheet (MF-VF-032)
+
+The six unordered pairs among Classic, Moonpunk, Moonzine and Moonledger are listed in both light and dark mode. Each cell points to the actual same-content desktop captures and maps to the [A/B contact sheet](../../artifacts/skins/pilot-pair-contact-sheet.html). Provenance sidecars record the identical fixed `/lab` + Northstar Studio fixture, viewport, font state, source and image digest. This worksheet stores review state; capture or structural checks do not set a visual verdict.
+
+Typed field values:
+
+- `review_status`: `pending` or `completed`.
+- `verdict`: `unreviewed`, `pass`, `needs-changes`, or `blocked`. `pass` and `needs-changes` require a human review; only `pass` means the pair has a positive visual verdict.
+- `reviewer`: a human-provided identifier; remains `unassigned` until supplied.
+- `reviewed_at`: ISO-8601 timestamp; remains `not-reviewed` until a reviewer records it.
+- `observations`: reviewer notes; remains `not-recorded` until review.
+- `exception`: `not-assessed` until review determines an exception, then record its reason. No exception has been inferred.
+
+| Pair | Mode | Fixture parity | Rendered images (A/B) | `review_status` | Reviewer | `reviewed_at` | `verdict` | Observations | Exception |
+|---|---|---|---|---|---|---|---|---|---|
+| moonpunk vs moonzine | light | same fixed /lab + Northstar Studio content | [moonpunk A](../../artifacts/skins/moonpunk-light-1440x960-default.png) · [moonzine B](../../artifacts/skins/moonzine-light-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonpunk vs moonzine | dark | same fixed /lab + Northstar Studio content | [moonpunk A](../../artifacts/skins/moonpunk-dark-1440x960-default.png) · [moonzine B](../../artifacts/skins/moonzine-dark-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonpunk vs classic | light | same fixed /lab + Northstar Studio content | [moonpunk A](../../artifacts/skins/moonpunk-light-1440x960-default.png) · [classic B](../../artifacts/skins/classic-light-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonpunk vs classic | dark | same fixed /lab + Northstar Studio content | [moonpunk A](../../artifacts/skins/moonpunk-dark-1440x960-default.png) · [classic B](../../artifacts/skins/classic-dark-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonpunk vs moonledger | light | same fixed /lab + Northstar Studio content | [moonpunk A](../../artifacts/skins/moonpunk-light-1440x960-default.png) · [moonledger B](../../artifacts/skins/moonledger-light-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonpunk vs moonledger | dark | same fixed /lab + Northstar Studio content | [moonpunk A](../../artifacts/skins/moonpunk-dark-1440x960-default.png) · [moonledger B](../../artifacts/skins/moonledger-dark-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonzine vs classic | light | same fixed /lab + Northstar Studio content | [moonzine A](../../artifacts/skins/moonzine-light-1440x960-default.png) · [classic B](../../artifacts/skins/classic-light-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonzine vs classic | dark | same fixed /lab + Northstar Studio content | [moonzine A](../../artifacts/skins/moonzine-dark-1440x960-default.png) · [classic B](../../artifacts/skins/classic-dark-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonzine vs moonledger | light | same fixed /lab + Northstar Studio content | [moonzine A](../../artifacts/skins/moonzine-light-1440x960-default.png) · [moonledger B](../../artifacts/skins/moonledger-light-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| moonzine vs moonledger | dark | same fixed /lab + Northstar Studio content | [moonzine A](../../artifacts/skins/moonzine-dark-1440x960-default.png) · [moonledger B](../../artifacts/skins/moonledger-dark-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| classic vs moonledger | light | same fixed /lab + Northstar Studio content | [classic A](../../artifacts/skins/classic-light-1440x960-default.png) · [moonledger B](../../artifacts/skins/moonledger-light-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+| classic vs moonledger | dark | same fixed /lab + Northstar Studio content | [classic A](../../artifacts/skins/classic-dark-1440x960-default.png) · [moonledger B](../../artifacts/skins/moonledger-dark-1440x960-default.png) | `pending` | `unassigned` | `not-reviewed` | `unreviewed` | `not-recorded` | `not-assessed` |
+
+## All-skin pair review matrix (MF-VF-290)
+
+This matrix tracks actual human verdicts for all 105 unordered pairs from the 15 canonical skin IDs, in light and dark mode (210 review slots). Rows begin pending. A screenshot or automated structural result does not populate a verdict. Complete reviewer, date, evidence link, observations, and exception only from an actual review; `pass` and `needs-changes` require a human reviewer.
+
+| Pair | Mode | Review status | Reviewer | Reviewed at | Evidence link | Verdict | Observations | Exception |
+|---|---|---|---|---|---|---|---|---|
+| classic vs moonchrome | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonchrome | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs mooncrash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs mooncrash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonglitch | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonglitch | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonhalftone | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonhalftone | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonink | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonink | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonledger | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonledger | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| classic vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs mooncrash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs mooncrash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonglitch | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonglitch | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonhalftone | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonhalftone | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonink | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonink | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonledger | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonledger | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonchrome vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonglitch | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonglitch | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonhalftone | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonhalftone | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonink | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonink | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonledger | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonledger | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| mooncrash vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonhalftone | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonhalftone | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonink | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonink | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonledger | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonledger | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonglitch vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonink | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonink | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonledger | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonledger | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonhalftone vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonledger | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonledger | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonink vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonpanel | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonpanel | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonledger vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonpunk | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonpunk | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpanel vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonquest | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonquest | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonpunk vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonraw | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonraw | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonquest vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonriot | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonriot | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonraw vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonriot vs moonscrawl | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonriot vs moonscrawl | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonriot vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonriot vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonriot vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonriot vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonscrawl vs moonsmash | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonscrawl vs moonsmash | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonscrawl vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonscrawl vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonsmash vs moonzine | light | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+| moonsmash vs moonzine | dark | pending | unassigned | not-reviewed | not-recorded | unreviewed | not-recorded | not-assessed |
+
+## Owner final visual signoff (MF-VF-292)
+
+Create one record for the owner's final visual signoff across all 15 skins × 2 modes (30 appearances). The owner must review the complete set of 30 captured appearances (light/dark) and the 105 unordered skin pairs from the visual baseline inventory, plus all original asset sources and creative references.
+
+| Review scope | Screenshot/capture paths with SHA-256s | Source commit; fixture; viewport/mode; render env | Reviewer name and date | Concrete observations and material exceptions | Waiver rationale (or `none`) | Disposition and decision date |
+|---|---|---|---|---|---|---|
+| Pending owner final review | pending | pending | pending | pending | pending | pending |
+
+Allowed dispositions: `pending`, `approved`, `approved-with-waiver`, or `rejected`. Use `approved-with-waiver` only with a specific deviation, rationale, and owner decision date. A rejected or waived claim must retain the unresolved findings and scope of the decision. No autogenerated name/date/approval; open deltas explicit.

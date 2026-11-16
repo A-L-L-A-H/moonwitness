@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { COVENANT_PILLARS, type WorldIdentifier } from "@/data/empire-registry";
+import { FourScripturesSanctum } from "./four-scriptures-sanctum";
 import {
   MagneticPortal,
   ScrollChapterReveal,
@@ -9,7 +11,8 @@ import {
   triggerSacredViewTransition,
 } from "./motion-primitives";
 import { RemembranceSanctuary } from "./remembrance-sanctuary";
-import { DiamondStarOrnament, OctagramMandalaIcon } from "./sacred-icons";
+import { DiamondStarOrnament, OctagramMandalaIcon } from "@moonwitness/ui/imperium";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { AstrolabeSealMedallion } from "./sacred-illustrations";
 
 export function CovenantAboutSection({
@@ -18,6 +21,7 @@ export function CovenantAboutSection({
   onReplayEntrance,
   onToggleQuietMode,
   onSelectWorld,
+  onInspectCorpusDoor,
   onReturnToGate,
 }: {
   readonly quietMode?: boolean;
@@ -25,8 +29,10 @@ export function CovenantAboutSection({
   readonly onReplayEntrance?: () => void;
   readonly onToggleQuietMode?: () => void;
   readonly onSelectWorld?: (worldId: WorldIdentifier) => void;
+  readonly onInspectCorpusDoor?: () => void;
   readonly onReturnToGate: () => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const [focusedPillar, setFocusedPillar] = useState<string>(COVENANT_PILLARS[0]?.numeral ?? "I");
 
   return (
@@ -48,11 +54,12 @@ export function CovenantAboutSection({
               id="about-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              ARCHITECTURE OF THE LIGHT
+              {locale === "id" ? "ARSITEKTUR CAHAYA" : "ARCHITECTURE OF THE LIGHT"}
             </h2>
-            <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[#dfd6c3]/90">
-              A-L-L-A-H.COM is designed as a luminous sanctuary where remembrance, rigorous
-              knowledge, and masterful creation converge into a single harmonious civilization.
+            <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[#e6decb]">
+              {locale === "id"
+                ? "Gerbang monosentris netral yang menyatukan kesaksian jujur, kajian komparatif lintas kitab wahyu, dan karya beramanah tanpa kultus maupun paksaan."
+                : "A neutral, monocentric gateway uniting honest witness, comparative study across revealed scriptures, and principled craft without cult or coercion."}
             </p>
           </div>
         </ScrollChapterReveal>
@@ -109,7 +116,10 @@ export function CovenantAboutSection({
           </div>
         </ScrollChapterReveal>
 
-        {/* Sanctuary of Remembrance, 9 Luminous Attributes, Tasbih Counter & Breath Guide */}
+        {/* Four Revealed Scriptural Witnesses (Taurat · Zabur · Injil · Al-Qur'an) */}
+        <FourScripturesSanctum quietMode={quietMode} onInspectCorpusDoor={onInspectCorpusDoor} />
+
+        {/* Contemplative Stillness Sanctuary, 9 Universal Attributes, Reflection Ring & Breath Guide */}
         <RemembranceSanctuary quietMode={quietMode} onNavigateToWorld={onSelectWorld} />
 
         {/* Return to Gate Ornament & Experience Controls */}
@@ -118,9 +128,10 @@ export function CovenantAboutSection({
             <button
               type="button"
               onClick={onReturnToGate}
-              className="btn-chamfer font-monument px-8 py-3 text-xs sm:text-sm tracking-[0.25em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
+              className="btn-chamfer font-monument group inline-flex items-center gap-3 px-9 py-3 text-xs sm:text-sm tracking-[0.25em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
             >
-              ASCEND TO THE GATE &uarr;
+              <DiamondStarOrnament className="h-3 w-3 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
+              <span>ASCEND TO THE GATE &uarr;</span>
             </button>
           </MagneticPortal>
 
@@ -129,7 +140,7 @@ export function CovenantAboutSection({
               <button
                 type="button"
                 onClick={onReplayEntrance}
-                className="min-h-[44px] border border-[#d6b46c]/35 bg-[#080a12]/80 px-5 py-2 font-mono text-[11px] tracking-[0.18em] text-[#e6decb] uppercase hover:border-[#f8eac6] hover:text-white transition-colors cursor-pointer"
+                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[#e6decb] uppercase hover:text-white cursor-pointer"
               >
                 REPLAY ENTRANCE
               </button>
@@ -139,7 +150,7 @@ export function CovenantAboutSection({
                 type="button"
                 aria-pressed={quietMode}
                 onClick={onToggleQuietMode}
-                className="min-h-[44px] border border-[#d6b46c]/35 bg-[#080a12]/80 px-5 py-2 font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase hover:border-[#f8eac6] hover:text-white transition-colors cursor-pointer"
+                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase hover:text-white cursor-pointer"
               >
                 {quietMode ? "ENABLE LIVING LIGHT SHADERS" : "QUIET CONTEMPLATIVE MODE"}
               </button>
@@ -157,10 +168,23 @@ export function CovenantAboutSection({
               <OctagramMandalaIcon className="h-6 w-6" />
               <span>A-L-L-A-H.COM &middot; EMPIRE OF THE LIGHT</span>
             </div>
+            <nav
+              aria-label="Sanctuary Dedicated Portals"
+              className="flex items-center gap-4 font-mono text-[10px] tracking-[0.16em] text-[#dfc07b]"
+            >
+              <Link href="/scriptures" className="hover:text-[#fff8e6]">
+                /SCRIPTURES
+              </Link>
+              <Link href="/codex" className="hover:text-[#fff8e6]">
+                /CODEX
+              </Link>
+              <Link href="/mtime" className="hover:text-[#fff8e6]">
+                /MTIME
+              </Link>
+            </nav>
             <div className="font-mono text-[10px] tracking-[0.18em] text-[#dfc07b]">
               {capabilityStatusLabel}
             </div>
-            <div>DREAM &middot; EXPLORE &middot; CREATE</div>
           </footer>
         </div>
       </div>

@@ -73,12 +73,12 @@ export function CelestialHudCapsule({
 
       <span className="h-px w-4 bg-[#d6b46c]/30" aria-hidden="true" />
 
-      {/* Quick Dhikr Jump */}
+      {/* Quick Contemplative Covenant Jump */}
       <button
         type="button"
         onClick={onJumpToRemembrance}
-        title="Jump to Remembrance Sanctuary"
-        aria-label="Jump to Remembrance Sanctuary"
+        title="Jump to Four Scriptures & Contemplation Sanctuary"
+        aria-label="Jump to Four Scriptures & Contemplation Sanctuary"
         className="flex h-11 w-11 items-center justify-center rounded-full border border-[#d6b46c]/35 bg-[#d6b46c]/12 text-[#fff4d2] hover:border-[#fff4d2] hover:bg-[#d6b46c]/28 transition-colors cursor-pointer"
       >
         <DiamondStarOrnament className="h-3.5 w-3.5" />

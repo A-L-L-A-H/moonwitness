@@ -1,0 +1,40 @@
+<div id="tab-routes" class="tab-content">
+  <div class="filter-bar">
+    <input type="text" class="search-input" id="routeSearch" placeholder="Search routes or methods..." onkeyup="filterRoutes()">
+    <span style="font-size: 13px; color: var(--text-muted);"><%= data.routes.length %> routes automatically intercepted via onRoute lifecycle hook</span>
+  </div>
+  <div class="table-box">
+    <table id="routesTable">
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>URL Pattern</th>
+          <th>Tags / Group</th>
+          <th>Auth</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.routes.forEach(function(r) { %>
+          <tr>
+            <td class="mono" style="font-weight: 700; color: <%= r.method === 'GET' ? '#10b981' : r.method === 'POST' ? '#6366f1' : r.method === 'DELETE' ? '#f43f5e' : '#f59e0b' %>">
+              <%= r.method %>
+            </td>
+            <td class="mono"><a href="<%= r.url.includes(':') ? '#' : r.url %>" style="color: #818cf8; text-decoration: none;"><%= r.url %></a></td>
+            <td>
+              <% if (r.tags && r.tags.length) { %>
+                <% r.tags.forEach(function(tag) { %><span class="badge badge-blue"><%= tag %></span><% }); %>
+              <% } else { %><span class="badge badge-cyan">Root</span><% } %>
+            </td>
+            <td>
+              <span class="badge <%= r.authRequired ? 'badge-amber' : 'badge-green' %>">
+                <%= r.authRequired ? 'PROTECTED' : 'PUBLIC' %>
+              </span>
+            </td>
+            <td style="color: var(--text-muted); font-size: 12px;"><%= r.description || '-' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+</div>

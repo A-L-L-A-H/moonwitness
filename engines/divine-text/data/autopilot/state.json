@@ -1,0 +1,608 @@
+{
+  "version": "6.0.0",
+  "question": "Audit the identity of Musa/Moses across available local scripture evidence.",
+  "started_at": "2026-08-23T06:46:36.495Z",
+  "updated_at": "2026-08-23T06:46:36.513Z",
+  "context": {
+    "question": "Audit the identity of Musa/Moses across available local scripture evidence.",
+    "token_count": 10,
+    "status": "READY",
+    "entities": [
+      "musa",
+      "torah"
+    ],
+    "retrieval": {
+      "corpus": {
+        "quran": {
+          "available": true,
+          "records": 6236
+        },
+        "hadith": {
+          "directory": true,
+          "corpus_ready": false
+        },
+        "torah": {
+          "corpus_ready": false
+        },
+        "psalms": {
+          "corpus_ready": false
+        },
+        "gospels": {
+          "corpus_ready": false
+        }
+      },
+      "available_sources": [
+        "quran"
+      ],
+      "status": "PARTIAL"
+    },
+    "graph": {
+      "nodes": [
+        {
+          "id": "Q-5-44",
+          "type": "claim",
+          "status": "QURAN_EXPLICIT",
+          "source_type": "QURAN",
+          "reference": "5:44",
+          "text": "The Quran states that Allah sent down the Torah with guidance and light.",
+          "tags": [
+            "torah",
+            "revelation"
+          ]
+        },
+        {
+          "id": "ID-TORAH-PENTATEUCH",
+          "type": "claim",
+          "status": "UNRESOLVED",
+          "source_type": "CROSS_TRADITION",
+          "reference": null,
+          "text": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+          "tags": [
+            "identity",
+            "torah"
+          ]
+        }
+      ],
+      "edges": [],
+      "status": "READY"
+    },
+    "scores": [
+      {
+        "claim": "The Quran states that Allah sent down the Torah with guidance and light.",
+        "text_reference": "5:44",
+        "status": "EVIDENCE_GROUNDED",
+        "score": {
+          "status": "SCORED",
+          "sourceQuality": 20,
+          "transmission": 25,
+          "proximity": 20,
+          "corroboration": 20,
+          "interpretationGap": 15,
+          "total": 100,
+          "confidence": "VERY_STRONG",
+          "basis": {
+            "sourceQuality": [
+              "Divine Origin"
+            ],
+            "transmission": [
+              "Mutawatir"
+            ],
+            "proximity": [
+              "Direct Revelation"
+            ],
+            "corroboration": [
+              "Internal Consistency"
+            ],
+            "interpretationGap": [
+              "Clear text"
+            ]
+          }
+        },
+        "review_required": false
+      },
+      {
+        "claim": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+        "text_reference": "ID-TORAH-PENTATEUCH",
+        "status": "PENDING_REVIEW",
+        "score": {
+          "status": "SCORED",
+          "sourceQuality": 12,
+          "transmission": 15,
+          "proximity": 10,
+          "corroboration": 8,
+          "interpretationGap": 8,
+          "total": 53,
+          "confidence": "MIXED",
+          "basis": {
+            "sourceQuality": [
+              "Historical records"
+            ],
+            "transmission": [
+              "Manuscript chains"
+            ],
+            "proximity": [
+              "Centuries later"
+            ],
+            "corroboration": [
+              "Partial"
+            ],
+            "interpretationGap": [
+              "Translation loss"
+            ]
+          }
+        },
+        "review_required": true
+      }
+    ],
+    "review": {
+      "pending_count": 1,
+      "gate": "REVIEW_REQUIRED",
+      "status": "READY"
+    },
+    "report": {
+      "generated_at": "2026-08-23T06:46:36.513Z",
+      "question": "Audit the identity of Musa/Moses across available local scripture evidence.",
+      "entities": [
+        "musa",
+        "torah"
+      ],
+      "corpus": {
+        "quran": {
+          "available": true,
+          "records": 6236
+        },
+        "hadith": {
+          "directory": true,
+          "corpus_ready": false
+        },
+        "torah": {
+          "corpus_ready": false
+        },
+        "psalms": {
+          "corpus_ready": false
+        },
+        "gospels": {
+          "corpus_ready": false
+        }
+      },
+      "graph": {
+        "nodes": [
+          {
+            "id": "Q-5-44",
+            "type": "claim",
+            "status": "QURAN_EXPLICIT",
+            "source_type": "QURAN",
+            "reference": "5:44",
+            "text": "The Quran states that Allah sent down the Torah with guidance and light.",
+            "tags": [
+              "torah",
+              "revelation"
+            ]
+          },
+          {
+            "id": "ID-TORAH-PENTATEUCH",
+            "type": "claim",
+            "status": "UNRESOLVED",
+            "source_type": "CROSS_TRADITION",
+            "reference": null,
+            "text": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+            "tags": [
+              "identity",
+              "torah"
+            ]
+          }
+        ],
+        "edges": [],
+        "status": "READY"
+      },
+      "scores": [
+        {
+          "claim": "The Quran states that Allah sent down the Torah with guidance and light.",
+          "text_reference": "5:44",
+          "status": "EVIDENCE_GROUNDED",
+          "score": {
+            "status": "SCORED",
+            "sourceQuality": 20,
+            "transmission": 25,
+            "proximity": 20,
+            "corroboration": 20,
+            "interpretationGap": 15,
+            "total": 100,
+            "confidence": "VERY_STRONG",
+            "basis": {
+              "sourceQuality": [
+                "Divine Origin"
+              ],
+              "transmission": [
+                "Mutawatir"
+              ],
+              "proximity": [
+                "Direct Revelation"
+              ],
+              "corroboration": [
+                "Internal Consistency"
+              ],
+              "interpretationGap": [
+                "Clear text"
+              ]
+            }
+          },
+          "review_required": false
+        },
+        {
+          "claim": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+          "text_reference": "ID-TORAH-PENTATEUCH",
+          "status": "PENDING_REVIEW",
+          "score": {
+            "status": "SCORED",
+            "sourceQuality": 12,
+            "transmission": 15,
+            "proximity": 10,
+            "corroboration": 8,
+            "interpretationGap": 8,
+            "total": 53,
+            "confidence": "MIXED",
+            "basis": {
+              "sourceQuality": [
+                "Historical records"
+              ],
+              "transmission": [
+                "Manuscript chains"
+              ],
+              "proximity": [
+                "Centuries later"
+              ],
+              "corroboration": [
+                "Partial"
+              ],
+              "interpretationGap": [
+                "Translation loss"
+              ]
+            }
+          },
+          "review_required": true
+        }
+      ],
+      "review": {
+        "pending_count": 1,
+        "gate": "REVIEW_REQUIRED",
+        "status": "READY"
+      },
+      "policy": "Autopilot never converts missing evidence to zero; unresolved or missing primary corpus remains pending."
+    }
+  },
+  "tasks": [
+    {
+      "id": "T001",
+      "type": "parse_question",
+      "status": "done",
+      "input": {
+        "question": "Audit the identity of Musa/Moses across available local scripture evidence."
+      },
+      "output": {
+        "question": "Audit the identity of Musa/Moses across available local scripture evidence.",
+        "token_count": 10,
+        "status": "READY"
+      },
+      "started_at": "2026-08-23T06:46:36.496Z",
+      "finished_at": "2026-08-23T06:46:36.496Z"
+    },
+    {
+      "id": "T002",
+      "type": "resolve_entities",
+      "status": "done",
+      "input": null,
+      "output": {
+        "entities": [
+          "musa",
+          "torah"
+        ],
+        "status": "READY"
+      },
+      "started_at": "2026-08-23T06:46:36.497Z",
+      "finished_at": "2026-08-23T06:46:36.497Z"
+    },
+    {
+      "id": "T003",
+      "type": "retrieve_local_corpus",
+      "status": "done",
+      "input": null,
+      "output": {
+        "corpus": {
+          "quran": {
+            "available": true,
+            "records": 6236
+          },
+          "hadith": {
+            "directory": true,
+            "corpus_ready": false
+          },
+          "torah": {
+            "corpus_ready": false
+          },
+          "psalms": {
+            "corpus_ready": false
+          },
+          "gospels": {
+            "corpus_ready": false
+          }
+        },
+        "available_sources": [
+          "quran"
+        ],
+        "status": "PARTIAL"
+      },
+      "started_at": "2026-08-23T06:46:36.498Z",
+      "finished_at": "2026-08-23T06:46:36.510Z"
+    },
+    {
+      "id": "T004",
+      "type": "build_evidence_graph",
+      "status": "done",
+      "input": null,
+      "output": {
+        "nodes": [
+          {
+            "id": "Q-5-44",
+            "type": "claim",
+            "status": "QURAN_EXPLICIT",
+            "source_type": "QURAN",
+            "reference": "5:44",
+            "text": "The Quran states that Allah sent down the Torah with guidance and light.",
+            "tags": [
+              "torah",
+              "revelation"
+            ]
+          },
+          {
+            "id": "ID-TORAH-PENTATEUCH",
+            "type": "claim",
+            "status": "UNRESOLVED",
+            "source_type": "CROSS_TRADITION",
+            "reference": null,
+            "text": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+            "tags": [
+              "identity",
+              "torah"
+            ]
+          }
+        ],
+        "edges": [],
+        "status": "READY"
+      },
+      "started_at": "2026-08-23T06:46:36.510Z",
+      "finished_at": "2026-08-23T06:46:36.511Z"
+    },
+    {
+      "id": "T005",
+      "type": "score_evidence",
+      "status": "done",
+      "input": null,
+      "output": {
+        "scores": [
+          {
+            "claim": "The Quran states that Allah sent down the Torah with guidance and light.",
+            "text_reference": "5:44",
+            "status": "EVIDENCE_GROUNDED",
+            "score": {
+              "status": "SCORED",
+              "sourceQuality": 20,
+              "transmission": 25,
+              "proximity": 20,
+              "corroboration": 20,
+              "interpretationGap": 15,
+              "total": 100,
+              "confidence": "VERY_STRONG",
+              "basis": {
+                "sourceQuality": [
+                  "Divine Origin"
+                ],
+                "transmission": [
+                  "Mutawatir"
+                ],
+                "proximity": [
+                  "Direct Revelation"
+                ],
+                "corroboration": [
+                  "Internal Consistency"
+                ],
+                "interpretationGap": [
+                  "Clear text"
+                ]
+              }
+            },
+            "review_required": false
+          },
+          {
+            "claim": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+            "text_reference": "ID-TORAH-PENTATEUCH",
+            "status": "PENDING_REVIEW",
+            "score": {
+              "status": "SCORED",
+              "sourceQuality": 12,
+              "transmission": 15,
+              "proximity": 10,
+              "corroboration": 8,
+              "interpretationGap": 8,
+              "total": 53,
+              "confidence": "MIXED",
+              "basis": {
+                "sourceQuality": [
+                  "Historical records"
+                ],
+                "transmission": [
+                  "Manuscript chains"
+                ],
+                "proximity": [
+                  "Centuries later"
+                ],
+                "corroboration": [
+                  "Partial"
+                ],
+                "interpretationGap": [
+                  "Translation loss"
+                ]
+              }
+            },
+            "review_required": true
+          }
+        ],
+        "status": "READY"
+      },
+      "started_at": "2026-08-23T06:46:36.511Z",
+      "finished_at": "2026-08-23T06:46:36.511Z"
+    },
+    {
+      "id": "T006",
+      "type": "check_review_gate",
+      "status": "done",
+      "input": null,
+      "output": {
+        "pending_count": 1,
+        "gate": "REVIEW_REQUIRED",
+        "status": "READY"
+      },
+      "started_at": "2026-08-23T06:46:36.512Z",
+      "finished_at": "2026-08-23T06:46:36.512Z"
+    },
+    {
+      "id": "T007",
+      "type": "generate_report",
+      "status": "done",
+      "input": null,
+      "output": {
+        "generated_at": "2026-08-23T06:46:36.513Z",
+        "question": "Audit the identity of Musa/Moses across available local scripture evidence.",
+        "entities": [
+          "musa",
+          "torah"
+        ],
+        "corpus": {
+          "quran": {
+            "available": true,
+            "records": 6236
+          },
+          "hadith": {
+            "directory": true,
+            "corpus_ready": false
+          },
+          "torah": {
+            "corpus_ready": false
+          },
+          "psalms": {
+            "corpus_ready": false
+          },
+          "gospels": {
+            "corpus_ready": false
+          }
+        },
+        "graph": {
+          "nodes": [
+            {
+              "id": "Q-5-44",
+              "type": "claim",
+              "status": "QURAN_EXPLICIT",
+              "source_type": "QURAN",
+              "reference": "5:44",
+              "text": "The Quran states that Allah sent down the Torah with guidance and light.",
+              "tags": [
+                "torah",
+                "revelation"
+              ]
+            },
+            {
+              "id": "ID-TORAH-PENTATEUCH",
+              "type": "claim",
+              "status": "UNRESOLVED",
+              "source_type": "CROSS_TRADITION",
+              "reference": null,
+              "text": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+              "tags": [
+                "identity",
+                "torah"
+              ]
+            }
+          ],
+          "edges": [],
+          "status": "READY"
+        },
+        "scores": [
+          {
+            "claim": "The Quran states that Allah sent down the Torah with guidance and light.",
+            "text_reference": "5:44",
+            "status": "EVIDENCE_GROUNDED",
+            "score": {
+              "status": "SCORED",
+              "sourceQuality": 20,
+              "transmission": 25,
+              "proximity": 20,
+              "corroboration": 20,
+              "interpretationGap": 15,
+              "total": 100,
+              "confidence": "VERY_STRONG",
+              "basis": {
+                "sourceQuality": [
+                  "Divine Origin"
+                ],
+                "transmission": [
+                  "Mutawatir"
+                ],
+                "proximity": [
+                  "Direct Revelation"
+                ],
+                "corroboration": [
+                  "Internal Consistency"
+                ],
+                "interpretationGap": [
+                  "Clear text"
+                ]
+              }
+            },
+            "review_required": false
+          },
+          {
+            "claim": "Modern Torah/Pentateuch is identical to the Torah given to Musa.",
+            "text_reference": "ID-TORAH-PENTATEUCH",
+            "status": "PENDING_REVIEW",
+            "score": {
+              "status": "SCORED",
+              "sourceQuality": 12,
+              "transmission": 15,
+              "proximity": 10,
+              "corroboration": 8,
+              "interpretationGap": 8,
+              "total": 53,
+              "confidence": "MIXED",
+              "basis": {
+                "sourceQuality": [
+                  "Historical records"
+                ],
+                "transmission": [
+                  "Manuscript chains"
+                ],
+                "proximity": [
+                  "Centuries later"
+                ],
+                "corroboration": [
+                  "Partial"
+                ],
+                "interpretationGap": [
+                  "Translation loss"
+                ]
+              }
+            },
+            "review_required": true
+          }
+        ],
+        "review": {
+          "pending_count": 1,
+          "gate": "REVIEW_REQUIRED",
+          "status": "READY"
+        },
+        "policy": "Autopilot never converts missing evidence to zero; unresolved or missing primary corpus remains pending."
+      },
+      "started_at": "2026-08-23T06:46:36.513Z",
+      "finished_at": "2026-08-23T06:46:36.513Z"
+    }
+  ]
+}

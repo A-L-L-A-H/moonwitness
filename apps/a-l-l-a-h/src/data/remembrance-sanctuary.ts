@@ -30,7 +30,7 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     worldLabel: "ARSY · Zenith Meridian",
     contemplation:
       "Every clarity in reason, beauty in creation, and guidance in conscience is a ray borrowed from His Light.",
-    practicePrompt: "Begin work seeking illumination over applause.",
+    practicePrompt: "Begin each work session seeking clarity of truth over applause.",
   },
   {
     id: "ar-rahman",
@@ -40,8 +40,9 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     linkedWorldId: "moonwitness",
     worldLabel: "MOONWITNESS · Sanctuary Archive",
     contemplation:
-      "Mercy encompasses the cosmos before judgment; it heals fractured stories without erasing accountability.",
-    practicePrompt: "Respond gently to human frailty—starting with your own mistakes.",
+      "Mercy encompasses creation before judgment; it heals fractured stories while keeping accountable truth intact.",
+    practicePrompt:
+      "Respond gently to human frailty—starting with honest humility toward your own errors.",
   },
   {
     id: "al-hakim",
@@ -73,8 +74,8 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     linkedWorldId: "arsy",
     worldLabel: "ARSY · Stillness Carrier",
     contemplation:
-      "True serenity is not the absence of duty, but the certainty of resting one’s heart in the Sovereign Creator.",
-    practicePrompt: "Exhale anxiety; align conscience before continuing your craft.",
+      "True serenity is not the absence of duty, but quiet confidence anchored in ethical stewardship.",
+    practicePrompt: "Exhale anxiety and align conscience before continuing your craft.",
   },
   {
     id: "al-badi",
@@ -84,8 +85,8 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     linkedWorldId: "rocksoul-dx",
     worldLabel: "ROCKSOUL DX · Sacred Geometry",
     contemplation:
-      "He originates heavens and earth in unprecedented harmony without any model or fatigue.",
-    practicePrompt: "Create with wonder and humility, returning all credit to the Originator.",
+      "Creation unfolds in coherent beauty, symmetry, and living order without fatigue.",
+    practicePrompt: "Build with wonder and intellectual humility toward cosmic order.",
   },
   {
     id: "al-quddus",
@@ -95,7 +96,7 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     linkedWorldId: "qalam",
     worldLabel: "QALAM · Clean Intention",
     contemplation:
-      "He is free from every flaw, vanity, and distortion—inviting believers to purify both heart and codebase.",
+      "Transcendent purity invites honest architecture—free from deceit, vanity, and manipulation.",
     practicePrompt: "Keep output honest, transparent, and uncorrupted by ego.",
   },
   {

@@ -1,0 +1,41 @@
+version: 1
+status: design-locked
+canonical_door: HTTPS+OpenAPI
+base_path: /v1
+validation:
+  request: canonical-json-schema
+  response: canonical-json-schema
+  errors: problem-details
+  authorization: security-policy
+  compatibility: explicit-per-operation
+operations:
+  - id: health.read
+    resource: health
+    method: GET
+    path: /health
+    auth: public
+  - id: research-runs.create
+    resource: research-run
+    method: POST
+    path: /research-runs
+    auth: user
+    idempotency: required
+  - id: research-runs.get
+    resource: research-run
+    method: GET
+    path: /research-runs/{id}
+    auth: user
+  - id: research-runs.events
+    resource: research-run-events
+    method: GET
+    path: /research-runs/{id}/events
+    auth: user
+    streaming: sse
+rules:
+  - every_operation_maps_to_exactly_one_capability
+  - every_operation_has_request_response_or_explicit_no_body_semantics
+  - every_mutation_defines_idempotency_behavior
+  - every_protected_operation_defines_authorization
+  - every_error_uses_canonical_problem_contract
+  - no_persistence_table_is_exposed_as_an_api_resource_by_accident
+  - new_operations_require_openapi_update_and_contract_fixture

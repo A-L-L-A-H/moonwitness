@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://blueprint.moonwitness.dev/schemas/event-envelope.schema.json",
+  "title": "EventEnvelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "type", "version", "occurredAt", "producerCapabilityId", "subject", "correlationId", "traceId", "payload"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "type": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*\\.[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "version": {"type": "integer", "minimum": 1},
+    "occurredAt": {"type": "string", "format": "date-time"},
+    "producerCapabilityId": {"type": "string", "pattern": "^CAP-[A-Z0-9-]+-[0-9]{3}$"},
+    "subject": {"type": "string", "minLength": 1},
+    "correlationId": {"type": "string", "minLength": 1},
+    "traceId": {"type": "string", "minLength": 1},
+    "causationId": {"type": "string", "minLength": 1},
+    "payload": {"type": "object"}
+  }
+}

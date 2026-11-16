@@ -1,0 +1,13 @@
+# Asset, icon and vector pipeline
+Audit original and licensed assets first. Inspect `apps/dock/src/ui/client/GeneratorStudio.tsx` before considering SHADOW reuse; never copy renderer as a second canon. SVG has safe viewBox, accessible title or aria-hidden, no untrusted embedded script/external URL, semantic color/focus in button wrapper, scaling/contrast variants, no automatic sound or motion. Preserve asset author, license, digest/source and consent. Do not redistribute fonts or unlicensed music/lyrics. M30 and D08 govern acceptance.
+
+## Pipeline gate (UI-F14 / QA-01)
+
+`pnpm ui:assets` (`node scripts/check-ui-assets.mjs`, no dependencies) enforces the paragraph above over the dirs the apps actually serve — `apps/dock/public`, `apps/headquarters/public`, `tools/cockpit/public`, `tools/cockpit/client/public`, and `apps/empire-web/public` — plus the framework-served `apps/empire-web/src/app/icon.svg`. It fails on: an `.svg` with no `<title>`, no `role="img"`+`aria-label` and no `aria-hidden="true"`; any `<script>`, `@import`, remote `href`/`xlink:href`, remote `<image>` or base64 payload in a vector; a served asset with no row, a wrong SHA-256 or a non-`CLEARED` status in [the asset ledger](../audit/ui-asset-ledger-d54ad43.md); or any file under `apps/` reaching `docs/design/mockups-xv` media (ADR-0009 §2.1). Build output (`dist/`, `.next/`) is excluded — verify the source, not the bundle. Inline JSX artwork in `packages/moonui` (crown, seal, icons, Empire mark, and orbit illustration) is code, not a ledgered binary asset; name it or mark it decorative in the component.
+
+Adding a production asset: put the file in the owning app's public dir, then add a ledger row with real author/origin evidence, an SPDX value (`NOASSERTION` when none is documented — never an invented licence), a consent entry (`Not applicable — no person depicted` when true) and the computed SHA-256, then re-run `pnpm ui:assets`. If provenance cannot be evidenced, the asset is `UNRESOLVED` and must not sit in a served directory: the ratified [M06-06 invariant](../decisions/M06-06-rights-classification.md) forbids serving `RIGHTS_UNKNOWN` media.
+
+Latest observed run, 2026-10-31: **32 violations across 39 scanned files** — 2 unnamed Cockpit favicons and 30 legacy rights blockers in Dock, Headquarters, and Cockpit. The five approved Empire WebP files and the Empire favicon passed their asset-name, containment, hash, and ledger checks. The gate remains red while those 30 unresolved files remain; keep it out of required CI until the whole scan passes.
+
+Empire's vector and artwork direction is documented in [EMPIRE_VISUAL_SYSTEM.md](EMPIRE_VISUAL_SYSTEM.md).
+

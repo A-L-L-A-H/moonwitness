@@ -1,0 +1,202 @@
+[
+  {
+    "prophet_id": "adam",
+    "prophet_name": "Ādam",
+    "mean_uncertainty": 0.2813,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 6
+  },
+  {
+    "prophet_id": "idris",
+    "prophet_name": "Idrīs",
+    "mean_uncertainty": 0.5273,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 9
+  },
+  {
+    "prophet_id": "nuh",
+    "prophet_name": "Nūḥ",
+    "mean_uncertainty": 0.137,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 2
+  },
+  {
+    "prophet_id": "hud",
+    "prophet_name": "Hūd",
+    "mean_uncertainty": 0.1213,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "salih",
+    "prophet_name": "Ṣāliḥ",
+    "mean_uncertainty": 0.0624,
+    "max_uncertainty": 0.35,
+    "claim_count": 15,
+    "review_claims": 0
+  },
+  {
+    "prophet_id": "ibrahim",
+    "prophet_name": "Ibrāhīm",
+    "mean_uncertainty": 0.1816,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 3
+  },
+  {
+    "prophet_id": "lut",
+    "prophet_name": "Lūṭ",
+    "mean_uncertainty": 0.1619,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 2
+  },
+  {
+    "prophet_id": "ismail",
+    "prophet_name": "Ismāʿīl",
+    "mean_uncertainty": 0.3224,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 5
+  },
+  {
+    "prophet_id": "ishaq",
+    "prophet_name": "Isḥāq",
+    "mean_uncertainty": 0.4991,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 7
+  },
+  {
+    "prophet_id": "yaqub",
+    "prophet_name": "Yaʿqūb",
+    "mean_uncertainty": 0.27,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 3
+  },
+  {
+    "prophet_id": "yusuf",
+    "prophet_name": "Yūsuf",
+    "mean_uncertainty": 0.0775,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "ayyub",
+    "prophet_name": "Ayyūb",
+    "mean_uncertainty": 0.2994,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 4
+  },
+  {
+    "prophet_id": "shuayb",
+    "prophet_name": "Shuʿayb",
+    "mean_uncertainty": 0.09,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "musa",
+    "prophet_name": "Mūsā",
+    "mean_uncertainty": 0.0761,
+    "max_uncertainty": 0.4,
+    "claim_count": 18,
+    "review_claims": 0
+  },
+  {
+    "prophet_id": "harun",
+    "prophet_name": "Hārūn",
+    "mean_uncertainty": 0.1231,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "dhulkifl",
+    "prophet_name": "Dhū al-Kifl",
+    "mean_uncertainty": 0.4752,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 7
+  },
+  {
+    "prophet_id": "dawud",
+    "prophet_name": "Dāwūd",
+    "mean_uncertainty": 0.1328,
+    "max_uncertainty": 1,
+    "claim_count": 18,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "sulayman",
+    "prophet_name": "Sulaymān",
+    "mean_uncertainty": 0.0712,
+    "max_uncertainty": 0.35,
+    "claim_count": 16,
+    "review_claims": 0
+  },
+  {
+    "prophet_id": "ilyas",
+    "prophet_name": "Ilyās",
+    "mean_uncertainty": 0.2391,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 3
+  },
+  {
+    "prophet_id": "alyasa",
+    "prophet_name": "Al-Yasaʿ",
+    "mean_uncertainty": 0.5215,
+    "max_uncertainty": 1,
+    "claim_count": 15,
+    "review_claims": 7
+  },
+  {
+    "prophet_id": "yunus",
+    "prophet_name": "Yūnus",
+    "mean_uncertainty": 0.1525,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 2
+  },
+  {
+    "prophet_id": "zakariya",
+    "prophet_name": "Zakariyyā",
+    "mean_uncertainty": 0.17,
+    "max_uncertainty": 1,
+    "claim_count": 17,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "yahya",
+    "prophet_name": "Yaḥyā",
+    "mean_uncertainty": 0.3003,
+    "max_uncertainty": 1,
+    "claim_count": 16,
+    "review_claims": 4
+  },
+  {
+    "prophet_id": "isa",
+    "prophet_name": "ʿĪsā",
+    "mean_uncertainty": 0.1288,
+    "max_uncertainty": 1,
+    "claim_count": 17,
+    "review_claims": 1
+  },
+  {
+    "prophet_id": "muhammad",
+    "prophet_name": "Muḥammad",
+    "mean_uncertainty": 0.0129,
+    "max_uncertainty": 0.12,
+    "claim_count": 17,
+    "review_claims": 0
+  }
+]

@@ -1,0 +1,4 @@
+version: 1
+status: superseded
+superseded_by: 02-domain/CAPABILITY-REGISTRY-V2.yaml
+note: Historical registry retained for provenance only. Active capability ownership is defined exclusively by CAPABILITY-REGISTRY-V2.yaml.

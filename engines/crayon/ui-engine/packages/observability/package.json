@@ -1,0 +1,9 @@
+{
+  "name": "allah-crayon-observability",
+  "version": "0.0.0-experimental",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "allah-crayon-kernel": "0.9.0-alpha.1"
+  }
+}

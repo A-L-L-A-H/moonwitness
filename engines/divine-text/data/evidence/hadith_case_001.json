@@ -1,0 +1,59 @@
+{
+  "case_id": "HADITH-CASE-001",
+  "title": "Hadith Evidence Model — Template Case",
+  "status": "methodology_template",
+  "claim": "A prophetic report should be evaluated as a transmitted report, not automatically as revelation.",
+  "source_type": "HADITH",
+  "source_level": "L4",
+  "audit_model": {
+    "identity": {
+      "collection": null,
+      "book": null,
+      "chapter": null,
+      "hadith_id": null
+    },
+    "matn": {
+      "summary": null,
+      "language": null,
+      "wording_variants": [],
+      "parallel_reports": []
+    },
+    "isnad": {
+      "chain_status": "pending",
+      "narrators": [],
+      "continuity": "pending",
+      "contemporaneity": "pending",
+      "source_layers": []
+    },
+    "narrator_audit": {
+      "method": "jarh_tadil_and_classical_rijal_sources",
+      "per_narrator": [],
+      "status": "pending"
+    },
+    "classical_grading": {
+      "label": null,
+      "grader": null,
+      "basis": null
+    },
+    "historical_assessment": {
+      "independent_corroboration": [],
+      "chronology_check": "pending",
+      "textual_history_check": "pending",
+      "assessment": "pending"
+    },
+    "scores": {
+      "source_quality": null,
+      "transmission": null,
+      "proximity": null,
+      "corroboration": null,
+      "interpretation_gap": null,
+      "total": null,
+      "confidence": null
+    },
+    "notes": [
+      "Classical labels such as sahih, hasan, and daif are stored separately from the project's historical score.",
+      "A strong transmission assessment does not convert a hadith into revelation.",
+      "A weakness in one chain does not automatically invalidate all parallel routes; routes must be compared separately."
+    ]
+  }
+}

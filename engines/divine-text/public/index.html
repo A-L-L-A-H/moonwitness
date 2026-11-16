@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Divine Text Verification Engine</title>
+  <link rel="stylesheet" href="/app.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">RESEARCH ENGINE · V6.3</div>
+      <h1>Divine Text Verification</h1>
+      <p class="subtitle">Revelation · Text · Transmission · Manuscripts · Evidence</p>
+    </div>
+    <div class="status-pill" id="health">checking…</div>
+  </header>
+
+  <main class="shell">
+    <section class="hero panel">
+      <div>
+        <h2>Evidence-first research workspace</h2>
+        <p>Separate revelation claims from text identity, historical evidence, transmission, and interpretation. <strong>PENDING is not a zero score.</strong></p>
+      </div>
+      <div class="hero-actions">
+        <button data-view="overview">Overview</button><button data-view="autopilot">Autopilot</button>
+        <button data-view="claims">Claims</button>
+        <button data-view="search">Qur'an Search</button><button data-view="corpus">Corpus</button>
+        <button data-view="manuscripts">Manuscripts</button>
+        <button data-view="identity">Identity Gaps</button><button data-view="scoring">Scoring</button>
+      </div>
+    </section>
+
+    <section id="view-overview" class="view active">
+      <div class="grid cards" id="metric-cards"></div>
+      <div class="grid two">
+        <article class="panel"><h3>Pipeline</h3><div id="pipeline"></div></article>
+        <article class="panel"><h3>Research rules</h3><ul class="rules">
+          <li>Revelation status ≠ textual preservation.</li>
+          <li>Text identity must be independently demonstrated.</li>
+          <li>Historical evidence does not prove metaphysical origin.</li>
+          <li>Source provenance and missing data are explicit.</li>
+        </ul></article>
+      </div>
+    </section>
+
+    <section id="view-claims" class="view">
+      <div class="panel"><div class="toolbar"><input id="claim-filter" placeholder="Filter claims…" /><select id="claim-status"><option value="">All status</option><option>QURAN_EXPLICIT</option><option>UNRESOLVED</option></select></div><div id="claims"></div></div>
+    </section>
+
+    <section id="view-autopilot" class="view">
+      <div class="grid two"><article class="panel"><h3>Research Autopilot</h3><div class="toolbar"><select id="autopilot-topic"><option value="isa">Isa / Jesus</option><option value="musa">Musa / Moses</option><option value="dawud">Dawud / David</option></select><button id="start-autopilot">▶ START AUTOPILOT</button></div><div id="autopilot-status" class="muted">Ready.</div></article><article class="panel"><h3>Autopilot Log</h3><div id="autopilot-log"></div></article></div>
+    </section>
+
+    <section id="view-corpus" class="view">
+      <div class="grid two"><article class="panel"><h3>Corpus Control</h3><div class="toolbar"><button id="download-all">⬇ DOWNLOAD ALL MISSING</button><button id="verify-all">✓ VERIFY / HASH</button></div><div id="corpus-status"></div><div class="muted">Sources are defined by the local registry. Raw files are preserved and never edited by the engine.</div></article><article class="panel"><h3>Corpus Registry</h3><div id="corpus-registry"></div></article></div>
+    </section>
+
+    <section id="view-search" class="view">
+      <div class="panel"><div class="toolbar"><input id="quran-query" placeholder="Search Qur'an, e.g. الله or عيسى" /><button id="quran-search">Search</button></div><div id="quran-results"></div></div>
+    </section>
+
+    <section id="view-manuscripts" class="view">
+      <div class="panel"><div id="manuscripts"></div></div>
+    </section>
+
+    <section id="view-scoring" class="view">
+      <div class="panel"><h3>Evidence Scoring</h3><div id="scoring-result"></div><div class="muted">Scores are per claim. Missing evidence remains PENDING.</div></div>
+    </section>
+
+    <section id="view-identity" class="view">
+      <div class="grid two">
+        <article class="panel"><h3>Revelation identity gaps</h3><div id="identity-gaps"></div></article>
+        <article class="panel"><h3>Evidence graph</h3><div id="graph-summary"></div><div id="graph-edges"></div></article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">Research UI · local-first · zero runtime dependencies · v6.3</footer>
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>

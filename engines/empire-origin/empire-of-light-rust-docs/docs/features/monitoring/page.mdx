@@ -1,0 +1,416 @@
+export const metadata = {
+  title: "Monitoring",
+  description:
+    "Monitor your applications with built-in CPU, memory, and network metrics. Set up alerts, view dashboards, and track uptime with Temps monitoring.",
+  alternates: {
+    canonical: "/docs/monitoring",
+  },
+};
+
+# Monitoring
+
+Monitor your application's health, performance, and resource usage in real-time. Get visibility into CPU, memory, network traffic, and response times to proactively detect and resolve issues. {{ className: 'lead' }}
+
+---
+
+## Real-Time Metrics
+
+Temps provides real-time metrics for every deployed container, giving you instant visibility into your application's performance.
+
+<Row>
+  <Col>
+    **Available Metrics:**
+    - **Requests** - Total requests and request rate
+    - **Response Time** - Average response time in ms
+    - **CPU Usage** - Percentage of CPU resources used
+    - **Memory Usage** - RAM consumption in MB and percentage
+    - **Network I/O** - Inbound and outbound data transfer rate
+
+    Metrics update in real-time, so you always see current performance data.
+
+  </Col>
+  <Col>
+    **Where to View:**
+    1. Navigate to your project in the dashboard
+    2. Open the **Monitoring** tab
+    3. View real-time metrics and charts
+  </Col>
+</Row>
+
+---
+
+## Accessing Metrics
+
+### Via Dashboard
+
+1. Go to **Projects** → Select your project
+2. Click the **Monitoring** tab
+3. View real-time metrics: requests, response time, CPU, memory, and network I/O
+
+The monitoring dashboard shows:
+
+- **Requests** - Total requests over time with request rate
+- **Response Time** - Average response time graph
+- **CPU** - Live CPU usage percentage
+- **Memory** - Live memory usage in MB and percentage
+- **Network I/O** - Real-time inbound/outbound data transfer
+
+### Via API
+
+Resource metrics are reported per container. First list the containers of an environment to get a `container_id`, then read its metrics:
+
+```bash
+# List the containers of an environment
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/environments/{environment_id}/containers"
+
+# Current CPU, memory and network usage of one container
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/environments/{environment_id}/containers/{container_id}/metrics"
+```
+
+The API returns:
+
+```json
+{
+  "container_id": "3f2a9c1b7e4d",
+  "container_name": "my-app-production-web",
+  "cpu_percent": 23.5,
+  "cpu_limit_cores": 1.0,
+  "memory_bytes": 268435456,
+  "memory_limit_bytes": 536870912,
+  "memory_percent": 50.0,
+  "network_rx_bytes": 1048576,
+  "network_tx_bytes": 2097152,
+  "timestamp": "2026-01-15T12:15:47.609192Z"
+}
+```
+
+`cpu_percent` follows the Docker convention: `200` means two cores fully used. `memory_percent` and `memory_limit_bytes` are `null` when the container has no memory limit. Network counters are totals since the container started, not rates.
+
+For history and live updates of the same container:
+
+```bash
+# Averaged history; range is 1h, 6h, 24h or 7d (default 1h)
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/environments/{environment_id}/containers/{container_id}/metrics/history?metric=container.cpu_percent&range=24h"
+
+# Server-Sent Events stream, one update per interval in milliseconds
+curl -N -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/environments/{environment_id}/containers/{container_id}/metrics/stream?interval=2000"
+```
+
+Useful history metrics are `container.cpu_percent`, `container.memory_used_bytes`, `container.memory_percent`, `container.network_rx_bytes_delta` and `container.network_tx_bytes_delta`. A `503` response from `metrics/history` means the metrics store is not available on this instance; the current-metrics endpoint still works. Request counts and response times come from the proxy and are shown in the dashboard.
+
+---
+
+## Understanding Metrics
+
+<Properties>
+  <Property name="Requests">
+    **What it shows:** Total number of requests and request rate over time
+    **When to worry:** - Sudden spikes in traffic - Unusually high error rates - Request rate exceeds expected capacity
+    **Action:** Monitor traffic patterns and scale resources if needed
+  </Property>
+
+  <Property name="Response Time">
+    **What it shows:** Average time to process requests in milliseconds
+    **When to worry:** - Consistently above 500ms may indicate performance issues - Sudden spikes in response time
+    **Action:** - Optimize application code - Add caching - Review database queries - Consider scaling
+  </Property>
+
+  <Property name="CPU Usage">
+    **What it shows:** Percentage of CPU resources your container is using
+    **When to worry:** - Consistently above 80% may indicate performance issues
+    - Spikes above 90% during traffic surges are normal
+    - Sustained 100% usage suggests you need more CPU resources
+    **Action:** If CPU is consistently high, consider: - Increasing CPU allocation in project settings - Optimizing application code
+  </Property>
+
+  <Property name="Memory Usage">
+    **What it shows:** RAM consumption in bytes and percentage of allocated memory
+    **When to worry:** - Approaching 90% of allocated memory
+    - Memory usage continuously growing (potential memory leak)
+    - Container restarts due to OOM (Out of Memory) errors
+    **Action:** If memory is high: - Increase memory allocation - Investigate memory leaks in your code
+  </Property>
+
+  <Property name="Network I/O">
+    **What it shows:** Data transfer rates (inbound and outbound) in bytes per second
+    **What to monitor:** - Unusual spikes in traffic - Asymmetric patterns (high outbound, low inbound) - Network saturation
+    **Action:** High network usage is usually normal for web applications, but monitor for: - DDoS attacks (sudden massive spikes) - Data exfiltration (unusual outbound patterns)
+  </Property>
+</Properties>
+
+---
+
+## Application metrics from Sentry SDKs
+
+Official Sentry JavaScript 11.8.0 SDKs can send custom metrics to the same native metric service used by OpenTelemetry. Open **Monitoring → Metrics** to explore them. This also works for external applications with no Temps-hosted containers.
+
+```javascript
+// After initializing the official SDK with your public Temps DSN:
+Sentry.metrics.count('import.records', 42);
+Sentry.metrics.gauge('import.queue_depth', 7);
+Sentry.metrics.distribution('import.duration', 125, { unit: 'millisecond' });
+await Sentry.flush(5000);
+```
+
+Counters record increments, gauges record current values, and distributions record observations with units. Trace/span IDs become native exemplars when supplied by the SDK. Native metric aggregation uses floating-point values; original numeric text and typed attributes are retained as source metadata. These are batched `trace_metric` items, not legacy StatsD.
+
+A single time bucket has no trend to plot. If a card says **Not enough data to chart**, send observations over multiple aggregation buckets, use an appropriate time range and select **Refresh**. Do not create fake samples to fill the chart. An emitted metric name/value in a native query proves storage; verify multiple buckets to test the chart.
+
+Browser metrics are useful for aggregate frontend behavior such as checkout failures or operation durations. Browser logs explain individual diagnostic events. Keep both sampled and bounded, avoid personal information, and use server-side telemetry as the source of truth for billing or trusted business totals.
+
+---
+
+## Cron monitoring {{ anchor: true, id: 'cron-monitoring' }}
+
+Use cron monitoring for scheduled work that can fail silently: a nightly backup, an hourly import, a report generator, or queue maintenance. Uptime checks can tell you the server responds while one of these jobs has stopped running. Cron check-ins distinguish a reported failure, a job that never started, and a job that started but exceeded its runtime budget.
+
+Open your project, then **Monitoring → Cron jobs**. This is available for both hosted projects and external applications. Choose **Create monitor**, enter a stable slug, select the project or environment scope, and configure an interval or five-field crontab schedule. Crontab schedules support a timezone. Set a start grace period, maximum runtime, and consecutive failure/recovery thresholds.
+
+### Send check-ins from the official SDK
+
+Use the project's Temps DSN with the official Node SDK. The following pattern was verified with `@sentry/node@10.17.0` and `@sentry/node@11.8.0`:
+
+```javascript
+import * as Sentry from '@sentry/node';
+
+Sentry.init({
+  dsn: process.env.TEMPS_SENTRY_DSN,
+  release: 'scheduled-worker@1.0.0',
+  sendClientReports: false,
+});
+
+// Run this callback from your existing scheduler.
+try {
+  await Sentry.withMonitor('nightly-import', async () => {
+    await runImport();
+  });
+} finally {
+  await Sentry.flush(5000); // Allow a short-lived worker to deliver check-ins.
+}
+```
+
+`runImport` represents your own job function. `withMonitor` sends `in_progress` before the callback and `ok` or `error` afterwards. For separate start/finish processes, use `captureCheckIn` and pass the same `checkInId` on completion. A release and trace ID can link a run to its deployment metadata and native trace.
+
+The DSN determines project/environment/deployment ownership. A free-form SDK `environment` label does not grant access to an environment; an unscoped DSN uses the project scope. The monitor slug and DSN scope must match. Public DSNs can submit check-ins but cannot read or manage monitors.
+
+### Manage schedules and inspect runs
+
+Creating a monitor in Temps starts schedule evaluation even before its first check-in. Monitors created or edited in the console use Temps-managed configuration, which takes precedence over later SDK `monitor_config` values. Alternatively, the SDK can upsert an unconfigured monitor by including its schedule in a check-in. Check-ins without a schedule are stored, with a pending-configuration receipt, but missed-run/timeout detection requires configuration.
+
+Open a monitor to see health, next expected start, runtime limit, monitoring policy and paginated run history. Runs report `ok`, `error`, `missed` or `timeout`. Pause monitoring to suspend schedule evaluation and alarms while continuing to retain incoming check-ins. Resume to establish fresh deadlines. Delete removes the monitor and its retained runs; its linked native alarm is resolved.
+
+The deadline worker checks every 15 seconds while the Temps server is running. It marks overdue starts as missed and overdue active runs as timed out. Consecutive failure/recovery thresholds control health and the linked Temps alarm. After downtime, overdue starts are coalesced rather than creating one row per missed schedule occurrence. A completed terminal run is immutable: a late success does not rewrite a timeout or missed result.
+
+Limits are 100 monitors per project and up to 10,000 runs per monitor, retained for 30 days. Monitoring observes your existing scheduler; it does not launch jobs. Notification delivery requires a configured provider. The monitor page shows the missing configuration and links to delivery settings; **View native alarms** remains available without external delivery.
+
+### Native API
+
+Authenticated clients use Temps endpoints under `/api/projects/{project_id}/cron-monitors`: list/create, get/update/delete by monitor ID, and `/{monitor_id}/runs` for history. Lists default to 20 records and allow at most 100 per page. Read/write permissions and project access are enforced; writes are audit logged. These routes are part of the generated Temps API clients, not Sentry's monitor-management API.
+
+---
+
+## Server and Worker Resource Usage
+
+The machine running the control plane and every worker node report CPU, memory and disk usage, and the console draws them the same way.
+
+- **Control plane**: **Monitoring → Server**. The node sampler also records network and block I/O and Docker disk usage.
+- **Worker**: **Settings → Nodes**, then open the worker. The **Resource usage** section shows CPU, memory and disk over 1 hour, 6 hours, 24 hours or 7 days. Samples arrive with the agent's heartbeat, about every 30 seconds, so a newly joined worker fills in within a minute. Network and block I/O are not reported by workers.
+
+Workers do not need an agent upgrade for this: the control plane stores the capacity figures that every `temps agent` heartbeat already carries. An agent that includes this release also measures CPU over the heartbeat interval rather than at a single instant, so older agents report a CPU figure that is usually close to zero.
+
+### Alerts on disk, memory and CPU
+
+Each node (the control plane or a worker) can have one alert rule per metric on `node.cpu_percent`, `node.memory_percent` and `node.disk_percent`, with a threshold between 0 and 100. Add them from the **Alert rules** card on the node, or press **Add recommended alerts** to create CPU above 90%, memory above 90% and disk above 85%, each for 5 minutes as a warning. Nothing is created until you press it. A firing rule raises an alarm like any other metric alert and notifies through your configured notification routes.
+
+```bash
+# Current values and history for a worker (node id 3)
+curl -H "Authorization: Bearer $TEMPS_API_TOKEN" \
+  "https://your-temps-instance.com/api/nodes/3/metrics/latest"
+curl -H "Authorization: Bearer $TEMPS_API_TOKEN" \
+  "https://your-temps-instance.com/api/nodes/3/metrics?metric=node.disk_percent&range=24h"
+
+# Alert when the worker's disk is more than 90% full for 10 minutes
+curl -X POST -H "Authorization: Bearer $TEMPS_API_TOKEN" -H "Content-Type: application/json" \
+  "https://your-temps-instance.com/api/nodes/3/metrics/alert-rules" \
+  -d '{"name":"Disk almost full","metric_name":"node.disk_percent","comparator":">","threshold":90,"severity":"critical","for_duration_secs":600}'
+```
+
+Removing a worker also removes its alert rules. The control plane's own rules are re-seeded on every start, so deleting one is refused; disable it instead.
+
+---
+
+## Health Checks
+
+Configure health checks to automatically monitor your application's availability:
+
+### Setting Up Health Checks
+
+Health checks are configured in your project's deployment settings:
+
+1. Go to **Project Settings** → **Deployment**
+2. Configure **Health Check** settings:
+   - **Path:** Endpoint to check (e.g., `/health` or `/api/health`)
+   - **Interval:** How often to check (default: 30 seconds)
+   - **Timeout:** Maximum wait time (default: 5 seconds)
+   - **Retries:** Number of failed attempts before marking unhealthy
+
+### Health Check Endpoint
+
+Your application should expose a health check endpoint that returns quickly:
+
+```javascript
+// Express.js example
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: Date.now() });
+});
+```
+
+```python
+# Flask example
+@app.route('/health')
+def health():
+    return {'status': 'ok', 'timestamp': time.time()}, 200
+```
+
+<Note>
+  **Best Practice:** Keep health checks lightweight. They should check basic
+  application state (database connectivity, critical services) but avoid
+  expensive operations.
+</Note>
+
+---
+
+## Alert Notifications
+
+Alerts reach people through two instance-wide pieces and one per-project piece:
+
+- **Providers** (Settings → Notifications → Providers) are destinations: email, Slack, webhook, or Cloudflare Email. They apply to **all projects**. Adding a provider also creates a route that sends it every notification.
+- **Routes** (Settings → Notifications → Routes) decide which severities go to which providers. They also apply to **all projects**.
+- **Alert rules** (a project's error alert rules and metric alerts, or Monitoring → Alert rules with a project picked) belong to **one project**. A rule fires at a severity, and every enabled route whose range contains that severity delivers it.
+
+When you create or edit an alert rule, the form checks whether its severity would reach anyone. If no enabled route sends that severity to an enabled provider, it shows **"This rule won't notify anyone yet"** with a link to add a provider or review routes. Setup pages reached from that link bring you back to the form afterwards, and a new rule keeps what you had typed.
+
+To confirm delivery:
+
+- After adding a provider, use **Send test notification** on the final step of the wizard.
+- On the routes list or a route's edit page, use **Test route**. It sends a sample notification at the route's lowest severity to each provider on the route and reports, for each one, whether it was sent, failed, or skipped because the provider is disabled.
+
+Monitoring → **Delivery preferences** holds instance-wide preferences (minimum severity, batching, the weekly digest). It does not configure destinations. Slack messages are sent by a Slack provider, so there is no webhook URL to enter there.
+
+---
+
+## Responding to Failures
+
+The console points you at a failure where you are already looking and offers the fix next to it.
+
+### Project header and overview
+
+The status badge next to the project name reads:
+
+- **Failed** when the project's latest deployment failed, even if an older deployment is still serving traffic.
+- **Degraded** when a live container in the project's main environment is stopped (exited or dead) or has restarted in the last 15 minutes. The main environment is the first non-preview environment with a live deployment. Sleeping on-demand environments don't count, since their containers are stopped on purpose.
+
+Click the badge to open the project overview. A banner there explains the problem and offers the next step:
+
+- **Failed deployment**: the failure title and how to fix it, which deployment is still live, and buttons to **Redeploy** the same source, **Roll back to #N (last successful)**, open the settings page that fixes the failure, or view the deployment.
+- **Down or restarting containers**: each affected container with its exit reason or restart count, plus **Restart** and **Logs** buttons.
+
+The failed deployment's own page has the same **Roll back to #N (last successful)** button in its failure banner. See [Rollbacks](/docs/rollbacks).
+
+### Alarms
+
+In **Monitoring & Alerts → Alarms**, each part of an alarm's scope links to its page: the environment, the deployment, the container (its logs), the managed service, or the error group. Alarms that have a direct fix also get a button next to Ack / Resolve / Silence:
+
+| Alarm type | Action |
+| --- | --- |
+| Container restarted, crashed, or OOM-killed | **Restart** the container |
+| Deployment failed or health check failed | **Redeploy** the deployment from the same source |
+| Error-tracking threshold | **Autofix** the error group |
+
+Restart and Redeploy ask for confirmation first.
+
+### Firing metric alerts
+
+When a metric alert rule fires, the Metrics page lists it above the charts. Click the row to open the chart of the metric that fired, with the rule's filters applied. **View alarm** opens the alarm the rule raised, where you can acknowledge or silence it. Rules that alert per series link to the alarm of the first firing series, and other rules open the project's alarm list. **Edit rule** opens the rule.
+
+---
+
+## Monitoring Best Practices
+
+<Properties>
+  <Property name="Set Resource Limits">
+    Configure appropriate CPU and memory limits based on your application's
+    needs. Monitor actual usage and adjust as needed. **How to set:** 1. Project
+    Settings → Deployment → Resources 2. Set CPU (cores) and Memory (MB) 3.
+    Monitor for a few days 4. Adjust based on actual usage patterns
+  </Property>
+
+  <Property name="Monitor Trends">
+    Don't just look at current values—watch for trends: - Gradual memory
+    increases (memory leaks) - CPU spikes during specific times (traffic
+    patterns) - Network anomalies (security issues)
+  </Property>
+
+  <Property name="Set Up Alerts">
+    Configure alerts for critical thresholds: - CPU > 90% for 5 minutes - Memory
+    > 85% of allocation - Container restarts - Health check failures Alerts can
+    notify you via email, webhooks, or integrations. Each project can create
+    up to 100 metric alert rules from the console or API; rules declared in
+    `.temps.yaml` are limited per file instead.
+  </Property>
+
+  <Property name="Compare Environments">
+    Compare metrics across environments to identify issues: - Production vs
+    staging performance - Preview environment resource usage - Before/after
+    deployment comparisons
+  </Property>
+</Properties>
+
+---
+
+## Troubleshooting
+
+<Properties>
+  <Property name="High CPU Usage">
+    **Symptoms:** CPU consistently above 80-90% **Possible causes:** -
+    Inefficient code or algorithms - Too many concurrent requests - Insufficient
+    CPU allocation **Solutions:** 1. Increase CPU allocation in project settings
+    2. Optimize application code 3. Add caching to reduce computation 4. Scale
+    horizontally (multiple containers)
+  </Property>
+
+  <Property name="High Memory Usage">
+    **Symptoms:** Memory approaching allocation limit, container restarts
+    **Possible causes:** - Memory leaks in application code - Insufficient
+    memory allocation - Large data structures in memory **Solutions:** 1.
+    Increase memory allocation 2. Profile application for memory leaks 3.
+    Implement pagination for large datasets 4. Use streaming for large file
+    operations
+  </Property>
+
+<Property name="Container Restarts">
+    **Symptoms:** Frequent container restarts, deployment failures
+    **Possible causes:** - Out of memory (OOM) errors - Application crashes - Health check failures
+    **Solutions:** 1. Check deployment logs for error messages 2. Review memory usage patterns 3. Verify health check endpoint is working 4. Check application error logs
+  </Property>
+
+<Property name="Metrics Not Updating">
+    **Symptoms:** Monitoring dashboard showing stale data or errors
+    **Possible causes:** - No active deployments - Network connectivity issues - Service unavailable
+    **Solutions:** 1. Verify a deployment is running 2. Check deployment status 3. Refresh the monitoring page 4. Contact support if issue persists
+  </Property>
+</Properties>
+
+---
+
+## Next Steps
+
+- [Configure Resource Limits](/docs/resources) to set CPU and memory allocations
+- [Set Up Health Checks](/docs/monitoring#health-checks) to monitor availability
+- [View Application Logs](/docs/logs) to correlate metrics with application behavior
+- [Set Up Alerts](/docs/monitoring#monitoring-best-practices) for proactive issue detection
+- [Publish a Status Page](/docs/status-pages) to share uptime with your users

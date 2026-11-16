@@ -1,0 +1,20 @@
+{
+  "id": "mw:recipe:oshb:wlc",
+  "version": "1.0.0",
+  "specVersion": "0.1",
+  "source": {
+    "kind": "filesystem",
+    "path": "source/source-manifest.json",
+    "sha256": "23b29d9c9a7c7d01d6a0510a88b9435a676dfe6f033252094230da711d776430",
+    "byte_size": 7895,
+    "media_type": "application/json"
+  },
+  "implementation": {
+    "module": "recipe.ts",
+    "parserVersion": "oshb-osis-1",
+    "normalizerVersion": "identity-1",
+    "mapperVersion": "1",
+    "validatorVersion": "1"
+  },
+  "output": { "path": "../../../dist/ingestion/oshb-wlc.jsonl" }
+}

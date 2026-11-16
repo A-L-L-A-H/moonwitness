@@ -1,0 +1,251 @@
+@import "tailwindcss";
+@import "@moonwitness/ui/theme.css";
+@import "@moonwitness/ui/skins.css";
+
+/* Gate keeps the editorial rhythm of its story pages. Colour, type, radius and shape
+   are resolved through the skin tokens so the selected world can restyle them. */
+.gate-shell {
+  --mw-route-gap: clamp(3rem, 6vw, 5rem);
+}
+
+.gate-section {
+  display: grid;
+  gap: var(--mw-card-padding);
+}
+
+.gate-measure {
+  max-width: 48rem;
+  margin-inline: auto;
+}
+
+.gate-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.55fr) minmax(0, 1.45fr);
+  gap: var(--mw-section-gap);
+  align-items: start;
+}
+
+.gate-auto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  gap: var(--mw-card-padding);
+}
+
+.gate-list {
+  display: grid;
+  gap: var(--mw-card-padding);
+}
+
+/* Framed plate used where approved artwork does not exist yet. */
+.gate-figure {
+  margin: 0;
+  overflow: hidden;
+  border: var(--mw-border-width) solid color-mix(in oklab, var(--mw-border) 60%, transparent);
+  border-radius: var(--mw-surface-radius);
+  background-image: linear-gradient(135deg, var(--mw-surface), var(--mw-surface-raised));
+}
+
+.gate-figure__plate {
+  display: flex;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  padding: var(--mw-card-padding);
+  color: var(--mw-muted-text);
+  font-family: var(--mw-font-numeric);
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+.gate-figure__caption {
+  padding: 0.75rem var(--mw-card-padding);
+  border-block-start: var(--mw-border-width) solid color-mix(in oklab, var(--mw-border) 60%, transparent);
+  color: var(--mw-accent);
+  font-family: var(--mw-font-numeric);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.gate-title {
+  margin: 0;
+  color: var(--mw-text);
+  font-family: var(--mw-font-display);
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  line-height: 1.15;
+}
+
+.gate-lede,
+.gate-copy {
+  margin: 0;
+  color: var(--mw-muted-text);
+  line-height: 1.7;
+}
+
+.gate-lede {
+  font-size: 1.125rem;
+}
+
+.gate-meta {
+  margin: 0;
+  color: var(--mw-muted-text);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.gate-body {
+  margin: 0;
+  color: var(--mw-text);
+  line-height: 1.6;
+}
+
+.gate-num {
+  color: var(--mw-accent);
+  font-family: var(--mw-font-numeric);
+  font-size: 0.8125rem;
+  letter-spacing: 0.1em;
+}
+
+.gate-label {
+  margin: 0 0 0.5rem;
+  color: var(--mw-text);
+  font-family: var(--mw-font-label);
+  font-weight: 600;
+  letter-spacing: var(--mw-label-tracking);
+}
+
+.gate-quote {
+  max-width: 40rem;
+  margin: 0 auto;
+  color: var(--mw-muted-text);
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  font-style: italic;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.gate-tease {
+  display: grid;
+  max-width: 40rem;
+  gap: var(--mw-card-padding);
+  justify-items: center;
+  margin-inline: auto;
+  padding-block: var(--mw-card-padding);
+  text-align: center;
+}
+
+.gate-panel {
+  display: grid;
+  gap: var(--mw-card-padding);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.gate-tile {
+  display: flex;
+  min-height: 16rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: var(--mw-card-padding);
+  text-align: center;
+}
+
+.gate-tile__mark {
+  display: flex;
+  width: 3.5rem;
+  height: 3.5rem;
+  align-items: center;
+  justify-content: center;
+  margin-block-end: 0.5rem;
+  border-radius: 50%;
+  background-color: color-mix(in oklab, var(--mw-accent) 16%, transparent);
+  color: var(--mw-accent);
+}
+
+.gate-tile__mark--blocked {
+  background-color: color-mix(in oklab, var(--mw-border) 40%, transparent);
+  color: var(--mw-muted-text);
+}
+
+.gate-tile__spacer {
+  flex: 1;
+}
+
+.gate-tile > :is(a, button) {
+  width: 100%;
+}
+
+.gate-card--column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.gate-card__foot {
+  padding-block-start: 0.75rem;
+  border-block-start: var(--mw-border-width) solid color-mix(in oklab, var(--mw-border) 55%, transparent);
+}
+
+.gate-rule {
+  padding-block-start: 1rem;
+  border-block-start: var(--mw-border-width) solid color-mix(in oklab, var(--mw-border) 55%, transparent);
+  color: var(--mw-muted-text);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.gate-colophon {
+  display: grid;
+  gap: 0.5rem;
+  padding-block-start: 2rem;
+  border-block-start: var(--mw-border-width) solid color-mix(in oklab, var(--mw-border) 55%, transparent);
+  color: var(--mw-muted-text);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+.gate-colophon p {
+  margin: 0;
+}
+
+.gate-colophon__slogan {
+  color: var(--mw-accent);
+  font-family: var(--mw-font-numeric);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+
+.gate-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.gate-provenance {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mw-control-gap);
+  margin-block-start: var(--mw-card-padding);
+}
+
+.gate-actions--block button,
+.gate-actions--block a {
+  width: 100%;
+}
+
+.gate-actions__start {
+  align-self: flex-start;
+  width: fit-content;
+}
+
+@media (max-width: 58rem) {
+  .gate-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--mw-card-padding);
+  }
+}

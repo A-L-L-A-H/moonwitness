@@ -1,0 +1,127 @@
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Procfile', id: 'procfile' },
+  { title: 'Alembic Migrations', id: 'alembic-migrations' },
+  { title: 'Environment Variables', id: 'environment-variables' },
+  { title: 'Managed PostgreSQL and Redis', id: 'managed-postgresql-and-redis' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+]
+
+export const metadata = {
+  title: "Deploy FastAPI With Managed PostgreSQL",
+  description: "Deploy FastAPI with automatic HTTPS, managed PostgreSQL and zero-downtime deploys on your own VPS. No cold starts — Uvicorn runs as a persistent process.",
+  alternates: {
+    canonical: "/docs/deploy-fastapi",
+  },
+  openGraph: {
+    title: "Deploy FastAPI With Managed PostgreSQL",
+    description: "Deploy FastAPI with automatic HTTPS, managed PostgreSQL and zero-downtime deploys on your own VPS. No cold starts — Uvicorn runs as a persistent process.",
+    images: [{ url: "/og/docs/deploy-fastapi.png", width: 1200, height: 630, alt: "Deploy FastAPI" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy FastAPI With Managed PostgreSQL",
+    description: "Deploy FastAPI with automatic HTTPS, managed PostgreSQL and zero-downtime deploys on your own VPS. No cold starts — Uvicorn runs as a persistent process.",
+    images: ["/og/docs/deploy-fastapi.png"],
+  }
+};
+
+# Deploy FastAPI on Your Own Server
+
+Deploy FastAPI applications with Uvicorn ASGI server and managed PostgreSQL. Your OpenAPI docs and Swagger UI work out of the box. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up --preset python" },
+]} />
+
+Temps installs your dependencies and looks for `FastAPI(` (or `Starlette(`) in `main.py`, `app.py`, `asgi.py`, `wsgi.py` or `server.py`. When it finds one, it starts your app with `uvicorn <module>:app --host 0.0.0.0 --port $PORT`, and adds Uvicorn to the build if your dependencies don't include it. Your app object must be named `app`; otherwise, set the start command in a [Procfile](#procfile). The Python version comes from `.python-version`, `runtime.txt` or `requires-python` in `pyproject.toml`, and defaults to 3.12.
+
+Once running, FastAPI serves its `/docs` (Swagger UI) and `/redoc` endpoints as usual.
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Install | uv, Poetry, Pipenv or pip, chosen from your lockfile or manifest (for example `pip install -r requirements.txt`) |
+| ASGI server | Uvicorn with its default settings (one worker); set your own command in a `Procfile` |
+| OpenAPI | `/docs` and `/redoc`, served by FastAPI itself |
+| Migrations | Not run automatically — see [Alembic Migrations](#alembic-migrations) |
+| HTTPS | Let's Encrypt certificate, auto-renewed |
+| Port | `PORT` env var injected, defaults to 8000 |
+| WebSockets | Fully supported via Uvicorn |
+
+---
+
+## Procfile {{ anchor: true, id: 'procfile' }}
+
+To control the start command (for example to run more workers), add a `Procfile` at the project root. Its `web:` line replaces the command Temps would otherwise generate. Temps then no longer adds Uvicorn for you, so make sure `uvicorn` is in your dependencies:
+
+```text
+web: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 4
+```
+
+---
+
+## Alembic Migrations {{ anchor: true, id: 'alembic-migrations' }}
+
+Temps doesn't run migrations for you, and has no deploy hooks. Run `alembic upgrade head` yourself after a deploy that changes the schema, for example from your CI pipeline, or inside the running container as shown for [Django migrations](/docs/deploy-django#migrations).
+
+---
+
+## Environment Variables {{ anchor: true, id: 'environment-variables' }}
+
+<CliCommands commands={[
+  { args: "environments vars set SECRET_KEY \"your-secret-key\" -e production" },
+]} />
+
+---
+
+## Managed PostgreSQL and Redis {{ anchor: true, id: 'managed-postgresql-and-redis' }}
+
+Create PostgreSQL or Redis under **Databases → Create database**, then link it from your project's **Databases** page. Temps injects `POSTGRES_URL` and `REDIS_URL` (plus the individual host, port and credential variables) automatically.
+
+`POSTGRES_URL` starts with `postgresql://`. For SQLAlchemy with asyncpg, swap the scheme in code:
+
+```python
+import os
+
+DATABASE_URL = os.environ["POSTGRES_URL"].replace("postgresql://", "postgresql+asyncpg://", 1)
+```
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Deploy with a database
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+</div>

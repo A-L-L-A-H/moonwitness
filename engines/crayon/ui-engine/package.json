@@ -1,0 +1,56 @@
+{
+  "name": "allah-crayon-ui-engine",
+  "private": true,
+  "version": "0.9.0-alpha.1",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "build:packages": "node scripts/build-packages.mjs",
+    "build:lab-tools": "npm run build -w allah-crayon-lab-tools",
+    "test": "npm run build:packages && npm run build && node --test tests/*.test.mjs",
+    "performance:check": "node scripts/performance-budget.mjs",
+    "performance:web": "node scripts/web-performance-budget.mjs",
+    "typecheck:lab": "npm run build:lab-tools && tsc -p apps/lab/tsconfig.json --noEmit",
+    "dev:lab": "npm run build:packages && npm run build:lab-tools && vite --config apps/lab/vite.config.ts",
+    "build:lab": "npm run build:packages && npm run build:lab-tools && vite build --config apps/lab/vite.config.ts",
+    "accessibility:lab": "node scripts/accessibility-lab.mjs",
+    "capture:lab": "node scripts/capture-lab.mjs",
+    "capture:matrix": "node scripts/capture-lab-matrix.mjs",
+    "verify:visual-matrix": "node scripts/verify-visual-matrix.mjs",
+    "approve:visual-baseline": "node scripts/approve-visual-baseline.mjs",
+    "verify:deploy": "node scripts/verify-deploy-artifact.mjs",
+    "create:crayon": "node scripts/create-crayon.mjs",
+    "example:semantic": "node examples/semantic-only.mjs",
+    "example:inspect": "node examples/inspect-path.mjs",
+    "example:adapter": "node examples/custom-domain-adapter.mjs",
+    "example:renderers": "node examples/renderers.mjs",
+    "verify:release-set": "node scripts/verify-release-set.mjs",
+    "verify:reason-codes": "node scripts/verify-reason-codes.mjs",
+    "verify:api-entrypoints": "node scripts/verify-api-entrypoints.mjs",
+    "check:package-names": "node scripts/check-package-names.mjs",
+    "pack:packages": "node scripts/pack-packages.mjs",
+    "smoke:packages": "node scripts/smoke-packages.mjs",
+    "smoke:registry": "node scripts/smoke-registry.mjs",
+    "supply-chain": "node scripts/generate-supply-chain.mjs",
+    "publish:packages": "node scripts/publish-packages.mjs",
+    "verify": "npm run verify:release-set && npm run verify:reason-codes && npm run verify:api-entrypoints && npm run typecheck && npm test && npm run performance:check && npm run typecheck:lab && npm run build:lab && npm run performance:web && npm run verify:deploy && npm run example:semantic && npm run example:inspect && npm run example:adapter && npm run example:renderers && npm run check:package-names && npm run pack:packages && npm run supply-chain && npm run smoke:packages"
+  },
+  "dependencies": {
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.1.0",
+    "playwright": "1.62.1",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vite": "^8.2.2"
+  }
+}

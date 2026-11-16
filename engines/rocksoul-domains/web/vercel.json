@@ -1,0 +1,16 @@
+{
+  "framework": "vite",
+  "installCommand": "pnpm install",
+  "buildCommand": "pnpm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/aws",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/aws/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}

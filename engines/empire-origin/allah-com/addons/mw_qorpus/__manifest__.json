@@ -1,0 +1,12 @@
+{
+  "name": "mw_qorpus",
+  "version": "1.0.0",
+  "category": "Knowledge",
+  "summary": "Qorpus Knowledge Ingestion & RAG Engine",
+  "depends": ["base"],
+  "models": ["qorpus.document", "qorpus.chunk"],
+  "views": [],
+  "data": ["data/index.ts"],
+  "installable": true,
+  "application": true
+}

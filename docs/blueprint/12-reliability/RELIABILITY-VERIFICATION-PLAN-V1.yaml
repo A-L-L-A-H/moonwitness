@@ -1,0 +1,29 @@
+version: 1
+status: design-locked
+matrices:
+  retry:
+    commands: idempotency_key_required
+    queries: bounded_retry_or_no_retry
+  timeout:
+    interactive: bounded
+    research: async
+    worker: bounded_per_attempt
+  cancellation:
+    request: best_effort
+    workflow: persisted_state_transition
+    job: cooperative
+required_evidence:
+  - duplicate_command_test
+  - timeout_behavior_test
+  - cancellation_test
+  - partial_failure_test
+  - backup_restore_test
+  - rollback_drill
+  - recovery_drill
+recovery:
+  rpo: workload_specific
+  rto: workload_specific
+  production_values_require_measurement: true
+certification:
+  policy: COMPLETE
+  executable_recovery_evidence: PENDING

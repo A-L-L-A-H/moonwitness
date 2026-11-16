@@ -1,0 +1,93 @@
+name: publish-npm-alpha
+# release-trigger: v0.9.0-alpha.1
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - living-crayon
+    types:
+      - completed
+
+concurrency:
+  group: crayon-npm-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  publish:
+    if: >-
+      github.repository == 'bjo163/ALLAH-CRAYON-UI-ENGINE' &&
+      ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main') ||
+       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'))
+    runs-on: self-hosted
+    timeout-minutes: 25
+    env:
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+      # This source repository is private, so npm provenance is intentionally disabled.
+      CRAYON_NPM_PROVENANCE: "false"
+    steps:
+      - name: Mark npm publish pending
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${RELEASE_SHA}" \
+            -d '{"state":"pending","context":"npm-publish","description":"Publishing verified CRAYON alpha packages"}'
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Validate local workspace manifests before install
+        run: node scripts/check-workspace-manifests.mjs
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Validate release set and build publish artifacts
+        run: npm run verify:release-set && npm run build:packages && npm run pack:packages && npm run supply-chain
+      - name: Upload supply-chain evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: crayon-supply-chain-${{ github.run_number }}
+          path: artifacts/supply-chain/*
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish CRAYON alpha packages
+        run: npm run publish:packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Verify real npm registry consumer
+        run: npm run smoke:registry
+      - name: Mark npm publish successful
+        if: success()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${RELEASE_SHA}" \
+            -d '{"state":"success","context":"npm-publish","description":"CRAYON alpha published and registry smoke passed"}'
+      - name: Mark npm publish failed
+        if: failure()
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl --fail -sS -X POST \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/statuses/${RELEASE_SHA}" \
+            -d '{"state":"failure","context":"npm-publish","description":"CRAYON alpha publish or registry verification failed"}'

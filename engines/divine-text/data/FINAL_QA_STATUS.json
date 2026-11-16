@@ -1,0 +1,21 @@
+{
+  "version": "6.2.1",
+  "core_tests": {
+    "passed": 13,
+    "failed": 0
+  },
+  "e2e_checks": {
+    "passed": 8,
+    "failed": 0
+  },
+  "one_command_fallback": "PASS",
+  "react_vite_install": "NOT_VERIFIED_IN_RUNTIME_DUE_NPM_NETWORK/CACHE",
+  "fallback_ui": "END_TO_END_VERIFIED",
+  "screenshot": "ui_preview_v6.png",
+  "known_data_gaps": [
+    "full hadith corpus",
+    "torah corpus",
+    "psalms corpus",
+    "gospels corpus"
+  ]
+}

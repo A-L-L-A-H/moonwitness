@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prophet Research Engine v2.3 · Research Explorer</title>
+<style>
+:root{--bg:#f5f4ef;--card:#fff;--text:#17191c;--muted:#68645d;--line:#dedad0;--strong:#17191c;--strongText:#fff;--soft:#efede6}
+@media(prefers-color-scheme:dark){:root{--bg:#111315;--card:#191c20;--text:#f2f4f5;--muted:#aab1b9;--line:#30363d;--strong:#f2f4f5;--strongText:#111315;--soft:#21262c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}main{max-width:1380px;margin:auto;padding:24px}.muted{color:var(--muted)}h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.05;margin:.3rem 0}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:11px;font-weight:800}.card,.item{background:var(--card);border:1px solid var(--line);border-radius:16px}.panel{padding:18px}.item{padding:12px;margin:8px 0}.hero{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end}.badge,.tag{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:11px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:20px 0}.tabs button,select,input{border:1px solid var(--line);border-radius:12px;background:var(--card);color:inherit;padding:11px 13px;font:inherit}.tabs button{cursor:pointer}.tabs button.active{background:var(--strong);color:var(--strongText);border-color:var(--strong)}select{width:100%;max-width:520px}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.metric{padding:15px}.metric b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}.big{font-size:25px;font-weight:850;margin-top:5px}.section{margin-top:18px}.section-title{display:flex;justify-content:space-between;gap:10px;align-items:end;margin-bottom:9px}.leader{display:grid;grid-template-columns:46px 1fr 94px;gap:10px;align-items:center}.leader strong{text-align:right}.architecture{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.node{border:1px solid var(--line);background:var(--card);border-radius:14px;padding:12px;min-height:96px}.node .n{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.node b{display:block;margin-top:6px}.arrow{display:grid;place-items:center;color:var(--muted)}.doc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.doc{padding:13px}.status-complete{font-weight:750}.hidden{display:none!important}.list-scroll{max-height:620px;overflow:auto;padding-right:4px}.callout{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.arabic{font-family:"Times New Roman",serif;font-size:1.15em}@media(max-width:980px){.hero,.grid4,.grid3,.doc-grid{grid-template-columns:1fr 1fr}.architecture{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}}@media(max-width:640px){main{padding:16px}.hero,.grid4,.grid3,.doc-grid,.architecture{grid-template-columns:1fr}.leader{grid-template-columns:38px 1fr 78px}}
+</style>
+</head>
+<body><main>
+<header class="hero">
+  <div><div class="eyebrow muted">Full TypeScript · Qur’an Core → Taurat → Zabur → Injil</div><h1>Prophet Research Engine v2.3</h1><p class="muted">Application stack release: React/Vite/shadcn/Tailwind → Node local API → SQLite, preserving Identity/RID/ASMA, provenance, context and scoring semantics.</p></div>
+  <div><span class="badge">v2.3 · AUDIT HARDENED</span></div>
+</header>
+
+<div class="tabs" role="tablist" aria-label="Explorer views">
+  <button class="active" data-tab="profile">Profile</button>
+  <button data-tab="provenance">Provenance</button>
+  <button data-tab="timeline">Timeline & Relations</button>
+  <button data-tab="leaders">Leaderboards</button>
+  <button data-tab="corpusview">Four Corpus</button>
+  <button data-tab="architectureview">Architecture & Docs</button>
+</div>
+
+<div class="toolbar"><label for="p"><b>Prophet</b></label><select id="p"></select><div id="app-error" class="muted"></div></div>
+
+<section id="profile" class="view">
+  <div class="grid4">
+    <div class="card metric"><b>Name Root</b><div class="big" id="root"></div><div class="muted" id="rootmeta"></div></div>
+    <div class="card metric"><b>RID · Positive</b><div class="big" id="rid"></div><div class="muted" id="ridmeta"></div></div>
+    <div class="card metric"><b>Qur’anic Status</b><div class="big" id="status"></div><div class="muted" id="statusrefs"></div></div>
+    <div class="card metric"><b>Data / Context</b><div id="datascore"></div><div class="big" id="contextscore"></div></div>
+  </div>
+  <div class="grid2 section">
+    <div class="card panel"><div class="big" id="name"></div><div class="muted" id="signature"></div><h3>Religion · Region · Language</h3><div id="context"></div></div>
+    <div class="card panel"><h3>ASMA / Divine Attribute Relations</h3><div id="asma"></div><div class="callout muted">ASMA relation = lexical/semantic/capability relation. It never means identity with Allah.</div><h3>Supplementary Witnesses</h3><div id="supp"></div></div>
+  </div>
+</section>
+
+<section id="provenance" class="view hidden">
+  <div class="grid2">
+    <div class="card panel"><div class="section-title"><h3>Claims & Provenance</h3><span class="badge" id="claimcount"></span></div><div class="list-scroll" id="claims"></div></div>
+    <div class="card panel"><h3>Uncertainty</h3><div id="uncertainty"></div><h3>Claim-specific Conflicts</h3><div id="conflicts"></div></div>
+  </div>
+</section>
+
+<section id="timeline" class="view hidden">
+  <div class="grid2"><div class="card panel"><h3>Mission / Event Graph</h3><div id="events"></div></div><div class="card panel"><h3>Genealogy & Relations</h3><div id="relations"></div></div></div>
+</section>
+
+<section id="leaders" class="view hidden">
+  <div class="grid4">
+    <div class="card metric"><b>Trait Evidence Top</b><div class="big" id="traittop"></div></div>
+    <div class="card metric"><b>Data Confidence Top</b><div class="big" id="datatop"></div></div>
+    <div class="card metric"><b>Context Evidence Top</b><div class="big" id="contexttop"></div></div>
+    <div class="card metric"><b>Human Preference</b><div class="big" id="prefstatus"></div></div>
+  </div>
+  <div class="grid2 section"><div class="card panel"><h3>Trait Evidence</h3><div id="traitleader"></div></div><div class="card panel"><h3>Data Confidence</h3><div id="dataleader"></div></div><div class="card panel"><h3>Context Evidence</h3><div id="contextleader"></div></div><div class="card panel"><h3>World Trait Salience</h3><div id="worldleader"></div></div></div>
+  <div class="callout muted section">Scores are research/evidence indices. They do not rank prophetic worth, religion, ethnicity, language, or country. Ties are preserved; composite remains disabled until empirical preference data is calibrated.</div>
+</section>
+
+<section id="corpusview" class="view hidden">
+  <div class="grid2"><div class="card panel"><h3>Four-Corpus Registry</h3><div id="corpus"></div></div><div class="card panel"><h3>Source Model</h3><div class="callout"><b>REVEALED SOURCE ≠ EXTANT TEXTUAL WITNESS</b><p class="muted">Qur’an is the project core/muhaimin source. Taurat, Zabur, and Injil are supplementary categories mapped to labeled textual witnesses. Extant witness corpora never silently become the original revelation.</p></div><div class="item"><b>TAURAT</b><div class="muted">Torah/Pentateuch witness; not automatically the entire Old Testament.</div></div><div class="item"><b>ZABUR</b><div class="muted">Psalms witness with attribution metadata; not every Psalm automatically equated with original Zabur.</div></div><div class="item"><b>INJIL</b><div class="muted">Gospel witness layer; not automatically the entire New Testament or identical to a reconstructed original Injil.</div></div></div></div>
+</section>
+
+<section id="architectureview" class="view hidden">
+  <div class="card panel"><h3>Research Architecture</h3><div class="architecture" id="arch"></div></div>
+  <div class="grid2 section"><div class="card panel"><h3>Runtime Contract</h3><div class="item"><b>Source of truth</b><div class="muted">Versioned JSON + PostgreSQL schema</div></div><div class="item"><b>Engine</b><div class="muted">Strict TypeScript / Node</div></div><div class="item"><b>API</b><div class="muted">REST-style `/api/v2/*`</div></div><div class="item"><b>Web</b><div class="muted">Static explorer generated from the same contracts</div></div></div><div class="card panel"><h3>Documentation Registry</h3><div id="docsstatus" class="muted"></div><div id="docs" class="doc-grid"></div></div></div>
+</section>
+
+<footer class="muted section">Final guardrails: unknown over guessing · source language ≠ spoken language · ancient region ≠ modern nationality · ASMA relation ≠ identity · traditional identification ≠ direct Qur’anic wording · cross-scripture differences remain visible.</footer>
+<script type="module" src="./dist/app.js"></script>
+</main></body></html>

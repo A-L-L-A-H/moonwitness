@@ -1,0 +1,32 @@
+{
+  "name": "@arsybelovedlabs/moonwitness-crayon-lab",
+  "version": "0.1.0",
+  "description": "Methodology and research laboratory experience.",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": "24.20.0",
+    "pnpm": "11.24.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "node scripts/lint.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "pnpm build && node --test tests/*.test.mjs",
+    "build": "tsc -p tsconfig.build.json",
+    "architecture": "node scripts/architecture-check.mjs",
+    "security": "node scripts/security-check.mjs"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2"
+  }
+}

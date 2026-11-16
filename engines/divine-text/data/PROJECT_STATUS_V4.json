@@ -1,0 +1,41 @@
+{
+  "version": "4.0.0",
+  "runtime": "Node.js ESM zero-dependency",
+  "milestones": {
+    "m1_quran_normalization": "COMPLETE_VERIFIED",
+    "m2_hadith_ingestion": "PENDING_EXTERNAL_FILE",
+    "m3_claim_database": "COMPLETE",
+    "m4_torah_mapping": "COMPLETE_BASELINE",
+    "m5_psalms_mapping": "COMPLETE_BASELINE",
+    "m6_gospel_mapping": "COMPLETE_BASELINE",
+    "m7_research_report": "COMPLETE_BASELINE",
+    "m8_passage_linking": "COMPLETE_BASELINE",
+    "m9_variant_model": "COMPLETE_BASELINE",
+    "m10_manuscript_register": "COMPLETE_BASELINE",
+    "m11_cross_scripture_engine": "COMPLETE_BASELINE",
+    "m12_v4_cli_api": "COMPLETE_VERIFIED"
+  },
+  "local_corpora": {
+    "quran": {"status":"NORMALIZED_LOCAL_WITNESS","records":6236,"surahs":114},
+    "hadith": {"status":"PENDING_EXTERNAL_FILE"},
+    "torah": {"status":"EXTERNAL_REGISTER_ONLY"},
+    "psalms": {"status":"EXTERNAL_REGISTER_ONLY"},
+    "gospels": {"status":"EXTERNAL_REGISTER_ONLY"}
+  },
+  "qa": {
+    "automated_tests": 5,
+    "passed": 5,
+    "failed": 0,
+    "build": "PASS",
+    "cli_quran_verify": "PASS",
+    "arabic_normalized_search": "PASS",
+    "score_bounds": "PASS",
+    "identity_unresolved_guard": "PASS",
+    "manuscript_registry": "PASS"
+  },
+  "policy": [
+    "Revelation claim != text identity != textual preservation != historical evidence != interpretation.",
+    "Missing corpora remain PENDING and are never scored as zero.",
+    "Raw source text must be preserved before normalization when external corpora are ingested."
+  ]
+}

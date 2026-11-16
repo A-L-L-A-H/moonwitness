@@ -1,0 +1,61 @@
+name: m-time-antikythera-calibration
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "crates/mtime-antikythera/**"
+      - "crates/mtime-spk/**"
+      - ".github/workflows/antikythera-calibration.yml"
+
+jobs:
+  de440-calibration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Download official DE440 short kernel
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mtime-antikythera
+          curl --fail --retry 5 --retry-delay 3             "https://naif.jpl.nasa.gov/pub/naif/JUNO/kernels/spk/de440s.bsp"             -o /tmp/mtime-antikythera/de440s.bsp
+          sha256sum /tmp/mtime-antikythera/de440s.bsp             | tee /tmp/mtime-antikythera/source-sha256.txt
+
+      - name: Compare historical and digital Antikythera profiles with DE440
+        run: |
+          set -euo pipefail
+          cargo run --quiet -p mtime-spk --example validate_antikythera_matrix --             /tmp/mtime-antikythera/de440s.bsp             | tee /tmp/mtime-antikythera/calibration-report.txt
+
+      - name: Analyze 1900-2100 residual structure
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mtime-antikythera/m6
+          cargo run --release --quiet -p mtime-spk --example analyze_antikythera_accuracy --             /tmp/mtime-antikythera/de440s.bsp             /tmp/mtime-antikythera/m6             | tee /tmp/mtime-antikythera/m6/report.txt
+          test "$(($(wc -l < /tmp/mtime-antikythera/m6/monthly-1900-2100.csv)-1))" -eq 2412
+          test -s /tmp/mtime-antikythera/m6/targeted-phases.csv
+          test -s /tmp/mtime-antikythera/m6/phase-bins.csv
+          test -s /tmp/mtime-antikythera/m6/summary.csv
+
+      - name: Run correction ablation and out-of-sample candidate fit
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mtime-antikythera/m8
+          cargo run --release --quiet -p mtime-spk --example ablate_antikythera_corrections --             /tmp/mtime-antikythera/de440s.bsp             /tmp/mtime-antikythera/m8             | tee /tmp/mtime-antikythera/m8/report.txt
+          test -s /tmp/mtime-antikythera/m8/ablation.csv
+          test -s /tmp/mtime-antikythera/m8/candidate-fit.csv
+          grep -q "default_profile_changed=false" /tmp/mtime-antikythera/m8/report.txt
+
+      - name: Run 1850-2149 long-span falsification
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/mtime-antikythera/m16
+          cargo run --release --quiet -p mtime-spk --example validate_antikythera_longspan --             /tmp/mtime-antikythera/de440s.bsp             /tmp/mtime-antikythera/m16             | tee /tmp/mtime-antikythera/m16/report.txt
+          test -s /tmp/mtime-antikythera/m16/longspan-partitions.csv
+          grep -q "monthly_epochs=3600" /tmp/mtime-antikythera/m16/report.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mtime-antikythera-de440-calibration
+          path: /tmp/mtime-antikythera/

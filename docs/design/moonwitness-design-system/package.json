@@ -1,0 +1,40 @@
+{
+  "name": "@arsybelovedlabs/moonwitness-design-system",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": "24.20.0",
+    "pnpm": "11.24.0"
+  },
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./styles.css": "./src/styles/system.css",
+    "./tokens.css": "./src/styles/tokens.css"
+  },
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "peerDependencies": {
+    "react": ">=19",
+    "react-dom": ">=19"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.5.10",
+    "@storybook/addon-docs": "10.5.10",
+    "@storybook/react-vite": "10.5.10",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.5",
+    "@vitejs/plugin-react": "5.2.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "storybook": "10.5.10",
+    "typescript": "6.0.3",
+    "vite": "7.3.6"
+  }
+}

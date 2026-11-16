@@ -1,0 +1,7 @@
+state: executing
+queries:
+  - figma_pointer
+  - canonical_ui_inventory
+  - public_web_routes_and_imports
+  - local_icon_forks
+  - showcase_assets

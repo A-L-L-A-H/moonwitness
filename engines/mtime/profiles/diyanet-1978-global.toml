@@ -1,0 +1,35 @@
+id = "DIYANET_1978_VISIBILITY"
+name = "Türkiye Diyanet visibility criterion — 1978 Istanbul basis, current rule component"
+version = "1978_2016_2026_VISIBILITY_COMPONENT"
+effective_from = "1978-01-01"
+require_all = true
+fallback_if_not_met = "NO_AUTOMATIC_CALENDAR_OUTCOME"
+observation_layer = "SEPARATE"
+authority_layer = "SEPARATE"
+scope = "GLOBAL_ANY_SITE"
+source = "T.C. Diyanet İşleri Başkanlığı — Din İşleri Yüksek Kurulu, 1447/2026 Ramadan methodology statement"
+source_url = "https://kurul.diyanet.gov.tr/tr/duyuru/1447-2026-yili-ramazan-ayi-baslangicina-iliskin-aciklama/019c7121-78c4-775c-964e-e581a8efa2c8"
+
+# IMPORTANT: the 5°/8° thresholds are a visibility criterion component,
+# not the complete current Diyanet month-start rule. The official 2026
+# statement also lists regional/timing conditions represented below.
+additional_calendar_conditions = [
+  "VISIBILITY_ON_NORTH_OR_SOUTH_AMERICA_MAINLAND",
+  "CONJUNCTION_BEFORE_WELLINGTON_FAJR"
+]
+
+[[clauses]]
+id = "ALTITUDE_TOPOCENTRIC_GE_5"
+metric = "MOON_ALTITUDE_TOPOCENTRIC_DEG"
+reference = "TOPOCENTRIC"
+comparator = "GE"
+threshold = 5.0
+unit = "deg"
+
+[[clauses]]
+id = "ELONGATION_GEOCENTRIC_GE_8"
+metric = "ELONGATION_GEOCENTRIC_DEG"
+reference = "GEOCENTRIC_CENTER_TO_CENTER"
+comparator = "GE"
+threshold = 8.0
+unit = "deg"

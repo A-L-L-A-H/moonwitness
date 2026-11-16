@@ -1,0 +1,27 @@
+version: 2
+status: hardening
+source_control:
+  platform: github
+  default_branch: main
+  protected: required
+  pull_request_required: true
+  required_checks: [lint, typecheck, tests, contract, architecture]
+ownership:
+  codeowners: required
+  capability_owner: required
+release:
+  packages: semver
+  api: explicit_compatibility_policy
+  release_evidence: required
+architecture_change:
+  locked_decisions: new_adr_required
+  exception_requires: [motivation, impact, migration, rollback, affected_repos, compatibility_risk]
+work_tracking:
+  platform: github
+  issues_required: true
+  project_boards_optional: true
+  architecture_truth_remains_blueprint: true
+quality:
+  no_direct_merge_to_protected_branch: true
+  dependency_review: required
+  secret_scanning: required

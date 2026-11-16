@@ -1228,6 +1228,27 @@
   transform: translateX(4px);
 }
 
+.awakening-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.awakening-quick-btn {
+  padding: 8px 12px;
+  border: 1px solid rgba(241, 235, 225, 0.3);
+  background: rgba(10, 10, 13, 0.72);
+  color: #f3ebd9;
+  font: 10px "IBM Plex Mono", monospace;
+  letter-spacing: 0.08em;
+}
+
+.awakening-quick-btn:hover:not(:disabled) {
+  border-color: #d7ff36;
+  color: #d7ff36;
+}
+
 .awakening-manifesto {
   display: grid;
   gap: 3px;

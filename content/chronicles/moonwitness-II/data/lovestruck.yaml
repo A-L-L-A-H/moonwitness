@@ -1,0 +1,15 @@
+version: "0.1"
+
+lovestruck:
+  - id: lovestruck_001
+    title: "LOVESTRUCK BY THE UNKNOWN"
+    event: event_001
+    attraction: "Something in the signal feels impossible to ignore."
+    vulnerability: "Attention becomes emotionally involved."
+    tension: "Desire and uncertainty coexist."
+    movement: "Connection changes the observer."
+    canon_level: lore
+    source: USER_INPUT
+    provenance: "MoonWitness emotional narrative system"
+    visibility: public
+    status: review

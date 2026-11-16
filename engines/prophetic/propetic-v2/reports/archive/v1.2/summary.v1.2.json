@@ -1,0 +1,19 @@
+{
+  "model": "Prophet Identity + Root + Asma Graph v1.2 — Final Audited Scoring + World Trait Research Layer",
+  "version": "1.2",
+  "prophets": 25,
+  "edges": 74,
+  "asma_edges": 37,
+  "supplemental_edges": 12,
+  "positive_rid": 25,
+  "unknown_name_roots": 5,
+  "divine_root_families": 18,
+  "auto_match_coverage": 25,
+  "world_trait_profiles": 23,
+  "validation_ok": true,
+  "warnings": [],
+  "profile_pass": 17,
+  "profile_review": 8,
+  "profile_fail": 0,
+  "mean_data_confidence": 88.22
+}

@@ -1,0 +1,136 @@
+name: Moonframe pipeline
+on:
+  push:
+    branches: [dev, main]
+permissions:
+  contents: read
+
+jobs:
+  spec-contracts:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+      - name: Validate contract references, counts, statuses and Markdown links
+        run: node scripts/validate-contracts.mjs
+      - name: Run validator negative self-tests
+        run: node scripts/validate-contracts.mjs --self-test
+      - name: Prove bounded token fixture
+        run: node scripts/token-subset-proof.mjs
+      - name: Validate M13 cross-contract and 460-task handoff integrity
+        run: node scripts/verify-m13-handoff.mjs
+      - name: Syntax-check unattended Codex runner
+        run: node --check scripts/run-m13-autopilot.mjs
+      - name: Dry-run frozen autonomous queue (no Codex launch)
+        run: node scripts/run-m13-autopilot.mjs --dry-run
+
+  runtime-and-showcase:
+    if: github.ref == 'refs/heads/dev'
+    needs: spec-contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Verify deterministic token generator & CSS bridge
+        run: pnpm run tokens
+      - name: Run unit & SSR tests
+        run: pnpm test
+      - name: Run TypeScript typecheck
+        run: pnpm run typecheck && pnpm --filter moonframe typecheck
+      - name: Build Next.js moonframe showcase app
+        run: pnpm run build
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run browser behavior, accessibility and skin capture tests
+        run: pnpm run test:browser
+      - name: Verify screenshot inventory and structural skin pair matrix
+        run: pnpm run audit:pairs
+      - name: Upload browser screenshots and diagnostic traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moonframe-visual-qa-${{ github.sha }}
+          path: |
+            artifacts/skins/
+            artifacts/site/
+            test-results/
+            playwright-report/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # A push made with GITHUB_TOKEN starts no further workflow runs, so main is promoted
+  # and released inside this same dev run instead of by a main-push trigger.
+  promote-to-main:
+    if: github.ref == 'refs/heads/dev'
+    needs: [spec-contracts, runtime-and-showcase]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Fast-forward main to the verified dev commit
+        run: |
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" = "$(git rev-parse HEAD)" ]; then
+            echo "main already carries this commit; nothing to promote"
+            exit 0
+          fi
+          git merge-base --is-ancestor origin/main HEAD || {
+            echo "main carries commits dev does not; land them on dev and let the gate re-run"
+            exit 1
+          }
+          git push origin "HEAD:refs/heads/main"
+
+  # Anything that lands on main outside the pipeline is a human push, which does trigger
+  # this job. main may only ever be a subset of dev.
+  main-carries-only-dev-work:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Reject main commits that never passed the gate on dev
+        run: |
+          git fetch origin dev
+          git merge-base --is-ancestor HEAD origin/dev || {
+            echo "::error title=main moved without dev::\`main\` carries $(git rev-parse --short HEAD) which \`dev\` does not. Work belongs on \`dev\`; the pipeline promotes it."
+            exit 1
+          }
+
+  release:
+    if: github.ref == 'refs/heads/dev'
+    needs: promote-to-main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Tag the promoted main commit when package.json carries a new version
+        run: |
+          git fetch origin main
+          git checkout --detach origin/main
+          version=$(node -p "require('./package.json').version")
+          tag="v${version}"
+          if git ls-remote --exit-code --tags origin "refs/tags/${tag}" >/dev/null 2>&1; then
+            echo "${tag} is already released"
+            exit 0
+          fi
+          git tag "$tag"
+          git push origin "$tag"
+          gh release create "$tag" --target main --title "Moonframe $tag" --generate-notes

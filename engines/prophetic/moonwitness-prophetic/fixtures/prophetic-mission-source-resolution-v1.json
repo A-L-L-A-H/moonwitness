@@ -1,0 +1,40 @@
+{
+  "fixtureId": "prophetic-mission-source-resolution-v1",
+  "capabilityId": "prophetic-domain",
+  "classification": "PRESERVE",
+  "parity": "EXACT",
+  "legacyEvidence": {
+    "repository": "bjo163/propetic",
+    "commit": "cc364b1",
+    "sourcePath": "src/engine/source-policy.ts"
+  },
+  "cases": [
+    {
+      "id": "quranic-claim-wins",
+      "profile": {
+        "mission": { "mission": { "summary": "Deliver the message", "refs": ["Q20:14"], "evidence": "Q5" } },
+        "supplementalWitnesses": [{ "sourceBook": "TAURAT", "evidence": "T1", "ref": "Exodus 3:10", "claim": "Supplemental claim", "missionSlots": ["mission"] }]
+      },
+      "slot": "mission",
+      "expected": { "source": "AL-QURAN", "evidence": "Q5", "refs": ["Q20:14"], "claim": "Deliver the message" }
+    },
+    {
+      "id": "supplemental-priority-is-stable",
+      "profile": {
+        "mission": { "call": { "summary": "No explicit Qur'anic call", "refs": [], "evidence": "E0" } },
+        "supplementalWitnesses": [
+          { "sourceBook": "INJIL", "evidence": "S2", "ref": "Luke 1:1", "claim": "Later witness", "missionSlots": ["call"] },
+          { "sourceBook": "TAURAT", "evidence": "T1", "ref": "Genesis 12:1", "claim": "Earlier-priority witness", "missionSlots": ["call"] }
+        ]
+      },
+      "slot": "call",
+      "expected": { "source": "TAURAT", "evidence": "T1", "refs": ["Genesis 12:1"], "claim": "Earlier-priority witness" }
+    },
+    {
+      "id": "unknown-does-not-infer",
+      "profile": { "mission": {}, "supplementalWitnesses": [] },
+      "slot": "call",
+      "expected": { "source": "UNKNOWN", "evidence": "E0", "refs": [], "claim": "UNKNOWN / NOT EXPLICIT" }
+    }
+  ]
+}

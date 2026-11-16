@@ -1,0 +1,151 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ConsoleShell, Input, type HudNavItem } from "@moonwitness/ui";
+import { Crown, SearchIcon } from "@moonwitness/ui/icons";
+import { useSavedAvatar } from "@/lib/avatar-store";
+import { useCurrentIdentity } from "@/lib/session";
+import { SkinSwitcher } from "@/components/skin-switcher";
+import { activeByPath, navHref, navItems, operationsNavItems } from "./nav-items";
+import { Notifications } from "./notifications";
+import { ProfileMenu } from "./profile-menu";
+import { useActiveSection } from "./use-active-section";
+
+const FOOTER_LEFT = "MOONWITNESS XV /// DIFFERENT PEOPLE. SAME SKY. MANY STORIES.";
+const FOOTER_RIGHT = "EMPIRE OF THE LIGHT";
+
+export function ConsoleShellAdapter({
+  breadcrumb,
+  search,
+  onNavigate,
+  plane = "creator",
+  children,
+}: {
+  breadcrumb: string;
+  search: { value: string; onChange: (v: string) => void; placeholder: string };
+  onNavigate?: () => void;
+  plane?: "creator" | "operations";
+  children: ReactNode;
+}) {
+  const operations = plane === "operations";
+  const items = operations ? operationsNavItems : navItems;
+  const rootHref = operations ? "/control" : "/";
+  const router = useRouter();
+  const pathname = usePathname();
+  const active = activeByPath(pathname);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const popRef = useRef<HTMLDivElement>(null);
+  const activeSection = useActiveSection(items, pathname);
+  const session = useCurrentIdentity();
+  const identity = session?.identity ?? "Creator // Empire";
+  const role = session?.role ?? "Empire crew";
+  const { seed: avatarSeed } = useSavedAvatar(identity);
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (popRef.current && !popRef.current.contains(e.target as Node)) {
+        setNotifOpen(false);
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, []);
+
+  function exitShadow() {
+    fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+    router.push("/");
+  }
+
+  const hudItems: HudNavItem[] = items.map((item) => ({
+    id: item.id,
+    label: item.label,
+    iconPath: item.icon,
+    href: navHref(item),
+    kind: item.target.kind,
+  }));
+
+  return (
+    <ConsoleShell
+      title={breadcrumb}
+      brandHref={rootHref}
+      subtitle={operations ? "ARSY // Operations Plane" : "Empire of the light"}
+      navLabel={operations ? "Operations" : "Empire"}
+      items={hudItems}
+      active={active}
+      activeSection={activeSection}
+      onNavigate={() => {
+        setNotifOpen(false);
+        setProfileOpen(false);
+        onNavigate?.();
+      }}
+      linkAs={Link}
+      headerStart={
+        <>
+          <Crown className="h-4 w-6 text-[var(--blue)]" />
+          <Link href={rootHref} className="inline-flex min-h-11 items-center hover:underline">
+            <span>{operations ? "Operations" : "The Empire"}</span>
+          </Link>
+          <span aria-hidden>›</span>
+        </>
+      }
+      headerSearch={
+        <div className="relative min-w-0 w-full">
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--paper)]" />
+          <Input
+            value={search.value}
+            onChange={(e) => search.onChange(e.target.value)}
+            placeholder={search.placeholder}
+            aria-label={search.placeholder}
+            className="min-h-11 w-full pl-9"
+          />
+        </div>
+      }
+      headerActions={
+        <div ref={popRef} className="relative flex items-center gap-1">
+          <SkinSwitcher />
+          <Notifications
+            open={notifOpen}
+            onToggle={() => {
+              setNotifOpen((v) => !v);
+              setProfileOpen(false);
+            }}
+          />
+          <ProfileMenu
+            open={profileOpen}
+            onToggle={() => {
+              setProfileOpen((v) => !v);
+              setNotifOpen(false);
+            }}
+            identity={identity}
+            role={role}
+            onExit={exitShadow}
+            avatarSeed={avatarSeed}
+          />
+        </div>
+      }
+      railFooter={
+        operations ? (
+          <div className="font-mono text-[10px] leading-relaxed text-[var(--paper)]">
+            <strong className="text-[var(--blue)]">OPERATIONS CONSOLE</strong>
+            <div>WEB → API → ARSY PLANE</div>
+          </div>
+        ) : undefined
+      }
+      commandLeft={
+        operations ? "MOONWITNESS OPERATIONS /// HOST, NETWORK & STORAGE PLANE" : FOOTER_LEFT
+      }
+      commandRight={
+        <>
+          <Crown className="h-3 w-5 text-[var(--yellow)]" />{" "}
+          {operations ? "ARSY CONTROL PLANE" : FOOTER_RIGHT}
+        </>
+      }
+    >
+      {children}
+    </ConsoleShell>
+  );
+}

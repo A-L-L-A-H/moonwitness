@@ -1,0 +1,33 @@
+version: 1
+status: locked
+machines:
+  research_run:
+    terminal: [COMPLETED, FAILED, CANCELLED]
+    transitions:
+      - {from: CREATED, event: queue, to: QUEUED}
+      - {from: QUEUED, event: start, to: RUNNING}
+      - {from: RUNNING, event: complete, to: COMPLETED}
+      - {from: RUNNING, event: fail, to: FAILED}
+      - {from: CREATED, event: cancel, to: CANCELLED}
+      - {from: QUEUED, event: cancel, to: CANCELLED}
+      - {from: RUNNING, event: cancel, to: CANCELLED}
+    forbidden:
+      - COMPLETED_to_any
+      - FAILED_to_any
+      - CANCELLED_to_any
+  job:
+    terminal: [SUCCEEDED, FAILED, CANCELLED]
+    transitions:
+      - {from: PENDING, event: start, to: RUNNING}
+      - {from: RUNNING, event: retry, to: RETRYING}
+      - {from: RETRYING, event: start, to: RUNNING}
+      - {from: RUNNING, event: succeed, to: SUCCEEDED}
+      - {from: RUNNING, event: fail, to: FAILED}
+      - {from: PENDING, event: cancel, to: CANCELLED}
+      - {from: RUNNING, event: cancel, to: CANCELLED}
+      - {from: RETRYING, event: cancel, to: CANCELLED}
+rules:
+  - transitions_are_explicit
+  - terminal_states_are_immutable
+  - invalid_transitions_are_rejected
+  - state_changes_emit_canonical_events

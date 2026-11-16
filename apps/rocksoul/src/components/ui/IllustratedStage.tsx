@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   archiveSceneUrl,
   awakeningSceneUrl,
@@ -7,6 +7,7 @@ import {
   studioSceneUrl,
   thresholdSceneUrl,
 } from "../../assets/art";
+import { GpuScene } from "./GpuScene";
 
 export type WorldDestination =
   | "awakening"
@@ -48,7 +49,9 @@ interface SceneFocus {
   panY: string;
   scale: number;
   accentColor: string;
+  accentRgb: readonly [number, number, number];
   glowX: string;
+  glowY: number;
 }
 
 const SCENE_IMAGES: Record<IllustratedSceneKind, string> = {
@@ -64,44 +67,56 @@ const SCENE_FOCUS: Record<WorldDestination, SceneFocus> = {
   awakening: {
     panX: "0%",
     panY: "0%",
-    scale: 1.04,
+    scale: 1.015,
     accentColor: "rgba(229, 62, 56, 0.24)",
+    accentRgb: [0.9, 0.24, 0.22],
     glowX: "64%",
+    glowY: 0.5,
   },
   threshold: {
     panX: "0%",
     panY: "0%",
-    scale: 1.03,
+    scale: 1.015,
     accentColor: "rgba(229, 62, 56, 0.2)",
+    accentRgb: [0.9, 0.24, 0.22],
     glowX: "50%",
+    glowY: 0.52,
   },
   archive: {
-    panX: "3.2%",
-    panY: "0.8%",
-    scale: 1.08,
+    panX: "1.4%",
+    panY: "0.4%",
+    scale: 1.03,
     accentColor: "rgba(216, 169, 98, 0.24)",
-    glowX: "16%",
+    accentRgb: [0.85, 0.66, 0.38],
+    glowX: "22%",
+    glowY: 0.52,
   },
   studio: {
-    panX: "1.4%",
-    panY: "0.6%",
-    scale: 1.08,
+    panX: "0.8%",
+    panY: "0.3%",
+    scale: 1.03,
     accentColor: "rgba(232, 224, 214, 0.2)",
+    accentRgb: [0.91, 0.88, 0.84],
     glowX: "38%",
+    glowY: 0.5,
   },
   "riot-deck": {
-    panX: "-1.6%",
-    panY: "0.4%",
-    scale: 1.09,
+    panX: "-0.8%",
+    panY: "0.2%",
+    scale: 1.03,
     accentColor: "rgba(229, 62, 56, 0.3)",
+    accentRgb: [0.9, 0.24, 0.22],
     glowX: "62%",
+    glowY: 0.52,
   },
   "signal-room": {
-    panX: "-3.4%",
-    panY: "0.8%",
-    scale: 1.08,
+    panX: "-1.4%",
+    panY: "0.4%",
+    scale: 1.03,
     accentColor: "rgba(116, 168, 220, 0.22)",
-    glowX: "84%",
+    accentRgb: [0.45, 0.66, 0.86],
+    glowX: "78%",
+    glowY: 0.5,
   },
 };
 
@@ -160,6 +175,9 @@ export function IllustratedStage({
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const visible = usePageVisibility();
+  const [gpuFailed, setGpuFailed] = useState(false);
+  const handleGpuUnsupported = useCallback(() => setGpuFailed(true), []);
+  const useGpu = !gpuFailed && typeof WebGL2RenderingContext !== "undefined";
 
   const resolvedDestination: WorldDestination = destination ?? scene;
   const focus = SCENE_FOCUS[resolvedDestination] ?? SCENE_FOCUS.threshold;
@@ -167,7 +185,7 @@ export function IllustratedStage({
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || reducedMotion || subtle) {
+    if (!container || reducedMotion || subtle || useGpu) {
       if (container) {
         container.style.setProperty("--px", "0px");
         container.style.setProperty("--py", "0px");
@@ -198,11 +216,11 @@ export function IllustratedStage({
       window.removeEventListener("pointermove", handlePointerMove);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [reducedMotion, subtle]);
+  }, [reducedMotion, subtle, useGpu]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || useGpu) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -281,7 +299,32 @@ export function IllustratedStage({
       window.removeEventListener("resize", resize);
       if (rafId) window.cancelAnimationFrame(rafId);
     };
-  }, [reducedMotion, scene, subtle, visible]);
+  }, [reducedMotion, scene, subtle, useGpu, visible]);
+
+  if (useGpu) {
+    return (
+      <div
+        ref={containerRef}
+        className={`world-canvas is-gpu${subtle ? " is-subtle" : ""}${className ? ` ${className}` : ""}`}
+        aria-hidden="true"
+        data-destination={resolvedDestination}
+        data-scene={scene}
+      >
+        <GpuScene
+          artworkSrc={artworkSrc}
+          accent={focus.accentRgb}
+          glow={[parseFloat(focus.glowX) / 100, focus.glowY]}
+          pan={[-parseFloat(focus.panX) / 100, parseFloat(focus.panY) / 100]}
+          zoom={subtle ? 1.01 : focus.scale}
+          calm={subtle ? 0.32 : 0}
+          reducedMotion={reducedMotion}
+          visible={visible}
+          onUnsupported={handleGpuUnsupported}
+        />
+        <div className="world-gpu-veil" />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -295,7 +338,7 @@ export function IllustratedStage({
         className="world-artwork-stage"
         style={{
           transform: subtle
-            ? "scale(1.02)"
+            ? "scale(1.01)"
             : `translate3d(calc(${focus.panX} + var(--px, 0px)), calc(${focus.panY} + var(--py, 0px)), 0) scale(${focus.scale})`,
         }}
       >
@@ -309,11 +352,11 @@ export function IllustratedStage({
         className="world-atmosphere-veil"
         style={{
           background: subtle
-            ? "radial-gradient(ellipse at 50% 30%, rgba(16, 10, 14, 0.74) 0%, rgba(7, 7, 10, 0.92) 78%), linear-gradient(180deg, rgba(7, 7, 10, 0.84) 0%, rgba(7, 7, 10, 0.94) 100%)"
+            ? `radial-gradient(circle at ${focus.glowX} 44%, ${focus.accentColor} 0%, transparent 48%), radial-gradient(ellipse at 50% 34%, rgba(10, 9, 14, 0.38) 0%, rgba(5, 5, 9, 0.78) 84%), linear-gradient(180deg, rgba(5, 5, 9, 0.56) 0%, rgba(5, 5, 9, 0.32) 42%, rgba(5, 5, 9, 0.84) 100%)`
             : `
                 radial-gradient(circle at ${focus.glowX} 56%, ${focus.accentColor} 0%, transparent 44%),
-                radial-gradient(ellipse at 20% 42%, rgba(7, 7, 10, 0.76) 0%, rgba(7, 7, 10, 0.22) 48%, rgba(7, 7, 10, 0.7) 100%),
-                linear-gradient(180deg, rgba(7, 7, 10, 0.56) 0%, rgba(7, 7, 10, 0.1) 34%, rgba(7, 7, 10, 0.16) 66%, rgba(7, 7, 10, 0.88) 100%)
+                radial-gradient(ellipse at 20% 42%, rgba(7, 7, 10, 0.72) 0%, rgba(7, 7, 10, 0.16) 48%, rgba(7, 7, 10, 0.64) 100%),
+                linear-gradient(180deg, rgba(7, 7, 10, 0.48) 0%, rgba(7, 7, 10, 0.08) 34%, rgba(7, 7, 10, 0.14) 66%, rgba(7, 7, 10, 0.84) 100%)
               `,
         }}
       />

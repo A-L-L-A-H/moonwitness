@@ -1,0 +1,1010 @@
+{
+  "schema_version": "corpus-index.v0.5",
+  "generated_at": "2026-09-08T04:18:00Z",
+  "counts": {
+    "canonical_records": 2,
+    "candidates": 16,
+    "merged_candidates": 1,
+    "entities": 5,
+    "claims": 8,
+    "sources": 7,
+    "evidence": 10,
+    "families": 18,
+    "regions": 2
+  },
+  "coverage": {
+    "regions": {
+      "Polynesia / Hawaiʻi": 1,
+      "Polynesia / Aotearoa New Zealand": 1,
+      "Southeast Asia / Bali": 1,
+      "Africa / West and Central Africa / African Atlantic": 1,
+      "East Asia / Japan": 1,
+      "Mesoamerica / Maya highlands": 1,
+      "Middle East / Mesopotamia / Sumer": 1,
+      "East Asia / China": 1,
+      "South Asia / India": 1,
+      "Oceania / Australia / Indigenous Australia": 1,
+      "Arctic / Inuit regions": 1,
+      "Europe / Ireland": 1,
+      "Europe / Finland and Karelia": 1,
+      "Central Asia / Kyrgyzstan": 1,
+      "North Asia / Sakha Republic (Yakutia)": 1,
+      "Southeast Asia / Philippines / Ifugao": 1,
+      "South America / Colombia / Muisca highlands": 1
+    },
+    "canonical_regions": {
+      "Middle East / Mesopotamia / Sumer": 1
+    }
+  },
+  "records": [
+    {
+      "id": "MYTH-MES-INANA-DESCENT-000001",
+      "title": "Inana's Descent to the Netherworld",
+      "family": "F01",
+      "record_type": "underworld_narrative",
+      "region": "Mesopotamia / Sumer",
+      "status": "reviewed",
+      "confidence": 0.97,
+      "detail": {
+        "summary": "A Sumerian literary composition in which Inana descends to the underworld, passes through seven gates while regalia are removed, is judged and killed within the narrative, is restored through Enki's intervention, and must provide a substitute in order to ascend.",
+        "long_description": "This canonical record describes what the Sumerian textual tradition says. ETCSL provides the scholarly composite text and translation, while CDLI P275004 supplies an Old Babylonian physical manuscript witness from Nippur. The record intentionally separates textual/historical attestation from empirical verification of supernatural events, and it does not collapse the Sumerian composition into the related Akkadian Ištar descent tradition.",
+        "tradition": "Sumerian literary and religious tradition",
+        "earliest_attestation": "ca. 1900–1600 BCE",
+        "entities": [
+          {
+            "id": "ENTITY-MES-INANA",
+            "name": "Inana",
+            "entity_type": "deity",
+            "roles": [
+              "central figure",
+              "descender"
+            ]
+          },
+          {
+            "id": "ENTITY-MES-ERESKIGALA",
+            "name": "Ereškigala",
+            "entity_type": "deity",
+            "roles": [
+              "underworld ruler",
+              "sister of Inana in the narrative"
+            ]
+          },
+          {
+            "id": "ENTITY-MES-NETI",
+            "name": "Neti",
+            "entity_type": "underworld_gatekeeper",
+            "roles": [
+              "chief doorman"
+            ]
+          },
+          {
+            "id": "ENTITY-MES-NINCUBURA",
+            "name": "Ninšubur",
+            "entity_type": "deity_or_divine_attendant",
+            "roles": [
+              "minister",
+              "escort",
+              "petitioner"
+            ]
+          },
+          {
+            "id": "ENTITY-MES-DUMUZID",
+            "name": "Dumuzid",
+            "entity_type": "deity",
+            "roles": [
+              "husband of Inana",
+              "later substitute figure"
+            ]
+          }
+        ],
+        "claims": [
+          {
+            "id": "CLAIM-MES-INANA-001",
+            "subject": "ENTITY-MES-INANA",
+            "predicate": "descends_to",
+            "object": "underworld",
+            "claim_type": "supernatural_narrative",
+            "source_basis": [
+              "SOURCE-ETCSL-INANA-DESCENT",
+              "SOURCE-CDLI-P275004"
+            ],
+            "confidence": 0.99
+          },
+          {
+            "id": "CLAIM-MES-INANA-002",
+            "subject": "ENTITY-MES-INANA",
+            "predicate": "passes_through",
+            "object": "seven gates where regalia are removed",
+            "claim_type": "textual_attestation",
+            "source_basis": [
+              "SOURCE-ETCSL-INANA-DESCENT"
+            ],
+            "confidence": 0.99
+          },
+          {
+            "id": "CLAIM-MES-INANA-003",
+            "subject": "ENTITY-MES-INANA",
+            "predicate": "is_judged_and_turned_into",
+            "object": "a corpse hung on a hook",
+            "claim_type": "supernatural_narrative",
+            "source_basis": [
+              "SOURCE-ETCSL-INANA-DESCENT"
+            ],
+            "confidence": 0.99
+          },
+          {
+            "id": "CLAIM-MES-INANA-004",
+            "subject": "ENTITY-MES-INANA",
+            "predicate": "is_restored_by",
+            "object": "life-giving plant and life-giving water used by Enki's created agents",
+            "claim_type": "supernatural_narrative",
+            "source_basis": [
+              "SOURCE-ETCSL-INANA-DESCENT"
+            ],
+            "confidence": 0.99
+          },
+          {
+            "id": "CLAIM-MES-INANA-005",
+            "subject": "ENTITY-MES-INANA",
+            "predicate": "must_provide",
+            "object": "a substitute in order to ascend from the underworld",
+            "claim_type": "supernatural_narrative",
+            "source_basis": [
+              "SOURCE-ETCSL-INANA-DESCENT"
+            ],
+            "confidence": 0.99
+          }
+        ],
+        "sources": [
+          {
+            "id": "SOURCE-ETCSL-INANA-DESCENT",
+            "title": "Inana's descent to the nether world: translation",
+            "source_type": "reference_work",
+            "primary_source": false,
+            "locator": "https://etcsl.orinst.ox.ac.uk/section1/tr141.htm",
+            "author": "The Electronic Text Corpus of Sumerian Literature (ETCSL)",
+            "date": "2000-01-21"
+          },
+          {
+            "id": "SOURCE-CDLI-P275004",
+            "title": "CDLI P275004 — literary tablet witness to Inanna's Descent",
+            "source_type": "primary_text",
+            "primary_source": true,
+            "locator": "https://cdli.earth/artifacts/275004",
+            "author": null,
+            "date": "Old Babylonian (ca. 1900-1600 BCE)"
+          },
+          {
+            "id": "SOURCE-ORACC-INANA-ISHTAR",
+            "title": "Ancient Mesopotamian Gods and Goddesses — Inana/Ištar (goddess)",
+            "source_type": "reference_work",
+            "primary_source": false,
+            "locator": "https://oracc.museum.upenn.edu/amgg/listofdeities/inanaitar/",
+            "author": "Ancient Mesopotamian Gods and Goddesses project",
+            "date": null
+          }
+        ],
+        "evidence": [
+          {
+            "id": "EVIDENCE-MES-INANA-001",
+            "target_id": "CLAIM-MES-INANA-001",
+            "source_id": "SOURCE-ETCSL-INANA-DESCENT",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "ETCSL 1.4.1, lines 1–5",
+            "summary": "The scholarly translation explicitly opens with Inana abandoning heaven and earth and descending to the underworld.",
+            "confidence": 0.99,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-MES-INANA-002",
+            "target_id": "CLAIM-MES-INANA-002",
+            "source_id": "SOURCE-ETCSL-INANA-DESCENT",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "ETCSL 1.4.1, lines 114–163",
+            "summary": "Ereškigala orders seven gates controlled separately; the text then narrates removal of Inana's regalia gate by gate.",
+            "confidence": 0.99,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-MES-INANA-003",
+            "target_id": "CLAIM-MES-INANA-003",
+            "source_id": "SOURCE-ETCSL-INANA-DESCENT",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "ETCSL 1.4.1, lines 164–172",
+            "summary": "The Anuna render judgment against Inana; the composition says she is turned into a corpse and hung on a hook.",
+            "confidence": 0.99,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-MES-INANA-004",
+            "target_id": "CLAIM-MES-INANA-004",
+            "source_id": "SOURCE-ETCSL-INANA-DESCENT",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "ETCSL 1.4.1, lines 217–281",
+            "summary": "Enki creates two agents, gives life-giving plant/water, and the narrative states that Inana rises after they are applied.",
+            "confidence": 0.99,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-MES-INANA-005",
+            "target_id": "CLAIM-MES-INANA-005",
+            "source_id": "SOURCE-ETCSL-INANA-DESCENT",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "ETCSL 1.4.1, lines 282–289",
+            "summary": "The Anuna state that if Inana is to ascend from the underworld she must provide a substitute.",
+            "confidence": 0.99,
+            "status": "reviewed"
+          }
+        ]
+      },
+      "qualified_ref": "mftl:MYTH-MES-INANA-DESCENT-000001"
+    },
+    {
+      "id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+      "title": "Temple Destruction Prediction in Mark 13:2",
+      "family": "F01",
+      "record_type": "prophecy_narrative",
+      "region": "Jerusalem / Roman Judaea narrative setting",
+      "status": "reviewed",
+      "confidence": 0.97,
+      "detail": {
+        "summary": "In Mark 13:2, Jesus is portrayed as telling a disciple that the Temple's great buildings will be thrown down so completely that no stone remains upon another. Later readers compare this wording with the Roman destruction of Jerusalem and the Second Temple in 70 CE. MFTL treats the wording as textual attestation and the text–event connection as an interpretive historical comparison; it does not infer supernatural fulfillment from the historical event alone.",
+        "long_description": "RGBL supplies the exact SBLGNT and World English Bible passage identities. LEGEND owns the independently evidenced 70 CE destruction event. SUPERHERO owns human witness/recorder intelligence such as Flavius Josephus. The dating of Mark relative to 70 CE remains a scholarly question, so this record intentionally separates the existence of a prediction narrative from claims about its historical timing, authorship, or supernatural fulfillment.",
+        "tradition": "Early Christian Gospel textual tradition",
+        "earliest_attestation": "commonly dated within ca. 65–75 CE scholarly range for Mark",
+        "entities": [],
+        "claims": [
+          {
+            "id": "CLAIM-JERUSALEM-MARK13-001",
+            "subject": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+            "predicate": "contains_prediction",
+            "object": "the Temple's great buildings will be thrown down so that no stone remains upon another",
+            "claim_type": "textual_attestation",
+            "source_basis": [
+              "SOURCE-RGBL-SBLGNT-MARK-13-2",
+              "SOURCE-RGBL-WEB-MARK-13-2"
+            ],
+            "confidence": 0.99
+          },
+          {
+            "id": "CLAIM-JERUSALEM-MARK13-002",
+            "subject": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+            "predicate": "is_associated_with_historical_event",
+            "object": "legend:EVT-JERUSALEM-SECOND-TEMPLE-DESTRUCTION-70",
+            "claim_type": "historical_comparison",
+            "source_basis": [
+              "SOURCE-RGBL-SBLGNT-MARK-13-2",
+              "SOURCE-MET-JERUSALEM-70"
+            ],
+            "confidence": 0.95
+          },
+          {
+            "id": "CLAIM-JERUSALEM-MARK13-003",
+            "subject": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+            "predicate": "composition_date_relative_to_70_CE",
+            "object": "scholarly dating is commonly placed around 65–75 CE, with debate over a pre- or post-destruction setting",
+            "claim_type": "chronology_claim",
+            "source_basis": [
+              "SOURCE-CAMBRIDGE-MARK-DATE"
+            ],
+            "confidence": 0.9
+          }
+        ],
+        "sources": [
+          {
+            "id": "SOURCE-RGBL-SBLGNT-MARK-13-2",
+            "title": "RGBL SBLGNT v1.2 — Mark 13:2",
+            "source_type": "primary_text",
+            "primary_source": true,
+            "locator": "https://github.com/bjo163/rocksoul-rgbl/blob/main/datasets/sblgnt-v1-2/data/core/resources/sblgnt-v1-2.jsonl",
+            "author": "SBLGNT / Rocksoul RGBL",
+            "date": "SBLGNT v1.2 corpus expression"
+          },
+          {
+            "id": "SOURCE-RGBL-WEB-MARK-13-2",
+            "title": "RGBL World English Bible Classic 2020 — Mark 13:2",
+            "source_type": "primary_text",
+            "primary_source": true,
+            "locator": "https://github.com/bjo163/rocksoul-rgbl/blob/main/datasets/web-classic-2020/data/core/resources/web-classic-2020.jsonl",
+            "author": "World English Bible / Rocksoul RGBL",
+            "date": "2020 stable edition"
+          },
+          {
+            "id": "SOURCE-CAMBRIDGE-MARK-DATE",
+            "title": "The Date of the Markan Gospel",
+            "source_type": "academic_article",
+            "primary_source": false,
+            "locator": "https://www.cambridge.org/core/journals/new-testament-studies/article/abs/date-of-the-markan-gospel/B34650230D991C2B56A96866131DC994",
+            "author": "S. G. F. Brandon",
+            "date": "1961"
+          },
+          {
+            "id": "SOURCE-MET-JERUSALEM-70",
+            "title": "The World between Empires: Art and Identity in the Ancient Middle East — Judaea",
+            "source_type": "museum",
+            "primary_source": false,
+            "locator": "https://resources.metmuseum.org/resources/metpublications/pdf/The_World_between_Empires_Art_and_Identity_in_the_Ancient_Middle_East.pdf",
+            "author": "The Metropolitan Museum of Art",
+            "date": "2019"
+          }
+        ],
+        "evidence": [
+          {
+            "id": "EVIDENCE-JERUSALEM-MARK13-001",
+            "target_id": "CLAIM-JERUSALEM-MARK13-001",
+            "source_id": "SOURCE-RGBL-SBLGNT-MARK-13-2",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "rgbl:mw:content:sblgnt:v1-2:mark:13:2",
+            "summary": "RGBL's canonical SBLGNT record preserves Mark 13:2 in Greek and targets the exact passage ID.",
+            "confidence": 0.99,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-JERUSALEM-MARK13-002",
+            "target_id": "CLAIM-JERUSALEM-MARK13-001",
+            "source_id": "SOURCE-RGBL-WEB-MARK-13-2",
+            "stance": "supports",
+            "evidence_type": "textual",
+            "locator": "rgbl:mw:content:web-classic:2020:mar:13:2",
+            "summary": "RGBL's World English Bible Classic 2020 expression independently exposes the same verse reference in English.",
+            "confidence": 0.98,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-JERUSALEM-MARK13-003",
+            "target_id": "CLAIM-JERUSALEM-MARK13-002",
+            "source_id": "SOURCE-MET-JERUSALEM-70",
+            "stance": "contextualizes",
+            "evidence_type": "historical",
+            "locator": "Judaea section discussing the 70 CE siege and Temple destruction",
+            "summary": "Metropolitan Museum scholarship independently describes Titus's 70 CE siege ending in the sack of Jerusalem and destruction of the Temple.",
+            "confidence": 0.97,
+            "status": "reviewed"
+          },
+          {
+            "id": "EVIDENCE-JERUSALEM-MARK13-004",
+            "target_id": "CLAIM-JERUSALEM-MARK13-003",
+            "source_id": "SOURCE-CAMBRIDGE-MARK-DATE",
+            "stance": "contextualizes",
+            "evidence_type": "historical",
+            "locator": "New Testament Studies 7(2), pp. 126–141",
+            "summary": "Academic discussion places the common dating debate for Mark around the 65–75 CE period and explicitly treats the 70 CE destruction as central to the chronology question.",
+            "confidence": 0.93,
+            "status": "reviewed"
+          }
+        ]
+      },
+      "qualified_ref": "mftl:MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001"
+    }
+  ],
+  "analytics": {
+    "candidate_pipeline": {
+      "active": 16,
+      "merged": 1
+    },
+    "candidate_types": {},
+    "claim_epistemic": {
+      "supported_as_textual_attestation": 6,
+      "supported": 2
+    },
+    "claim_types": {
+      "textual_attestation": 2,
+      "historical_attestation": 1,
+      "chronology_claim": 1,
+      "supernatural_narrative": 4
+    },
+    "claim_confidence": {
+      "high": 8,
+      "medium": 0,
+      "low": 0
+    },
+    "evidence_stance": {
+      "supports": 8,
+      "contextualizes": 2
+    },
+    "evidence_types": {
+      "textual": 7,
+      "historical": 3
+    },
+    "source_authority": {
+      "academic": 3,
+      "primary": 3,
+      "institutional": 1
+    },
+    "source_types": {
+      "academic_article": 1,
+      "manuscript": 1,
+      "reference_work": 2,
+      "museum": 1,
+      "primary_text": 2
+    },
+    "source_reliability_average": 0.9714285714285715,
+    "provenance_completeness": {
+      "claims_with_evidence": 8,
+      "claims_total": 8,
+      "sources_with_locators": 7,
+      "sources_total": 7,
+      "canonical_records_with_claims": 2,
+      "canonical_records_total": 2
+    },
+    "benchmark": {
+      "target": 25,
+      "status": {
+        "canonical": 2,
+        "candidate": 16,
+        "research_issue": 7
+      },
+      "canonical": 2,
+      "candidate": 16,
+      "research_issue": 7
+    },
+    "drift": {
+      "records": 1,
+      "risks": {
+        "translation_choice": 1,
+        "analysis_added": 1,
+        "correspondence_misread_as_causation_or_fulfillment": 1
+      }
+    },
+    "automation": {
+      "steward": "MFTL Steward",
+      "schedule": "daily 09:17 Asia/Jakarta",
+      "parallel_lanes": [
+        {
+          "id": "myth-ritual-transmission",
+          "candidate_type": "myth / ritual / narrative transmission"
+        },
+        {
+          "id": "sacred-place-legend",
+          "candidate_type": "sacred_place / legend"
+        },
+        {
+          "id": "prophecy-apocalyptic",
+          "candidate_type": "prophecy_narrative / religious_claim"
+        },
+        {
+          "id": "pseudoarchaeology-pseudohistory",
+          "candidate_type": "pseudohistory / pseudoarchaeology"
+        },
+        {
+          "id": "conspiracy-narrative",
+          "candidate_type": "conspiracy_narrative"
+        },
+        {
+          "id": "urban-legend-rumor",
+          "candidate_type": "urban_legend / rumor"
+        },
+        {
+          "id": "supernatural-claim",
+          "candidate_type": "supernatural_claim"
+        }
+      ]
+    },
+    "observatory": {
+      "benchmark_slots": [
+        {
+          "id": "BENCH-001",
+          "status": "canonical",
+          "ref": "mftl:MYTH-MES-INANA-DESCENT-000001",
+          "failure_mode": "textual_attestation_vs_empirical_truth"
+        },
+        {
+          "id": "BENCH-002",
+          "status": "canonical",
+          "ref": "mftl:MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+          "failure_mode": "prediction_correspondence_vs_fulfillment"
+        },
+        {
+          "id": "BENCH-003",
+          "status": "candidate",
+          "ref": "mftl:CAND-AFR-MAMI-WATA-000001",
+          "failure_mode": "cross_cultural_conflation"
+        },
+        {
+          "id": "BENCH-004",
+          "status": "candidate",
+          "ref": "mftl:CAND-ARCTIC-SEDNA-000001",
+          "failure_mode": "oral_variant_conflation"
+        },
+        {
+          "id": "BENCH-005",
+          "status": "candidate",
+          "ref": "mftl:CAND-AUS-NGATYI-RAINBOW-SERPENT-000001",
+          "failure_mode": "population_overgeneralization"
+        },
+        {
+          "id": "BENCH-006",
+          "status": "candidate",
+          "ref": "mftl:CAND-CHN-CHANGE-000001",
+          "failure_mode": "variant_conflation"
+        },
+        {
+          "id": "BENCH-007",
+          "status": "candidate",
+          "ref": "mftl:CAND-COL-MUISCA-EL-DORADO-GUATAVITA-000001",
+          "failure_mode": "colonial_retelling_vs_ritual_evidence"
+        },
+        {
+          "id": "BENCH-008",
+          "status": "candidate",
+          "ref": "mftl:CAND-FIN-KALEVALA-000001",
+          "failure_mode": "compiled_text_vs_oral_sources"
+        },
+        {
+          "id": "BENCH-009",
+          "status": "candidate",
+          "ref": "mftl:CAND-HAW-PELE-000001",
+          "failure_mode": "narrative_attribution_vs_geologic_event"
+        },
+        {
+          "id": "BENCH-010",
+          "status": "candidate",
+          "ref": "mftl:CAND-IDN-TIRTA-EMPUL-000001",
+          "failure_mode": "ritual_attestation_vs_sacred_efficacy"
+        },
+        {
+          "id": "BENCH-011",
+          "status": "candidate",
+          "ref": "mftl:CAND-IRL-BEAN-SI-000001",
+          "failure_mode": "omen_tradition_vs_empirical_prediction"
+        },
+        {
+          "id": "BENCH-012",
+          "status": "candidate",
+          "ref": "mftl:CAND-JPN-AMATERASU-000001",
+          "failure_mode": "textual_tradition_vs_ritual_identity"
+        },
+        {
+          "id": "BENCH-013",
+          "status": "candidate",
+          "ref": "mftl:CAND-KGZ-MANAS-TRILOGY-000001",
+          "failure_mode": "performance_transmission_vs_fixed_text"
+        },
+        {
+          "id": "BENCH-014",
+          "status": "candidate",
+          "ref": "mftl:CAND-MAO-MAUI-000001",
+          "failure_mode": "cross_polynesian_variant_conflation"
+        },
+        {
+          "id": "BENCH-015",
+          "status": "candidate",
+          "ref": "mftl:CAND-MAYA-POPOL-VUH-000001",
+          "failure_mode": "transmitted_text_vs_precolonial_tradition"
+        },
+        {
+          "id": "BENCH-016",
+          "status": "candidate",
+          "ref": "mftl:CAND-PHL-HUDHUD-IFUGAO-000001",
+          "failure_mode": "performance_context_vs_textual_freeze"
+        },
+        {
+          "id": "BENCH-017",
+          "status": "candidate",
+          "ref": "mftl:CAND-SAKHA-OLONKHO-000001",
+          "failure_mode": "oral_performance_vs_literary_canon"
+        },
+        {
+          "id": "BENCH-018",
+          "status": "candidate",
+          "ref": "mftl:CAND-SAS-DURGA-MAHISHA-000001",
+          "failure_mode": "textual_iconographic_variant_conflation"
+        },
+        {
+          "id": "BENCH-019",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#2",
+          "failure_mode": "ritual_sacrifice_vs_violent_death"
+        },
+        {
+          "id": "BENCH-020",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#4",
+          "failure_mode": "apotropaic_interpretation_vs_funerary_symbolism"
+        },
+        {
+          "id": "BENCH-021",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#5",
+          "failure_mode": "famous_interpretation_vs_new_taphonomic_evidence"
+        },
+        {
+          "id": "BENCH-022",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#6",
+          "failure_mode": "modern_category_vs_historical_function"
+        },
+        {
+          "id": "BENCH-023",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#7",
+          "failure_mode": "legacy_excavation_story_vs_forensic_evidence"
+        },
+        {
+          "id": "BENCH-024",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#8",
+          "failure_mode": "ritual_interpretation_vs_practical_deposition"
+        },
+        {
+          "id": "BENCH-025",
+          "status": "research_issue",
+          "ref": "github:rocksoul-mftl#9",
+          "failure_mode": "counter_witchcraft_vs_generic_protection_label"
+        }
+      ],
+      "drift_records": [
+        {
+          "schema_version": "narrative-drift.v0.1",
+          "id": "DRIFT-JERUSALEM-MARK13-001",
+          "subject_ref": "mftl:MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+          "title": "Mark 13:2 — text to historical-comparison drift",
+          "stages": [
+            {
+              "id": "STAGE-TEXT-GREEK",
+              "layer": "exact_text",
+              "ref": "rgbl:mw:passage:sblgnt:v1-2:mark:13:2",
+              "scope": "Exact Greek corpus passage identity; no historical verdict."
+            },
+            {
+              "id": "STAGE-TEXT-ENGLISH",
+              "layer": "translation",
+              "ref": "rgbl:mw:passage:web-classic:2020:mar:13:2",
+              "scope": "English translation expression of the passage; translation choices remain inspectable."
+            },
+            {
+              "id": "STAGE-STORY",
+              "layer": "narrative_analysis",
+              "ref": "mftl:MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+              "scope": "MFTL extracts a prediction narrative and chronology-sensitive claims."
+            },
+            {
+              "id": "STAGE-EVENT",
+              "layer": "historical_comparison",
+              "ref": "legend:EVT-JERUSALEM-SECOND-TEMPLE-DESTRUCTION-70",
+              "scope": "Independent historical event used for comparison; correspondence is not fulfillment."
+            }
+          ],
+          "drift_observations": [
+            {
+              "from": "STAGE-TEXT-GREEK",
+              "to": "STAGE-TEXT-ENGLISH",
+              "dimension": "language",
+              "change": "Corpus expression changes language while passage identity is preserved.",
+              "risk": "translation_choice"
+            },
+            {
+              "from": "STAGE-TEXT-ENGLISH",
+              "to": "STAGE-STORY",
+              "dimension": "interpretive_scope",
+              "change": "Exact wording becomes an extracted narrative/claim model.",
+              "risk": "analysis_added"
+            },
+            {
+              "from": "STAGE-STORY",
+              "to": "STAGE-EVENT",
+              "dimension": "historical_relation",
+              "change": "Narrative is compared with an independently modeled event.",
+              "risk": "correspondence_misread_as_causation_or_fulfillment"
+            }
+          ],
+          "guardrails": [
+            "TEXTUAL ATTESTATION ≠ EMPIRICAL PROOF",
+            "CORRESPONDENCE ≠ CAUSATION",
+            "CORRESPONDENCE ≠ SUPERNATURAL FULFILLMENT",
+            "DATE OF TEXT RELATIVE TO EVENT REMAINS A SEPARATE CLAIM"
+          ]
+        }
+      ],
+      "research_queue": [
+        {
+          "id": "PIPE-active",
+          "name": "16 candidate(s)",
+          "status": "active",
+          "region": "multi-region",
+          "candidate_type": "aggregate pipeline",
+          "source_count": 0,
+          "authorities": [],
+          "discovered_at": "2026-09-08T04:18:00Z"
+        },
+        {
+          "id": "PIPE-merged",
+          "name": "1 candidate(s)",
+          "status": "merged",
+          "region": "multi-region",
+          "candidate_type": "aggregate pipeline",
+          "source_count": 0,
+          "authorities": [],
+          "discovered_at": "2026-09-08T04:18:00Z"
+        }
+      ],
+      "coverage_points": [
+        {
+          "id": "MYTH-MES-INANA-DESCENT-000001",
+          "label": "Inana's Descent to the Netherworld",
+          "kind": "canonical",
+          "region": "Mesopotamia / Sumer",
+          "lat": 32.5,
+          "lon": 44,
+          "estimated": true
+        },
+        {
+          "id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+          "label": "Temple Destruction Prediction in Mark 13:2",
+          "kind": "canonical",
+          "region": "Jerusalem / Roman Judaea narrative setting",
+          "lat": 31.78,
+          "lon": 35.23,
+          "estimated": true
+        },
+        {
+          "id": "REGION-Polynesia / Hawaiʻi",
+          "label": "Polynesia / Hawaiʻi",
+          "kind": "candidate",
+          "region": "Polynesia / Hawaiʻi",
+          "lat": 20.8,
+          "lon": -156.3,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Polynesia / Aotearoa New Zealand",
+          "label": "Polynesia / Aotearoa New Zealand",
+          "kind": "candidate",
+          "region": "Polynesia / Aotearoa New Zealand",
+          "lat": -41,
+          "lon": 174,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Southeast Asia / Bali",
+          "label": "Southeast Asia / Bali",
+          "kind": "candidate",
+          "region": "Southeast Asia / Bali",
+          "lat": -8.4,
+          "lon": 115.2,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Africa / West and Central Africa / African Atlantic",
+          "label": "Africa / West and Central Africa / African Atlantic",
+          "kind": "candidate",
+          "region": "Africa / West and Central Africa / African Atlantic",
+          "lat": 5,
+          "lon": 10,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-East Asia / Japan",
+          "label": "East Asia / Japan",
+          "kind": "candidate",
+          "region": "East Asia / Japan",
+          "lat": 36,
+          "lon": 138,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Mesoamerica / Maya highlands",
+          "label": "Mesoamerica / Maya highlands",
+          "kind": "candidate",
+          "region": "Mesoamerica / Maya highlands",
+          "lat": 15.2,
+          "lon": -91,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Middle East / Mesopotamia / Sumer",
+          "label": "Middle East / Mesopotamia / Sumer",
+          "kind": "candidate",
+          "region": "Middle East / Mesopotamia / Sumer",
+          "lat": 32.5,
+          "lon": 44,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-East Asia / China",
+          "label": "East Asia / China",
+          "kind": "candidate",
+          "region": "East Asia / China",
+          "lat": 35,
+          "lon": 103,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-South Asia / India",
+          "label": "South Asia / India",
+          "kind": "candidate",
+          "region": "South Asia / India",
+          "lat": 22,
+          "lon": 79,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Oceania / Australia / Indigenous Australia",
+          "label": "Oceania / Australia / Indigenous Australia",
+          "kind": "candidate",
+          "region": "Oceania / Australia / Indigenous Australia",
+          "lat": -25,
+          "lon": 134,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Arctic / Inuit regions",
+          "label": "Arctic / Inuit regions",
+          "kind": "candidate",
+          "region": "Arctic / Inuit regions",
+          "lat": 67,
+          "lon": -100,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Europe / Ireland",
+          "label": "Europe / Ireland",
+          "kind": "candidate",
+          "region": "Europe / Ireland",
+          "lat": 53,
+          "lon": -8,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Europe / Finland and Karelia",
+          "label": "Europe / Finland and Karelia",
+          "kind": "candidate",
+          "region": "Europe / Finland and Karelia",
+          "lat": 63,
+          "lon": 30,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Central Asia / Kyrgyzstan",
+          "label": "Central Asia / Kyrgyzstan",
+          "kind": "candidate",
+          "region": "Central Asia / Kyrgyzstan",
+          "lat": 41,
+          "lon": 75,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-North Asia / Sakha Republic (Yakutia)",
+          "label": "North Asia / Sakha Republic (Yakutia)",
+          "kind": "candidate",
+          "region": "North Asia / Sakha Republic (Yakutia)",
+          "lat": 66,
+          "lon": 129,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-Southeast Asia / Philippines / Ifugao",
+          "label": "Southeast Asia / Philippines / Ifugao",
+          "kind": "candidate",
+          "region": "Southeast Asia / Philippines / Ifugao",
+          "lat": 16.8,
+          "lon": 121,
+          "estimated": true,
+          "status": "coverage"
+        },
+        {
+          "id": "REGION-South America / Colombia / Muisca highlands",
+          "label": "South America / Colombia / Muisca highlands",
+          "kind": "candidate",
+          "region": "South America / Colombia / Muisca highlands",
+          "lat": 4.7,
+          "lon": -74.1,
+          "estimated": true,
+          "status": "coverage"
+        }
+      ],
+      "freshness_events": [
+        {
+          "type": "corpus_index",
+          "id": "corpus-index.v0.5",
+          "label": "Research Observatory snapshot",
+          "date": "2026-09-08T04:18:00Z",
+          "age_days": 0
+        },
+        {
+          "type": "canonical_record",
+          "id": "MYTH-MES-INANA-DESCENT-000001",
+          "label": "Inana's Descent to the Netherworld",
+          "date": "2026-09-07T21:28:21Z",
+          "age_days": 1
+        },
+        {
+          "type": "canonical_record",
+          "id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+          "label": "Temple Destruction Prediction in Mark 13:2",
+          "date": "2026-09-07T21:28:21Z",
+          "age_days": 1
+        }
+      ],
+      "research_velocity": [
+        {
+          "date": "2026-09-07",
+          "total": 36,
+          "types": {
+            "candidate": 16,
+            "canonical_record": 2,
+            "claim": 8,
+            "evidence": 10
+          }
+        },
+        {
+          "date": "2026-09-08",
+          "total": 1,
+          "types": {
+            "observatory_release": 1
+          }
+        }
+      ],
+      "cross_repo_refs": [
+        {
+          "ref": "mftl:MYTH-MES-INANA-DESCENT-000001",
+          "domain": "mftl",
+          "source_record_id": "MYTH-MES-INANA-DESCENT-000001"
+        },
+        {
+          "ref": "legend:EVT-JERUSALEM-SECOND-TEMPLE-DESTRUCTION-70",
+          "domain": "legend",
+          "source_record_id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001"
+        },
+        {
+          "ref": "rgbl:mw:content:sblgnt:v1-2:mark:13:2",
+          "domain": "rgbl",
+          "source_record_id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001"
+        },
+        {
+          "ref": "rgbl:mw:content:web-classic:2020:mar:13:2",
+          "domain": "rgbl",
+          "source_record_id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001"
+        },
+        {
+          "ref": "mftl:MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001",
+          "domain": "mftl",
+          "source_record_id": "MYTH-JERUSALEM-TEMPLE-DESTRUCTION-PROPHECY-000001"
+        }
+      ],
+      "conspiracy": {
+        "integrity_code": "E17",
+        "lane_active": true,
+        "lane": {
+          "id": "conspiracy-narrative",
+          "candidate_type": "conspiracy_narrative",
+          "region_hint": "global",
+          "tradition_hint": "conspiracy, rumor, and misinformation studies",
+          "queries": [
+            "conspiracy narrative misinformation rumor historical transmission",
+            "conspiracy theory narrative evidence misinformation social history"
+          ],
+          "guardrail": "Study the existence, transmission, evidence, counterevidence, and social history of the narrative. Never treat the conspiracy claim as established merely because it is widespread."
+        },
+        "staged_candidates": []
+      },
+      "confidence_distribution": {
+        "0–59": 0,
+        "60–84": 0,
+        "85–94": 1,
+        "95–100": 7
+      }
+    }
+  }
+}

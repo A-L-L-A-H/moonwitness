@@ -1,0 +1,13 @@
+[package]
+name = "mtime-observation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+mtime-integrity = { path = "../mtime-integrity" }
+mtime-core = { path = "../mtime-core" }
+
+[lints]
+workspace = true

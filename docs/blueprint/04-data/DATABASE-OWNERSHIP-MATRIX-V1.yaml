@@ -1,0 +1,36 @@
+version: 1
+status: design-locked
+principle: no_shared_database_ownership
+stores:
+  control_state:
+    owner: moonwitness-runtime
+    technology: postgresql
+    environment: development-neon-or-supabase
+    production: postgresql-compatible-on-vps
+    contains: [workflow_state, job_state, scheduling_metadata]
+  knowledge_store:
+    owner: moonwitness-corpus
+    technology: sqlite-artifacts-and-postgresql-where-required
+    environment: build-and-release
+    contains: [source_registry, editions, materialized_corpus, quality_metadata]
+  intelligence_state:
+    owner: moonwitness-cosmic
+    technology: postgresql-compatible
+    contains: [analysis_runs, cacheable_results, engine_state_where_required]
+  application_state:
+    owner: application-repository
+    technology: postgresql-compatible
+    rule: application_owned_only_when_domain_specific
+  object_artifacts:
+    owner: capability-that-produces-artifact
+    technology: s3-compatible-object-storage
+    contains: [exports, reports, media, release_artifacts, large_payloads]
+rules:
+  - no_cross_repository_table_access
+  - no_business_logic_in_database_triggers
+  - migrations_owned_by_store_owner
+  - schema_changes_require_contract_impact_review
+  - read_access_must_use_owner_api_or_published_artifact
+  - credentials_are_environment_secrets
+  - transient_cache_is_not_source_of_truth
+  - immutable_release_artifacts_are_content_addressed

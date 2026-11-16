@@ -1,0 +1,43 @@
+status: PASS_WITH_NOTES
+repository: ArsyBelovedLabs/moonwitness-crayon-lab
+branch: dev
+base_commit: 9fbe573f8ec891b995cd9ad77e576a52f590a958
+head_commit: 240e7827fafaf8c701b10fc89af5e213af9f69bb
+blueprint_refs:
+  - 17-genesis/WAVE-0-MULTI-REPO-EXECUTION-PACKETS-V1.md
+  - 17-genesis/IMPLEMENTATION-HANDOFF-CONTRACT-V1.md
+  - 07-ui-ux/EXPERIENCE-CONSTITUTION-V1.md
+  - 16-repositories/DEPENDENCY-DIRECTION.yaml
+adrs: []
+changed_paths:
+  - .github/workflows/ci.yml
+  - docs/GENESIS-W0-13-WORKER-REPORT.yaml
+migration_actions:
+  preserve:
+    - application-owned research-lab composition
+    - existing shell/package boundary
+    - no duplicated canonical methodology or reusable UI ownership
+    - no direct database ownership in the application shell
+  extract: []
+  adapt:
+    - CI now verifies the actual package tarball produced by pnpm pack
+  rewrite: []
+  deprecate: []
+  archive: []
+verification:
+  install: PASS
+  lint: PASS
+  typecheck: PASS
+  unit: PASS
+  build: PASS
+  package_portability: PASS
+  architecture: PASS
+  security: PASS
+  serverless_smoke: SKIPPED_NOT_APPLICABLE
+  docker_smoke: SKIPPED_NOT_APPLICABLE
+compatibility_notes:
+  - PR #2 CI run 33435309555 passed frozen install, lint, typecheck, tests, build, package-tarball portability, architecture, and security.
+  - W0-08 API and W0-10 frontend-platform dependency gates are complete before this certification.
+  - The current repository contract is a private TypeScript research-lab compositional shell package with no serverless or Docker runtime adapter; runtime smoke is therefore not fabricated at Wave 0.
+remaining_risks:
+  - GitHub main branch protection remains an organization-wide governance evidence gap that cannot be applied through the currently available connector/plan path.

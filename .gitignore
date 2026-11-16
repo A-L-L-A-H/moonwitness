@@ -12,6 +12,8 @@ next-env.d.ts
 
 # turbo
 .turbo/
+.vinext/
+.cloudflare/
 
 # testing
 coverage/
@@ -90,3 +92,6 @@ apps/rocksoul/src-tauri/target/
 apps/rocksoul/shots/
 apps/rocksoul/test-results/
 apps/rocksoul/.taste-skill/
+
+# Local raw image scratch mockups (optimized deliverables live in apps/web/public/art)
+vibe_images/

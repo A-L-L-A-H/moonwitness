@@ -1,0 +1,377 @@
+[
+  {
+    "prophet_id": "adam",
+    "prophet_name": "Ādam",
+    "data_confidence_score": 76.63,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 0.45,
+      "mission_evidence": 0.8187500000000001,
+      "name_root_confidence": 0.75,
+      "asma_relation_quality": 0.9564
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "idris",
+    "prophet_name": "Idrīs",
+    "data_confidence_score": 74.59,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.5375,
+      "name_root_confidence": 0.5,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "nuh",
+    "prophet_name": "Nūḥ",
+    "data_confidence_score": 99.58,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.9791
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "hud",
+    "prophet_name": "Hūd",
+    "data_confidence_score": 83.15,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.83125,
+      "name_root_confidence": 0.5,
+      "asma_relation_quality": 0.9564
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "salih",
+    "prophet_name": "Ṣāliḥ",
+    "data_confidence_score": 94.14,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 0.9,
+      "status_evidence": 1,
+      "mission_evidence": 0.95625,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "ibrahim",
+    "prophet_name": "Ibrāhīm",
+    "data_confidence_score": 86.69,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 0.5,
+      "asma_relation_quality": 0.9791
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "lut",
+    "prophet_name": "Lūṭ",
+    "data_confidence_score": 91.95,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.95625,
+      "name_root_confidence": 0.75,
+      "asma_relation_quality": 0.9163
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "ismail",
+    "prophet_name": "Ismāʿīl",
+    "data_confidence_score": 87.4,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.59375,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "ishaq",
+    "prophet_name": "Isḥāq",
+    "data_confidence_score": 77.77,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.33125,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "yaqub",
+    "prophet_name": "Yaʿqūb",
+    "data_confidence_score": 87.31,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.7875000000000001,
+      "name_root_confidence": 0.75,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "yusuf",
+    "prophet_name": "Yūsuf",
+    "data_confidence_score": 98.27,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.9163
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "ayyub",
+    "prophet_name": "Ayyūb",
+    "data_confidence_score": 80.7,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.83125,
+      "name_root_confidence": 0.5,
+      "asma_relation_quality": 0.82365
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "shuayb",
+    "prophet_name": "Shuʿayb",
+    "data_confidence_score": 90.02,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 0.75,
+      "asma_relation_quality": 0.7881999999999999
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "musa",
+    "prophet_name": "Mūsā",
+    "data_confidence_score": 85.13,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 0.5,
+      "asma_relation_quality": 0.8940999999999999
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "harun",
+    "prophet_name": "Hārūn",
+    "data_confidence_score": 81.43,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.83125,
+      "name_root_confidence": 0.5,
+      "asma_relation_quality": 0.8615
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "dhulkifl",
+    "prophet_name": "Dhū al-Kifl",
+    "data_confidence_score": 65.96,
+    "band": "MODERATE",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 0.25,
+      "mission_evidence": 0.58125,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "dawud",
+    "prophet_name": "Dāwūd",
+    "data_confidence_score": 98.59,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.93145
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "sulayman",
+    "prophet_name": "Sulaymān",
+    "data_confidence_score": 94.5,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.95625,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.7881999999999999
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "ilyas",
+    "prophet_name": "Ilyās",
+    "data_confidence_score": 92.84,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.875,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.7881999999999999
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "alyasa",
+    "prophet_name": "Al-Yasaʿ",
+    "data_confidence_score": 77.77,
+    "band": "STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.33125,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.8591
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "yunus",
+    "prophet_name": "Yūnus",
+    "data_confidence_score": 96.22,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.82485
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "zakariya",
+    "prophet_name": "Zakariyyā",
+    "data_confidence_score": 94.5,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.95625,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.7881999999999999
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "yahya",
+    "prophet_name": "Yaḥyā",
+    "data_confidence_score": 88.38,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 1,
+      "status_evidence": 1,
+      "mission_evidence": 0.75,
+      "name_root_confidence": 0.75,
+      "asma_relation_quality": 0.9587
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "isa",
+    "prophet_name": "ʿĪsā",
+    "data_confidence_score": 93.14,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 0.85,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.82485
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  },
+  {
+    "prophet_id": "muhammad",
+    "prophet_name": "Muḥammad",
+    "data_confidence_score": 95.97,
+    "band": "VERY_STRONG",
+    "calibration_status": "UNCALIBRATED",
+    "components": {
+      "rid_evidence": 0.85,
+      "status_evidence": 1,
+      "mission_evidence": 1,
+      "name_root_confidence": 1,
+      "asma_relation_quality": 0.9579333333333334
+    },
+    "note": "Data-confidence only; never interpret as rank, holiness, or worth of a prophet."
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {"domain":"finance","case":"background balance refresh","class":"low","input":{"relevance":0.20,"impact":0.05,"urgency":0.05,"uncertainty":0.05}},
+  {"domain":"finance","case":"large irreversible settlement exception","class":"high","input":{"relevance":0.98,"impact":0.96,"urgency":0.82,"uncertainty":0.35}},
+  {"domain":"communication","case":"routine newsletter archive","class":"low","input":{"relevance":0.18,"impact":0.06,"urgency":0.05,"uncertainty":0.03}},
+  {"domain":"communication","case":"externally sent legal correction","class":"high","input":{"relevance":0.94,"impact":0.78,"urgency":0.80,"uncertainty":0.32}},
+  {"domain":"files","case":"autosave metadata","class":"low","input":{"relevance":0.16,"impact":0.04,"urgency":0.03,"uncertainty":0.02}},
+  {"domain":"files","case":"recursive delete with expiring restore window","class":"high","input":{"relevance":0.96,"impact":0.88,"urgency":0.76,"uncertainty":0.28}},
+  {"domain":"operations","case":"periodic healthy scrape","class":"low","input":{"relevance":0.15,"impact":0.04,"urgency":0.04,"uncertainty":0.03}},
+  {"domain":"operations","case":"partial production deploy with unknown fleet state","class":"high","input":{"relevance":1.00,"impact":0.92,"urgency":0.95,"uncertainty":0.78}},
+  {"domain":"approval","case":"draft purchase note","class":"low","input":{"relevance":0.22,"impact":0.08,"urgency":0.04,"uncertainty":0.04}},
+  {"domain":"approval","case":"high-value final approval with conflicted prerequisite","class":"high","input":{"relevance":0.97,"impact":0.90,"urgency":0.70,"uncertainty":0.72}},
+  {"domain":"ai","case":"formatting suggestion","class":"low","input":{"relevance":0.20,"impact":0.05,"urgency":0.02,"uncertainty":0.12}},
+  {"domain":"ai","case":"agent-proposed schema migration requiring human commitment","class":"high","input":{"relevance":0.95,"impact":0.86,"urgency":0.58,"uncertainty":0.62}}
+]

@@ -1,23 +1,38 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  DiamondStarOrnament,
+  DnaBadge,
+  DnaButton,
+  SacredCornerBrackets,
+} from "@moonwitness/ui/imperium";
+import { ECOSYSTEM_RUNTIME_CATALOG } from "@/data/empire-canon-codex";
 import {
   DOCK_TELEMETRY_NODES,
   WORLD_DOMAINS,
   type DockNodeTelemetry,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { useEcosystemTelemetry } from "@/lib/use-ecosystem-telemetry";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
 import { WorldEmblemById } from "./sacred-icons";
-import {
-  AstrolabeOrreryMap,
-  GatewayWaveformSvg,
-  SacredCornerBrackets,
-} from "./sacred-illustrations";
+import { AstrolabeOrreryMap, GatewayWaveformSvg } from "./sacred-illustrations";
+
+const CONFIGURED_WEB_URL = process.env.NEXT_PUBLIC_WEB_URL?.replace(/\/+$/, "") ?? null;
+
+const LOCAL_WEB_ROUTES: readonly { readonly href: string; readonly label: string }[] = [
+  { href: "/dock", label: "Chronicle Dock" },
+  { href: "/mission-control", label: "Command Center" },
+  { href: "/intelligence", label: "RIOT Intelligence" },
+  { href: "/skin-lab", label: "7-DNA Skin Lab" },
+];
 
 type DockFilterState = "ALL" | DockNodeTelemetry["state"];
 
@@ -35,6 +50,8 @@ export function DockMatrixSection({
   readonly quietMode?: boolean;
   readonly onLaunchWorld: (worldId: WorldIdentifier) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
+  const telemetry = useEcosystemTelemetry();
   const [filterState, setFilterState] = useState<DockFilterState>("ALL");
   const [selectedNodeCode, setSelectedNodeCode] = useState<string>(
     DOCK_TELEMETRY_NODES[0]?.nodeCode ?? "GATE-01",
@@ -101,11 +118,12 @@ export function DockMatrixSection({
               id="dock-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              THE DOCK · SOVEREIGN MATRIX
+              {locale === "id" ? "DERMAGA · MATRIKS BERDAULAT" : "THE DOCK · SOVEREIGN MATRIX"}
             </h2>
             <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
-              Interactive heliocentric astrolabe plotting the five Empire gateways around one
-              monocentric light core. Select any orbital node to lock sextant telemetry and launch.
+              {locale === "id"
+                ? "Astrolabe heliosentris interaktif yang memetakan lima gerbang ekosistem di sekitar satu inti cahaya monosentris. Pilih titik orbit untuk membaca telemetri."
+                : "Interactive heliocentric astrolabe plotting the five Empire gateways around one monocentric light core. Select any orbital node to lock sextant telemetry and launch."}
             </p>
 
             {/* Filter by Gateway Class */}
@@ -117,19 +135,17 @@ export function DockMatrixSection({
               {DOCK_FILTER_OPTIONS.map((option) => {
                 const isActive = filterState === option.id;
                 return (
-                  <button
+                  <DnaButton
                     key={option.id}
-                    type="button"
+                    tone="secondary"
                     aria-pressed={isActive}
                     onClick={() => handleSelectFilter(option.id)}
-                    className={`min-h-[44px] border px-4 py-1.5 font-mono text-[11px] tracking-[0.18em] uppercase transition-colors cursor-pointer ${
-                      isActive
-                        ? "border-[#f8eac6] bg-[#d6b46c]/20 text-[#fff6df] shadow-[0_0_20px_rgba(223,192,123,0.22)]"
-                        : "border-[#d6b46c]/30 bg-[#080b14] text-[#c8beaa] hover:border-[#d6b46c]/65 hover:text-[#fff6df]"
+                    className={`px-4.5 py-1.5 text-[11px] tracking-[0.18em] uppercase ${
+                      isActive ? "text-[#fff6df]" : "text-[#c8beaa] hover:text-[#fff6df]"
                     }`}
                   >
                     {option.label}
-                  </button>
+                  </DnaButton>
                 );
               })}
             </div>
@@ -176,11 +192,7 @@ export function DockMatrixSection({
                       role="tab"
                       aria-selected={isSelected}
                       onClick={() => handleSelectNode(node.nodeCode)}
-                      className={`min-h-[54px] border px-2.5 py-2 text-left transition-all cursor-pointer ${
-                        isSelected
-                          ? "border-[#fff4d2] bg-[#d6b46c]/20 shadow-[0_0_24px_rgba(223,192,123,0.2)]"
-                          : "border-[#d6b46c]/25 bg-[#080b14]/90 hover:border-[#d6b46c]/55"
-                      }`}
+                      className="btn-luxe-secondary min-h-[54px] px-3 py-2 text-left cursor-pointer"
                     >
                       <div className="flex items-center justify-between font-mono text-[9.5px] text-[#dfc07b]">
                         <span>{node.nodeCode}</span>
@@ -200,7 +212,7 @@ export function DockMatrixSection({
 
               {/* Active Gateway Beveled Telemetry Aperture */}
               <SpatialTiltCard disabled={quietMode} maxTiltDeg={2.8}>
-                <div className="octa-bevel-shell relative border border-[#e6c987]/45 bg-gradient-to-br from-[#0e1322] via-[#070a13] to-[#05060b] p-6 sm:p-8 shadow-[0_24px_65px_rgba(0,0,0,0.88)]">
+                <div className="octa-bevel-shell relative p-6 sm:p-8">
                   <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-4 font-mono text-[11px] text-[#d6b46c]">
                     <span>TELEMETRY LOCK // {activeNode.nodeCode}</span>
                     <span className="inline-flex items-center gap-1.5 text-[#f7dfa0]">
@@ -269,10 +281,193 @@ export function DockMatrixSection({
                     <button
                       type="button"
                       onClick={() => onLaunchWorld(activeNode.worldId)}
-                      className="btn-chamfer font-monument px-7 py-2.5 text-xs tracking-[0.2em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
+                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs tracking-[0.2em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
                     >
-                      ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;
+                      <DiamondStarOrnament className="h-2.5 w-2.5 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
+                      <span>ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;</span>
                     </button>
+                  </div>
+
+                  {/* Live Multi-Node Observatory, Cloudflare Edges & Portal Bridges */}
+                  <div className="mt-5 border-t border-[#d6b46c]/20 pt-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
+                      <span className="text-[#dfc07b]">ECOSYSTEM TOPOLOGY BRIDGE</span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`border px-2 py-0.5 ${
+                            telemetry.status === "online"
+                              ? "border-[#e6c987]/55 bg-[#d6b46c]/15 text-[#fff6df]"
+                              : "border-[#d6b46c]/25 bg-[#080a12] text-[#d8ceba]"
+                          }`}
+                        >
+                          {telemetry.status === "checking"
+                            ? "PROBING ECOSYSTEM…"
+                            : telemetry.status === "online"
+                              ? `API ONLINE · DB:${(telemetry.databaseStatus ?? "OK").toUpperCase()} · ${telemetry.timelineTotal ?? 0} EVENTS · ${telemetry.erasCount ?? 0} ERAS`
+                              : telemetry.runtimeMode === "cloudflare-edge"
+                                ? "CLOUDFLARE EDGE · ORIGIN API STANDBY"
+                                : "CANON SPEC MODE · LOCAL API STANDBY"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={telemetry.refresh}
+                          disabled={telemetry.refreshing}
+                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[#f5dfa6] hover:text-white disabled:opacity-50 cursor-pointer"
+                        >
+                          {telemetry.refreshing ? "PROBING…" : "REFRESH"}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Real Live Public Cloudflare Edge Portals */}
+                    <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 font-mono text-[10px]">
+                      {ECOSYSTEM_RUNTIME_CATALOG.liveEdges
+                        .filter((edge) => edge.id !== "sanctuary")
+                        .map((edge) => {
+                          const liveProbe = telemetry.edges.find((e) => e.id === edge.id);
+                          const isUp = liveProbe?.status === "online";
+                          return (
+                            <a
+                              key={edge.id}
+                              href={edge.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between border border-[#d6b46c]/30 bg-[#090d18] px-3 py-2 text-[#fff6df] hover:border-[#fff4d2] hover:bg-[#12182b] transition-colors"
+                            >
+                              <div className="min-w-0 pr-2">
+                                <div className="font-bold truncate">{edge.hostname} ↗</div>
+                                <div className="text-[9.5px] text-[#cfc5b0] truncate">
+                                  {edge.workerName}
+                                </div>
+                              </div>
+                              <span
+                                className={`shrink-0 border px-1.5 py-0.5 text-[9.5px] ${
+                                  isUp
+                                    ? "border-[#e6c987]/55 bg-[#d6b46c]/20 text-[#fff8e6]"
+                                    : "border-[#d6b46c]/25 bg-[#080a12] text-[#cfc5b0]"
+                                }`}
+                              >
+                                {liveProbe
+                                  ? isUp
+                                    ? `LIVE · ${liveProbe.latencyMs ?? 0}ms`
+                                    : liveProbe.status.toUpperCase()
+                                  : "EDGE"}
+                              </span>
+                            </a>
+                          );
+                        })}
+                    </div>
+
+                    {telemetry.services.length > 0 && (
+                      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 font-mono text-[10px]">
+                        {telemetry.services.map((svc) => (
+                          <div
+                            key={svc.id}
+                            className={`border px-2.5 py-1.5 ${
+                              svc.status === "online"
+                                ? "border-[#e6c987]/45 bg-[#d6b46c]/10 text-[#fff6df]"
+                                : svc.status === "degraded"
+                                  ? "border-[#e6c987]/35 bg-[#1a1408] text-[#f5dfa6]"
+                                  : "border-[#d6b46c]/20 bg-[#060911] text-[#cfc5b0]"
+                            }`}
+                          >
+                            <div className="font-bold tracking-[0.04em]">
+                              {svc.name.toUpperCase()}
+                            </div>
+                            <div className="mt-0.5 text-[10px]">
+                              {svc.status === "online"
+                                ? `ONLINE · ${svc.latencyMs ?? 0}ms`
+                                : telemetry.runtimeMode === "cloudflare-edge"
+                                  ? "LOCAL STACK"
+                                  : svc.status.toUpperCase()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {telemetry.git?.available && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 border border-[#d6b46c]/20 bg-[#060911] px-3 py-2 font-mono text-[10px] text-[#e0d7c4]">
+                        <span>
+                          GIT WORKSPACE:{" "}
+                          <strong className="text-[#fff6df]">
+                            {telemetry.git.branch ?? "HEAD"} ({telemetry.git.headShort ?? "—"})
+                          </strong>
+                        </span>
+                        <span className="text-[#f5dfa6]">
+                          {telemetry.git.dirtyCount > 0
+                            ? `${telemetry.git.dirtyCount} CHANGED FILES`
+                            : "CLEAN TREE"}
+                          {telemetry.git.lastCommitSubject
+                            ? ` · ${telemetry.git.lastCommitSubject}`
+                            : ""}
+                        </span>
+                      </div>
+                    )}
+
+                    {telemetry.codexGovernance?.source === "cloudflare-d1" && (
+                      <div className="border border-[#d6b46c]/25 bg-[#060911] px-3 py-2.5 space-y-1.5 font-mono text-[10px]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[#dfc07b]">
+                          <span>CLOUDFLARE D1 · SOVEREIGN-CODEX-DB LIVE</span>
+                          <span className="text-[#fff6df]">
+                            {telemetry.codexGovernance.milestonesCount} MILESTONES ·{" "}
+                            {telemetry.codexGovernance.tasksCount} TASKS ·{" "}
+                            {telemetry.codexGovernance.docsCount} DOCS ·{" "}
+                            {telemetry.codexGovernance.releasesCount} RELEASES
+                          </span>
+                        </div>
+                        {telemetry.codexGovernance.latestReleases.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 text-[9.5px] text-[#e0d7c4]">
+                            {telemetry.codexGovernance.latestReleases.slice(0, 2).map((rel) => (
+                              <DnaBadge
+                                key={rel.tag}
+                                className="font-mono text-[9.5px] text-[#f5dfa6]"
+                              >
+                                {rel.tag} ({rel.channel})
+                              </DnaBadge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Link
+                        href="/scriptures"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#f5dfa6] uppercase"
+                      >
+                        4-SCRIPTURE STUDIO &rsaquo;
+                      </Link>
+                      <Link
+                        href="/mtime"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#f5dfa6] uppercase"
+                      >
+                        M-TIME OBSERVATORY &rsaquo;
+                      </Link>
+                      <Link
+                        href="/codex"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase"
+                      >
+                        CODEX DOORS &rsaquo;
+                      </Link>
+                    </div>
+
+                    {(CONFIGURED_WEB_URL ||
+                      telemetry.services.find((s) => s.id === "web")?.status === "online") && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {LOCAL_WEB_ROUTES.map((link) => (
+                          <a
+                            key={link.href}
+                            href={`${CONFIGURED_WEB_URL ?? "http://localhost:3000"}${link.href}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase hover:text-[#fff6df]"
+                          >
+                            {link.label} ↗
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </SpatialTiltCard>

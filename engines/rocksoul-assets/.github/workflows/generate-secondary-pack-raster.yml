@@ -1,0 +1,57 @@
+name: Generate Secondary Pack Raster
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "moonwitness/asset-packs.json"
+      - "moonwitness/icons/svg/**"
+      - "moonwitness/icons/icons.json"
+      - "moonwitness/dashboard-pack/widgets/**"
+      - "moonwitness/dashboard-pack/dashboard-pack.json"
+      - "moonwitness/data-viz/charts/**"
+      - "moonwitness/data-viz/data-viz.json"
+      - "moonwitness/hero-backgrounds/svg/**"
+      - "moonwitness/hero-backgrounds/backgrounds.json"
+      - "moonwitness/state-illustrations/svg/**"
+      - "moonwitness/state-illustrations/states.json"
+      - "moonwitness/motion/svg/**"
+      - "moonwitness/motion/motion.json"
+      - "moonwitness/*-pack/svg/**"
+      - "moonwitness/*-pack/manifest.json"
+      - "moonwitness/ui/v2/*.svg"
+      - "moonwitness/ui/v2/manifest.json"
+      - "tools/assets/render-packs.py"
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Install renderer
+        run: python -m pip install --disable-pip-version-check cairosvg==2.7.1
+      - name: Render PNG derivatives
+        run: python tools/assets/render-packs.py
+      - name: Commit derivatives
+        run: |
+          git config user.name "moonwitness-assets-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A moonwitness
+          if git diff --cached --quiet; then
+            echo "No raster changes."
+          else
+            git commit -m "build(assets): generate secondary pack PNG derivatives"
+            for attempt in 1 2 3; do
+              git pull --rebase origin "$GITHUB_REF_NAME"
+              if git push; then break; fi
+              test "$attempt" -lt 3
+              sleep 2
+            done
+          fi

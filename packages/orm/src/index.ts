@@ -10,9 +10,12 @@ export type { BaseMetadata, RecordStatus, RecordSource } from "./base-metadata.j
 export { createActorContext, SYSTEM_ACTOR } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
 export { ConflictError } from "./errors.js";
-export { initDb, closeDb, getDb } from "./driver.js";
+export { initDb, initD1Db, closeDb, getDb } from "./driver.js";
+export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
 export type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
+export { D1Driver, splitSqlStatements } from "./drivers/d1.driver.js";
+export type { D1DatabaseLike, D1PreparedStatementLike } from "./drivers/d1.driver.js";
 export { applyMigrations, listAppliedMigrations } from "./migrations.js";
 export type { Migration } from "./migrations.js";
 export { backupDatabase, restoreDatabase } from "./backup.js";

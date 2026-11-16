@@ -1,0 +1,10 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { buildEvidenceGraph } from '../src/evidence-graph.mjs';
+import { generateCorpusGapReport } from '../src/ingest.mjs';
+import { writeV41Report } from '../src/report-v41.mjs';
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const graph = buildEvidenceGraph(`${root}/data/claims/claims.json`);
+const gap = generateCorpusGapReport(`${root}/data/PROJECT_STATUS_V4.json`, `${root}/outputs/CORPUS_GAP_REPORT.json`);
+const report = writeV41Report(root, graph, gap);
+console.log(JSON.stringify(report, null, 2));

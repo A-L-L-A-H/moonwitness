@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { ArrowRight, Crown } from "../icons";
 import { ModuleGlyph } from "./module-glyph";
 
@@ -19,14 +20,20 @@ export interface ModuleItem {
 export interface ModuleCardProps<T extends ModuleItem = ModuleItem> {
   module: T;
   onOpen: (m: T) => void;
+  art?: ReactNode;
 }
 
-export function ModuleCard<T extends ModuleItem>({ module, onOpen }: ModuleCardProps<T>) {
+export function ModuleCard<T extends ModuleItem>({ module, onOpen, art }: ModuleCardProps<T>) {
   return (
     <button
       onClick={() => onOpen(module)}
-      className="zine-card-rough group flex w-full items-center gap-4 p-4 text-left transition-transform hover:-translate-y-0.5"
+      className="zine-card-rough group relative isolate flex w-full items-center gap-4 overflow-hidden p-4 text-left transition-transform hover:-translate-y-0.5"
     >
+      {art ? (
+        <span aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          {art}
+        </span>
+      ) : null}
       <span
         className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md"
         style={{ background: module.color, color: module.color === "#ffd21f" ? "#111" : "#fff" }}
@@ -50,7 +57,7 @@ export function ModuleCard<T extends ModuleItem>({ module, onOpen }: ModuleCardP
           ))}
         </span>
       </span>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--line)] text-zinc-400 transition-colors group-hover:border-[var(--pink)] group-hover:text-[var(--pink)]">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center border border-[var(--line)] bg-[var(--panel)] text-zinc-400 transition-colors group-hover:border-[var(--pink)] group-hover:text-[var(--pink)]">
         <ArrowRight className="h-4 w-4" />
       </span>
     </button>

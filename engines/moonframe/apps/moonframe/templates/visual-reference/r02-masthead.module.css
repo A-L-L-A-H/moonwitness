@@ -1,0 +1,89 @@
+.masthead {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: clamp(18rem, 48vw, 34rem);
+  align-items: end;
+  overflow: hidden;
+  padding: clamp(1.25rem, 5vw, 4rem);
+  border-block: 2px solid var(--mf-text, #171717);
+  color: var(--mf-text, #171717);
+  background: var(--mf-surface, #fff);
+}
+
+.backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 58rem);
+  padding: clamp(1rem, 3vw, 2rem);
+  background: color-mix(in srgb, var(--mf-surface, #fff) 92%, transparent);
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  max-width: min(16ch, 100%);
+  margin: 0;
+  font-family: var(--mf-display-font, "Arial Black", "Helvetica Neue", sans-serif);
+  font-size: clamp(2.25rem, 9vw, 7rem);
+  font-weight: 900;
+  line-height: 0.98;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.description {
+  max-width: 58ch;
+  margin: 1.25rem 0 0;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 48rem) and (max-width: 70rem) {
+  .masthead {
+    min-height: 30rem;
+    align-items: center;
+    padding: clamp(2rem, 6vw, 4rem);
+  }
+
+  .content {
+    width: min(72%, 46rem);
+    margin-inline-start: auto;
+  }
+
+  .title {
+    font-size: clamp(3.25rem, 7vw, 5.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masthead *,
+  .masthead *::before,
+  .masthead *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -35,8 +35,22 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Cross-World Contrast Gate
+        run: pnpm ui:contrast
+
       - name: Build web
         working-directory: ./apps/web
+        run: pnpm build
+
+      - name: Cross-World Playwright Skin & Console Regression
+        if: env.CI != ''
+        working-directory: ./apps/web
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm exec playwright test --config cross-world-playwright.config.ts
+
+      - name: Build A-L-L-A-H Imperium Sanctuary
+        working-directory: ./apps/a-l-l-a-h
         run: pnpm build
 
       - name: Install Playwright browser

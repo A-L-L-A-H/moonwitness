@@ -1,0 +1,184 @@
+export const metadata = {
+  title: 'Data Ownership & Privacy',
+  description:
+    'How Temps keeps all your data on your own infrastructure and what that means for privacy, compliance, and control.',
+  alternates: {
+    canonical: '/docs/data-ownership-and-privacy',
+  },
+}
+
+export const sections = [
+  { title: 'Your server, your data', id: 'your-server-your-data' },
+  { title: 'What data Temps stores', id: 'what-data-temps-stores' },
+  { title: 'Encryption at rest', id: 'encryption-at-rest' },
+  { title: 'Privacy by design', id: 'privacy-by-design' },
+  { title: 'GDPR and compliance', id: 'gdpr-and-compliance' },
+  { title: 'What Temps does not do', id: 'what-temps-does-not-do' },
+]
+
+# Data Ownership & Privacy
+
+When you self-host Temps, every byte of your data — analytics events, error reports, session recordings, database backups, application logs — stays on your infrastructure. None of it is sent to Temps (the company), third-party analytics services, or any external server. The only thing the binary reports is [anonymous product telemetry](#anonymous-telemetry) — event names, counts, and coarse internal labels (Temps module names, route templates) under a random instance ID. An admin can turn it off in **Settings › Telemetry**, or set `TEMPS_TELEMETRY=0`, and nothing is sent. {{ className: 'lead' }}
+
+---
+
+## Your server, your data {{ anchor: true, id: 'your-server-your-data' }}
+
+Temps is a binary you run on your own server. It stores data in a PostgreSQL database (with TimescaleDB extension) running on that same server. There is no cloud backend, and none of your data — analytics, recordings, errors, logs, backups, credentials — ever leaves your infrastructure. The binary does send [anonymous product telemetry](#anonymous-telemetry) (event names and counts under a random instance ID, disable in **Settings › Telemetry** or with `TEMPS_TELEMETRY=0`), described in full below.
+
+This means:
+
+- **You control data retention** — keep analytics for 1 day or 10 years, your choice
+- **You control access** — only people you grant access to can see your data
+- **You control location** — host in the EU, the US, or anywhere that suits your compliance requirements
+- **You control deletion** — delete data permanently at any time
+
+If you stop using Temps, your data stays on your server. There is no export step, no data request process, and no 30-day deletion window.
+
+---
+
+## What data Temps stores {{ anchor: true, id: 'what-data-temps-stores' }}
+
+All data lives in one PostgreSQL database:
+
+| Data type | What is stored | Where |
+|-----------|---------------|-------|
+| **Analytics events** | Page views, custom events, visitor metadata (country, browser, device, referrer) | TimescaleDB hypertable |
+| **Session recordings** | DOM snapshots captured by rrweb (mouse movements, clicks, scroll, DOM changes) | TimescaleDB |
+| **Error reports** | Stack traces, error messages, browser context, breadcrumbs | PostgreSQL tables |
+| **Deployment logs** | Build output, deploy output, job statuses | Structured JSONL in PostgreSQL |
+| **Application logs** | stdout/stderr from your containers | Docker log driver |
+| **Backups** | Database dumps, service snapshots | S3-compatible storage you provide |
+| **User accounts** | Email, hashed password, role | PostgreSQL tables |
+| **API keys** | Key hash, permissions, name | PostgreSQL tables |
+| **Service credentials** | Database passwords, S3 keys | Encrypted (AES-256-GCM) in PostgreSQL |
+
+### Where data does NOT go
+
+- None of **your** data (analytics events, recordings, error reports, logs, backups, user accounts, credentials) is ever sent to `temps.sh` or any Temps-operated server
+- No data is sent to Google, Facebook, or any advertising network
+- No data is shared with analytics aggregators
+- The `temps upgrade` command checks GitHub for new releases (a public API call with no user data)
+- The binary sends anonymous product telemetry to `telemetry.temps.sh` — event names, counts, and coarse labels only, detailed in the next section. Turn it off in **Settings › Telemetry** or set `TEMPS_TELEMETRY=0` and nothing is sent.
+
+---
+
+## Anonymous product telemetry {{ anchor: true, id: 'anonymous-telemetry' }}
+
+Temps reports anonymous usage events so the maintainers can tell whether the product actually works for self-hosters (e.g. "how many instances attempted a deploy vs. succeeded"). Every event carries only:
+
+- A **random instance ID** generated on your server (`~/.temps/anonymous_id`, or for stateless control planes a random value stored once in your database and shared by every replica) — not derived from your hardware, domain, account, or instance name
+- The **event name** (e.g. `deploy_succeeded`, `instance_heartbeat`) and the Temps version
+- A small bag of **non-identifying properties**: counts, enum labels (build preset, source type), and coarse buckets (RAM tier — never exact specs)
+
+What is **never** sent: emails, IPs, repo names, domains, URLs, environment variables, error messages, stack traces, file paths from your projects, or any free-form user text.
+
+Like any HTTPS request, the ingest server sees the public IP address your server connects from. It looks up a two-letter country code from it, stores only that code, and never stores or logs the IP.
+
+**Settings › Telemetry** in the console shows whether telemetry is on and why, your instance ID, the destination host, and the full list of event types this version can send.
+
+### Error summary
+
+To find and fix bugs that only appear on self-hosted instances, Temps periodically (every 6 hours, only if something went wrong) sends one aggregated `error_summary` event containing **counts** of:
+
+- ERROR-level log events, keyed by the Temps source module that logged them
+- Console-API 5xx responses, keyed by route *template* (`/api/projects/{id}` — never the actual URL you requested)
+- Panics, keyed by source file and line in the Temps codebase
+
+Every key is a compile-time identifier of Temps's own code. The error messages themselves — which can contain your project names, paths, and IDs — are never transmitted.
+
+### Operation outcomes
+
+So the maintainers can see which operations fail most often, Temps reports the outcome of a few operations: backup runs (`backup_succeeded`, `backup_failed`), restores (`restore_succeeded`, `restore_failed`), certificate issuance and renewal (`ssl_certificate_issued`, `ssl_certificate_failed`), and failures when creating a managed service, connecting a git provider, joining a worker node, running a PostgreSQL major upgrade or starting after an upgrade (`upgrade_completed`, `upgrade_failed`).
+
+These events carry only coarse labels: the engine or provider type (`postgres_pgdump`, `github`), a duration band (`1-5m`), a size band (`100MB-1GB`), the from/to Temps release or PostgreSQL major version, and for failures a fixed code such as `timeout`, `authentication` or `disk_exhausted`. The code is picked on your server from the error; the error message itself is never sent.
+
+### Opting out
+
+Telemetry is on by default. Two ways to turn it off:
+
+- **From the console (instance admins):** open **Settings › Telemetry** and switch off *Send anonymous usage data*. The choice is stored in the database, takes effect immediately without a restart (other processes sharing the database pick it up within 30 seconds), and every change is recorded in the audit log as `TELEMETRY_SETTING_UPDATED`. You can turn it back on the same way.
+- **For a whole host:** set `TEMPS_TELEMETRY=0` (also accepts `false`, `off`, `no`, `disabled`) in the server's environment and restart. This overrides the console setting, which then shows that telemetry is forced off by the environment.
+
+Nothing is sent while opted out — no events, no daily heartbeat, no error summaries. Two things still happen locally: the instance ID file is created (so re-enabling later doesn't churn identity), and error counts are tallied in a small fixed-size in-process buffer that is never read or transmitted while opted out.
+
+---
+
+## Encryption at rest {{ anchor: true, id: 'encryption-at-rest' }}
+
+Sensitive values are encrypted before being stored in the database:
+
+- **Managed service credentials** (PostgreSQL passwords, Redis passwords, S3 keys) — encrypted with AES-256-GCM using a key stored at `~/.temps/encryption_key`
+- **S3 backup credentials** — encrypted with the same key
+- **Session cookies** — encrypted with a separate cookie secret
+
+The encryption key is generated during `temps setup` and stored on the filesystem. Anyone with access to both the database and the encryption key can decrypt credentials. Protect the `~/.temps/` directory accordingly.
+
+API responses always mask sensitive values with `***`. The dashboard never shows raw passwords or API keys after initial creation.
+
+---
+
+## Privacy by design {{ anchor: true, id: 'privacy-by-design' }}
+
+### Analytics
+
+Temps analytics are designed to be useful without being invasive:
+
+- **No cookies** — Visitor identification uses a hash of IP + User-Agent + a daily rotating salt. No cookies are set for analytics.
+- **No cross-site tracking** — Each project's analytics are independent. There is no mechanism to track users across different projects or sites.
+- **No personal data collection** — Analytics capture country (from IP via a local GeoLite2 database), browser, OS, referrer, and page path. No names, emails, or account IDs are collected automatically.
+- **IP geolocation is local** — The GeoLite2 database is downloaded during setup and runs entirely on your server. IP addresses are not sent to any external service for resolution.
+
+### Session replay
+
+Session recordings capture DOM state, not raw user input:
+
+- **Password fields are always masked** — regardless of configuration
+- **`maskAllInputs` option** — when enabled, all form input values are replaced with asterisks
+- **`blockClass` option** — add a CSS class to any element to hide it completely from recordings
+- **Sample rate** — control what percentage of sessions are recorded (e.g. 10%)
+- **Recordings stay on your server** — they are stored in your PostgreSQL database and never transmitted externally
+
+### Error tracking
+
+Error reports capture stack traces and browser context. The Sentry-compatible client sends data to your Temps instance over your own domain (via the `/api/_temps` proxy path), so:
+
+- No data goes to `sentry.io` or any external error tracking service
+- Error reports are not shared with anyone
+- Source maps are uploaded to your server for server-side symbolication
+
+---
+
+## GDPR and compliance {{ anchor: true, id: 'gdpr-and-compliance' }}
+
+Self-hosting Temps simplifies compliance because you are both the data controller and the data processor. There is no third-party processor to evaluate or sign a DPA with.
+
+**GDPR considerations:**
+
+- **Lawful basis** — Analytics without cookies can often rely on legitimate interest. Consult your legal advisor for your specific case.
+- **Data minimization** — Temps collects minimal data by default (no PII, no cookies, no cross-site tracking)
+- **Right to erasure** — You have full database access. Delete any data at any time with SQL.
+- **Data location** — Host in the EU to keep data within EU borders.
+- **Data portability** — All data is in standard PostgreSQL. Export with `pg_dump`.
+- **No sub-processors** — Self-hosted means no data flows to external services (except the S3 provider you choose for backups, which you control)
+
+**SOC 2, HIPAA, and other frameworks:**
+
+Self-hosting gives you full control over the security posture. You manage:
+
+- Server hardening and access controls
+- Network security and firewall rules
+- Encryption at rest and in transit
+- Audit logging (Temps includes a built-in audit log for all write operations)
+- Backup and disaster recovery
+
+---
+
+## What Temps does not do {{ anchor: true, id: 'what-temps-does-not-do' }}
+
+To be explicit about what Temps does not handle for you:
+
+- **Server security** — You are responsible for OS updates, firewall configuration, SSH hardening, and access controls on the server itself
+- **Database backups to a separate location** — Temps can back up to S3, but you must configure the S3 storage. Without it, backups only exist on the same server as the data.
+- **Disk encryption** — Temps encrypts sensitive fields in the database but does not encrypt the entire disk. Use your cloud provider's disk encryption or LUKS if you need full-disk encryption.
+- **DDoS protection** — Temps does not include DDoS mitigation. Use Cloudflare, AWS Shield, or your provider's DDoS protection if needed.

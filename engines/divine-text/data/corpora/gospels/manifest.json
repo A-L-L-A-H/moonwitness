@@ -1,0 +1,6 @@
+{
+  "tradition": "Canonical Gospels",
+  "status": "EXTERNAL_REGISTER_ONLY",
+  "books": ["Matthew", "Mark", "Luke", "John"],
+  "note": "The four canonical Gospels are not automatically identified as the Quranic Injil."
+}

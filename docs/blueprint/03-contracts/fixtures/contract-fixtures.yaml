@@ -1,0 +1,40 @@
+version: 1
+status: validation-baseline
+purpose: Canonical examples used to validate schema semantics before implementation.
+fixtures:
+  - id: research-run-minimal
+    schema: research-run
+    valid: true
+    notes: Minimal accepted research run envelope.
+  - id: evidence-minimal
+    schema: evidence
+    valid: true
+    notes: Evidence must retain source identity and provenance linkage.
+  - id: provenance-minimal
+    schema: provenance
+    valid: true
+    notes: Provenance is immutable/auditable metadata, not business logic.
+  - id: problem-minimal
+    schema: problem
+    valid: true
+    notes: RFC7807-style problem semantics.
+  - id: identity-minimal
+    schema: identity
+    valid: true
+    notes: Caller identity is explicit; authentication is transport/application concern.
+  - id: job-minimal
+    schema: job
+    valid: true
+    notes: Retryable asynchronous work requires stable idempotency identity.
+  - id: workflow-minimal
+    schema: workflow
+    valid: true
+    notes: Workflow state is durable and externally observable through the canonical API.
+  - id: event-envelope-minimal
+    schema: event-envelope
+    valid: true
+    notes: Event name/version/producer/id/timestamp are mandatory audit fields.
+rules:
+  - fixtures_are_versioned
+  - invalid_cases_must_be_added_before_contract_finalization
+  - examples_never_override_schema

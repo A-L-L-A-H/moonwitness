@@ -1,0 +1,46 @@
+version: 1
+status: design-locked
+principles:
+  database_private: true
+  cross_repository_sql_access: forbidden
+  canonical_cross_repository_data: contract-or-artifact
+  migrations_owner: data-owning-repository
+persistence_units:
+  - capability: shared-contracts
+    owner: moonwitness-core
+    persistence: none
+  - capability: corpus
+    owner: moonwitness-corpus
+    persistence: private-postgresql-or-release-artifact
+    development: neon-or-supabase
+    production: postgres-on-vps
+  - capability: cosmic
+    owner: moonwitness-cosmic
+    persistence: private-postgresql-when-required
+    development: neon-or-supabase
+    production: postgres-on-vps
+  - capability: crayon
+    owner: moonwitness-crayon
+    persistence: private-file-artifact-or-postgresql-when-required
+  - capability: prophetic
+    owner: moonwitness-prophetic
+    persistence: private-postgresql-or-offline-artifact
+  - capability: runtime
+    owner: moonwitness-runtime
+    persistence: durable-run-store
+  - capability: worker
+    owner: moonwitness-worker
+    persistence: job-state-isolation-or-runtime-owned-store
+  - capability: api
+    owner: moonwitness-api
+    persistence: none-as-canonical-domain-owner
+  - capability: applications
+    owner: applications
+    persistence: local-ui-state-only
+rules:
+  - api_must_not_directly_own_domain_tables
+  - applications_must_not_connect_to_domain_databases
+  - engines_must_not_write_other_engine_databases
+  - schema_changes_must_be_versioned
+  - exports_must_be_reproducible
+  - backup_and_restore_must_be_testable

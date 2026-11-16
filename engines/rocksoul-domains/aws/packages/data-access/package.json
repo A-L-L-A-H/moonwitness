@@ -1,0 +1,11 @@
+{
+  "name": "@moonwitness/data-access",
+  "version": "4.33.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@moonwitness/persistence": "4.33.0"
+  }
+}

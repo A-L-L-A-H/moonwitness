@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "0.1.0",
+  "contractVersion": "0.1.0",
+  "contractId": "MF-CREATIVE-SLOTS-001",
+  "status": "proposed-slots-no-rights-granted",
+  "sourceAuthorities": [
+    "contracts/moonframe-creative-reference-contract-v0.1.json",
+    "contracts/moonframe-asset-manifest-v0.1.json"
+  ],
+  "roles": {
+    "L0": {
+      "name": "base-layout",
+      "description": "Semantic page structure and live selectable content.",
+      "source": "application markup and the relevant page-template contract",
+      "licenseStatus": "application-owned-content; no asset license implied"
+    },
+    "L1": {
+      "name": "primary-scene",
+      "description": "Optional primary scene illustration or background media.",
+      "source": "consumer-supplied or separately commissioned source media, recorded per asset",
+      "licenseStatus": "unverified-until-per-asset-evidence"
+    },
+    "L2": {
+      "name": "secondary-scene",
+      "description": "Optional supporting scene elements and atmosphere.",
+      "source": "consumer-supplied or separately commissioned source media, recorded per asset",
+      "licenseStatus": "unverified-until-per-asset-evidence"
+    },
+    "L3": {
+      "name": "surface-and-texture",
+      "description": "Optional nonsemantic texture, masks, and surface treatments.",
+      "source": "original or licensed static asset with provenance recorded per asset",
+      "licenseStatus": "unverified-until-per-asset-evidence"
+    },
+    "L4": {
+      "name": "foreground-device",
+      "description": "Optional stickers, labels, frames, and decorative overlays; essential words remain live text.",
+      "source": "original or licensed static asset with provenance recorded per asset",
+      "licenseStatus": "unverified-until-per-asset-evidence"
+    }
+  },
+  "assetRecordRequirements": [
+    "assetId",
+    "slotRole",
+    "sourcePathOrExternalReference",
+    "sha256WhenBytesAreAvailable",
+    "creatorOrSupplierWhenKnown",
+    "licenseOrRightsEvidenceReference",
+    "reviewStatus"
+  ],
+  "rightsPolicy": "A slot role describes placement only. It grants no copyright, trademark, redistribution, reference-use, or derivative-work rights. Missing evidence remains unverified; never infer permission from file presence or a reference mapping.",
+  "referenceUse": "Creative reference mappings identify design intent only and do not transfer rights to source media.",
+  "approval": "proposed-not-production-approved"
+}

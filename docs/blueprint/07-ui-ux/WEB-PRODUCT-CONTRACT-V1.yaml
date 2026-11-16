@@ -1,0 +1,48 @@
+version: 1
+status: active
+application:
+  repository: moonwitness-wheremythfadetolegend
+  role: primary-public-web
+  layer: application
+legacy:
+  repository: moonwitness-web
+  role: legacy-public-web
+  status: paused
+data:
+  historical:
+    source: github-versioned-json
+    adapter: static-data-adapter
+    frozen_baseline: August-2026
+    mutable_runtime_state: false
+  live:
+    client: moonwitness-sdk
+    client_name: MoonClient
+    transport: moonwitness-api
+    database_access: forbidden
+ui:
+  reusable_platform:
+    owner: moonwitness-frontend-platform
+  application_composition_owner: moonwitness-wheremythfadetolegend
+  design_system_bridge:
+    repository: moonwitness-design-system
+    role: showcase-or-compatibility-bridge
+security:
+  browser_secrets: forbidden
+  direct_database_access: forbidden
+  private_backend_credentials: forbidden
+  direct_coolify_access: forbidden
+deployment:
+  target: vercel
+  repository_visibility: public
+  production_domain: myth.moonwitness.biz.id
+  live_status: not-verified
+integration:
+  web_to_api: moonwitness-sdk
+  api_boundary: moonwitness-api
+  historical_data_boundary: static-data-adapter
+rules:
+  - live_web_data_must_use_canonical_api_client
+  - browser_must_not_connect_to_private_database
+  - historical_frozen_data_may_remain_repository_backed
+  - application_must_not_duplicate_domain_logic
+  - one_primary_public_web_owner

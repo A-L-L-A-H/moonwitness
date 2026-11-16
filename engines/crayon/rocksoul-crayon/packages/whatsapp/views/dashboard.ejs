@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Rocksoul WhatsApp Gateway</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --card-bg: #131b2e;
+      --border: #1e293b;
+      --primary: #22c55e;
+      --primary-hover: #16a34a;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #0f172a;
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #22c55e, #10b981);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+    }
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .brand-sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .btn {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.2);
+    }
+    .btn-primary:hover { opacity: 0.95; }
+    .btn-outline {
+      background: transparent;
+      border-color: #334155;
+      color: #cbd5e1;
+    }
+    .btn-outline:hover { background: #1e293b; color: white; }
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #f87171;
+    }
+    .btn-danger:hover { background: #ef4444; color: white; }
+    .btn-sm { padding: 0.35rem 0.65rem; font-size: 0.75rem; }
+
+    main {
+      flex: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1.75rem;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      padding: 0.75rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      color: #22c55e;
+      border-bottom-color: #22c55e;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .badge-open { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .badge-qrcode { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .badge-connecting { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+    .badge-close, .badge-idle { background: rgba(148, 163, 184, 0.2); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.875rem;
+    }
+    th {
+      padding: 0.75rem 1rem;
+      color: #64748b;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 1rem;
+      border-bottom: 1px solid #1e293b;
+      color: #e2e8f0;
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    /* Form Controls */
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: #0b0f19;
+      border: 1px solid #334155;
+      border-radius: 0.5rem;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #22c55e;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1.5rem;
+    }
+    .modal {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 1rem;
+      padding: 2rem;
+      max-width: 450px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .qr-container {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin: 1.5rem auto;
+      display: inline-block;
+    }
+    .qr-container img {
+      display: block;
+      width: 240px;
+      height: 240px;
+    }
+
+    .notice {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .notice-key {
+      font-family: monospace;
+      font-size: 0.9rem;
+      background: #0b0f19;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      color: #4ade80;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-icon">💬</div>
+      <div>
+        <div class="brand-title">Rocksoul WhatsApp Gateway</div>
+        <div class="brand-sub">Multi-Device • Isolated SQLite • Protected (210491)</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a href="/chat" class="btn btn-primary btn-sm">💬 Buka WhatsApp Web</a>
+      <span class="badge badge-open">SQLite: Connected</span>
+      <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+    </div>
+  </header>
+
+  <main>
+    <% if (flashKey) { %>
+      <div class="notice">
+        <div>
+          <strong>🎉 API Key Berhasil Dibuat:</strong> Simpan kunci ini sekarang karena tidak akan ditampilkan lagi!
+          <div style="margin-top: 0.5rem;"><span class="notice-key" id="rawToken"><%= flashKey %></span></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="copyToken()">Salin Token</button>
+      </div>
+    <% } %>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-devices')">📱 WhatsApp Devices (<%= sessions.length %>)</button>
+      <button class="tab-btn" onclick="switchTab('tab-apikeys')">🔑 API Keys (<%= apiKeys.length %>)</button>
+      <button class="tab-btn" onclick="switchTab('tab-sender')">✉️ Test Send Message</button>
+      <button class="tab-btn" onclick="switchTab('tab-docs')">📖 Quick API Docs</button>
+    </div>
+
+    <!-- TAB 1: WhatsApp Devices -->
+    <div id="tab-devices" class="tab-content active">
+      <!-- Create Session Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Add / Start WhatsApp Session</div>
+        </div>
+        <form onsubmit="startSession(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="newSessionId">Session / Device ID</label>
+              <input type="text" id="newSessionId" placeholder="misal: cs-1, marketing, sales" required pattern="[a-zA-Z0-9_-]+" />
+            </div>
+            <button type="submit" class="btn btn-primary">Start Device &amp; Generate QR</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sessions List -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Registered WhatsApp Sessions</div>
+          <button class="btn btn-outline btn-sm" onclick="location.reload()">🔄 Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Session ID</th>
+              <th>Phone Number</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (sessions.length === 0) { %>
+              <tr>
+                <td colspan="5" style="text-align: center; color: #64748b; padding: 2rem;">
+                  Belum ada session WhatsApp. Buat session pertama di form atas!
+                </td>
+              </tr>
+            <% } %>
+            <% sessions.forEach(function(s) { %>
+              <tr>
+                <td class="mono" style="font-weight: 700; color: #fff;"><%= s.sessionId %></td>
+                <td><%= s.user ? '+' + s.user.phone : '-' %></td>
+                <td><%= s.user ? (s.user.name || 'WhatsApp Account') : '-' %></td>
+                <td>
+                  <span class="badge badge-<%= s.status %>"><%= s.status %></span>
+                </td>
+                <td style="text-align: right;">
+                  <div style="display: inline-flex; gap: 0.5rem;">
+                    <% if (s.status !== 'open') { %>
+                      <a href="/sessions/<%= s.sessionId %>/qr?format=html" target="_blank" class="btn btn-outline btn-sm">Scan QR ↗</a>
+                    <% } %>
+                    <button onclick="logoutSession('<%= s.sessionId %>')" class="btn btn-danger btn-sm">Logout / Delete</button>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: API Keys -->
+    <div id="tab-apikeys" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Generate Scoped API Key</div>
+        </div>
+        <form method="POST" action="/api-keys/generate">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="keyName">Token Name</label>
+              <input type="text" id="keyName" name="name" placeholder="misal: Backend Fastify API, Webhook Bot" required />
+            </div>
+            <div class="form-group">
+              <label for="keyScopes">Scopes (Comma separated)</label>
+              <input type="text" id="keyScopes" name="scopes" value="* , messages:send" />
+            </div>
+            <button type="submit" class="btn btn-primary">Create API Key</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Stored API Keys (Isolated SQLite)</div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Prefix</th>
+              <th>Name</th>
+              <th>Scopes</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (apiKeys.length === 0) { %>
+              <tr>
+                <td colspan="6" style="text-align: center; color: #64748b; padding: 2rem;">
+                  Belum ada API Key yang tersimpan di SQLite.
+                </td>
+              </tr>
+            <% } %>
+            <% apiKeys.forEach(function(k) { %>
+              <tr>
+                <td class="mono" style="color: #38bdf8;"><%= k.keyPrefix %></td>
+                <td style="font-weight: 600;"><%= k.name %></td>
+                <td><code style="background: #0b0f19; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;"><%= k.scopes %></code></td>
+                <td>
+                  <span class="badge <%= k.isActive ? 'badge-open' : 'badge-close' %>">
+                    <%= k.isActive ? 'ACTIVE' : 'REVOKED' %>
+                  </span>
+                </td>
+                <td style="color: #94a3b8; font-size: 0.8rem;"><%= k.createdAt.substring(0, 19).replace('T', ' ') %></td>
+                <td style="text-align: right;">
+                  <% if (k.isActive) { %>
+                    <form method="POST" action="/api-keys/<%= k.id %>/revoke" style="display: inline;" onsubmit="return confirm('Yakin ingin mencabut API Key ini?')">
+                      <button type="submit" class="btn btn-danger btn-sm">Revoke</button>
+                    </form>
+                  <% } else { %>
+                    <span style="color: #64748b; font-size: 0.8rem;">Revoked</span>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: Send Test Message -->
+    <div id="tab-sender" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Send WhatsApp Test Message</div>
+        </div>
+        <form onsubmit="sendMessage(event)">
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="sendSessionId">Pilih Session</label>
+            <select id="sendSessionId" required>
+              <% sessions.forEach(function(s) { %>
+                <option value="<%= s.sessionId %>"><%= s.sessionId %> (<%= s.status %> <%= s.user ? '- +' + s.user.phone : '' %>)</option>
+              <% }); %>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label for="sendTo">Target Phone Number</label>
+            <input type="text" id="sendTo" placeholder="misal: 08123456789 atau 628123456789" required />
+          </div>
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label for="sendText">Message Content</label>
+            <textarea id="sendText" rows="4" placeholder="Ketik pesan tes di sini..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" id="btnSend">Kirim Pesan WhatsApp</button>
+          <div id="sendResult" style="margin-top: 1rem;"></div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TAB 4: Quick Docs -->
+    <div id="tab-docs" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">cURL Integration Example</div>
+        </div>
+        <pre style="background: #0b0f19; padding: 1.25rem; border-radius: 0.5rem; overflow-x: auto; color: #38bdf8; font-family: monospace; font-size: 0.85rem; line-height: 1.5;">
+# Kirim Pesan menggunakan Header API Key
+curl -X POST http://localhost:3001/sessions/default/messages/send \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: wa_live_your_secret_key_here" \
+  -d '{
+    "to": "08123456789",
+    "text": "Halo dari Rocksoul WhatsApp Gateway!"
+  }'
+
+# Cek Status Session
+curl http://localhost:3001/sessions/default/status \
+  -H "x-api-key: wa_live_your_secret_key_here"
+        </pre>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    async function startSession(e) {
+      e.preventDefault();
+      const id = document.getElementById('newSessionId').value.trim();
+      if (!id) return;
+
+      const res = await fetch(`/sessions/${id}/start`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        window.open(`/sessions/${id}/qr?format=html`, '_blank');
+        setTimeout(() => location.reload(), 1000);
+      } else {
+        alert(data.error || 'Gagal memulai session');
+      }
+    }
+
+    async function logoutSession(id) {
+      if (!confirm(`Yakin ingin logout dan menghapus session '${id}'?`)) return;
+      const res = await fetch(`/sessions/${id}/logout`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.error || 'Gagal logout');
+      }
+    }
+
+    async function sendMessage(e) {
+      e.preventDefault();
+      const sessionId = document.getElementById('sendSessionId').value;
+      const to = document.getElementById('sendTo').value.trim();
+      const text = document.getElementById('sendText').value.trim();
+      const btn = document.getElementById('btnSend');
+      const resultDiv = document.getElementById('sendResult');
+
+      btn.disabled = true;
+      btn.textContent = 'Mengirim...';
+      resultDiv.innerHTML = '';
+
+      try {
+        const res = await fetch(`/sessions/${sessionId}/messages/send`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to, text })
+        });
+        const data = await res.json();
+        if (data.success) {
+          resultDiv.innerHTML = `<div style="color: #4ade80; background: rgba(34, 197, 94, 0.15); padding: 0.75rem; border-radius: 6px;">
+            ✅ Pesan terkirim! Message ID: <code>${data.messageId}</code>
+          </div>`;
+          document.getElementById('sendText').value = '';
+        } else {
+          resultDiv.innerHTML = `<div style="color: #f87171; background: rgba(239, 68, 68, 0.15); padding: 0.75rem; border-radius: 6px;">
+            ❌ Gagal mengirim: ${data.error}
+          </div>`;
+        }
+      } catch (err) {
+        resultDiv.innerHTML = `<div style="color: #f87171; background: rgba(239, 68, 68, 0.15); padding: 0.75rem; border-radius: 6px;">
+          ❌ Error koneksi: ${err.message}
+        </div>`;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Kirim Pesan WhatsApp';
+      }
+    }
+
+    function copyToken() {
+      const token = document.getElementById('rawToken').textContent;
+      navigator.clipboard.writeText(token);
+      alert('API Key berhasil disalin ke clipboard!');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+[
+{"id":"DSS-ROOT","name":"Dead Sea Scrolls Digital Library","type":"MANUSCRIPT_COLLECTION","relevance":"Ancient biblical manuscripts","source_url":"https://www.deadseascrolls.org.il/","status":"EXTERNAL_SOURCE"},
+{"id":"SIN-ROOT","name":"Codex Sinaiticus Project","type":"MANUSCRIPT","relevance":"Fourth-century Greek Christian Bible witness; includes complete surviving New Testament","source_url":"https://www.codexsinaiticus.org/en/","status":"EXTERNAL_SOURCE"},
+{"id":"SEFARIA-TORAH","name":"Sefaria Torah","type":"MODERN_TEXT_WITNESS","relevance":"Online Hebrew/English Torah witness","source_url":"https://www.sefaria.org/texts/Tanakh/Torah","status":"EXTERNAL_SOURCE"}
+]

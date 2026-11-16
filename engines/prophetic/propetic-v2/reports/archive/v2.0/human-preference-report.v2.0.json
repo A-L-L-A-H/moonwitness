@@ -1,0 +1,98 @@
+{
+  "status": "UNCALIBRATED",
+  "n": 0,
+  "unique_respondents": 0,
+  "estimates": [
+    {
+      "trait": "compassion",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "courage",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "fairness",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "forgiveness",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "gratitude",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "honesty",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "hope",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "humility",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "judgment",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "kindness",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "leadership",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "patience",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "perseverance",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "self_regulation",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    },
+    {
+      "trait": "wisdom",
+      "ability": 0,
+      "normalized_score": 0,
+      "comparisons": 0
+    }
+  ],
+  "note": "Need >=100 observations and >=30 unique respondents."
+}

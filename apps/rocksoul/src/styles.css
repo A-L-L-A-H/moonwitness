@@ -1,5 +1,6 @@
 @config "../tailwind.config.js";
 @import "tailwindcss";
+@import "@moonwitness/ui/skins/dna-base.css";
 
 :root{font-family:"Barlow Condensed",sans-serif;color:#f3ebd9;background:#101010;font-synthesis:none;text-rendering:optimizeLegibility;--black:#101010;--panel:#171717;--panel2:#202020;--paper:#f3ebd9;--lime:#d7ff36;--orange:#ff6339;--pink:#ff5ac8;--purple:#6555ff;--muted:#8f8a80;--line:#48443c;--mono:"IBM Plex Mono",monospace}
 *{box-sizing:border-box}html,body,#root{margin:0;min-height:100%;height:100%;background:var(--black)}body{overflow:hidden}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}::selection{background:var(--lime);color:var(--black)}
@@ -43,4 +44,335 @@
   overflow-y: auto;
   scrollbar-color: #595347 #151515;
   scrollbar-width: thin;
+}
+
+.monitor-pill-btn {
+  border-color: rgba(215, 255, 54, 0.45);
+  color: var(--lime);
+}
+
+.deck-overseer-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 9px 14px;
+  border: 1px solid #49443a;
+  background: #141414;
+  font: 10px var(--mono);
+  color: #b7afa1;
+}
+
+.deck-overseer-metrics,
+.deck-overseer-actions,
+.monitor-head-actions,
+.monitor-repo-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.deck-overseer-metrics b {
+  color: var(--lime);
+  font-weight: 500;
+}
+
+.repo-row-btn {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #38342d;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.repo-row-btn:hover {
+  background: #222218;
+}
+
+.monitor-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.monitor-stat-card {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.monitor-stat-value {
+  font-size: 30px;
+  line-height: 0.95;
+  font-weight: 900;
+  color: var(--lime);
+}
+
+.monitor-stat-value.tier-watch { color: #f6c453; }
+.monitor-stat-value.tier-alert { color: var(--orange); }
+.monitor-stat-value.tier-critical { color: #ff4747; }
+.monitor-stat-value.tier-unavailable { color: #a79f92; }
+
+.monitor-stat-card small {
+  font: 9px var(--mono);
+  color: #a39a8c;
+}
+
+.monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.monitor-panel-wide {
+  grid-column: 1 / -1;
+}
+
+.monitor-panel-body {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.monitor-repo-card {
+  border: 1px solid #3a362e;
+  background: #121212;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.monitor-repo-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.monitor-repo-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 18px;
+  color: #fff;
+}
+
+.monitor-repo-path {
+  display: block;
+  font: 9px var(--mono);
+  color: #8f887b;
+}
+
+.monitor-badge {
+  border: 1px solid #4d473b;
+  background: #1d1d1d;
+  padding: 3px 7px;
+  font: 9px var(--mono);
+  color: #cfc7b8;
+}
+
+.monitor-badge.branch { color: var(--lime); border-color: rgba(215, 255, 54, 0.35); }
+.monitor-badge.dirty { color: var(--orange); border-color: rgba(255, 99, 57, 0.45); }
+.monitor-badge.clean { color: #84e6a7; border-color: rgba(132, 230, 167, 0.35); }
+
+.monitor-head-commit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  background: #0c0c0c;
+  border-left: 3px solid var(--lime);
+  font: 10px var(--mono);
+}
+
+.monitor-head-commit code { color: var(--lime); }
+.monitor-head-commit time { margin-left: auto; color: #8c8578; }
+
+.monitor-repo-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.monitor-code-list,
+.monitor-commit-list {
+  margin: 6px 0 0;
+  padding: 8px 10px;
+  list-style: none;
+  max-height: 170px;
+  overflow: auto;
+  background: #0b0b0b;
+  border: 1px solid #302d27;
+  font: 9px/1.6 var(--mono);
+  color: #d0d7bc;
+}
+
+.monitor-muted {
+  margin: 6px 0 0;
+  font: 10px var(--mono);
+  color: #8f8779;
+}
+
+.monitor-session-list,
+.monitor-disk-list,
+.monitor-plans-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.monitor-session-row,
+.monitor-plan-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #322e27;
+  background: #121212;
+  font: 10px var(--mono);
+}
+
+.monitor-session-row b {
+  display: block;
+  color: var(--paper);
+}
+
+.monitor-session-row small,
+.monitor-session-meta time {
+  color: #938b7d;
+  font-size: 9px;
+}
+
+.monitor-session-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.monitor-disk-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 9px 10px;
+  border: 1px solid #343028;
+  background: #121212;
+  font: 10px var(--mono);
+}
+
+.monitor-disk-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.monitor-tier.tier-calm { color: var(--lime); }
+.monitor-tier.tier-watch { color: #f6c453; }
+.monitor-tier.tier-alert { color: var(--orange); }
+.monitor-tier.tier-critical { color: #ff4747; }
+
+.monitor-bar {
+  height: 7px;
+  background: #27251f;
+  overflow: hidden;
+}
+
+.monitor-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--lime);
+}
+
+.monitor-bar > span.tier-bg-watch { background: #f6c453; }
+.monitor-bar > span.tier-bg-alert { background: var(--orange); }
+.monitor-bar > span.tier-bg-critical { background: #ff4747; }
+
+.monitor-services-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.monitor-service-card {
+  border: 1px solid #3b372f;
+  background: #121212;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font: 10px var(--mono);
+}
+
+.monitor-service-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.monitor-service-top b { color: var(--paper); }
+.monitor-service-card small { color: #8c8477; }
+
+.monitor-canon-strip {
+  border-top: 1px dashed #49443a;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.monitor-canon-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font: 10px var(--mono);
+  color: var(--lime);
+}
+
+.monitor-canon-head > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.monitor-doors-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.monitor-door-chip {
+  border: 1px solid #3b372f;
+  background: #151515;
+  padding: 7px 9px;
+  font: 9px var(--mono);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.monitor-door-chip b { color: var(--pink); }
+.monitor-door-chip span { color: var(--paper); }
+
+@media (max-width: 1120px) {
+  .monitor-summary-grid,
+  .monitor-grid,
+  .monitor-repo-columns,
+  .monitor-services-grid,
+  .monitor-doors-row {
+    grid-template-columns: 1fr;
+  }
 }

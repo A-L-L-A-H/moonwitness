@@ -1,0 +1,62 @@
+version: 1
+status: design-locked
+principles:
+  request_response_is_short_lived: true
+  long_work_is_durable_async: true
+  process_memory_is_not_durable_state: true
+  idempotency_required_for_retryable_commands: true
+  cancellation_is_cooperative: true
+  transport_is_separate_from_execution: true
+execution_units:
+  request:
+    owner: moonwitness-api
+    lifetime: short
+    allowed_runtime: [serverless, long-running]
+  workflow:
+    owner: moonwitness-runtime
+    lifetime: durable
+    trigger: api-or-internal
+  job:
+    owner: moonwitness-worker
+    lifetime: async
+    retryable: true
+  analysis:
+    owner: capability-engine
+    lifetime: short-or-async
+  batch:
+    owner: capability-engine-or-worker
+    lifetime: async
+states:
+  research_run: [queued, running, succeeded, failed, cancelled]
+  job: [queued, running, retrying, succeeded, failed, cancelled]
+  workflow: [accepted, running, waiting, succeeded, failed, cancelled]
+events:
+  - research-run.accepted
+  - research-run.started
+  - research-run.progressed
+  - research-run.succeeded
+  - research-run.failed
+  - research-run.cancelled
+  - job.enqueued
+  - job.started
+  - job.retrying
+  - job.succeeded
+  - job.failed
+  - job.cancelled
+rules:
+  - event_names_are_versioned
+  - event_payloads_are_contracts
+  - consumers_must_tolerate_duplicate_delivery
+  - producer_is_canonical_owner
+  - api_exposes_event_stream_only_as_http_sse
+  - no_direct_cross_repository_queue_tables
+serverless_rules:
+  - no_assumption_of_process_affinity
+  - no_durable_in_memory_queue
+  - no_long_lived_global_mutable_state
+  - no_provider_specific_domain_dependency
+  - handoff_to_durable_execution_for_long_work
+docker_rules:
+  - same_application_logic_as_serverless
+  - explicit_graceful_shutdown
+  - health_and_readiness_required

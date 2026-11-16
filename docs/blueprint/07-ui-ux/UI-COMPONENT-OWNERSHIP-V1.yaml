@@ -1,0 +1,20 @@
+version: 1
+status: locked
+layers:
+  tokens: moonwitness-frontend-platform
+  primitives: moonwitness-frontend-platform
+  patterns: moonwitness-frontend-platform
+  domain_components: owning_domain_or_frontend-platform_by_explicit_contract
+  pages: application_repository
+ownership_rules:
+  - one_component_one_canonical_owner
+  - applications_may_compose_but_not_fork_platform_primitives
+  - domain_components_cannot_import_private_database_access
+  - accessibility_contract_belongs_to_component_owner
+states_required:
+  - loading
+  - empty
+  - success
+  - error
+  - disabled
+  - optimistic_or_pending_when_applicable

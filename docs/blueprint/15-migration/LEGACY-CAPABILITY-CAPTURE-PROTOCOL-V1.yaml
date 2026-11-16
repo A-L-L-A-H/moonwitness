@@ -1,0 +1,37 @@
+version: 1
+status: design-locked
+sources:
+  - repo: bjo163/moonwitness
+    ref: dev
+  - repo: bjo163/moonwitness-corpus
+    ref: dev
+  - repo: bjo163/cosmic
+    ref: dev
+  - repo: bjo163/ALLAH-CRAYON-RGBL-ENGINE
+    ref: dev
+  - repo: bjo163/propetic
+    ref: main
+capture:
+  for_each_capability:
+    - source_path
+    - source_commit
+    - public_behavior
+    - input_fixture
+    - output_fixture
+    - side_effects
+    - error_behavior
+    - provenance_requirements
+    - performance_observation
+    - known_quirks
+classification:
+  allowed: [PRESERVE, EXTRACT, ADAPT, REWRITE, MERGE, DEPRECATE, ARCHIVE, DELETE]
+parity:
+  exact_match_required_for: [contracts, identifiers, deterministic calculations]
+  semantic_match_allowed_for: [presentation, internal implementation]
+  differences_require: explanation_and_approved_change
+retirement:
+  legacy_path_may_be_removed_only_after: [gen2_parity_pass, consumer_migration, rollback_artifact, owner_signoff]
+certification:
+  source_inventory: PARTIAL
+  fixture_capture: PENDING
+  parity_suite: PENDING

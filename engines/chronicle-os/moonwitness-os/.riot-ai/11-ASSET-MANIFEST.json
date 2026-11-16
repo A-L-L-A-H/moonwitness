@@ -1,0 +1,559 @@
+{
+  "product": "R!OT OS",
+  "design_dna": "CHAOS BRUTAL GRUNGE GEN Z FUNKY",
+  "manifest_version": 1,
+  "target_minimums": {
+    "png": 24,
+    "svg": 32,
+    "p5_sketches": 12,
+    "total_distinct_deliverables": 68
+  },
+  "status_values": [
+    "planned",
+    "generated",
+    "curated",
+    "integrated",
+    "verified",
+    "blocked"
+  ],
+  "entries": [
+    {
+      "id": "png-hero-command-deck",
+      "format": "png",
+      "path": "packages/artwork/assets/png/heroes/hero-command-deck-xerox-01.png",
+      "purpose": "Primary dashboard/command deck hero",
+      "aspect_ratio": "16:9",
+      "target_long_edge_px": 2048,
+      "status": "generated"
+    },
+    {
+      "id": "png-hero-welcome-collage",
+      "format": "png",
+      "path": "packages/artwork/assets/png/heroes/hero-welcome-collage-01.png",
+      "purpose": "Welcome/onboarding hero",
+      "aspect_ratio": "16:9",
+      "target_long_edge_px": 2048,
+      "status": "generated"
+    },
+    {
+      "id": "png-hero-operations-poster",
+      "format": "png",
+      "path": "packages/artwork/assets/png/heroes/hero-operations-poster-01.png",
+      "purpose": "Operations overview poster panel",
+      "aspect_ratio": "16:9",
+      "target_long_edge_px": 2048,
+      "status": "generated"
+    },
+    {
+      "id": "png-hero-docs-cover",
+      "format": "png",
+      "path": "packages/artwork/assets/png/heroes/hero-docs-cover-01.png",
+      "purpose": "Documentation cover",
+      "aspect_ratio": "16:9",
+      "target_long_edge_px": 2048,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-infrastructure",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-infrastructure-signal-rig.png",
+      "purpose": "Infrastructure module spot illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-isp-telco",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-isp-telco-antenna.png",
+      "purpose": "ISP/telco module spot illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-customer-ops",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-customer-ops-creature.png",
+      "purpose": "Customer operations module illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-finance",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-finance-machine.png",
+      "purpose": "Finance module illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-sales",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-sales-growth-engine.png",
+      "purpose": "Sales/growth module illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-creative",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-creative-copier.png",
+      "purpose": "Creative module illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-intelligence",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-intelligence-radar.png",
+      "purpose": "Intelligence module illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-module-comms",
+      "format": "png",
+      "path": "packages/artwork/assets/png/modules/module-comms-switchboard.png",
+      "purpose": "Communications module illustration",
+      "aspect_ratio": "1:1",
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-character-gremlin-01",
+      "format": "png",
+      "path": "packages/artwork/assets/png/characters/character-riot-gremlin-stance-01.png",
+      "purpose": "Primary mascot pose",
+      "aspect_ratio": "1:1",
+      "transparent": true,
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-character-gremlin-02",
+      "format": "png",
+      "path": "packages/artwork/assets/png/characters/character-riot-gremlin-action-01.png",
+      "purpose": "Primary mascot action pose",
+      "aspect_ratio": "1:1",
+      "transparent": true,
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-character-gremlin-03",
+      "format": "png",
+      "path": "packages/artwork/assets/png/characters/character-riot-gremlin-reaction-01.png",
+      "purpose": "Primary mascot reaction pose",
+      "aspect_ratio": "1:1",
+      "transparent": true,
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-character-static-rat",
+      "format": "png",
+      "path": "packages/artwork/assets/png/characters/character-static-rat-scout-01.png",
+      "purpose": "Network/signal mascot",
+      "aspect_ratio": "1:1",
+      "transparent": true,
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-character-byte-goblin",
+      "format": "png",
+      "path": "packages/artwork/assets/png/characters/character-byte-goblin-collector-01.png",
+      "purpose": "Data/storage mascot",
+      "aspect_ratio": "1:1",
+      "transparent": true,
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-character-wrench-ghost",
+      "format": "png",
+      "path": "packages/artwork/assets/png/characters/character-wrench-ghost-repair-01.png",
+      "purpose": "Maintenance/repair mascot",
+      "aspect_ratio": "1:1",
+      "transparent": true,
+      "target_long_edge_px": 1024,
+      "status": "generated"
+    },
+    {
+      "id": "png-texture-xerox",
+      "format": "png",
+      "path": "packages/artwork/assets/png/textures/texture-photocopy-grain-01.png",
+      "purpose": "Xerox paper grain overlay",
+      "aspect_ratio": "1:1",
+      "tileable": true,
+      "target_dimensions_px": "2048x2048",
+      "status": "generated"
+    },
+    {
+      "id": "png-texture-halftone",
+      "format": "png",
+      "path": "packages/artwork/assets/png/textures/texture-halftone-dots-01.png",
+      "purpose": "Halftone print plate",
+      "aspect_ratio": "1:1",
+      "tileable": true,
+      "target_dimensions_px": "2048x2048",
+      "status": "generated"
+    },
+    {
+      "id": "png-texture-torn-paper",
+      "format": "png",
+      "path": "packages/artwork/assets/png/textures/texture-torn-paper-collage-01.png",
+      "purpose": "Torn-paper material plate",
+      "aspect_ratio": "1:1",
+      "tileable": false,
+      "target_dimensions_px": "2048x2048",
+      "status": "generated"
+    },
+    {
+      "id": "png-texture-industrial",
+      "format": "png",
+      "path": "packages/artwork/assets/png/textures/texture-industrial-scuff-01.png",
+      "purpose": "Industrial scuff overlay",
+      "aspect_ratio": "1:1",
+      "tileable": true,
+      "target_dimensions_px": "2048x2048",
+      "status": "generated"
+    },
+    {
+      "id": "png-texture-interference",
+      "format": "png",
+      "path": "packages/artwork/assets/png/textures/texture-signal-interference-01.png",
+      "purpose": "Signal interference overlay",
+      "aspect_ratio": "1:1",
+      "tileable": true,
+      "target_dimensions_px": "2048x2048",
+      "status": "generated"
+    },
+    {
+      "id": "png-texture-ink",
+      "format": "png",
+      "path": "packages/artwork/assets/png/textures/texture-ink-smudge-01.png",
+      "purpose": "Ink and toner smudge plate",
+      "aspect_ratio": "1:1",
+      "tileable": true,
+      "target_dimensions_px": "2048x2048",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-warning-burst",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-warning-burst.svg",
+      "purpose": "Warning/attention accent",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-marker-arrow",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-marker-arrow.svg",
+      "purpose": "Hand-drawn annotation arrow",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-serial-tag",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-serial-tag.svg",
+      "purpose": "Industrial serial label",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-tape-strip",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-tape-strip.svg",
+      "purpose": "Tape strip ornament",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-ink-stamp",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-ink-stamp.svg",
+      "purpose": "Ink stamp mark",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-hand-circle",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-hand-circle.svg",
+      "purpose": "Hand-drawn annotation circle",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-ripped-tab",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-ripped-tab.svg",
+      "purpose": "Ripped label tab",
+      "status": "generated"
+    },
+    {
+      "id": "svg-sticker-signal-star",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/stickers/sticker-signal-star.svg",
+      "purpose": "Signal starburst sticker",
+      "status": "generated"
+    },
+    {
+      "id": "svg-character-gremlin",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/characters/character-riot-gremlin.svg",
+      "purpose": "Primary vector mascot",
+      "status": "generated"
+    },
+    {
+      "id": "svg-character-static-rat",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/characters/character-static-rat.svg",
+      "purpose": "Network mascot vector",
+      "status": "generated"
+    },
+    {
+      "id": "svg-character-byte-goblin",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/characters/character-byte-goblin.svg",
+      "purpose": "Data mascot vector",
+      "status": "generated"
+    },
+    {
+      "id": "svg-character-wrench-ghost",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/characters/character-wrench-ghost.svg",
+      "purpose": "Repair mascot vector",
+      "status": "generated"
+    },
+    {
+      "id": "svg-character-gremlin-mini",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/characters/character-riot-gremlin-mini.svg",
+      "purpose": "Small-size mascot icon",
+      "status": "generated"
+    },
+    {
+      "id": "svg-character-static-rat-mini",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/characters/character-static-rat-mini.svg",
+      "purpose": "Small-size signal mascot icon",
+      "status": "generated"
+    },
+    {
+      "id": "svg-frame-comic-panel",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/frames/frame-comic-panel.svg",
+      "purpose": "Comic panel border",
+      "status": "generated"
+    },
+    {
+      "id": "svg-frame-torn-paper",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/frames/frame-torn-paper.svg",
+      "purpose": "Torn-paper border",
+      "status": "generated"
+    },
+    {
+      "id": "svg-frame-industrial-plate",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/frames/frame-industrial-plate.svg",
+      "purpose": "Industrial panel frame",
+      "status": "generated"
+    },
+    {
+      "id": "svg-frame-offset-corner",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/frames/frame-offset-corner.svg",
+      "purpose": "Offset brutalist frame",
+      "status": "generated"
+    },
+    {
+      "id": "svg-frame-ticket-edge",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/frames/frame-ticket-edge.svg",
+      "purpose": "Ticket-edge frame",
+      "status": "generated"
+    },
+    {
+      "id": "svg-frame-rough-underline",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/frames/frame-rough-underline.svg",
+      "purpose": "Rough editorial underline",
+      "status": "generated"
+    },
+    {
+      "id": "svg-ornament-halftone-corner",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/ornaments/ornament-halftone-corner.svg",
+      "purpose": "Halftone corner overlay",
+      "status": "generated"
+    },
+    {
+      "id": "svg-ornament-speedlines",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/ornaments/ornament-manga-speedlines.svg",
+      "purpose": "Manga speed-line overlay",
+      "status": "generated"
+    },
+    {
+      "id": "svg-ornament-crosshatch",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/ornaments/ornament-crosshatch.svg",
+      "purpose": "Crosshatch overlay",
+      "status": "generated"
+    },
+    {
+      "id": "svg-ornament-ink-splat",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/ornaments/ornament-ink-splat.svg",
+      "purpose": "Ink splat silhouette",
+      "status": "generated"
+    },
+    {
+      "id": "svg-ornament-jagged-divider",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/ornaments/divider-jagged.svg",
+      "purpose": "Jagged section divider",
+      "status": "generated"
+    },
+    {
+      "id": "svg-ornament-comic-impact",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/ornaments/ornament-comic-impact.svg",
+      "purpose": "Comic impact burst",
+      "status": "generated"
+    },
+    {
+      "id": "svg-scene-server-rig",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/illustrations/scene-server-rig.svg",
+      "purpose": "Infrastructure vector spot illustration",
+      "status": "generated"
+    },
+    {
+      "id": "svg-scene-signal-radar",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/illustrations/scene-signal-radar.svg",
+      "purpose": "Intelligence vector spot illustration",
+      "status": "generated"
+    },
+    {
+      "id": "svg-scene-data-vault",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/illustrations/scene-data-vault.svg",
+      "purpose": "Storage/data vector spot illustration",
+      "status": "generated"
+    },
+    {
+      "id": "svg-scene-comms-switchboard",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/illustrations/scene-comms-switchboard.svg",
+      "purpose": "Communications vector spot illustration",
+      "status": "generated"
+    },
+    {
+      "id": "svg-scene-finance-machine",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/illustrations/scene-finance-machine.svg",
+      "purpose": "Finance vector spot illustration",
+      "status": "generated"
+    },
+    {
+      "id": "svg-scene-creative-copier",
+      "format": "svg",
+      "path": "packages/artwork/assets/svg/illustrations/scene-creative-copier.svg",
+      "purpose": "Creative studio vector spot illustration",
+      "status": "generated"
+    }
+  ],
+  "p5_sketches": [
+    {
+      "id": "p5-xerox-turbulence",
+      "name": "xerox-turbulence",
+      "path": "packages/graphics/src/sketches/xerox-turbulence.ts",
+      "purpose": "Seeded photocopier noise field",
+      "status": "generated"
+    },
+    {
+      "id": "p5-manga-speedlines",
+      "name": "manga-speedlines",
+      "path": "packages/graphics/src/sketches/manga-speedlines.ts",
+      "purpose": "Directional comic speed lines",
+      "status": "generated"
+    },
+    {
+      "id": "p5-halftone-field",
+      "name": "halftone-field",
+      "path": "packages/graphics/src/sketches/halftone-field.ts",
+      "purpose": "Responsive halftone field",
+      "status": "generated"
+    },
+    {
+      "id": "p5-signal-glitch",
+      "name": "signal-glitch",
+      "path": "packages/graphics/src/sketches/signal-glitch.ts",
+      "purpose": "Bounded signal interference effect",
+      "status": "generated"
+    },
+    {
+      "id": "p5-ink-splatter",
+      "name": "ink-splatter",
+      "path": "packages/graphics/src/sketches/ink-splatter.ts",
+      "purpose": "Seeded organic ink marks",
+      "status": "generated"
+    },
+    {
+      "id": "p5-acid-orbit",
+      "name": "acid-orbit",
+      "path": "packages/graphics/src/sketches/acid-orbit.ts",
+      "purpose": "Procedural eccentric orbital composition",
+      "status": "generated"
+    },
+    {
+      "id": "p5-industrial-waveform",
+      "name": "industrial-waveform",
+      "path": "packages/graphics/src/sketches/industrial-waveform.ts",
+      "purpose": "Industrial telemetry waveform",
+      "status": "generated"
+    },
+    {
+      "id": "p5-chaos-grid",
+      "name": "chaos-grid",
+      "path": "packages/graphics/src/sketches/chaos-grid.ts",
+      "purpose": "Seeded modular grid disruption",
+      "status": "generated"
+    },
+    {
+      "id": "p5-paper-rip",
+      "name": "paper-rip",
+      "path": "packages/graphics/src/sketches/paper-rip.ts",
+      "purpose": "Deterministic torn paper geometry",
+      "status": "generated"
+    },
+    {
+      "id": "p5-crosshatch-ritual",
+      "name": "crosshatch-ritual",
+      "path": "packages/graphics/src/sketches/crosshatch-ritual.ts",
+      "purpose": "Layered hand-drawn crosshatch field",
+      "status": "generated"
+    },
+    {
+      "id": "p5-static-creature",
+      "name": "static-creature",
+      "path": "packages/graphics/src/sketches/static-creature.ts",
+      "purpose": "Abstract signal creature silhouette",
+      "status": "generated"
+    },
+    {
+      "id": "p5-riot-poster-engine",
+      "name": "riot-poster-engine",
+      "path": "packages/graphics/src/sketches/riot-poster-engine.ts",
+      "purpose": "Seeded procedural R!OT poster background",
+      "status": "generated"
+    }
+  ]
+}

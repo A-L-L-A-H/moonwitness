@@ -1,0 +1,10 @@
+services:
+  flow:
+    build: ../..
+    ports: ["${FLOW_PORT:-3003}:3003"]
+    environment:
+      FLOW_DATABASE_URL: file:/app/data/flow.db
+      FLOW_INTERNAL_API_KEY: ${FLOW_INTERNAL_API_KEY}
+    volumes: [flow_data:/app/data]
+volumes:
+  flow_data:

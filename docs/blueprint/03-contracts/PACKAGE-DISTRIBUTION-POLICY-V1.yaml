@@ -1,0 +1,46 @@
+version: 1
+status: locked
+purpose: Canonical distribution policy for reusable private @arsybelovedlabs packages across independent Gen2 repositories.
+registry:
+  type: npm
+  host: https://npm.pkg.github.com
+  scope: '@arsybelovedlabs'
+ownership:
+  publisher: package-owning-repository
+  source_of_truth: owning_repository_source
+publication:
+  mechanism: github-actions
+  authentication: github-token
+  versioning: semver
+  artifact_scope: package-exports-and-files-only
+consumption:
+  clean_checkout_required: true
+  registry_scope: '@arsybelovedlabs:registry=https://npm.pkg.github.com'
+  lockfile_required: true
+  explicit_versions_required: true
+  private_source_imports_forbidden: true
+  local_file_dependencies_forbidden: true
+  workspace_cross_repository_dependencies_forbidden: true
+  git_url_substitution_forbidden: true
+  git_submodule_forbidden: true
+access:
+  ci: minimum-read-package-permission
+  package_access: explicit_repository_grant_when_required
+  local_development: developer_managed_credential_outside_repository
+security:
+  secrets_in_repo: forbidden
+  credentials_in_package: forbidden
+  local_env_files_in_package: forbidden
+  least_privilege: required
+compatibility:
+  package_semver: required
+  api_contract_compatibility: governed_by_03-contracts/CONTRACT-COMPATIBILITY-POLICY-V1.yaml
+alternatives_rejected:
+  - git-submodule
+  - file-dependency
+  - cross-repository-workspace-dependency
+  - self-hosted-package-registry
+  - public-npm-for-private-packages
+first_adopter:
+  repository: ArsyBelovedLabs/moonwitness-core
+  package: '@arsybelovedlabs/moonwitness-core'

@@ -1,0 +1,1000 @@
+version: 1
+status: proposed
+authority: non-canonical-planning-draft
+date: 2026-09-01
+program: ROCKSOUL-LAZARUS
+title: "ROCKSOUL LAZARUS proposed issue backlog"
+companion_plan: 08-ai/ROCKSOUL-LAZARUS-PROGRAM-PLAN-DRAFT-V1.md
+research_basis: 08-ai/ROCKSOUL-LAZARUS-PROPHETIC-ETHICS-RESEARCH-V1.md
+production_base:
+  repository: ArsyBelovedLabs/moonwitness-platform-foundation
+  role: application_domain_kernel_and_plugin_runtime
+  platform_backbone: GitLab_Self_Hosted
+  integration_boundaries: [REST, OIDC, webhooks, Package_Registry, runners, CI_CD]
+  status: selected_pending_adr_and_production_evidence
+platform_backbone:
+  provider: GitLab_Self_Hosted
+  role: source_ci_cd_runner_registry_delivery_backbone
+  status: live_installation_pending_endpoint_and_environment_contract
+architecture_authority: ArsyBelovedLabs/moonwitness-blueprint
+
+publication:
+  enabled: false
+  reason: "Human review and the GitLab/Foundation production-boundary ADR must precede GitHub issue creation."
+  first_target: ArsyBelovedLabs/moonwitness-blueprint
+  production_implementation_target: ArsyBelovedLabs/moonwitness-platform-foundation
+  duplicate_policy: transfer_or_link_never_duplicate
+  implementation_flow: blueprint_to_issue_to_branch_to_draft_pr_to_ci_to_review
+
+rules:
+  - "This backlog does not amend the frozen MoonWitness architecture."
+  - "A repository-topology, ownership, protocol, persistence, deployment, or public-contract change requires an ADR."
+  - "Legacy bjo163 repositories remain read-only implementation evidence."
+  - "Unknown states, commands, tools, schemas, and verification gates fail closed."
+  - "No issue may authorize reset, clean, deletion, broad staging, production action, or external messaging without a scoped safety contract and approval."
+  - "Local development is source-mode by default; production packaging follows a separately approved deployment decision."
+  - "Religious source mappings remain attributed research and cannot grant software authority."
+  - "Quantum, blockchain, custom-language, AGI, and ASI claims require independent empirical evidence and cannot bypass ordinary gates."
+
+priority_definition:
+  P0: blocks trustworthy execution or can cause destructive, deceptive, unauthorized, or unrecoverable behavior
+  P1: required for a reliable multi-agent beta or operator pilot
+  P2: improves quality, scale, usability, or research value after the safety baseline
+  P3: speculative research that must remain outside the production critical path
+
+effort_definition:
+  S: up_to_2_engineering_days
+  M: 3_to_5_engineering_days
+  L: 6_to_10_engineering_days
+  XL: requires_decomposition_after_discovery
+
+observed_existing_work:
+  - id: EXISTING-BLUEPRINT-PR-35
+    repository: ArsyBelovedLabs/moonwitness-blueprint
+    url: https://github.com/ArsyBelovedLabs/moonwitness-blueprint/pull/35
+    state: open_draft_ci_pass
+    relation: research_basis
+  - id: EXISTING-PROPHETIC-PR-6
+    repository: ArsyBelovedLabs/moonwitness-prophetic
+    url: https://github.com/ArsyBelovedLabs/moonwitness-prophetic/pull/6
+    state: open_draft_ci_pass
+    relation: bounded_pep_proof_of_concept
+  - id: EXISTING-PLATFORM-FOUNDATION-ROADMAP
+    repository: ArsyBelovedLabs/moonwitness-platform-foundation
+    url: https://github.com/ArsyBelovedLabs/moonwitness-platform-foundation/issues/3
+    state: open_with_23_linked_open_issues
+    relation: overlap_requires_classification_not_copying
+  - id: EXISTING-VISUAL-PROGRAM
+    repository: ArsyBelovedLabs/moonwitness-blueprint
+    url: https://github.com/ArsyBelovedLabs/moonwitness-blueprint/issues/28
+    state: open
+    relation: moonwitness_ui_scope_only
+
+gates:
+  - id: G0
+    name: governance_truth
+    exit: "Approved ownership, repository inventory, lifecycle, protected delivery, and upstream policy."
+  - id: G1
+    name: contracts_and_safety
+    exit: "Versioned cross-service contracts and zero known destructive or false-success paths."
+  - id: G2
+    name: trustworthy_local_alpha
+    exit: "Restartable serial goal flow with evidence and zero false success across the alpha benchmark."
+  - id: G3
+    name: parallel_beta
+    exit: "Leased parallel DAG improves measured outcomes without safety or reproducibility regression."
+  - id: G4
+    name: operator_experience
+    exit: "Authenticated browser, channel, approval, evidence, diff, cancellation, and recovery E2E."
+  - id: G5
+    name: source_linked_ethics_research
+    exit: "Reviewed source lanes, adversarial evaluation, baseline, ablation, failures, and human sign-off."
+  - id: G6
+    name: production_pilot
+    exit: "SLO, security, recovery, release, cost, and observation-period evidence pass."
+  - id: G7
+    name: experimental_laboratory
+    exit: "Classical baseline, reproducibility, independent review, and production-independent fallback."
+
+issues:
+  - id: RSL-GOV-001
+    title: "Ratify GitLab Self-Hosted backbone, Foundation kernel, and ROCKSOUL product boundary"
+    target_repositories: [ArsyBelovedLabs/moonwitness-blueprint]
+    gate: G0
+    priority: P0
+    type: governance
+    effort: M
+    status: proposed_needs_adr
+    blocked_by: []
+    acceptance_criteria:
+      - "ADR names GitLab Self-Hosted as the source/CI/CD/runner/registry/delivery backbone and moonwitness-platform-foundation as the application/domain kernel."
+      - "ADR names ROCKSOUL as the product suite integrated into Foundation and maps OpenCode, orchestrator, runner, browser worker, gateway, Command Center and research capabilities to foundation plugin, adapter, or isolated-worker boundaries."
+      - "The decision preserves MoonWitness Blueprint as architecture authority and leaves no second active engine or source of truth."
+    evidence: [approved_adr, updated_decision_registry, repository_authority_link]
+
+  - id: RSL-GOV-002
+    title: "Reconcile organization repositories, local folders, and lifecycle classification"
+    target_repositories: [ArsyBelovedLabs/moonwitness-blueprint]
+    gate: G0
+    priority: P0
+    type: governance
+    effort: M
+    status: proposed
+    blocked_by: [RSL-GOV-001]
+    acceptance_criteria:
+      - "Every GitHub repository and local organization folder has owner, purpose, status, default branch, canonicality, and lifecycle."
+      - "opencode/rocksoul-code, rocksoul-cli, moonwitness-lab.partial, moonwitness-lab, platform-foundation, scripts, and test are explicitly resolved."
+      - "No deletion occurs without a separate exact-target authorization and recovery record."
+    evidence: [machine_readable_inventory, remote_audit, human_signoff]
+
+  - id: RSL-GOV-003
+    title: "Normalize the local organization workspace without losing repository state"
+    target_repositories: [ArsyBelovedLabs/moonwitness-blueprint]
+    gate: G0
+    priority: P0
+    type: operations
+    effort: S
+    status: proposed
+    blocked_by: [RSL-GOV-002]
+    acceptance_criteria:
+      - "Canonical active repositories use X:/REPO/ArsyBelovedLabs/<repository-name>."
+      - "The local folder opencode is renamed to rocksoul-code only after process, worktree, path-reference, and Git-state checks pass."
+      - "Partial/reference material is placed outside the active namespace or explicitly marked read-only."
+    evidence: [before_after_inventory, clean_git_statuses, source_launcher_smoke]
+
+  - id: RSL-GOV-004
+    title: "Require protected branches, CODEOWNERS, pull requests, and CI across ROCKSOUL"
+    target_repositories:
+      - ArsyBelovedLabs/rocksoul-code
+      - ArsyBelovedLabs/rocksoul-code-web
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+    gate: G0
+    priority: P0
+    type: governance
+    effort: M
+    status: proposed
+    blocked_by: [RSL-GOV-001]
+    acceptance_criteria:
+      - "Main requires pull requests and passing lint, typecheck, tests, build or package checks where applicable."
+      - "CODEOWNERS and security ownership cover policy, execution, authentication, contracts, and release files."
+      - "Direct autonomous pushes to main are denied."
+    evidence: [branch_protection_export, codeowners_files, rejected_direct_push_test]
+
+  - id: RSL-GOV-005
+    title: "Formalize OpenCode upstream sync, license, branding-addon, and compatibility policy"
+    target_repositories: [ArsyBelovedLabs/rocksoul-code]
+    gate: G0
+    priority: P0
+    type: governance
+    effort: M
+    status: proposed
+    blocked_by: [RSL-GOV-001]
+    acceptance_criteria:
+      - "Origin and upstream roles, sync cadence, conflict policy, patch ledger, and rollback are documented."
+      - "Branding remains an isolated addon unless a compatibility fix is justified and tested."
+      - "License notices, dependency provenance, and upstream commit ancestry are verifiable."
+    evidence: [upstream_sync_runbook, patch_manifest, license_audit, compatibility_ci]
+
+  - id: RSL-FND-001
+    title: "Make the foundation host reproducible and production-configured"
+    target_repositories: [ArsyBelovedLabs/moonwitness-platform-foundation]
+    gate: G1
+    priority: P0
+    type: operations
+    effort: M
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-GOV-001]
+    related_existing_issues: ["moonwitness-platform-foundation#4", "moonwitness-platform-foundation#18"]
+    acceptance_criteria:
+      - "A committed lockfile, pinned toolchain, deterministic build, environment contract, and secret validation exist."
+      - "CI does not install mutable dependencies with npm install --no-save for the production path."
+      - "Node and Bun compatibility is intentional and tested rather than accidental."
+    evidence: [lockfile, reproducible_build, environment_matrix, release_manifest]
+
+  - id: RSL-FND-002
+    title: "Complete foundation GitLab OIDC, session, PostgreSQL, and migration lifecycle"
+    target_repositories: [ArsyBelovedLabs/moonwitness-platform-foundation]
+    gate: G1
+    priority: P0
+    type: security
+    effort: L
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-GOV-001]
+    related_existing_issues: ["moonwitness-platform-foundation#5", "moonwitness-platform-foundation#6"]
+    acceptance_criteria:
+      - "GitLab OIDC callback, issuer/audience/nonce/JWKS validation, session expiry, logout, rotation and replay handling pass against fixtures."
+      - "PostgreSQL migrations and event/session/webhook persistence are deterministic, locked and restart-safe."
+      - "No second password database or GitLab internal database access is introduced."
+    evidence: [oidc_e2e, migration_rehearsal, restart_test, security_review]
+
+  - id: RSL-FND-003
+    title: "Complete durable GitLab webhook, idempotency, replay, and dead-letter flow"
+    target_repositories: [ArsyBelovedLabs/moonwitness-platform-foundation]
+    gate: G1
+    priority: P0
+    type: reliability
+    effort: L
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-GOV-001, RSL-CON-001]
+    related_existing_issues: ["moonwitness-platform-foundation#7"]
+    acceptance_criteria:
+      - "Raw event identity, signature/token validation, correlation, schema validation and idempotency are recorded before dispatch."
+      - "Transient failure retries safely; poison events enter an inspectable dead-letter path and can be replayed once."
+      - "Duplicate GitLab events cannot duplicate plugin side effects."
+    evidence: [webhook_fixture_pack, replay_report, dead_letter_test, audit_trace]
+
+  - id: RSL-FND-004
+    title: "Complete foundation plugin provenance, permissions, rollback, and isolation"
+    target_repositories: [ArsyBelovedLabs/moonwitness-platform-foundation]
+    gate: G1
+    priority: P0
+    type: security
+    effort: XL
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-GOV-001]
+    related_existing_issues: ["moonwitness-platform-foundation#8", "moonwitness-platform-foundation#9"]
+    acceptance_criteria:
+      - "Plugin artifacts use allow-listed registries, integrity/provenance checks, dependency DAG validation, version compatibility, and rollback metadata."
+      - "Trusted in-process execution is explicitly separated from untrusted/heavy isolated execution."
+      - "Disable/remove never silently deletes plugin-owned data or leaves active contributions behind."
+    evidence: [plugin_supply_chain_report, isolation_tests, rollback_rehearsal, data_retention_test]
+
+  - id: RSL-FND-005
+    title: "Migrate ROCKSOUL capabilities into foundation plugins and typed adapters"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+      - ArsyBelovedLabs/rocksoul-code
+    gate: G2
+    priority: P0
+    type: migration
+    effort: XL
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-FND-001, RSL-FND-002, RSL-FND-003, RSL-FND-004, RSL-CON-001]
+    related_existing_issues: ["moonwitness-platform-foundation#15", "moonwitness-platform-foundation#16", "moonwitness-platform-foundation#17"]
+    acceptance_criteria:
+      - "Each capability has one foundation owner, one contract owner, one data owner, and an explicit transitional sidecar status."
+      - "OpenCode, goal orchestration, runner, browser, gateway, corpus and prophetic behavior migrate capability-first with parity fixtures."
+      - "No private source import, shared database, or duplicate active owner is introduced."
+    evidence: [capability_migration_matrix, parity_fixtures, plugin_install_e2e, sidecar_cutover_record]
+
+  - id: RSL-FND-006
+    title: "Define the production UI split between Command Center and Rocksoul Code"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/moonwitness-commandcenter
+      - ArsyBelovedLabs/rocksoul-code-web
+    gate: G2
+    priority: P1
+    type: architecture
+    effort: M
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-GOV-001, RSL-FND-001]
+    related_existing_issues: ["moonwitness-platform-foundation#13", "moonwitness-platform-foundation#14", "moonwitness-platform-foundation#26"]
+    acceptance_criteria:
+      - "Command Center is the public MoonWitness product surface per the foundation roadmap."
+      - "Rocksoul Code Web is the operator/engineering control surface and does not become a second public product authority."
+      - "Both consume foundation contracts and do not expose GitLab/OpenCode secrets to the browser."
+    evidence: [ui_ownership_adr, route_matrix, auth_boundary_test, e2e_navigation]
+
+  - id: RSL-FND-007
+    title: "Integrate AI and MCP through foundation permissions, audit, and evaluation"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-code
+    gate: G2
+    priority: P1
+    type: security
+    effort: L
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-FND-004, RSL-FND-005]
+    related_existing_issues: ["moonwitness-platform-foundation#16"]
+    acceptance_criteria:
+      - "AI remains optional; the foundation kernel operates without a model provider."
+      - "Agent, skill, tool, MCP, context and policy permissions are explicit, auditable and revocable."
+      - "PEP, local/cloud routing and OpenCode actions cannot bypass foundation approval or verification."
+    evidence: [ai_permission_matrix, mcp_audit_fixture, provider_failure_tests, no_ai_smoke]
+
+  - id: RSL-FND-008
+    title: "Certify foundation HTTP, observability, recovery, deployment, and launch gates"
+    target_repositories: [ArsyBelovedLabs/moonwitness-platform-foundation]
+    gate: G6
+    priority: P0
+    type: operations
+    effort: XL
+    status: proposed_link_existing_issue
+    blocked_by: [RSL-FND-001, RSL-FND-002, RSL-FND-003, RSL-FND-004, RSL-FND-005, RSL-EVAL-002]
+    related_existing_issues: ["moonwitness-platform-foundation#10", "moonwitness-platform-foundation#11", "moonwitness-platform-foundation#20", "moonwitness-platform-foundation#23", "moonwitness-platform-foundation#25"]
+    acceptance_criteria:
+      - "Production HTTP host, graceful shutdown, readiness, audit/metrics, backup/restore, deployment and rollback are rehearsed."
+      - "Coolify or the approved production host deploys an immutable release without manual database edits."
+      - "Public beta/production launch is blocked by any unwaived critical security, recovery, contract, or benchmark failure."
+    evidence: [production_smoke, trace_and_slo_report, restore_rehearsal, deployment_rollback, launch_decision]
+
+  - id: RSL-CON-001
+    title: "Publish versioned cross-service contracts and compatibility fixtures"
+    target_repositories:
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+      - ArsyBelovedLabs/rocksoul-code-web
+    gate: G1
+    priority: P0
+    type: contract
+    effort: L
+    status: proposed
+    blocked_by: [RSL-GOV-001]
+    acceptance_criteria:
+      - "Paths, payloads, errors, states, actor, correlation, idempotency, approval, cancellation, and evidence envelopes are versioned."
+      - "Provider and framework internals do not become shared contracts."
+      - "Every consumer runs compatibility fixtures against its provider in CI."
+    evidence: [openapi_or_json_schema, generated_examples, producer_consumer_contract_ci]
+
+  - id: RSL-CON-002
+    title: "Reconcile Rocksoul Code Web documentation with live service APIs"
+    target_repositories: [ArsyBelovedLabs/rocksoul-code-web]
+    gate: G1
+    priority: P0
+    type: documentation
+    effort: S
+    status: proposed
+    blocked_by: [RSL-CON-001]
+    acceptance_criteria:
+      - "Goal documentation uses /v1/goals and its actual title, projectId, mode, and autonomyLevel fields."
+      - "Runner documentation uses argv arrays and /v1 paths."
+      - "Browser documentation uses typed steps, allowedDomains, budgets, and approval_required."
+    evidence: [docs_contract_test, example_request_smoke]
+
+  - id: RSL-CON-003
+    title: "Unify state machines and fail on unknown contract versions"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-gateway
+    gate: G1
+    priority: P0
+    type: contract
+    effort: M
+    status: proposed
+    blocked_by: [RSL-CON-001]
+    acceptance_criteria:
+      - "Browser approval_required is consumed consistently by orchestrator and UI."
+      - "Illegal transitions, stale decisions, expired approvals, and unknown schema versions are rejected."
+      - "Restart and retry preserve idempotent terminal outcomes."
+    evidence: [state_transition_matrix, cross_service_state_tests, restart_fixture]
+
+  - id: RSL-SAFE-001
+    title: "Replace simulated verification success with registered fail-closed verifiers"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G1
+    priority: P0
+    type: security
+    effort: M
+    status: proposed
+    blocked_by: [RSL-CON-001]
+    acceptance_criteria:
+      - "Unknown verifier names block execution and report verifier_not_registered."
+      - "spec_validation, browser_execution, screenshot_evidence, command_verification, and security_audit have real implementations or remain blocked."
+      - "A required gate cannot be waived by a model or aggregate score."
+    evidence: [negative_tests, verifier_registry, false_success_regression_suite]
+
+  - id: RSL-SAFE-002
+    title: "Route every executable verification and operation through Rocksoul Runner"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+    gate: G1
+    priority: P0
+    type: security
+    effort: L
+    status: proposed
+    blocked_by: [RSL-CON-001, RSL-SAFE-001]
+    acceptance_criteria:
+      - "Orchestrator no longer invokes a shell for manifest-provided or generated commands."
+      - "Commands remain argv arrays with workspace confinement, policy, budgets, cancellation, approval, and audit."
+      - "Injection, traversal, symlink escape, timeout, output overflow, and denied-command fixtures fail closed."
+    evidence: [runner_integration_tests, command_policy_matrix, adversarial_fixtures]
+
+  - id: RSL-SAFE-003
+    title: "Replace destructive rollback with isolated worktrees and recoverable checkpoints"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+    gate: G1
+    priority: P0
+    type: security
+    effort: L
+    status: proposed
+    blocked_by: [RSL-SAFE-002]
+    acceptance_criteria:
+      - "Autonomous execution occurs in a per-goal worktree or stronger sandbox."
+      - "No endpoint performs reset --hard or clean -fd against the user's checkout."
+      - "Rollback is a recoverable branch/worktree operation with explicit target, approval, preview, and evidence."
+    evidence: [dirty_checkout_test, rollback_rehearsal, recovery_artifact]
+
+  - id: RSL-SAFE-004
+    title: "Make Git delivery task-scoped and preserve unrelated user changes"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G1
+    priority: P0
+    type: security
+    effort: M
+    status: proposed
+    blocked_by: [RSL-SAFE-003, RSL-GOV-004]
+    acceptance_criteria:
+      - "Delivery stages only paths attributed to the approved task inside its worktree."
+      - "git add -A, base-checkout switching, and implicit pull are absent from autonomous delivery."
+      - "Push and draft-PR creation require verified gates and recorded authority."
+    evidence: [unrelated_change_fixture, staged_path_manifest, draft_pr_e2e]
+
+  - id: RSL-SAFE-005
+    title: "Add service identity, actor propagation, approval integrity, and secret handling"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-code-web
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+    gate: G1
+    priority: P0
+    type: security
+    effort: L
+    status: proposed
+    blocked_by: [RSL-CON-001]
+    acceptance_criteria:
+      - "Every mutation authenticates service and accountable actor; health remains separately scoped."
+      - "Approvals are bound to exact action digest, scope, consequence, expiry, and approver."
+      - "Logs, evidence, prompts, browser artifacts, and outbound payloads redact configured secret classes."
+    evidence: [threat_model, auth_matrix, stale_and_replay_tests, secret_leak_scan]
+
+  - id: RSL-SAFE-006
+    title: "Make project inspection read-only unless manifest persistence is explicitly requested"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G1
+    priority: P0
+    type: security
+    effort: S
+    status: proposed
+    blocked_by: []
+    acceptance_criteria:
+      - "Inspection has a side-effect-free default."
+      - "Persisting .rocksoul/project.json requires a separate authorized mutation and reports the changed path."
+      - "Assistant/read-only mode proves a byte-identical workspace after inspection."
+    evidence: [read_only_snapshot_test, explicit_persist_api_test]
+
+  - id: RSL-ORC-001
+    title: "Certify the serial goal lifecycle before enabling broader autonomy"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+    gate: G2
+    priority: P0
+    type: feature
+    effort: L
+    status: proposed
+    blocked_by: [RSL-SAFE-001, RSL-SAFE-002, RSL-SAFE-003, RSL-SAFE-005]
+    acceptance_criteria:
+      - "Create, plan, approve, execute, verify, cancel, resume, fail, repair, deliver, and archive paths are deterministic."
+      - "Completion requires all required gates and an evidence bundle."
+      - "Thirty representative tasks produce zero false-success outcomes."
+    evidence: [lifecycle_model, serial_e2e_suite, alpha_benchmark_report]
+
+  - id: RSL-ORC-002
+    title: "Add durable idempotency, event replay, restart recovery, and compensation"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+    gate: G2
+    priority: P0
+    type: reliability
+    effort: L
+    status: proposed
+    blocked_by: [RSL-CON-003]
+    acceptance_criteria:
+      - "Duplicate goal, approval, execution, browser, runner, and delivery requests do not duplicate effects."
+      - "Restart reconstructs active state from durable records without inventing success."
+      - "Interrupted external effects have explicit reconcile or compensate behavior."
+    evidence: [crash_recovery_suite, replay_test, idempotency_matrix]
+
+  - id: RSL-ORC-003
+    title: "Implement leased parallel DAG scheduling with deterministic joins"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+    gate: G3
+    priority: P1
+    type: feature
+    effort: XL
+    status: proposed_blocked
+    blocked_by: [RSL-ORC-001, RSL-ORC-002, RSL-EVAL-001]
+    acceptance_criteria:
+      - "Ready tasks use bounded leases, heartbeats, cancellation, retry ownership, and concurrency budgets."
+      - "Parallel branches cannot concurrently modify the same contract or path ownership set."
+      - "Join preserves dissent and blocks downstream work after required failure."
+    evidence: [scheduler_model, contention_tests, parallel_ablation_report]
+
+  - id: RSL-ORC-004
+    title: "Add independent council review without persona or authority inflation"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+    gate: G3
+    priority: P1
+    type: feature
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-ORC-001, RSL-MOD-001]
+    acceptance_criteria:
+      - "Architect, security, QA, evidence, and impact reviews have disjoint prompts and recorded model/provider provenance."
+      - "Dissent is stored before synthesis and cannot be silently rewritten by the supervisor."
+      - "Council use must beat a simpler baseline on predefined tasks or remain optional."
+    evidence: [dissent_fixture, council_ablation, provenance_records]
+
+  - id: RSL-ORC-005
+    title: "Enforce calibrated cognitive hard gates throughout the lifecycle"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-orchestrator
+    gate: G3
+    priority: P1
+    type: evaluation
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-EVAL-001, RSL-ORC-001]
+    acceptance_criteria:
+      - "Scoring is evaluated at plan, act, verify, deliver, rollback, and memory-promotion transitions."
+      - "Safety, verification, approval, privacy, reversibility, and provenance remain non-compensable hard gates."
+      - "Weights and thresholds are calibrated and versioned from benchmark evidence."
+    evidence: [calibration_report, lifecycle_gate_tests, score_version_registry]
+
+  - id: RSL-MOD-001
+    title: "Implement benchmarked local-first and sanitized cloud model routing"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G3
+    priority: P1
+    type: feature
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-ORC-001, RSL-EVAL-001]
+    acceptance_criteria:
+      - "Local, online, and fallback adapters share one provider-neutral task contract."
+      - "Routing uses observed quality, privacy, reliability, latency, cost, tool success, and resource evidence."
+      - "A provider failure cannot bypass approval or verification."
+    evidence: [model_route_benchmark, fallback_tests, provider_provenance]
+
+  - id: RSL-MOD-002
+    title: "Add disclosure budgets, sanitization evidence, and private-context controls"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G3
+    priority: P1
+    type: privacy
+    effort: M
+    status: proposed_blocked
+    blocked_by: [RSL-MOD-001, RSL-SAFE-005]
+    acceptance_criteria:
+      - "Cloud requests contain the minimum approved context and a redaction/disclosure manifest."
+      - "Secrets, raw long-term memory, credentials, and prohibited paths fail closed."
+      - "Cumulative disclosure is budgeted per goal and visible to the user."
+    evidence: [privacy_fixtures, disclosure_ledger, provider_request_snapshot_tests]
+
+  - id: RSL-MEM-001
+    title: "Build an epistemic ledger for claims, sources, confidence, contradiction, and expiry"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G3
+    priority: P1
+    type: feature
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-CON-001, RSL-ORC-002]
+    acceptance_criteria:
+      - "Facts, hypotheses, human decisions, source passages, model synthesis, and software assumptions use distinct record types."
+      - "Claims retain source URI/hash, observation time, confidence, contradiction, and expiry."
+      - "Expired or contradicted claims cannot silently authorize action."
+    evidence: [ledger_schema, contradiction_tests, provenance_query_demo]
+
+  - id: RSL-MEM-002
+    title: "Govern operational memory and reusable skill promotion"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G3
+    priority: P1
+    type: safety
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-MEM-001, RSL-EVAL-001]
+    acceptance_criteria:
+      - "Task memory is ephemeral by default; durable promotion requires evaluation, provenance, scope and human approval."
+      - "Prompt injection, poisoned incidents, obsolete guidance, and cross-project leakage are tested."
+      - "Skills have version, capability declaration, rollback, revocation, and regression suite."
+    evidence: [memory_policy, poisoning_red_team, skill_promotion_record]
+
+  - id: RSL-BRW-001
+    title: "Integrate typed browser plans, approval, cancellation, and evidence with orchestrator"
+    target_repositories:
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-browser-worker
+    gate: G4
+    priority: P0
+    type: feature
+    effort: L
+    status: proposed
+    blocked_by: [RSL-CON-003, RSL-SAFE-005, RSL-ORC-001]
+    acceptance_criteria:
+      - "Planner output compiles into validated browser steps rather than free-form browser instructions."
+      - "approval_required pauses the goal until an action-digest decision is resolved or expires."
+      - "Cancellation reaches active Playwright work and terminal evidence is reconciled."
+    evidence: [browser_contract_e2e, approval_resume_test, cancellation_test]
+
+  - id: RSL-BRW-002
+    title: "Harden browser network, artifact, credential, and prompt-injection boundaries"
+    target_repositories: [ArsyBelovedLabs/rocksoul-browser-worker]
+    gate: G4
+    priority: P0
+    type: security
+    effort: L
+    status: proposed
+    blocked_by: [RSL-SAFE-005]
+    acceptance_criteria:
+      - "DNS rebinding, redirects, private-network targets, downloads, popups, new tabs, and credential entry are governed."
+      - "Screenshots, DOM extracts, logs, and downloads have access control, hashes, retention, and redaction."
+      - "Page content cannot redefine tool policy or approval requirements."
+    evidence: [browser_threat_model, ssrf_suite, artifact_access_tests, injection_red_team]
+
+  - id: RSL-GTW-001
+    title: "Complete authenticated Telegram and Slack ingress adapters"
+    target_repositories: [ArsyBelovedLabs/rocksoul-gateway]
+    gate: G4
+    priority: P1
+    type: feature
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-CON-001, RSL-SAFE-005, RSL-ORC-001]
+    acceptance_criteria:
+      - "Vendor-native signature, timestamp, replay, identity, allowlist and idempotency checks pass before normalization."
+      - "Commands map to explicit goal, approval, cancellation and status operations."
+      - "Untrusted channel text cannot choose workspace, capability, model authority, or approval identity."
+    evidence: [vendor_signature_fixtures, replay_tests, channel_e2e]
+
+  - id: RSL-GTW-002
+    title: "Add policy-controlled outbound notifications and schedules"
+    target_repositories: [ArsyBelovedLabs/rocksoul-gateway]
+    gate: G4
+    priority: P1
+    type: feature
+    effort: M
+    status: proposed_blocked
+    blocked_by: [RSL-GTW-001]
+    acceptance_criteria:
+      - "Outbound destination, content class, approval, retry, idempotency and delivery receipt are recorded."
+      - "Consequential, public, sensitive, or high-volume messages require policy and human approval."
+      - "Schedules use timezone, missed-run, expiry, concurrency and cancellation semantics."
+    evidence: [outbound_policy_tests, schedule_restart_tests, delivery_receipts]
+
+  - id: RSL-WEB-001
+    title: "Build the operator control plane for approvals, evidence, diffs, cost, and recovery"
+    target_repositories: [ArsyBelovedLabs/rocksoul-code-web]
+    gate: G4
+    priority: P1
+    type: feature
+    effort: XL
+    status: proposed_blocked
+    blocked_by: [RSL-ORC-001, RSL-CON-001, RSL-SAFE-005]
+    acceptance_criteria:
+      - "UI shows goal/task state, owner, model route, authority, approvals, commands, browser actions, evidence, changed files, cost and blockers."
+      - "Approval displays exact action digest, consequence, scope, expiry and recourse."
+      - "Cancel, retry, resume, rollback preview, draft delivery and incident views are accessible and state-consistent."
+    evidence: [accessibility_audit, golden_flow_screens, contract_e2e]
+
+  - id: RSL-WEB-002
+    title: "Certify full source-mode browser-to-engine-to-evidence flows"
+    target_repositories:
+      - ArsyBelovedLabs/rocksoul-code-web
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+      - ArsyBelovedLabs/rocksoul-code
+    gate: G4
+    priority: P0
+    type: testing
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-WEB-001, RSL-BRW-001, RSL-SAFE-004]
+    acceptance_criteria:
+      - "E2E covers create, inspect, plan, approve, execute, verify, deny, cancel, restart, recover, diff and draft PR."
+      - "Failure injection covers engine, provider, runner, browser, gateway, persistence and network interruption."
+      - "Test artifacts prove no unrelated workspace mutation and no false completion."
+    evidence: [playwright_report, service_logs, evidence_bundle, workspace_hash_comparison]
+
+  - id: RSL-EVAL-001
+    title: "Create the ROCKSOUL autonomy benchmark and false-success metric"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G2
+    priority: P0
+    type: evaluation
+    effort: L
+    status: proposed
+    blocked_by: [RSL-CON-001]
+    acceptance_criteria:
+      - "Versioned tasks cover coding, review, repair, browser, operations, refusal, ambiguity, privacy and recovery."
+      - "Metrics include task success, false success, intervention, rollback, safety refusal, cost, latency, disclosure and reproducibility."
+      - "Baseline uses the simplest viable serial agent before adding council, memory or quantum components."
+    evidence: [benchmark_manifest, baseline_results, scoring_protocol]
+
+  - id: RSL-EVAL-002
+    title: "Run adversarial red-team and failure-injection certification"
+    target_repositories:
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+      - ArsyBelovedLabs/rocksoul-code-web
+    gate: G4
+    priority: P0
+    type: security
+    effort: XL
+    status: proposed_blocked
+    blocked_by: [RSL-EVAL-001, RSL-SAFE-005, RSL-WEB-002]
+    acceptance_criteria:
+      - "Fixtures cover prompt injection, tool-output injection, poisoned memory, stale approval, replay, path escape, secret leakage, false evidence, correlated reviewers and dependency compromise."
+      - "Every failure has expected detect, deny, contain, recover and audit outcomes."
+      - "Blocking failures remain open and prevent pilot promotion."
+    evidence: [threat_fixture_pack, red_team_report, remediation_trace]
+
+  - id: RSL-EVAL-003
+    title: "Replace autonomy marketing levels with evidence-backed maturity claims"
+    target_repositories:
+      - ArsyBelovedLabs/rocksoul-code-web
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-cli
+    gate: G2
+    priority: P1
+    type: governance
+    effort: S
+    status: proposed
+    blocked_by: [RSL-EVAL-001]
+    acceptance_criteria:
+      - "R0-R5 labels map to explicit capabilities, constraints, benchmark and certification evidence."
+      - "UI and docs do not imply AGI, ASI, consciousness, infallibility, prophecy, unrestricted autonomy, or production certification."
+      - "Unsupported levels are hidden or visibly marked research-only."
+    evidence: [claim_inventory, documentation_tests, benchmark_links]
+
+  - id: RSL-PEP-001
+    title: "Conduct qualified human review of prophetic ethics source lanes and mappings"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-blueprint
+      - ArsyBelovedLabs/moonwitness-prophetic
+    gate: G5
+    priority: P1
+    type: research
+    effort: XL
+    status: proposed_needs_human_review
+    blocked_by: []
+    acceptance_criteria:
+      - "Reviewers inspect passage identity, Arabic text where used, translation, attribution, interpretation boundary, disagreement and prohibited claims."
+      - "Qur'an, Tawrat, Zabur, Injil, textual witnesses, tafsir, scholarship and model synthesis remain distinct provenance lanes."
+      - "Corrections preserve a versioned review trail."
+    evidence: [reviewer_protocol, signed_review_records, source_change_log]
+
+  - id: RSL-PEP-002
+    title: "Evaluate PEP advice against neutral and simpler safety baselines"
+    target_repositories: [ArsyBelovedLabs/moonwitness-prophetic]
+    gate: G5
+    priority: P1
+    type: evaluation
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-PEP-001, RSL-EVAL-001]
+    acceptance_criteria:
+      - "Baseline, PEP-assisted, and ablated variants run the same adversarial tasks."
+      - "Metrics cover attribution accuracy, uncertainty, harm, proportionality, appeal, non-impersonation and false authority."
+      - "Negative results and regressions are published with equal status."
+    evidence: [pep_benchmark, ablation_report, reviewer_signoff]
+
+  - id: RSL-PEP-003
+    title: "Add non-impersonation, attribution, and hidden-wisdom firewall tests"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-prophetic
+      - ArsyBelovedLabs/rocksoul-code-web
+    gate: G5
+    priority: P0
+    type: safety
+    effort: M
+    status: proposed_blocked
+    blocked_by: [RSL-PEP-001]
+    acceptance_criteria:
+      - "The system refuses first-person prophetic identity, revelation, miracle, unseen-knowledge, resurrection, salvation, and digital-return claims."
+      - "UI distinguishes direct source, translation, attributed interpretation, and model synthesis."
+      - "Hidden-wisdom language cannot authorize secrecy, harm, surveillance, bypass, or irreversible action."
+    evidence: [adversarial_fixture_pack, ui_source_lane_test, refusal_regression]
+
+  - id: RSL-OPS-001
+    title: "Create a reliable source-mode supervisor for local development"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-code-web
+    gate: G2
+    priority: P0
+    type: operations
+    effort: M
+    status: proposed
+    blocked_by: [RSL-GOV-003, RSL-SAFE-005]
+    acceptance_criteria:
+      - "One documented command starts engine, web, orchestrator, runner, browser, and gateway from sibling source repositories."
+      - "Ports, PID ownership, logs, readiness, restart, graceful stop, stale-process cleanup and failure reporting are deterministic."
+      - "The launcher does not require Docker CLI for local use."
+    evidence: [windows_source_smoke, clean_stop_test, port_collision_test]
+
+  - id: RSL-OPS-002
+    title: "Add cross-service observability, SLOs, audit retention, and resource accounting"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-code-web
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+      - ArsyBelovedLabs/rocksoul-code
+    gate: G6
+    priority: P1
+    type: observability
+    effort: XL
+    status: proposed_blocked
+    blocked_by: [RSL-WEB-002]
+    acceptance_criteria:
+      - "Goal, task, model, tool, command, browser, approval and delivery share trace/correlation identity."
+      - "SLIs cover success, false success, queue, latency, cancellation, recovery, cost, tokens, storage and evidence completeness."
+      - "Sensitive data retention and access are explicit and tested."
+    evidence: [trace_demo, slo_catalog, retention_test, resource_report]
+
+  - id: RSL-OPS-003
+    title: "Establish reproducible releases, SBOM, dependency review, backup, restore, and pilot gate"
+    target_repositories:
+      - ArsyBelovedLabs/moonwitness-platform-foundation
+      - ArsyBelovedLabs/rocksoul-code
+      - ArsyBelovedLabs/rocksoul-code-web
+      - ArsyBelovedLabs/rocksoul-orchestrator
+      - ArsyBelovedLabs/rocksoul-runner
+      - ArsyBelovedLabs/rocksoul-browser-worker
+      - ArsyBelovedLabs/rocksoul-gateway
+    gate: G6
+    priority: P1
+    type: operations
+    effort: XL
+    status: proposed_blocked
+    blocked_by: [RSL-GOV-004, RSL-OPS-002, RSL-EVAL-002]
+    acceptance_criteria:
+      - "Pinned toolchains, lockfiles, provenance, SBOM, vulnerability checks and signed release records exist."
+      - "State and evidence backup/restore plus deployment rollback are rehearsed."
+      - "Pilot promotion requires passing SLO, security, recovery, benchmark and observation-period evidence."
+    evidence: [release_manifest, sbom, restore_rehearsal, pilot_decision_record]
+
+  - id: RSL-LAB-001
+    title: "Prototype a declarative MITHAQ policy notation with standard-format fallback"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G7
+    priority: P3
+    type: research
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-CON-001, RSL-EVAL-001, RSL-ORC-001]
+    acceptance_criteria:
+      - "Notation compiles deterministically to versioned JSON Schema-compatible policy data."
+      - "Parser, formatter, type checker, source map, diagnostics, capability analysis and denial semantics are tested."
+      - "Names are mnemonic engineering vocabulary, not claims of a Qur'an-authored programming language."
+    evidence: [grammar, compiler_tests, json_round_trip, usability_ablation]
+
+  - id: RSL-LAB-002
+    title: "Build content-addressed witness records before evaluating decentralized anchors"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G7
+    priority: P2
+    type: research
+    effort: L
+    status: proposed_blocked
+    blocked_by: [RSL-MEM-001, RSL-OPS-002]
+    acceptance_criteria:
+      - "Evidence manifests use canonical encoding, hashes, signatures, timestamps, lineage, access control and retention."
+      - "Tamper detection and recovery work without a blockchain dependency."
+      - "Any external or decentralized anchor is adopted only after threat, privacy, cost and recovery comparison."
+    evidence: [witness_schema, tamper_fixture, classical_storage_baseline, anchor_decision]
+
+  - id: RSL-LAB-003
+    title: "Create a classical-first quantum experiment harness"
+    target_repositories: [ArsyBelovedLabs/rocksoul-orchestrator]
+    gate: G7
+    priority: P3
+    type: research
+    effort: XL
+    status: proposed_blocked
+    blocked_by: [RSL-EVAL-001, RSL-ORC-003, RSL-OPS-002]
+    acceptance_criteria:
+      - "Every PennyLane or later backend experiment includes tuned classical baseline, seeds, encoding, backend, shots, depth, noise, queue, runtime, cost and fallback."
+      - "Promotion requires reproducible task-relevant improvement and independent review."
+      - "Negative, dequantized, or non-advantage results are preserved and production remains quantum-independent."
+    evidence: [experiment_manifest, classical_baseline, repeated_runs, independent_review]
+
+issue_creation_order:
+  immediate_after_review:
+    - RSL-GOV-001
+  after_architecture_decision:
+    - RSL-GOV-002
+    - RSL-GOV-004
+    - RSL-GOV-005
+    - RSL-FND-001
+    - RSL-FND-002
+    - RSL-CON-001
+    - RSL-SAFE-006
+  after_inventory:
+    - RSL-GOV-003
+  gate_1_batch:
+    - RSL-FND-003
+    - RSL-FND-004
+    - RSL-CON-002
+    - RSL-CON-003
+    - RSL-SAFE-001
+    - RSL-SAFE-002
+    - RSL-SAFE-003
+    - RSL-SAFE-004
+    - RSL-SAFE-005
+  gate_2_batch:
+    - RSL-FND-005
+    - RSL-FND-006
+    - RSL-FND-007
+    - RSL-ORC-001
+    - RSL-ORC-002
+    - RSL-EVAL-001
+    - RSL-OPS-001
+  create_only_when_entry_gate_passes:
+    - RSL-ORC-003
+    - RSL-ORC-004
+    - RSL-ORC-005
+    - RSL-MOD-001
+    - RSL-MOD-002
+    - RSL-MEM-001
+    - RSL-MEM-002
+    - RSL-BRW-001
+    - RSL-BRW-002
+    - RSL-GTW-001
+    - RSL-GTW-002
+    - RSL-WEB-001
+    - RSL-WEB-002
+    - RSL-EVAL-002
+    - RSL-EVAL-003
+    - RSL-PEP-001
+    - RSL-PEP-002
+    - RSL-PEP-003
+    - RSL-OPS-002
+    - RSL-OPS-003
+    - RSL-FND-008
+    - RSL-LAB-001
+    - RSL-LAB-002
+    - RSL-LAB-003
+
+program_done_when:
+  - moonwitness_platform_foundation_is_the_single_production_host
+  - gitlab_remains_the_external_generic_platform_engine
+  - rocksoul_capabilities_have_one_foundation_owner_or_explicit_transitional_sidecar_status
+  - canonical_ownership_is_unambiguous
+  - protected_pr_delivery_is_enforced
+  - unknown_verification_cannot_pass
+  - unrelated_user_work_cannot_be_reset_cleaned_staged_or_committed
+  - executable_actions_cross_policy_and_approval_boundaries
+  - restart_and_duplicate_requests_preserve_correct_effects
+  - source_mode_full_story_e2e_passes
+  - benchmark_reports_zero_false_success_for_the_certified_scope
+  - model_memory_scoring_and_pep_claims_match_evidence
+  - observability_backup_restore_and_rollback_are_rehearsed
+  - speculative_research_is_not_a_production_dependency

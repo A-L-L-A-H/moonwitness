@@ -1,0 +1,7 @@
+{
+  "name": "@rocksoul/scheduler", "version": "1.0.0", "private": true, "type": "module",
+  "main": "./dist/index.js", "types": "./dist/index.d.ts",
+  "scripts": {"dev":"tsx watch src/server.ts","build":"tsc","start":"node dist/server.js","clean":"rimraf dist","test":"node --test tests/*.test.js","db:generate":"drizzle-kit generate","db:migrate":"tsx src/migrate.ts"},
+  "dependencies": {"@fastify/cors":"^10.0.2","@libsql/client":"^0.18.0","better-sqlite3":"^13.0.3","cron-parser":"^5.4.0","drizzle-orm":"^0.45.2","fastify":"^5.2.1","fastify-plugin":"^6.0.0","plainjob":"^0.0.14","zod":"^3.25.76"},
+  "devDependencies": {"@rocksoul/tsconfig":"workspace:*","@types/better-sqlite3":"^7.6.13","@types/node":"^22.13.10","rimraf":"^6.0.1","tsx":"^4.19.3","typescript":"^5.8.2"}
+}

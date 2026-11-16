@@ -1,0 +1,52 @@
+version: 2
+status: design-locked
+capabilities:
+  - id: knowledge
+    owner: moonwitness-corpus
+    purpose: canonical corpus ingestion, validation, materialization, release
+  - id: intelligence
+    owner: moonwitness-cosmic
+    purpose: semantic, temporal, mizan, explanation and analysis capabilities
+  - id: methodology
+    owner: moonwitness-crayon
+    purpose: research methodology, measurement, scoring and evaluation
+  - id: prophetic-domain
+    owner: moonwitness-prophetic
+    purpose: bounded prophetic research domain workflows
+  - id: workflow
+    owner: moonwitness-runtime
+    purpose: durable workflow orchestration and state transitions
+  - id: async-execution
+    owner: moonwitness-worker
+    purpose: retryable asynchronous job execution
+  - id: network
+    owner: moonwitness-api
+    purpose: canonical HTTPS/OpenAPI transport boundary
+  - id: developer-sdk
+    owner: moonwitness-sdk
+    purpose: consumer-facing typed API client generated from canonical API contract
+  - id: frontend-platform
+    owner: moonwitness-frontend-platform
+    purpose: portable design tokens, accessible primitives and reusable UI kits
+  - id: application-web
+    owner: moonwitness-wheremythfadetolegend
+    purpose: primary public observatory user experience
+  - id: application-command-center
+    owner: moonwitness-commandcenter
+    purpose: operational and research control experience
+  - id: application-crayon-lab
+    owner: moonwitness-crayon-lab
+    purpose: CRAYON research/laboratory experience
+  - id: contracts
+    owner: moonwitness-core
+    purpose: canonical identifiers, wire schemas, shared domain types and problem taxonomy
+  - id: provenance-contract
+    owner: moonwitness-core
+    implementation_owner: moonwitness-cosmic
+    purpose: canonical evidence provenance and witness contract
+rules:
+  - every_capability_has_exactly_one_canonical_owner
+  - consumers_must_use_public_contracts
+  - applications_must_not_own_domain_capabilities
+  - transport_must_not_own_business_logic
+  - persistence_must_not_define_cross_repository_contracts

@@ -1,0 +1,121 @@
+# TODO ↔ GitHub Issues synchronization
+
+MoonWitness Corpus keeps `TODO.md` and GitHub Issues synchronized automatically.
+
+The synchronization intentionally has **split ownership** instead of treating both sides as fully editable copies of one document:
+
+- `TODO.md` owns task identity, canonical task text, ordering, and roadmap phase.
+- GitHub Issues own day-to-day discussion and open/closed workflow state.
+- The TODO checkbox and issue open/closed state are bidirectional.
+
+This prevents issue-title edits, bot formatting, or discussion metadata from silently rewriting the roadmap document.
+
+## Stable task identity
+
+Every roadmap checkbox under a `P<n>` section receives a hidden stable marker:
+
+```md
+- [ ] Define canonical ID grammar. <!-- mw-todo:P1-001 -->
+```
+
+The same marker is embedded in the synchronized issue body:
+
+```html
+<!-- mw-todo:P1-001 -->
+```
+
+The marker, not the issue number or task text, is the synchronization identity. Once assigned, do not change or reuse it for a different task.
+
+New tasks without markers are assigned the next available ID in their phase automatically. Reordering tasks does not change existing IDs.
+
+## TODO → Issues
+
+The workflow runs when `TODO.md` or the sync implementation changes on `main`, and can also be started manually with `workflow_dispatch`.
+
+For every roadmap task under `P0`, `P1`, ...:
+
+1. assign a stable marker when missing;
+2. find the GitHub Issue carrying the same marker;
+3. create an issue when an unchecked task does not yet have one;
+4. update the issue title/body when canonical TODO text or phase changes;
+5. close the issue when the TODO checkbox becomes checked;
+6. reopen the issue when the TODO checkbox becomes unchecked;
+7. ensure `todo-sync`, `roadmap`, and phase labels such as `P1` exist.
+
+Already-completed historical tasks that never had an issue are not backfilled as synthetic closed issues.
+
+### Rate-limit safety and resumability
+
+GitHub applies secondary limits to rapid content creation. The synchronizer therefore deliberately avoids burst writes:
+
+- successful POST/PATCH mutations are spaced by a configurable delay (`TODO_SYNC_MUTATION_DELAY_MS`, default 2200 ms);
+- HTTP 403/429 rate-limit responses use bounded retry/backoff and honor `Retry-After` when GitHub supplies it;
+- task markers are written to `TODO.md` **before** issue mutations begin in local runs; protected-branch CI sets `TODO_SYNC_NO_WRITE=1` and fails closed instead, requiring a pull request;
+- a later run scans existing issue markers before creating anything, so it safely resumes instead of duplicating issues.
+
+The sync is intentionally idempotent: the same `TODO.md` plus the same existing issue set converges to the same task/issue mapping.
+
+## Issue → TODO
+
+When a managed issue is closed or reopened:
+
+1. the workflow reads its `mw-todo` marker;
+2. locates the matching checkbox in `TODO.md`;
+3. compares the expected checkbox state with the repository file;
+4. writes a report and fails the run when the file has drifted;
+5. a human opens a pull request that updates the checkbox.
+
+Issues without an `mw-todo` marker are ignored. The CI workflow never writes `TODO.md` or pushes to a protected branch; `--check` mode only reports the required change.
+
+## Loop prevention
+
+Because the workflow no longer writes to `TODO.md`, bot commits cannot recursively trigger the workflow at all.
+
+The workflow additionally uses one concurrency group so TODO/issue changes are serialized rather than racing each other.
+
+## Deleting or replacing tasks
+
+Deletion is intentionally conservative.
+
+Removing a task from `TODO.md` does **not** automatically delete or close its GitHub Issue. The old issue remains an audit/discussion record and the synchronizer logs that the marker is no longer present.
+
+For cancelled work, prefer closing the issue explicitly and documenting the reason before removing or replacing the roadmap task.
+
+Never reuse an old task ID for unrelated work.
+
+## Manual commands
+
+The same implementation can be run from a checkout:
+
+```bash
+# Requires GITHUB_TOKEN/GH_TOKEN and GITHUB_REPOSITORY=owner/repo
+pnpm todo:sync
+
+# Validate that all currently tracked roadmap tasks have stable markers
+pnpm todo:check
+
+# Report TODO.md drift against live issue state without writing
+pnpm exec tsx scripts/reconcile-issue-status.ts --check
+```
+
+`pnpm todo:sync:issue` is intended for the GitHub `issues` event because it reads `GITHUB_EVENT_PATH`.
+
+For manual recovery from a temporary GitHub content-creation limit, it is safe to rerun `pnpm todo:sync` or dispatch the workflow again. Existing marker-linked issues are discovered first and are not recreated.
+
+## Security and permissions
+
+The workflow declares only the permissions it needs:
+
+```yaml
+permissions:
+  contents: read
+  issues: write
+```
+
+No personal access token and no branch-protection bypass are required. The workflow never commits or pushes; when TODO state drifts it fails with a report so a pull request can update `TODO.md`.
+
+## Source files
+
+- workflow: `.github/workflows/todo-issues-sync.yml`
+- implementation: `scripts/sync-todo-issues.ts`
+- canonical task list: `TODO.md`

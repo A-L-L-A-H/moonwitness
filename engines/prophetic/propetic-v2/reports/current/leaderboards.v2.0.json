@@ -1,0 +1,943 @@
+{
+  "trait_evidence": [
+    {
+      "rank": 1,
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "score": 90,
+      "band": "DIRECT_LEXEME",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 1,
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "score": 90,
+      "band": "DIRECT_LEXEME",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 1,
+      "prophet_id": "nuh",
+      "prophet_name": "Nūḥ",
+      "score": 90,
+      "band": "DIRECT_LEXEME",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 1,
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "score": 90,
+      "band": "DIRECT_LEXEME",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "adam",
+      "prophet_name": "Ādam",
+      "score": 80,
+      "band": "SHARED_ROOT",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "score": 80,
+      "band": "SHARED_ROOT",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "hud",
+      "prophet_name": "Hūd",
+      "score": 80,
+      "band": "SHARED_ROOT",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "score": 80,
+      "band": "SHARED_ROOT",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "score": 80,
+      "band": "SHARED_ROOT",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "alyasa",
+      "prophet_name": "Al-Yasaʿ",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "ayyub",
+      "prophet_name": "Ayyūb",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "dhulkifl",
+      "prophet_name": "Dhū al-Kifl",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "idris",
+      "prophet_name": "Idrīs",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "ishaq",
+      "prophet_name": "Isḥāq",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "ismail",
+      "prophet_name": "Ismāʿīl",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "salih",
+      "prophet_name": "Ṣāliḥ",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "yaqub",
+      "prophet_name": "Yaʿqūb",
+      "score": 65,
+      "band": "SEMANTIC",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "harun",
+      "prophet_name": "Hārūn",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "ilyas",
+      "prophet_name": "Ilyās",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "score": 0,
+      "band": "LIMITED",
+      "metric": "TRAIT_EVIDENCE",
+      "note": "Strongest curated shared/semantic trait evidence class. Heuristic matcher, divine interaction, mission alignment and etymology are excluded."
+    }
+  ],
+  "data_confidence": [
+    {
+      "rank": 1,
+      "prophet_id": "nuh",
+      "prophet_name": "Nūḥ",
+      "score": 99.58,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 2,
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "score": 98.59,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 3,
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "score": 98.27,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 4,
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "score": 96.22,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "score": 95.97,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 6,
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "score": 94.5,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 6,
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "score": 94.5,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 8,
+      "prophet_id": "salih",
+      "prophet_name": "Ṣāliḥ",
+      "score": 94.14,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 9,
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "score": 93.14,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 10,
+      "prophet_id": "ilyas",
+      "prophet_name": "Ilyās",
+      "score": 92.84,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 11,
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "score": 91.95,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 12,
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "score": 90.02,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 13,
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "score": 88.38,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 14,
+      "prophet_id": "ismail",
+      "prophet_name": "Ismāʿīl",
+      "score": 87.4,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 15,
+      "prophet_id": "yaqub",
+      "prophet_name": "Yaʿqūb",
+      "score": 87.31,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 16,
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "score": 86.69,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 17,
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "score": 85.13,
+      "band": "VERY_STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 18,
+      "prophet_id": "hud",
+      "prophet_name": "Hūd",
+      "score": 83.15,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 19,
+      "prophet_id": "harun",
+      "prophet_name": "Hārūn",
+      "score": 81.43,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 20,
+      "prophet_id": "ayyub",
+      "prophet_name": "Ayyūb",
+      "score": 80.7,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 21,
+      "prophet_id": "alyasa",
+      "prophet_name": "Al-Yasaʿ",
+      "score": 77.77,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 21,
+      "prophet_id": "ishaq",
+      "prophet_name": "Isḥāq",
+      "score": 77.77,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 23,
+      "prophet_id": "adam",
+      "prophet_name": "Ādam",
+      "score": 76.63,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 24,
+      "prophet_id": "idris",
+      "prophet_name": "Idrīs",
+      "score": 74.59,
+      "band": "STRONG",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    },
+    {
+      "rank": 25,
+      "prophet_id": "dhulkifl",
+      "prophet_name": "Dhū al-Kifl",
+      "score": 65.96,
+      "band": "MODERATE",
+      "metric": "DATA_CONFIDENCE",
+      "note": "Includes RID/status/mission/name-root/ASMA data confidence; not prophet rank."
+    }
+  ],
+  "world_trait_salience": [
+    {
+      "rank": 1,
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "score": 36.57,
+      "band": "HIGH_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 1,
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "score": 36.57,
+      "band": "HIGH_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 3,
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "score": 33.21,
+      "band": "HIGH_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 4,
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "score": 29.52,
+      "band": "SOME_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 5,
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "score": 27.88,
+      "band": "SOME_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 6,
+      "prophet_id": "nuh",
+      "prophet_name": "Nūḥ",
+      "score": 21.25,
+      "band": "SOME_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 6,
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "score": 21.25,
+      "band": "SOME_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 8,
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "score": 0,
+      "band": "LOW_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    },
+    {
+      "rank": 8,
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "score": 0,
+      "band": "LOW_SALIENCE",
+      "metric": "WORLD_TRAIT_SALIENCE",
+      "note": "At least two conservative trait mappings required. Uses textual evidence × mapping confidence × VIA reliability × published top-five categories; not preference probability."
+    }
+  ],
+  "context_evidence": [
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "context_score": 100,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 100,
+      "modern_crosswalk_confidence": 90,
+      "band": "VERY_STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 1
+    },
+    {
+      "prophet_id": "harun",
+      "prophet_name": "Hārūn",
+      "context_score": 93.79,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 82.5,
+      "modern_crosswalk_confidence": 90,
+      "band": "VERY_STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 2
+    },
+    {
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "context_score": 93.79,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 82.5,
+      "modern_crosswalk_confidence": 90,
+      "band": "VERY_STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 2
+    },
+    {
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "context_score": 93.79,
+      "religion_score": 100,
+      "region_score": 82.5,
+      "language_score": 100,
+      "modern_crosswalk_confidence": 65,
+      "band": "VERY_STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 2
+    },
+    {
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "context_score": 87.96,
+      "religion_score": 100,
+      "region_score": 82.5,
+      "language_score": 82.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 5
+    },
+    {
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "context_score": 84.26,
+      "religion_score": 100,
+      "region_score": 82.5,
+      "language_score": 72.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 6
+    },
+    {
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "context_score": 84.26,
+      "religion_score": 100,
+      "region_score": 82.5,
+      "language_score": 72.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "STRONG",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 6
+    },
+    {
+      "prophet_id": "alyasa",
+      "prophet_name": "Al-Yasaʿ",
+      "context_score": 73.6,
+      "religion_score": 100,
+      "region_score": 55,
+      "language_score": 72.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 8
+    },
+    {
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "context_score": 73.6,
+      "religion_score": 100,
+      "region_score": 55,
+      "language_score": 72.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 8
+    },
+    {
+      "prophet_id": "hud",
+      "prophet_name": "Hūd",
+      "context_score": 68.75,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 32.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 10
+    },
+    {
+      "prophet_id": "salih",
+      "prophet_name": "Ṣāliḥ",
+      "context_score": 68.75,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 32.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 10
+    },
+    {
+      "prophet_id": "nuh",
+      "prophet_name": "Nūḥ",
+      "context_score": 63,
+      "religion_score": 100,
+      "region_score": 50,
+      "language_score": 50,
+      "modern_crosswalk_confidence": 35,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 12
+    },
+    {
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "context_score": 60.82,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 13
+    },
+    {
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "context_score": 60.82,
+      "religion_score": 100,
+      "region_score": 100,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 90,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 13
+    },
+    {
+      "prophet_id": "ismail",
+      "prophet_name": "Ismāʿīl",
+      "context_score": 57.04,
+      "religion_score": 100,
+      "region_score": 82.5,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 90,
+      "band": "MODERATE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 15
+    },
+    {
+      "prophet_id": "yaqub",
+      "prophet_name": "Yaʿqūb",
+      "context_score": 54.64,
+      "religion_score": 100,
+      "region_score": 72.5,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "LIMITED",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 16
+    },
+    {
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "context_score": 52.69,
+      "religion_score": 100,
+      "region_score": 65,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "LIMITED",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 17
+    },
+    {
+      "prophet_id": "ilyas",
+      "prophet_name": "Ilyās",
+      "context_score": 49.83,
+      "religion_score": 100,
+      "region_score": 55,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "LIMITED",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 18
+    },
+    {
+      "prophet_id": "ishaq",
+      "prophet_name": "Isḥāq",
+      "context_score": 48.27,
+      "religion_score": 100,
+      "region_score": 50,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 65,
+      "band": "LIMITED",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 19
+    },
+    {
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "context_score": 48.27,
+      "religion_score": 100,
+      "region_score": 50,
+      "language_score": 22.5,
+      "modern_crosswalk_confidence": 35,
+      "band": "LIMITED",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 19
+    },
+    {
+      "prophet_id": "ayyub",
+      "prophet_name": "Ayyūb",
+      "context_score": 29.24,
+      "religion_score": 100,
+      "region_score": 0,
+      "language_score": 50,
+      "modern_crosswalk_confidence": 35,
+      "band": "SPARSE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 21
+    },
+    {
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "context_score": 29.24,
+      "religion_score": 100,
+      "region_score": 50,
+      "language_score": 0,
+      "modern_crosswalk_confidence": 35,
+      "band": "SPARSE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 21
+    },
+    {
+      "prophet_id": "adam",
+      "prophet_name": "Ādam",
+      "context_score": 25.36,
+      "religion_score": 45,
+      "region_score": 72.5,
+      "language_score": 0,
+      "modern_crosswalk_confidence": 35,
+      "band": "SPARSE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 23
+    },
+    {
+      "prophet_id": "dhulkifl",
+      "prophet_name": "Dhū al-Kifl",
+      "context_score": 13.57,
+      "religion_score": 100,
+      "region_score": 0,
+      "language_score": 0,
+      "modern_crosswalk_confidence": 35,
+      "band": "SPARSE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 24
+    },
+    {
+      "prophet_id": "idris",
+      "prophet_name": "Idrīs",
+      "context_score": 11.76,
+      "religion_score": 65,
+      "region_score": 0,
+      "language_score": 0,
+      "modern_crosswalk_confidence": 35,
+      "band": "SPARSE",
+      "note": "Evidence/provenance quality only; not a rank of religion, people, language, country, or prophet.",
+      "rank": 25
+    }
+  ],
+  "human_preference": {
+    "status": "UNCALIBRATED",
+    "n": 0,
+    "unique_respondents": 0,
+    "estimates": [
+      {
+        "trait": "compassion",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "courage",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "fairness",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "forgiveness",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "gratitude",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "honesty",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "hope",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "humility",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "judgment",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "kindness",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "leadership",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "patience",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "perseverance",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "self_regulation",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      },
+      {
+        "trait": "wisdom",
+        "ability": 0,
+        "normalized_score": 0,
+        "comparisons": 0
+      }
+    ],
+    "note": "Need >=100 observations and >=30 unique respondents."
+  },
+  "composite": {
+    "status": "DISABLED_UNTIL_PREFERENCE_CALIBRATION",
+    "score": null
+  }
+}

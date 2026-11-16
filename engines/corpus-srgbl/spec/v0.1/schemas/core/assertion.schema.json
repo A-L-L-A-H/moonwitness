@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://moonwitness.org/corpus/spec/v0.1/schemas/core/assertion.schema.json",
+  "type": "object",
+  "required": ["id", "record_type", "subject", "predicate", "object", "assertion_class"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/canonicalId" },
+    "record_type": { "const": "assertion" },
+    "subject": { "$ref": "common.schema.json#/$defs/canonicalId" },
+    "predicate": { "$ref": "common.schema.json#/$defs/canonicalId" },
+    "object": { "$ref": "common.schema.json#/$defs/assertionObject" },
+    "assertion_class": { "type": "string" },
+    "scope": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "tradition": { "$ref": "common.schema.json#/$defs/canonicalId" },
+        "community": { "$ref": "common.schema.json#/$defs/canonicalId" },
+        "agent": { "$ref": "common.schema.json#/$defs/canonicalId" },
+        "period": { "$ref": "common.schema.json#/$defs/canonicalId" },
+        "place": { "$ref": "common.schema.json#/$defs/canonicalId" }
+      },
+      "additionalProperties": false
+    },
+    "evidence": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/canonicalId" } },
+    "provenance": { "$ref": "common.schema.json#/$defs/canonicalId" },
+    "lifecycle": { "$ref": "common.schema.json#/$defs/recordLifecycle" },
+    "extensions": { "type": "object" }
+  },
+  "additionalProperties": false
+}

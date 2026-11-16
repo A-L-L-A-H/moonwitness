@@ -1,0 +1,2398 @@
+[
+  {
+    "id": "event:adam:call",
+    "prophet_id": "adam",
+    "slot": "call",
+    "summary": "Earthly human commission / khalīfah context",
+    "refs": [
+      "2:30"
+    ],
+    "evidence": "Q1",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:test",
+    "prophet_id": "adam",
+    "slot": "test",
+    "summary": "Tree prohibition and descent",
+    "refs": [
+      "2:35-36"
+    ],
+    "evidence": "Q5",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:gift",
+    "prophet_id": "adam",
+    "slot": "gift",
+    "summary": "Teaching of the names",
+    "refs": [
+      "2:31"
+    ],
+    "evidence": "Q5",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:mission",
+    "prophet_id": "adam",
+    "slot": "mission",
+    "summary": "Human stewardship / obedience",
+    "refs": [
+      "2:30-35"
+    ],
+    "evidence": "Q1",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:conflict",
+    "prophet_id": "adam",
+    "slot": "conflict",
+    "summary": "Temptation by Satan",
+    "refs": [
+      "2:36",
+      "20:120"
+    ],
+    "evidence": "Q5",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:response",
+    "prophet_id": "adam",
+    "slot": "response",
+    "summary": "Received words and repented",
+    "refs": [
+      "2:37"
+    ],
+    "evidence": "Q5",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:judgment",
+    "prophet_id": "adam",
+    "slot": "judgment",
+    "summary": "Repentance accepted; descent to earth",
+    "refs": [
+      "2:37-38"
+    ],
+    "evidence": "Q5",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:adam:legacy",
+    "prophet_id": "adam",
+    "slot": "legacy",
+    "summary": "Human-origin exemplar",
+    "refs": [
+      "3:59"
+    ],
+    "evidence": "Q2",
+    "era": "PRIMORDIAL_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:idris:call",
+    "prophet_id": "idris",
+    "slot": "call",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:test",
+    "prophet_id": "idris",
+    "slot": "test",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:gift",
+    "prophet_id": "idris",
+    "slot": "gift",
+    "summary": "Ṣiddīq + prophethood",
+    "refs": [
+      "19:56"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:mission",
+    "prophet_id": "idris",
+    "slot": "mission",
+    "summary": "Truthful prophetic witness",
+    "refs": [
+      "19:56"
+    ],
+    "evidence": "Q2",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:conflict",
+    "prophet_id": "idris",
+    "slot": "conflict",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:response",
+    "prophet_id": "idris",
+    "slot": "response",
+    "summary": "Truthfulness",
+    "refs": [
+      "19:56"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:judgment",
+    "prophet_id": "idris",
+    "slot": "judgment",
+    "summary": "Raised to a high station",
+    "refs": [
+      "19:57"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:idris:legacy",
+    "prophet_id": "idris",
+    "slot": "legacy",
+    "summary": "Truthful prophet exemplar",
+    "refs": [
+      "19:56-57"
+    ],
+    "evidence": "Q2",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:nuh:call",
+    "prophet_id": "nuh",
+    "slot": "call",
+    "summary": "Warn your people",
+    "refs": [
+      "71:1"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:test",
+    "prophet_id": "nuh",
+    "slot": "test",
+    "summary": "Persistent rejection",
+    "refs": [
+      "11:36",
+      "71:5-7"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:gift",
+    "prophet_id": "nuh",
+    "slot": "gift",
+    "summary": "Ark instruction",
+    "refs": [
+      "11:37"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:mission",
+    "prophet_id": "nuh",
+    "slot": "mission",
+    "summary": "Warning + tawḥīd",
+    "refs": [
+      "71:1-3"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:conflict",
+    "prophet_id": "nuh",
+    "slot": "conflict",
+    "summary": "Denial by his people",
+    "refs": [
+      "11:27-32"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:response",
+    "prophet_id": "nuh",
+    "slot": "response",
+    "summary": "Persistent calling and reliance",
+    "refs": [
+      "71:5-10"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:judgment",
+    "prophet_id": "nuh",
+    "slot": "judgment",
+    "summary": "Flood; believers saved",
+    "refs": [
+      "11:40-44"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:nuh:legacy",
+    "prophet_id": "nuh",
+    "slot": "legacy",
+    "summary": "Peace/blessing upon Nūḥ",
+    "refs": [
+      "37:79",
+      "11:48"
+    ],
+    "evidence": "Q5",
+    "era": "EARLY_HUMANITY",
+    "era_confidence": 0.45
+  },
+  {
+    "id": "event:hud:call",
+    "prophet_id": "hud",
+    "slot": "call",
+    "summary": "To ʿĀd",
+    "refs": [
+      "7:65"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:test",
+    "prophet_id": "hud",
+    "slot": "test",
+    "summary": "Rejection by ʿĀd",
+    "refs": [
+      "11:53"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:gift",
+    "prophet_id": "hud",
+    "slot": "gift",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:mission",
+    "prophet_id": "hud",
+    "slot": "mission",
+    "summary": "Worship Allah alone",
+    "refs": [
+      "7:65"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:conflict",
+    "prophet_id": "hud",
+    "slot": "conflict",
+    "summary": "People reject his claim",
+    "refs": [
+      "11:53"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:response",
+    "prophet_id": "hud",
+    "slot": "response",
+    "summary": "Tawakkul on Allah",
+    "refs": [
+      "11:56"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:judgment",
+    "prophet_id": "hud",
+    "slot": "judgment",
+    "summary": "Saved with believers; punishment on ʿĀd",
+    "refs": [
+      "11:58"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:hud:legacy",
+    "prophet_id": "hud",
+    "slot": "legacy",
+    "summary": "Tawḥīd warning to ʿĀd",
+    "refs": [
+      "7:65"
+    ],
+    "evidence": "Q2",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:call",
+    "prophet_id": "salih",
+    "slot": "call",
+    "summary": "To Thamūd",
+    "refs": [
+      "7:73"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:test",
+    "prophet_id": "salih",
+    "slot": "test",
+    "summary": "She-camel test",
+    "refs": [
+      "7:73"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:gift",
+    "prophet_id": "salih",
+    "slot": "gift",
+    "summary": "She-camel as sign",
+    "refs": [
+      "7:73"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:mission",
+    "prophet_id": "salih",
+    "slot": "mission",
+    "summary": "Worship Allah; reform",
+    "refs": [
+      "11:61"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:conflict",
+    "prophet_id": "salih",
+    "slot": "conflict",
+    "summary": "Camel harmed; defiance",
+    "refs": [
+      "7:77"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:response",
+    "prophet_id": "salih",
+    "slot": "response",
+    "summary": "Warning and clear message",
+    "refs": [
+      "7:73",
+      "11:63"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:judgment",
+    "prophet_id": "salih",
+    "slot": "judgment",
+    "summary": "Earthquake/punishment",
+    "refs": [
+      "7:78"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:salih:legacy",
+    "prophet_id": "salih",
+    "slot": "legacy",
+    "summary": "Sign-centered warning to Thamūd",
+    "refs": [
+      "7:73"
+    ],
+    "evidence": "Q2",
+    "era": "ANCIENT_ARABIA",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:ibrahim:call",
+    "prophet_id": "ibrahim",
+    "slot": "call",
+    "summary": "Called away from idolatry",
+    "refs": [
+      "6:74-79"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:test",
+    "prophet_id": "ibrahim",
+    "slot": "test",
+    "summary": "Fire and sacrifice trial",
+    "refs": [
+      "21:68-69",
+      "37:102-107"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:gift",
+    "prophet_id": "ibrahim",
+    "slot": "gift",
+    "summary": "Argument, guidance, imamate",
+    "refs": [
+      "6:83",
+      "2:124"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:mission",
+    "prophet_id": "ibrahim",
+    "slot": "mission",
+    "summary": "Tawḥīd / millah ḥanīfiyyah",
+    "refs": [
+      "16:120-123"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:conflict",
+    "prophet_id": "ibrahim",
+    "slot": "conflict",
+    "summary": "Idolatrous people and ruler",
+    "refs": [
+      "21:52-68"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:response",
+    "prophet_id": "ibrahim",
+    "slot": "response",
+    "summary": "Submission and steadfastness",
+    "refs": [
+      "2:131"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:judgment",
+    "prophet_id": "ibrahim",
+    "slot": "judgment",
+    "summary": "Saved from fire; trial fulfilled",
+    "refs": [
+      "21:69",
+      "2:124"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ibrahim:legacy",
+    "prophet_id": "ibrahim",
+    "slot": "legacy",
+    "summary": "Imam / Abrahamic model",
+    "refs": [
+      "2:124",
+      "16:123"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_SEMITIC",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:lut:call",
+    "prophet_id": "lut",
+    "slot": "call",
+    "summary": "Address to his people",
+    "refs": [
+      "7:80"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:test",
+    "prophet_id": "lut",
+    "slot": "test",
+    "summary": "Corrupt social environment",
+    "refs": [
+      "7:80-81"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:gift",
+    "prophet_id": "lut",
+    "slot": "gift",
+    "summary": "Ḥukm + ʿilm",
+    "refs": [
+      "21:74"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:mission",
+    "prophet_id": "lut",
+    "slot": "mission",
+    "summary": "Moral warning",
+    "refs": [
+      "7:80-81"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:conflict",
+    "prophet_id": "lut",
+    "slot": "conflict",
+    "summary": "People persist in wrongdoing",
+    "refs": [
+      "7:82"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:response",
+    "prophet_id": "lut",
+    "slot": "response",
+    "summary": "Continued warning",
+    "refs": [
+      "7:80-81"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:judgment",
+    "prophet_id": "lut",
+    "slot": "judgment",
+    "summary": "Family saved except wife; punishment",
+    "refs": [
+      "7:83-84"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:lut:legacy",
+    "prophet_id": "lut",
+    "slot": "legacy",
+    "summary": "Moral-warning exemplar",
+    "refs": [
+      "21:74-75"
+    ],
+    "evidence": "Q2",
+    "era": "PATRIARCHAL_LEVANT",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ismail:call",
+    "prophet_id": "ismail",
+    "slot": "call",
+    "summary": "Messenger-prophet identity",
+    "refs": [
+      "19:54"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:test",
+    "prophet_id": "ismail",
+    "slot": "test",
+    "summary": "The son in QS 37:102-107 is unnamed in the Qur'anic Arabic text; identification as Ismail is tafsir/traditional, not direct Qur'anic naming.",
+    "refs": [
+      "37:102-107"
+    ],
+    "evidence": "T1",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:gift",
+    "prophet_id": "ismail",
+    "slot": "gift",
+    "summary": "Ṣidq al-waʿd; prophethood",
+    "refs": [
+      "19:54"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:mission",
+    "prophet_id": "ismail",
+    "slot": "mission",
+    "summary": "Command family to prayer and charity",
+    "refs": [
+      "19:55"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:conflict",
+    "prophet_id": "ismail",
+    "slot": "conflict",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:response",
+    "prophet_id": "ismail",
+    "slot": "response",
+    "summary": "The son in QS 37:102-107 is unnamed in the Qur'anic Arabic text; identification as Ismail is tafsir/traditional, not direct Qur'anic naming.",
+    "refs": [
+      "37:102-107"
+    ],
+    "evidence": "T1",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:judgment",
+    "prophet_id": "ismail",
+    "slot": "judgment",
+    "summary": "The son in QS 37:102-107 is unnamed in the Qur'anic Arabic text; identification as Ismail is tafsir/traditional, not direct Qur'anic naming.",
+    "refs": [
+      "37:102-107"
+    ],
+    "evidence": "T1",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ismail:legacy",
+    "prophet_id": "ismail",
+    "slot": "legacy",
+    "summary": "Promise-keeping and family worship",
+    "refs": [
+      "19:54-55"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:ishaq:call",
+    "prophet_id": "ishaq",
+    "slot": "call",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:test",
+    "prophet_id": "ishaq",
+    "slot": "test",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:gift",
+    "prophet_id": "ishaq",
+    "slot": "gift",
+    "summary": "Gifted to Ibrahim; prophet among righteous",
+    "refs": [
+      "37:112"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:mission",
+    "prophet_id": "ishaq",
+    "slot": "mission",
+    "summary": "Continuation of guidance",
+    "refs": [
+      "6:84"
+    ],
+    "evidence": "Q2",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:conflict",
+    "prophet_id": "ishaq",
+    "slot": "conflict",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:response",
+    "prophet_id": "ishaq",
+    "slot": "response",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:judgment",
+    "prophet_id": "ishaq",
+    "slot": "judgment",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:ishaq:legacy",
+    "prophet_id": "ishaq",
+    "slot": "legacy",
+    "summary": "Blessed prophetic lineage",
+    "refs": [
+      "37:112-113"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:yaqub:call",
+    "prophet_id": "yaqub",
+    "slot": "call",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:test",
+    "prophet_id": "yaqub",
+    "slot": "test",
+    "summary": "Loss/separation from Yusuf",
+    "refs": [
+      "12:18",
+      "12:84"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:gift",
+    "prophet_id": "yaqub",
+    "slot": "gift",
+    "summary": "Guidance and lineage",
+    "refs": [
+      "6:84"
+    ],
+    "evidence": "Q2",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:mission",
+    "prophet_id": "yaqub",
+    "slot": "mission",
+    "summary": "Transmit tawḥīd to descendants",
+    "refs": [
+      "2:132-133"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:conflict",
+    "prophet_id": "yaqub",
+    "slot": "conflict",
+    "summary": "Family crisis",
+    "refs": [
+      "12:18-87"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:response",
+    "prophet_id": "yaqub",
+    "slot": "response",
+    "summary": "Ṣabrun jamīl",
+    "refs": [
+      "12:18",
+      "12:83"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:judgment",
+    "prophet_id": "yaqub",
+    "slot": "judgment",
+    "summary": "Reunion",
+    "refs": [
+      "12:99"
+    ],
+    "evidence": "Q5",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yaqub:legacy",
+    "prophet_id": "yaqub",
+    "slot": "legacy",
+    "summary": "Israelite ancestral covenant",
+    "refs": [
+      "2:132-133"
+    ],
+    "evidence": "Q2",
+    "era": "PATRIARCHAL_CANAAN",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:call",
+    "prophet_id": "yusuf",
+    "slot": "call",
+    "summary": "Early dream/sign",
+    "refs": [
+      "12:4-6"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:test",
+    "prophet_id": "yusuf",
+    "slot": "test",
+    "summary": "Well, slavery, temptation, prison",
+    "refs": [
+      "12:15",
+      "12:23-35"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:gift",
+    "prophet_id": "yusuf",
+    "slot": "gift",
+    "summary": "Ḥukm, ʿilm, dream interpretation",
+    "refs": [
+      "12:22",
+      "12:6"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:mission",
+    "prophet_id": "yusuf",
+    "slot": "mission",
+    "summary": "Tawḥīd witness + crisis governance",
+    "refs": [
+      "12:37-40",
+      "12:55"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:conflict",
+    "prophet_id": "yusuf",
+    "slot": "conflict",
+    "summary": "Brothers, temptation, false accusation",
+    "refs": [
+      "12:8-18",
+      "12:23-35"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:response",
+    "prophet_id": "yusuf",
+    "slot": "response",
+    "summary": "Iḥsān and restraint",
+    "refs": [
+      "12:22",
+      "12:90"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:judgment",
+    "prophet_id": "yusuf",
+    "slot": "judgment",
+    "summary": "Vindication and authority",
+    "refs": [
+      "12:50-56"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:yusuf:legacy",
+    "prophet_id": "yusuf",
+    "slot": "legacy",
+    "summary": "Preservation through famine and reconciliation",
+    "refs": [
+      "12:47-49",
+      "12:92"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPTIAN_PATRIARCHAL",
+    "era_confidence": 0.7
+  },
+  {
+    "id": "event:ayyub:call",
+    "prophet_id": "ayyub",
+    "slot": "call",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:test",
+    "prophet_id": "ayyub",
+    "slot": "test",
+    "summary": "Severe affliction",
+    "refs": [
+      "21:83"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:gift",
+    "prophet_id": "ayyub",
+    "slot": "gift",
+    "summary": "Healing and restored family",
+    "refs": [
+      "21:84"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:mission",
+    "prophet_id": "ayyub",
+    "slot": "mission",
+    "summary": "Patience exemplar",
+    "refs": [
+      "38:44"
+    ],
+    "evidence": "Q2",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:conflict",
+    "prophet_id": "ayyub",
+    "slot": "conflict",
+    "summary": "Affliction",
+    "refs": [
+      "21:83"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:response",
+    "prophet_id": "ayyub",
+    "slot": "response",
+    "summary": "Ṣabr and return to Allah",
+    "refs": [
+      "38:44"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:judgment",
+    "prophet_id": "ayyub",
+    "slot": "judgment",
+    "summary": "Mercy and restoration",
+    "refs": [
+      "21:84"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:ayyub:legacy",
+    "prophet_id": "ayyub",
+    "slot": "legacy",
+    "summary": "Model of patience",
+    "refs": [
+      "38:44"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_SEMITIC_UNCERTAIN",
+    "era_confidence": 0.3
+  },
+  {
+    "id": "event:shuayb:call",
+    "prophet_id": "shuayb",
+    "slot": "call",
+    "summary": "To Madyan",
+    "refs": [
+      "7:85"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:test",
+    "prophet_id": "shuayb",
+    "slot": "test",
+    "summary": "Rejection and threat of expulsion",
+    "refs": [
+      "7:88"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:gift",
+    "prophet_id": "shuayb",
+    "slot": "gift",
+    "summary": "Clear proof / reform mandate",
+    "refs": [
+      "7:85",
+      "11:88"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:mission",
+    "prophet_id": "shuayb",
+    "slot": "mission",
+    "summary": "Fair measure, justice, reform",
+    "refs": [
+      "7:85",
+      "11:85-88"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:conflict",
+    "prophet_id": "shuayb",
+    "slot": "conflict",
+    "summary": "Economic corruption and rejection",
+    "refs": [
+      "11:84-87"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:response",
+    "prophet_id": "shuayb",
+    "slot": "response",
+    "summary": "I only desire reform",
+    "refs": [
+      "11:88"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:judgment",
+    "prophet_id": "shuayb",
+    "slot": "judgment",
+    "summary": "Punishment on rejecters",
+    "refs": [
+      "7:91"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:shuayb:legacy",
+    "prophet_id": "shuayb",
+    "slot": "legacy",
+    "summary": "Economic justice / reform",
+    "refs": [
+      "11:85-88"
+    ],
+    "evidence": "Q5",
+    "era": "ANCIENT_MADYAN",
+    "era_confidence": 0.5
+  },
+  {
+    "id": "event:musa:call",
+    "prophet_id": "musa",
+    "slot": "call",
+    "summary": "Called at the fire / sacred valley",
+    "refs": [
+      "20:11-24"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:test",
+    "prophet_id": "musa",
+    "slot": "test",
+    "summary": "Pharaoh and repeated trials",
+    "refs": [
+      "20:43-79"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:gift",
+    "prophet_id": "musa",
+    "slot": "gift",
+    "summary": "Signs, kalām, scripture",
+    "refs": [
+      "7:144",
+      "20:17-23",
+      "2:53"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:mission",
+    "prophet_id": "musa",
+    "slot": "mission",
+    "summary": "Liberation + guidance of Bani Israil",
+    "refs": [
+      "20:47",
+      "17:2"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:conflict",
+    "prophet_id": "musa",
+    "slot": "conflict",
+    "summary": "Pharaoh",
+    "refs": [
+      "20:43-79"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:response",
+    "prophet_id": "musa",
+    "slot": "response",
+    "summary": "Trust, prayer, perseverance",
+    "refs": [
+      "20:25-36"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:judgment",
+    "prophet_id": "musa",
+    "slot": "judgment",
+    "summary": "Sea deliverance; Pharaoh drowned",
+    "refs": [
+      "20:77-79"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:musa:legacy",
+    "prophet_id": "musa",
+    "slot": "legacy",
+    "summary": "Torah / liberation / kalām signature",
+    "refs": [
+      "17:2",
+      "7:144"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:call",
+    "prophet_id": "harun",
+    "slot": "call",
+    "summary": "Appointed as support to Musa",
+    "refs": [
+      "20:29-36"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:test",
+    "prophet_id": "harun",
+    "slot": "test",
+    "summary": "Calf crisis",
+    "refs": [
+      "20:90-94"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:gift",
+    "prophet_id": "harun",
+    "slot": "gift",
+    "summary": "Eloquence / strengthening Musa",
+    "refs": [
+      "28:34-35"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:mission",
+    "prophet_id": "harun",
+    "slot": "mission",
+    "summary": "Joint messenger role",
+    "refs": [
+      "20:47"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:conflict",
+    "prophet_id": "harun",
+    "slot": "conflict",
+    "summary": "Calf worship among people",
+    "refs": [
+      "20:90"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:response",
+    "prophet_id": "harun",
+    "slot": "response",
+    "summary": "Warned people and restrained conflict",
+    "refs": [
+      "20:90-94"
+    ],
+    "evidence": "Q5",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:judgment",
+    "prophet_id": "harun",
+    "slot": "judgment",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:harun:legacy",
+    "prophet_id": "harun",
+    "slot": "legacy",
+    "summary": "Prophetic support / shared deliverance",
+    "refs": [
+      "37:114-120"
+    ],
+    "evidence": "Q2",
+    "era": "EGYPT_SINAI_EXODUS",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dhulkifl:call",
+    "prophet_id": "dhulkifl",
+    "slot": "call",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:test",
+    "prophet_id": "dhulkifl",
+    "slot": "test",
+    "summary": "Patience",
+    "refs": [
+      "21:85"
+    ],
+    "evidence": "Q5",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:gift",
+    "prophet_id": "dhulkifl",
+    "slot": "gift",
+    "summary": "Counted among the good",
+    "refs": [
+      "38:48"
+    ],
+    "evidence": "Q5",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:mission",
+    "prophet_id": "dhulkifl",
+    "slot": "mission",
+    "summary": "Patient righteous exemplar",
+    "refs": [
+      "21:85",
+      "38:48"
+    ],
+    "evidence": "Q2",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:conflict",
+    "prophet_id": "dhulkifl",
+    "slot": "conflict",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:response",
+    "prophet_id": "dhulkifl",
+    "slot": "response",
+    "summary": "Ṣabr",
+    "refs": [
+      "21:85"
+    ],
+    "evidence": "Q5",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:judgment",
+    "prophet_id": "dhulkifl",
+    "slot": "judgment",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dhulkifl:legacy",
+    "prophet_id": "dhulkifl",
+    "slot": "legacy",
+    "summary": "Patience / goodness",
+    "refs": [
+      "21:85",
+      "38:48"
+    ],
+    "evidence": "Q5",
+    "era": "UNKNOWN_HISTORICAL_ERA",
+    "era_confidence": 0.15
+  },
+  {
+    "id": "event:dawud:call",
+    "prophet_id": "dawud",
+    "slot": "call",
+    "summary": "Rise after Jalut narrative / kingdom given",
+    "refs": [
+      "2:251"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:test",
+    "prophet_id": "dawud",
+    "slot": "test",
+    "summary": "Disputants / judgment test",
+    "refs": [
+      "38:21-24"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:gift",
+    "prophet_id": "dawud",
+    "slot": "gift",
+    "summary": "Kingdom, wisdom, Zabur, iron",
+    "refs": [
+      "38:20",
+      "17:55",
+      "34:10"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:mission",
+    "prophet_id": "dawud",
+    "slot": "mission",
+    "summary": "Judge among people with truth",
+    "refs": [
+      "38:26"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:conflict",
+    "prophet_id": "dawud",
+    "slot": "conflict",
+    "summary": "Judicial test",
+    "refs": [
+      "38:21-24"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:response",
+    "prophet_id": "dawud",
+    "slot": "response",
+    "summary": "Repented and returned",
+    "refs": [
+      "38:24"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:judgment",
+    "prophet_id": "dawud",
+    "slot": "judgment",
+    "summary": "Forgiven and near station",
+    "refs": [
+      "38:25"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:dawud:legacy",
+    "prophet_id": "dawud",
+    "slot": "legacy",
+    "summary": "Just rule + wisdom + Zabur",
+    "refs": [
+      "38:20",
+      "38:26"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:call",
+    "prophet_id": "sulayman",
+    "slot": "call",
+    "summary": "Inherited Dawud",
+    "refs": [
+      "27:16"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:test",
+    "prophet_id": "sulayman",
+    "slot": "test",
+    "summary": "Power/wealth tests",
+    "refs": [
+      "38:31-35"
+    ],
+    "evidence": "Q2",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:gift",
+    "prophet_id": "sulayman",
+    "slot": "gift",
+    "summary": "Kingdom, wind, jinn, language of birds",
+    "refs": [
+      "27:16",
+      "34:12"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:mission",
+    "prophet_id": "sulayman",
+    "slot": "mission",
+    "summary": "Grateful just rule and tawḥīd invitation",
+    "refs": [
+      "27:19",
+      "27:28-31"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:conflict",
+    "prophet_id": "sulayman",
+    "slot": "conflict",
+    "summary": "Queen's polity / disbelief",
+    "refs": [
+      "27:22-31"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:response",
+    "prophet_id": "sulayman",
+    "slot": "response",
+    "summary": "Gratitude",
+    "refs": [
+      "27:19",
+      "27:40"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:judgment",
+    "prophet_id": "sulayman",
+    "slot": "judgment",
+    "summary": "Queen recognizes submission to Allah",
+    "refs": [
+      "27:44"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:sulayman:legacy",
+    "prophet_id": "sulayman",
+    "slot": "legacy",
+    "summary": "Wisdom, kingdom, gratitude",
+    "refs": [
+      "27:15-19"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_MONARCHY",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:ilyas:call",
+    "prophet_id": "ilyas",
+    "slot": "call",
+    "summary": "Messenger to his people",
+    "refs": [
+      "37:123-124"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:test",
+    "prophet_id": "ilyas",
+    "slot": "test",
+    "summary": "Baal worship",
+    "refs": [
+      "37:125"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:gift",
+    "prophet_id": "ilyas",
+    "slot": "gift",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:mission",
+    "prophet_id": "ilyas",
+    "slot": "mission",
+    "summary": "Call to fear Allah and abandon Baal",
+    "refs": [
+      "37:124-126"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:conflict",
+    "prophet_id": "ilyas",
+    "slot": "conflict",
+    "summary": "Denial",
+    "refs": [
+      "37:127"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:response",
+    "prophet_id": "ilyas",
+    "slot": "response",
+    "summary": "Tawḥīd call",
+    "refs": [
+      "37:124-126"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:judgment",
+    "prophet_id": "ilyas",
+    "slot": "judgment",
+    "summary": "Chosen servants excepted",
+    "refs": [
+      "37:127-128"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:ilyas:legacy",
+    "prophet_id": "ilyas",
+    "slot": "legacy",
+    "summary": "Peace upon Ilyasin",
+    "refs": [
+      "37:130"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.6
+  },
+  {
+    "id": "event:alyasa:call",
+    "prophet_id": "alyasa",
+    "slot": "call",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:test",
+    "prophet_id": "alyasa",
+    "slot": "test",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:gift",
+    "prophet_id": "alyasa",
+    "slot": "gift",
+    "summary": "Favored / among the good",
+    "refs": [
+      "6:86",
+      "38:48"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:mission",
+    "prophet_id": "alyasa",
+    "slot": "mission",
+    "summary": "Righteous prophetic exemplar",
+    "refs": [
+      "6:86",
+      "38:48"
+    ],
+    "evidence": "Q2",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:conflict",
+    "prophet_id": "alyasa",
+    "slot": "conflict",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:response",
+    "prophet_id": "alyasa",
+    "slot": "response",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:judgment",
+    "prophet_id": "alyasa",
+    "slot": "judgment",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:alyasa:legacy",
+    "prophet_id": "alyasa",
+    "slot": "legacy",
+    "summary": "Favored and good",
+    "refs": [
+      "6:86",
+      "38:48"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:call",
+    "prophet_id": "yunus",
+    "slot": "call",
+    "summary": "Among the messengers",
+    "refs": [
+      "37:139"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:test",
+    "prophet_id": "yunus",
+    "slot": "test",
+    "summary": "Ship and fish",
+    "refs": [
+      "37:140-142"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:gift",
+    "prophet_id": "yunus",
+    "slot": "gift",
+    "summary": "Rescue after tasbīḥ",
+    "refs": [
+      "37:143-145"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:mission",
+    "prophet_id": "yunus",
+    "slot": "mission",
+    "summary": "Messenger to his people",
+    "refs": [
+      "37:139",
+      "10:98"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:conflict",
+    "prophet_id": "yunus",
+    "slot": "conflict",
+    "summary": "Departure and fish trial",
+    "refs": [
+      "21:87"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:response",
+    "prophet_id": "yunus",
+    "slot": "response",
+    "summary": "Tasbīḥ and confession",
+    "refs": [
+      "21:87",
+      "37:143"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:judgment",
+    "prophet_id": "yunus",
+    "slot": "judgment",
+    "summary": "Rescued; people believe",
+    "refs": [
+      "21:88",
+      "10:98"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:yunus:legacy",
+    "prophet_id": "yunus",
+    "slot": "legacy",
+    "summary": "Believing community spared punishment",
+    "refs": [
+      "10:98"
+    ],
+    "evidence": "Q5",
+    "era": "ISRAELITE_PROPHETIC_PERIOD",
+    "era_confidence": 0.55
+  },
+  {
+    "id": "event:zakariya:call",
+    "prophet_id": "zakariya",
+    "slot": "call",
+    "summary": "Prayer in sanctuary context",
+    "refs": [
+      "3:37-38"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:test",
+    "prophet_id": "zakariya",
+    "slot": "test",
+    "summary": "Old age / childlessness",
+    "refs": [
+      "19:4-5"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:gift",
+    "prophet_id": "zakariya",
+    "slot": "gift",
+    "summary": "Yahya granted",
+    "refs": [
+      "19:7"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:mission",
+    "prophet_id": "zakariya",
+    "slot": "mission",
+    "summary": "Worship and continuity of righteous family",
+    "refs": [
+      "21:89-90"
+    ],
+    "evidence": "Q2",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:conflict",
+    "prophet_id": "zakariya",
+    "slot": "conflict",
+    "summary": "Human limitation / childlessness",
+    "refs": [
+      "19:4-5"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:response",
+    "prophet_id": "zakariya",
+    "slot": "response",
+    "summary": "Private prayer and hope",
+    "refs": [
+      "19:3-6"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:judgment",
+    "prophet_id": "zakariya",
+    "slot": "judgment",
+    "summary": "Prayer answered",
+    "refs": [
+      "19:7",
+      "21:90"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:zakariya:legacy",
+    "prophet_id": "zakariya",
+    "slot": "legacy",
+    "summary": "Continuity through Yahya",
+    "refs": [
+      "19:7"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+    "era_confidence": 0.65
+  },
+  {
+    "id": "event:yahya:call",
+    "prophet_id": "yahya",
+    "slot": "call",
+    "summary": "Named before birth",
+    "refs": [
+      "19:7"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:test",
+    "prophet_id": "yahya",
+    "slot": "test",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:gift",
+    "prophet_id": "yahya",
+    "slot": "gift",
+    "summary": "Ḥukm as child; compassion, purity, taqwa",
+    "refs": [
+      "19:12-13"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:mission",
+    "prophet_id": "yahya",
+    "slot": "mission",
+    "summary": "Confirming a Word from Allah; righteous witness",
+    "refs": [
+      "3:39"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:conflict",
+    "prophet_id": "yahya",
+    "slot": "conflict",
+    "summary": "UNKNOWN / NOT EXPLICIT",
+    "refs": [],
+    "evidence": "E0",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:response",
+    "prophet_id": "yahya",
+    "slot": "response",
+    "summary": "Piety and dutifulness",
+    "refs": [
+      "19:13-14"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:judgment",
+    "prophet_id": "yahya",
+    "slot": "judgment",
+    "summary": "Peace upon birth, death, resurrection",
+    "refs": [
+      "19:15"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:yahya:legacy",
+    "prophet_id": "yahya",
+    "slot": "legacy",
+    "summary": "Purity / taqwa exemplar",
+    "refs": [
+      "19:12-15"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.8
+  },
+  {
+    "id": "event:isa:call",
+    "prophet_id": "isa",
+    "slot": "call",
+    "summary": "Annunciation / word to Maryam",
+    "refs": [
+      "3:45"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:test",
+    "prophet_id": "isa",
+    "slot": "test",
+    "summary": "Rejection and plots",
+    "refs": [
+      "3:52-54",
+      "4:157"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:gift",
+    "prophet_id": "isa",
+    "slot": "gift",
+    "summary": "Signs by Allah's permission; Injil",
+    "refs": [
+      "3:49",
+      "5:46"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:mission",
+    "prophet_id": "isa",
+    "slot": "mission",
+    "summary": "Messenger to Bani Israil",
+    "refs": [
+      "3:49",
+      "61:6"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:conflict",
+    "prophet_id": "isa",
+    "slot": "conflict",
+    "summary": "Opposition and disbelief",
+    "refs": [
+      "3:52-54"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:response",
+    "prophet_id": "isa",
+    "slot": "response",
+    "summary": "Disciples / reliance on Allah",
+    "refs": [
+      "3:52"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:judgment",
+    "prophet_id": "isa",
+    "slot": "judgment",
+    "summary": "Allah raised him",
+    "refs": [
+      "4:158"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:isa:legacy",
+    "prophet_id": "isa",
+    "slot": "legacy",
+    "summary": "Sign and mercy",
+    "refs": [
+      "19:21"
+    ],
+    "evidence": "Q5",
+    "era": "SECOND_TEMPLE",
+    "era_confidence": 0.9
+  },
+  {
+    "id": "event:muhammad:call",
+    "prophet_id": "muhammad",
+    "slot": "call",
+    "summary": "Recitation/revelation command",
+    "refs": [
+      "96:1-5"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:test",
+    "prophet_id": "muhammad",
+    "slot": "test",
+    "summary": "Rejection, hostility, burden of mission",
+    "refs": [
+      "15:97",
+      "25:31"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:gift",
+    "prophet_id": "muhammad",
+    "slot": "gift",
+    "summary": "Qur'an / revelation",
+    "refs": [
+      "17:9",
+      "76:23"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:mission",
+    "prophet_id": "muhammad",
+    "slot": "mission",
+    "summary": "Witness, bearer of good news, warner, caller",
+    "refs": [
+      "33:45-46"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:conflict",
+    "prophet_id": "muhammad",
+    "slot": "conflict",
+    "summary": "Opposition of disbelievers",
+    "refs": [
+      "25:31"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:response",
+    "prophet_id": "muhammad",
+    "slot": "response",
+    "summary": "Patience and reliance",
+    "refs": [
+      "16:127",
+      "33:3"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:judgment",
+    "prophet_id": "muhammad",
+    "slot": "judgment",
+    "summary": "Manifest victory",
+    "refs": [
+      "48:1"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  },
+  {
+    "id": "event:muhammad:legacy",
+    "prophet_id": "muhammad",
+    "slot": "legacy",
+    "summary": "Mercy to worlds + seal of prophets",
+    "refs": [
+      "21:107",
+      "33:40"
+    ],
+    "evidence": "Q5",
+    "era": "LATE_ANTIQUITY_ARABIA",
+    "era_confidence": 1
+  }
+]

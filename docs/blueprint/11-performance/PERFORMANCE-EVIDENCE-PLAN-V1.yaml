@@ -1,0 +1,29 @@
+version: 1
+status: design-locked
+workloads:
+  interactive:
+    measure: p50,p95,p99 latency
+  api:
+    measure: request latency,error rate,throughput
+  research:
+    measure: acceptance latency,completion latency,queue delay
+  ingestion:
+    measure: records_per_second,CPU,memory,IO
+  batch:
+    measure: throughput,concurrency,backpressure
+  ai:
+    measure: latency,tokens,cost,cache_hit_rate
+required_evidence:
+  - representative_dataset
+  - concurrency_profile
+  - cold_start_profile_for_serverless
+  - steady_state_profile_for_docker
+  - resource_utilization
+  - failure_behavior
+policy:
+  numeric_production_budgets_are_derived_from_measurement: true
+  premature_optimization_forbidden: true
+certification:
+  design_baseline: COMPLETE
+  benchmark_evidence: PENDING
+  production_calibration: PENDING

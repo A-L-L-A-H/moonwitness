@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { parse as parseToml } from "smol-toml";
 import { parse as parseYaml } from "yaml";
@@ -58,7 +59,10 @@ for (const gate of ["typecheck", "check:commands", "clippy"]) {
     throw new Error(`Mandatory gate runner is missing required check: ${gate}`);
   }
 }
-const pnpmWorkspace = await readFile("pnpm-workspace.yaml", "utf8");
+const workspaceFile = existsSync("pnpm-workspace.yaml")
+  ? "pnpm-workspace.yaml"
+  : "../../pnpm-workspace.yaml";
+const pnpmWorkspace = await readFile(workspaceFile, "utf8");
 if (!pnpmWorkspace.includes("packages:") || !pnpmWorkspace.includes("allowBuilds:")) {
   throw new Error("pnpm workspace must explicitly declare package and build-script policy.");
 }

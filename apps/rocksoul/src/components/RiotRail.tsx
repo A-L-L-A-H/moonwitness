@@ -1,5 +1,5 @@
 import React from "react";
-import { GitBranch, Home, ListChecks, RadioTower, Swords } from "lucide-react";
+import { Activity, GitBranch, Home, ListChecks, RadioTower, Swords } from "lucide-react";
 import { AnarchyStarSigil } from "./ui/RocksoulVectors";
 
 export interface RiotRailProps {
@@ -11,6 +11,7 @@ export interface RiotRailProps {
 export default function RiotRail({ page, onNavigate, onSwitchboard }: RiotRailProps) {
   const items = [
     { id: "deck", label: "DECK", icon: <Home size={20} strokeWidth={2.4} /> },
+    { id: "monitor", label: "OVERSEER", icon: <Activity size={20} strokeWidth={2.4} /> },
     { id: "pit", label: "PIT", icon: <ListChecks size={20} strokeWidth={2.4} /> },
     { id: "git", label: "GIT", icon: <GitBranch size={20} strokeWidth={2.4} /> },
     { id: "war-room", label: "WAR ROOM", icon: <Swords size={20} strokeWidth={2.4} /> },

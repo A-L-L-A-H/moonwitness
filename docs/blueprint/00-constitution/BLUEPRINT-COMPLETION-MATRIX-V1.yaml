@@ -1,0 +1,142 @@
+version: 10
+status: design-frozen-evidence-pending
+purpose: Authoritative gate separating frozen architecture design from staged implementation evidence, package distribution readiness, and Genesis foundation authorization.
+active_truth:
+  repository: ArsyBelovedLabs/moonwitness-blueprint
+  reference_repositories: bjo163/* legacy until Gen2 migration
+  execution_state: foundation-implementation
+  design_state: frozen
+sections:
+  constitution:
+    status: design-frozen
+    canonical: 00-constitution/ARCHITECTURE-TRUTH-V1.md
+    freeze: 00-constitution/DESIGN-FREEZE-DECLARATION-V1.md
+    supporting: [00-constitution/BLUEPRINT-READINESS-DEFINITIONS-V1.md, 00-constitution/BLUEPRINT-QUALITY-GATES-V1.yaml, 00-constitution/CANONICAL-IDENTIFIER-SYSTEM-V1.yaml, 00-constitution/BLUEPRINT-LINT-CONTRACT-V1.yaml, 00-constitution/ADR-021-LATEST-RUNTIME-COMPATIBILITY.md, 00-constitution/ADR-022-CROSS-CUTTING-PLATFORM-CONTRACTS.md, 00-constitution/ADR-023-CANONICAL-CONTRACT-WIRE-NAMING-AND-ENVELOPE.md, 00-constitution/ADR-024-PRIVATE-NPM-PACKAGE-DISTRIBUTION.md]
+  architecture:
+    status: design-frozen
+    canonical: 01-architecture/
+    supporting: [01-architecture/GOLDEN-PATH-V1.md]
+  domain:
+    status: design-frozen-evidence-pending
+    canonical: 02-domain/CAPABILITY-REGISTRY-V2.yaml
+    supporting: [02-domain/BOUNDED-CONTEXT-AND-INVARIANTS-V1.yaml, 02-domain/DOMAIN-MODEL-CANONICAL-V1.yaml, 02-domain/RUNTIME-JOB-EVENT-MODEL-V1.yaml, 02-domain/STATE-MACHINES-V1.yaml, 02-domain/EVENT-TAXONOMY-V1.yaml]
+    evidence_pending: [domain_fixture_execution, transition_tests]
+  contracts:
+    status: design-frozen-evidence-pending
+    canonical: 03-contracts/CONTRACT-REGISTRY.yaml
+    supporting: [03-contracts/CONTRACT-COMPATIBILITY-POLICY-V1.yaml, 03-contracts/EXECUTABLE-CONTRACT-VALIDATION-V1.yaml, 03-contracts/schemas/, 03-contracts/fixtures/contract-fixtures.yaml, 03-contracts/ERROR-TAXONOMY-V1.yaml, 03-contracts/IDEMPOTENCY-POLICY-V1.yaml, 00-constitution/ADR-023-CANONICAL-CONTRACT-WIRE-NAMING-AND-ENVELOPE.md]
+    resolved_design_issues: [event_envelope_wire_field_conflict, problem_details_retryable_conflict]
+    evidence_pending: [executable_schema_validation, complete_negative_fixture_set]
+  data:
+    status: design-frozen-evidence-pending
+    canonical: 04-data/DATABASE-OWNERSHIP-MATRIX-V1.yaml
+    supporting: [04-data/LOGICAL-DATA-AND-ISOLATION-MODEL-V1.yaml, 04-data/PERSISTENCE-OWNERSHIP-REGISTRY-V1.yaml, 04-data/DATA-CLASSIFICATION-AND-LIFECYCLE-V1.yaml, 04-data/ARTIFACT-STORAGE-CONTRACT-V1.yaml]
+    evidence_pending: [persistence_artifact_tests, retention_calibration]
+  engineering:
+    status: design-frozen-policy
+    canonical: 05-engineering/TOOLCHAIN-MANIFEST-V1.yaml
+    supporting: [05-engineering/ENVIRONMENT-CONTRACT-V1.yaml, 05-engineering/SUPPLY-CHAIN-POLICY-V1.yaml]
+    evidence_pending: [approved_version_lock_in_gen2]
+  api:
+    status: design-frozen-evidence-pending
+    canonical: 06-api/openapi/openapi.yaml
+    supporting: [06-api/API-RESOURCE-CAPABILITY-MAP-V1.yaml, 06-api/API-OPERATION-CATALOG-V1.yaml, 06-api/API-CONTRACT-POLICY-V1.yaml, 06-api/API-CONTRACT-VALIDATION-MATRIX-V1.yaml, 06-api/OPENAPI-CONTRACT-COVERAGE-MATRIX-V1.yaml, 06-api/API-LIFECYCLE-V1.yaml, 06-api/CORRELATION-AND-TRACE-CONTEXT-V1.yaml]
+    evidence_pending: [full_openapi_implementation, openapi_schema_parity, generated_sdk_validation]
+  ui_ux:
+    status: design-frozen-evidence-pending
+    canonical: 07-ui-ux/UI-PLATFORM-CONTRACT-V1.yaml
+    supporting: [07-ui-ux/DESIGN-TOKEN-SYSTEM-V1.yaml, 07-ui-ux/UI-COMPONENT-OWNERSHIP-V1.yaml, 07-ui-ux/UI-NAVIGATION-IA-V1.yaml, 07-ui-ux/UI-STATE-UX-CONTRACT-V1.yaml]
+    evidence_pending: [complete_component_inventory, application_ia_specs, accessibility_checks, golden_ui_state_coverage]
+  ai:
+    status: design-frozen-evidence-pending
+    canonical: 08-ai/AI-INTELLIGENCE-CONTRACT-V1.yaml
+    supporting: [08-ai/AI-EVALUATION-CONTRACT-V1.yaml, 08-ai/MODEL-PROVIDER-AND-FAILOVER-V1.yaml, 08-ai/RETRIEVAL-CONTRACT-V1.yaml, 08-ai/AI-TOOL-BOUNDARY-V1.yaml, 08-ai/AI-EVALUATION-AND-QUALITY-V1.yaml]
+    evidence_pending: [retrieval_fixtures, evaluation_dataset_metrics, provider_compatibility]
+  security:
+    status: design-frozen-evidence-pending
+    canonical: 09-security/SECURITY-BOUNDARY-MODEL-V1.yaml
+    supporting: [09-security/AUTHORIZATION-MATRIX-V1.yaml, 09-security/SECURITY-VERIFICATION-PLAN-V1.yaml, 09-security/IDENTITY-SESSION-MODEL-V1.yaml, 09-security/SUPPLY-CHAIN-SECURITY-V1.yaml]
+    evidence_pending: [authz_tests, threat_model_verification, dependency_scanning_in_gen2]
+  observability:
+    status: design-frozen-evidence-pending
+    canonical: 10-observability/OBSERVABILITY-CONTRACT-V1.yaml
+    supporting: [10-observability/SLI-SLO-CATALOG-V1.yaml, 10-observability/OBSERVABILITY-VERIFICATION-PLAN-V1.yaml, 10-observability/OTEL-SEMANTIC-CONVENTIONS-V1.yaml]
+    evidence_pending: [telemetry_routing_smoke, production_slo_calibration]
+  performance:
+    status: design-frozen-evidence-pending
+    canonical: 11-performance/PERFORMANCE-BUDGETS-V1.yaml
+    supporting: [11-performance/PERFORMANCE-EVIDENCE-PLAN-V1.yaml, 11-performance/LOAD-PROFILES-V1.yaml, 11-performance/COST-BUDGETS-V1.yaml]
+    evidence_pending: [measured_load_profiles, measured_ai_cost, production_calibration]
+  reliability:
+    status: design-frozen-evidence-pending
+    canonical: 12-reliability/RELIABILITY-POLICY-V1.yaml
+    supporting: [12-reliability/RELIABILITY-VERIFICATION-PLAN-V1.yaml, 12-reliability/RETRY-TIMEOUT-CANCELLATION-MATRIX-V1.yaml, 12-reliability/RECOVERY-AND-DR-TOPOLOGY-V1.yaml]
+    evidence_pending: [measured_rpo_rto, backup_restore_drill, rollback_drill]
+  deployment:
+    status: design-frozen-evidence-pending
+    canonical: 13-deployment/ENVIRONMENT-AND-PROMOTION-MATRIX-V1.yaml
+    supporting: [13-deployment/DEPLOYMENT-VERIFICATION-PLAN-V1.yaml, 13-deployment/DUAL-RUNTIME-ACCEPTANCE-MATRIX-V1.md, 13-deployment/SERVERLESS-AND-LATEST-RUNTIME-ARCHITECTURE-V1.md]
+    evidence_pending: [vercel_validation, neon_or_supabase_validation, docker_vps_smoke, promotion_evidence]
+  governance:
+    status: design-frozen-evidence-pending
+    canonical: 14-governance/GOVERNANCE-CONTROLS-V1.yaml
+    evidence_pending: [codeowners_application, protected_branch_evidence, release_automation_evidence]
+  migration:
+    status: design-frozen-evidence-pending
+    canonical: 15-migration/GOLDEN-REGRESSION-AND-DECOMMISSION-POLICY-V1.yaml
+    supporting: [15-migration/FIVE-REPOSITORY-RE-AUDIT-FINAL-2026-08-30.md, 15-migration/GOLDEN-FIXTURE-REGISTER-V1.yaml, 15-migration/GOLDEN-REGRESSION-MATRIX-V1.yaml, 15-migration/LEGACY-CAPABILITY-CAPTURE-PROTOCOL-V1.yaml, 15-migration/MIGRATION-LIFECYCLE-V1.yaml, 15-migration/migration-manifest.yaml]
+    evidence_pending: [complete_source_path_mapping, golden_fixture_capture, parity_certification, decommission_evidence]
+  package_distribution:
+    status: design-locked-evidence-pending
+    canonical: 03-contracts/PACKAGE-DISTRIBUTION-POLICY-V1.yaml
+    supporting: [00-constitution/ADR-024-PRIVATE-NPM-PACKAGE-DISTRIBUTION.md]
+    evidence_pending: [core_publish_workflow, package_access_to_consumers, clean_checkout_install, versioned_package_install]
+  repositories:
+    status: design-frozen-provisioned
+    canonical: 16-repositories/MASTER-REPOSITORY-MAP.yaml
+    supporting: [16-repositories/DEPENDENCY-DIRECTION.yaml, 16-repositories/PACKAGE-DEPENDENCY-GRAPH-V1.yaml, 16-repositories/repository-manifest.yaml]
+  genesis:
+    status: foundation-implementation-in-progress
+    canonical: 17-genesis/GENESIS-READINESS-CHECKLIST.md
+    supporting: [17-genesis/GENESIS-00-EXECUTION-SPECIFICATION-V1.md, 17-genesis/IMPLEMENTATION-HANDOFF-CONTRACT-V1.md]
+    stages:
+      foundation_preflight:
+        authorized_when: [design_freeze_pass, architecture_design_pass, canonical_machine_contract_design_pass, contradiction_scan_design_pass, repository_manifest_pass, dependency_graph_pass, dependency_direction_pass, canonical_network_door_pass, database_boundary_pass, runtime_policy_pass, no_plane_dependency_pass]
+      foundation_implementation:
+        requires: [foundation_preflight_authorized]
+        produces: [gen2_repository_provisioning, governance_application, ci_baseline, toolchain_lock, architecture_check_evidence, package_distribution_baseline]
+      implementation_certification:
+        requires: [foundation_implementation_complete]
+        blocked_by: [executable_schema_validation, complete_negative_fixture_set, golden_fixture_capture, deployment_smoke_evidence, governance_application, package_distribution_evidence]
+      production_certification:
+        requires: [implementation_certification]
+        blocked_by: [performance_measurement, measured_rpo_rto, backup_restore_drill, rollback_drill, production_slo_calibration, parity_certification]
+    rule: evidence_that_requires_gen2_must_not_gate_creation_of_gen2
+quality_rules:
+  - exactly_one_active_artifact_per_decision
+  - historical_versions_must_be_marked_superseded
+  - worker_prompts_are_execution_artifacts_not_architecture_truth
+  - no_repository_is_provisioned_without_governance_baseline
+  - no_public_api_is_complete_until_openapi_and_schema_validation_pass
+  - design_complete_does_not_equal_implementation_certified
+  - no_plane_dependency_or_reference_is_allowed
+  - no_unverified_current_runtime_is_allowed_as_production_baseline
+  - post_freeze_architecture_change_requires_new_adr
+  - canonical_contract_wire_naming_is_camelCase
+  - problem_details_retryable_is_required_boolean
+  - reusable_private_packages_use_github_packages_npm_registry
+release_gate:
+  design_freeze: PASS
+  architecture_design: PASS
+  canonical_machine_contract_design: PASS
+  contradiction_scan_design: PASS
+  foundation_preflight_authorized: true
+  foundation_implementation: IN_PROGRESS
+  package_distribution: PENDING
+  blueprint_lint_execution: PENDING
+  executable_contract_validation: PENDING
+  golden_fixture_capture: PENDING
+  performance_measurement: PENDING
+  deployment_smoke_evidence: PENDING
+  governance_application: PENDING
+  genesis_authorized: false

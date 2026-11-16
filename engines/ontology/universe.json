@@ -1,0 +1,35 @@
+{
+  "contract_version": "1.0",
+  "ontology": "Universal Ontology v1.0.0",
+  "universe": {
+    "id": "universe",
+    "name": "Universe",
+    "description": "Top-level managed boundary for the Universal Ontology instance. The canonical resolution spine contains 49 levels across 7 zones and may be traversed through containment, projection, relation, and representation edges."
+  },
+  "ecosystems": [
+    {
+      "id": "rocksoul",
+      "name": "ROCKSOUL",
+      "path": "ecosystem-rocksoul",
+      "lifecycle": "active"
+    },
+    {
+      "id": "moonwitness",
+      "name": "MoonWitness",
+      "path": "ecosystem-moonwitness",
+      "lifecycle": "active"
+    },
+    {
+      "id": "crayon",
+      "name": "CRAYON",
+      "path": "ecosystem-crayon",
+      "lifecycle": "active"
+    },
+    {
+      "id": "isp",
+      "name": "ISP",
+      "path": "ecosystem-isp",
+      "lifecycle": "active"
+    }
+  ]
+}

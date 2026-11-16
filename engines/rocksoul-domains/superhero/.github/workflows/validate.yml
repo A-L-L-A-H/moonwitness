@@ -1,0 +1,63 @@
+name: Validate SUPERHERO
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Pin npm
+        run: npm install --global npm@11.6.0
+      - name: Install
+        run: npm install --no-audit --no-fund
+      - name: Validate data, snapshot, types, UI contract, and production build
+        run: npm run ci
+      - name: Ensure generated index is current
+        run: git diff --exit-code -- data/index.json
+      - name: Synchronize generated artifacts
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json public/data/superhero.snapshot.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build: sync generated SUPERHERO artifacts"
+            git push origin HEAD:main
+          fi
+      - name: Enforce main-only remote
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin --prune
+          mapfile -t branches < <(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}' | sort)
+          for branch in "${branches[@]}"; do
+            if [ "$branch" = "main" ]; then
+              continue
+            fi
+            if [[ "$branch" == dependabot/* ]]; then
+              echo "Preserving ephemeral dependency-update branch: $branch"
+              continue
+            fi
+            echo "Deleting noncanonical remote branch: $branch"
+            git push origin --delete "$branch"
+          done
+          canonical="$(git ls-remote --heads origin | awk '{sub("refs/heads/", "", $2); print $2}' | grep -v '^dependabot/' | sort || true)"
+          test "$canonical" = "main"

@@ -1,0 +1,20 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'packages/ai/*'
+
+overrides:
+  libsignal: '6.0.0'
+
+allowBuilds:
+  '@rocksoul/ui@https://codeload.github.com/bjo163/rocksoul-ui/tar.gz/d4d7f21dfdf17ab1485181b1e5e4aae71555c12c': true
+  better-sqlite3: true
+  esbuild: true
+  '@whiskeysockets/baileys': true
+  protobufjs: true
+
+onlyBuiltDependencies:
+  - better-sqlite3
+  - esbuild
+  - '@whiskeysockets/baileys'
+  - protobufjs

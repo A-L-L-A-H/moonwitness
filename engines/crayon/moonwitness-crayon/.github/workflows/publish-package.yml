@@ -1,0 +1,33 @@
+name: Publish package
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.20.0
+          registry-url: https://npm.pkg.github.com
+          scope: "@arsybelovedlabs"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm architecture && pnpm security
+      - run: pnpm pack --pack-destination .package-audit
+      - run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

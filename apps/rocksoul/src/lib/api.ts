@@ -397,6 +397,59 @@ export async function call<Command extends NativeCommand>(
     return undefined as unknown as CommandResult<Command>;
   }
 
+  if (command === "get_monitor_snapshot") {
+    return {
+      generated_at: timestamp(),
+      disks: [],
+      services: [],
+      agent_sessions: [],
+      repositories: repositories.map((repo) => ({
+        id: repo.id,
+        name: repo.name,
+        path: repo.path,
+        branch: repo.branch || repo.default_branch || "unknown",
+        head_hash: "",
+        head_subject: "Native desktop required for live Git worktree inspection.",
+        head_age: "",
+        dirty_count: 0,
+        staged_count: 0,
+        untracked_count: 0,
+        worktree_count: 0,
+        changed_files: [],
+        recent_commits: [],
+      })),
+      plans: [],
+    } as unknown as CommandResult<Command>;
+  }
+
+  if (command === "open_ecosystem_url") {
+    const rawUrl = (stringArg("url") ?? "").trim();
+    const allowlisted = [
+      "http://127.0.0.1:3000",
+      "http://localhost:3000",
+      "http://127.0.0.1:3002",
+      "http://localhost:3002",
+      "http://127.0.0.1:3003",
+      "http://localhost:3003",
+      "http://127.0.0.1:8000",
+      "http://localhost:8000",
+      "http://127.0.0.1:8787",
+      "http://localhost:8787",
+    ];
+    const matched = allowlisted.some((origin) => {
+      if (!rawUrl.startsWith(origin)) return false;
+      const suffix = rawUrl.slice(origin.length);
+      return suffix === "" || suffix.startsWith("/") || suffix.startsWith("?") || suffix.startsWith("#");
+    });
+    if (!matched || /\s/.test(rawUrl)) {
+      throw new Error("Only local MoonWitness endpoints on ports 3000, 3002, 3003, 8000, or 8787 may be opened.");
+    }
+    if (typeof window !== "undefined" && typeof window.open === "function") {
+      window.open(rawUrl, "_blank", "noopener,noreferrer");
+    }
+    return undefined as unknown as CommandResult<Command>;
+  }
+
   if (command === "add_repository") {
     throw new Error("Repository registration is available in the native desktop app.");
   }

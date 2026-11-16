@@ -12,6 +12,9 @@ export interface SkinPreset {
   readonly eventCard: { skin: SkinName; density: 'compact' | 'comfortable' | 'spacious' };
   readonly kanbanColumn: { skin: SkinName; compact: boolean };
   readonly moduleCard: { skin: SkinName; size: 'sm' | 'md' | 'lg' | 'xl'; elevated: boolean };
+  readonly hudPanel: { skin: SkinName };
+  readonly scenePanel: { skin: SkinName };
+  readonly atlasStage: { skin: SkinName };
   readonly effects: string;
 }
 
@@ -20,7 +23,8 @@ export const defaultPreset: SkinPreset = {
   button: { variant: 'default', skin: 'default' }, card: { variant: 'default', skin: 'default' },
   input: { skin: 'default' }, badge: { variant: 'default', skin: 'default' },
   eventCard: { skin: 'default', density: 'comfortable' }, kanbanColumn: { skin: 'default', compact: false },
-  moduleCard: { skin: 'default', size: 'md', elevated: true }, effects: '',
+  moduleCard: { skin: 'default', size: 'md', elevated: true },
+  hudPanel: { skin: 'default' }, scenePanel: { skin: 'default' }, atlasStage: { skin: 'default' }, effects: '',
 };
 
 export const riotPreset: SkinPreset = {
@@ -28,7 +32,8 @@ export const riotPreset: SkinPreset = {
   button: { variant: 'riot', skin: 'riot', size: 'default' }, card: { variant: 'default', skin: 'riot' },
   input: { skin: 'riot' }, badge: { variant: 'default', skin: 'riot' },
   eventCard: { skin: 'riot', density: 'comfortable' }, kanbanColumn: { skin: 'riot', compact: false },
-  moduleCard: { skin: 'riot', size: 'md', elevated: true }, effects: 'halftone grain cmyk-slip',
+  moduleCard: { skin: 'riot', size: 'md', elevated: true },
+  hudPanel: { skin: 'riot' }, scenePanel: { skin: 'riot' }, atlasStage: { skin: 'riot' }, effects: 'halftone grain cmyk-slip',
 };
 
 export const editorialPreset: SkinPreset = {
@@ -36,7 +41,8 @@ export const editorialPreset: SkinPreset = {
   button: { variant: 'editorial', skin: 'editorial', size: 'lg' }, card: { variant: 'outline', skin: 'editorial' },
   input: { skin: 'editorial' }, badge: { variant: 'outline', skin: 'editorial' },
   eventCard: { skin: 'editorial', density: 'spacious' }, kanbanColumn: { skin: 'editorial', compact: false },
-  moduleCard: { skin: 'editorial', size: 'lg', elevated: false }, effects: 'duotone brush-underline',
+  moduleCard: { skin: 'editorial', size: 'lg', elevated: false },
+  hudPanel: { skin: 'editorial' }, scenePanel: { skin: 'editorial' }, atlasStage: { skin: 'editorial' }, effects: 'duotone brush-underline',
 };
 
 export const technicalPreset: SkinPreset = {
@@ -44,7 +50,8 @@ export const technicalPreset: SkinPreset = {
   button: { variant: 'technical', skin: 'technical', size: 'sm' }, card: { variant: 'default', skin: 'technical' },
   input: { skin: 'technical' }, badge: { variant: 'default', skin: 'technical' },
   eventCard: { skin: 'technical', density: 'compact' }, kanbanColumn: { skin: 'technical', compact: true },
-  moduleCard: { skin: 'technical', size: 'md', elevated: true }, effects: '',
+  moduleCard: { skin: 'technical', size: 'md', elevated: true },
+  hudPanel: { skin: 'technical' }, scenePanel: { skin: 'technical' }, atlasStage: { skin: 'technical' }, effects: '',
 };
 
 export const archivePreset: SkinPreset = {
@@ -52,7 +59,8 @@ export const archivePreset: SkinPreset = {
   button: { variant: 'archive', skin: 'archive', size: 'default' }, card: { variant: 'default', skin: 'archive' },
   input: { skin: 'archive' }, badge: { variant: 'default', skin: 'archive' },
   eventCard: { skin: 'archive', density: 'comfortable' }, kanbanColumn: { skin: 'archive', compact: false },
-  moduleCard: { skin: 'archive', size: 'lg', elevated: true }, effects: 'grain brush-underline sticker',
+  moduleCard: { skin: 'archive', size: 'lg', elevated: true },
+  hudPanel: { skin: 'archive' }, scenePanel: { skin: 'archive' }, atlasStage: { skin: 'archive' }, effects: 'grain brush-underline sticker',
 };
 
 export const transmissionPreset: SkinPreset = {
@@ -60,7 +68,8 @@ export const transmissionPreset: SkinPreset = {
   button: { variant: 'transmission', skin: 'transmission', size: 'default' }, card: { variant: 'default', skin: 'transmission' },
   input: { skin: 'transmission' }, badge: { variant: 'default', skin: 'transmission' },
   eventCard: { skin: 'transmission', density: 'comfortable' }, kanbanColumn: { skin: 'transmission', compact: false },
-  moduleCard: { skin: 'transmission', size: 'md', elevated: true }, effects: 'halftone grain scanlines',
+  moduleCard: { skin: 'transmission', size: 'md', elevated: true },
+  hudPanel: { skin: 'transmission' }, scenePanel: { skin: 'transmission' }, atlasStage: { skin: 'transmission' }, effects: 'halftone grain scanlines',
 };
 
 export const skinPresets: Record<SkinName, SkinPreset> = {
@@ -80,5 +89,6 @@ export function applyPreset(name: SkinName) {
     density: preset.eventCard.density,
     compact: preset.kanbanColumn.compact,
     moduleSize: preset.moduleCard.size, elevated: preset.moduleCard.elevated,
+    hudSkin: preset.hudPanel.skin, sceneSkin: preset.scenePanel.skin, atlasSkin: preset.atlasStage.skin,
   };
 }

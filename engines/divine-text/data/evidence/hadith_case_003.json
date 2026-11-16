@@ -1,0 +1,17 @@
+{
+  "case_id": "HADITH-METHODOLOGY-001",
+  "source_type": "HADITH",
+  "source_level": "L4",
+  "claim": "Classical hadith criticism explicitly treats isnad and narrator reliability as part of evaluating transmissions.",
+  "evidence": [
+    {
+      "source": "Sahih Muslim, Introduction",
+      "reference": "Introduction 26-31",
+      "finding": "The introduction emphasizes that transmission is taken from trustworthy narrators and that narrator criticism is permissible/required in the defense of the tradition."
+    }
+  ],
+  "source_urls": [
+    "https://sunnah.com/muslim/introduction/25",
+    "https://sunnah.com/muslim/introduction/30"
+  ]
+}

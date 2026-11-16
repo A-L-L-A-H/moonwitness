@@ -1,4 +1,6 @@
-export type WorldIdentifier = "moonwitness" | "arsy" | "qalam" | "sidra" | "rocksoul-dx";
+import type { WorldIdentifier } from "@moonwitness/canon";
+
+export type { WorldIdentifier };
 
 export type NavigationSectionId = "the-gate" | "the-worlds" | "the-codex" | "the-dock" | "about";
 

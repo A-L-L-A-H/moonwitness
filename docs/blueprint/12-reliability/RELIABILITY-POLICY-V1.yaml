@@ -1,0 +1,25 @@
+version: 1
+status: hardening
+retry:
+  rule: only-idempotent-or-idempotency-key-protected-operations
+  backoff: bounded-exponential-with-jitter
+timeout:
+  rule: every-network-and-job-operation-has-explicit-timeout
+cancellation:
+  model: cooperative
+  durable_state: required_before_acknowledgement_where_applicable
+backpressure:
+  required: true
+  overload_behavior: explicit
+recovery:
+  rpo_rto: workload-specific-and-measured
+backup:
+  required_for: [canonical-data, workflow-state, audit, provenance]
+restore:
+  must_be_tested: true
+rollback:
+  application: previous-known-good-release
+  schema: backward-compatible-migration-or-explicit-recovery-plan
+failure:
+  partial_failure: observable-and-recoverable
+  silent_data_loss: forbidden

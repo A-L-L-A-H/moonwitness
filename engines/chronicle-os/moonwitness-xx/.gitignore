@@ -1,0 +1,13 @@
+node_modules
+.pnpm-store
+.env
+.env.*
+!.env.example
+.DS_Store
+coverage
+dist
+.next
+.turbo
+*.log
+apps/worker/.data
+addons/whatsapp/.sessions

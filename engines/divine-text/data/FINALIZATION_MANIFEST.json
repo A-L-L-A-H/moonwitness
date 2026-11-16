@@ -1,0 +1,20 @@
+{
+  "release": "5.1.1",
+  "purpose": "General-AI-enabled local research engine with evidence-gated scoring",
+  "ollama_removed": true,
+  "providers": [
+    "openai",
+    "gemini",
+    "deterministic"
+  ],
+  "numeric_scores_available_for_other_books": false,
+  "why": "Primary corpora/manuscript evidence for Torah, Psalms and Gospels are not locally ingested yet; identity claims remain unresolved.",
+  "manual_verification_required": true,
+  "quran_numeric_preservation_score": null,
+  "quran_reason": "Current repository provides a local normalized witness; a full preservation score requires the defined evidence components and provenance audit.",
+  "artifact_files": [
+    "data/PROJECT_STATUS_V5_1_1.json",
+    "outputs/SCORECARD_STATUS.json",
+    "docs/v5/MANUAL_VERIFICATION.md"
+  ]
+}

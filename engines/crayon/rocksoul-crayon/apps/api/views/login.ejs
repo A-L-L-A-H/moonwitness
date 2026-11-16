@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - RockSoul Gateway Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #09090b;
+      --card: rgba(18, 18, 24, 0.75);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --indigo: #6366f1;
+      --indigo-hover: #4f46e5;
+      --rose: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient background lighting */
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0) 70%);
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .orb-2 {
+      width: 380px;
+      height: 380px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.18) 0%, rgba(236, 72, 153, 0) 70%);
+      bottom: -80px;
+      right: 15%;
+    }
+
+    .login-box {
+      width: 100%;
+      max-width: 420px;
+      background: var(--card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      position: relative;
+      z-index: 1;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .brand-section {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .logo {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6, #ec4899);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 24px;
+      color: #fff;
+      box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .alert-error {
+      background: var(--rose-bg);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--rose);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .input-wrapper {
+      position: relative;
+    }
+    .input-field {
+      width: 100%;
+      background: #18181f;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 12px 42px 12px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-family: var(--font-sans);
+      transition: all 0.2s ease;
+    }
+    .input-field:focus {
+      outline: none;
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    .toggle-visibility {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 4px;
+    }
+    .toggle-visibility:hover { color: #fff; }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
+    }
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #4f46e5, #4338ca);
+      transform: translateY(-1px);
+    }
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .footer-note code {
+      background: #18181f;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      color: #a5b4fc;
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-orb orb-1"></div>
+  <div class="glow-orb orb-2"></div>
+
+  <div class="login-box">
+    <div class="brand-section">
+      <% if (typeof assets !== 'undefined' && assets?.brand?.lockup) { %>
+        <div style="margin-bottom: 20px; display: flex; justify-content: center;">
+          <img src="<%= assets.brand.lockup %>" alt="MoonWitness × Rocksoul" style="max-width: 260px; height: auto;" />
+        </div>
+      <% } else if (typeof assets !== 'undefined' && assets?.brand?.logoHorizontal) { %>
+        <div style="margin-bottom: 20px; display: flex; justify-content: center;">
+          <img src="<%= assets.brand.logoHorizontal %>" alt="MoonWitness" style="max-width: 240px; height: auto;" />
+        </div>
+      <% } else { %>
+        <div class="logo">RS</div>
+      <% } %>
+      <h1 class="title">RockSoul Gateway</h1>
+      <p class="subtitle">Authentication required to access console telemetry</p>
+    </div>
+
+    <div id="alertBox" class="alert-error">
+      <span>⚠️</span>
+      <span id="alertMsg">Invalid password</span>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="label" for="passwordInput">Dashboard Access Key</label>
+        <div class="input-wrapper">
+          <input
+            type="password"
+            id="passwordInput"
+            class="input-field"
+            placeholder="Enter DASHBOARD_PASSWORD..."
+            required
+            autocomplete="current-password"
+            autofocus
+          >
+          <button type="button" class="toggle-visibility" onclick="togglePass()" title="Toggle visibility">👁️</button>
+        </div>
+      </div>
+
+      <button type="submit" id="submitBtn" class="btn-submit">
+        Unlock Dashboard
+      </button>
+    </form>
+
+    <div class="footer-note">
+      Configure via <code>DASHBOARD_PASSWORD</code> env variable
+    </div>
+  </div>
+
+  <script>
+    function togglePass() {
+      const input = document.getElementById('passwordInput');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const password = document.getElementById('passwordInput').value.trim();
+      const alertBox = document.getElementById('alertBox');
+      const alertMsg = document.getElementById('alertMsg');
+      const submitBtn = document.getElementById('submitBtn');
+
+      alertBox.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Verifying...';
+
+      try {
+        const res = await fetch('/api/dashboard/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password }),
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          window.location.reload();
+        } else {
+          alertMsg.innerText = data.message || 'Incorrect dashboard password';
+          alertBox.style.display = 'flex';
+          submitBtn.disabled = false;
+          submitBtn.innerText = 'Unlock Dashboard';
+          document.getElementById('passwordInput').select();
+        }
+      } catch (err) {
+        alertMsg.innerText = 'Network error connecting to gateway';
+        alertBox.style.display = 'flex';
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Unlock Dashboard';
+      }
+    }
+  </script>
+</body>
+</html>

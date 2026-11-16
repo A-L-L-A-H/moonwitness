@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Activity, ArrowUpRight, GitBranch, Pencil, Plus, RefreshCw, Trash2, Workflow, X } from "lucide-react";
 import { thumbArchiveUrl, thumbRiotUrl, thumbSignalUrl, thumbStudioUrl } from "../assets/art";
 import { IssueRow } from "../components";
@@ -111,6 +111,8 @@ export function Pit({
 
 export interface GitProps {
   repositories: Repository[];
+  initialSelectedId?: string | undefined;
+  initialView?: GitView | undefined;
   onAddRepository: (path: string) => Promise<Repository>;
   onRefresh: () => Promise<void>;
 }
@@ -120,18 +122,58 @@ interface PendingOperation {
   label: string;
 }
 
-export function Git({ repositories, onAddRepository, onRefresh }: GitProps) {
+export function Git({
+  repositories,
+  initialSelectedId,
+  initialView,
+  onAddRepository,
+  onRefresh,
+}: GitProps) {
   const [path, setPath] = useState("");
-  const [selected, setSelected] = useState(repositories[0]?.id || "");
+  const [selected, setSelected] = useState(initialSelectedId || repositories[0]?.id || "");
   const [snapshot, setSnapshot] = useState<GitSnapshot | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [selectedView, setSelectedView] = useState<GitView>("status");
+  const [selectedView, setSelectedView] = useState<GitView>(initialView || "status");
   const [pendingOperation, setPendingOperation] = useState<PendingOperation | null>(null);
   const [operationBranch, setOperationBranch] = useState("");
   const [commitMessage, setCommitMessage] = useState("");
   const [operationPreview, setOperationPreview] = useState("");
+  const autoLoadKeyRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!initialView) return;
+    const targetId =
+      initialSelectedId && repositories.some((repo) => repo.id === initialSelectedId)
+        ? initialSelectedId
+        : repositories[0]?.id || "";
+    if (!targetId) return;
+    const key = `${targetId}:${initialView}`;
+    if (autoLoadKeyRef.current === key) return;
+    autoLoadKeyRef.current = key;
+    let active = true;
+
+    const loadInitial = async () => {
+      setSelected(targetId);
+      setSelectedView(initialView);
+      setLoading(true);
+      setError("");
+      try {
+        const result = await call("git_snapshot", { repositoryId: targetId, view: initialView });
+        if (active) setSnapshot(result);
+      } catch (e) {
+        if (active) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+
+    void loadInitial();
+    return () => {
+      active = false;
+    };
+  }, [initialSelectedId, initialView, repositories]);
 
   async function inspect(kind: GitView = selectedView) {
     if (!selected) return;
@@ -267,7 +309,7 @@ export function Git({ repositories, onAddRepository, onRefresh }: GitProps) {
             <span className="micro-label">LOCAL GIT CONTROLS</span>
           </div>
           <div className="git-actions">
-            {(["status", "log", "diff", "branches"] as const).map((key) => (
+            {(["status", "log", "diff", "patch", "branches"] as const).map((key) => (
               <button
                 key={key}
                 className={`outline-button ${selectedView === key ? "selected" : ""}`}

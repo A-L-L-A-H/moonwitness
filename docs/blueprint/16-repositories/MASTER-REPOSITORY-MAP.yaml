@@ -1,0 +1,75 @@
+version: 1
+status: locked
+organization: ArsyBelovedLabs
+repository_strategy: independent-repositories
+reusable_unit: package
+network_boundary: moonwitness-api
+repositories:
+  moonwitness-core:
+    purpose: canonical shared contracts, identifiers, primitives
+    layer: core
+    database: none
+  moonwitness-corpus:
+    purpose: canonical knowledge ingestion, validation, materialization, release
+    layer: domain
+    database: private
+  moonwitness-cosmic:
+    purpose: intelligent analysis and reasoning engine
+    layer: domain
+    database: private
+  moonwitness-crayon:
+    purpose: methodology, measurement, research computation
+    layer: domain
+    database: private
+  moonwitness-prophetic:
+    purpose: bounded prophetic research domain capability
+    layer: domain
+    database: private
+  moonwitness-runtime:
+    purpose: application orchestration and workflow execution
+    layer: runtime
+    database: private
+  moonwitness-worker:
+    purpose: async jobs and background execution
+    layer: runtime
+    database: private
+  moonwitness-api:
+    purpose: canonical HTTP/OpenAPI transport boundary and application persistence boundary
+    layer: transport
+    database: no-direct-domain-db
+  moonwitness-sdk:
+    purpose: consumer developer interface and canonical typed API client
+    layer: transport
+  moonwitness-frontend-platform:
+    purpose: portable design system and reusable React UI packages
+    layer: frontend
+  moonwitness-wheremythfadetolegend:
+    purpose: primary public user experience and observatory application
+    layer: application
+    database: none-direct
+    status: active
+  moonwitness-web:
+    purpose: legacy public user experience
+    layer: application
+    database: none-direct
+    status: paused
+  moonwitness-commandcenter:
+    purpose: operations and research control experience
+    layer: application
+    database: none-direct
+    status: hold
+  moonwitness-crayon-lab:
+    purpose: methodology/research laboratory experience
+    layer: application
+    database: none-direct
+  moonwitness-blueprint:
+    purpose: canonical architecture and governance truth
+    layer: control
+rules:
+  - repositories_do_not_import_private_source_paths_from_other_repositories
+  - packages_are_consumed_through_public_exports
+  - services_are_reached_through_contracts
+  - applications_do_not_own_domain_logic_unnecessarily
+  - applications_do_not_access_private_databases_directly
+  - databases_are_not_cross_repository_contracts
+  - primary_public_web_has_one_canonical_application_owner

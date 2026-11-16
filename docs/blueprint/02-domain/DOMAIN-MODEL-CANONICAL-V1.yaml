@@ -1,0 +1,55 @@
+version: 1
+status: design-locked
+entities:
+  research_run:
+    contract: research-run
+    owner: moonwitness-core
+    lifecycle: [queued, running, succeeded, failed, cancelled]
+  workflow:
+    contract: workflow
+    owner: moonwitness-core
+    runtime_owner: moonwitness-runtime
+    lifecycle: [accepted, running, waiting, succeeded, failed, cancelled]
+  job:
+    contract: job
+    owner: moonwitness-core
+    runtime_owner: moonwitness-worker
+    lifecycle: [queued, running, retrying, succeeded, failed, cancelled]
+  evidence:
+    contract: evidence
+    owner: moonwitness-core
+    source_owner: moonwitness-corpus
+  provenance:
+    contract: provenance
+    owner: moonwitness-core
+    implementation_owner: moonwitness-cosmic
+  knowledge_document:
+    owner: moonwitness-corpus
+    source_of_truth: corpus-artifact
+  analysis_result:
+    owner: moonwitness-cosmic
+    exposed_through: research-run
+  methodology_result:
+    owner: moonwitness-crayon
+    exposed_through: research-run
+  prophetic_case:
+    owner: moonwitness-prophetic
+    domain_specific: true
+identifiers:
+  rule: opaque-stable-ids
+  public_ids_must_not_expose_database_primary_keys: true
+  correlation_id: required_for_multi_step_execution
+relations:
+  research_run -> workflow: may_start
+  workflow -> job: may_enqueue
+  job -> evidence: may_produce
+  evidence -> provenance: must_reference
+  knowledge_document -> evidence: may_support
+  analysis_result -> evidence: must_reference_when_evidence_based
+  methodology_result -> analysis_result: may_score_or_evaluate
+rules:
+  - domain_entities_are_transport_agnostic
+  - domain_entities_do_not_import_frameworks
+  - domain_entities_do_not_open_database_connections
+  - domain_entities_do_not_emit_http_directly
+  - domain_entities_do_not_contain_ui_concerns

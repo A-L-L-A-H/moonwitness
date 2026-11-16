@@ -1,0 +1,30 @@
+{
+  "version": "2.0",
+  "status": "UNCALIBRATED",
+  "method": "BRADLEY_TERRY_PAIRWISE",
+  "minimum_observations_for_public_score": 100,
+  "minimum_unique_respondents": 30,
+  "observations": [],
+  "traits": [
+    "honesty",
+    "kindness",
+    "fairness",
+    "gratitude",
+    "judgment",
+    "perseverance",
+    "forgiveness",
+    "humility",
+    "leadership",
+    "self_regulation",
+    "hope",
+    "compassion",
+    "courage",
+    "wisdom",
+    "patience"
+  ],
+  "guardrails": [
+    "Compare traits, never prophets.",
+    "Do not infer metaphysical truth from preference.",
+    "Do not enable preference-dependent composite before calibration threshold."
+  ]
+}

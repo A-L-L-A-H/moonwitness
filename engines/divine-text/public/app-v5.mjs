@@ -1,0 +1,6 @@
+const $=s=>document.querySelector(s); const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function get(p){const r=await fetch(p); if(!r.ok) throw new Error(await r.text()); return r.json();}
+async function boot(){const h=await get('/api/health'); $('#health').textContent=`v${h.version} · ${h.ok?'ONLINE':'OFFLINE'}`; const r=await get('/api/report'); $('#summary').innerHTML=`<div>Qur'an: ${r.quran.records} ayat</div><div>Claims: ${r.claims}</div><div>Manuscripts: ${r.manuscripts}</div><div>Graph edges: ${r.graph.edge_count}</div>`; const g=await get('/api/graph'); $('#graph').innerHTML=g.edges.map(e=>`<div>${esc(e.from)} → <b>${esc(e.type)}</b> → ${esc(e.to)}</div>`).join('')||'<em>No relations</em>';}
+$('#run').onclick=async()=>{const topic=$('#topic').value; const r=await get(`/api/research/run?topic=${encodeURIComponent(topic)}`); $('#results').textContent=JSON.stringify(r,null,2);};
+$('#ask').onclick=async()=>{const prompt=$('#prompt').value.trim(); if(!prompt)return; const r=await fetch('/api/ai/ask',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({prompt})}).then(x=>x.json()); $('#ai').textContent=JSON.stringify(r,null,2);};
+boot();

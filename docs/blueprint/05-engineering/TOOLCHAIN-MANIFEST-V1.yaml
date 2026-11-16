@@ -1,0 +1,47 @@
+version: 2
+status: locked
+runtime_policy: latest-supported-production
+node:
+  policy: track-latest-and-promote-latest-supported
+  current_latest_checked: 26.8.1
+  current_latest_status: current
+  lts_latest_checked: 24.20.0
+  serverless_default_target: latest-supported-by-vercel
+  container_target: latest-supported-verified
+package_manager:
+  name: pnpm
+  policy: latest-stable-compatible
+language:
+  typescript: latest-stable-compatible
+  module_system: esm
+backend:
+  fastify: 5.x
+frontend:
+  nextjs: 16.3.x
+  react: 19.2.x
+  tailwind: 4.x
+  shadcn: current-compatible
+api:
+  openapi: 3.2.0
+contracts:
+  json_schema: 2020-12
+observability:
+  opentelemetry: current-compatible
+deployment:
+  development:
+    web: vercel
+    database: neon-or-supabase
+  production:
+    runtime: docker-compose-on-vps
+runtime_compatibility:
+  serverless: required
+  docker: required
+  parity_goal: same-domain-behavior
+rules:
+  - track_latest_upstream_release
+  - use_latest_supported_runtime_per_target
+  - use_latest_stable_patch_within_supported_major
+  - do_not_force_current_release_when_platform_support_is_unverified
+  - upgrade_only_through_ci_and_compatibility_checks
+  - never_require_provider_specific_runtime_apis_inside_domain_packages
+  - keep_domain_packages_hosting_runtime_agnostic

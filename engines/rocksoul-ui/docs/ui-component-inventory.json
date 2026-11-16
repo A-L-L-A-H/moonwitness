@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-11",
+  "scope": "packages/ui/src",
+  "canonicalSurfaces": {
+    "foundation": ["tokens.ts", "styles.css", "lib/cn.ts"],
+    "subPrimitives": ["components/ui/form.tsx", "components/ui/input-group.tsx"],
+    "atoms": [
+      "components/ui/button.tsx", "components/ui/icon-button.tsx", "components/ui/badge.tsx", "components/ui/input.tsx",
+      "components/ui/textarea.tsx", "components/ui/checkbox.tsx", "components/ui/radio-group.tsx",
+      "components/ui/switch.tsx", "components/ui/slider.tsx", "components/ui/select.tsx",
+      "components/ui/native-select.tsx", "components/ui/input-otp.tsx", "components/ui/label.tsx",
+      "components/ui/avatar.tsx", "components/ui/card.tsx", "components/ui/separator.tsx",
+      "components/ui/scroll-area.tsx", "components/ui/aspect-ratio.tsx", "components/ui/progress.tsx",
+      "components/ui/spinner.tsx", "components/ui/skeleton.tsx", "components/ui/kbd.tsx",
+      "components/ui/tooltip.tsx", "components/ui/popover.tsx", "components/ui/hover-card.tsx",
+      "components/ui/dialog.tsx", "components/ui/alert-dialog.tsx", "components/ui/sheet.tsx",
+      "components/ui/drawer.tsx", "components/ui/dropdown-menu.tsx", "components/ui/context-menu.tsx",
+      "components/ui/command.tsx", "components/ui/tabs.tsx", "components/ui/accordion.tsx",
+      "components/ui/collapsible.tsx", "components/ui/calendar.tsx", "components/ui/table.tsx",
+      "components/ui/pagination.tsx", "components/ui/breadcrumb.tsx", "components/ui/sidebar.tsx", "components/ui/visually-hidden.tsx"
+    ],
+    "molecules": [
+      "components/molecules/copy-button.tsx",
+      "components/molecules/date-input.tsx",
+      "components/molecules/date-range-picker.tsx",
+      "components/molecules/file-input.tsx",
+      "components/molecules/filter-group.tsx",
+      "components/molecules/form-actions.tsx",
+      "components/molecules/inline-message.tsx",
+      "components/molecules/key-value.tsx",
+      "components/molecules/pagination.tsx",
+      "components/molecules/password-input.tsx",
+      "components/molecules/progress-indicator.tsx",
+      "components/molecules/search-input.tsx",
+      "components/molecules/split-button.tsx",
+      "components/molecules/stat.tsx"
+    ],
+    "organisms": [
+      "components/organisms/attachment-list.tsx",
+      "components/organisms/content-states.tsx",
+      "components/organisms/data-table.tsx",
+      "components/organisms/detail-panel.tsx",
+      "components/organisms/filter-bar.tsx",
+      "components/organisms/form-footer.tsx",
+      "components/organisms/form-section.tsx",
+      "components/organisms/timeline.tsx"
+    ],
+    "templates": [
+      "components/templates/page-layout.tsx",
+      "components/templates/page-templates.tsx"
+    ],
+    "features": "apps/web/src/features"
+  },
+  "compatibility": [],
+  "domainComponents": "components/*.tsx",
+  "screens": "screens/*.tsx",
+  "overlapDecisions": [
+    { "behavior": "Button and IconButton", "owner": "components/ui/button.tsx + components/ui/icon-button.tsx", "legacy": null, "action": "canonical" },
+    { "behavior": "Badge", "owner": "components/ui/badge.tsx + components/feedback/status-badge.tsx", "legacy": null, "action": "generic and domain owners are explicit" },
+    { "behavior": "Input/Textarea/Select/Checkbox/Radio/Switch", "owner": "components/ui/*", "legacy": null, "action": "canonical controls composed with Field" },
+    { "behavior": "Dialog/Drawer/Tooltip/Avatar/Skeleton", "owner": "components/ui/*", "legacy": null, "action": "canonical" },
+    { "behavior": "Tabs", "owner": "components/ui/tabs.tsx", "legacy": null, "action": "canonical parts API" },
+    { "behavior": "Pagination", "owner": "components/molecules/pagination.tsx + components/ui/pagination.tsx", "legacy": null, "action": "canonical composition" }
+  ],
+  "promotionQueue": [
+    { "name": "Field", "level": "molecule", "source": "components/ui/form.tsx + components/ui/field.tsx" },
+    { "name": "SearchInput", "level": "molecule", "source": "new" },
+    { "name": "FilterBar", "level": "organism", "source": "new" },
+    { "name": "DataTable", "level": "organism", "source": "components/ui/table.tsx" },
+    { "name": "AppShell", "level": "template", "source": "components/application-shell.tsx" }
+  ]
+}

@@ -10,6 +10,8 @@ describe("RiotRail", () => {
     render(<RiotRail page="pit" onNavigate={onNavigate} onSwitchboard={onSwitchboard} />);
 
     expect(screen.getByTitle("PIT")).toHaveClass("active");
+    fireEvent.click(screen.getByTitle("OVERSEER"));
+    expect(onNavigate).toHaveBeenCalledWith("monitor");
     fireEvent.click(screen.getByTitle("GIT"));
     expect(onNavigate).toHaveBeenCalledWith("git");
 

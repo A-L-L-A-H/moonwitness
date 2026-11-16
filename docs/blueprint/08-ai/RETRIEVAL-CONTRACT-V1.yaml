@@ -1,0 +1,29 @@
+version: 1
+status: locked
+pipeline:
+  - source_registration
+  - ingestion
+  - normalization
+  - chunking
+  - indexing
+  - retrieval
+  - ranking
+  - citation
+  - provenance
+source_of_truth:
+  canonical_knowledge: moonwitness-corpus
+  index: derived_rebuildable
+required_result_metadata:
+  - source_id
+  - artifact_id
+  - locator
+  - relevance
+  - retrieval_strategy
+  - index_version
+  - corpus_release
+  - provenance
+rules:
+  - retrieval_never_becomes_source_of_truth
+  - citations_must_resolve_to_known_sources
+  - index_rebuild_must_be_deterministic_given_same_inputs
+  - retrieval_snapshots_are_versioned

@@ -1,0 +1,53 @@
+{
+  "name": "prophet-research-engine",
+  "version": "2.3.2",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13",
+    "npm": ">=10"
+  },
+  "workspaces": [
+    "apps/web",
+    "apps/api"
+  ],
+  "scripts": {
+    "install:win": "npm install && npm run setup",
+    "clean": "node scripts/clean.mjs",
+    "build:core": "npm run clean && tsc -p tsconfig.json && tsc -p tsconfig.web.json && node dist/scripts/generate-web-data.js",
+    "test:core": "npm run build:core && node --test dist/tests/*.test.js",
+    "api:build": "npm --workspace @prophet-research/api run build",
+    "api:start": "node apps/api/dist/server.js",
+    "web:dev": "npm --workspace @prophet-research/web run dev",
+    "web:build": "npm --workspace @prophet-research/web run build",
+    "web:typecheck": "npm --workspace @prophet-research/web run typecheck",
+    "web:typecheck:offline": "tsc -p apps/web/tsconfig.offline.json --noEmit",
+    "db:sync": "npm run api:build && node -e \"import('./apps/api/dist/db.js').then(m=>{const s=m.openStore(process.cwd());console.log(s.health());s.db.close()})\"",
+    "db:reset": "node scripts/reset-db.mjs && npm run db:sync",
+    "dev": "npm run api:build && concurrently \"npm run api:start\" \"npm run web:dev\"",
+    "build": "npm run build:core && npm run api:build && npm run web:build",
+    "test:integration": "node tests-v2.3/sqlite-api.test.mjs",
+    "test:ui-contract": "node tests-v2.3/react-ui-contract.test.mjs",
+    "test:scoring-audit": "node tests-v2.3/scoring-audit.test.mjs",
+    "test:offline": "npm run test:core && npm run api:build && npm run db:sync && npm run test:integration && npm run test:ui-contract && npm run test:scoring-audit && npm run test:handoff-contract && npm run test:docs && npm run web:typecheck:offline",
+    "test": "npm run test:core && npm run api:build && npm run db:sync && npm run test:integration && npm run test:ui-contract && npm run test:scoring-audit && npm run test:handoff-contract && npm run test:docs && npm run web:typecheck",
+    "e2e": "playwright test",
+    "verify": "node scripts/verify-full.mjs",
+    "setup": "node scripts/setup.mjs",
+    "setup:e2e": "node scripts/setup.mjs --e2e",
+    "doctor": "node scripts/doctor.mjs",
+    "start": "node scripts/start.mjs",
+    "start:prod": "node scripts/start.mjs",
+    "verify:handoff": "node scripts/verify-handoff.mjs",
+    "e2e:install": "npx playwright install chromium",
+    "test:handoff-contract": "node tests-v2.3/handoff-contract.test.mjs",
+    "start:open": "node scripts/run-open.mjs",
+    "test:docs": "node tests-v2.3/docs-integrity.test.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.0",
+    "concurrently": "9.1.2",
+    "typescript": "5.9.2"
+  },
+  "packageManager": "npm@10.9.2"
+}

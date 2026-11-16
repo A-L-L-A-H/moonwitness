@@ -8,6 +8,7 @@ overrides:
   postcss: "^8.5.23"
   esbuild: "^0.28.1"
   minimatch: "^11.0.1"
+  "vite@>=8.3.0 <8.3.4": "^8.3.4"
 
 allowBuilds:
   "@scarf/scarf": false
@@ -19,3 +20,4 @@ allowBuilds:
   workerd@1.20250718.0: true
   workerd@1.20261103.1: true
   workerd@1.20261110.1: true
+  workerd@1.20261113.1: true

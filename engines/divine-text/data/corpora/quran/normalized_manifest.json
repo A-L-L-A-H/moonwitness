@@ -1,0 +1,9 @@
+{
+  "corpus": "Quran normalized Uthmani local witness",
+  "record_count": 6236,
+  "surah_count": 114,
+  "bad_records": 0,
+  "sha256": "45a6c1c2e433eb02e8e4cc74bbf145412f4263c6e430ca603112755412bbfbf9",
+  "derivation": "Cleaned known TeX markup from local qurantext-uthmani.def; no textual substitution beyond marker removal.",
+  "status": "LOCAL_WITNESS_NORMALIZED"
+}

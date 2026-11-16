@@ -1,0 +1,25 @@
+version: 1
+status: locked
+classes:
+  interactive_http:
+    timeout: bounded_short
+    retry: only_when_safe_and_idempotent
+    cancellation: client_disconnect_or_explicit_cancel
+  durable_job:
+    timeout: bounded_per_attempt
+    retry: explicit_backoff_with_max_attempts
+    cancellation: durable_cancel_request
+  ai_call:
+    timeout: provider_and_policy_specific
+    retry: transient_failures_only
+    fallback: provider_policy
+  artifact_write:
+    timeout: bounded
+    retry: idempotent
+rules:
+  - retry_requires_retryable_classification
+  - exponential_backoff_with_jitter_for_repeated_attempts
+  - max_attempts_are_explicit
+  - cancellation_is_idempotent
+  - timeout_does_not_imply_failure_of_underlying_durable_job
+  - errors_expose_retryable_semantics

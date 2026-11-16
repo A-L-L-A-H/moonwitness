@@ -1,0 +1,27 @@
+version: 1
+status: hardening
+workloads:
+  interactive:
+    target: p95-low-latency
+    constraint: avoid_unbounded_server_work
+  api_read:
+    target: p95-fast-read
+  api_command:
+    target: accepted-quickly
+    constraint: long_work_becomes_async
+  research_run:
+    target: durable-progress-over-request-latency
+  ingestion:
+    target: throughput-and-reproducibility
+  batch:
+    target: controlled-concurrency
+  ai:
+    target: bounded-latency-and-cost
+budgets:
+  exact_numbers: to-be-established-from-production-like-benchmark
+  rule: every_numeric_budget_requires_measurement_source
+concurrency:
+  bounded: true
+  backpressure: required
+optimization:
+  order: [correctness, security, provenance, reproducibility, observability, performance]

@@ -1,0 +1,25 @@
+{
+  "claim": {
+    "claim_id": "string",
+    "claim": "string",
+    "subject": "string",
+    "tradition": "string",
+    "source_type": "QURAN|HADITH|SUNNAH|SIRAH|TAFSIR|FIQH|CANONICAL_BOOK|MANUSCRIPT|HISTORY|ACADEMIC",
+    "reference": "string",
+    "source_level": "L0|L1|L2|L3|L4|L5|L6|L7",
+    "evidence_items": [],
+    "contrary_evidence": [],
+    "scores": {
+      "source_quality": 0,
+      "transmission": 0,
+      "proximity": 0,
+      "corroboration": 0,
+      "interpretation_gap": 0
+    },
+    "score_status": "pending|scored",
+    "total": null,
+    "confidence": null,
+    "notes": "string",
+    "scores_note": "interpretation_gap is scored as points for low interpretive distance; higher score means less interpretation is required."
+  }
+}

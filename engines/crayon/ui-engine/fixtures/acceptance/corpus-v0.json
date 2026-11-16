@@ -1,0 +1,19 @@
+{
+  "version": "0",
+  "invariants": [
+    "truth-state-preserved",
+    "possibility-derived",
+    "consequence-visible",
+    "authority-explicit",
+    "resistance-explainable",
+    "renderer-neutral-rir"
+  ],
+  "domains": [
+    { "id": "banking", "entityType": "account", "verb": "transfer", "reversibility": "compensatable", "risk": 0.6, "impact": 0.8, "uncertainty": 0.2 },
+    { "id": "files", "entityType": "file", "verb": "delete", "reversibility": "temporarily-reversible", "risk": 0.5, "impact": 0.6, "uncertainty": 0.1 },
+    { "id": "email", "entityType": "message", "verb": "send", "reversibility": "irreversible", "risk": 0.5, "impact": 0.6, "uncertainty": 0.05 },
+    { "id": "erp", "entityType": "approval", "verb": "approve", "reversibility": "compensatable", "risk": 0.4, "impact": 0.7, "uncertainty": 0.15 },
+    { "id": "devops", "entityType": "service", "verb": "deploy", "reversibility": "compensatable", "risk": 0.7, "impact": 0.9, "uncertainty": 0.25 },
+    { "id": "ai", "entityType": "proposal", "verb": "accept-proposal", "reversibility": "reversible", "risk": 0.4, "impact": 0.5, "uncertainty": 0.3 }
+  ]
+}

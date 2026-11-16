@@ -4,15 +4,152 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { LUMINOUS_NAMES_OF_ALLAH, TASBIH_PHRASES } from "@/data/remembrance-sanctuary";
 import type { WorldIdentifier } from "@/data/empire-registry";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament } from "./sacred-icons";
-import { AstrolabeSealMedallion, SacredCornerBrackets } from "./sacred-illustrations";
+import { DiamondStarOrnament, SacredCornerBrackets } from "@moonwitness/ui/imperium";
+import { AstrolabeSealMedallion } from "./sacred-illustrations";
 
 const TASBIH_STORAGE_KEY = "allah-tasbih-state-v1";
+const MUHASABAH_STORAGE_KEY = "allah-muhasabah-v1";
+const MUHASABAH_JOURNAL_LS_KEY = "allah-muhasabah-journal-v1";
+const MUHASABAH_IDB_NAME = "allah-sanctuary-local";
+const MUHASABAH_IDB_STORE = "journal";
+
+interface PrivateJournalEntry {
+  readonly id: string;
+  readonly createdAt: string;
+  readonly text: string;
+}
+
+function readIdbJournalEntries(): Promise<readonly PrivateJournalEntry[]> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      resolve([]);
+      return;
+    }
+    try {
+      const req = window.indexedDB.open(MUHASABAH_IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(MUHASABAH_IDB_STORE)) {
+          db.createObjectStore(MUHASABAH_IDB_STORE, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction(MUHASABAH_IDB_STORE, "readonly");
+        const store = tx.objectStore(MUHASABAH_IDB_STORE);
+        const allReq = store.getAll();
+        allReq.onsuccess = () => {
+          const rows = Array.isArray(allReq.result) ? (allReq.result as PrivateJournalEntry[]) : [];
+          resolve(rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+          db.close();
+        };
+        allReq.onerror = () => {
+          resolve([]);
+          db.close();
+        };
+      };
+      req.onerror = () => resolve([]);
+    } catch {
+      resolve([]);
+    }
+  });
+}
+
+function writeIdbJournalEntry(entry: PrivateJournalEntry): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      resolve(false);
+      return;
+    }
+    try {
+      const req = window.indexedDB.open(MUHASABAH_IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(MUHASABAH_IDB_STORE)) {
+          db.createObjectStore(MUHASABAH_IDB_STORE, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction(MUHASABAH_IDB_STORE, "readwrite");
+        tx.objectStore(MUHASABAH_IDB_STORE).put(entry);
+        tx.oncomplete = () => {
+          db.close();
+          resolve(true);
+        };
+        tx.onerror = () => {
+          db.close();
+          resolve(false);
+        };
+      };
+      req.onerror = () => resolve(false);
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
+function deleteIdbJournalEntry(id: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      resolve();
+      return;
+    }
+    try {
+      const req = window.indexedDB.open(MUHASABAH_IDB_NAME, 1);
+      req.onsuccess = () => {
+        const db = req.result;
+        if (db.objectStoreNames.contains(MUHASABAH_IDB_STORE)) {
+          const tx = db.transaction(MUHASABAH_IDB_STORE, "readwrite");
+          tx.objectStore(MUHASABAH_IDB_STORE).delete(id);
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            resolve();
+          };
+        } else {
+          db.close();
+          resolve();
+        }
+      };
+      req.onerror = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
+
+const MUHASABAH_PLEDGES = [
+  {
+    id: "restitution",
+    labelEn: "Fulfill trust & settle any debt owed",
+    labelId: "Tunaikan amanah & lunasi hak sesama",
+  },
+  {
+    id: "gentle-speech",
+    labelEn: "Guard tongue from mockery or falsehood",
+    labelId: "Jaga lisan dari dusta & merendahkan",
+  },
+  {
+    id: "hidden-mercy",
+    labelEn: "Offer unseen kindness without applause",
+    labelId: "Beri kebaikan senyap tanpa mencari pujian",
+  },
+  {
+    id: "honest-craft",
+    labelEn: "Deliver clean, verifiable work as worship",
+    labelId: "Hasilkan karya jujur & teruji sebagai ibadah",
+  },
+] as const;
 
 interface PersistedTasbihState {
   readonly phraseId: string;
@@ -28,6 +165,7 @@ export function RemembranceSanctuary({
   readonly quietMode?: boolean;
   readonly onNavigateToWorld?: (worldId: WorldIdentifier) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const [selectedNameId, setSelectedNameId] = useState<string>(LUMINOUS_NAMES_OF_ALLAH[0]!.id);
   const [activePhraseId, setActivePhraseId] = useState<string>(TASBIH_PHRASES[0]!.id);
   const [beadCount, setBeadCount] = useState<number>(0);
@@ -37,6 +175,12 @@ export function RemembranceSanctuary({
   const [breathActive, setBreathActive] = useState<boolean>(false);
   const [breathPhaseIndex, setBreathPhaseIndex] = useState<number>(0);
   const [justCompletedCycle, setJustCompletedCycle] = useState<boolean>(false);
+  const [pledgeIds, setPledgeIds] = useState<readonly string[]>([]);
+  const [journalDraft, setJournalDraft] = useState<string>("");
+  const [journalEntries, setJournalEntries] = useState<readonly PrivateJournalEntry[]>([]);
+  const [journalEngine, setJournalEngine] = useState<
+    "INDEXEDDB_ON_DEVICE" | "LOCAL_STORAGE_ON_DEVICE"
+  >("LOCAL_STORAGE_ON_DEVICE");
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
@@ -84,7 +228,114 @@ export function RemembranceSanctuary({
     } catch {
       // Ignore storage access failures in private browsing contexts
     }
+
+    try {
+      const savedPledges = window.localStorage.getItem(MUHASABAH_STORAGE_KEY);
+      if (savedPledges) {
+        const parsedPledges = JSON.parse(savedPledges) as unknown;
+        if (Array.isArray(parsedPledges)) {
+          setPledgeIds(parsedPledges.filter((item): item is string => typeof item === "string"));
+        }
+      }
+    } catch {
+      // Ignore storage access failures in private browsing contexts
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const idbRows = await readIdbJournalEntries();
+      if (cancelled) return;
+      if (idbRows.length > 0) {
+        setJournalEntries(idbRows);
+        setJournalEngine("INDEXEDDB_ON_DEVICE");
+        return;
+      }
+      if (typeof window !== "undefined" && "indexedDB" in window) {
+        setJournalEngine("INDEXEDDB_ON_DEVICE");
+      }
+      try {
+        const rawJournal = window.localStorage.getItem(MUHASABAH_JOURNAL_LS_KEY);
+        if (rawJournal) {
+          const parsed = JSON.parse(rawJournal) as unknown;
+          if (Array.isArray(parsed)) {
+            setJournalEntries(
+              parsed.filter((row): row is PrivateJournalEntry =>
+                Boolean(row && typeof row === "object" && "id" in row && "text" in row),
+              ),
+            );
+          }
+        }
+      } catch {
+        // Ignore restricted storage contexts
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(MUHASABAH_STORAGE_KEY, JSON.stringify(pledgeIds));
+    } catch {
+      // Ignore storage quota or restricted context
+    }
+  }, [pledgeIds]);
+
+  const toggleMuhasabahPledge = (id: string) => {
+    setPledgeIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
+  const saveJournalNote = async () => {
+    const clean = journalDraft.trim();
+    if (!clean) return;
+    const entry: PrivateJournalEntry = {
+      id: `note-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      text: clean.slice(0, 600),
+    };
+    const next = [entry, ...journalEntries].slice(0, 24);
+    setJournalEntries(next);
+    setJournalDraft("");
+    const idbOk = await writeIdbJournalEntry(entry);
+    setJournalEngine(idbOk ? "INDEXEDDB_ON_DEVICE" : "LOCAL_STORAGE_ON_DEVICE");
+    try {
+      window.localStorage.setItem(MUHASABAH_JOURNAL_LS_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore storage quota issues
+    }
+  };
+
+  const removeJournalNote = async (id: string) => {
+    const next = journalEntries.filter((e) => e.id !== id);
+    setJournalEntries(next);
+    await deleteIdbJournalEntry(id);
+    try {
+      window.localStorage.setItem(MUHASABAH_JOURNAL_LS_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore storage issues
+    }
+  };
+
+  const exportPrivateMuhasabahJson = () => {
+    const snapshot = {
+      exportedAt: new Date().toISOString(),
+      privacyNote: "Exported strictly on-device. Zero server telemetry or public leaderboard.",
+      tasbih: { activePhraseId, beadCount, cyclesCompleted, totalWitnessed },
+      muhasabahPledges: MUHASABAH_PLEDGES.filter((p) => pledgeIds.includes(p.id)).map((p) => p.id),
+      muhasabahJournal: journalEntries,
+    };
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `allah-muhasabah-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   useEffect(() => {
     try {
@@ -192,17 +443,18 @@ export function RemembranceSanctuary({
           <div dir="rtl" lang="ar" className="text-2xl sm:text-3xl text-[#f5dfa6] tracking-wide">
             بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
           </div>
-          <div className="mt-3 flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] text-[#d6b46c] uppercase">
+          <div className="mt-3 flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] text-[#dfc07b] uppercase">
             <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d6b46c]" />
-            <span>MĪZĀN AL-QALB · SANCTUARY OF REMEMBRANCE</span>
+            <span>MĪZĀN AL-QALB · CONTEMPLATIVE STILLNESS</span>
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-[#d6b46c]" />
           </div>
           <h3 className="font-monument mt-3 text-2xl sm:text-3xl tracking-[0.16em] text-gold-gradient uppercase">
-            REMEMBRANCE, GRATITUDE &amp; STILLNESS
+            CONTEMPLATION, GRATITUDE &amp; STILLNESS
           </h3>
-          <p className="mt-2.5 max-w-2xl font-serif text-base text-[#e2dac7]/90 leading-relaxed">
-            A quiet chamber dedicated solely to Al-Khāliq—reflecting on His Beautiful Names, marking
-            peaceful remembrance, and aligning intention before every act of creation.
+          <p className="mt-2.5 max-w-2xl font-serif text-base text-[#e6decb] leading-relaxed">
+            A quiet, non-sectarian chamber honoring One Creator—reflecting on universal virtues of
+            Light, Mercy, Wisdom, Gratitude, and Peace while centering conscience before every act
+            of building.
           </p>
         </div>
       </ScrollChapterReveal>
@@ -213,10 +465,10 @@ export function RemembranceSanctuary({
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-mono text-[11px] tracking-[0.2em] text-[#dfc07b] uppercase">
-                AL-ASMĀ’ AL-ḤUSNĀ · LUMINOUS CONTEMPLATIONS (9 OF 99)
+                UNIVERSAL ATTRIBUTES · LUMINOUS CONTEMPLATIONS (9 OF 99)
               </span>
-              <span className="font-mono text-[10px] text-[#a79d86]">
-                MONOCENTRIC TAWHID · ZERO IDOLS
+              <span className="font-mono text-[10.5px] text-[#cfc5b0]">
+                MONOCENTRIC UNITY · ZERO HUMAN IDOLS
               </span>
             </div>
 
@@ -230,7 +482,7 @@ export function RemembranceSanctuary({
                 {/* Hand-crafted Obsidian & Gold-Leaf Nonagram Rosette Dial */}
                 <div className="pointer-events-none absolute inset-4 overflow-hidden rounded-full border border-[#d6b46c]/40 bg-[#05070e] shadow-[0_0_54px_rgba(223,192,123,0.14),inset_0_0_36px_rgba(0,0,0,0.92)]">
                   <Image
-                    src="/art/nonagram-sanctuary-dial.png"
+                    src="/art/nonagram-sanctuary-dial.webp"
                     alt=""
                     fill
                     loading="eager"
@@ -369,7 +621,7 @@ export function RemembranceSanctuary({
                   <button
                     type="button"
                     onClick={() => onNavigateToWorld(selectedName.linkedWorldId)}
-                    className="min-h-[44px] border border-[#d6b46c]/35 bg-[#0b0e18] px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f8eac6] uppercase hover:border-[#fff4d2] hover:bg-[#d6b46c]/20 transition-colors cursor-pointer"
+                    className="btn-luxe-secondary px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
                   >
                     {selectedName.worldLabel} &rsaquo;
                   </button>
@@ -380,7 +632,7 @@ export function RemembranceSanctuary({
         </div>
 
         {/* Right: Orbital Tasbih Counter & Sakinah Breath Guide */}
-        <div className="octa-bevel-shell lg:col-span-5 border border-[#dfc07b]/35 bg-gradient-to-b from-[#0b0f1c] via-[#070a13] to-[#05060b] p-5 sm:p-6 flex flex-col justify-between shadow-[0_20px_55px_rgba(0,0,0,0.85)]">
+        <div className="octa-bevel-shell lg:col-span-5 p-6 sm:p-7 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
               <span className="font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">
@@ -391,10 +643,8 @@ export function RemembranceSanctuary({
                   type="button"
                   aria-pressed={chimeEnabled}
                   onClick={() => setChimeEnabled((prev) => !prev)}
-                  className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer transition-colors ${
-                    chimeEnabled
-                      ? "border-[#fff4d2] bg-[#d6b46c]/25 text-[#fff8e6]"
-                      : "border-[#d6b46c]/25 text-[#bfb59e] hover:border-[#d6b46c]/55"
+                  className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer ${
+                    chimeEnabled ? "text-[#fff8e6]" : "text-[#bfb59e] hover:text-[#fff6df]"
                   }`}
                 >
                   {chimeEnabled ? "CHIME: 528HZ" : "CHIME: MUTE"}
@@ -403,10 +653,8 @@ export function RemembranceSanctuary({
                   type="button"
                   aria-pressed={breathActive}
                   onClick={() => setBreathActive((prev) => !prev)}
-                  className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer transition-colors ${
-                    breathActive
-                      ? "border-[#fff4d2] bg-[#d6b46c]/25 text-[#fff8e6]"
-                      : "border-[#d6b46c]/25 text-[#bfb59e] hover:border-[#d6b46c]/55"
+                  className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer ${
+                    breathActive ? "text-[#fff8e6]" : "text-[#bfb59e] hover:text-[#fff6df]"
                   }`}
                 >
                   {breathActive ? "BREATH: ON" : "BREATH: GUIDE"}
@@ -415,18 +663,17 @@ export function RemembranceSanctuary({
             </div>
 
             {/* Phrase Selector Pills */}
-            <div className="mt-4 flex flex-wrap gap-1.5">
+            <div className="mt-4 flex flex-wrap gap-2">
               {TASBIH_PHRASES.map((phrase) => {
                 const active = phrase.id === activePhrase.id;
                 return (
                   <button
                     key={phrase.id}
                     type="button"
+                    aria-pressed={active}
                     onClick={() => handleSelectPhrase(phrase.id)}
-                    className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase transition-colors cursor-pointer ${
-                      active
-                        ? "border-[#fff4d2] bg-[#d6b46c]/20 text-[#fff6df]"
-                        : "border-[#d6b46c]/20 bg-[#0b0e18] text-[#bfb59e] hover:border-[#d6b46c]/50"
+                    className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase cursor-pointer ${
+                      active ? "text-[#fff6df]" : "text-[#bfb59e] hover:text-[#fff6df]"
                     }`}
                   >
                     {phrase.transliteration}
@@ -510,16 +757,16 @@ export function RemembranceSanctuary({
                   </div>
                   <div className="relative z-10 mt-1 font-mono text-2xl font-semibold text-[#fff8e6]">
                     {beadCount}
-                    <span className="text-xs text-[#9f9580]"> / 33</span>
+                    <span className="text-xs text-[#cfc5b0]"> / 33</span>
                   </div>
                   <div className="relative z-10 mt-1 inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.18em] text-[#dfc07b] uppercase">
-                    <DiamondStarOrnament className="h-2.5 w-2.5" /> RECITE
+                    <DiamondStarOrnament className="h-2.5 w-2.5" /> PAUSE &amp; REFLECT
                   </div>
                 </button>
               </div>
 
               <p className="mt-3 font-serif text-sm text-[#e6decb]">{activePhrase.translation}</p>
-              <p className="mt-1 text-xs text-[#a79d86]">{activePhrase.heartFocus}</p>
+              <p className="mt-1 text-xs text-[#cfc5b0]">{activePhrase.heartFocus}</p>
               {breathActive && (
                 <div
                   role="status"
@@ -535,28 +782,140 @@ export function RemembranceSanctuary({
                   aria-live="polite"
                   className="mt-2 border border-[#fff4d2]/55 bg-[#d6b46c]/20 px-3 py-1 font-mono text-[11px] text-[#fff8e6]"
                 >
-                  Alḥamdulillāh · 33-Bead Cycle Sealed ({cyclesCompleted} total)
+                  33-Bead Contemplation Cycle Sealed ({cyclesCompleted} total)
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quiet On-Device Private Muhasabah Checklist */}
+          <div className="mt-5 border-t border-[#d6b46c]/20 pt-4">
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#dfc07b] uppercase">
+              <span>
+                {locale === "id"
+                  ? "MUḤĀSABAH PRIVAT · KHUSUS PERANGKAT INI"
+                  : "PRIVATE MUḤĀSABAH · ON-DEVICE ONLY"}
+              </span>
+              <span>
+                {pledgeIds.length}/{MUHASABAH_PLEDGES.length}
+              </span>
+            </div>
+            <div className="mt-2.5 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {MUHASABAH_PLEDGES.map((item) => {
+                const checked = pledgeIds.includes(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={checked}
+                    onClick={() => toggleMuhasabahPledge(item.id)}
+                    className={`btn-luxe-secondary flex items-center gap-2 px-3 py-1.5 text-left text-[11px] leading-snug cursor-pointer ${
+                      checked ? "text-[#fff8e6]" : "text-[#cfc5b0] hover:text-[#fff6df]"
+                    }`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`inline-block h-2 w-2 shrink-0 rotate-45 border ${
+                        checked
+                          ? "border-[#fff4d2] bg-[#fff4d2]"
+                          : "border-[#dfc07b]/60 bg-transparent"
+                      }`}
+                    />
+                    <span>{locale === "id" ? item.labelId : item.labelEn}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-2.5 font-mono text-[9.5px] leading-relaxed text-[#bfb59e]">
+              {locale === "id"
+                ? "AMAL NYATA (0% POTONGAN): Salurkan zakat/sedekah langsung kepada tetangga, anak yatim, atau pihak yang berhak di sekitar Anda."
+                : "DIRECT SERVICE (0% PLATFORM FEE): Channel kindness, fair wages & zakat directly to neighbors, orphans, and those around you."}
+            </p>
+
+            {/* On-Device Reflection Journal (IndexedDB + LocalStorage, 0% Server Transmission) */}
+            <div className="mt-3.5 border-t border-[#d6b46c]/15 pt-3 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9.5px] text-[#dfc07b]">
+                <span>
+                  {locale === "id"
+                    ? "JURNAL MUḤĀSABAH PRIVAT (LOKAL SAJA)"
+                    : "ON-DEVICE REFLECTION JOURNAL (LOCAL ONLY)"}
+                </span>
+                <span className="text-[#9f9580]">{journalEngine}</span>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  value={journalDraft}
+                  onChange={(e) => setJournalDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void saveJournalNote();
+                    }
+                  }}
+                  placeholder={
+                    locale === "id"
+                      ? "Tulis refleksi jujur untuk diri sendiri..."
+                      : "Write a private self-reflection note..."
+                  }
+                  aria-label="Private on-device Muhasabah reflection journal"
+                  className="flex-1 border border-[#d6b46c]/30 bg-[#05070e] px-3 py-1.5 font-serif text-xs text-[#fff8e6] placeholder-[#8f8572] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void saveJournalNote()}
+                  className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] text-[#f5dfa6] uppercase cursor-pointer"
+                >
+                  {locale === "id" ? "SIMPAN LOKAL" : "SEAL LOCALLY"}
+                </button>
+              </div>
+              {journalEntries.length > 0 && (
+                <ul className="space-y-1.5">
+                  {journalEntries.slice(0, 3).map((note) => (
+                    <li
+                      key={note.id}
+                      className="flex items-start justify-between gap-2 border border-[#d6b46c]/20 bg-[#080c17] px-3 py-1.5 font-serif text-xs text-[#e6decb]"
+                    >
+                      <span>{note.text}</span>
+                      <button
+                        type="button"
+                        onClick={() => void removeJournalNote(note.id)}
+                        className="shrink-0 font-mono text-[9px] text-[#bfb59e] hover:text-white cursor-pointer"
+                      >
+                        DELETE
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
 
           <div
             aria-live="polite"
-            className="mt-5 flex items-center justify-between border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
+            className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
           >
             <span>CYCLES: {cyclesCompleted}</span>
-            <span>TOTAL REMEMBRANCES: {totalWitnessed}</span>
-            <button
-              type="button"
-              onClick={() => {
-                setBeadCount(0);
-                setJustCompletedCycle(false);
-              }}
-              className="min-h-[44px] border border-[#d6b46c]/25 px-3 py-1 hover:border-[#f5dfa6] hover:text-[#fff6df] cursor-pointer"
-            >
-              RESET RING
-            </button>
+            <span>TOTAL: {totalWitnessed}</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={exportPrivateMuhasabahJson}
+                className="btn-luxe-secondary px-3 py-1 text-[#f5dfa6] hover:text-white cursor-pointer"
+              >
+                EXPORT JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBeadCount(0);
+                  setJustCompletedCycle(false);
+                }}
+                className="btn-luxe-secondary px-3 py-1 hover:text-[#fff6df] cursor-pointer"
+              >
+                RESET RING
+              </button>
+            </div>
           </div>
         </div>
       </div>

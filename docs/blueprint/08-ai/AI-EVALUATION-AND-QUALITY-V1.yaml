@@ -1,0 +1,20 @@
+version: 1
+status: locked
+required_dimensions:
+  correctness: task_specific
+  groundedness: citation_and_source_support
+  consistency: repeated_run_and_provider_consistency
+  safety: policy_compliance
+  latency: p95_and_tail
+  cost: cost_per_unit_of_work
+  reproducibility: model_snapshot_plus_prompt_plus_retrieval_snapshot
+release_gate:
+  dataset_version: required
+  metric_version: required
+  threshold: required
+  regression_comparison: required
+  human_review: required_for_high_impact_tasks
+rules:
+  - production_prompts_are_versioned
+  - evaluation_inputs_are_reproducible
+  - failed_quality_gate_blocks_model_promotion

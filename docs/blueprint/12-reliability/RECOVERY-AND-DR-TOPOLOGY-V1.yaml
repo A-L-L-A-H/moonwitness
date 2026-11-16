@@ -1,0 +1,30 @@
+version: 1
+status: locked
+failure_domains:
+  - api_failure
+  - database_failure
+  - object_storage_failure
+  - worker_failure
+  - ai_provider_failure
+  - vercel_failure
+  - vps_failure
+modes:
+  degraded_read_only:
+    allowed_when: write_path_unavailable_but_reads_are_safe
+  provider_fallback:
+    allowed_for: ai
+  job_replay:
+    required_for: idempotent_durable_jobs
+RPO_RTO:
+  targets: defined_per_data_class_and_service_tier
+  evidence: measured_in_staging_before_production_claim
+actions:
+  backup: automated_and_monitored
+  restore: periodic_drill_required
+  rollback: versioned_and_documented
+  incident_record: required
+rules:
+  - recovery_procedures_are_testable
+  - backups_are_not_considered_valid_until_restore_is_verified
+  - critical_artifacts_require_integrity_verification
+  - failover_preserves_provenance_and_correlation

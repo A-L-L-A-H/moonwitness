@@ -50,3 +50,22 @@ test("the world stays usable on narrow screens and its skip link preserves the r
   await page.setViewportSize({ width: 1024, height: 768 });
   await expect(page.getByRole("region", { name: "Recent work" })).toBeHidden();
 });
+
+test("Awakening direct shortcuts open WORKBENCH, OVERSEER monitor, and GIT patch view", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "AGENT MONITOR" }).click();
+
+  await expect(page).toHaveURL(/#\/monitor$/);
+  await expect(page.getByRole("heading", { name: "OVERSEER" })).toBeVisible();
+  await expect(page.getByText(/MOONWITNESS ECOSYSTEM NODES/)).toBeVisible();
+
+  await page.getByTitle("GIT").click();
+  await expect(page).toHaveURL(/#\/git$/);
+  await expect(page.getByRole("heading", { name: "GIT JUNGLE" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "PATCH" })).toBeVisible();
+
+  await page.getByTitle("DECK").click();
+  await expect(page).toHaveURL(/#\/deck$/);
+  await expect(page.getByLabel("Live Overseer summary")).toBeVisible();
+  await expect(page.getByLabel("Live Overseer summary")).not.toContainText("DISK C::");
+});

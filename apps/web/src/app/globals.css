@@ -1,9 +1,10 @@
 @import "tailwindcss";
+@import "@moonwitness/ui/theme.css";
+@import "@moonwitness/ui/base.css";
+@import "@moonwitness/ui/skins/imperium.css";
+@import "../styles/motion.css";
 
 @source "../../../../packages/ui/src";
-
-@import "@moonwitness/ui/base.css";
-@import "../styles/motion.css";
 
 /* ---- ID Lab ---- */
 @keyframes avatar-pop {

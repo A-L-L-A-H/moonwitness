@@ -1,0 +1,587 @@
+{
+  "schemaVersion": 2,
+  "buildOrder": [
+    "token",
+    "raw-primitive",
+    "component",
+    "pattern",
+    "screen"
+  ],
+  "naming": "MW / <Component> / <Variant> / <State>",
+  "typography": {
+    "direction": "grotesk display + neutral readable body + mono metadata",
+    "proposedFamilies": {
+      "display": "Inter Tight",
+      "body": "Inter",
+      "mono": "IBM Plex Mono"
+    },
+    "status": "frozen",
+    "fallbacks": {
+      "display": "Arial, sans-serif",
+      "body": "Arial, sans-serif",
+      "mono": "ui-monospace, monospace"
+    },
+    "licensing": "Inter/Inter Tight (OFL-1.1); IBM Plex Mono (OFL-1.1)"
+  },
+  "components": [
+    {
+      "name": "MW Header",
+      "surface": [
+        "web",
+        "community"
+      ],
+      "variants": [
+        "transparent",
+        "solid",
+        "compact-mobile"
+      ],
+      "states": [
+        "default",
+        "scrolled"
+      ],
+      "parts": [
+        "brand",
+        "nav",
+        "search",
+        "live-status",
+        "account"
+      ],
+      "responsive": {
+        "mobile": "collapse nav into menu; retain search entry and account"
+      }
+    },
+    {
+      "name": "Platform Sidebar",
+      "surface": [
+        "platform"
+      ],
+      "variants": [
+        "expanded",
+        "collapsed"
+      ],
+      "parts": [
+        "brand",
+        "workspace",
+        "navigation",
+        "system-status",
+        "account"
+      ],
+      "responsive": {
+        "tablet": "collapsible",
+        "mobile": "drawer"
+      }
+    },
+    {
+      "name": "Case Header",
+      "variants": [
+        "public",
+        "community",
+        "platform"
+      ],
+      "parts": [
+        "case-id",
+        "eyebrow",
+        "title",
+        "status",
+        "summary",
+        "metadata",
+        "actions"
+      ],
+      "responsive": {
+        "mobile": "stack metadata and move actions below summary"
+      }
+    },
+    {
+      "name": "Case Card",
+      "variants": [
+        "default",
+        "compact",
+        "featured"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "selected"
+      ],
+      "parts": [
+        "case-id",
+        "title",
+        "summary",
+        "status",
+        "trace-count",
+        "updated-at"
+      ]
+    },
+    {
+      "name": "Four Record Summary",
+      "parts": [
+        "story",
+        "event",
+        "person",
+        "rgbl"
+      ],
+      "states": [
+        "linked",
+        "partial",
+        "missing"
+      ],
+      "rule": "AWS is downstream legal evaluation and is not counted as one of the four records."
+    },
+    {
+      "name": "Evidence Card",
+      "variants": [
+        "story",
+        "event",
+        "person",
+        "rgbl",
+        "aws"
+      ],
+      "states": [
+        "default",
+        "selected",
+        "flagged"
+      ],
+      "parts": [
+        "domain",
+        "source",
+        "claim",
+        "provenance",
+        "verification",
+        "status",
+        "actions"
+      ]
+    },
+    {
+      "name": "Repository Card",
+      "variants": [
+        "public",
+        "platform"
+      ],
+      "states": [
+        "healthy",
+        "degraded",
+        "offline",
+        "syncing"
+      ],
+      "parts": [
+        "domain",
+        "repo",
+        "sync-status",
+        "records",
+        "schema-version",
+        "last-sync"
+      ]
+    },
+    {
+      "name": "Source Block",
+      "variants": [
+        "quote",
+        "record",
+        "legal-instrument"
+      ],
+      "parts": [
+        "source-id",
+        "title",
+        "excerpt",
+        "citation",
+        "provenance",
+        "verification"
+      ]
+    },
+    {
+      "name": "Citation",
+      "variants": [
+        "inline",
+        "block",
+        "legal"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "copied"
+      ],
+      "parts": [
+        "code",
+        "source",
+        "locator",
+        "copy-action"
+      ]
+    },
+    {
+      "name": "Correlation Score",
+      "variants": [
+        "summary",
+        "detailed"
+      ],
+      "parts": [
+        "score",
+        "confidence",
+        "dimensions",
+        "explanation",
+        "method-link"
+      ],
+      "rule": "Never show a score without a confidence/explanation affordance."
+    },
+    {
+      "name": "Graph Node",
+      "variants": [
+        "canonical-record",
+        "evidence",
+        "source",
+        "person",
+        "event",
+        "story",
+        "rgbl-text",
+        "legal-state",
+        "external-reference",
+        "unresolved-record",
+        "inferred-candidate-record",
+        "missing-record",
+        "system-provider-resource"
+      ],
+      "states": [
+        "default",
+        "selected",
+        "dimmed",
+        "unresolved"
+      ],
+      "parts": [
+        "type",
+        "label",
+        "status",
+        "relation-count"
+      ],
+      "accessibility": {
+        "keyboardSelectable": true,
+        "textEquivalentRequired": true
+      },
+      "visualSystemVersion": 2,
+      "grammarFamily": "graph-v2"
+    },
+    {
+      "name": "Graph Edge",
+      "variants": [
+        "supports",
+        "contradicts",
+        "references",
+        "temporal",
+        "identity",
+        "legal",
+        "provenance",
+        "dependency",
+        "routes-to",
+        "unresolved-candidate"
+      ],
+      "states": [
+        "default",
+        "highlighted",
+        "dimmed"
+      ],
+      "accessibility": {
+        "legendRequired": true
+      },
+      "visualSystemVersion": 2,
+      "grammarFamily": "graph-v2"
+    },
+    {
+      "name": "Timeline Entry",
+      "variants": [
+        "event",
+        "source",
+        "decision",
+        "community"
+      ],
+      "states": [
+        "default",
+        "flagged"
+      ],
+      "parts": [
+        "timestamp",
+        "title",
+        "description",
+        "source",
+        "status"
+      ]
+    },
+    {
+      "name": "Legal Status",
+      "variants": [
+        "permitted",
+        "restricted",
+        "prohibited",
+        "disputed",
+        "unresolved"
+      ],
+      "parts": [
+        "status",
+        "jurisdiction",
+        "basis",
+        "review-state"
+      ],
+      "rule": "Legal status must distinguish source law from MoonWitness interpretation/review."
+    },
+    {
+      "name": "AWS Boundary",
+      "parts": [
+        "boundary-line",
+        "label",
+        "legal-state"
+      ],
+      "rule": "Crimson boundary is semantic; do not use as generic decorative divider."
+    },
+    {
+      "name": "Discussion Item",
+      "variants": [
+        "comment",
+        "question",
+        "community-note",
+        "moderator-note"
+      ],
+      "states": [
+        "default",
+        "edited",
+        "reported",
+        "hidden"
+      ],
+      "parts": [
+        "author",
+        "role",
+        "body",
+        "timestamp",
+        "replies",
+        "actions",
+        "moderation-state"
+      ]
+    },
+    {
+      "name": "Submission Card",
+      "states": [
+        "unverified",
+        "in-review",
+        "verified",
+        "rejected",
+        "needs-context"
+      ],
+      "parts": [
+        "submitter",
+        "evidence",
+        "source",
+        "verification-state",
+        "reviewer",
+        "review-actions"
+      ]
+    },
+    {
+      "name": "Notification Item",
+      "variants": [
+        "case-update",
+        "reply",
+        "review",
+        "system"
+      ],
+      "states": [
+        "unread",
+        "read"
+      ]
+    },
+    {
+      "name": "Repository Health Row",
+      "states": [
+        "online",
+        "degraded",
+        "offline",
+        "syncing"
+      ],
+      "parts": [
+        "repo",
+        "status",
+        "commit",
+        "schema",
+        "records",
+        "queue",
+        "errors",
+        "last-sync",
+        "action"
+      ]
+    },
+    {
+      "name": "Audit Event Row",
+      "parts": [
+        "timestamp",
+        "actor",
+        "action",
+        "resource",
+        "result",
+        "trace-id"
+      ],
+      "surface": [
+        "platform"
+      ]
+    },
+    {
+      "name": "Metric Tile",
+      "variants": [
+        "neutral",
+        "good",
+        "warning",
+        "critical"
+      ],
+      "surface": [
+        "platform"
+      ],
+      "parts": [
+        "label",
+        "value",
+        "delta",
+        "context"
+      ]
+    },
+    {
+      "name": "Textual Hierarchy Trace",
+      "surface": [
+        "web",
+        "platform"
+      ],
+      "variants": [
+        "compact",
+        "detailed"
+      ],
+      "states": [
+        "complete",
+        "partial",
+        "missing"
+      ],
+      "parts": [
+        "work",
+        "expression",
+        "edition",
+        "artifact",
+        "passage",
+        "content"
+      ],
+      "accessibility": {
+        "orderedTextEquivalentRequired": true,
+        "keyboardNavigation": false
+      },
+      "rule": "Each level is a distinct identity. Translation or edition must never be rendered as the canonical work."
+    },
+    {
+      "name": "Parallel Text Lanes",
+      "surface": [
+        "web",
+        "platform"
+      ],
+      "variants": [
+        "source-first",
+        "comparison"
+      ],
+      "states": [
+        "available",
+        "partial",
+        "unavailable"
+      ],
+      "parts": [
+        "language",
+        "script",
+        "representation",
+        "exact-text",
+        "content-id",
+        "artifact",
+        "provenance"
+      ],
+      "accessibility": {
+        "langAttributeRequired": true,
+        "directionMetadataRequired": true
+      },
+      "rule": "Missing content is rendered as unavailable and is never synthesized."
+    },
+    {
+      "name": "Source Rights Summary",
+      "surface": [
+        "web",
+        "platform"
+      ],
+      "variants": [
+        "dataset",
+        "artifact"
+      ],
+      "states": [
+        "declared",
+        "partial",
+        "unknown",
+        "restricted"
+      ],
+      "parts": [
+        "dataset-id",
+        "artifact-id",
+        "revision",
+        "sha256",
+        "rights-status",
+        "license-expression",
+        "availability"
+      ],
+      "rule": "Corpus presence does not establish redistribution rights."
+    },
+    {
+      "name": "Textual Relation Trace",
+      "surface": [
+        "web",
+        "platform"
+      ],
+      "variants": [
+        "alignment",
+        "variant",
+        "translation",
+        "evidence"
+      ],
+      "states": [
+        "asserted",
+        "candidate",
+        "unresolved"
+      ],
+      "parts": [
+        "subject",
+        "relation",
+        "object",
+        "method",
+        "evidence",
+        "provenance",
+        "review-state"
+      ],
+      "accessibility": {
+        "textEquivalentRequired": true
+      },
+      "rule": "Similarity, alignment, translation and identity are distinct relation types."
+    },
+    {
+      "name": "ROCKSOUL Intervention Overlay",
+      "variants": [
+        "annotation",
+        "tape",
+        "xerox",
+        "redaction",
+        "film-scratch"
+      ],
+      "surface": [
+        "editorial",
+        "archive",
+        "cinematic",
+        "community"
+      ],
+      "visualSystemVersion": 2
+    },
+    {
+      "name": "Surface Personality Frame",
+      "variants": [
+        "operator",
+        "forensic",
+        "editorial",
+        "archive",
+        "cinematic",
+        "community"
+      ],
+      "visualSystemVersion": 2
+    }
+  ],
+  "visualSystemVersion": 2
+}

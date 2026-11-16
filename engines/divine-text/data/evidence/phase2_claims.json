@@ -1,0 +1,78 @@
+{
+  "claims": [
+    {
+      "claim_id": "QURAN-001",
+      "claim": "Within the Qur'an's own source framework, the Qur'an is presented as revelation from Allah.",
+      "subject": "Al-Qur'an",
+      "tradition": "Islam",
+      "source_type": "QURAN",
+      "reference": "3:3; 15:9",
+      "source_level": "L6",
+      "evidence_items": ["The Qur'an explicitly describes Allah as sending down the Book/Qur'an."],
+      "contrary_evidence": [],
+      "scores": {
+        "source_quality": null,
+        "transmission": null,
+        "proximity": null,
+        "corroboration": null,
+        "interpretation_gap": null
+      },
+      "score_status": "pending",
+      "total": null,
+      "confidence": null,
+      "notes": "The revelation claim and the historical/textual preservation question are distinct."
+    },
+    {
+      "claim_id": "QURAN-TX-001",
+      "claim": "Very early Qur'anic manuscript witnesses exist and are available for scholarly study.",
+      "subject": "Qur'an manuscript tradition",
+      "tradition": "Islam",
+      "source_type": "MANUSCRIPT",
+      "reference": "Corpus Coranicum; Birmingham Qur'an manuscript",
+      "source_level": "L3",
+      "evidence_items": [
+        "Corpus Coranicum catalogs a large body of Qur'anic manuscript material.",
+        "University of Birmingham reports a parchment radiocarbon range of 568–645 CE at 95.4% probability for the Birmingham Qur'an parchment."
+      ],
+      "contrary_evidence": [
+        "Radiocarbon dates the parchment, not the exact moment ink was applied."
+      ],
+      "scores": {
+        "source_quality": null,
+        "transmission": null,
+        "proximity": null,
+        "corroboration": null,
+        "interpretation_gap": null
+      },
+      "score_status": "pending",
+      "total": null,
+      "confidence": null,
+      "notes": "Do not convert manuscript age directly into proof of divine authorship."
+    },
+    {
+      "claim_id": "HADITH-001",
+      "claim": "Hadith reports are analyzed through both their matn and isnad, and classical Muslim hadith criticism explicitly evaluates transmitters and chains.",
+      "subject": "Hadith methodology",
+      "tradition": "Islam",
+      "source_type": "HADITH",
+      "reference": "Sahih Muslim, Introduction 26 and related chapters",
+      "source_level": "L4",
+      "evidence_items": [
+        "Sahih Muslim's introduction discusses isnad as part of religious transmission and stresses transmission from trustworthy narrators.",
+        "The introduction also records explicit concern with narrator defects and criticism."
+      ],
+      "contrary_evidence": [],
+      "scores": {
+        "source_quality": null,
+        "transmission": null,
+        "proximity": null,
+        "corroboration": null,
+        "interpretation_gap": null
+      },
+      "score_status": "pending",
+      "total": null,
+      "confidence": null,
+      "notes": "This claim concerns the existence of a classical verification methodology, not the authenticity of every individual hadith."
+    }
+  ]
+}

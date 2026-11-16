@@ -1,0 +1,14 @@
+{
+  "version": "0",
+  "stability": "alpha-entrypoints",
+  "packages": {
+    "allah-crayon-kernel": ["."],
+    "allah-crayon-physics": ["."],
+    "allah-crayon-snapshot": ["."],
+    "allah-crayon-rir": ["."],
+    "allah-crayon-inspector": ["."],
+    "allah-crayon-agent": ["."],
+    "allah-crayon-voice": ["."],
+    "allah-crayon-react": [".", "./safe", "./styles.css"]
+  }
+}

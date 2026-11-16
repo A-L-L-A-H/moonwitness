@@ -1,0 +1,14 @@
+{
+  "envelopeVersion": "0",
+  "kind": "rir",
+  "semanticVersion": "0",
+  "payload": {
+    "version": "0",
+    "situationId": "situation:compatibility",
+    "root": "field:root",
+    "explanation": ["compatibility fixture"],
+    "nodes": [
+      { "id": "field:root", "kind": "field", "children": [] }
+    ]
+  }
+}

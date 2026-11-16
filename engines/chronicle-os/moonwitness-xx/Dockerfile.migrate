@@ -1,0 +1,10 @@
+FROM node:26-bookworm-slim
+WORKDIR /app
+
+RUN npm install --global pnpm@12.19.0
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN chown -R node:node /app
+USER node
+
+CMD ["./packages/database/node_modules/.bin/mikro-orm", "migration:up", "--config", "./packages/database/mikro-orm.config.js"]

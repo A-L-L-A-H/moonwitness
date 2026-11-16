@@ -1,0 +1,26 @@
+version: 1
+status: locked
+principals:
+  user:
+    authentication: external_identity_provider_or_approved_authentication
+    session: short_lived_access_plus_refresh_or_platform_equivalent
+  service:
+    authentication: workload_identity_or_signed_credential
+  worker:
+    authentication: workload_identity
+  agent:
+    authentication: delegated_identity_with_explicit_scope
+session:
+  access_token:
+    max_lifetime: policy_defined
+    audience_required: true
+    issuer_required: true
+  refresh:
+    rotation: required_when_supported
+    revocation: required
+rules:
+  - authentication_is_separate_from_authorization
+  - tokens_are_not_logged
+  - credentials_are_scoped_to_minimum_required_resources
+  - service_to_service_identity_is_explicit
+  - anonymous_access_is_explicitly_allowed_or_denied_per_operation

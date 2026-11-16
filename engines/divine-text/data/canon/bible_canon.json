@@ -1,0 +1,232 @@
+{
+  "project_note": "Canonical structure is represented as a research model, not a single universal canon claim.",
+  "sections": [
+    {
+      "name": "Old Testament",
+      "books": [
+        {
+          "name": "Genesis",
+          "category": "Torah/Pentateuch"
+        },
+        {
+          "name": "Exodus",
+          "category": "Torah/Pentateuch"
+        },
+        {
+          "name": "Leviticus",
+          "category": "Torah/Pentateuch"
+        },
+        {
+          "name": "Numbers",
+          "category": "Torah/Pentateuch"
+        },
+        {
+          "name": "Deuteronomy",
+          "category": "Torah/Pentateuch"
+        },
+        {
+          "name": "Joshua",
+          "category": "Historical"
+        },
+        {
+          "name": "Judges",
+          "category": "Historical"
+        },
+        {
+          "name": "Ruth",
+          "category": "Historical"
+        },
+        {
+          "name": "Samuel",
+          "category": "Historical"
+        },
+        {
+          "name": "Kings",
+          "category": "Historical"
+        },
+        {
+          "name": "Chronicles",
+          "category": "Historical"
+        },
+        {
+          "name": "Ezra-Nehemiah",
+          "category": "Historical"
+        },
+        {
+          "name": "Esther",
+          "category": "Historical"
+        },
+        {
+          "name": "Job",
+          "category": "Wisdom/Poetry"
+        },
+        {
+          "name": "Psalms",
+          "category": "Wisdom/Poetry"
+        },
+        {
+          "name": "Proverbs",
+          "category": "Wisdom/Poetry"
+        },
+        {
+          "name": "Ecclesiastes",
+          "category": "Wisdom/Poetry"
+        },
+        {
+          "name": "Song of Songs",
+          "category": "Wisdom/Poetry"
+        },
+        {
+          "name": "Isaiah",
+          "category": "Prophets"
+        },
+        {
+          "name": "Jeremiah",
+          "category": "Prophets"
+        },
+        {
+          "name": "Ezekiel",
+          "category": "Prophets"
+        },
+        {
+          "name": "Daniel",
+          "category": "Prophets/Apocalyptic"
+        },
+        {
+          "name": "The Twelve",
+          "category": "Prophets"
+        }
+      ]
+    },
+    {
+      "name": "New Testament",
+      "books": [
+        {
+          "name": "Matthew",
+          "category": "Gospel"
+        },
+        {
+          "name": "Mark",
+          "category": "Gospel"
+        },
+        {
+          "name": "Luke",
+          "category": "Gospel"
+        },
+        {
+          "name": "John",
+          "category": "Gospel"
+        },
+        {
+          "name": "Acts",
+          "category": "Narrative"
+        },
+        {
+          "name": "Romans",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "1 Corinthians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "2 Corinthians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "Galatians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "Ephesians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "Philippians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "Colossians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "1 Thessalonians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "2 Thessalonians",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "1 Timothy",
+          "category": "Pastoral Letter"
+        },
+        {
+          "name": "2 Timothy",
+          "category": "Pastoral Letter"
+        },
+        {
+          "name": "Titus",
+          "category": "Pastoral Letter"
+        },
+        {
+          "name": "Philemon",
+          "category": "Pauline Letter"
+        },
+        {
+          "name": "Hebrews",
+          "category": "General/Anonymous"
+        },
+        {
+          "name": "James",
+          "category": "General Letter"
+        },
+        {
+          "name": "1 Peter",
+          "category": "General Letter"
+        },
+        {
+          "name": "2 Peter",
+          "category": "General Letter"
+        },
+        {
+          "name": "1 John",
+          "category": "General Letter"
+        },
+        {
+          "name": "2 John",
+          "category": "General Letter"
+        },
+        {
+          "name": "3 John",
+          "category": "General Letter"
+        },
+        {
+          "name": "Jude",
+          "category": "General Letter"
+        },
+        {
+          "name": "Revelation",
+          "category": "Apocalyptic"
+        }
+      ]
+    }
+  ],
+  "tradition_profiles": {
+    "protestant": {
+      "total_books": 66,
+      "old_testament_books": 39,
+      "new_testament_books": 27
+    },
+    "catholic": {
+      "total_books": 73,
+      "old_testament_books": 46,
+      "new_testament_books": 27
+    },
+    "orthodox": {
+      "total_books": null,
+      "old_testament_books": "varies_by_jurisdiction",
+      "new_testament_books": 27
+    }
+  }
+}

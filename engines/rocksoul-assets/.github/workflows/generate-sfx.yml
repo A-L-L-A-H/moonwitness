@@ -1,0 +1,43 @@
+name: Generate SFX Pack
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "tools/assets/generate-sfx.py"
+      - "moonwitness/sfx/sounds.json"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Verify ffmpeg
+        run: ffmpeg -version | head -1
+      - name: Generate WAV + OGG
+        run: python tools/assets/generate-sfx.py
+      - name: Commit generated SFX
+        run: |
+          git config user.name "moonwitness-assets-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add moonwitness/sfx/generated
+          if git diff --cached --quiet; then
+            echo "No SFX changes."
+          else
+            git commit -m "build(sfx): generate product sound pack"
+            for attempt in 1 2 3; do
+              git pull --rebase origin "$GITHUB_REF_NAME"
+              if git push; then break; fi
+              test "$attempt" -lt 3
+              sleep 2
+            done
+          fi

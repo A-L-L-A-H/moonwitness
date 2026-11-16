@@ -17,6 +17,9 @@ const badgeVariants = cva(
         pink: "border-[var(--pink)] bg-[var(--pink)] text-[var(--ink)]",
         yellow: "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]",
         blue: "border-[var(--blue)] bg-[var(--blue)] text-[var(--ink)]",
+        dna: "mw-dna-badge rounded-none border-[var(--dna-border,#d6b46c)] bg-[var(--dna-surface-elevated,#0e1322)] text-[var(--dna-focus,#fff4d2)]",
+        imperium:
+          "rounded-none border-[#d6b46c]/55 bg-[#0e1322] font-mono tracking-wider text-[#f5dfa6]",
       },
     },
     defaultVariants: {

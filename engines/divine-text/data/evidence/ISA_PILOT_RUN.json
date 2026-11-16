@@ -1,0 +1,42 @@
+{
+  "run_id": "ISA-PILOT-001",
+  "theme": "Identity and status of Isa/Jesus",
+  "scope": "Quranic claims cross-referenced with selected canonical Gospel passage and textual-status notes",
+  "claims": [
+    {
+      "claim_id": "ISA-001",
+      "statement": "The Quran explicitly states that Allah gave Isa the Injil.",
+      "source": "QURAN",
+      "reference": "5:46",
+      "source_level": "L6",
+      "status": "QURAN_EXPLICIT",
+      "web_source": "https://quran.com/5/46",
+      "note": "This establishes the Quranic revelation claim; it does not identify Matthew/Mark/Luke/John as that Injil."
+    },
+    {
+      "claim_id": "ISA-002",
+      "statement": "The Quran explicitly describes Jesus son of Mary as a messenger of Allah.",
+      "source": "QURAN",
+      "reference": "4:171",
+      "source_level": "L6",
+      "status": "QURAN_EXPLICIT",
+      "web_source": "https://quran.com/4/171",
+      "note": "The verse also warns against saying 'Three' and affirms one God."
+    },
+    {
+      "claim_id": "ISA-003",
+      "statement": "Matthew 24:1-2 records a prediction attributed to Jesus concerning the temple's destruction.",
+      "source": "GOSPEL",
+      "reference": "Matthew 24:1-2",
+      "source_level": "L3",
+      "status": "TEXTUAL_WITNESS",
+      "web_source": "https://www.biblegateway.com/passage/?search=Matt.24",
+      "note": "This is a Gospel text attributing the saying to Jesus; it is not by itself proof that the passage is the original Injil given to Isa."
+    }
+  ],
+  "comparison_rules": [
+    "Do not equate the Quranic Injil with a modern Gospel without an identification argument.",
+    "Do not treat a Gospel passage as a Quranic revelation claim.",
+    "Keep theological claims separate from manuscript/history claims."
+  ]
+}

@@ -1,0 +1,157 @@
+export const metadata = {
+  title: "Deploy Ruby on Rails With Managed Postgres",
+  description:
+    "Deploy Ruby on Rails with Puma, managed PostgreSQL, asset precompilation, and migrations on your own VPS. Self-hosted alternative to Heroku for Rails.",
+  alternates: {
+    canonical: "/docs/deploy-rails",
+  },
+  openGraph: {
+    title: "Deploy Ruby on Rails With Managed Postgres",
+    description: "Deploy Ruby on Rails with Puma, managed PostgreSQL, asset precompilation, and migrations on your own VPS. Self-hosted alternative to Heroku for Rails.",
+    images: [{ url: "/og/docs/deploy-rails.png", width: 1200, height: 630, alt: "Deploy Ruby on Rails" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Ruby on Rails With Managed Postgres",
+    description: "Deploy Ruby on Rails with Puma, managed PostgreSQL, asset precompilation, and migrations on your own VPS. Self-hosted alternative to Heroku for Rails.",
+    images: ["/og/docs/deploy-rails.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Run migrations', id: 'migrations' },
+  { title: 'Managed services', id: 'managed-services' },
+  { title: 'Background jobs with Sidekiq', id: 'background-jobs-with-sidekiq' },
+  { title: 'Action Cable', id: 'action-cable' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+];
+
+# Deploy Ruby on Rails on Your Own Server
+
+**Push your Rails app and Temps takes it from there** — installing gems, precompiling assets, and starting `rails server` with automatic HTTPS. You run database migrations yourself as a one-off step after each deploy (see below). {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up --preset nixpacks-ruby" },
+]} />
+
+Temps doesn't detect Ruby projects from a `Gemfile`, so choose the **Autopack (Ruby)** preset (`nixpacks-ruby`), as above or under **Project → Settings → Build & deploy → Build → Framework**.
+
+With that preset, the build runs `bundle install`, precompiles assets, and starts your app with `bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000}`. The Ruby version comes from `.ruby-version` or the `ruby` line in your `Gemfile`, and defaults to 3.3. Temps sets `RAILS_ENV=production`, `RACK_ENV=production` and `RAILS_LOG_TO_STDOUT=1` for you.
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Install | `bundle install` |
+| Assets | `bundle exec rails assets:precompile`, when the app has `app/assets` or `app/javascript` |
+| App server | `rails server` (Puma, Rails' default server); a `Procfile` `web:` line replaces the command |
+| HTTPS | Let's Encrypt, auto-renewed |
+| Port | `PORT` env var injected, defaults to 3000 |
+| Action Cable | WebSocket support via reverse proxy |
+
+Apps generated before Rails 7.1 serve the precompiled assets in `public/` only when `RAILS_SERVE_STATIC_FILES` is set. Recent Temps versions set it for Rails apps; on older versions, set it yourself:
+
+<CliCommands commands={[
+  { args: "environments vars set RAILS_SERVE_STATIC_FILES 1 -e production" },
+]} />
+
+Database migrations are **not** run automatically — see [Run migrations](#migrations) below.
+
+---
+
+## Run migrations {{ anchor: true, id: 'migrations' }}
+
+Temps does not have a remote "run one command" CLI action yet, so migrations are run directly against the container over SSH. Find the container name, then run the migration:
+
+```bash
+bunx @temps-sdk/cli projects show -p my-rails-app --json     # note the numeric "id"
+bunx @temps-sdk/cli containers list -p <project-id>          # note the container_name
+ssh your-server 'docker exec <container_name> bundle exec rails db:migrate'
+```
+
+Run this manually (or from your CI/CD pipeline right after the deploy step) every time a deploy includes a schema change.
+
+On the first deploy the tables don't exist yet. If your app's `/` needs the database, the deploy fails its health check before you can migrate, so point the health check at a path that doesn't, such as Rails' built-in `/up` (Rails 7.1 and later), with `health.path` in `.temps.yaml` (see [Health checks](#health-checks)).
+
+Do not add `bundle exec rails db:migrate` to your Dockerfile's `CMD` or start command — with rolling deploys, restarts, or multiple replicas, the container start command can run more than once, and concurrent migration runs against the same database can conflict or corrupt data.
+
+---
+
+## Managed services {{ anchor: true, id: 'managed-services' }}
+
+Create PostgreSQL and Redis under **Databases → Create database**, then link them from your project's **Databases** page. Temps injects `POSTGRES_URL` and `REDIS_URL`. It doesn't inject `DATABASE_URL`, so point Rails at `POSTGRES_URL` in `config/database.yml`:
+
+```yaml
+production:
+  adapter: postgresql
+  url: <%= ENV["POSTGRES_URL"] %>
+```
+
+Set a secret key base for production:
+
+<CliCommands commands={[
+  { args: "environments vars set SECRET_KEY_BASE \"$(openssl rand -hex 64)\" -e production" },
+]} />
+
+---
+
+## Background jobs with Sidekiq {{ anchor: true, id: 'background-jobs-with-sidekiq' }}
+
+Temps runs only the web process. In a `Procfile`, only the `web:` line is used, as the start command; other process types such as `worker: bundle exec sidekiq` are ignored, so Temps doesn't run Sidekiq for you. For example, this `Procfile` starts Puma with your own config:
+
+```text
+web: bundle exec puma -C config/puma.rb
+```
+
+---
+
+## Action Cable {{ anchor: true, id: 'action-cable' }}
+
+Action Cable WebSockets work out of the box. Set `config.action_cable.allowed_request_origins` to include your domain:
+
+```ruby
+# config/environments/production.rb
+config.action_cable.allowed_request_origins = ["https://yourdomain.com"]
+```
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Deploy with a database
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+  <Button href="/docs/ci-cd-setup" variant="text" arrow="right">
+    Set up CI/CD
+  </Button>
+</div>

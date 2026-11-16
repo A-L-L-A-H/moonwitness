@@ -1,0 +1,52 @@
+version: 1
+status: active
+scope: W0-11 visual precondition
+canonical_ui_owner: ArsyBelovedLabs/moonwitness-frontend-platform
+primary_public_web: ArsyBelovedLabs/moonwitness-wheremythfadetolegend
+design_master: figma_when_verified
+showcase_mirror: ArsyBelovedLabs/moonwitness-design-system
+requirements:
+  component_gate:
+    - semantic_tokens
+    - reusable_primitives
+    - canonical_components
+    - domain_instruments
+    - page_templates
+    - responsive_rules
+    - canonical_icons_27
+  public_surfaces:
+    - MYTH-01
+    - MYTH-02
+    - MYTH-04
+    - MYTH-05
+    - MYTH-06
+    - MYTH-08
+    - MYTH-09
+    - MYTH-11
+    - MYTH-13
+  detail_surfaces:
+    - MYTH-03
+    - MYTH-10
+    - MYTH-12
+    - MYTH-14
+    - MYTH-15
+  consistency:
+    one_screen_per_golden_image: true
+    generated_images_are_authoritative: false
+    preserve_product_navigation: true
+    preserve_frozen_baseline_distinction: true
+    preserve_exact_causality_guardrail: true
+    no_local_icon_forks: true
+    status_not_color_only: true
+  responsive_widths: [1440, 1280, 1024, 768, 430, 390, 360]
+closeout:
+  w0_11_requires:
+    - VISUAL-01
+    - VISUAL-02
+    - VISUAL-03
+    - UI-DIST-01
+    - runtime_smoke
+    - green_ci
+    - deployment_evidence
+  global_stage2_exception:
+    protected_branch_evidence_required: true

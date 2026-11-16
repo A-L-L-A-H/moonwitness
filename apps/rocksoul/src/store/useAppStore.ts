@@ -5,10 +5,12 @@ import type {
   CreateIssueArgs,
   CreateMilestoneArgs,
   CreateProjectArgs,
+  GitView,
   Issue,
   IssueStatus,
   Milestone,
   MilestoneStatus,
+  MonitorSnapshot,
   Project,
   Repository,
   UpdateIssueArgs,
@@ -17,9 +19,14 @@ import type {
 } from "../lib/contracts";
 
 export interface AppState {
-  page: "deck" | "pit" | "git" | "war-room" | "noise";
+  page: "deck" | "monitor" | "pit" | "git" | "war-room" | "noise";
   loading: boolean;
   error: string;
+  monitor: MonitorSnapshot | null;
+  monitorLoading: boolean;
+  monitorError: string;
+  autoMonitor: boolean;
+  gitPresetView: GitView | null;
   stats: { active: number; blocked: number; completed: number };
   issues: Issue[];
   repositories: Repository[];
@@ -31,7 +38,11 @@ export interface AppState {
   setPage: (page: AppState["page"]) => void;
   setSelectedRepository: (selectedRepository: string) => void;
   setProjectFilter: (projectFilter: string) => void;
+  setAutoMonitor: (autoMonitor: boolean) => void;
+  setGitPresetView: (gitPresetView: GitView | null) => void;
   refresh: () => Promise<void>;
+  refreshMonitor: () => Promise<void>;
+  openEcosystemUrl: (url: string) => Promise<void>;
   createIssue: (payload: CreateIssueArgs) => Promise<void>;
   editIssue: (payload: UpdateIssueArgs) => Promise<void>;
   deleteIssue: (issueId: string) => Promise<void>;
@@ -50,6 +61,11 @@ export const useAppStore = create<AppState>((setState, getState) => ({
   page: "deck",
   loading: false,
   error: "",
+  monitor: null,
+  monitorLoading: false,
+  monitorError: "",
+  autoMonitor: true,
+  gitPresetView: null,
   stats: { active: 0, blocked: 0, completed: 0 },
   issues: [],
   repositories: [],
@@ -61,7 +77,26 @@ export const useAppStore = create<AppState>((setState, getState) => ({
   setPage: (page) => setState({ page }),
   setSelectedRepository: (selectedRepository) => setState({ selectedRepository }),
   setProjectFilter: (projectFilter) => setState({ projectFilter }),
+  setAutoMonitor: (autoMonitor) => setState({ autoMonitor }),
+  setGitPresetView: (gitPresetView) => setState({ gitPresetView }),
+  refreshMonitor: async () => {
+    if (getState().monitorLoading) return;
+    setState({ monitorLoading: true, monitorError: "" });
+    try {
+      const monitor = await call("get_monitor_snapshot");
+      setState({ monitor, monitorLoading: false });
+    } catch (error) {
+      setState({
+        monitorLoading: false,
+        monitorError: error instanceof Error ? error.message : String(error),
+      });
+    }
+  },
+  openEcosystemUrl: async (url) => {
+    await call("open_ecosystem_url", { url });
+  },
   refresh: async () => {
+    if (getState().loading) return;
     setState({ loading: true, error: "" });
     try {
       const dashboard = await call("get_dashboard");
@@ -128,5 +163,9 @@ export const useAppStore = create<AppState>((setState, getState) => ({
     await call("delete_milestone", { milestoneId });
     await getState().refresh();
   },
-  addRepository: async (path) => await call("add_repository", { path }),
+  addRepository: async (path) => {
+    const repository = await call("add_repository", { path });
+    await getState().refresh();
+    return repository;
+  },
 }));

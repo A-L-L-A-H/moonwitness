@@ -1,0 +1,16 @@
+{
+  "version": "6.3.0",
+  "local_only": true,
+  "runtime": "Node.js + React/Vite UI source",
+  "commands": {
+    "start_ui": "npm run start:all",
+    "download_all": "npm run corpus:download:all",
+    "verify_all": "npm run corpus:verify",
+    "full_audit": "npm run audit:full",
+    "autopilot": "npm run autopilot"
+  },
+  "corpus_families": ["quran", "hadith", "torah", "psalms", "gospels"],
+  "raw_preserved": true,
+  "source_texts_never_modified": true,
+  "pending_is_not_zero": true
+}

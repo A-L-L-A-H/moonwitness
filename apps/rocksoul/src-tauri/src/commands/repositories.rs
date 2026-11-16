@@ -258,20 +258,106 @@ pub fn git_snapshot(
     }
     let branch = git_output(root, &["branch", "--show-current"]).unwrap_or(default_branch);
     let view = view.unwrap_or_else(|| "status".into());
-    let args: &[&str] = match view.as_str() {
-        "status" => &["status", "--short", "--branch"],
-        "log" => &["log", "-8", "--oneline", "--decorate"],
-        "diff" => &["diff", "--stat"],
-        "branches" => &["branch", "--all", "--no-color"],
-        _ => return Err("Unsupported Git inspection view.".into()),
+    let output = if view == "patch" {
+        let diff = git_output(root, &["diff", "--no-color", "HEAD"])
+            .or_else(|_| git_output(root, &["diff", "--no-color"]))?;
+        super::monitor::truncate_utf8_patch(diff)
+    } else {
+        let args: &[&str] = match view.as_str() {
+            "status" => &["status", "--short", "--branch"],
+            "log" => &["log", "-8", "--oneline", "--decorate"],
+            "diff" => &["diff", "--stat"],
+            "branches" => &["branch", "--all", "--no-color"],
+            _ => return Err("Unsupported Git inspection view.".into()),
+        };
+        git_output(root, args)?
     };
-    let output = git_output(root, args)?;
     Ok(GitSnapshot {
         name,
         branch,
         view,
         output,
     })
+}
+
+fn find_monorepo_root(start: &Path) -> Option<PathBuf> {
+    let mut cursor = Some(start);
+    for _ in 0..8 {
+        let candidate = cursor?;
+        if candidate.join(".git").exists() && candidate.join("pnpm-workspace.yaml").is_file() {
+            return Some(candidate.to_path_buf());
+        }
+        cursor = candidate.parent();
+    }
+    None
+}
+
+fn auto_register_workspace_with_connection(
+    connection: &mut Connection,
+    candidates: &[PathBuf],
+) -> Result<bool, String> {
+    let existing_count: i64 = connection
+        .query_row("SELECT COUNT(*) FROM repositories", [], |row| row.get(0))
+        .map_err(|error| error.to_string())?;
+    if existing_count > 0 {
+        return Ok(false);
+    }
+
+    let Some(root_path) = candidates.iter().find_map(|path| find_monorepo_root(path)) else {
+        return Ok(false);
+    };
+    let canonical = root_path
+        .canonicalize()
+        .map_err(|error| error.to_string())?;
+    let name = canonical
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("moonwitness")
+        .to_string();
+    let branch =
+        git_output(&canonical, &["branch", "--show-current"]).unwrap_or_else(|_| "dev".into());
+    let remote_url = git_output(&canonical, &["remote", "get-url", "origin"]).unwrap_or_default();
+    let canonical_path = canonical.to_string_lossy().to_string();
+
+    let transaction = connection
+        .transaction_with_behavior(TransactionBehavior::Immediate)
+        .map_err(|error| error.to_string())?;
+    transaction
+        .execute(
+            "INSERT OR IGNORE INTO repositories (id, workspace_id, name, path, remote_url, default_branch) VALUES (?1, 'local', ?2, ?3, ?4, ?5)",
+            params![
+                Uuid::new_v4().to_string(),
+                name,
+                canonical_path,
+                remote_url,
+                if branch.is_empty() { "main" } else { &branch }
+            ],
+        )
+        .map_err(|error| error.to_string())?;
+    db::record_event(
+        &transaction,
+        "git",
+        &format!("Auto-connected workspace repository {}", name),
+        "{}",
+    )?;
+    transaction.commit().map_err(|error| error.to_string())?;
+    Ok(true)
+}
+
+pub fn ensure_default_workspace_repository(app: &AppHandle) -> Result<(), String> {
+    let mut connection = db::connect(app)?;
+    let mut candidates = Vec::new();
+    if let Ok(cwd) = std::env::current_dir() {
+        candidates.push(cwd);
+    }
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(parent) = exe.parent() {
+            candidates.push(parent.to_path_buf());
+        }
+    }
+    candidates.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")));
+    let _ = auto_register_workspace_with_connection(&mut connection, &candidates)?;
+    Ok(())
 }
 
 #[tauri::command]
@@ -404,7 +490,8 @@ fn execute_git_operation(
 #[cfg(test)]
 mod tests {
     use super::{
-        execute_git_operation, git_arguments, git_metadata_path, git_output, run_git, GitRunner,
+        auto_register_workspace_with_connection, execute_git_operation, git_arguments,
+        git_metadata_path, git_output, run_git, GitRunner,
     };
     use rusqlite::Connection;
     use std::{
@@ -940,5 +1027,40 @@ mod tests {
             git_output(&repository.0, &["status", "--porcelain"]).unwrap(),
             ""
         );
+    }
+
+    #[test]
+    fn auto_register_workspace_discovers_monorepo_only_when_empty() {
+        let repository = TemporaryRepository::new();
+        fs::write(
+            repository.0.join("pnpm-workspace.yaml"),
+            "packages:\n  - \"apps/*\"\n",
+        )
+        .expect("workspace marker should write");
+
+        let mut connection = Connection::open_in_memory().expect("test db should open");
+        connection
+            .execute_batch(include_str!("../../migrations/001_init.sql"))
+            .expect("schema should apply");
+        connection
+            .execute(
+                "INSERT INTO workspaces (id, name) VALUES ('local', 'Local')",
+                [],
+            )
+            .expect("workspace should insert");
+
+        let registered = auto_register_workspace_with_connection(
+            &mut connection,
+            std::slice::from_ref(&repository.0),
+        )
+        .expect("auto registration should succeed");
+        assert!(registered);
+
+        let second = auto_register_workspace_with_connection(
+            &mut connection,
+            std::slice::from_ref(&repository.0),
+        )
+        .expect("second pass should be idempotent");
+        assert!(!second);
     }
 }

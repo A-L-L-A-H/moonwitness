@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import "@moonwitness/ui/theme.css";
+@import "@moonwitness/ui/skins.css";
+@import "tw-animate-css";
+
+/* The observatory keeps its own rhythm; colour, type, radius and shape come from the skin. */
+.jizz-shell {
+  --mw-route-gap: clamp(3rem, 7vw, 6rem);
+}
+
+.jizz-records {
+  display: grid;
+  gap: var(--mw-card-padding);
+  min-width: 0;
+}
+
+.jizz-records__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--mw-card-padding);
+}
+
+/* Phenomena catalogue */
+.jizz-search-bar {
+  margin-bottom: var(--mw-card-padding);
+}
+
+.jizz-tag-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: var(--mw-card-padding);
+}
+
+.jizz-phenomenon-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jizz-phenomenon-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mw-surface-shadow);
+}
+
+.jizz-phenomenon-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Phenomenon detail */
+.jizz-phenomenon-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mw-card-padding);
+}
+
+.jizz-phenomenon-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.jizz-phenomenon-header__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.jizz-phenomenon-summary {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+.jizz-phenomenon-source {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.jizz-phenomenon-source [data-slot="link"] {
+  color: var(--mw-text);
+  text-decoration: underline;
+}
+
+/* Perspectives matrix */
+.jizz-perspectives-matrix,
+.jizz-signals-timeline {
+  margin-top: var(--mw-card-padding);
+}
+
+/* Signals timeline */
+.jizz-signals-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: var(--mw-card-padding);
+}
+
+.jizz-signal-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.jizz-signal-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jizz-signal-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--mw-surface-shadow);
+}
+
+.jizz-signal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.jizz-signal-metadata__pre {
+  background: var(--mw-surface-raised);
+  padding: 0.75rem;
+  border-radius: var(--mw-control-radius);
+  font-size: 0.875rem;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.jizz-phenomenon-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: var(--mw-card-padding);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .jizz-records__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .jizz-signals-controls {
+    gap: 0.75rem;
+  }
+
+  .jizz-phenomenon-header {
+    gap: 0.75rem;
+  }
+}

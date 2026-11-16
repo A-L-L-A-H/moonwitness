@@ -1,0 +1,201 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --lab-radius: 10px;
+}
+
+:root[data-theme="dark"] {
+  --lab-bg: #070a0f;
+  --lab-surface: #0d1218;
+  --lab-surface-elevated: #141b23;
+  --lab-text: #edf1f4;
+  --lab-muted: #94a0aa;
+  --lab-line: #2a343e;
+  --lab-line-soft: #1b242d;
+  --lab-accent: #cfa95c;
+  --lab-accent-strong: #e5bb62;
+  --lab-accent-soft: rgba(207, 169, 92, .12);
+  --lab-semantic: #57bdd0;
+  --lab-witness: #48b386;
+  --lab-warning: #d2a647;
+  --lab-danger: #d96861;
+  --lab-code-bg: #030609;
+  --lab-code-text: #dbe7ec;
+  --lab-grid: rgba(114, 149, 166, .07);
+  --lab-shadow: 0 24px 80px rgba(0, 0, 0, .26);
+  --crayon-background: #0d1218;
+  --crayon-surface: #111820;
+  --crayon-text: #edf1f4;
+  --crayon-muted: #94a0aa;
+  --crayon-line: #2a343e;
+  --crayon-line-strong: #5c6a74;
+  --crayon-accent: #cfa95c;
+  --crayon-positive: #48b386;
+  --crayon-unknown: #d2a647;
+  --crayon-danger: #d96861;
+}
+
+:root[data-theme="light"] {
+  --lab-bg: #f4f1e9;
+  --lab-surface: #fbfaf5;
+  --lab-surface-elevated: #ffffff;
+  --lab-text: #182028;
+  --lab-muted: #68717a;
+  --lab-line: #c8c3b7;
+  --lab-line-soft: #ded9ce;
+  --lab-accent: #aa7926;
+  --lab-accent-strong: #8e6017;
+  --lab-accent-soft: rgba(170, 121, 38, .09);
+  --lab-semantic: #3976b9;
+  --lab-witness: #247355;
+  --lab-warning: #9a6a1f;
+  --lab-danger: #b64d48;
+  --lab-code-bg: #171c22;
+  --lab-code-text: #edf1f4;
+  --lab-grid: rgba(70, 78, 85, .07);
+  --lab-shadow: 0 24px 72px rgba(71, 60, 37, .10);
+  --crayon-background: #fbfaf5;
+  --crayon-surface: #ffffff;
+  --crayon-text: #182028;
+  --crayon-muted: #68717a;
+  --crayon-line: #c8c3b7;
+  --crayon-line-strong: #77756d;
+  --crayon-accent: #aa7926;
+  --crayon-positive: #247355;
+  --crayon-unknown: #9a6a1f;
+  --crayon-danger: #b64d48;
+}
+
+* { box-sizing: border-box; }
+html { min-width: 320px; min-height: 100%; background: var(--lab-bg); }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: var(--lab-bg); color: var(--lab-text); }
+button, input, textarea, select { font: inherit; }
+button, select { color: inherit; }
+button:focus-visible, select:focus-visible, .crayon-trajectory:focus-visible { outline: 2px solid var(--lab-semantic); outline-offset: 3px; }
+
+.lab-shell {
+  min-height: 100vh;
+  padding: 28px;
+  color: var(--lab-text);
+  background:
+    radial-gradient(circle at 54% 17%, color-mix(in srgb, var(--lab-accent) 11%, transparent), transparent 31%),
+    radial-gradient(circle at 85% 52%, color-mix(in srgb, var(--lab-semantic) 8%, transparent), transparent 28%),
+    linear-gradient(90deg, var(--lab-grid) 1px, transparent 1px),
+    linear-gradient(var(--lab-grid) 1px, transparent 1px),
+    var(--lab-bg);
+  background-size: auto, auto, 30px 30px, 30px 30px, auto;
+  transition: background-color .18s ease, color .18s ease;
+}
+
+.lab-header,.scenario-rail,.orientation-strip,.lab-grid,.lab-footer { max-width: 1540px; margin-inline: auto; }
+.lab-header { display:flex; justify-content:space-between; gap:32px; align-items:end; padding:10px 0 26px; }
+.lab-header > div:first-child { max-width: 900px; }
+.lab-header__controls { min-width: 310px; display:grid; gap:18px; }
+.eyebrow,.crayon-kicker,.orientation-strip span,.theme-control>span { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--lab-muted); }
+.lab-header h1 { max-width:880px; margin:7px 0 0; font-size:clamp(34px,4.8vw,72px); line-height:.96; letter-spacing:-.055em; font-weight:580; text-wrap:balance; }
+
+.theme-control { display:grid; gap:8px; justify-items:end; }
+.theme-control>div { display:flex; gap:1px; padding:3px; border:1px solid var(--lab-line); border-radius:999px; background:var(--lab-surface); box-shadow:var(--lab-shadow); }
+.theme-control button { border:0; border-radius:999px; background:transparent; padding:7px 11px; font:9px ui-monospace,monospace; text-transform:uppercase; letter-spacing:.06em; cursor:pointer; color:var(--lab-muted); }
+.theme-control button.is-active { background:var(--lab-accent); color:var(--lab-bg); }
+
+.release-stamp { border-top:1px solid var(--lab-accent); padding-top:10px; display:grid; gap:4px; text-align:right; }
+.release-stamp span { font:10px ui-monospace,monospace; color:var(--lab-accent-strong); text-transform:uppercase; }
+.release-stamp strong { font-size:12px; font-weight:600; color:var(--lab-muted); }
+
+.orientation-strip { display:grid; grid-template-columns:repeat(5,1fr); border:1px solid var(--lab-line); border-radius:var(--lab-radius); overflow:hidden; background:color-mix(in srgb, var(--lab-surface) 88%, transparent); box-shadow:var(--lab-shadow); }
+.orientation-strip>div { min-height:96px; padding:17px 18px; display:grid; align-content:space-between; gap:16px; }
+.orientation-strip>div+div { border-left:1px solid var(--lab-line); }
+.orientation-strip strong { max-width:260px; font-size:14px; line-height:1.32; font-weight:580; }
+.orientation-strip>div:nth-child(2) strong { color:var(--lab-accent-strong); }
+.orientation-strip>div:nth-child(5) strong { color:var(--lab-witness); }
+
+.lab-grid { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(370px,.72fr); min-height:710px; margin-top:18px; border:1px solid var(--lab-line); border-radius:var(--lab-radius); background:color-mix(in srgb, var(--lab-surface) 90%, transparent); overflow:hidden; box-shadow:var(--lab-shadow); }
+.representation-zone { padding:28px 32px 34px; min-width:0; }
+.inspect-zone { border-left:1px solid var(--lab-line); padding:28px 28px 34px; overflow:hidden; background:color-mix(in srgb, var(--lab-surface-elevated) 82%, transparent); }
+.inspect-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+.inspect-heading h2 { margin:4px 0 0; font-size:24px; letter-spacing:-.03em; font-weight:580; }
+.inspect-switch { display:flex; flex-wrap:wrap; border-bottom:1px solid var(--lab-line); }
+.inspect-switch button { border:0; background:transparent; padding:7px 8px; font:9px ui-monospace,monospace; text-transform:uppercase; cursor:pointer; color:var(--lab-muted); opacity:.72; }
+.inspect-switch button.is-active { opacity:1; color:var(--lab-text); border-bottom:2px solid var(--lab-accent); }
+
+.microscope-controls { display:grid; gap:9px; margin:18px 0 4px; padding:14px; border:1px solid var(--lab-line); border-left:2px solid var(--lab-semantic); border-radius:7px; background:color-mix(in srgb,var(--lab-surface) 88%,transparent); }
+.microscope-controls label { display:grid; gap:8px; }
+.microscope-controls label>span,.microscope-controls>strong { font:9px ui-monospace,monospace; letter-spacing:.08em; text-transform:uppercase; color:var(--lab-semantic); }
+.microscope-controls small { color:var(--lab-muted); line-height:1.45; }
+.microscope-controls select { width:100%; min-width:0; padding:8px 10px; border:1px solid var(--lab-line); border-radius:6px; background:var(--lab-surface-elevated); }
+.microscope-controls button { justify-self:start; border:1px solid var(--lab-line); border-radius:6px; padding:7px 10px; background:var(--lab-surface-elevated); cursor:pointer; }
+
+.reason-stack { display:grid; gap:7px; padding:4px 0 0; }
+.reason-stack p { margin:0; max-width:58ch; font-size:11px; line-height:1.48; color:var(--lab-muted); padding-left:12px; border-left:1px solid var(--lab-line); }
+.reason-stack p:last-child { border-left-color:var(--lab-accent); color:var(--lab-text); }
+.inspect-data { margin:20px 0 0; max-height:420px; overflow:auto; background:var(--lab-code-bg); color:var(--lab-code-text); padding:16px; font-size:9px; line-height:1.58; border:1px solid var(--lab-line); border-radius:7px; }
+
+.lab-footer { display:flex; justify-content:space-between; gap:18px; padding:18px 2px 4px; font:9px ui-monospace,monospace; letter-spacing:.04em; text-transform:uppercase; color:var(--lab-muted); }
+.lab-footer span:last-child { color:var(--lab-accent-strong); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-shell,
+  .lab-shell *,
+  .lab-shell *::before,
+  .lab-shell *::after {
+    scroll-behavior:auto !important;
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --lab-line: currentColor;
+    --lab-line-soft: currentColor;
+  }
+  .orientation-strip,
+  .lab-grid,
+  .theme-control>div,
+  .microscope-controls,
+  .inspect-data {
+    border-width:2px;
+  }
+  .eyebrow,
+  .orientation-strip span,
+  .theme-control>span,
+  .release-stamp span {
+    text-decoration:underline;
+    text-decoration-thickness:1px;
+  }
+}
+
+@media (forced-colors: active) {
+  .lab-shell,
+  .orientation-strip,
+  .lab-grid,
+  .inspect-zone,
+  .theme-control>div,
+  .microscope-controls,
+  .inspect-data,
+  .theme-control button,
+  .inspect-switch button,
+  .microscope-controls button,
+  .microscope-controls select {
+    forced-color-adjust:auto;
+    background:Canvas;
+    color:CanvasText;
+    box-shadow:none;
+  }
+  button:focus-visible,
+  select:focus-visible,
+  .crayon-trajectory:focus-visible {
+    outline:3px solid Highlight;
+  }
+  .theme-control button.is-active,
+  .inspect-switch button.is-active {
+    background:Highlight;
+    color:HighlightText;
+  }
+}
+
+@media (max-width:1180px) { .orientation-strip{grid-template-columns:repeat(3,1fr)}.orientation-strip>div:nth-child(4){border-left:0;border-top:1px solid var(--lab-line)}.orientation-strip>div:nth-child(5){border-top:1px solid var(--lab-line)}.lab-grid{grid-template-columns:1fr}.inspect-zone{border-left:0;border-top:1px solid var(--lab-line)} }
+@media (max-width:760px) { .lab-shell{padding:16px}.lab-header{align-items:start;flex-direction:column}.lab-header__controls{width:100%;min-width:0}.theme-control{justify-items:start}.release-stamp{text-align:left;width:100%}.orientation-strip{grid-template-columns:1fr}.orientation-strip>div+div,.orientation-strip>div:nth-child(4),.orientation-strip>div:nth-child(5){border-left:0;border-top:1px solid var(--lab-line)}.representation-zone,.inspect-zone{padding:22px 18px}.inspect-heading{flex-direction:column}.lab-footer{flex-direction:column} }

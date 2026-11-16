@@ -1,0 +1,59 @@
+version: 1
+organization: ArsyBelovedLabs
+repositories:
+  - name: moonwitness-core
+    role: shared-contracts
+    canonical_owner: core
+  - name: moonwitness-corpus
+    role: knowledge
+    canonical_owner: corpus
+  - name: moonwitness-cosmic
+    role: intelligence-engine
+    canonical_owner: cosmic
+  - name: moonwitness-crayon
+    role: methodology-engine
+    canonical_owner: crayon
+  - name: moonwitness-prophetic
+    role: specialized-domain
+    canonical_owner: prophetic
+  - name: moonwitness-runtime
+    role: workflow-runtime
+    canonical_owner: runtime
+  - name: moonwitness-worker
+    role: async-execution
+    canonical_owner: worker
+  - name: moonwitness-api
+    role: canonical-network-boundary
+    canonical_owner: api
+  - name: moonwitness-sdk
+    role: developer-interface
+    canonical_owner: sdk
+  - name: moonwitness-frontend-platform
+    role: portable-ui-platform
+    canonical_owner: frontend-platform
+  - name: moonwitness-wheremythfadetolegend
+    role: primary-public-web
+    canonical_owner: web
+    status: active
+  - name: moonwitness-web
+    role: legacy-public-web
+    canonical_owner: web
+    status: paused
+  - name: moonwitness-commandcenter
+    role: operations-research-application
+    canonical_owner: commandcenter
+    status: hold
+  - name: moonwitness-crayon-lab
+    role: methodology-research-application
+    canonical_owner: crayon-lab
+  - name: moonwitness-blueprint
+    role: architectural-source-of-truth
+    canonical_owner: blueprint
+
+rules:
+  repository_is_not_runtime_dependency: true
+  package_is_reuse_unit: true
+  one_capability_owner: true
+  one_primary_public_web_owner: true
+  database_is_private: true
+  canonical_network_door: https-openapi

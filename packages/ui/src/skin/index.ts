@@ -24,6 +24,22 @@ const defaultSkinContext: SkinContextValue = {
 
 export const SkinContext = createContext<SkinContextValue>(defaultSkinContext);
 
+export function skinBaseClasses(skin: SkinName): Record<string, string> {
+  const applied = applyPreset(skin);
+  return {
+    button: (applied.variant || '') + ' ' + (applied.skin || '') + ' ' + (applied.size || ''),
+    card: (applied.cardVariant || '') + ' ' + (applied.skin || ''),
+    input: applied.inputSkin || '',
+    badge: (applied.badgeVariant || '') + ' ' + (applied.badgeSkin || ''),
+    eventCard: 'skin-' + (applied.skin || '') + ' density-' + (applied.density || ''),
+    kanbanColumn: 'skin-' + (applied.skin || '') + ' ' + (applied.compact ? 'compact' : ''),
+    moduleCard: 'skin-' + (applied.skin || '') + ' ' + 'size-' + (applied.moduleSize || '') + ' ' + (applied.elevated ? 'elevated' : ''),
+    hudPanel: 'skin-' + (applied.hudSkin || '') + ' hud-layer',
+    scenePanel: 'skin-' + (applied.sceneSkin || '') + ' scene-layer',
+    atlasStage: 'skin-' + (applied.atlasSkin || '') + ' atlas-layer',
+  };
+}
+
 export interface SkinProviderProps {
   defaultSkin?: SkinName;
   children: ReactNode;
@@ -48,16 +64,7 @@ export function SkinProvider({ defaultSkin = 'default', children, onSkinChange }
     onSkinChange?.(newSkin);
   }, [onSkinChange]);
   const getClasses = useCallback((component: string, overrides?: Record<string, unknown>): string => {
-    const applied = applyPreset(skin);
-    const baseClasses: Record<string, string> = {
-      button: (applied.variant || '') + ' ' + (applied.skin || '') + ' ' + (applied.size || ''),
-      card: (applied.cardVariant || '') + ' ' + (applied.skin || ''),
-      input: applied.inputSkin || '',
-      badge: (applied.badgeVariant || '') + ' ' + (applied.badgeSkin || ''),
-      eventCard: 'skin-' + (applied.skin || '') + ' density-' + (applied.density || ''),
-      kanbanColumn: 'skin-' + (applied.skin || '') + ' ' + (applied.compact ? 'compact' : ''),
-      moduleCard: 'skin-' + (applied.skin || '') + ' size-' + (applied.moduleSize || '') + ' ' + (applied.elevated ? 'elevated' : ''),
-    };
+    const baseClasses = skinBaseClasses(skin);
     let className = baseClasses[component] || '';
     if (overrides) {
       const overrideEntries = Object.entries(overrides).filter(([, v]) => v);
@@ -146,16 +153,7 @@ export function withSkin<P extends { className?: string; skin?: SkinName }>(Comp
 export function createSkinComponent(componentName: string, skinName: SkinName): React.FC<React.HTMLAttributes<HTMLElement> & { as?: React.ElementType }> {
   return function SkinnedComponent(props: React.HTMLAttributes<HTMLElement> & { as?: React.ElementType }) {
     const { as, ...rest } = props;
-    const applied = applyPreset(skinName);
-    const baseClasses: Record<string, string> = {
-      button: (applied.variant || '') + ' ' + (applied.skin || '') + ' ' + (applied.size || ''),
-      card: (applied.cardVariant || '') + ' ' + (applied.skin || ''),
-      input: applied.inputSkin || '',
-      badge: (applied.badgeVariant || '') + ' ' + (applied.badgeSkin || ''),
-      eventCard: 'skin-' + (applied.skin || '') + ' density-' + (applied.density || ''),
-      kanbanColumn: 'skin-' + (applied.skin || '') + ' ' + (applied.compact ? 'compact' : ''),
-      moduleCard: 'skin-' + (applied.skin || '') + ' size-' + (applied.moduleSize || '') + ' ' + (applied.elevated ? 'elevated' : ''),
-    };
+    const baseClasses = skinBaseClasses(skinName);
     const className = [baseClasses[componentName] || '', rest.className].filter(Boolean).join(' ');
     return React.createElement(as || 'div', { ...rest, className, 'data-skin': skinName });
   };
@@ -215,3 +213,35 @@ export function skinCn(baseVariants: Record<string, unknown>, skin: SkinName, co
 export { skinPresets, getPreset, applyPreset, listPresets } from './presets';
 export { composeEffects, effectPresets, halftone, grain, cmykSlip, duotone, tape, sticker, brushUnderline } from './effects';
 export { eventCardVariants, kanbanColumnVariants, moduleCardVariants, buttonSkinCompositions, inputSkinCompositions, badgeSkinCompositions, cardSkinCompositions } from './compositions';
+export {
+  DnaButton,
+  DnaChamber,
+  DnaPortalArch,
+  DnaBadge,
+  type DnaButtonProps,
+  type DnaChamberProps,
+  type DnaPortalArchProps,
+  type DnaBadgeProps,
+} from './imperium';
+export {
+  SacredCornerBrackets,
+  OctagramMandalaIcon,
+  SearchLensIcon,
+  CrescentStarIcon,
+  DiamondStarOrnament,
+} from './imperium-icons';
+export {
+  MASTER_DNA_IDS,
+  MASTER_DNA_WORLDS,
+  getDnaWorld,
+  listDnaWorlds,
+  dnaWorldCssVariables,
+  useDnaWorld,
+  SkinScope,
+  SkinRoot,
+  type MasterDnaId,
+  type DnaWorldPalette,
+  type MasterDnaWorldSpec,
+  type SkinScopeProps,
+  type SkinRootProps,
+} from './dna-worlds';

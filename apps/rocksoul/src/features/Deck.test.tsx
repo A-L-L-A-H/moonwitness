@@ -61,4 +61,41 @@ describe("Deck", () => {
     fireEvent.click(screen.getByRole("button", { name: /ADD TO THE PILE/i }));
     expect(onCreate).toHaveBeenCalledTimes(1);
   });
+
+  it("renders the live overseer banner and repository click shortcut when snapshot is present", () => {
+    const onNavigate = vi.fn();
+    const onInspectRepo = vi.fn();
+    const onOpenUrl = vi.fn();
+
+    render(
+      <Deck
+        issues={[]}
+        repositories={[{ id: "r1", name: "moonwitness", branch: "dev", path: "/test/path", remote_url: "", default_branch: "main" }]}
+        events={[]}
+        monitor={{
+          generated_at: "2026-11-16T07:05:00Z",
+          disks: [{ drive: "C:", mount_path: "C:\\", available: true, total_gb: 118, free_gb: 12.5, used_pct: 89, tier: "calm" }],
+          services: [{ id: "allah", name: "A-L-L-A-H", url: "http://127.0.0.1:3003", status: "online", http_status: 200, latency_ms: 8 }],
+          agent_sessions: [{ session_id: "abc", updated_at: "2026-11-16T07:04:00Z", step_count: 10, last_type: "PLANNER_RESPONSE", last_status: "DONE", last_tool: "edit_file" }],
+          repositories: [{ id: "r1", name: "moonwitness", path: "/test/path", branch: "dev", head_hash: "c5a873b", head_subject: "unify", head_age: "now", dirty_count: 2, staged_count: 1, untracked_count: 0, worktree_count: 1, changed_files: [], recent_commits: [] }],
+          plans: [],
+        }}
+        dataReady={true}
+        loading={false}
+        onCreate={vi.fn()}
+        onStatusChange={vi.fn()}
+        onNavigate={onNavigate}
+        onInspectRepo={onInspectRepo}
+        onOpenUrl={onOpenUrl}
+      />,
+    );
+
+    expect(screen.getByLabelText("Live Overseer summary")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /A-L-L-A-H :3003/i }));
+    expect(onOpenUrl).toHaveBeenCalledWith("http://127.0.0.1:3003");
+    fireEvent.click(screen.getByRole("button", { name: /OPEN OVERSEER/i }));
+    expect(onNavigate).toHaveBeenCalledWith("monitor");
+    fireEvent.click(screen.getByRole("button", { name: /moonwitness/i }));
+    expect(onInspectRepo).toHaveBeenCalledWith("r1");
+  });
 });

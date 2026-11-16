@@ -1,0 +1,5635 @@
+{
+  "adam": [
+    {
+      "prophet_id": "adam",
+      "prophet_name": "Ādam",
+      "divine_root": "ʿ-L-M",
+      "divine_name": "AL-ʿALĪM",
+      "raw_score": 95.64,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "Exact RID ↔ divine root match."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "adam",
+        "prophet_name": "Ādam",
+        "divine_root": "ʿ-L-M",
+        "divine_name": "AL-ʿALĪM",
+        "divine_kind": "divine_name",
+        "score": 0.99,
+        "evidence": "Q3",
+        "reasons": [
+          "RID root ʿ-L-M = divine root ʿ-L-M",
+          "RID concepts: knowledge",
+          "RID lexical semantics: knowledge",
+          "lexical context: knowledge"
+        ],
+        "root_match": true,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "knowledge"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "adam",
+      "prophet_name": "Ādam",
+      "divine_root": "Ḥ-K-M",
+      "divine_name": "AL-ḤAKĪM",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: knowledge."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "adam",
+        "prophet_name": "Ādam",
+        "divine_root": "Ḥ-K-M",
+        "divine_name": "AL-ḤAKĪM",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: knowledge"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "knowledge"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "idris": [
+    {
+      "prophet_id": "idris",
+      "prophet_name": "Idrīs",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "idris",
+        "prophet_name": "Idrīs",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.46,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth",
+          "RID lexical semantics: truthfulness, sincerity",
+          "lexical context: truthfulness, sincerity, truth"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "idris",
+      "prophet_name": "Idrīs",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "idris",
+        "prophet_name": "Idrīs",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "nuh": [
+    {
+      "prophet_id": "nuh",
+      "prophet_name": "Nūḥ",
+      "divine_root": "Š-K-R",
+      "divine_name": "ASH-SHAKŪR",
+      "raw_score": 97.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.9,
+          "rationale": [
+            "Curated Q4 = 0.90; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 1.00 from strongest evidence 0.90.",
+            "Exact RID ↔ divine root match."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q4"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "nuh",
+        "prophet_name": "Nūḥ",
+        "divine_root": "Š-K-R",
+        "divine_name": "ASH-SHAKŪR",
+        "divine_kind": "divine_name",
+        "score": 1,
+        "evidence": "Q4",
+        "reasons": [
+          "RID root Š-K-R = divine root Š-K-R",
+          "explicit identity-layer lexeme overlaps divine form",
+          "RID concepts: gratitude",
+          "RID lexical semantics: gratitude, thankfulness",
+          "lexical context: shakur, gratitude, thankfulness"
+        ],
+        "root_match": true,
+        "lexeme_match": true,
+        "concept_overlap": [
+          "gratitude"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "nuh",
+      "prophet_name": "Nūḥ",
+      "divine_root": "Ḥ-M-D",
+      "divine_name": "AL-ḤAMĪD",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: gratitude."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "nuh",
+        "prophet_name": "Nūḥ",
+        "divine_root": "Ḥ-M-D",
+        "divine_name": "AL-ḤAMĪD",
+        "divine_kind": "divine_name",
+        "score": 0.37,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: gratitude",
+          "RID lexical semantics: gratitude",
+          "lexical context: gratitude"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "gratitude"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "hud": [
+    {
+      "prophet_id": "hud",
+      "prophet_name": "Hūd",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 95.64,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "Exact RID ↔ divine root match."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "hud",
+        "prophet_name": "Hūd",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 1,
+        "evidence": "Q3",
+        "reasons": [
+          "RID root ʾ-M-N = divine root ʾ-M-N",
+          "RID concepts: truth, trust",
+          "RID lexical semantics: trustworthiness, faithfulness",
+          "lexical context: trustworthiness, faithfulness"
+        ],
+        "root_match": true,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth",
+          "trust"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "hud",
+      "prophet_name": "Hūd",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: truth, trust."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "hud",
+        "prophet_name": "Hūd",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.43,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth, trust",
+          "RID lexical semantics: faithfulness",
+          "lexical context: faithfulness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth",
+          "trust"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "salih": [
+    {
+      "prophet_id": "salih",
+      "prophet_name": "Ṣāliḥ",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "salih",
+        "prophet_name": "Ṣāliḥ",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.44,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "RID lexical semantics: goodness, righteousness",
+          "lexical context: goodness, righteousness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "salih",
+      "prophet_name": "Ṣāliḥ",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "salih",
+        "prophet_name": "Ṣāliḥ",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "ibrahim": [
+    {
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "divine_root": "Ḥ-L-M",
+      "divine_name": "AL-ḤALĪM",
+      "raw_score": 97.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.9,
+          "rationale": [
+            "Curated Q4 = 0.90; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 1.00 from strongest evidence 0.90.",
+            "Explicit identity lexeme overlap."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q4"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "ibrahim",
+        "prophet_name": "Ibrāhīm",
+        "divine_root": "Ḥ-L-M",
+        "divine_name": "AL-ḤALĪM",
+        "divine_kind": "divine_name",
+        "score": 0.4,
+        "evidence": "Q4",
+        "reasons": [
+          "explicit identity-layer lexeme overlaps divine form",
+          "identity concepts: patience",
+          "lexical context: halim, forbearing"
+        ],
+        "root_match": false,
+        "lexeme_match": true,
+        "concept_overlap": [
+          "patience"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ibrahim",
+        "prophet_name": "Ibrāhīm",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.44,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth",
+          "RID lexical semantics: truthfulness, sincerity",
+          "lexical context: truthfulness, sincerity"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ibrahim",
+      "prophet_name": "Ibrāhīm",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ibrahim",
+        "prophet_name": "Ibrāhīm",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "lut": [
+    {
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "divine_root": "Ḥ-K-M",
+      "divine_name": "AL-ḤAKĪM",
+      "raw_score": 91.63,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.95,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.85,
+          "rationale": [
+            "Strong curated root evidence; matcher disagreement receives only a modest penalty."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "divine_root": "ʿ-L-M",
+      "divine_name": "AL-ʿALĪM",
+      "raw_score": 91.63,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.95,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.85,
+          "rationale": [
+            "Strong curated root evidence; matcher disagreement receives only a modest penalty."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 59,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.2,
+          "rationale": [
+            "Automatic-only hypothesis support Q3 ×0.25 = 0.20; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Exact RID ↔ divine root match."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "lut",
+        "prophet_name": "Lūṭ",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 1,
+        "evidence": "Q3",
+        "reasons": [
+          "RID root ʾ-M-N = divine root ʾ-M-N",
+          "RID concepts: truth, trust",
+          "RID lexical semantics: trustworthiness, faithfulness",
+          "lexical context: trustworthiness, faithfulness"
+        ],
+        "root_match": true,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth",
+          "trust"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "lut",
+      "prophet_name": "Lūṭ",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: truth, trust."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "lut",
+        "prophet_name": "Lūṭ",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.43,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth, trust",
+          "RID lexical semantics: faithfulness",
+          "lexical context: faithfulness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth",
+          "trust"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "ismail": [
+    {
+      "prophet_id": "ismail",
+      "prophet_name": "Ismāʿīl",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "ismail",
+        "prophet_name": "Ismāʿīl",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.37,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth",
+          "RID lexical semantics: truthfulness",
+          "lexical context: truthfulness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ismail",
+      "prophet_name": "Ismāʿīl",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ismail",
+        "prophet_name": "Ismāʿīl",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "ishaq": [
+    {
+      "prophet_id": "ishaq",
+      "prophet_name": "Isḥāq",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "ishaq",
+        "prophet_name": "Isḥāq",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.44,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "RID lexical semantics: righteousness, goodness",
+          "lexical context: righteousness, goodness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ishaq",
+      "prophet_name": "Isḥāq",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: goodness, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ishaq",
+        "prophet_name": "Isḥāq",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.42,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "identity concepts: guidance"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "yaqub": [
+    {
+      "prophet_id": "yaqub",
+      "prophet_name": "Yaʿqūb",
+      "divine_root": "Ḥ-L-M",
+      "divine_name": "AL-ḤALĪM",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: patience."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "yaqub",
+        "prophet_name": "Yaʿqūb",
+        "divine_root": "Ḥ-L-M",
+        "divine_name": "AL-ḤALĪM",
+        "divine_kind": "divine_name",
+        "score": 0.37,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: patience",
+          "RID lexical semantics: patience",
+          "lexical context: patience"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "patience"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yaqub",
+      "prophet_name": "Yaʿqūb",
+      "divine_root": "R-ʾ-F",
+      "divine_name": "AR-RAʾŪF",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: patience."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yaqub",
+        "prophet_name": "Yaʿqūb",
+        "divine_root": "R-ʾ-F",
+        "divine_name": "AR-RAʾŪF",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: patience"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "patience"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "yusuf": [
+    {
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "divine_root": "ʿ-L-M",
+      "divine_name": "AL-ʿALĪM",
+      "raw_score": 91.63,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.95,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.85,
+          "rationale": [
+            "Strong curated root evidence; matcher disagreement receives only a modest penalty."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "divine_root": "Ḥ-K-M",
+      "divine_name": "AL-ḤAKĪM",
+      "raw_score": 91.63,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.95,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.85,
+          "rationale": [
+            "Strong curated root evidence; matcher disagreement receives only a modest penalty."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "divine_root": "Q-D-S",
+      "divine_name": "AL-QUDDŪS",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: purity."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yusuf",
+        "prophet_name": "Yūsuf",
+        "divine_root": "Q-D-S",
+        "divine_name": "AL-QUDDŪS",
+        "divine_kind": "divine_name",
+        "score": 0.35,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: purity",
+          "RID lexical semantics: purified"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "purity"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yusuf",
+        "prophet_name": "Yūsuf",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yusuf",
+      "prophet_name": "Yūsuf",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: truth."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yusuf",
+        "prophet_name": "Yūsuf",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "ayyub": [
+    {
+      "prophet_id": "ayyub",
+      "prophet_name": "Ayyūb",
+      "divine_root": "Ḥ-L-M",
+      "divine_name": "AL-ḤALĪM",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: patience."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "ayyub",
+        "prophet_name": "Ayyūb",
+        "divine_root": "Ḥ-L-M",
+        "divine_name": "AL-ḤALĪM",
+        "divine_kind": "divine_name",
+        "score": 0.37,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: patience",
+          "RID lexical semantics: patience",
+          "lexical context: patience"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "patience"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ayyub",
+      "prophet_name": "Ayyūb",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ayyub",
+      "prophet_name": "Ayyūb",
+      "divine_root": "R-ʾ-F",
+      "divine_name": "AR-RAʾŪF",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: patience, mercy."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ayyub",
+        "prophet_name": "Ayyūb",
+        "divine_root": "R-ʾ-F",
+        "divine_name": "AR-RAʾŪF",
+        "divine_kind": "divine_name",
+        "score": 0.36,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: patience",
+          "mission concepts: mercy"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "patience",
+          "mercy"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "shuayb": [
+    {
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "divine_root": "F-T-Ḥ",
+      "divine_name": "AL-FATTĀḤ",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "shuayb",
+        "prophet_name": "Shuʿayb",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "shuayb",
+      "prophet_name": "Shuʿayb",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "shuayb",
+        "prophet_name": "Shuʿayb",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "musa": [
+    {
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "divine_root": "K-L-M",
+      "divine_name": "DIVINE KALĀM",
+      "raw_score": 100,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 1,
+          "rationale": [
+            "Curated Q5 = 1.00; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 1.00 from strongest evidence 1.00.",
+            "Explicit identity lexeme overlap."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q5"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "musa",
+        "prophet_name": "Mūsā",
+        "divine_root": "K-L-M",
+        "divine_name": "DIVINE KALĀM",
+        "divine_kind": "divine_attribute",
+        "score": 0.26,
+        "evidence": "Q4",
+        "reasons": [
+          "explicit identity-layer lexeme overlaps divine form",
+          "lexical context: kalam"
+        ],
+        "root_match": false,
+        "lexeme_match": true,
+        "concept_overlap": [],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "divine_root": "H-D-Y",
+      "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "divine_root": "Q-D-S",
+      "divine_name": "AL-QUDDŪS",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: purity, worship."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "musa",
+        "prophet_name": "Mūsā",
+        "divine_root": "Q-D-S",
+        "divine_name": "AL-QUDDŪS",
+        "divine_kind": "divine_name",
+        "score": 0.43,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: purity",
+          "RID lexical semantics: purified",
+          "mission concepts: worship",
+          "lexical context: purified"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "purity",
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: truth, trust."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "musa",
+        "prophet_name": "Mūsā",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.36,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth",
+          "mission concepts: trust"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth",
+          "trust"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "musa",
+      "prophet_name": "Mūsā",
+      "divine_root": "ʾ-M-N",
+      "divine_name": "AL-MUʾMIN",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: truth, trust."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "musa",
+        "prophet_name": "Mūsā",
+        "divine_root": "ʾ-M-N",
+        "divine_name": "AL-MUʾMIN",
+        "divine_kind": "divine_name",
+        "score": 0.36,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: truth",
+          "mission concepts: trust"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "truth",
+          "trust"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "harun": [
+    {
+      "prophet_id": "harun",
+      "prophet_name": "Hārūn",
+      "divine_root": "H-D-Y",
+      "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+      "raw_score": 86.15,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: mercy, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "harun",
+        "prophet_name": "Hārūn",
+        "divine_root": "H-D-Y",
+        "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+        "divine_kind": "divine_predicate",
+        "score": 0.2,
+        "evidence": "Q2",
+        "reasons": [
+          "identity concepts: mercy, guidance",
+          "lexical context: deliverance, guidance"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "mercy",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "harun",
+      "prophet_name": "Hārūn",
+      "divine_root": "K-L-M",
+      "divine_name": "DIVINE KALĀM",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: speech."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "harun",
+        "prophet_name": "Hārūn",
+        "divine_root": "K-L-M",
+        "divine_name": "DIVINE KALĀM",
+        "divine_kind": "divine_attribute",
+        "score": 0.5,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: speech",
+          "RID lexical semantics: clarity, eloquence, speech",
+          "lexical context: clarity, eloquence, speech"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "speech"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "dhulkifl": [
+    {
+      "prophet_id": "dhulkifl",
+      "prophet_name": "Dhū al-Kifl",
+      "divine_root": "Ḥ-L-M",
+      "divine_name": "AL-ḤALĪM",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: patience."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "dhulkifl",
+        "prophet_name": "Dhū al-Kifl",
+        "divine_root": "Ḥ-L-M",
+        "divine_name": "AL-ḤALĪM",
+        "divine_kind": "divine_name",
+        "score": 0.39,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: patience",
+          "RID lexical semantics: patience",
+          "lexical context: patient, patience"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "patience"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "dhulkifl",
+      "prophet_name": "Dhū al-Kifl",
+      "divine_root": "R-ʾ-F",
+      "divine_name": "AR-RAʾŪF",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: patience."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "dhulkifl",
+        "prophet_name": "Dhū al-Kifl",
+        "divine_root": "R-ʾ-F",
+        "divine_name": "AR-RAʾŪF",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: patience"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "patience"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "dawud": [
+    {
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "divine_root": "Ḥ-Q-Q",
+      "divine_name": "AL-ḤAQQ",
+      "raw_score": 94.66,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.95,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "Explicit identity lexeme overlap."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "dawud",
+        "prophet_name": "Dāwūd",
+        "divine_root": "Ḥ-Q-Q",
+        "divine_name": "AL-ḤAQQ",
+        "divine_kind": "divine_name",
+        "score": 0.32,
+        "evidence": "Q4",
+        "reasons": [
+          "explicit identity-layer lexeme overlaps divine form",
+          "mission concepts: truth",
+          "lexical context: haqq"
+        ],
+        "root_match": false,
+        "lexeme_match": true,
+        "concept_overlap": [
+          "truth"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "divine_root": "Ḥ-K-M",
+      "divine_name": "AL-ḤAKĪM",
+      "raw_score": 91.63,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.95,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.85,
+          "rationale": [
+            "Strong curated root evidence; matcher disagreement receives only a modest penalty."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "dawud",
+      "prophet_name": "Dāwūd",
+      "divine_root": "T-W-B",
+      "divine_name": "AT-TAWWĀB",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: return, gift."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "dawud",
+        "prophet_name": "Dāwūd",
+        "divine_root": "T-W-B",
+        "divine_name": "AT-TAWWĀB",
+        "divine_kind": "divine_name",
+        "score": 0.49,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: return",
+          "RID lexical semantics: returning",
+          "identity concepts: gift",
+          "lexical context: returning"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "return",
+          "gift"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "sulayman": [
+    {
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "divine_root": "W-H-B",
+      "divine_name": "AL-WAHHĀB",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "divine_root": "Š-K-R",
+      "divine_name": "ASH-SHAKŪR",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "sulayman",
+      "prophet_name": "Sulaymān",
+      "divine_root": "T-W-B",
+      "divine_name": "AT-TAWWĀB",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: return, gift."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "sulayman",
+        "prophet_name": "Sulaymān",
+        "divine_root": "T-W-B",
+        "divine_name": "AT-TAWWĀB",
+        "divine_kind": "divine_name",
+        "score": 0.47,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: return",
+          "RID lexical semantics: returning",
+          "identity concepts: gift"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "return",
+          "gift"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "ilyas": [
+    {
+      "prophet_id": "ilyas",
+      "prophet_name": "Ilyās",
+      "divine_root": "H-D-Y",
+      "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ilyas",
+      "prophet_name": "Ilyās",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: goodness, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ilyas",
+        "prophet_name": "Ilyās",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.42,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "identity concepts: guidance"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "ilyas",
+      "prophet_name": "Ilyās",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "ilyas",
+        "prophet_name": "Ilyās",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.44,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "RID lexical semantics: righteousness, goodness",
+          "lexical context: righteousness, goodness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "alyasa": [
+    {
+      "prophet_id": "alyasa",
+      "prophet_name": "Al-Yasaʿ",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 85.91,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: goodness."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "alyasa",
+        "prophet_name": "Al-Yasaʿ",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.46,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "RID lexical semantics: goodness, excellence",
+          "lexical context: good, goodness, excellence"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "alyasa",
+      "prophet_name": "Al-Yasaʿ",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: goodness, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "alyasa",
+        "prophet_name": "Al-Yasaʿ",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.42,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "identity concepts: guidance"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "yunus": [
+    {
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "divine_root": "Q-D-S",
+      "divine_name": "AL-QUDDŪS",
+      "raw_score": 86.15,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: purity, worship."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "yunus",
+        "prophet_name": "Yūnus",
+        "divine_root": "Q-D-S",
+        "divine_name": "AL-QUDDŪS",
+        "divine_kind": "divine_name",
+        "score": 0.43,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: purity, worship",
+          "RID lexical semantics: devotion",
+          "lexical context: devotion"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "purity",
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "divine_root": "Ḥ-M-D",
+      "divine_name": "AL-ḤAMĪD",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: worship."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yunus",
+        "prophet_name": "Yūnus",
+        "divine_root": "Ḥ-M-D",
+        "divine_name": "AL-ḤAMĪD",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: worship"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yunus",
+      "prophet_name": "Yūnus",
+      "divine_root": "S-M-ʿ",
+      "divine_name": "AS-SAMĪʿ",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: worship."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yunus",
+        "prophet_name": "Yūnus",
+        "divine_root": "S-M-ʿ",
+        "divine_name": "AS-SAMĪʿ",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: worship"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "zakariya": [
+    {
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "divine_root": "S-M-ʿ",
+      "divine_name": "AS-SAMĪʿ",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "divine_root": "W-H-B",
+      "divine_name": "AL-WAHHĀB",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 54.4,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.82,
+          "rationale": [
+            "Semantic concept overlap: goodness, mercy, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "zakariya",
+        "prophet_name": "Zakariyyā",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.48,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "identity concepts: mercy, guidance",
+          "lexical context: mercy"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness",
+          "mercy",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: goodness, mercy."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "zakariya",
+        "prophet_name": "Zakariyyā",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.56,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: goodness",
+          "RID lexical semantics: righteousness, goodness",
+          "identity concepts: mercy",
+          "lexical context: righteousness, goodness"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "goodness",
+          "mercy"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "zakariya",
+      "prophet_name": "Zakariyyā",
+      "divine_root": "H-D-Y",
+      "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: mercy, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "zakariya",
+        "prophet_name": "Zakariyyā",
+        "divine_root": "H-D-Y",
+        "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+        "divine_kind": "divine_predicate",
+        "score": 0.2,
+        "evidence": "Q2",
+        "reasons": [
+          "identity concepts: mercy, guidance",
+          "lexical context: guided, guidance"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "mercy",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "yahya": [
+    {
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 95.87,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.9,
+          "rationale": [
+            "Curated Q4 = 0.90; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 1.00 from strongest evidence 0.90.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.9,
+          "rationale": [
+            "Very strong curated text remains primary even when the heuristic matcher does not reproduce it."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q4"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "divine_root": "Ḥ-K-M",
+      "divine_name": "AL-ḤAKĪM",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: knowledge, judgment."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yahya",
+        "prophet_name": "Yaḥyā",
+        "divine_root": "Ḥ-K-M",
+        "divine_name": "AL-ḤAKĪM",
+        "divine_kind": "divine_name",
+        "score": 0.2,
+        "evidence": "Q2",
+        "reasons": [
+          "identity concepts: knowledge, judgment",
+          "lexical context: wisdom, judgment"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "knowledge",
+          "judgment"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "yahya",
+      "prophet_name": "Yaḥyā",
+      "divine_root": "Q-D-S",
+      "divine_name": "AL-QUDDŪS",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: purity."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "yahya",
+        "prophet_name": "Yaḥyā",
+        "divine_root": "Q-D-S",
+        "divine_name": "AL-QUDDŪS",
+        "divine_kind": "divine_name",
+        "score": 0.39,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: purity",
+          "RID lexical semantics: reverence",
+          "lexical context: reverence, purity"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "purity"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "isa": [
+    {
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 86.15,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "Semantic concept overlap: mercy, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "isa",
+        "prophet_name": "ʿĪsā",
+        "divine_root": "R-Ḥ-M",
+        "divine_name": "AR-RAḤĪM",
+        "divine_kind": "divine_name_family",
+        "score": 0.56,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: mercy, guidance",
+          "RID lexical semantics: salvation, deliverance, rescue",
+          "lexical context: salvation, deliverance, rescue"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "mercy",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "divine_root": "Q-D-S",
+      "divine_name": "AL-QUDDŪS",
+      "raw_score": 78.82,
+      "band": "STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.65,
+          "rationale": [
+            "Curated Q2 = 0.65; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.72,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.72 from strongest evidence 0.65.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.65,
+          "rationale": [
+            "Curated relation exists, but matcher does not reproduce it above threshold."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q2"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "divine_root": "H-D-Y",
+      "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+      "raw_score": 53.15,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.73,
+          "rationale": [
+            "Semantic concept overlap: mercy, guidance."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "isa",
+        "prophet_name": "ʿĪsā",
+        "divine_root": "H-D-Y",
+        "divine_name": "DIVINE GUIDANCE / HĀDIYAN",
+        "divine_kind": "divine_predicate",
+        "score": 0.5,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: mercy, guidance",
+          "RID lexical semantics: salvation, deliverance",
+          "lexical context: salvation, deliverance"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "mercy",
+          "guidance"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "divine_root": "B-R-R",
+      "divine_name": "AL-BARR",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: mercy."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "isa",
+        "prophet_name": "ʿĪsā",
+        "divine_root": "B-R-R",
+        "divine_name": "AL-BARR",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: mercy"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "mercy"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "isa",
+      "prophet_name": "ʿĪsā",
+      "divine_root": "R-ʾ-F",
+      "divine_name": "AR-RAʾŪF",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: mercy."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "isa",
+        "prophet_name": "ʿĪsā",
+        "divine_root": "R-ʾ-F",
+        "divine_name": "AR-RAʾŪF",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: mercy"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "mercy"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ],
+  "muhammad": [
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "divine_root": "R-ʾ-F",
+      "divine_name": "AR-RAʾŪF",
+      "raw_score": 95.87,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.9,
+          "rationale": [
+            "Curated Q4 = 0.90; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 1.00 from strongest evidence 0.90.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.9,
+          "rationale": [
+            "Very strong curated text remains primary even when the heuristic matcher does not reproduce it."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q4"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "divine_root": "R-Ḥ-M",
+      "divine_name": "AR-RAḤĪM",
+      "raw_score": 95.87,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.9,
+          "rationale": [
+            "Curated Q4 = 0.90; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 1.00 from strongest evidence 0.90.",
+            "No automatic matcher candidate for this root; conservative floor 0.25."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.9,
+          "rationale": [
+            "Very strong curated text remains primary even when the heuristic matcher does not reproduce it."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q4"
+      ],
+      "automatic_candidate": null,
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "divine_root": "Ḥ-M-D",
+      "divine_name": "AL-ḤAMĪD",
+      "raw_score": 95.64,
+      "band": "VERY_STRONG",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.8,
+          "rationale": [
+            "Curated Q3 = 0.80; automatic matcher excluded from evidence aggregation to prevent double counting."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 1,
+          "rationale": [
+            "Curated textual class implies linguistic floor 0.95 from strongest evidence 0.80.",
+            "Exact RID ↔ divine root match."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 1,
+          "rationale": [
+            "Curated edge provenance=1.00."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 1,
+          "rationale": [
+            "Curated relation reproduced by the automatic matcher."
+          ]
+        }
+      ],
+      "curated_evidence": [
+        "Q3"
+      ],
+      "automatic_candidate": {
+        "prophet_id": "muhammad",
+        "prophet_name": "Muḥammad",
+        "divine_root": "Ḥ-M-D",
+        "divine_name": "AL-ḤAMĪD",
+        "divine_kind": "divine_name",
+        "score": 1,
+        "evidence": "Q3",
+        "reasons": [
+          "RID root Ḥ-M-D = divine root Ḥ-M-D",
+          "RID concepts: gratitude, worship",
+          "RID lexical semantics: praise",
+          "lexical context: praise"
+        ],
+        "root_match": true,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "gratitude",
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "divine_root": "Q-D-S",
+      "divine_name": "AL-QUDDŪS",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: worship."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "muhammad",
+        "prophet_name": "Muḥammad",
+        "divine_root": "Q-D-S",
+        "divine_name": "AL-QUDDŪS",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: worship"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "divine_root": "S-M-ʿ",
+      "divine_name": "AS-SAMĪʿ",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: worship."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "muhammad",
+        "prophet_name": "Muḥammad",
+        "divine_root": "S-M-ʿ",
+        "divine_name": "AS-SAMĪʿ",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: worship"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "worship"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    },
+    {
+      "prophet_id": "muhammad",
+      "prophet_name": "Muḥammad",
+      "divine_root": "Š-K-R",
+      "divine_name": "ASH-SHAKŪR",
+      "raw_score": 51.77,
+      "band": "MODERATE",
+      "calibrated_probability": null,
+      "calibration_status": "UNCALIBRATED",
+      "components": [
+        {
+          "name": "evidence_strength",
+          "value": 0.1625,
+          "rationale": [
+            "Automatic-only hypothesis support Q2 ×0.25 = 0.16; not treated as independent textual evidence."
+          ]
+        },
+        {
+          "name": "linguistic_match",
+          "value": 0.64,
+          "rationale": [
+            "Semantic concept overlap: gratitude."
+          ]
+        },
+        {
+          "name": "provenance",
+          "value": 0.65,
+          "rationale": [
+            "No curated edge; provenance estimated from RID references only."
+          ]
+        },
+        {
+          "name": "cross_source_consistency",
+          "value": 1,
+          "rationale": [
+            "No relation-specific cross-scripture divergence recorded; unrelated profile-level differences are excluded."
+          ]
+        },
+        {
+          "name": "reproducibility",
+          "value": 0.55,
+          "rationale": [
+            "Automatic candidate only; no curated relation yet."
+          ]
+        }
+      ],
+      "curated_evidence": [],
+      "automatic_candidate": {
+        "prophet_id": "muhammad",
+        "prophet_name": "Muḥammad",
+        "divine_root": "Š-K-R",
+        "divine_name": "ASH-SHAKŪR",
+        "divine_kind": "divine_name",
+        "score": 0.3,
+        "evidence": "Q2",
+        "reasons": [
+          "RID concepts: gratitude"
+        ],
+        "root_match": false,
+        "lexeme_match": false,
+        "concept_overlap": [
+          "gratitude"
+        ],
+        "method": "automatic_candidate"
+      },
+      "mathematical_properties": [
+        "bounded_0_100",
+        "monotonic_support",
+        "diminishing_returns",
+        "conflict_penalty",
+        "equal_weight_geometric_balance"
+      ]
+    }
+  ]
+}

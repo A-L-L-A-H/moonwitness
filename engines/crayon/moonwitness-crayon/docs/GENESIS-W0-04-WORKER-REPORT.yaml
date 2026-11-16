@@ -1,0 +1,35 @@
+status: PASS_WITH_NOTES
+repository: ArsyBelovedLabs/moonwitness-crayon
+branch: dev
+base_commit: 064c1c1dac8b822d608ff3e7aef885f8a7bf9c57
+head_commit: 9e715515f8ac08a36af2ad4f76fb790de01a10fc
+blueprint_refs:
+  - 17-genesis/GENESIS-00-EXECUTION-SPECIFICATION-V1.md
+  - 17-genesis/WAVE-0-MULTI-REPO-EXECUTION-PACKETS-V1.md
+  - 17-genesis/IMPLEMENTATION-HANDOFF-CONTRACT-V1.md
+adrs: []
+changed_paths:
+  - .github/workflows/ci.yml
+  - docs/GENESIS-W0-04-WORKER-REPORT.yaml
+migration_actions:
+  preserve:
+    - methodology, measurement, and research-computation package boundary
+    - canonical core dependency and public exports
+  extract: []
+  adapt:
+    - CI now verifies the generated package tarball
+  rewrite: []
+  deprecate: []
+  archive: []
+verification:
+  typecheck: PASS
+  unit: PASS
+  integration: SKIPPED
+  contract: PASS
+  e2e: SKIPPED
+  architecture: PASS
+compatibility_notes:
+  - CI run 33433574070 passed frozen install, lint, typecheck, tests, build, package tarball, architecture, and security checks.
+  - No UI/Next.js ownership, direct database coupling, or canonical network transport was introduced.
+remaining_risks:
+  - Organization-wide Stage 2 protected-branch evidence remains pending outside this repository worker because the connected GitHub integration cannot apply branch-protection rules.

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { SRGBL_V8_STAGES } from "@moonwitness/canon";
 import {
   useRiotAiChat,
   useRiotAiHealth,
@@ -11,6 +12,33 @@ import {
   type RiotAiConfigHistoryEntry,
 } from "@/lib/api/riot-ai";
 import { ArchiveMemoryBridge } from "./ArchiveMemoryBridge";
+
+type EpistemicFrameMode = "standard" | "srgbl-v8" | "p18-witness" | "offside-onside";
+
+const EPISTEMIC_FRAME_OPTIONS: readonly {
+  readonly id: EpistemicFrameMode;
+  readonly label: string;
+  readonly prefix: string;
+}[] = [
+  { id: "standard", label: "STANDARD PROMPT", prefix: "" },
+  {
+    id: "srgbl-v8",
+    label: "SRGBL v8 (S1–L5)",
+    prefix: `[EPISTEMIC FRAME: SRGBL v8 Pipeline — ${SRGBL_V8_STAGES.map((s) => s.stage).join(" -> ")}. Distinguish verified facts from UNKNOWN.]`,
+  },
+  {
+    id: "p18-witness",
+    label: "P18 KEY WITNESS",
+    prefix:
+      "[EPISTEMIC FRAME: P18 Key Witness v0 — Evaluate Artifact/Edition/Passage spine, cite provenance explicitly, never invent certainty.]",
+  },
+  {
+    id: "offside-onside",
+    label: "OFFSIDE → ONSIDE",
+    prefix:
+      "[EPISTEMIC FRAME: WSI Semantic Frame Audit — Expose hidden assumptions before inference and separate source category from witness claim.]",
+  },
+];
 
 interface IntelligenceDashboardProps {
   models: RiotAiModel[];
@@ -89,6 +117,7 @@ export function IntelligenceDashboard({
   const health = useRiotAiHealth();
   const chat = useRiotAiChat();
   const [selectedModel, setSelectedModel] = useState("");
+  const [epistemicFrame, setEpistemicFrame] = useState<EpistemicFrameMode>("standard");
   const [draft, setDraft] = useState("");
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [streamingContent, setStreamingContent] = useState("");
@@ -148,8 +177,11 @@ export function IntelligenceDashboard({
 
   async function submitMessage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const content = draft.trim();
-    if (!content || !selectedModel || pendingRequestRef.current) return;
+    const rawContent = draft.trim();
+    if (!rawContent || !selectedModel || pendingRequestRef.current) return;
+
+    const frameSpec = EPISTEMIC_FRAME_OPTIONS.find((opt) => opt.id === epistemicFrame);
+    const content = frameSpec?.prefix ? `${frameSpec.prefix}\n\n${rawContent}` : rawContent;
 
     const nextMessages: ConversationMessage[] = [
       ...messages,
@@ -730,6 +762,30 @@ export function IntelligenceDashboard({
           )}
 
           <form onSubmit={submitMessage} className="border-t-2 border-[var(--line)] p-4">
+            <div
+              className="mb-3 flex flex-wrap items-center gap-1.5"
+              role="group"
+              aria-label="Epistemic prompt framing"
+            >
+              <span className="mr-1 font-mono text-[10px] tracking-widest text-zinc-500">
+                FRAME:
+              </span>
+              {EPISTEMIC_FRAME_OPTIONS.map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  aria-pressed={epistemicFrame === opt.id}
+                  onClick={() => setEpistemicFrame(opt.id)}
+                  className={`min-h-8 border px-2.5 py-1 font-mono text-[10px] tracking-wider transition-colors ${
+                    epistemicFrame === opt.id
+                      ? "border-[var(--blue)] bg-[var(--blue)]/20 text-white"
+                      : "border-[var(--line)] bg-black/20 text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <label htmlFor="riot-ai-prompt" className="sr-only">
               Message the selected inference model
             </label>

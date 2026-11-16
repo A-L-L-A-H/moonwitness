@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://moonwitness.org/corpus/spec/v0.1/schemas/core/dataset.schema.json",
+  "type": "object",
+  "required": ["id", "datasetVersion", "specVersion", "profiles", "partitions"],
+  "properties": {
+    "id": { "$ref": "common.schema.json#/$defs/canonicalId" },
+    "datasetVersion": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+    },
+    "specVersion": { "type": "string" },
+    "profiles": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "required": ["dataset", "version"],
+        "properties": {
+          "dataset": { "$ref": "common.schema.json#/$defs/canonicalId" },
+          "version": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?(?:\\+[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*)?$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "partitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["recordType", "path"],
+        "properties": {
+          "recordType": { "type": "string" },
+          "path": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "sources": { "type": "array", "items": { "type": "string" } },
+    "rights": { "type": "string" },
+    "availability": { "enum": ["bundled", "external", "metadata_only", "restricted"] }
+  },
+  "additionalProperties": false
+}

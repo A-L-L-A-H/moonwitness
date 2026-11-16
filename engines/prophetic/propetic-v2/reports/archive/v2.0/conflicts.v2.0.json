@@ -1,0 +1,62 @@
+{
+  "version": "2.0",
+  "cases": [
+    {
+      "id": "conflict:sacrifice-son",
+      "subject": "Ibrahim sacrifice-test son",
+      "quran": {
+        "refs": [
+          "37:102-107"
+        ],
+        "claim": "The son is not named in the Qur’anic Arabic text."
+      },
+      "supplement": {
+        "book": "TAURAT",
+        "ref": "Genesis 22:2",
+        "claim": "The Torah textual witness names Isaac."
+      },
+      "type": "IDENTIFICATION_DIVERGENCE",
+      "severity": 0.75,
+      "scope": "claim_specific",
+      "rule": "Do not project the supplementary identification into Qur’anic wording."
+    },
+    {
+      "id": "uncertain:idris-enoch",
+      "subject": "Idris Enoch identification",
+      "quran": {
+        "refs": [
+          "19:56-57"
+        ],
+        "claim": "Idris is named and described as siddiq and nabi."
+      },
+      "supplement": {
+        "book": "TAURAT",
+        "ref": "Genesis 5:22-24",
+        "claim": "Enoch walks with God and is taken."
+      },
+      "type": "IDENTITY_BINDING_UNCERTAIN",
+      "severity": 0.55,
+      "scope": "identity_binding",
+      "rule": "Traditional identification remains low-confidence and non-automatic."
+    },
+    {
+      "id": "uncertain:musa-name",
+      "subject": "Musa name etymology",
+      "quran": {
+        "refs": [
+          "20:9-14"
+        ],
+        "claim": "Qur’an provides Mūsā without historical etymology."
+      },
+      "supplement": {
+        "book": "TAURAT",
+        "ref": "Exodus 2:10",
+        "claim": "Hebrew narrative gives a draw-out wordplay."
+      },
+      "type": "ETYMOLOGY_MULTIPLE_HYPOTHESES",
+      "severity": 0.6,
+      "scope": "name_root",
+      "rule": "Keep Egyptian and Hebrew analyses separate."
+    }
+  ]
+}

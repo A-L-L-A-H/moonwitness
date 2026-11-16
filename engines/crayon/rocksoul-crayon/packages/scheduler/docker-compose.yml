@@ -1,0 +1,14 @@
+name: rocksoul-scheduler
+services:
+  scheduler:
+    build:
+      context: ../..
+      dockerfile: packages/scheduler/Dockerfile
+    container_name: rocksoul_scheduler
+    restart: unless-stopped
+    ports: ["${SCHEDULER_PORT:-3002}:3002"]
+    environment:
+      SCHEDULER_DATABASE_URL: file:/app/data/scheduler.db
+    volumes: [scheduler_data:/app/data]
+volumes:
+  scheduler_data:

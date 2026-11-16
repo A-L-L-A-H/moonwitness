@@ -1,0 +1,25 @@
+{
+  "name": "divine-text-verification-engine",
+  "version": "7.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local-first, zero-dependency JS research engine with deterministic evidence audit and optional local AI orchestration.",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "serve": "node src/server.mjs",
+    "cli": "node src/cli.mjs",
+    "start:all": "node scripts/start-all.mjs",
+    "start:all:dev": "node scripts/start-all-dev.mjs",
+    "start:all:fallback": "node scripts/start-all.mjs --no-install",
+    "e2e": "node scripts/e2e-local.mjs",
+    "install:e2e": "node scripts/install-and-e2e.mjs",
+    "corpus:list": "node scripts/corpus-manager.mjs list",
+    "corpus:status": "node scripts/corpus-manager.mjs status",
+    "corpus:verify": "node scripts/corpus-manager.mjs verify",
+    "corpus:download": "node scripts/corpus-manager.mjs download",
+    "corpus:download:all": "node scripts/corpus-manager.mjs download all",
+    "autopilot": "node src/autopilot/engine.mjs --autopilot",
+    "audit:full": "npm test && npm run e2e && npm run corpus:status && npm run corpus:verify",
+    "final:check": "npm test && npm run e2e && npm run corpus:list && npm run corpus:status && npm run corpus:verify"
+  }
+}

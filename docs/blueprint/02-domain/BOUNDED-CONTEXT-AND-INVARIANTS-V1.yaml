@@ -1,0 +1,48 @@
+version: 1
+status: hardening
+contexts:
+  contracts:
+    owner: moonwitness-core
+    responsibilities: [identifiers, errors, wire-schemas, stable-interfaces, provenance-contract]
+  knowledge:
+    owner: moonwitness-corpus
+    responsibilities: [ingestion, validation, normalization, materialization, release, retrieval]
+  intelligence:
+    owner: moonwitness-cosmic
+    responsibilities: [semantic, temporal, mizan, explanation, analysis]
+  methodology:
+    owner: moonwitness-crayon
+    responsibilities: [research-method, measurement, scoring, robustness, evaluation]
+  prophetic:
+    owner: moonwitness-prophetic
+    responsibilities: [bounded-prophetic-research]
+  orchestration:
+    owner: moonwitness-runtime
+    responsibilities: [workflow-state, capability-coordination]
+  execution:
+    owner: moonwitness-worker
+    responsibilities: [jobs, retries, async-execution]
+  network:
+    owner: moonwitness-api
+    responsibilities: [https, openapi, auth-boundary, sse]
+  applications:
+    owners: [moonwitness-wheremythfadetolegend, moonwitness-commandcenter, moonwitness-crayon-lab]
+    legacy_or_paused: [moonwitness-web]
+    responsibilities: [user-experience-only]
+invariants:
+  - cross_context_writes_are_forbidden_without_explicit_contract
+  - canonical_owner_must_be_unique
+  - domain_contexts_must_not_import_application_code
+  - domain_contexts_must_not_import_hosting_provider_code
+  - database_tables_are_not_cross_context_contracts
+  - API_must_delegate_to_application_capabilities
+  - workflow_state_must_be_durable
+  - research_results_require_provenance
+  - asynchronous_commands_must_be_idempotent
+terminology:
+  capability: stable business/system ability with one canonical owner
+  contract: externally observable data/behavior agreement
+  workflow: durable coordination state spanning one or more capabilities
+  job: retryable unit of asynchronous work
+  evidence: material supporting a research assertion or result
+  provenance: machine-readable lineage explaining source, transformation, and derivation

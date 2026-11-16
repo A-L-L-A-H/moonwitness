@@ -1,0 +1,27 @@
+{
+  "name":"allah-crayon-rgbl-engine",
+  "version":"7.0.0",
+  "private":true,
+  "type":"module",
+  "description":"RGBL v7.0 — Stable Research Specification & Engine for CRAYON SIN-CAN",
+  "engines":{"node":">=20"},
+  "scripts":{
+    "build":"tsc -p tsconfig.json",
+    "test":"vitest run",
+    "test:watch":"vitest",
+    "verify:source":"npm run build && npm test && node scripts/repo-check.mjs",
+    "verify:media":"node scripts/verify-media.mjs",
+    "verify:production":"node scripts/verify-production.mjs",
+    "verify:v7":"npm run build && npm test && node scripts/verify-v7.mjs",
+    "check":"npm run verify:source",
+    "crayon":"tsx engine/src/cli.ts",
+    "example:allah":"tsx examples/allah.ts",
+    "example:human":"tsx examples/human.ts",
+    "example:nature":"tsx examples/nature.ts",
+    "example:justice":"tsx examples/justice.ts",
+    "go-live":"node scripts/go-live.mjs",
+    "release:production":"node scripts/release-production.mjs",
+    "release:v7":"node scripts/release-v7.mjs"
+  },
+  "devDependencies":{"@types/node":"24.0.0","tsx":"4.20.0","typescript":"5.9.0","vitest":"3.2.0"}
+}

@@ -1,0 +1,20 @@
+{
+  "version": "4.2.0",
+  "status": "WEB_UI_READY_LOCAL",
+  "tests": {"passed": 8, "failed": 0},
+  "ui": {"status": "ready", "runtime": "Node.js built-ins", "port": 8787},
+  "corpora": {
+    "quran": "NORMALIZED_LOCAL_WITNESS",
+    "hadith": "PENDING_EXTERNAL_FILE",
+    "torah": "EXTERNAL_REGISTER_ONLY",
+    "psalms": "EXTERNAL_REGISTER_ONLY",
+    "gospels": "EXTERNAL_REGISTER_ONLY"
+  },
+  "graph": {"status": "ACTIVE", "explicit_relations": true},
+  "methodology": {
+    "pending_is_not_zero": true,
+    "revelation_vs_identity_separated": true,
+    "text_vs_transmission_separated": true,
+    "metaphysical_claims_not_numeric": true
+  }
+}

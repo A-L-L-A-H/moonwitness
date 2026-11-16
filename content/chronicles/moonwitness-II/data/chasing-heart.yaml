@@ -1,0 +1,15 @@
+version: "0.1"
+
+chasing_heart:
+  - id: chasing_heart_001
+    title: "CHASING THE SIGNAL"
+    event: event_001
+    desire: "Follow what keeps pulling attention back."
+    pursuit: "Trace the connection instead of abandoning the question."
+    tension: "Longing grows where certainty is missing."
+    destination: "A deeper understanding of what matters."
+    canon_level: lore
+    source: USER_INPUT
+    provenance: "MoonWitness emotional narrative system"
+    visibility: public
+    status: review

@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  },
+  "include": [
+    "src",
+    "../../packages/lab-tools/src",
+    "../../packages/renderer-web/src",
+    "../../packages/renderer-agent/src",
+    "../../packages/renderer-voice/src",
+    "../../packages/inspector/src",
+    "../../packages/rir/src",
+    "../../packages/snapshot/src",
+    "../../packages/physics/src",
+    "../../packages/kernel/src"
+  ]
+}

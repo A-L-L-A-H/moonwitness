@@ -1,0 +1,4 @@
+import test from "node:test";import assert from "node:assert/strict";import {loadDataset} from "../src/lib/load.js";import {contextLeaderboard,scoreContext} from "../src/engine/context-scoring.js";
+test("all 25 profiles have context",()=>{const d=loadDataset();assert.equal(d.prophet_order.filter(id=>!!d.prophets[id]?.context).length,25)});
+test("context score is bounded and top rank is evidence-only",()=>{const d=loadDataset();const rows=contextLeaderboard(d);assert.equal(rows.length,25);assert.ok(rows.every(r=>r.context_score>=0&&r.context_score<=100));assert.ok(rows[0]!.note.includes("Evidence/provenance"));});
+test("modern geography is crosswalk, never nationality",()=>{const d=loadDataset();for(const id of d.prophet_order){const c=d.prophets[id]?.context;assert.ok(c?.guardrails.includes("MODERN_GEOGRAPHY_IS_CROSSWALK_NOT_NATIONALITY"));}});

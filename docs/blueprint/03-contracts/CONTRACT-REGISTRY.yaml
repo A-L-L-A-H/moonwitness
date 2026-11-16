@@ -1,0 +1,66 @@
+version: 3
+status: locked
+principles:
+  canonical_wire_contract: json-schema
+  canonical_wire_naming: camelCase
+  http_contract: openapi
+  validation: zod-or-json-schema
+  versioning: semver-for-packages-and-explicit-api-compatibility
+  one_contract_one_owner: true
+contracts:
+  - id: problem-details
+    schema: 03-contracts/schemas/problem.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-api, all-applications]
+    compatibility_note: retryable is required boolean; correlationId is canonical wire name
+  - id: research-run
+    schema: 03-contracts/schemas/research-run.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-api, moonwitness-runtime, moonwitness-worker, moonwitness-sdk, applications]
+  - id: evidence
+    schema: 03-contracts/schemas/evidence.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-corpus, moonwitness-cosmic, moonwitness-crayon, moonwitness-prophetic, applications]
+  - id: provenance
+    schema: 03-contracts/schemas/provenance.schema.json
+    owner: moonwitness-core
+    implementation_owner: moonwitness-cosmic
+    consumers: [moonwitness-api, moonwitness-corpus, moonwitness-cosmic, moonwitness-crayon, moonwitness-prophetic]
+  - id: workflow
+    schema: 03-contracts/schemas/workflow.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-api, moonwitness-runtime, moonwitness-worker, moonwitness-sdk]
+  - id: job
+    schema: 03-contracts/schemas/job.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-api, moonwitness-runtime, moonwitness-worker, moonwitness-sdk]
+  - id: event-envelope
+    schema: 03-contracts/schemas/event-envelope.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-runtime, moonwitness-worker, moonwitness-api]
+    compatibility_note: canonical wire fields use camelCase; event taxonomy is aligned to the schema
+  - id: pagination
+    schema: 03-contracts/schemas/pagination.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-api, moonwitness-sdk, applications]
+  - id: identity
+    schema: 03-contracts/schemas/identity.schema.json
+    owner: moonwitness-core
+    consumers: [moonwitness-api, moonwitness-runtime, moonwitness-sdk, applications]
+protocols:
+  http: canonical
+  openapi: canonical
+  sse: http-streaming-mode
+  async-events: internal
+  mcp: optional-adapter
+  grpc: exceptional-internal-adapter
+  websocket: exceptional-bidirectional-adapter
+  trpc: local-only-noncanonical
+  graphql: noncanonical-exception-only
+rules:
+  - no-duplicate-business-logic
+  - no-second-source-of-truth
+  - no-direct-db-contracts
+  - no-deep-cross-repository-imports
+  - no-generated-schema-modification-by-consumers
+  - canonical_wire_fields_use_camelCase

@@ -1,0 +1,105 @@
+{
+  "schema_version": "rocksoul.research-issue.v1",
+  "canonical_branch": "main",
+  "principle": "ISSUE FIRST. SOURCE SECOND. CANON LAST.",
+  "title": {
+    "automatic": "[AUTO-RESEARCH] {DOMAIN} · {TITLE}",
+    "manual": "[RESEARCH] {DOMAIN} · {TITLE}"
+  },
+  "lifecycle": [
+    "discovered",
+    "triaged",
+    "needs_sources",
+    "source_inspected",
+    "ready_for_observation",
+    "canonicalized",
+    "merged",
+    "rejected",
+    "duplicate"
+  ],
+  "required_sections": [
+    "visual_header",
+    "research_card",
+    "research_question",
+    "why_it_matters",
+    "discovery_snapshot",
+    "source_candidates",
+    "domain_lens",
+    "counterevidence_uncertainty",
+    "coverage_gaps",
+    "duplicate_check",
+    "cross_domain_routing",
+    "steward_gate",
+    "suggested_next_action",
+    "machine_metadata"
+  ],
+  "machine_metadata": {
+    "contract": "ROCKSOUL-RESEARCH-CONTRACT:v1",
+    "domain": "ROCKSOUL-RESEARCH-DOMAIN:{DOMAIN}",
+    "owner": "ROCKSOUL-RESEARCH-OWNER:{REPOSITORY}",
+    "origin": "ROCKSOUL-RESEARCH-ORIGIN:{ORIGIN}",
+    "fingerprint": "ROCKSOUL-RESEARCH-FP:{FINGERPRINT}",
+    "state": "ROCKSOUL-RESEARCH-STATE:{STATE}"
+  },
+  "domains": {
+    "STORY": {
+      "repository": "rocksoul-mftl",
+      "question": "What was told?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/archive-room.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-data.md",
+      "automated_scout_path": "scripts/research-scout.mjs"
+    },
+    "EVENT": {
+      "repository": "rocksoul-legend",
+      "question": "What happened?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/field-investigation.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-event.md"
+    },
+    "PERSON": {
+      "repository": "rocksoul-superhero",
+      "question": "Who was involved?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/evidence-desk.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-person.md"
+    },
+    "TEXT": {
+      "repository": "rocksoul-rgbl",
+      "question": "What does the exact source text say?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/source-trace.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-text.md"
+    },
+    "LAW": {
+      "repository": "rocksoul-aws",
+      "question": "What law applies?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/legal-archive.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-law.md"
+    },
+    "PERSPECTIVE": {
+      "repository": "rocksoul-jizz",
+      "question": "How is the world seeing it?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/data-observatory.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-data.md",
+      "automated_scout_path": "scripts/research-scout.mjs"
+    },
+    "RELATIONSHIP": {
+      "repository": "rocksoul-correlation",
+      "question": "How do reviewed records relate?",
+      "hero": "https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/correlation-sky.png",
+      "issue_template_path": ".github/ISSUE_TEMPLATE/research-relationship.md"
+    }
+  },
+  "invariants": [
+    "Every scheduled research discovery opens or updates an issue in the canonical owner repository before candidate or live/canonical promotion.",
+    "An issue is an operational research envelope, not canonical truth.",
+    "Source inspection must be explicit before source-scoped extraction.",
+    "Global discovery dedup does not erase legitimate domain-specific research views.",
+    "Cross-domain routing proposes work; it does not mint foreign canonical records.",
+    "Correlation receives event-driven reviewed relation proposals only after domain evidence exists.",
+    "Hero images are presentation only and carry no evidentiary meaning."
+  ],
+  "state_mapping": {
+    "steward_decision:stage_candidate": "needs_sources",
+    "steward_decision:needs_sources": "needs_sources",
+    "steward_decision:hold": "triaged",
+    "steward_decision:duplicate": "duplicate"
+  }
+}

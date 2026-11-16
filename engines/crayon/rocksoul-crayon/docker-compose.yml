@@ -1,0 +1,127 @@
+name: rocksoul-monorepo
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rocksoul_fastify_api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - DATABASE_URL=file:/app/data/sqlite.db
+      - FLOW_BASE_URL=http://flow:3003
+      - FLOW_INTERNAL_API_KEY=${FLOW_INTERNAL_API_KEY:-development-flow-internal-key}
+      - WEBHOOKS_BASE_URL=http://webhooks:3004
+      - WEBHOOKS_INTERNAL_API_KEY=${WEBHOOKS_INTERNAL_API_KEY:-development-webhooks-internal-key}
+    volumes:
+      - rocksoul_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:3000}
+    container_name: rocksoul_web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:5173/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: packages/scheduler/Dockerfile
+    container_name: rocksoul_scheduler
+    restart: unless-stopped
+    ports:
+      - "${SCHEDULER_PORT:-3002}:3002"
+    environment:
+      NODE_ENV: production
+      SCHEDULER_HOST: 0.0.0.0
+      SCHEDULER_PORT: 3002
+      SCHEDULER_DATABASE_URL: file:/app/data/scheduler.db
+      ROCKSOUL_API_BASE_URL: http://api:3000
+      WHATSAPP_BASE_URL: ${WHATSAPP_BASE_URL:-http://whatsapp:3001}
+    volumes:
+      - scheduler_data:/app/data
+    depends_on:
+      api:
+        condition: service_healthy
+
+  flow:
+    build:
+      context: .
+      dockerfile: packages/flow/Dockerfile
+    container_name: rocksoul_flow
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      FLOW_HOST: 0.0.0.0
+      FLOW_PORT: 3003
+      FLOW_DATABASE_URL: file:/app/data/flow.db
+      FLOW_INTERNAL_API_KEY: ${FLOW_INTERNAL_API_KEY:-development-flow-internal-key}
+      ROCKSOUL_API_BASE_URL: http://api:3000
+      SCHEDULER_BASE_URL: http://scheduler:3002
+      WHATSAPP_BASE_URL: http://whatsapp-gateway:3001
+    volumes:
+      - flow_data:/app/data
+    depends_on:
+      api:
+        condition: service_healthy
+
+  webhooks:
+    build:
+      context: .
+      dockerfile: packages/webhooks/Dockerfile
+    container_name: rocksoul_webhooks
+    restart: unless-stopped
+    ports:
+      - "${WEBHOOKS_PORT:-3004}:3004"
+    environment:
+      NODE_ENV: production
+      WEBHOOKS_HOST: 0.0.0.0
+      WEBHOOKS_PORT: 3004
+      WEBHOOKS_DATABASE_URL: file:/app/data/webhook.db
+      WEBHOOKS_INTERNAL_API_KEY: ${WEBHOOKS_INTERNAL_API_KEY:-development-webhooks-internal-key}
+      FLOW_BASE_URL: http://flow:3003
+      FLOW_INTERNAL_API_KEY: ${FLOW_INTERNAL_API_KEY:-development-flow-internal-key}
+    volumes:
+      - webhooks_data:/app/data
+    depends_on:
+      flow:
+        condition: service_started
+
+
+volumes:
+  rocksoul_data:
+    name: rocksoul_data
+  scheduler_data:
+    name: scheduler_data
+  flow_data:
+    name: flow_data
+  webhooks_data:
+    name: webhooks_data

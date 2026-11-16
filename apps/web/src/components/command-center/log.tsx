@@ -29,20 +29,20 @@ export function MissionLog({
 }: MissionLogProps) {
   const running = workflows.filter((w) => w.status === "Running").length;
   return (
-    <section aria-labelledby="cc-log" className="scroll-mt-24">
+    <section aria-labelledby="cc-log" className="@container scroll-mt-24">
       <SectionHeading id="cc-log" title="MISSION" accent="LOG" note={`${running} running`} />
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 @[36rem]:grid-cols-2 @[62rem]:grid-cols-3">
         <Card className="min-w-0 p-4">
           <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
             ACTIVE WORKFLOWS <Crown className="h-4 w-6 text-[var(--yellow)]" />
           </h3>
           <div className="divide-y divide-[var(--line)]">
             {workflows.map((w) => (
-              <div key={w.id} className="flex items-center gap-3 py-2.5">
+              <div key={w.id} className="flex flex-wrap items-center gap-3 py-2.5">
                 <Bolt className={`h-4 w-3 shrink-0 ${STATUS_TEXT[w.status]}`} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-bold text-zinc-200">{w.name}</p>
-                  <p className="truncate text-[10px] text-zinc-500">
+                  <p className="truncate text-[11px] text-zinc-400">
                     {w.status === "Paused"
                       ? "Paused by operator"
                       : w.status === "Succeeded"
@@ -92,7 +92,7 @@ export function MissionLog({
                   style={{ background: f.color }}
                 />
                 <p className="min-w-0 flex-1 text-xs leading-snug text-zinc-300">{f.text}</p>
-                <span className="shrink-0 text-[10px] text-zinc-600">{f.ago}</span>
+                <span className="shrink-0 text-[11px] text-zinc-400">{f.ago}</span>
               </div>
             ))}
             {feed.length === 0 && (
@@ -117,7 +117,7 @@ export function MissionLog({
                   !
                 </span>
                 <p className="min-w-0 flex-1 text-xs text-zinc-300">{a.text}</p>
-                <span className="text-[10px] text-zinc-600">{a.ago}</span>
+                <span className="text-[11px] text-zinc-400">{a.ago}</span>
                 <Button
                   type="button"
                   variant="ghost"
