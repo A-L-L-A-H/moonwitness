@@ -745,7 +745,6 @@ export function PreviewRoom({ roomId, onReturn, onNavigate, reducedMotion, syste
   const Icon = room.symbol;
   const roomDistrict = roomId as ArtworkDistrictId;
   const sceneArt = ROOM_SCENE_ART[roomDistrict];
-  const thumbArt = DISTRICT_THUMBNAILS[roomDistrict];
 
   return (
     <main className={`living-universe preview-room preview-room--${roomId}`} data-reduced-motion={reducedMotion}>
@@ -778,11 +777,6 @@ export function PreviewRoom({ roomId, onReturn, onNavigate, reducedMotion, syste
           <div className="room-viewport-frame">
             <img className="room-scene-artwork" src={sceneArt} alt="" />
             <div className="room-viewport-vignette" />
-            {thumbArt && (
-              <div className="room-viewport-inset">
-                <img src={thumbArt} alt="" />
-              </div>
-            )}
           </div>
           <div className="room-viewport-telemetry">
             <TelemetryWaveformSvg className="rs-waveform-svg room-telemetry-wave" />

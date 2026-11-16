@@ -699,6 +699,177 @@
   flex: 0 0 auto;
 }
 
+/* === UNIFIED HEADER LOCKUP & PREVIEW ROOM CONSISTENCY === */
+
+.world-wordmark {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.world-wordmark-copy {
+  display: block !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+  text-align: left;
+}
+
+.world-wordmark-copy b {
+  margin-left: 3px;
+  color: #e53e38;
+}
+
+.world-wordmark-copy small {
+  display: block !important;
+  margin-top: 4px !important;
+  color: #cfc5b4 !important;
+  font: 8.5px/1 "IBM Plex Mono", monospace !important;
+  letter-spacing: 0.16em !important;
+}
+
+.preview-room-copy {
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 3px solid #e53e38 !important;
+  background: linear-gradient(135deg, rgba(8, 9, 14, 0.88) 0%, rgba(8, 9, 14, 0.54) 76%, transparent 100%) !important;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+.preview-room-art {
+  border: 1px solid rgba(229, 62, 56, 0.36) !important;
+  border-left: 3px solid #e53e38 !important;
+  background: rgba(8, 9, 14, 0.88) !important;
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+}
+
+.return-threshold,
+.room-destination-nav button {
+  padding: 5px 14px !important;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+/* === UNIFIED BUTTONS, FILTERS, INPUTS, WAR ROOM, NOISE, MODALS === */
+
+.katana-cut-shell .riot-button {
+  background: linear-gradient(90deg, #e53e38 0%, #a8221d 100%) !important;
+  border: 1px solid #ff8b80 !important;
+  color: #f4eee4 !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%) !important;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+.katana-cut-shell .riot-button:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+.katana-cut-shell .riot-button:disabled {
+  background: rgba(24, 24, 30, 0.85) !important;
+  border-color: rgba(243, 235, 217, 0.16) !important;
+  color: #8f887d !important;
+}
+
+.katana-cut-shell .outline-button {
+  background: rgba(8, 9, 14, 0.82) !important;
+  border: 1px solid rgba(243, 235, 217, 0.22) !important;
+  color: #dfd6c7 !important;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+}
+
+.katana-cut-shell .outline-button:hover:not(:disabled),
+.katana-cut-shell .outline-button.selected {
+  border-color: #d7ff36 !important;
+  color: #d7ff36 !important;
+  background: rgba(215, 255, 54, 0.08) !important;
+}
+
+.katana-cut-shell .filter-strip button,
+.katana-cut-shell .filter-strip select {
+  background: rgba(8, 9, 14, 0.86) !important;
+  border: 1px solid rgba(243, 235, 217, 0.2) !important;
+  color: #c8bfb0 !important;
+  clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
+}
+
+.katana-cut-shell .filter-strip button.selected {
+  background: linear-gradient(90deg, #e53e38 0%, #a8221d 100%) !important;
+  border-color: #ff8b80 !important;
+  color: #f4eee4 !important;
+}
+
+.katana-cut-shell .filter-strip button.selected b {
+  color: #d7ff36 !important;
+}
+
+.katana-cut-shell input,
+.katana-cut-shell textarea,
+.katana-cut-shell select,
+.issue-dialog input,
+.issue-dialog textarea,
+.issue-dialog select {
+  background: rgba(6, 7, 11, 0.88) !important;
+  border-color: rgba(243, 235, 217, 0.2) !important;
+  color: #f4eee4 !important;
+}
+
+.katana-cut-shell input:focus,
+.katana-cut-shell textarea:focus,
+.katana-cut-shell select:focus,
+.issue-dialog input:focus,
+.issue-dialog textarea:focus,
+.issue-dialog select:focus {
+  border-color: #e53e38 !important;
+}
+
+.katana-cut-shell .milestone-board-head {
+  background: linear-gradient(90deg, rgba(229, 62, 56, 0.34) 0%, rgba(229, 62, 56, 0.06) 55%, rgba(8, 9, 14, 0.4) 100%) !important;
+  color: #f4eee4 !important;
+  border-bottom: 1px solid rgba(243, 235, 217, 0.14) !important;
+}
+
+.katana-cut-shell .noise-telemetry-strip {
+  background: rgba(6, 7, 11, 0.65) !important;
+  border-bottom: 1px solid rgba(229, 62, 56, 0.24) !important;
+}
+
+.katana-cut-shell .terminal-output {
+  background: rgba(5, 6, 9, 0.9) !important;
+  border: 1px solid rgba(229, 62, 56, 0.28) !important;
+}
+
+/* Uniform Katana Chamfer on ALL Modals */
+.issue-dialog,
+.settings-dialog,
+.git-confirm-dialog,
+.command-panel {
+  background: linear-gradient(155deg, rgba(13, 14, 21, 0.97) 0%, rgba(7, 8, 12, 0.96) 100%) !important;
+  border: 1px solid rgba(243, 235, 217, 0.24) !important;
+  border-left: 4px solid #e53e38 !important;
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.78) !important;
+}
+
+.settings-section {
+  background: rgba(6, 7, 11, 0.78) !important;
+  border: 1px solid rgba(243, 235, 217, 0.14) !important;
+  border-left: 2px solid rgba(229, 62, 56, 0.65) !important;
+}
+
+.issue-dialog .riot-button,
+.settings-dialog .outline-button,
+.git-confirm-dialog .riot-button,
+.git-confirm-dialog .outline-button {
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.issue-dialog .riot-button {
+  background: linear-gradient(90deg, #e53e38 0%, #a8221d 100%) !important;
+  color: #f4eee4 !important;
+}
+
 .katana-cut-shell .command-panel,
 .katana-cut-shell .issue-dialog,
 .katana-cut-shell .settings-dialog,
