@@ -1,0 +1,19 @@
+[package]
+name = "mtime-hilal"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+mtime-core = { path = "../mtime-core" }
+mtime-timescales = { path = "../mtime-timescales" }
+mtime-eop = { path = "../mtime-eop" }
+mtime-astro = { path = "../mtime-astro" }
+mtime-spk = { path = "../mtime-spk" }
+mtime-hijri = { path = "../mtime-hijri" }
+mtime-jpl = { path = "../mtime-jpl" }
+mtime-worship = { path = "../mtime-worship" }
+
+[lints]
+workspace = true

@@ -1,0 +1,32 @@
+version: 1
+status: locked
+states:
+  - draft
+  - experimental
+  - stable
+  - deprecated
+  - sunset
+  - removed
+rules:
+  draft:
+    public: false
+  experimental:
+    public: opt_in
+    compatibility: best_effort
+  stable:
+    public: true
+    compatibility: governed
+  deprecated:
+    public: true
+    replacement_or_reason: required
+    sunset_date: required
+  sunset:
+    public: false_or_restricted
+    migration_notice: required
+  removed:
+    callable: false
+compatibility:
+  breaking_change_requires: major_api_version_or_explicit_migration
+  additive_change: allowed_when_backward_compatible
+  deprecation_notice: required_before_sunset
+  schema_version: explicit

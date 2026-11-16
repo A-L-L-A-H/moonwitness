@@ -1,0 +1,34 @@
+version: 1
+status: locked
+context:
+  request_id:
+    scope: single_http_attempt
+    required: true
+  trace_id:
+    scope: distributed_trace
+    required: true
+  correlation_id:
+    scope: logical_operation
+    required: true
+  actor_id:
+    scope: authenticated_principal
+    required_when_authenticated: true
+  tenant_id:
+    scope: tenant_context
+    required_when_multitenant: true
+  research_run_id:
+    scope: research_lifecycle
+    required_for_research: true
+  job_id:
+    scope: durable_async_execution
+    required_for_jobs: true
+propagation:
+  http_headers:
+    request_id: x-request-id
+    correlation_id: x-correlation-id
+    trace_context: w3c-trace-context
+rules:
+  - preserve_existing_trace_context
+  - never_put_secrets_in_correlation_fields
+  - logs_must_include_available_context
+  - events_must_carry_correlation_and_trace_context

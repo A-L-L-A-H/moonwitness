@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { COVENANT_PILLARS, type WorldIdentifier } from "@/data/empire-registry";
 import { FourScripturesSanctum } from "./four-scriptures-sanctum";
@@ -164,10 +165,23 @@ export function CovenantAboutSection({
               <OctagramMandalaIcon className="h-6 w-6" />
               <span>A-L-L-A-H.COM &middot; EMPIRE OF THE LIGHT</span>
             </div>
+            <nav
+              aria-label="Sanctuary Dedicated Portals"
+              className="flex items-center gap-4 font-mono text-[10px] tracking-[0.16em] text-[#dfc07b]"
+            >
+              <Link href="/scriptures" className="hover:text-[#fff8e6]">
+                /SCRIPTURES
+              </Link>
+              <Link href="/codex" className="hover:text-[#fff8e6]">
+                /CODEX
+              </Link>
+              <Link href="/mtime" className="hover:text-[#fff8e6]">
+                /MTIME
+              </Link>
+            </nav>
             <div className="font-mono text-[10px] tracking-[0.18em] text-[#dfc07b]">
               {capabilityStatusLabel}
             </div>
-            <div>DREAM &middot; EXPLORE &middot; CREATE</div>
           </footer>
         </div>
       </div>

@@ -1,0 +1,36 @@
+{
+  "mode": "cloud-optional-local-first",
+  "default": "deterministic",
+  "providers": [
+    {
+      "id": "openai",
+      "auth_env": "OPENAI_API_KEY",
+      "model_env": "OPENAI_MODEL",
+      "default_model": "gpt-5.6",
+      "endpoint": "https://api.openai.com/v1/responses",
+      "docs": "https://platform.openai.com/docs/quickstart/make-your-first-api-request"
+    },
+    {
+      "id": "gemini",
+      "auth_env": "GEMINI_API_KEY",
+      "fallback_auth_env": "GOOGLE_API_KEY",
+      "model_env": "GEMINI_MODEL",
+      "default_model": "gemini-3.7-flash",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
+      "docs": "https://ai.google.dev/gemini-api/docs/get-started"
+    },
+    {
+      "id": "deterministic",
+      "default_model": null,
+      "note": "No external AI call; reproducible local fallback."
+    }
+  ],
+  "rules": [
+    "Never invent citations or manuscript facts.",
+    "Never convert PENDING into zero or false.",
+    "Separate direct source evidence from inference.",
+    "Every generated claim must link to a source or be marked inference.",
+    "Human review is required for high-impact contradiction findings.",
+    "API keys are server-side only and must never be exposed to the browser."
+  ]
+}

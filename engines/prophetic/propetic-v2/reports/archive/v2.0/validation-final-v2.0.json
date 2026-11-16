@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "legacy": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "counts": {
+      "prophets": 25,
+      "edges": 74,
+      "asma_edges": 37,
+      "supplemental_edges": 12,
+      "positive_rid": 25,
+      "unknown_name_roots": 5,
+      "divine_root_families": 18,
+      "auto_match_coverage": 25,
+      "world_trait_profiles": 23
+    }
+  },
+  "v2": {
+    "ok": true,
+    "errors": [],
+    "warnings": [],
+    "counts": {
+      "prophets": 25,
+      "provenance_claims": 399,
+      "event_nodes": 200,
+      "genealogy_relations": 8,
+      "conflict_cases": 3,
+      "preference_observations": 0,
+      "corpus_sources": 4
+    }
+  }
+}

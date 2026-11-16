@@ -43,12 +43,12 @@ export function StoryPlateGeometrySvg({
   readonly accentHex: string;
 }) {
   const plateSrc = panelNumber.includes("01")
-    ? "/art/story-plate-01.png"
+    ? "/art/story-plate-01.webp"
     : panelNumber.includes("02")
-      ? "/art/story-plate-02.png"
+      ? "/art/story-plate-02.webp"
       : panelNumber.includes("03")
-        ? "/art/story-plate-03.png"
-        : "/art/story-plate-04.png";
+        ? "/art/story-plate-03.webp"
+        : "/art/story-plate-04.webp";
 
   return (
     <div
@@ -104,7 +104,7 @@ export function Monocentric100CenterSvg({
       className="relative h-48 w-48 shrink-0 overflow-hidden rounded-full border border-[#d6b46c]/45 bg-[#05070e] shadow-[0_0_38px_rgba(223,192,123,0.16)]"
     >
       <Image
-        src="/art/tawhid-100center-orb.png"
+        src="/art/tawhid-100center-orb.webp"
         alt="100CENTER concentric pearl orb surrounded by three rings of 99 reflections"
         fill
         sizes="192px"
@@ -152,7 +152,7 @@ export function MeridianConstellationMapSvg({
       className="relative h-44 sm:h-48 w-full overflow-hidden border border-[#d6b46c]/30 bg-[#060912] shadow-[inset_0_0_28px_rgba(0,0,0,0.9)]"
     >
       <Image
-        src="/art/meridian-sky-chart.png"
+        src="/art/meridian-sky-chart.webp"
         alt=""
         fill
         sizes="(max-width: 1024px) 100vw, 520px"
@@ -329,7 +329,7 @@ export function AstrolabeOrreryMap({
       {/* Hand-crafted Brass & Obsidian Astrolabe Art Dial */}
       <div className="relative h-full w-full overflow-hidden rounded-full border border-[#d6b46c]/45 bg-[#040509] shadow-[0_0_64px_rgba(223,192,123,0.14),inset_0_0_40px_rgba(0,0,0,0.92)]">
         <Image
-          src="/art/astrolabe-orrery-plate.png"
+          src="/art/astrolabe-orrery-plate.webp"
           alt=""
           fill
           loading="eager"
@@ -516,11 +516,11 @@ export function DoorPortalGlyph({
 }
 
 const WORLD_ART_PLATES: Record<WorldIdentifier, string> = {
-  moonwitness: "/art/meridian-sky-chart.png",
-  arsy: "/art/astrolabe-orrery-plate.png",
-  qalam: "/art/nonagram-sanctuary-dial.png",
-  sidra: "/art/sidra-lote-constellation.png",
-  "rocksoul-dx": "/art/story-plate-03.png",
+  moonwitness: "/art/meridian-sky-chart.webp",
+  arsy: "/art/astrolabe-orrery-plate.webp",
+  qalam: "/art/nonagram-sanctuary-dial.webp",
+  sidra: "/art/sidra-lote-constellation.webp",
+  "rocksoul-dx": "/art/story-plate-03.webp",
 };
 
 /**
@@ -539,7 +539,7 @@ export function AstrolabeSealMedallion({
       className={`relative overflow-hidden rounded-full border border-[#f5dfa6]/45 bg-[#05070e] shadow-[0_0_26px_rgba(223,192,123,0.26)] ${className}`}
     >
       <Image
-        src="/art/astrolabe-orrery-plate.png"
+        src="/art/astrolabe-orrery-plate.webp"
         alt=""
         fill
         loading="eager"

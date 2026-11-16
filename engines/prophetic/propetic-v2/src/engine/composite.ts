@@ -1,0 +1,3 @@
+import type { PreferenceReport } from "../types.js";
+export interface CompositeInput{evidence:number;context:number;world_trait:number|null;preference:number|null}
+export function compositeResearchScore(i:CompositeInput,p:PreferenceReport){if(p.status!=="CALIBRATED"||i.preference===null)return{status:"DISABLED" as const,score:null,note:"Disabled until preference calibration threshold."};if(i.world_trait===null)return{status:"DISABLED" as const,score:null,note:"World-trait score unavailable."};const v=[i.evidence,i.context,i.world_trait,i.preference].map(x=>Math.max(1e-9,Math.min(100,x))/100),g=Math.exp(v.reduce((s,x)=>s+Math.log(x),0)/v.length);return{status:"ENABLED" as const,score:Number((100*g).toFixed(2)),note:"Research index, not moral/metaphysical rank."};}

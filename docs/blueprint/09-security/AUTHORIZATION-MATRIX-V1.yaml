@@ -1,0 +1,28 @@
+version: 1
+status: design-locked
+default: deny
+identities:
+  user: human interactive actor
+  service: trusted application/service identity
+  worker: asynchronous execution identity
+  agent: constrained AI/tool identity
+resources:
+  health:
+    read: [public]
+  research-run:
+    create: [user, service]
+    read: [user, service, worker, agent]
+    cancel: [user, service, worker]
+  evidence:
+    read: [user, service, worker, agent]
+  provenance:
+    read: [user, service, worker, agent]
+  corpus-artifact:
+    read: [service, worker]
+rules:
+  - authorization_is_resource_and_action_scoped
+  - tenant_scope_is_enforced_before_resource_access
+  - worker_access_is_job_scoped
+  - agent_access_uses_explicit_tool_allowlist
+  - no_client_supplied_owner_or_tenant_override
+  - privileged_operations_require_explicit_role_or_service_permission

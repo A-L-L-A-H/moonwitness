@@ -1,3 +1,5 @@
+import { getCloudflareWorkerEnv, type D1DatabaseLike } from "./cloudflare-runtime";
+
 export type ServiceHealthState = "online" | "degraded" | "offline";
 export type EcosystemRuntimeMode = "local-node" | "cloudflare-edge";
 
@@ -28,6 +30,25 @@ export interface EcosystemGitStatus {
   readonly lastCommitAge: string | null;
 }
 
+export interface CodexGovernanceSnapshot {
+  readonly source: "cloudflare-d1" | "unavailable";
+  readonly milestonesCount: number;
+  readonly tasksCount: number;
+  readonly docsCount: number;
+  readonly releasesCount: number;
+  readonly latestReleases: readonly {
+    readonly tag: string;
+    readonly title: string;
+    readonly channel: string;
+  }[];
+  readonly coreDocs: readonly {
+    readonly id: string;
+    readonly category: string;
+    readonly title: string;
+    readonly version: string;
+  }[];
+}
+
 export interface EcosystemSnapshot {
   readonly generatedAt: string;
   readonly runtimeMode: EcosystemRuntimeMode;
@@ -38,6 +59,7 @@ export interface EcosystemSnapshot {
   readonly services: readonly EcosystemServiceStatus[];
   readonly edges: readonly EcosystemEdgeStatus[];
   readonly git: EcosystemGitStatus;
+  readonly codexGovernance: CodexGovernanceSnapshot;
 }
 
 export type FetchLike = (input: string, init?: RequestInit) => Promise<Response>;
@@ -253,10 +275,76 @@ async function fetchJsonSafe(
   }
 }
 
+async function probeCodexGovernance(
+  explicitDb?: D1DatabaseLike | null,
+): Promise<CodexGovernanceSnapshot> {
+  const emptySnapshot: CodexGovernanceSnapshot = {
+    source: "unavailable",
+    milestonesCount: 0,
+    tasksCount: 0,
+    docsCount: 0,
+    releasesCount: 0,
+    latestReleases: [],
+    coreDocs: [],
+  };
+
+  try {
+    const db = explicitDb ?? (await getCloudflareWorkerEnv())?.DB ?? null;
+    if (!db) return emptySnapshot;
+
+    const [countsRes, releasesRes, docsRes] = await Promise.all([
+      db
+        .prepare(
+          "SELECT 'milestones' AS tbl, COUNT(*) AS cnt FROM codex_milestones UNION ALL SELECT 'tasks', COUNT(*) FROM codex_tasks UNION ALL SELECT 'docs', COUNT(*) FROM codex_docs UNION ALL SELECT 'releases', COUNT(*) FROM codex_releases",
+        )
+        .all<{ tbl?: string; cnt?: number }>(),
+      db
+        .prepare(
+          "SELECT tag_name, title, channel FROM codex_releases ORDER BY published_at DESC LIMIT 4",
+        )
+        .all<{ tag_name?: string; title?: string; channel?: string }>(),
+      db
+        .prepare(
+          "SELECT id, category, title, version FROM codex_docs ORDER BY updated_at DESC LIMIT 5",
+        )
+        .all<{ id?: string; category?: string; title?: string; version?: string }>(),
+    ]);
+
+    const countsMap = new Map<string, number>();
+    for (const row of countsRes.results ?? []) {
+      if (typeof row.tbl === "string" && typeof row.cnt === "number") {
+        countsMap.set(row.tbl, row.cnt);
+      }
+    }
+
+    return {
+      source: "cloudflare-d1",
+      milestonesCount: countsMap.get("milestones") ?? 0,
+      tasksCount: countsMap.get("tasks") ?? 0,
+      docsCount: countsMap.get("docs") ?? 0,
+      releasesCount: countsMap.get("releases") ?? 0,
+      latestReleases: (releasesRes.results ?? []).map((r) => ({
+        tag: String(r.tag_name ?? ""),
+        title: String(r.title ?? ""),
+        channel: String(r.channel ?? ""),
+      })),
+      coreDocs: (docsRes.results ?? []).map((d) => ({
+        id: String(d.id ?? ""),
+        category: String(d.category ?? ""),
+        title: String(d.title ?? ""),
+        version: String(d.version ?? ""),
+      })),
+    };
+  } catch {
+    return emptySnapshot;
+  }
+}
+
 export async function probeEcosystemHealth(options?: {
   readonly fetchFn?: FetchLike;
   readonly gitRunner?: GitRunnerLike;
   readonly runtimeMode?: EcosystemRuntimeMode;
+  readonly db?: D1DatabaseLike | null;
 }): Promise<EcosystemSnapshot> {
   const fetchFn = options?.fetchFn ?? ((input: string, init?: RequestInit) => fetch(input, init));
   const gitRunner = options?.gitRunner ?? defaultGitRunner;
@@ -268,14 +356,16 @@ export async function probeEcosystemHealth(options?: {
   const edgeTargets = buildEdgeTargets();
   const apiBase = targets.find((item) => item.id === "api")!.displayUrl;
 
-  const [services, edges, git, readyPayload, statsPayload, erasPayload] = await Promise.all([
-    Promise.all(targets.map((target) => probeTarget(target, fetchFn, skipLoopbackOnEdge))),
-    Promise.all(edgeTargets.map((target) => probeTarget(target, fetchFn, false))),
-    probeLocalGit(gitRunner),
-    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/readyz`, skipLoopbackOnEdge),
-    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/stats`, skipLoopbackOnEdge),
-    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/eras`, skipLoopbackOnEdge),
-  ]);
+  const [services, edges, git, readyPayload, statsPayload, erasPayload, codexGovernance] =
+    await Promise.all([
+      Promise.all(targets.map((target) => probeTarget(target, fetchFn, skipLoopbackOnEdge))),
+      Promise.all(edgeTargets.map((target) => probeTarget(target, fetchFn, false))),
+      probeLocalGit(gitRunner),
+      fetchJsonSafe(fetchFn, `${apiBase}/api/v1/readyz`, skipLoopbackOnEdge),
+      fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/stats`, skipLoopbackOnEdge),
+      fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/eras`, skipLoopbackOnEdge),
+      probeCodexGovernance(options?.db),
+    ]);
 
   const apiService = services.find((item) => item.id === "api");
   const apiOnline = apiService?.status === "online";
@@ -310,5 +400,6 @@ export async function probeEcosystemHealth(options?: {
     services,
     edges,
     git,
+    codexGovernance,
   };
 }

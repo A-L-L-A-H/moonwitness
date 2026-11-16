@@ -1,0 +1,44 @@
+version: 1
+status: active
+workstreams:
+  VISUAL-01:
+    repo: ArsyBelovedLabs/moonwitness-blueprint
+    issue: 28
+    state: active
+  VISUAL-02:
+    repo: ArsyBelovedLabs/moonwitness-frontend-platform
+    issue: 30
+    state: repository_gate_certified_figma_fidelity_pending
+    evidence:
+      package_version: 0.3.5
+      canonical_head: c3b3197896d792be317151a0f9566b036f9d53d7
+      hud_showcase_run: 33461785592
+      hud_showcase_artifact: 9783410423
+      hud_showcase_digest: sha256:9a1ffccaba0ca64db12fb68256ce65e19002a96c95bfe41ae9a8969974647c78
+      domain_instruments: 12
+      page_templates: 8
+      icons: 27
+      responsive_widths: [1440, 1280, 1024, 768, 430, 390, 360]
+  VISUAL-03:
+    repo: ArsyBelovedLabs/moonwitness-wheremythfadetolegend
+    issue: 9
+    state: implementation_ready_package_auth_blocked
+    evidence:
+      pr: 10
+      head: 1c4201defe51aea83eded1de30dd1ede4662c7ef
+      data_qa_run: 33468087621
+      data_qa_result: success
+      e2e_run: 33468087646
+      visual_contract_step: success
+      docker_run: 33468087663
+      package_blocker: GitHub Packages 403 permission_denied read_package
+      package_version_in_app: 0.3.2
+      target_package_after_auth: 0.3.5
+      hud_composition: ObservatorySceneChrome using canonical MoonWitnessIcon
+  VISUAL-04:
+    repo: ArsyBelovedLabs/moonwitness-design-system
+    issue: 15
+    state: package_access_blocked
+    blocker: GitHub Packages 403 permission_denied read_package
+blocking_w0_11: true
+next_gate: package_read_authorization_then_public_web_0_3_5_and_figma_pointer

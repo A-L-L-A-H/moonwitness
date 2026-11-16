@@ -1,0 +1,32 @@
+{
+  "release": "2.3.2",
+  "research_schema": "2.0",
+  "generated_at": "2026-08-23T06:09:30.328Z",
+  "environment": {
+    "node": "v22.16.0",
+    "npm": "10.9.2",
+    "platform": "linux",
+    "arch": "x64",
+    "hostname": "72232bcca315"
+  },
+  "gates": {
+    "mode": "OFFLINE_CORE_API",
+    "core_api_sqlite": "PASS",
+    "react_typecheck": "NOT_AVAILABLE",
+    "vite_build": "NOT_AVAILABLE",
+    "browser_e2e": "NOT_RUN",
+    "doctor": "PASS"
+  },
+  "artifacts": {
+    "api_build": true,
+    "web_build": false,
+    "sqlite_db": true,
+    "package_lock": false,
+    "playwright_report": false
+  },
+  "checksums": {
+    "dataset_sha256": "d31eda396c6cdfdc891f8185bee11b26cd95dbaa9abd6785f68c2bdc16c13e0f",
+    "sqlite_sha256": "4fd0ee9d80e7f26e52b9851fb8c5e0e4db86f34617ef422cf38a88c723bf3a3d",
+    "package_lock_sha256": null
+  }
+}

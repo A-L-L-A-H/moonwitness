@@ -1,0 +1,35 @@
+{
+  "version": "5.1.1",
+  "status": "AI_READY_LOCAL_RESEARCH_ENGINE",
+  "tests": "17 checks reported in v5.1 release; final score-gate policy added",
+  "ai": {
+    "mode": "cloud_optional_local_first",
+    "default": "deterministic",
+    "providers": [
+      "openai",
+      "gemini",
+      "deterministic"
+    ],
+    "ollama": false,
+    "provider_docs": "data/ai/provider.json"
+  },
+  "corpora": {
+    "quran": "LOCAL_NORMALIZED",
+    "hadith": "PENDING_EXTERNAL_FILE",
+    "torah": "EXTERNAL_REGISTER_ONLY",
+    "psalms": "EXTERNAL_REGISTER_ONLY",
+    "gospels": "EXTERNAL_REGISTER_ONLY"
+  },
+  "graph": {
+    "status": "ACTIVE",
+    "edges": 4
+  },
+  "scoring": {
+    "status": "EVIDENCE_GATED",
+    "manual_verification_required_for": [
+      "primary-source identity claims for Torah/Psalms/Gospels",
+      "manuscript dating/variant claims",
+      "high-impact contradiction findings"
+    ]
+  }
+}

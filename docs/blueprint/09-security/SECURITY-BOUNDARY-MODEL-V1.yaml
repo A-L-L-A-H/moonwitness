@@ -1,0 +1,29 @@
+version: 1
+status: hardening
+identities:
+  human_user: user_or_operator
+  service: machine_identity
+  worker: asynchronous_executor
+  agent: ai_or_tool_client
+  public_client: unauthenticated_or_publicly_scoped_consumer
+sessions:
+  web: secure_cookie_or_provider_managed_session
+  api: bearer_or_equivalent_token
+  service: short_lived_service_credentials
+authorization:
+  model: resource_and_action_based
+  default: deny
+  required_context: [principal, resource, action, tenant]
+  isolation: tenant_and_resource_scoped
+secrets:
+  source_control: forbidden
+  runtime: environment_or_secret_manager
+  logs: secret_redaction_required
+ai_tools:
+  default: deny
+  allowlist_required: true
+  outbound_access: explicit
+supply_chain:
+  lockfile_required: true
+  dependency_review: required
+  vulnerable_dependency_policy: documented

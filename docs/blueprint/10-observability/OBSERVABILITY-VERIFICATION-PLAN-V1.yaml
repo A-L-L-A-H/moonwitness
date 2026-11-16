@@ -1,0 +1,36 @@
+version: 1
+status: design-locked
+telemetry:
+  logs: structured
+  metrics: OpenTelemetry
+  traces: OpenTelemetry
+  transport: OTLP
+  correlation:
+    required: [request_id, trace_id]
+    research: [research_run_id]
+    job: [job_id]
+  audit:
+    immutable: true
+    required_for: [authz, admin, data-export, provenance, tool-execution]
+sli:
+  - api_availability
+  - api_latency_p95
+  - research_acceptance_latency
+  - job_success_rate
+  - queue_delay
+  - telemetry_delivery_success
+slo_policy:
+  targets_are_environment_specific: true
+  production_targets_require_baseline_measurement: true
+verification:
+  required_evidence:
+    - log_correlation
+    - trace_propagation
+    - metric_export
+    - audit_event_emission
+    - alert_route
+    - sensitive_data_redaction
+certification:
+  semantic_conventions: DEFINED
+  numeric_targets: BASELINE_ONLY
+  centralized_routing_test: PENDING_IMPLEMENTATION

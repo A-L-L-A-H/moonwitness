@@ -1,0 +1,34 @@
+version: 2
+status: locked
+wire_naming: camelCase
+standard: problem-details-compatible
+code_pattern: MW-<AREA>-<CONDITION>
+areas:
+  AUTH: authentication_and_authorization
+  CONTRACT: request_response_validation_and_compatibility
+  KNOWLEDGE: corpus_and_knowledge_operations
+  WORKFLOW: research_runs_and_workflows
+  RUNTIME: execution_and_worker_runtime
+  INFRA: dependency_and_platform_failures
+  AI: model_provider_and_inference
+  PROVENANCE: evidence_lineage_and_integrity
+  DATA: persistence_and_storage
+  RATE: quotas_and_throttling
+rules:
+  - every_api_error_has_stable_code
+  - stable_code_is_not_message_text
+  - errors_must_be_safe_for_public_clients
+  - internal_details_go_to_structured_logs
+  - retryability_must_be_machine_readable
+fields:
+  code: required
+  title: required
+  status: required
+  detail: optional_safe_summary
+  instance: optional
+  retryable: required_boolean
+  correlationId: required_when_available
+notes:
+  - correlationId is the canonical wire field name.
+  - retryable is always present and boolean in the canonical Problem Details contract.
+  - legacy snake_case terminology is not a parallel canonical wire representation.

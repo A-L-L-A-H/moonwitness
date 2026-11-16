@@ -1,0 +1,517 @@
+openapi: 3.2.0
+info:
+  title: MoonWitness API
+  version: 1.0.0
+  description: Canonical network contract for MoonWitness capabilities.
+servers:
+  - url: https://api.example.invalid
+    description: Placeholder; environment-specific deployment supplies the real base URL.
+tags:
+  - name: Health
+  - name: ResearchRuns
+  - name: Workflows
+  - name: Jobs
+  - name: Evidence
+  - name: Knowledge
+  - name: Analysis
+  - name: Metadata
+paths:
+  /v1/health:
+    get:
+      tags: [Health]
+      operationId: getHealth
+      summary: Return service liveness status.
+      security: []
+      responses:
+        '200':
+          description: Healthy service.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /v1/readiness:
+    get:
+      tags: [Health]
+      operationId: getReadiness
+      summary: Return dependency readiness status.
+      security: []
+      responses:
+        '200':
+          description: Dependencies are ready.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          description: A required dependency is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /v1/research-runs:
+    get:
+      tags: [ResearchRuns]
+      operationId: listResearchRuns
+      summary: List research runs.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Research run page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchRunPage'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+    post:
+      tags: [ResearchRuns]
+      operationId: createResearchRun
+      summary: Create a durable research run.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateResearchRunRequest'
+      responses:
+        '202':
+          description: Research run accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchRun'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+  /v1/research-runs/{researchRunId}:
+    get:
+      tags: [ResearchRuns]
+      operationId: getResearchRun
+      summary: Retrieve a research run.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/ResearchRunId'
+      responses:
+        '200':
+          description: Research run.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchRun'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/research-runs/{researchRunId}/cancel:
+    post:
+      tags: [ResearchRuns]
+      operationId: cancelResearchRun
+      summary: Cancel a queued or running research run.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/ResearchRunId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Research run cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchRun'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/research-runs/{researchRunId}/events:
+    get:
+      tags: [ResearchRuns]
+      operationId: streamResearchRunEvents
+      summary: Stream research-run events using Server-Sent Events.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/ResearchRunId'
+      responses:
+        '200':
+          description: Server-Sent Events stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/workflows:
+    post:
+      tags: [Workflows]
+      operationId: createWorkflow
+      summary: Create a durable workflow.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkflowRequest'
+      responses:
+        '202':
+          description: Workflow accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+  /v1/workflows/{workflowId}:
+    get:
+      tags: [Workflows]
+      operationId: getWorkflow
+      summary: Retrieve a workflow.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/WorkflowId'
+      responses:
+        '200':
+          description: Workflow.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/workflows/{workflowId}/cancel:
+    post:
+      tags: [Workflows]
+      operationId: cancelWorkflow
+      summary: Cancel a workflow.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/WorkflowId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '200':
+          description: Workflow cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workflow'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/jobs:
+    get:
+      tags: [Jobs]
+      operationId: listJobs
+      summary: List jobs.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Job page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobPage'
+  /v1/jobs/{jobId}:
+    get:
+      tags: [Jobs]
+      operationId: getJob
+      summary: Retrieve a job.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/JobId'
+      responses:
+        '200':
+          description: Job.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/evidence:
+    get:
+      tags: [Evidence]
+      operationId: listEvidence
+      summary: List evidence records.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Evidence page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidencePage'
+  /v1/evidence/{evidenceId}:
+    get:
+      tags: [Evidence]
+      operationId: getEvidence
+      summary: Retrieve an evidence record.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/EvidenceId'
+      responses:
+        '200':
+          description: Evidence record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/knowledge/search:
+    get:
+      tags: [Knowledge]
+      operationId: searchKnowledge
+      summary: Search materialized knowledge documents.
+      x-authorization-boundary: deployment
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema: { type: string }
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Cursor'
+      responses:
+        '200':
+          description: Knowledge search page.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgePage'
+  /v1/knowledge/{knowledgeId}:
+    get:
+      tags: [Knowledge]
+      operationId: getKnowledge
+      summary: Retrieve a materialized knowledge document.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/KnowledgeId'
+      responses:
+        '200':
+          description: Knowledge document.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeDocument'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /v1/analysis:
+    post:
+      tags: [Analysis]
+      operationId: submitAnalysis
+      summary: Submit an analysis as a durable research run.
+      x-authorization-boundary: deployment
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalysisRequest'
+      responses:
+        '202':
+          description: Analysis accepted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResearchRun'
+        '400':
+          $ref: '#/components/responses/InvalidRequest'
+  /v1/metadata/capabilities:
+    get:
+      tags: [Metadata]
+      operationId: getCapabilities
+      summary: List active API capabilities.
+      security: []
+      responses:
+        '200':
+          description: Active capabilities.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CapabilityList'
+  /v1/metadata/versions:
+    get:
+      tags: [Metadata]
+      operationId: getVersions
+      summary: List contract and runtime versions.
+      security: []
+      responses:
+        '200':
+          description: Version metadata.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionMetadata'
+components:
+  parameters:
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      schema: { type: string }
+    ResearchRunId:
+      name: researchRunId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    WorkflowId:
+      name: workflowId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    JobId:
+      name: jobId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    EvidenceId:
+      name: evidenceId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    KnowledgeId:
+      name: knowledgeId
+      in: path
+      required: true
+      schema: { type: string, minLength: 1 }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 1, maxLength: 255 }
+  schemas:
+    Health:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+    ResearchRun:
+      $ref: '../../03-contracts/schemas/research-run.schema.json'
+    Workflow:
+      $ref: '../../03-contracts/schemas/workflow.schema.json'
+    Job:
+      $ref: '../../03-contracts/schemas/job.schema.json'
+    Evidence:
+      $ref: '../../03-contracts/schemas/evidence.schema.json'
+    ProblemDetails:
+      $ref: '../../03-contracts/schemas/problem.schema.json'
+    CreateResearchRunRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        caseId: { type: [string, 'null'] }
+        correlationId: { type: [string, 'null'] }
+        traceId: { type: [string, 'null'] }
+    ResearchRunPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ResearchRun' }
+        nextCursor: { type: [string, 'null'] }
+    CreateWorkflowRequest:
+      type: object
+      additionalProperties: false
+      required: [kind]
+      properties:
+        kind: { type: string, minLength: 1 }
+        inputRef: { type: string }
+    JobPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Job' }
+        nextCursor: { type: [string, 'null'] }
+    EvidencePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Evidence' }
+        nextCursor: { type: [string, 'null'] }
+    KnowledgeDocument:
+      type: object
+      additionalProperties: false
+      required: [id, sourceId]
+      properties:
+        id: { type: string, minLength: 1 }
+        sourceId: { type: string, minLength: 1 }
+        title: { type: string }
+        content: { type: string }
+        updatedAt: { type: string, format: date-time }
+    KnowledgePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/KnowledgeDocument' }
+        nextCursor: { type: [string, 'null'] }
+    AnalysisRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        caseId: { type: [string, 'null'] }
+        inputRef: { type: [string, 'null'] }
+        text: { type: [string, 'null'] }
+        correlationId: { type: [string, 'null'] }
+        traceId: { type: [string, 'null'] }
+    CapabilityList:
+      type: object
+      additionalProperties: false
+      required: [capabilities]
+      properties:
+        capabilities:
+          type: array
+          items: { type: string }
+    VersionMetadata:
+      type: object
+      additionalProperties: false
+      required: [api, openapi]
+      properties:
+        api: { type: string }
+        openapi: { type: string }
+        node: { type: string }
+  responses:
+    InvalidRequest:
+      description: Invalid request.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    NotFound:
+      description: Not found.
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }

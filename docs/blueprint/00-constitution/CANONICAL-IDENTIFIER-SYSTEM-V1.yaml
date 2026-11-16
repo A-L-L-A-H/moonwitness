@@ -1,0 +1,19 @@
+version: 1
+status: locked
+purpose: Stable machine-readable identities for architecture entities; names and paths may evolve without changing identity.
+formats:
+  capability: CAP-<DOMAIN>-<NNN>
+  contract: CON-<DOMAIN>-<NNN>
+  api_operation: API-<DOMAIN>-<NNN>
+  event: EVT-<DOMAIN>-<NNN>
+  job: JOB-<DOMAIN>-<NNN>
+  data_store: DATA-<DOMAIN>-<NNN>
+  package: PKG-<DOMAIN>-<NNN>
+  repository: REPO-<DOMAIN>-<NNN>
+  decision: ADR-<NNN>
+rules:
+  - ids_are_immutable
+  - ids_are_not_derived_from_repository_names
+  - renamed_entities_keep_their_ids
+  - one_active_owner_per_id
+  - references_must_use_ids_when_crossing_document_boundaries

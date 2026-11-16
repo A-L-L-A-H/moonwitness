@@ -1,0 +1,11 @@
+import assert from "node:assert/strict"; import fs from "node:fs";
+const root=new URL("../",import.meta.url).pathname;
+const app=fs.readFileSync(root+"apps/web/src/App.tsx","utf8");
+const pkg=JSON.parse(fs.readFileSync(root+"apps/web/package.json","utf8"));
+const comp=JSON.parse(fs.readFileSync(root+"apps/web/components.json","utf8"));
+assert.equal(pkg.dependencies.react,"18.3.1"); assert.ok(pkg.devDependencies.vite); assert.ok(pkg.devDependencies.tailwindcss);
+assert.equal(comp.style,"new-york"); assert.equal(comp.rsc,false);
+for(const label of ["Profile","Provenance","Timeline & Relations","Leaderboards","Four Corpus","Architecture & Docs"]) assert.ok(app.includes(label),label);
+for(const route of ["api.prophets","api.prophet","api.leaderboards","api.corpus","api.docs","api.provenance","api.timeline","api.events","api.genealogy"]) assert.ok(app.includes(route),route);
+for(const c of ["button.tsx","card.tsx","badge.tsx","tabs.tsx","table.tsx","input.tsx"]) assert.ok(fs.existsSync(root+"apps/web/src/components/ui/"+c),c);
+console.log("React/Vite/shadcn/Tailwind UI contract: PASS");

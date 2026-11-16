@@ -1,0 +1,38 @@
+{
+  "fixtureId": "crayon-decision-robustness-v1",
+  "datasetStatus": "synthetic-development-only-not-empirical",
+  "legacyEvidence": {
+    "repository": "bjo163/ALLAH-CRAYON-RGBL-ENGINE",
+    "ref": "dev",
+    "commit": "085ce7077607c2ce1213f124496b97ba0fad707e",
+    "path": "engine/src/research/robustness.ts"
+  },
+  "cases": [
+    {
+      "id": "HUM-ROB-01",
+      "context": { "risk": "low", "reversibility": "reversible" },
+      "scenarios": [
+        { "id": "busy", "label": "Person is overloaded", "status": "live", "decisionKey": "ask neutrally and wait", "rationale": "Non-response alone does not establish intention." },
+        { "id": "avoidant", "label": "Person is intentionally avoiding contact", "status": "live", "decisionKey": "ask neutrally and wait", "rationale": "A low-pressure clarification is still proportionate." }
+      ],
+      "expected": { "classification": "robust", "recommendation": "proceed-with-bounds", "consensusRatio": 1 }
+    },
+    {
+      "id": "JUS-ROB-01",
+      "context": { "risk": "high", "reversibility": "irreversible" },
+      "scenarios": [
+        { "id": "account-a", "label": "Account A is accurate", "status": "live", "decisionKey": "sanction", "rationale": "If A is accurate, sanction may be justified." },
+        { "id": "account-b", "label": "Account B is accurate", "status": "live", "decisionKey": "do not sanction yet", "rationale": "If B is accurate, sanction would be unjust." }
+      ],
+      "expected": { "classification": "fragile", "recommendation": "stop-high-consequence-action", "consensusRatio": 0.5 }
+    },
+    {
+      "id": "EMPTY-LIVE-01",
+      "context": { "risk": "medium", "reversibility": "reversible" },
+      "scenarios": [
+        { "id": "rejected", "label": "Rejected scenario", "status": "rejected", "decisionKey": "ignore", "rationale": "Not live." }
+      ],
+      "expected": { "classification": "blocked", "recommendation": "gather-discriminating-evidence", "consensusRatio": 0 }
+    }
+  ]
+}

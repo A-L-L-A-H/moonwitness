@@ -1,0 +1,11 @@
+import fs from "node:fs";
+import type { ConflictDataset, CorpusRegistry, DocumentationRegistry, GenealogyGraph, PreferenceDataset, SourceEditionRegistry, TimelineDataset } from "../types.js";
+import { conflictsPath, corpusRegistryPath, documentationRegistryPath, genealogyPath, preferencePath, sourceEditionsPath, timelinePath } from "./paths.js";
+const read=<T>(p:string)=>JSON.parse(fs.readFileSync(p,"utf8")) as T;
+export const loadCorpusRegistry=()=>read<CorpusRegistry>(corpusRegistryPath);
+export const loadDocumentationRegistry=()=>read<DocumentationRegistry>(documentationRegistryPath);
+export const loadSourceEditions=()=>read<SourceEditionRegistry>(sourceEditionsPath);
+export const loadGenealogy=()=>read<GenealogyGraph>(genealogyPath);
+export const loadTimeline=()=>read<TimelineDataset>(timelinePath);
+export const loadConflicts=()=>read<ConflictDataset>(conflictsPath);
+export const loadPreferenceDataset=()=>read<PreferenceDataset>(preferencePath);

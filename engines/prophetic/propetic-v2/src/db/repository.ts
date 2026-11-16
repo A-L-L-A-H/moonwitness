@@ -1,0 +1,3 @@
+import type { Dataset, EventNode, GenealogyGraph, ProvenanceIndex } from "../types.js";
+export interface ResearchRepository{dataset():Dataset;prophet(id:string):Dataset["prophets"][string]|null;provenance():ProvenanceIndex;events():EventNode[];genealogy():GenealogyGraph}
+export class InMemoryResearchRepository implements ResearchRepository{constructor(private d:Dataset,private p:ProvenanceIndex,private e:EventNode[],private g:GenealogyGraph){}dataset(){return this.d}prophet(id:string){return this.d.prophets[id]??null}provenance(){return this.p}events(){return this.e}genealogy(){return this.g}}

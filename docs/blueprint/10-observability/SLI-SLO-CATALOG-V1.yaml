@@ -1,0 +1,34 @@
+version: 1
+status: baseline
+principle: technical_health_and_research_quality_are_separate
+slis:
+  - id: api.availability
+    measurement: successful_http_requests / total_http_requests
+  - id: api.latency
+    measurement: p95_request_duration
+  - id: research.acceptance_latency
+    measurement: time_from_create_to_accepted
+  - id: job.success_rate
+    measurement: succeeded_jobs / terminal_jobs
+  - id: worker.queue_delay
+    measurement: time_from_enqueue_to_start
+  - id: telemetry.delivery
+    measurement: emitted_spans_logs_metrics_accepted / emitted
+slos:
+  - id: api-availability
+    target: 99.9%
+    window: 30d
+  - id: api-p95-latency
+    target: '<= 500ms for interactive non-streaming reads'
+    window: 30d
+  - id: job-success
+    target: '>= 99% excluding terminal business failures'
+    window: 30d
+  - id: telemetry-delivery
+    target: '>= 99%'
+    window: 30d
+rules:
+  - targets_are_initial_baselines
+  - production_targets_must_be_revalidated_after_load_testing
+  - no_slo_claim_without_measurement_source
+  - research_correctness_is_not_inferred_from_slo_success

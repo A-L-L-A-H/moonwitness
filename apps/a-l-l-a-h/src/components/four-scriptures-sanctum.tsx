@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { FOUR_CORPUS_CONCORDANCE, FOUR_CORPUS_POLICY } from "@/data/empire-canon-codex";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
@@ -17,6 +19,7 @@ export function FourScripturesSanctum({
   readonly quietMode?: boolean;
   readonly onInspectCorpusDoor?: () => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const [selectedCode, setSelectedCode] =
     useState<(typeof FOUR_CORPUS_POLICY.corpora)[number]["code"]>("SRC-TOR");
   const [selectedThemeId, setSelectedThemeId] = useState<string>(FOUR_CORPUS_CONCORDANCE[0]!.id);
@@ -45,7 +48,9 @@ export function FourScripturesSanctum({
             TAURAT · ZABUR · INJĪL · AL-QUR’ĀN
           </h3>
           <p className="mt-3 max-w-3xl font-serif text-base text-[#e6decb] leading-relaxed">
-            {FOUR_CORPUS_POLICY.neutralityPrinciple}
+            {locale === "id"
+              ? "Keempat kitab suci bersumber dari Pencipta Yang Esa (ALLAH). Kajian perbandingan meneliti saksi teks tanpa merasa paling unggul, menghormati nurani tanpa paksaan (QS 2:256), dan menjaga kesetaraan antarumat."
+              : FOUR_CORPUS_POLICY.neutralityPrinciple}
           </p>
           <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 border border-[#d6b46c]/30 bg-[#0a0d16] px-4 py-1.5 font-mono text-[10.5px] tracking-[0.14em] text-[#f5dfa6]">
             <span>{FOUR_CORPUS_POLICY.invariant}</span>
@@ -137,15 +142,25 @@ export function FourScripturesSanctum({
                 {selectedCorpus.invariant}
               </p>
             </div>
-            {onInspectCorpusDoor && (
-              <button
-                type="button"
-                onClick={onInspectCorpusDoor}
-                className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.16em] text-[#fff4d2] uppercase hover:text-white cursor-pointer"
+            <div className="flex flex-col gap-2">
+              <Link
+                href="/scriptures"
+                className="btn-luxe-secondary inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[#f5dfa6] uppercase hover:text-white"
               >
-                INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
-              </button>
-            )}
+                {locale === "id"
+                  ? "BUKA STUDIO 4 KITAB & PENCARI AYAT ›"
+                  : "OPEN 4-SCRIPTURE PARALLEL STUDIO ›"}
+              </Link>
+              {onInspectCorpusDoor && (
+                <button
+                  type="button"
+                  onClick={onInspectCorpusDoor}
+                  className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[#fff4d2] uppercase hover:text-white cursor-pointer"
+                >
+                  INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

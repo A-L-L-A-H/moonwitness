@@ -1,0 +1,144 @@
+version: 1
+status: BLOCKED_PRODUCTION_MCP_ROUTE
+
+identity:
+  service_name: MoonWitness Pencil
+  repository: ArsyBelovedLabs/moonwitness-pencil
+  design_master_id: MW-UI-MASTER-V1
+  role: FALLBACK_EDITOR_AND_REMOTE_MCP_APP
+
+service:
+  supplied_origin: "http://pencil.moonwitness.biz.id/"
+  preferred_secure_origin: "https://pencil.moonwitness.biz.id/"
+  expected_health_endpoint: "https://pencil.moonwitness.biz.id/health"
+  expected_mcp_endpoint: "https://pencil.moonwitness.biz.id/mcp"
+  expected_rpc_endpoint: "https://pencil.moonwitness.biz.id/rpc"
+  route_evidence:
+    repository_path: packages/mcp/src/server.ts
+    routes: [/health, /rpc, /mcp]
+    http_binary: openpencil-mcp-http
+  external_probe:
+    workflow: .github/workflows/moonwitness-mcp-probe.yml
+    run_id: 33497902226
+    artifact_id: 9796472183
+    artifact_digest: "sha256:6be79511364b759ab5bd92c306e2bdb8ff06bde4afaf187416b41f5a9e6a55db"
+    dns:
+      state: PASS
+      resolved_ip: 188.245.160.150
+    http_origin:
+      state: PASS_REDIRECTS_TO_HTTPS
+    https_origin:
+      state: PASS
+      status_code: 200
+      response_class: OPENPENCIL_SPA
+    health:
+      state: PASS
+      status_code: 200
+      reported_service: moonwitness-pencil
+      reported_version: 0.13.2
+    mcp:
+      state: FAIL_MISROUTED_TO_SPA
+      status_code: 200
+      observed_response_class: OPENPENCIL_SPA_HTML
+      expected_response_class: MCP_TRANSPORT_OR_AUTH_REQUIRED
+  deployment_drift:
+    deployed_version: 0.13.2
+    connected_repository_version: 0.14.0
+    state: PRODUCTION_BEHIND_SOURCE
+  current_reachability:
+    state: HTTPS_REACHABLE_MCP_ROUTE_BLOCKED
+    blocker: PRODUCTION_MCP_PROXY_ROUTE_NOT_CONFIGURED
+    blocker_issue: ArsyBelovedLabs/moonwitness-pencil#3
+    note: "DNS, HTTPS origin and health are externally reachable. /mcp currently falls through to the SPA and cannot be used for ChatGPT MCP tool discovery."
+
+chatgpt:
+  integration_model: SKILL_PLUS_CUSTOM_MCP_APP
+  custom_app_name: MoonWitness Pencil
+  developer_mode:
+    purpose: "Connect ChatGPT to the remote Pencil MCP service for read/write design actions."
+    target_endpoint: "https://pencil.moonwitness.biz.id/mcp"
+    state: BLOCKED_UNTIL_MCP_ROUTE_AND_AUTH_TOOL_SCAN_PASS
+    auth_required: true
+    secret_policy: "Never place MCP auth tokens in Blueprint, Git, skill files, screenshots, CI artifacts, or chat."
+  skill:
+    id: moonwitness-pencil
+    source_repository: ArsyBelovedLabs/moonwitness-pencil
+    source_path: skills/moonwitness-pencil/SKILL.md
+    merged_prs: [1, 2]
+    state: SOURCE_MERGED_BUNDLE_READY_NOT_INSTALLED
+    ci_run_id: 33498049800
+    artifact_id: 9796527039
+    bundle_sha256: 78e8a89dba1e87e48e4af2f2218ba3a78711589f91906eefcadfa4f3970b7942
+    purpose: "Reusable MoonWitness-specific design governance and Pencil/Figma handoff workflow."
+    install_note: "The bundle is validated and uploadable; this contract does not claim that ChatGPT has installed it."
+
+mcp_security:
+  implementation_default: AUTH_ENABLED
+  implementation_evidence: packages/mcp/src/server.ts
+  remote_policy:
+    - use HTTPS for ChatGPT remote MCP
+    - keep authentication enabled
+    - test read-only discovery before write actions
+    - keep eval/code-execution capability disabled unless explicitly reviewed and required
+    - restrict filesystem access with OPENPENCIL_MCP_ROOT when filesystem tools are enabled
+    - never expose auth token values in evidence
+
+master_governance:
+  canonical_master_id: MW-UI-MASTER-V1
+  existing_figma_candidate: hA5BaFjlsYMs9wficQv5iP
+  pencil_role: "Editor of the same logical master lineage, never a second master."
+  forbidden_while_candidate_unresolved:
+    - create a blank replacement master
+    - promote a Pencil file by filename alone
+    - call new_document for a new canonical master
+  handoff_rule: "Open/import the accepted .fig lineage, use moonwitness-canonical-ui-master.pen when needed, preserve page/component/frame identity, then lint/diff before acceptance."
+
+tool_contract:
+  confirmed_mcp_tools:
+    - list_documents
+    - save_file
+    - open_file
+    - new_document
+    - get_codegen_prompt
+  note: "Core OpenPencil design read/write tools are also exposed through ALL_TOOLS. Runtime Scan Tools remains authoritative after production routing is fixed."
+  moonwitness_policy:
+    list_documents: ALLOWED_READ_FIRST
+    open_file: ALLOWED_FOR_EXISTING_MASTER_LINEAGE
+    save_file: ALLOWED_FOR_REVIEWED_SCOPED_CHANGES
+    new_document: BLOCKED_BY_DESIGN_MASTER_CREATION_GATE
+    get_codegen_prompt: REQUIRED_BEFORE_DESIGN_TO_CODE_WHEN_AVAILABLE
+
+production_routing:
+  state: BLOCKED_EXTERNAL_DEPLOYMENT_CONFIG_OWNER_NOT_DISCOVERED
+  operational_contract: ArsyBelovedLabs/moonwitness-pencil/docs/ops/MOONWITNESS-MCP-PRODUCTION-ROUTING.md
+  blocker_issue: ArsyBelovedLabs/moonwitness-pencil#3
+  source_search_result: "No connected organization source matched the production domain/IP or openpencil-mcp-http, OPENPENCIL_MCP_ROOT, port 7600, nginx, Caddy or Hetzner deployment configuration."
+  required_path_ownership:
+    root_and_assets: OPENPENCIL_SPA
+    health: SERVICE_HEALTH
+    mcp: AUTHENTICATED_OPENPENCIL_MCP_HTTP_BACKEND
+    rpc: AUTHENTICATED_OPENPENCIL_BROWSER_RPC_BACKEND
+  rule: "Do not invent or apply a reverse-proxy configuration until the authoritative live VPS/control-plane configuration is identified."
+
+authority:
+  - 07-ui-ux/DESIGN-MASTER-REGISTRY-V1.yaml
+  - 07-ui-ux/FIGMA-COMPONENT-FIRST-WORKFLOW-V1.md
+  - 07-ui-ux/FIGMA-SHOWCASE-SCREEN-MATRIX-V1.md
+  - 07-ui-ux/USER-FLOW-AND-INTERACTION-MODEL-V1.md
+  - ArsyBelovedLabs/moonwitness-frontend-platform
+
+acceptance_before_remote_use:
+  completed:
+    - external DNS resolution succeeds
+    - valid HTTPS is available
+    - /health responds
+    - Agent Skill source is merged and validated bundle exists
+  blocked:
+    - /mcp routes to MCP backend instead of SPA
+    - /rpc routes to RPC backend instead of SPA
+    - MCP authentication is externally verified
+    - ChatGPT Scan Tools returns expected design tools
+    - Pencil app/browser is attached for document actions
+    - list_documents identifies intended lineage
+    - controlled read succeeds
+    - controlled non-destructive write/save roundtrip succeeds

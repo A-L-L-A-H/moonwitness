@@ -1,0 +1,11 @@
+{
+  "version":"2.0",
+  "status":"REFERENCE_ONLY_NO_PINNED_RAW_CORPUS",
+  "rule":"Exact quotation/token/root ingestion requires a pinned edition_id and checksum. Reference-only claims may operate without raw text ingestion.",
+  "editions":[
+    {"edition_id":"quran-reference-v2","source_id":"quran","work":"Al-Qur'an","language":"Arabic","status":"REFERENCE_ONLY","raw_text_ingested":false,"note":"Surah:ayah references are normalized; no raw corpus edition is silently assumed."},
+    {"edition_id":"taurat-witness-reference-v2","source_id":"taurat","work":"Torah/Pentateuch textual witness","language":"Hebrew textual tradition","status":"REFERENCE_ONLY","raw_text_ingested":false,"note":"Exact edition/translation must be pinned before computational quotation or lexical analysis."},
+    {"edition_id":"zabur-witness-reference-v2","source_id":"zabur","work":"Psalms textual witness","language":"Hebrew textual tradition","status":"REFERENCE_ONLY","raw_text_ingested":false,"note":"Psalm attribution remains separate metadata."},
+    {"edition_id":"injil-witness-reference-v2","source_id":"injil","work":"Canonical Gospel textual witness","language":"Greek textual tradition; historical Semitic milieu remains separate","status":"REFERENCE_ONLY","raw_text_ingested":false,"note":"Extant Gospel witness remains distinct from reconstructed original Injil."}
+  ]
+}

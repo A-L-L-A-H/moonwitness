@@ -1,0 +1,12 @@
+{
+  "corpus_id": "quran-uthmani-local-texlive",
+  "record_count": 6236,
+  "format": "JSONL",
+  "text_field": "text_uthmani",
+  "source_file": "/usr/share/texlive/texmf-dist/tex/latex/quran/qurantext-uthmani.def",
+  "source_license": "LaTeX Project Public License (LPPL), as stated in source file header",
+  "source_provenance": "Installed TeX Live quran package; qurantext-uthmani.def",
+  "note": "This is a local corpus extracted from an installed TeX Live package. It is NOT claimed to be a Tanzil download. It is stored as a reproducible local witness and should be cross-checked against the project-selected primary digital source.",
+  "sha256": "e89e2d88c6c28305c8f16ef36a100b2b7a27bfcb90a5391ece19b3c1dc71a991",
+  "upstream_documentation": "https://tanzil.net/docs/Uthmani"
+}

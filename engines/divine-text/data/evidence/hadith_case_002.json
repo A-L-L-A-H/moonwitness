@@ -1,0 +1,20 @@
+{
+  "case_id": "HADITH-METHODOLOGY-001",
+  "claim": "Classical Muslim hadith scholarship explicitly treats isnad and narrator trustworthiness as part of report evaluation.",
+  "source_type": "HADITH_METHODOLOGY",
+  "source_level": "L4",
+  "sources": [
+    "SRC-MUSLIM-INTRO-ISNAD",
+    "SRC-MUSLIM-ABOUT-METHODOLOGY"
+  ],
+  "evidence": [
+    "Sahih Muslim's introduction contains sections on the chain of transmission and trustworthy narrators.",
+    "The introduction also contains material on identifying defects in transmitters.",
+    "A separate methodological overview describes narrator evaluation and attention to wording differences."
+  ],
+  "contrary_or_limitations": [
+    "The existence of a classical criticism method does not establish that every transmitted hadith is authentic.",
+    "A classical grading and the project's historical score are deliberately separate fields."
+  ],
+  "score_status": "pending"
+}

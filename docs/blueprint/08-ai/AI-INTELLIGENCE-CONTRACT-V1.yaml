@@ -1,0 +1,35 @@
+version: 1
+status: hardening
+principles:
+  provider_agnostic: true
+  model_output_is_untrusted: true
+  evidence_before_claim: true
+  reproducibility_metadata_required: true
+  evaluation_is_first_class: true
+boundaries:
+  retrieval:
+    owner: moonwitness-corpus
+    interface: typed-capability-and-http-contract
+  context_assembly:
+    owner: moonwitness-runtime
+    inputs: [retrieved-evidence, task, policy]
+  model_execution:
+    owner: intelligence-provider-adapter
+    rule: provider-sdk-hidden-behind-interface
+  tools:
+    owner: capability-specific
+    rule: explicit-allowlist
+  evaluation:
+    owner: moonwitness-crayon
+    requires: [dataset-id, metric-version, run-id]
+  provenance:
+    owner: moonwitness-core
+    implementation: capability-specific
+metadata:
+  required: [model-id, provider, prompt-version, input-hash, output-hash, token-usage, cost, latency, run-id]
+rules:
+  - no_provider_sdk_in_domain_package
+  - no_untracked_tool_execution
+  - no_claim_without_traceable_support
+  - prompts_and_policies_are_versioned
+  - model_changes_require_evaluation

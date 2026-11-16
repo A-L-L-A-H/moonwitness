@@ -1,0 +1,26 @@
+version: 1
+status: hardening
+standard: opentelemetry
+transport: otlp
+signals:
+  logs: structured
+  metrics: required
+  traces: required
+  audit: required
+correlation:
+  required: [trace_id, request_id]
+  async: propagate_trace_and_correlation_context
+semantic_dimensions:
+  required: [service, environment, operation, capability, outcome]
+security:
+  secret_redaction: required
+  tenant_identifiers: policy-controlled
+quality:
+  technical_health_must_not_be_used_as_epistemic_quality_proxy: true
+centralization:
+  collection: collector_or_provider_endpoint
+  storage: externalized
+  application_must_not_become_telemetry_database: true
+slo:
+  required_for: [api, workflow, worker, critical_ui]
+  catalog_owned_by: governance-and-operations

@@ -1,0 +1,51 @@
+version: 1
+status: design-locked
+base_path: /v1
+resources:
+  health:
+    capability: network
+    methods: [GET]
+    purpose: liveness and service identity
+  research-runs:
+    capability: workflow
+    methods: [GET, POST]
+    operations: [create, get, list]
+    state_contract: research-run
+  research-run-events:
+    capability: workflow
+    methods: [GET]
+    transport: sse
+    parent: research-runs
+  evidence:
+    capability: provenance-contract
+    methods: [GET]
+    operations: get, list
+  knowledge:
+    capability: knowledge
+    methods: [GET]
+    operations: search, get
+  analysis:
+    capability: intelligence
+    methods: [POST]
+    operations: submit
+    async_by_default: true
+  workflows:
+    capability: workflow
+    methods: [GET, POST, POST]
+    operations: create, get, cancel
+  jobs:
+    capability: async-execution
+    methods: [GET]
+    operations: get, list
+  metadata:
+    capability: contracts
+    methods: [GET]
+    operations: capabilities, versions
+rules:
+  - every_endpoint_maps_to_exactly_one_capability
+  - no_endpoint_writes_cross_repository_database_directly
+  - mutation_endpoints_require_idempotency_when_retryable
+  - long_running_work_returns_accepted_execution_reference
+  - streaming_is_sse_under_same_http_api
+  - external_consumers_use_openapi
+  - internal_packages_do_not_call_http_when_in_process

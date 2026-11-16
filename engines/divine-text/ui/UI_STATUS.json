@@ -1,0 +1,8 @@
+{
+  "stack": "React + Vite + TypeScript",
+  "component_style": "shadcn-inspired local components",
+  "local_only": true,
+  "backend": "Node local API on port 8787",
+  "autopilot": true,
+  "views": ["overview","autopilot","claims","corpus","evidence","scoring","reports"]
+}

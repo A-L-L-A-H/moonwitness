@@ -1,0 +1,17 @@
+{
+  "collection": "hadith",
+  "status": "PENDING_EXTERNAL_FILE",
+  "target_sources": [
+    {
+      "name": "AhmedBaset/hadith-json",
+      "version": "v1.2.0",
+      "url": "https://github.com/AhmedBaset/hadith-json/tree/v1.2.0"
+    },
+    {
+      "name": "Hugging Face Bukhari mirror",
+      "url": "https://huggingface.co/datasets/meeAtif/hadith_datasets"
+    }
+  ],
+  "local_ingestion": false,
+  "note": "Do not fabricate missing corpus data. Ingest raw files when available."
+}

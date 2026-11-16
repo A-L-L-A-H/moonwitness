@@ -1,0 +1,12 @@
+{
+  "release": "2.3.0",
+  "research_schema": "2.0",
+  "gates": {
+    "mode": "FULL_DEPENDENCY_BROWSER_E2E",
+    "core_api_sqlite": "PASS",
+    "react_typecheck": "PASS",
+    "vite_build": "PASS",
+    "browser_e2e": "PASS",
+    "doctor": "PASS"
+  }
+}

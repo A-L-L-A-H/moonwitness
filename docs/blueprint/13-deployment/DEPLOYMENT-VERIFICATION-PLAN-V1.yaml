@@ -1,0 +1,48 @@
+version: 1
+status: design-locked
+targets:
+  local:
+    runtime: node
+    persistence: local_or_test_container
+  web-preview:
+    hosting: vercel
+    application: moonwitness-wheremythfadetolegend
+    persistence: nonproduction_or_none_for_public_static_web
+  web-production:
+    hosting: vercel
+    application: moonwitness-wheremythfadetolegend
+    persistence: none-direct
+  api-production:
+    hosting: coolify
+    application: moonwitness-api
+    runtime: docker-compose
+    persistence: managed_postgresql_or_declared_private_service
+  legacy-web:
+    application: moonwitness-web
+    hosting: paused
+checks:
+  - config_schema_valid
+  - secrets_not_in_source
+  - health_endpoint
+  - readiness_endpoint
+  - canonical_openapi_available
+  - web_static_build_smoke
+  - web_api_client_contract_smoke
+  - docker_entrypoint_smoke
+  - graceful_shutdown
+  - telemetry_export
+  - migration_startup_policy
+  - rollback_artifact_available
+rules:
+  provider_specific_logic_must_be_adapter_only: true
+  same_platform_logic_across_supported_targets: true
+  local_disk_must_not_be_durable_data_store: true
+  environment_configuration_must_be_explicit: true
+  web_must_not_access_database_directly: true
+  public_web_must_use_canonical_api_client: true
+certification:
+  design: COMPLETE
+  web_vercel_execution_evidence: PENDING_EXTERNAL
+  api_coolify_execution_evidence: PENDING_EXTERNAL
+  postgresql_execution_evidence: PENDING_EXTERNAL
+  legacy_web: PAUSED

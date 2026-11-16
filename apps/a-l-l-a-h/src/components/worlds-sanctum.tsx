@@ -964,7 +964,7 @@ export function WorldsSanctum({
                             className="relative h-60 sm:h-64 w-full overflow-hidden border border-[#d6b46c]/30 bg-[#060912] shadow-[inset_0_0_28px_rgba(0,0,0,0.88)]"
                           >
                             <Image
-                              src="/art/sidra-lote-constellation.png"
+                              src="/art/sidra-lote-constellation.webp"
                               alt=""
                               fill
                               sizes="(max-width: 768px) 100vw, 480px"

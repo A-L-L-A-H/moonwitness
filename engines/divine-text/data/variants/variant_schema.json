@@ -1,0 +1,15 @@
+{
+  "variant_types": {
+    "orthographic": "spelling/script-form difference",
+    "reading": "reading tradition difference",
+    "lexical": "word-level difference",
+    "syntactic": "grammatical/structural difference",
+    "substantive": "difference with potentially meaningful semantic impact"
+  },
+  "severity": {
+    "low": "primarily orthographic",
+    "medium": "may affect reading or nuance",
+    "high": "potentially affects substantive meaning"
+  },
+  "rule": "Never label a variant as a contradiction without contextual and textual review."
+}

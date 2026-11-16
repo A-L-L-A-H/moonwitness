@@ -20,6 +20,8 @@ import {
   GOD_PROMISE_THREE_TRACKS,
   MASTER_DNA_WORLDS_META,
   MONWITNESS_XII_FACELESS_GUIDES,
+  MTIME_HISTORICAL_BENCHMARKS,
+  MTIME_OBSERVER_SITES,
   NINE_CANON_CHARACTERS,
   ORIGINAL_CREW_ARCHETYPES,
   OWNER_FOUR_LINE_MANIFESTO,
@@ -43,6 +45,11 @@ import {
   WINGS_TEN_ARRAY,
   WORLD_PATCH_HIGHLIGHTS,
   WORLD_PATCHES_REGISTRY,
+  computeMTimeSolarLunarEstimate,
+  evaluateMTimeCriterion,
+  normalizeArabicScript,
+  searchCompactQuranTuples,
+  stripUthmaniMacros,
 } from "./index";
 
 describe("@moonwitness/canon SSOT invariants", () => {
@@ -141,5 +148,41 @@ describe("@moonwitness/canon SSOT invariants", () => {
     for (const item of CODEX_SEARCH_INDEX) {
       expect(doorIds.has(item.doorId)).toBe(true);
     }
+  });
+
+  it("evaluates M-Time calendar rules cleanly with semantic guards & estimates lunar geometry", () => {
+    const metResult = evaluateMTimeCriterion("MABIMS_ID_2026", {
+      moonAltitudeDeg: 3.1,
+      elongationDeg: 6.5,
+      semantics: { altitudeBasis: "TOPOCENTRIC", elongationBasis: "GEOCENTRIC_CENTER_TO_CENTER" },
+    });
+    expect(metResult.verdict).toBe("MET");
+    expect(metResult.computedAction).toBe("BEGIN_NEW_MONTH_NEXT_LOCAL_DAY");
+
+    const incompatible = evaluateMTimeCriterion("MABIMS_ID_2026", {
+      moonAltitudeDeg: 4.0,
+      elongationDeg: 7.0,
+      semantics: { altitudeBasis: "TOPOCENTRIC", elongationBasis: "GEOCENTRIC_APPARENT" },
+    });
+    expect(incompatible.verdict).toBe("SEMANTICALLY_INCOMPATIBLE");
+    expect(incompatible.computedAction).toBe("UNKNOWN");
+
+    const est = computeMTimeSolarLunarEstimate("2026-03-19T11:00:00Z", MTIME_OBSERVER_SITES[0]!);
+    expect(est.julianDayUtc).toBeGreaterThan(2461000);
+    expect(MTIME_HISTORICAL_BENCHMARKS.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("normalizes Arabic Uthmani records and searches Quran tuples accurately", () => {
+    const cleaned = stripUthmaniMacros("بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ\\qt@no{﴿١﴾");
+    expect(cleaned).not.toContain("qt@no");
+    expect(cleaned).toContain("﴿١﴾");
+    expect(normalizeArabicScript("ٱللَّهُ")).toContain("الله");
+
+    const sample = [
+      [1, 1, "Al-Fatihah", cleaned] as const,
+      [2, 256, "Al-Baqarah", "لَآ إِكْرَاهَ فِى ٱلدِّينِ"] as const,
+    ];
+    expect(searchCompactQuranTuples(sample, "2:256")[0]?.reference).toBe("2:256");
+    expect(searchCompactQuranTuples(sample, "الله")[0]?.surah).toBe(1);
   });
 });

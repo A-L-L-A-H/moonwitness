@@ -1,0 +1,42 @@
+version: 1
+status: hardening
+layers:
+  tokens:
+    owner: moonwitness-frontend-platform
+    output: css-variables-and-consumable-token-data
+  primitives:
+    owner: moonwitness-frontend-platform
+    rules: [accessible, keyboard-safe, semantic, theme-aware]
+  domain_kits:
+    owner: moonwitness-frontend-platform
+    rules: [domain-aware-but-app-independent]
+  applications:
+    owners: [moonwitness-wheremythfadetolegend, moonwitness-commandcenter, moonwitness-crayon-lab]
+    legacy_or_paused: [moonwitness-web]
+    rules: [application-composition-only]
+visual_policy:
+  themes: [light, dark]
+  design_source: shadcn-compatible
+  new_base_components: prefer-base-ui-when-appropriate
+  legacy_components: preserve-if-compatible-during-migration
+a11y:
+  target: WCAG-2.2-AA
+  keyboard_navigation: required
+  focus_visibility: required
+  reduced_motion: required
+  semantic_labels: required
+state_model:
+  required_states: [loading, empty, error, success, partial, offline]
+  async_progress: consistent-with-research-run-state
+web_application:
+  primary_repository: moonwitness-wheremythfadetolegend
+  canonical_client: moonwitness-sdk
+  transport_boundary: moonwitness-api
+  historical_data_source: github-versioned-json
+  direct_database_access: forbidden
+forbidden:
+  - domain-database-access-from-ui
+  - provider-specific-ui-core
+  - application-business-logic-in-primitives
+  - duplicate-design-token-values
+  - direct-web-database-access

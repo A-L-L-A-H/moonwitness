@@ -1,0 +1,39 @@
+version: 1
+status: selection-baseline
+purpose: Define the legacy behaviors that must be captured as reproducible fixtures before Gen2 implementation can be certified.
+repositories:
+  - repository: bjo163/moonwitness
+    ref: dev
+    areas: [research-run-lifecycle, api-boundary, application-contracts]
+    fixture_requirement: capture representative request-response and lifecycle transitions
+  - repository: bjo163/moonwitness-corpus
+    ref: dev
+    areas: [upstream-validation, materialization, reproducible-build, release-artifacts]
+    fixture_requirement: capture deterministic corpus outputs and validation reports
+  - repository: bjo163/cosmic
+    ref: dev
+    areas: [semantic-analysis, temporal-analysis, mizan-analysis, explanation, witness-provenance]
+    fixture_requirement: capture deterministic analysis inputs/outputs and provenance chain
+  - repository: bjo163/ALLAH-CRAYON-RGBL-ENGINE
+    ref: dev
+    areas: [methodology, scoring, robustness, lab-measurement]
+    fixture_requirement: capture scoring vectors, edge cases and robustness reports
+  - repository: bjo163/propetic
+    ref: main
+    areas: [research-domain, scoring, offline-contract, handoff]
+    fixture_requirement: capture domain results, scoring and handoff behavior
+cross_repo:
+  - id: api-contract-parity
+    source: legacy-behavior
+    target: gen2-openapi-contract
+  - id: provenance-integrity
+    source: legacy-witness-chain
+    target: gen2-provenance-contract
+  - id: serverless-docker-equivalence
+    source: canonical-capability
+    target: two-runtime-execution
+rules:
+  - fixture_inputs_are_versioned
+  - expected_outputs_are_reviewed
+  - non_deterministic_fields_are_normalized_explicitly
+  - any_intentional_behavior_change_requires_adr_and_fixture_update

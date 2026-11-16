@@ -1,0 +1,23 @@
+{
+  "domain": "human",
+  "question": "I made a mistake. What can I understand and change?",
+  "observations": [
+    "I interrupted someone during a disagreement",
+    "My voice became louder"
+  ],
+  "evidence": [
+    "The other person stopped speaking"
+  ],
+  "patterns": [
+    "When I feel criticized, I react before listening"
+  ],
+  "actors": ["self", "other person"],
+  "intentions": ["I wanted to defend myself"],
+  "impacts": ["The other person was not fully heard"],
+  "values": ["respect", "responsibility"],
+  "problems": ["I interrupted and escalated the conversation"],
+  "possibilities": ["listen", "clarify", "apologize", "practice a slower response"],
+  "nextActions": ["apologize and ask the other person to finish their point"],
+  "benefits": ["clearer communication", "repair of trust"],
+  "cautions": ["Do not turn one mistake into a permanent identity label"]
+}

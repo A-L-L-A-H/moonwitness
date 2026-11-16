@@ -1,0 +1,53 @@
+version: 1
+status: design-locked
+order:
+  - canonicality
+  - ownership
+  - contract
+  - security
+  - observability
+  - reliability
+  - performance
+  - deployment
+  - migration
+  - governance
+checks:
+  canonicality:
+    - one_active_artifact_per_decision
+    - historical_versions_marked_superseded
+  ownership:
+    - one_owner_per_capability
+    - one_owner_per_persistence_boundary
+  contract:
+    - all_canonical_schemas_parse
+    - fixtures_validate
+    - operation_catalog_matches_openapi
+  security:
+    - deny_by_default
+    - tenant_isolation
+    - secret_scan
+  observability:
+    - correlation_fields_defined
+    - audit_policy_defined
+  reliability:
+    - retry_idempotency_defined
+    - timeout_defined
+    - recovery_evidence_plan_defined
+  performance:
+    - workload_profiles_defined
+    - numeric_targets_marked_as_measured_or_baseline
+  deployment:
+    - serverless_boundary_defined
+    - docker_boundary_defined
+  migration:
+    - source_ref_recorded
+    - capability_mapping_recorded
+    - parity_method_defined
+  governance:
+    - ADR_change_control
+    - owner_mapping
+    - required_ci_checks
+failure:
+  unresolved_conflict: BLOCK_GENESIS
+  ambiguous_owner: BLOCK_GENESIS
+  second_network_door: BLOCK_GENESIS

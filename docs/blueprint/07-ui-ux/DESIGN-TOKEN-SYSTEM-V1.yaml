@@ -1,0 +1,24 @@
+version: 1
+status: locked
+source: semantic-design-tokens
+modes:
+  - light
+  - dark
+  - reduced-motion
+  - high-contrast
+layers:
+  primitive:
+    scope: raw_values
+  semantic:
+    scope: intent_and_role
+  component:
+    scope: component_states
+  application:
+    scope: product_specific_composition
+rules:
+  - applications_consume_semantic_tokens
+  - raw_color_values_are_not_repeated_in_application_code
+  - light_and_dark_share_semantics_not_literal_values
+  - spacing_typography_radius_shadow_follow_token_scale
+  - focus_visible_is_mandatory
+  - destructive_actions_have_distinct_semantics

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ECOSYSTEM_RUNTIME_CATALOG } from "@/data/empire-canon-codex";
 import {
@@ -398,6 +399,53 @@ export function DockMatrixSection({
                         </span>
                       </div>
                     )}
+
+                    {telemetry.codexGovernance?.source === "cloudflare-d1" && (
+                      <div className="border border-[#d6b46c]/25 bg-[#060911] px-3 py-2.5 space-y-1.5 font-mono text-[10px]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[#dfc07b]">
+                          <span>CLOUDFLARE D1 · SOVEREIGN-CODEX-DB LIVE</span>
+                          <span className="text-[#fff6df]">
+                            {telemetry.codexGovernance.milestonesCount} MILESTONES ·{" "}
+                            {telemetry.codexGovernance.tasksCount} TASKS ·{" "}
+                            {telemetry.codexGovernance.docsCount} DOCS ·{" "}
+                            {telemetry.codexGovernance.releasesCount} RELEASES
+                          </span>
+                        </div>
+                        {telemetry.codexGovernance.latestReleases.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 text-[9.5px] text-[#e0d7c4]">
+                            {telemetry.codexGovernance.latestReleases.slice(0, 2).map((rel) => (
+                              <span
+                                key={rel.tag}
+                                className="border border-[#d6b46c]/25 bg-[#0a0f1c] px-2 py-0.5 text-[#f5dfa6]"
+                              >
+                                {rel.tag} ({rel.channel})
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Link
+                        href="/scriptures"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#f5dfa6] uppercase"
+                      >
+                        4-SCRIPTURE STUDIO &rsaquo;
+                      </Link>
+                      <Link
+                        href="/mtime"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#f5dfa6] uppercase"
+                      >
+                        M-TIME OBSERVATORY &rsaquo;
+                      </Link>
+                      <Link
+                        href="/codex"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase"
+                      >
+                        CODEX DOORS &rsaquo;
+                      </Link>
+                    </div>
 
                     {(CONFIGURED_WEB_URL ||
                       telemetry.services.find((s) => s.id === "web")?.status === "online") && (

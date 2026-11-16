@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "claims": [
+    {
+      "claim_id": "QURAN-001",
+      "topic": "Revelation Identity",
+      "claim": "The Quran presents itself as revelation from Allah.",
+      "source_type": "QURAN",
+      "source_level": "L6",
+      "reference": "15:9",
+      "status": "QURAN_EXPLICIT",
+      "score": null
+    },
+    {
+      "claim_id": "TORAH-001",
+      "topic": "Torah Revelation",
+      "claim": "The Quran says Allah sent down the Torah with guidance and light.",
+      "source_type": "QURAN",
+      "source_level": "L6",
+      "reference": "5:44",
+      "status": "QURAN_EXPLICIT",
+      "score": null
+    },
+    {
+      "claim_id": "ZABUR-001",
+      "topic": "Zabur Revelation",
+      "claim": "The Quran says Dawud was given the Zabur.",
+      "source_type": "QURAN",
+      "source_level": "L6",
+      "reference": "4:163;17:55",
+      "status": "QURAN_EXPLICIT",
+      "score": null
+    },
+    {
+      "claim_id": "INJIL-001",
+      "topic": "Injil Revelation",
+      "claim": "The Quran says Allah gave Isa the Injil with guidance and light.",
+      "source_type": "QURAN",
+      "source_level": "L6",
+      "reference": "5:46",
+      "status": "QURAN_EXPLICIT",
+      "score": null
+    },
+    {
+      "claim_id": "INJIL-002",
+      "topic": "Injil Text Identification",
+      "claim": "Matthew, Mark, Luke and John are identical to the Injil given to Isa.",
+      "source_type": "CHRISTIAN_TRADITION",
+      "source_level": "L1",
+      "reference": null,
+      "status": "TO_BE_VERIFIED",
+      "score": null
+    },
+    {
+      "claim_id": "TORAH-002",
+      "topic": "Torah Text Identification",
+      "claim": "The modern Torah/Pentateuch is identical to the Torah given to Musa.",
+      "source_type": "TEXTUAL_HISTORY",
+      "source_level": "L1",
+      "reference": null,
+      "status": "TO_BE_VERIFIED",
+      "score": null
+    }
+  ]
+}

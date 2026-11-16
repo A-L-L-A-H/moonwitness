@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 222 47% 11%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 11%;
+    --radius: 0.85rem;
+  }
+  .dark {
+    --background: 222 47% 5%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 7%;
+    --card-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222 47% 11%;
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 212 27% 84%;
+  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground antialiased; min-width: 320px; }
+}
+
+@layer components {
+  .eyebrow { @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground; }
+  .metric { @apply text-3xl font-semibold tracking-tight; }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  .profile-special { @apply border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 to-transparent; }
+  .seal-badge { @apply flex items-center gap-3 rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-transparent p-3; }
+  .seal-badge-icon { @apply text-xl text-amber-500; }
+  .seal-badge-title { @apply text-sm font-semibold text-amber-600 dark:text-amber-400; }
+  .seal-badge-desc { @apply text-xs text-muted-foreground; }
+  .stats-card { @apply rounded-lg border bg-muted/20 p-4; }
+  .etymology-hero { @apply rounded-lg border bg-muted/10 p-5; }
+  .etymology-script { @apply flex flex-col items-center justify-center rounded-lg border bg-background/60 p-4; }
+  .etymology-root { @apply text-3xl font-semibold tracking-tight; }
+  .etymology-script-sub { @apply mt-1 text-xs text-muted-foreground; }
+  .identity-timeline { @apply overflow-x-auto; }
+  .timeline-node { @apply min-w-[160px] rounded-lg border bg-muted/20 p-3; }
+  .timeline-node-header { @apply flex items-center justify-between; }
+  .timeline-node-level { @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground; }
+  .timeline-node-evidence { @apply rounded-full border px-2 py-0.5 text-[10px] text-muted-foreground; }
+  .timeline-node-value { @apply mt-2 text-sm font-semibold; }
+  .timeline-node-note { @apply mt-1 text-xs text-muted-foreground; }
+  .timeline-node-refs { @apply mt-2 text-[11px] text-muted-foreground; }
+}

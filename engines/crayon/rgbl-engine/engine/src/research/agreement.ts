@@ -1,0 +1,9 @@
+import type {AgreementReport} from "./types.js";
+import type {RgblLevel} from "../core/types.js";
+const LEVELS:RgblLevel[]=["R1","G2","B3","L4"];
+const zeroMatrix=()=>Object.fromEntries(LEVELS.map(a=>[a,Object.fromEntries(LEVELS.map(b=>[b,0]))])) as Record<RgblLevel,Record<RgblLevel,number>>;
+const safe=(n:number,d:number)=>d===0?0:n/d;
+export function rawAgreement(a:RgblLevel[],b:RgblLevel[]):number{if(a.length!==b.length||a.length===0)throw new Error("label arrays must have equal non-zero length");return a.filter((x,i)=>x===b[i]).length/a.length;}
+export function cohenKappa(a:RgblLevel[],b:RgblLevel[]):number{const observed=rawAgreement(a,b);const n=a.length;const expected=LEVELS.reduce((sum,l)=>sum+(a.filter(x=>x===l).length/n)*(b.filter(x=>x===l).length/n),0);if(expected===1)return observed===1?1:0;return(observed-expected)/(1-expected);}
+export function agreementReport(reference:RgblLevel[],comparison:RgblLevel[]):AgreementReport{if(reference.length!==comparison.length||reference.length===0)throw new Error("label arrays must have equal non-zero length");const confusion=zeroMatrix();reference.forEach((actual,i)=>{const predicted=comparison[i];if(predicted)confusion[actual][predicted]+=1;});const perLevel=Object.fromEntries(LEVELS.map(level=>{const tp=confusion[level][level];const fp=LEVELS.reduce((s,row)=>s+(row===level?0:confusion[row][level]),0);const fn=LEVELS.reduce((s,col)=>s+(col===level?0:confusion[level][col]),0);const precision=safe(tp,tp+fp),recall=safe(tp,tp+fn),f1=(precision+recall)===0?0:(2*precision*recall)/(precision+recall);return[level,{precision,recall,f1,support:LEVELS.reduce((s,col)=>s+confusion[level][col],0)}];})) as AgreementReport["perLevel"];return{n:reference.length,rawAgreement:rawAgreement(reference,comparison),cohenKappa:cohenKappa(reference,comparison),confusion,perLevel};}
+export const repeatedRunStability=(first:RgblLevel[],second:RgblLevel[])=>rawAgreement(first,second);

@@ -1,0 +1,41 @@
+version: 1
+status: hardening
+canonical_door: https
+contract: openapi-3.2
+transport:
+  request_response: https
+  streaming: sse
+  websocket: exception-only
+resources:
+  research-runs:
+    capability: workflow
+    operations: [create, get, cancel, list, events]
+  evidence:
+    capability: contracts-or-domain-owner
+    operations: [get, list]
+  corpus:
+    capability: knowledge
+    operations: [search, get-release, get-artifact]
+  analysis:
+    capability: intelligence
+    operations: [submit, get]
+  health:
+    capability: network
+    operations: [health, readiness]
+required_operation_metadata:
+  - operation_id
+  - request_schema
+  - response_schema
+  - errors
+  - authorization
+  - idempotency
+  - observability
+  - compatibility
+rules:
+  - no_table_as_resource
+  - no_private_domain_endpoint
+  - no_duplicate_operation_for_same_capability
+  - all_errors_use_problem_details
+  - pagination_uses_canonical_contract
+  - long_work_returns_durable_resource_reference
+  - sse_is_subresource_of_http_api

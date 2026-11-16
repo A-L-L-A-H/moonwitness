@@ -1,0 +1,512 @@
+{
+  "formatVersion": "1",
+  "generatedAt": "2026-08-27T00:00:00Z",
+  "scope": "P12 Foundation Text Corpus",
+  "totals": {
+    "activeDatasets": 14,
+    "records": 507570,
+    "coveredUnits": 144460
+  },
+  "gates": {
+    "noUnresolvedBundledRights": {
+      "status": "pass",
+      "detail": "Every bundled dataset has a verified bundled-rights status."
+    },
+    "requiredSourceEnglishIndonesian": {
+      "status": "blocked",
+      "detail": "Human source-language, English, and Indonesian coverage is not yet complete for every major translation collection.",
+      "gaps": [
+        {
+          "datasetId": "mw:dataset:suttacentral:dn-mn-sujato",
+          "english": "complete",
+          "indonesian": "missing"
+        },
+        {
+          "datasetId": "mw:dataset:suttacentral:sn-an-sujato",
+          "english": "complete",
+          "indonesian": "missing"
+        },
+        {
+          "datasetId": "mw:dataset:bible:tsi-2021",
+          "english": "missing",
+          "indonesian": "complete_for_48_book_export"
+        },
+        {
+          "datasetId": "mw:dataset:web-classic:2020",
+          "english": "complete",
+          "indonesian": "missing"
+        },
+        {
+          "datasetId": "mw:dataset:dhammapada:sujato",
+          "english": "complete",
+          "indonesian": "missing"
+        },
+        {
+          "datasetId": "mw:dataset:dhammapada:indonesian-wikisource",
+          "english": "missing",
+          "indonesian": "partial_422_of_423"
+        },
+        {
+          "datasetId": "mw:dataset:quranenc:english-rwwad",
+          "english": "complete",
+          "indonesian": "missing"
+        },
+        {
+          "datasetId": "mw:dataset:quranenc:indonesian-kemenag",
+          "english": "missing",
+          "indonesian": "complete"
+        }
+      ]
+    }
+  },
+  "datasets": [
+    {
+      "datasetId": "mw:dataset:world-religions:baseline",
+      "workCollection": "World religions/persons registry baseline",
+      "datasetRole": "registry",
+      "completeness": {
+        "status": "external",
+        "unit": "entity/assertion",
+        "covered": 154,
+        "expected": null,
+        "scope": "Non-exhaustive baseline; expansion is tracked by P13 coverage"
+      },
+      "recordCount": 154,
+      "sourceLanguage": null,
+      "sourceLanguageStatus": "not_applicable",
+      "english": "baseline",
+      "indonesian": "baseline",
+      "rights": {
+        "status": "verified_for_bundled_metadata_only",
+        "license": "CC0-1.0",
+        "evidence": "datasets/registries/snapshots/wikidata/README.md"
+      },
+      "alignment": {
+        "status": "not_applicable",
+        "notes": "Registry assertions link source entities and do not align text editions."
+      },
+      "sourceArtifact": {
+        "revision": "Wikidata entity lastrevid manifest 2026-08-27",
+        "path": "datasets/registries/snapshots/wikidata/snapshot-manifest.json",
+        "sha256": "597ee2994231e02875455221e253e7c1a623e359dbc538e62f2a71b0dea6fae8",
+        "byteSize": 18048
+      }
+    },
+    {
+      "datasetId": "mw:dataset:suttacentral:dn-mn-sujato",
+      "workCollection": "Dīgha Nikāya and Majjhima Nikāya",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "complete",
+        "unit": "sutta",
+        "covered": 186,
+        "expected": 186,
+        "scope": "34 DN and 152 MN translation source files"
+      },
+      "recordCount": 75089,
+      "sourceLanguage": "pli",
+      "sourceLanguageStatus": "metadata_only_pending_root_rights",
+      "english": "complete",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_public_domain",
+        "license": "CC0-1.0",
+        "evidence": "datasets/suttacentral-dn-mn-sujato/README.md"
+      },
+      "alignment": {
+        "status": "blocked_pending_source_language_rights",
+        "notes": "No Pali alignment is asserted by this English-only dataset."
+      },
+      "sourceArtifact": {
+        "revision": "suttacentral/bilara-data@cf0dac3b59a3f9b1d4829acb311e303f1eb6bba6",
+        "path": "ingestion/recipes/suttacentral-dn-mn/source/source-manifest.json",
+        "sha256": "4fd51e3efae30d93dd2dd310983f555d3809598f10fd3391daf42147d080ddd6",
+        "byteSize": 56217
+      }
+    },
+    {
+      "datasetId": "mw:dataset:suttacentral:sn-an-sujato",
+      "workCollection": "Saṁyutta Nikāya and Aṅguttara Nikāya",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "complete",
+        "unit": "sutta",
+        "covered": 3751,
+        "expected": 3751,
+        "scope": "3,751 SN/AN sutta records across 3,227 pinned Bilara files"
+      },
+      "recordCount": 147914,
+      "sourceLanguage": "pli",
+      "sourceLanguageStatus": "metadata_only_pending_root_rights",
+      "english": "complete",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_public_domain",
+        "license": "CC0-1.0",
+        "evidence": "datasets/suttacentral-sn-an-sujato/README.md"
+      },
+      "alignment": {
+        "status": "blocked_pending_source_language_rights",
+        "notes": "No Pali alignment is asserted by this English-only dataset."
+      },
+      "sourceArtifact": {
+        "revision": "suttacentral/bilara-data@cf0dac3b59a3f9b1d4829acb311e303f1eb6bba6",
+        "path": "ingestion/recipes/suttacentral-sn-an/source/source-manifest.json",
+        "sha256": "052dec614451ebcdab2434ca178c3f403654b1738f09a3573deecb0aad894667",
+        "byteSize": 1015463
+      }
+    },
+    {
+      "datasetId": "mw:dataset:bible:passage-alignments",
+      "workCollection": "Bible cross-edition passage references",
+      "datasetRole": "alignment",
+      "completeness": {
+        "status": "external",
+        "unit": "passage",
+        "covered": 30948,
+        "expected": null,
+        "scope": "Only exact chapter/verse matches after source-specific book-code mapping; non-matches intentionally remain gaps"
+      },
+      "recordCount": 30950,
+      "sourceLanguage": null,
+      "sourceLanguageStatus": "not_applicable",
+      "english": "not_applicable",
+      "indonesian": "not_applicable",
+      "rights": {
+        "status": "verified_for_bundled_metadata_only",
+        "license": "Metadata only; source-text rights remain with dependency datasets",
+        "evidence": "docs/P12-015-016-BIBLE-ALIGNMENTS.md"
+      },
+      "alignment": {
+        "status": "complete_for_exact_reference_join",
+        "notes": "The coverage deliberately excludes any match requiring inferred versification or semantic equivalence."
+      },
+      "sourceArtifact": {
+        "revision": "scripts/materialize-bible-alignments.ts@1",
+        "path": "scripts/materialize-bible-alignments.ts",
+        "sha256": "3863f96f023a6182ebc957524b2645b9cde669df94747043521e45db66775710",
+        "byteSize": 4691
+      }
+    },
+    {
+      "datasetId": "mw:dataset:bible:tsi-2021",
+      "workCollection": "Indonesian Bible TSI 2021",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "partial",
+        "unit": "verse",
+        "covered": 20649,
+        "expected": 20650,
+        "scope": "Pinned eBible VPL export for 48 supplied book codes; one WEB versification gap is explicit and canonical full-Bible completeness remains an open gap."
+      },
+      "recordCount": 61869,
+      "sourceLanguage": "he/grc",
+      "sourceLanguageStatus": "provided_by_WLC_and_SBLGNT_dependencies_where_available",
+      "english": "missing",
+      "indonesian": "complete_for_48_book_export",
+      "rights": {
+        "status": "verified_for_bundled_licensed_redistribution",
+        "license": "CC-BY-SA-4.0",
+        "evidence": "datasets/bible-tsi-2021/README.md"
+      },
+      "alignment": {
+        "status": "complete_for_exact_WEB_and_inherited_WLC_SBLGNT_bridges",
+        "notes": "TSI verses use exact WEB book/chapter/verse passage targets; existing pinned WEB↔WLC/SBLGNT bridges are projected without semantic identity."
+      },
+      "sourceArtifact": {
+        "revision": "eBible ind_vpl.zip / TSI 2021",
+        "path": "ingestion/recipes/tsi/source/ind_vpl.txt",
+        "sha256": "dd750b6f7f91cc058ce7814280ccec4b09710f18203dce0a7a80797d6250a165",
+        "byteSize": 3884668
+      }
+    },
+    {
+      "datasetId": "mw:dataset:web-classic:2020",
+      "workCollection": "Bible (WEB Classic ecumenical book set)",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "complete",
+        "unit": "reference slot",
+        "covered": 38058,
+        "expected": 38058,
+        "scope": "Full eBible WEB Classic ecumenical VPL source set; includes 29 explicit empty slots"
+      },
+      "recordCount": 76124,
+      "sourceLanguage": "multiple",
+      "sourceLanguageStatus": "separate_WLC_and_SBLGNT_datasets",
+      "english": "complete",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_public_domain",
+        "license": "Public Domain; World English Bible trademark notice",
+        "evidence": "docs/P12-012-014-WEB-CLASSIC.md"
+      },
+      "alignment": {
+        "status": "not_started",
+        "notes": "WEB↔WLC and WEB↔SBLGNT must model verse and book-set differences explicitly."
+      },
+      "sourceArtifact": {
+        "revision": "eBible eng-web_vpl.zip, 2020 stable text edition",
+        "path": "ingestion/recipes/web-classic-2020/source/source-manifest.json",
+        "sha256": "50a63007e1b8bde87a3d46aa6fdd1474a8b3195b5f2da3116f022a487e8b2013",
+        "byteSize": 475
+      }
+    },
+    {
+      "datasetId": "mw:dataset:sblgnt:v1-2",
+      "workCollection": "New Testament",
+      "datasetRole": "source_text",
+      "completeness": {
+        "status": "complete",
+        "unit": "verse",
+        "covered": 7941,
+        "expected": 7941,
+        "scope": "Complete SBLGNT XML source set"
+      },
+      "recordCount": 15885,
+      "sourceLanguage": null,
+      "sourceLanguageStatus": "not_applicable",
+      "english": "missing",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_licensed_redistribution",
+        "license": "CC-BY-4.0",
+        "evidence": "datasets/sblgnt-v1-2/README.md"
+      },
+      "alignment": {
+        "status": "not_started",
+        "notes": "Greek↔English/Indonesian alignment is deferred to later Foundation Corpus tasks."
+      },
+      "sourceArtifact": {
+        "revision": "LogosBible/SBLGNT@c4d241a9c1c479a55b989ba35a4976c1d0b8052c",
+        "path": "ingestion/recipes/sblgnt-v1-2/source/source-manifest.json",
+        "sha256": "96addfb28c3164368a1780815c0da579f644b43193fcbb7fd1b861d71325ff7f",
+        "byteSize": 6129
+      }
+    },
+    {
+      "datasetId": "mw:dataset:oshb:wlc",
+      "workCollection": "Hebrew Bible",
+      "datasetRole": "source_text",
+      "completeness": {
+        "status": "complete",
+        "unit": "verse",
+        "covered": 23213,
+        "expected": 23213,
+        "scope": "Complete OSHB wlc/ source set"
+      },
+      "recordCount": 69648,
+      "sourceLanguage": null,
+      "sourceLanguageStatus": "not_applicable",
+      "english": "missing",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_mixed_rights",
+        "license": "WLC public domain; OSHB annotations CC-BY-4.0",
+        "evidence": "docs/P12-007-009-OSHB-WLC.md"
+      },
+      "alignment": {
+        "status": "not_started",
+        "notes": "Hebrew Bible alignment to WEB is deferred to P12-015."
+      },
+      "sourceArtifact": {
+        "revision": "openscriptures/morphhb@3d15126fb1ef74867fc1434be1942e837932691f",
+        "path": "ingestion/recipes/oshb-wlc/source/source-manifest.json",
+        "sha256": "97eef4819aea695324e1f5ceeae5355b6df1943e888a6359dec72ebb5302ad01",
+        "byteSize": 8146
+      }
+    },
+    {
+      "datasetId": "mw:dataset:dhammapada:sujato",
+      "workCollection": "Dhammapada",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "complete",
+        "unit": "stanza",
+        "covered": 423,
+        "expected": 423,
+        "scope": "Complete Dhammapada, 26 chapters and 423 stanzas"
+      },
+      "recordCount": 4005,
+      "sourceLanguage": "pli",
+      "sourceLanguageStatus": "missing_pending_rights_audit",
+      "english": "complete",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_redistribution",
+        "license": "CC0-1.0",
+        "evidence": "datasets/dhammapada-sujato/LICENSES/SUTTACENTRAL-CC0.md"
+      },
+      "alignment": {
+        "status": "blocked_pending_source_language_rights_audit",
+        "notes": "Pali↔English alignment must wait for the independent Pali root source/rights decision."
+      },
+      "sourceArtifact": {
+        "revision": "suttacentral/bilara-data@cf0dac3b59a3f9b1d4829acb311e303f1eb6bba6",
+        "path": "ingestion/recipes/dhammapada-sujato/source/source-manifest.json",
+        "sha256": "3b667414243f5c66e0dc244d5b25947f8148fc510b3401e31cfd4f1d5b27fbba",
+        "byteSize": 9927
+      }
+    },
+    {
+      "datasetId": "mw:dataset:dhammapada:indonesian-wikisource",
+      "workCollection": "Dhammapada",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "partial",
+        "unit": "stanza",
+        "covered": 422,
+        "expected": 423,
+        "scope": "422/423 numbered stanzas; stanza 359 is absent upstream and remains an explicit gap."
+      },
+      "recordCount": 849,
+      "sourceLanguage": "pli",
+      "sourceLanguageStatus": "provided_by_dependency_dhammapada_sujato_metadata_only",
+      "english": "missing",
+      "indonesian": "partial_422_of_423",
+      "rights": {
+        "status": "verified_for_bundled_licensed_redistribution",
+        "license": "CC-BY-SA-4.0",
+        "evidence": "datasets/dhammapada-indonesian-wikisource/README.md"
+      },
+      "alignment": {
+        "status": "complete_for_422_structural_stanza_links",
+        "notes": "Correspondence is structural only; no semantic or translation identity asserted."
+      },
+      "sourceArtifact": {
+        "revision": "id.wikisource.org revision 198106",
+        "path": "ingestion/recipes/dhammapada-indonesian-wikisource/source/Dhammapada.wikitext",
+        "sha256": "cb4f797ab426c3de4a312b41d1d1897fa3fb1a3ba4e38dc215fd4b6439b42d1d",
+        "byteSize": 87297
+      }
+    },
+    {
+      "datasetId": "mw:dataset:world-religions:textual-evidence",
+      "workCollection": "Scoped religious-person textual evidence",
+      "datasetRole": "registry",
+      "completeness": {
+        "status": "external",
+        "unit": "assertion",
+        "covered": 7,
+        "expected": null,
+        "scope": "Bounded evidence lane; not an exhaustive religious-person or scripture index"
+      },
+      "recordCount": 9,
+      "sourceLanguage": null,
+      "sourceLanguageStatus": "not_applicable",
+      "english": "metadata",
+      "indonesian": "metadata",
+      "rights": {
+        "status": "verified_for_bundled_metadata_only",
+        "license": "Metadata links; dependency licenses govern source text",
+        "evidence": "datasets/world-religions-textual-evidence/manifest.json"
+      },
+      "alignment": {
+        "status": "complete",
+        "notes": "Seven scoped role assertions point to exact P12 content IDs across Quran, WLC, and SBLGNT."
+      },
+      "sourceArtifact": {
+        "revision": "local deterministic materializer",
+        "path": "scripts/materialize-p13-textual-evidence.ts",
+        "sha256": "5428d18df4aecdf59140651c74a7005f0f2cb5e663ba27faedc9cbbaedffba3e",
+        "byteSize": 3425
+      }
+    },
+    {
+      "datasetId": "mw:dataset:quranenc:english-rwwad",
+      "workCollection": "Quran",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "complete",
+        "unit": "ayah",
+        "covered": 6236,
+        "expected": 6236,
+        "scope": "114 surahs; exact ayah links to Tanzil Quran passage IDs"
+      },
+      "recordCount": 6240,
+      "sourceLanguage": "ar",
+      "sourceLanguageStatus": "provided_by_dependency_quran_tanzil",
+      "english": "complete",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_source_preserving_redistribution",
+        "license": "QuranEnc source-preserving republication terms",
+        "evidence": "datasets/quranenc-english-rwwad/README.md"
+      },
+      "alignment": {
+        "status": "complete",
+        "notes": "Arabic↔English joins use exact sura/ayah target IDs."
+      },
+      "sourceArtifact": {
+        "revision": "QuranEnc API v1",
+        "path": "ingestion/recipes/quranenc/source/english_rwwad/source-manifest.json",
+        "sha256": "a1f0320a9ba31e0457708b9c6a18700e566b469bd7e598d73ec5ca709ef4a5d8",
+        "byteSize": 19524
+      }
+    },
+    {
+      "datasetId": "mw:dataset:quranenc:indonesian-kemenag",
+      "workCollection": "Quran",
+      "datasetRole": "translation",
+      "completeness": {
+        "status": "complete",
+        "unit": "ayah",
+        "covered": 6236,
+        "expected": 6236,
+        "scope": "114 surahs; exact ayah links to Tanzil Quran passage IDs"
+      },
+      "recordCount": 6240,
+      "sourceLanguage": "ar",
+      "sourceLanguageStatus": "provided_by_dependency_quran_tanzil",
+      "english": "missing",
+      "indonesian": "complete",
+      "rights": {
+        "status": "verified_for_bundled_source_preserving_redistribution",
+        "license": "QuranEnc source-preserving republication terms",
+        "evidence": "datasets/quranenc-indonesian-kemenag/README.md"
+      },
+      "alignment": {
+        "status": "complete",
+        "notes": "Arabic↔Indonesian joins use exact sura/ayah target IDs."
+      },
+      "sourceArtifact": {
+        "revision": "QuranEnc API v1",
+        "path": "ingestion/recipes/quranenc/source/indonesian_affairs/source-manifest.json",
+        "sha256": "e84cc21a85abb441d39a5ce19438129feb38ddee3d8fc96142b00443a83a7851",
+        "byteSize": 19529
+      }
+    },
+    {
+      "datasetId": "mw:dataset:quran:tanzil-uthmani",
+      "workCollection": "Quran",
+      "datasetRole": "source_text",
+      "completeness": {
+        "status": "complete",
+        "unit": "ayah",
+        "covered": 6236,
+        "expected": 6236,
+        "scope": "114 surahs; 6,236 ayah"
+      },
+      "recordCount": 12594,
+      "sourceLanguage": null,
+      "sourceLanguageStatus": "not_applicable",
+      "english": "missing",
+      "indonesian": "missing",
+      "rights": {
+        "status": "verified_for_bundled_source_preserving_redistribution",
+        "license": "CC-BY-3.0 with Tanzil source-specific terms",
+        "evidence": "datasets/quran-tanzil-uthmani/LICENSES/TANZIL.md"
+      },
+      "alignment": {
+        "status": "not_started",
+        "notes": "Arabic↔English↔Indonesian alignment is deferred until independently sourced translations are ingested."
+      },
+      "sourceArtifact": {
+        "revision": "dotquran/corpus@c23f5cec2e95e253dc450bd0f34d09e37ba40fac",
+        "path": "ingestion/recipes/quran-tanzil-uthmani/source/quran-uthmani-tanzil-v1.1.txt",
+        "sha256": "6933e133dd56db778c801bf738848454e43648105a151e8d84d86a7cae39ec5f",
+        "byteSize": 1396087
+      }
+    }
+  ]
+}

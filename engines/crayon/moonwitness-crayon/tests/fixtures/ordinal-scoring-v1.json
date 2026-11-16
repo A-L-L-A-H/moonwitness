@@ -1,0 +1,20 @@
+{
+  "fixtureId": "crayon-ordinal-scoring-v1",
+  "source": {
+    "repository": "bjo163/ALLAH-CRAYON-RGBL-ENGINE",
+    "commit": "085ce7077607c2ce1213f124496b97ba0fad707e",
+    "path": "engine/src/research/measurement.ts"
+  },
+  "datasetStatus": "synthetic-development-only-not-empirical",
+  "records": [
+    { "studyId": "phase-b-synth", "caseId": "free-1", "evaluatorId": "e1", "arm": "free", "scores": { "traceability": 1, "inferentialRestraint": 2, "uncertaintyHonesty": 1, "conflictPreservation": 1, "decisionProportionality": 2, "usefulness": 2 } },
+    { "studyId": "phase-b-synth", "caseId": "free-2", "evaluatorId": "e2", "arm": "free", "scores": { "traceability": 1, "inferentialRestraint": 1, "uncertaintyHonesty": 1, "conflictPreservation": 1, "decisionProportionality": 2, "usefulness": 2 } },
+    { "studyId": "phase-b-synth", "caseId": "checklist-1", "evaluatorId": "e3", "arm": "checklist", "scores": { "traceability": 2, "inferentialRestraint": 2, "uncertaintyHonesty": 2, "conflictPreservation": 2, "decisionProportionality": 3, "usefulness": 2 } },
+    { "studyId": "phase-b-synth", "caseId": "rgbl-1", "evaluatorId": "e4", "arm": "rgbl", "scores": { "traceability": 3, "inferentialRestraint": 4, "uncertaintyHonesty": 3, "conflictPreservation": 3, "decisionProportionality": 3, "usefulness": 3 } }
+  ],
+  "expected": {
+    "rgblTraceabilityMean": 3,
+    "rgblVsFreeTraceabilityDifference": 2,
+    "interpretation": "descriptive-only-no-causal-claim"
+  }
+}

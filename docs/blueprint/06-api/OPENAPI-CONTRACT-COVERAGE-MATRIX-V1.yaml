@@ -1,0 +1,50 @@
+version: 1
+status: implementation-aligned
+purpose: Ensure every canonical API operation maps to one capability, schemas, authorization, errors, and executable parity evidence.
+source_catalog: 06-api/API-OPERATION-CATALOG-V1.yaml
+canonical_spec: 06-api/openapi/openapi.yaml
+coverage_dimensions:
+  - operation_id
+  - method_path
+  - capability_owner
+  - request_schema
+  - response_schema
+  - problem_schema
+  - authorization
+  - idempotency
+  - pagination_if_list
+  - observability
+  - parity_test
+operations:
+  health.get: {response_schema: Health, authorization: public-operational}
+  readiness.get: {response_schema: Health, authorization: public-operational}
+  research-runs.create: {request_schema: CreateResearchRunRequest, response_schema: ResearchRun, authorization: deployment, idempotency: required}
+  research-runs.get: {response_schema: ResearchRun, authorization: deployment}
+  research-runs.list: {response_schema: ResearchRunPage, authorization: deployment, pagination: cursor}
+  research-runs.cancel: {response_schema: ResearchRun, authorization: deployment, idempotency: required}
+  research-runs.events: {response_schema: text/event-stream, authorization: deployment, transport: sse}
+  workflows.create: {request_schema: CreateWorkflowRequest, response_schema: Workflow, authorization: deployment, idempotency: required}
+  workflows.get: {response_schema: Workflow, authorization: deployment}
+  workflows.cancel: {response_schema: Workflow, authorization: deployment, idempotency: required}
+  jobs.get: {response_schema: Job, authorization: deployment}
+  jobs.list: {response_schema: JobPage, authorization: deployment, pagination: cursor}
+  knowledge.search: {response_schema: KnowledgePage, authorization: deployment, pagination: cursor}
+  knowledge.get: {response_schema: KnowledgeDocument, authorization: deployment}
+  evidence.get: {response_schema: Evidence, authorization: deployment}
+  evidence.list: {response_schema: EvidencePage, authorization: deployment, pagination: cursor}
+  analysis.submit: {request_schema: AnalysisRequest, response_schema: ResearchRun, authorization: deployment, idempotency: required}
+  metadata.capabilities: {response_schema: CapabilityList, authorization: public-operational}
+  metadata.versions: {response_schema: VersionMetadata, authorization: public-operational}
+policy:
+  missing_required_coverage: BLOCK_GENESIS
+  operation_without_capability_owner: BLOCK_GENESIS
+  operation_exposes_private_storage: BLOCK_GENESIS
+  second_network_door: BLOCK_GENESIS
+  catalog_openapi_method_path_drift: BLOCK_GENESIS
+certification:
+  catalog_to_openapi_parity: EXECUTABLE_CI_GATE
+  schema_sources: CANONICAL_JSON_SCHEMA_OR_EXPLICIT_OPENAPI_COMPONENT
+  auth_annotations: ALIGNED
+  idempotency_annotations: ALIGNED
+  schema_examples: PENDING_SEPARATE_CERTIFICATION
+  reconciliation_adr: 00-constitution/ADR-026-API-OPERATION-RECONCILIATION.md

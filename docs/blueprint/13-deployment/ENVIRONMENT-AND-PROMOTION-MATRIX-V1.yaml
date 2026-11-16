@@ -1,0 +1,49 @@
+version: 1
+status: hardening
+environments:
+  local:
+    purpose: developer-feedback
+    runtime: node
+    persistence: local-or-dev-postgresql
+  preview:
+    hosting: vercel
+    application: moonwitness-wheremythfadetolegend
+    persistence: nonproduction-or-none-for-public-static-web
+    rule: production-like-web-contracts-with-nonproduction-data
+  production:
+    hosting: coolify
+    application: moonwitness-api
+    runtime: docker-compose
+    persistence: postgresql-compatible
+    rule: reproducible-from-versioned-artifacts
+  web-production:
+    hosting: vercel
+    application: moonwitness-wheremythfadetolegend
+    persistence: none-direct
+    rule: public-web-consumes-approved-api-and-frozen-historical-data
+promotion:
+  order: [local, preview, production]
+  gates: [lint, typecheck, tests, contracts, architecture, security, portability]
+serverless:
+  domain_provider_independent: true
+  local_disk_not_durable: true
+  process_memory_not_durable: true
+  long_work_to_async: true
+docker:
+  same_application_logic: true
+  graceful_shutdown: true
+  health_and_readiness: true
+config:
+  secrets_outside_repo: true
+  environment_schema_versioned: true
+web:
+  primary_repository: moonwitness-wheremythfadetolegend
+  legacy_repository: moonwitness-web
+  legacy_status: paused
+  api_client: moonwitness-sdk
+  api_boundary: moonwitness-api
+  historical_source: github-versioned-json
+  direct_database_access: forbidden
+vps:
+  status: paused
+  production_role: disabled

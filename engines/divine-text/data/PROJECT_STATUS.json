@@ -1,0 +1,54 @@
+{
+  "version": "3.0.0",
+  "milestones": {
+    "1_quran_normalization": "COMPLETE_VERIFIED",
+    "2_hadith_ingestion": "PENDING_EXTERNAL_FILE",
+    "3_claim_database": "COMPLETE",
+    "4_torah_mapping": "COMPLETE_BASELINE",
+    "5_psalms_mapping": "COMPLETE_BASELINE",
+    "6_gospel_mapping": "COMPLETE_BASELINE",
+    "7_research_report": "COMPLETE",
+    "8_passage_linking": "COMPLETE",
+    "9_variant_model": "COMPLETE",
+    "10_manuscript_register": "COMPLETE_BASELINE",
+    "11_cross_scripture_engine": "COMPLETE_BASELINE",
+    "12_v3_qa": "COMPLETE_VERIFIED"
+  },
+  "local_corpora": {
+    "quran": {
+      "records": 6236,
+      "status": "NORMALIZED_LOCAL_WITNESS"
+    },
+    "hadith": {
+      "status": "PENDING"
+    },
+    "torah": {
+      "status": "EXTERNAL_REGISTER_ONLY"
+    },
+    "psalms": {
+      "status": "EXTERNAL_REGISTER_ONLY"
+    },
+    "gospels": {
+      "status": "EXTERNAL_REGISTER_ONLY"
+    }
+  },
+  "qa": {
+    "pytest_passed": null,
+    "cli_package_mode_verified": true,
+    "json_files_valid": true,
+    "known_pending": [
+      "Full hadith corpus not locally ingested",
+      "Torah/Psalms/Gospels primary corpora not locally ingested"
+    ],
+    "known_limitations": [
+      "Local Quran witness is derived from qurantext-uthmani.def and is not a canonical-manuscript edition",
+      "Interpretation gap score is inverse-distance points: higher is better/less interpretation required",
+      "Bible canon varies by tradition and jurisdiction"
+    ]
+  },
+  "release": "V3_RESEARCH_SYSTEM",
+  "known_pending": [
+    "Full hadith corpus not locally ingested",
+    "Torah/Psalms/Gospels primary corpora not locally ingested"
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "version": "2.0",
+  "relations": [
+    {
+      "id": "rel:ibrahim:ismail",
+      "from": "prophet:ibrahim",
+      "to": "prophet:ismail",
+      "kind": "PARENT_CHILD",
+      "direction": "parent_to_child",
+      "source": "SUPPLEMENT_PLUS_QURANIC_LINEAGE",
+      "refs": [
+        "2:125-129",
+        "Genesis 16-17"
+      ],
+      "confidence": "high",
+      "note": "Biological relation is clearer in the Torah witness; Qur’an places Ibrahim and Ismail together at the House."
+    },
+    {
+      "id": "rel:ibrahim:ishaq",
+      "from": "prophet:ibrahim",
+      "to": "prophet:ishaq",
+      "kind": "PARENT_CHILD",
+      "direction": "parent_to_child",
+      "source": "QURAN",
+      "refs": [
+        "37:112",
+        "11:71"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "rel:ishaq:yaqub",
+      "from": "prophet:ishaq",
+      "to": "prophet:yaqub",
+      "kind": "PARENT_CHILD",
+      "direction": "parent_to_child",
+      "source": "QURAN_PLUS_SUPPLEMENT",
+      "refs": [
+        "11:71",
+        "19:49",
+        "Genesis 25:26"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "rel:yaqub:yusuf",
+      "from": "prophet:yaqub",
+      "to": "prophet:yusuf",
+      "kind": "PARENT_CHILD",
+      "direction": "parent_to_child",
+      "source": "QURAN",
+      "refs": [
+        "12:4-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "rel:musa:harun",
+      "from": "prophet:musa",
+      "to": "prophet:harun",
+      "kind": "SIBLINGS",
+      "direction": "symmetric",
+      "source": "QURAN",
+      "refs": [
+        "19:53",
+        "20:29-36"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "rel:dawud:sulayman",
+      "from": "prophet:dawud",
+      "to": "prophet:sulayman",
+      "kind": "PARENT_CHILD",
+      "direction": "parent_to_child",
+      "source": "SUPPLEMENT_PLUS_QURANIC_SUCCESSION",
+      "refs": [
+        "27:16",
+        "2 Samuel 12:24"
+      ],
+      "confidence": "high",
+      "note": "Qur’an gives succession/inheritance; biological son relation is explicit in supplementary witness."
+    },
+    {
+      "id": "rel:zakariya:yahya",
+      "from": "prophet:zakariya",
+      "to": "prophet:yahya",
+      "kind": "PARENT_CHILD",
+      "direction": "parent_to_child",
+      "source": "QURAN",
+      "refs": [
+        "19:7",
+        "3:38-39"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "rel:ibrahim:lut",
+      "from": "prophet:ibrahim",
+      "to": "prophet:lut",
+      "kind": "KIN_ASSOCIATION",
+      "direction": "related_context",
+      "source": "SUPPLEMENT_WITH_QURANIC_ASSOCIATION",
+      "refs": [
+        "29:26",
+        "Genesis 11:27-31"
+      ],
+      "confidence": "medium",
+      "note": "Qur’an associates Lut with Ibrahim; nephew relation comes from Torah witness."
+    }
+  ],
+  "guardrail": "Only explicit or source-labeled supplementary kinship is encoded; silence is not filled by guesswork."
+}

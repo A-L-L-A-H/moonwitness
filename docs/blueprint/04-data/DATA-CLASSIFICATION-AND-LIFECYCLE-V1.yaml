@@ -1,0 +1,33 @@
+version: 1
+status: locked
+classifications:
+  PUBLIC:
+    encryption_at_rest: platform_default
+    export: allowed
+  INTERNAL:
+    encryption_at_rest: required
+    export: controlled
+  CONFIDENTIAL:
+    encryption_at_rest: required
+    export: restricted
+  RESTRICTED:
+    encryption_at_rest: required
+    export: deny_by_default
+  SECRET:
+    encryption_at_rest: required
+    export: prohibited
+    secret_manager_only: true
+required_metadata:
+  - classification
+  - owner_capability_id
+  - retention_policy
+  - access_policy
+  - provenance
+retention:
+  rules_are_defined_by_data_owner: true
+  deletion_must_be_auditable: true
+  legal_hold_overrides_deletion: true
+artifacts:
+  canonical_artifact_is_immutable: true
+  derived_artifact_must_reference_parent: true
+  checksums_required: true

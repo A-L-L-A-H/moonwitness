@@ -1,0 +1,30 @@
+version: 1
+status: locked
+canonical_operations:
+  - generate
+  - embed
+  - rerank
+  - tool_call
+provider_adapter_rules:
+  - provider_specific_sdk_stays_outside_domain
+  - provider_capabilities_must_be_declared
+  - model_identity_and_snapshot_are_recorded
+  - fallback_is_explicit_and_policy_driven
+failover:
+  trigger: timeout_or_transient_provider_failure_or_policy_failure
+  order: configured_provider_priority
+  max_attempts: explicit
+  preserve_correlation: true
+  preserve_idempotency: true
+  no_cross_provider_hidden_semantic_change: true
+cost:
+  record_input_tokens: true
+  record_output_tokens: true
+  record_estimated_cost: true
+  currency: explicit
+provenance:
+  provider: required
+  model: required
+  model_snapshot_or_version: required
+  prompt_template_version: required
+  retrieval_snapshot: required_when_retrieval_used

@@ -1,0 +1,6 @@
+{
+  "tradition": "Torah/Pentateuch",
+  "status": "EXTERNAL_REGISTER_ONLY",
+  "candidate_books": ["Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy"],
+  "note": "Candidate text is not automatically equated with Quranic Taurat."
+}

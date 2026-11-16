@@ -1,0 +1,238 @@
+# Changelog
+
+> Auto-generated from GitHub Releases. Do not edit manually.
+
+## v0.1.11-dev.32 — DEV — 2026-09-14
+
+## What's Changed
+* feat(semantic): preserve deterministic projection trace by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/66
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.11-dev.31...v0.1.11-dev.32
+
+## v0.1.11-dev.31 — DEV — 2026-09-14
+
+## What's Changed
+* feat(semantic): freeze Phase 7 rule normalization and resolution contracts by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/62
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.11-dev.30...v0.1.11-dev.31
+
+## v0.1.11-dev.30 — DEV — 2026-09-14
+
+## What's Changed
+* docs(rfc): freeze Phase 7 semantic projection boundary by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/61
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.10...v0.1.11-dev.30
+
+## v0.1.10 — STABLE — 2026-09-14
+
+## What's Changed
+* feat(mvp-exit): freeze Phase 1–6 contracts for v0.1.10 by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/59
+* release: promote MVP Exit v0.1.10 candidate by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/60
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.9...v0.1.10
+
+## v0.1.10-dev.28 — DEV — 2026-09-14
+
+## What's Changed
+* feat(mvp-exit): freeze Phase 1–6 contracts for v0.1.10 by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/59
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.9...v0.1.10-dev.28
+
+## v0.1.9 — STABLE — 2026-09-14
+
+## What's Changed
+* docs(product): integrate OX-DX product design handoff by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/35
+* release: promote OX-DX product design handoff by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/36
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.8...v0.1.9
+
+## v0.1.9-dev.26 — DEV — 2026-09-14
+
+## What's Changed
+* docs(product): integrate OX-DX product design handoff by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/35
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.8...v0.1.9-dev.26
+
+## v0.1.8 — STABLE — 2026-09-14
+
+## What's Changed
+* docs(brand): integrate OX-DX brand bible superset by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/31
+* test(mvp): lock deterministic discovery with committed fixtures by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/32
+* release: promote deterministic MVP fixtures and OX-DX brand integration by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/33
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.7...v0.1.8
+
+## v0.1.8-dev.24 — DEV — 2026-09-14
+
+## What's Changed
+* test(mvp): lock deterministic discovery with committed fixtures by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/32
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.8-dev.23...v0.1.8-dev.24
+
+## v0.1.8-dev.23 — DEV — 2026-09-14
+
+## What's Changed
+* docs(brand): integrate OX-DX brand bible superset by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/31
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.7...v0.1.8-dev.23
+
+## v0.1.7 — STABLE — 2026-09-14
+
+## What's Changed
+* feat: expose syntax projection on main discover CLI by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/27
+* release: promote canonical syntax discover CLI by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/28
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.6...v0.1.7
+
+## v0.1.7-dev.21 — DEV — 2026-09-14
+
+## What's Changed
+* feat: expose syntax projection on main discover CLI by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/27
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.6...v0.1.7-dev.21
+
+## v0.1.6 — STABLE — 2026-09-14
+
+## What's Changed
+* feat: add cross-language syntax projection smoke by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/24
+* release: promote cross-language syntax projection by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/25
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.5...v0.1.6
+
+## v0.1.6-dev.19 — DEV — 2026-09-14
+
+## What's Changed
+* feat: add cross-language syntax projection smoke by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/24
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.5...v0.1.6-dev.19
+
+## v0.1.5 — STABLE — 2026-09-14
+
+## What's Changed
+* ci: add real external discovery reference smoke by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/21
+* release: promote real external reference smoke by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/22
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.4...v0.1.5
+
+## v0.1.5-dev.17 — DEV — 2026-09-14
+
+## What's Changed
+* ci: add real external discovery reference smoke by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/21
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.4...v0.1.5-dev.17
+
+## v0.1.4 — STABLE — 2026-09-14
+
+## What's Changed
+* docs: rewrite README for OX-DX by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/13
+* feat: discover standalone repository roots by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/15
+* release: promote standalone repository discovery by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/16
+* fix: harden release push against branch races by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/18
+* release: promote safe release push by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/19
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.3...v0.1.4
+
+## v0.1.4-dev.15 — DEV — 2026-09-14
+
+## What's Changed
+* fix: harden release push against branch races by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/18
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.4-dev.13...v0.1.4-dev.15
+
+## v0.1.4-dev.13 — DEV — 2026-09-14
+
+## What's Changed
+* docs: rewrite README for OX-DX by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/13
+* feat: discover standalone repository roots by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/15
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.3...v0.1.4-dev.13
+
+## v0.1.3 — STABLE — 2026-09-14
+
+## What's Changed
+* feat: complete automation P5-P10 by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/7
+* release: promote automation P5-P10 to stable by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/8
+* fix: harden P5 back-sync lifecycle by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/10
+* chore: reconcile stable generated state into dev by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/12
+* release: promote P5 back-sync hardening by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/11
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.1...v0.1.3
+
+## v0.1.3-dev.9 — DEV — 2026-09-14
+
+## What's Changed
+* release: promote automation P5-P10 to stable by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/8
+* chore: reconcile stable generated state into dev by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/12
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.3-dev.8...v0.1.3-dev.9
+
+## v0.1.3-dev.8 — DEV — 2026-09-14
+
+## What's Changed
+* fix: harden P5 back-sync lifecycle by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/10
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.2-dev.6...v0.1.3-dev.8
+
+## v0.1.2 — STABLE — 2026-09-14
+
+## What's Changed
+* feat: complete automation P5-P10 by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/7
+* release: promote automation P5-P10 to stable by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/8
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.1...v0.1.2
+
+## v0.1.2-dev.6 — DEV — 2026-09-14
+
+## What's Changed
+* feat: complete automation P5-P10 by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/7
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.1...v0.1.2-dev.6
+
+## v0.1.2-dev.4 — DEV — 2026-09-14
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.1-dev.1...v0.1.2-dev.4
+
+## v0.1.1 — STABLE — 2026-09-14
+
+## What's Changed
+* release: promote dev to main by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/5
+
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/compare/v0.1.1-dev.1...v0.1.1
+
+## v0.1.1-dev.1 — DEV — 2026-09-14
+
+## What's Changed
+* feat: add self-inspection MVP gate by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/1
+* feat: persist self snapshot baseline by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/2
+* feat: auto-sync README from self snapshot by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/3
+* feat: automate dev and stable releases by @bjo163 in https://github.com/bjo163/universal-ontology-engine/pull/4
+
+## New Contributors
+* @bjo163 made their first contribution in https://github.com/bjo163/universal-ontology-engine/pull/1
+
+**Full Changelog**: https://github.com/bjo163/universal-ontology-engine/commits/v0.1.1-dev.1

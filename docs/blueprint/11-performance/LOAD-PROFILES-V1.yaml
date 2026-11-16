@@ -1,0 +1,31 @@
+version: 1
+status: locked
+workloads:
+  interactive_read:
+    concurrency: low_to_medium
+    latency_goal: user_facing
+  interactive_mutation:
+    concurrency: bounded
+    idempotency: required
+  research_run_creation:
+    concurrency: bounded
+    durable: true
+  long_running_job:
+    concurrency: worker_capacity_limited
+    backpressure: required
+  corpus_build:
+    concurrency: controlled_batch
+    cost_guard: required
+  ai_inference:
+    concurrency: provider_and_budget_limited
+    cost_guard: required
+measurement:
+  cold_start: measure_for_serverless
+  warm_latency: measure
+  throughput: measure
+  tail_latency: p95_and_p99_where_relevant
+  memory_cpu: measure_for_container_workloads
+rules:
+  - budgets_are_per_workload_not_global
+  - measured_results_are_evidence_not_architecture_truth
+  - workload_limits_must_be_versioned

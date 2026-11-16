@@ -1,0 +1,9 @@
+{
+  "version":"5.0.0",
+  "status":"AI_READY_LOCAL_RESEARCH_ENGINE",
+  "tests":13,
+  "ai":{"mode":"deterministic_default","local_optional":true,"provider":"ollama-compatible"},
+  "corpora":{"quran":"LOCAL_NORMALIZED","hadith":"PENDING_EXTERNAL_FILE","torah":"EXTERNAL_REGISTER_ONLY","psalms":"EXTERNAL_REGISTER_ONLY","gospels":"EXTERNAL_REGISTER_ONLY"},
+  "graph":{"status":"ACTIVE","edges":4},
+  "scoring":{"status":"EVIDENCE_GATED"}
+}

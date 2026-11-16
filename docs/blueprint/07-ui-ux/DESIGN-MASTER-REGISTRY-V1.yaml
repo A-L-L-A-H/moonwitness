@@ -1,0 +1,185 @@
+version: 1
+status: blueprint_locked_existing_master_audit
+
+master:
+  id: MW-UI-MASTER-V1
+  display_name: "MoonWitness — Canonical Product UI Master"
+  portable_basename: moonwitness-canonical-ui-master
+  lifecycle_state: EXISTING_CANDIDATE_DISCOVERED_AUDIT_PENDING
+  creation_allowed: false
+  new_master_creation_policy: FORBIDDEN_WHILE_EXISTING_CANDIDATE_IS_UNRESOLVED
+
+purpose:
+  - single logical design master for MoonWitness product UI
+  - prevent duplicate Figma/OpenPencil masters and visual drift
+  - preserve one component-first lineage across editors and exports
+
+existing_figma_files:
+  - file_key: wTw3wWrtK8Xl6t1LSWWxDI
+    supplied_name: "MoonWitness — Where Myth Fade to Legend — Design System"
+    url: "https://www.figma.com/design/wTw3wWrtK8Xl6t1LSWWxDI/MoonWitness-%E2%80%94-Where-Myth-Fade-to-Legend-%E2%80%94-Design-System"
+    classification: LEGACY_APPLICATION_DESIGN_SYSTEM_REFERENCE
+    canonical_master: false
+    action: "retain for comparison; do not promote without explicit Blueprint reclassification"
+  - file_key: LP5AwOwe6QGeXRNpeZWsjd
+    supplied_name: "MoonWitness Design System — Experimental Observatory UI"
+    url: "https://www.figma.com/design/LP5AwOwe6QGeXRNpeZWsjd/MoonWitness-Design-System-%E2%80%94-Experimental-Observatory-UI"
+    classification: EXPERIMENTAL_NON_CANONICAL
+    canonical_master: false
+    action: "retain as experiment/reference only"
+  - file_key: hA5BaFjlsYMs9wficQv5iP
+    supplied_name: "MoonWitness — Canonical UI Master"
+    url: "https://www.figma.com/design/hA5BaFjlsYMs9wficQv5iP/MoonWitness-%E2%80%94-Canonical-UI-Master"
+    classification: CANONICAL_CANDIDATE_PENDING_AUDIT
+    canonical_master: false
+    intended_master_id: MW-UI-MASTER-V1
+    action: "audit structure/components/frames against Blueprint and frontend-platform; adopt and rename to canonical display name only if audit passes"
+  - file_key: s9NpyUTTxuQAKCNN5PJSsi
+    supplied_name: "MoonWitness Visual Execution Review — NON-CANONICAL"
+    url: "https://www.figma.com/design/s9NpyUTTxuQAKCNN5PJSsi/MoonWitness-Visual-Execution-Review-%E2%80%94-NON-CANONICAL"
+    classification: NON_CANONICAL_REVIEW_WORKSPACE
+    canonical_master: false
+    action: "review evidence only; never promote by naming alone"
+
+current_figma_audit:
+  status: BLOCKED_BY_FIGMA_MCP_STARTER_RATE_LIMIT
+  attempted_file_key: wTw3wWrtK8Xl6t1LSWWxDI
+  result: "Figma MCP Starter-plan tool-call limit reached before document metadata audit could start."
+  rule: "Rate-limit failure does not justify creating another master."
+
+adoption_decision:
+  preferred_existing_candidate_file_key: hA5BaFjlsYMs9wficQv5iP
+  reason: "This is the only supplied file explicitly named Canonical UI Master, but naming is not sufficient evidence for adoption."
+  state: AUDIT_REQUIRED_BEFORE_CANONICALIZATION
+  no_new_master_required: true
+  audit_requirements:
+    - verify top-level page structure against canonical_page_order
+    - verify variables/tokens against Blueprint and frontend-platform
+    - verify component names and variants against FIGMA-COMPONENT-FIRST-WORKFLOW-V1.md
+    - verify 12 domain instruments and 8 page templates
+    - verify authorized application frames only
+    - verify responsive states at required viewports
+    - identify experimental/duplicate/deprecated nodes for archival
+    - compare candidate geometry to frontend-platform HUD/component evidence
+    - record audit evidence before setting canonical_master true
+  adoption_result_when_passed:
+    canonical_master: true
+    file_display_name: "MoonWitness — Canonical Product UI Master"
+    active_editor: Figma
+    file_key: hA5BaFjlsYMs9wficQv5iP
+    creation_gate: NOT_APPLICABLE_EXISTING_MASTER_ADOPTED
+
+editor_policy:
+  primary_editor: Figma
+  fallback_editor: OpenPencil
+  rule: "Figma and OpenPencil are editors of the same logical master, never separate masters."
+  figma:
+    use_when: "canonical candidate/master is reachable and write/rate limits permit"
+    candidate_file_key: hA5BaFjlsYMs9wficQv5iP
+    target_display_name: "MoonWitness — Canonical Product UI Master"
+  openpencil:
+    use_when: "Figma authoring is blocked by rate limit, write restriction, or automation limitation"
+    project_service_origin: "http://pencil.moonwitness.biz.id/"
+    preferred_secure_origin: "https://pencil.moonwitness.biz.id/"
+    integration_contract: 07-ui-ux/PENCIL-INTEGRATION-CONTRACT-V1.yaml
+    skill_repository: ArsyBelovedLabs/moonwitness-pencil
+    skill_path: skills/moonwitness-pencil/SKILL.md
+    working_filename: moonwitness-canonical-ui-master.pen
+    fig_compatibility_filename: moonwitness-canonical-ui-master.fig
+    source_rule: "Open/export the same adopted Figma master lineage; never start a blank replacement master."
+  handoff:
+    - never recreate the master from a blank canvas merely to switch editors
+    - transfer the same document lineage through supported .fig/.pen import-export
+    - preserve canonical page names, component names, frame IDs, variables, and states
+    - after an editor handoff, run design lint/diff where tooling permits before accepting the new revision
+    - only one editor lineage may be marked ACTIVE at a time
+
+blueprint_authority:
+  architecture_and_product_scope:
+    - 00-design-freeze
+    - ADR-025
+    - 07-ui-ux/APPLICATION-INFORMATION-ARCHITECTURE-V1.md
+    - 07-ui-ux/USER-FLOW-AND-INTERACTION-MODEL-V1.md
+  visual_execution:
+    - 07-ui-ux/EXPERIENCE-CONSTITUTION-V1.md
+    - 07-ui-ux/DESIGN-TOKEN-SYSTEM-V1.yaml
+    - 07-ui-ux/FIGMA-COMPONENT-FIRST-WORKFLOW-V1.md
+    - 07-ui-ux/FIGMA-SHOWCASE-SCREEN-MATRIX-V1.md
+    - 07-ui-ux/UI-COMPONENT-OWNERSHIP-V1.yaml
+    - 07-ui-ux/PENCIL-INTEGRATION-CONTRACT-V1.yaml
+  master_identity: 07-ui-ux/DESIGN-MASTER-REGISTRY-V1.yaml
+
+production_relationship:
+  canonical_reusable_owner: ArsyBelovedLabs/moonwitness-frontend-platform
+  application_composition_owner: application repositories
+  showcase_owner: ArsyBelovedLabs/moonwitness-design-system
+  rule: "The design master specifies geometry/states; frontend-platform owns reusable production implementation; showcase never becomes a second owner."
+
+canonical_page_order:
+  - "00 — CONSTITUTION"
+  - "01 — VARIABLES / TOKENS"
+  - "02 — RAW PRIMITIVES"
+  - "03 — COMPONENTS"
+  - "04 — COMPONENT VARIANTS"
+  - "05 — DOMAIN INSTRUMENTS"
+  - "06 — PAGE TEMPLATES"
+  - "07 — MYTH / ACTIVE PAGES"
+  - "08 — COMMAND CENTER"
+  - "09 — CRAYON LAB / GATED FUTURE"
+  - "10 — MOBILE / RESPONSIVE"
+  - "11 — STATES"
+  - "12 — DEPRECATED / ARCHIVE"
+
+naming:
+  component_rule: "Use the exact canonical component/instrument/template names from FIGMA-COMPONENT-FIRST-WORKFLOW-V1.md."
+  application_frame_rule: "<SCREEN_ID> / <SCREEN_NAME> / <VIEWPORT> / <STATE>"
+  examples:
+    - "MYTH-01 / Monthly Report — August 2026 / 1440 / FROZEN BASELINE"
+    - "MYTH-04 / Spread Map / 390 / FROZEN BASELINE"
+    - "MYTH-10 / Evidence Detail / 430 / INSPECTOR OPEN"
+    - "CC-01 / Overview / 1440 / READY"
+  experimental_prefix: "EXP /"
+  deprecated_prefix: "DEPRECATED /"
+  forbidden:
+    - Untitled
+    - Final
+    - Final Final
+    - New Master
+    - Master 2
+    - Copy of Master
+
+viewport_contract:
+  required: [1440, 1280, 1024, 768, 430, 390, 360]
+  rule: "Responsive frames recompose; they are not mechanically scaled desktop screenshots."
+
+creation_gate:
+  state: CLOSED
+  reason: "An existing canonical candidate has been discovered; creating another master would increase ambiguity."
+  blocker: "Do not instantiate another Figma/OpenPencil master. Resolve and adopt/reject hA5BaFjlsYMs9wficQv5iP first."
+
+first_write_sequence_after_adoption:
+  - normalize existing pages into canonical order 00 through 12 without duplicating masters
+  - reconcile variables/tokens from Blueprint and frontend-platform evidence
+  - reconcile raw primitives
+  - reconcile canonical components and variants
+  - reconcile domain instruments
+  - reconcile page templates
+  - move experiments/duplicates to 12 — DEPRECATED / ARCHIVE
+  - compose only authorized application frames from FIGMA-SHOWCASE-SCREEN-MATRIX-V1.md
+  - create responsive states
+  - generate one-screen-per-image showcase evidence last
+
+revision_control:
+  blueprint_baseline_sha: 6c12f237374066335c2a6cdb96913f6b88ec5c97
+  active_design_revision: null
+  active_editor: null
+  last_handoff: null
+  rule: "Every accepted design revision must record editor, file identifier/path, Blueprint baseline, and review evidence before it can be called canonical."
+
+noncanonical_material:
+  - generated contact sheets
+  - generated multi-screen boards
+  - exploratory Figma/OpenPencil files
+  - screenshots without screen-matrix ID
+  - showcase images not reconciled to the master and implementation
+  rule: "These may inform review but never advance canonical master or golden-screen status."

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bjo163/universe-foundation/blob/main/specifications/universe-contract.json",
+  "title": "Universal Ontology Universe Registry Contract",
+  "type": "object",
+  "required": ["contract_version", "ontology", "hierarchy", "universe", "ecosystems"],
+  "properties": {
+    "contract_version": {"const": "1.0.0"},
+    "ontology": {"const": "Universal Ontology v1.0.0"},
+    "hierarchy": {
+      "const": [
+        "UNIVERSE", "CREATION", "ORDER", "REALITY", "REALM", "WORLD", "DOMAIN",
+        "ECOSYSTEM", "ORGANIZATION", "COMMUNITY", "REGION", "ENVIRONMENT", "NETWORK", "CONTEXT",
+        "PURPOSE", "MISSION", "OBJECTIVE", "PROGRAM", "PROJECT", "PRODUCT", "SYSTEM",
+        "REPOSITORY", "SOURCE", "UNIT", "MODULE", "SUBSYSTEM", "COMPONENT", "ELEMENT",
+        "SYMBOL", "ENTITY", "PROPERTY", "RELATION", "OPERATION", "FUNCTION", "BEHAVIOR",
+        "STATE", "EVENT", "PROCESS", "FLOW", "TRANSITION", "ACTION", "EXECUTION",
+        "INSTRUCTION", "EXPRESSION", "VALUE", "DATA", "TOKEN", "CHARACTER", "BIT"
+      ]
+    },
+    "universe": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9-]*$"},
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "ecosystems": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "path"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1, "pattern": "^[a-z0-9][a-z0-9-]*$"},
+          "name": {"type": "string", "minLength": 1},
+          "path": {"type": "string", "minLength": 1},
+          "source": {"type": "string", "minLength": 1},
+          "repository": {"type": "string"},
+          "organization": {"type": "string"},
+          "lifecycle": {"type": "string", "enum": ["planned", "active", "maintenance", "archived"]},
+          "contract": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

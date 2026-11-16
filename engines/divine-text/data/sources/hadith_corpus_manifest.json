@@ -1,0 +1,16 @@
+{
+  "name": "hadith-json",
+  "version": "1.2.0",
+  "source_repository": "https://github.com/AhmedBaset/hadith-json",
+  "source_data": "Sunnah.com",
+  "published_scope": "17 hadith books; 50,884 hadiths",
+  "license_note": "Repository/data licensing and Sunnah.com redistribution terms must be reviewed before redistributing scraped English text.",
+  "known_limitations": [
+    "Musnad Ahmad chapters 8-30 are missing in this source release.",
+    "The repository README describes the scraper as imperfect and recommends pinning the version.",
+    "This is a corpus of selected collections, not literally all hadith ever transmitted."
+  ],
+  "download_status": "PARTIAL_ENVIRONMENT_LIMIT",
+  "pinned_version": "v1.2.0",
+  "files_downloaded": ["data/sources/hadith_json_README.md"]
+}

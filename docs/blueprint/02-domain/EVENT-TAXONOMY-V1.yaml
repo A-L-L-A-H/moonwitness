@@ -1,0 +1,44 @@
+version: 2
+status: locked
+wire_naming: camelCase
+naming: <aggregate>.<past_tense_event>
+events:
+  research:
+    - research.run.created
+    - research.run.queued
+    - research.run.started
+    - research.run.progressed
+    - research.run.completed
+    - research.run.failed
+    - research.run.cancelled
+  job:
+    - job.created
+    - job.started
+    - job.retrying
+    - job.completed
+    - job.failed
+    - job.cancelled
+  artifact:
+    - artifact.created
+    - artifact.verified
+    - artifact.superseded
+required_envelope:
+  - id
+  - type
+  - version
+  - occurredAt
+  - producerCapabilityId
+  - subject
+  - correlationId
+  - traceId
+  - payload
+optional_envelope:
+  - causationId
+rules:
+  - event_names_are_stable_contracts
+  - events_are_immutable_facts
+  - consumers_must_not_mutate_event_payloads
+  - schema_evolution_uses_compatibility_policy
+  - sensitive_payloads_follow_data_classification
+  - canonical_wire_fields_use_camelCase
+  - historical_snake_case_names_are_not_parallel_wire_fields

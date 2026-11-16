@@ -1,0 +1,29 @@
+version: 1
+status: locked
+standard: OpenTelemetry
+required_context:
+  - service.name
+  - service.version
+  - deployment.environment
+  - trace_id
+  - span_id
+  - correlation_id
+  - capability_id
+  - repository
+  - actor_id_when_available
+  - tenant_id_when_applicable
+logs:
+  format: structured_json
+  required_levels: [debug, info, warn, error]
+  no_secrets: true
+metrics:
+  dimensions_must_be_bounded: true
+  avoid_high_cardinality_ids_as_metric_labels: true
+traces:
+  propagate_w3c_context: true
+audit:
+  security_and_data_access_events: required
+rules:
+  - telemetry_must_not_change_business_correctness
+  - ephemeral_compute_must_export_before_termination_when_possible
+  - pii_and_secret_redaction_is_mandatory

@@ -1,0 +1,11 @@
+import path from "node:path";
+export const projectRoot=process.cwd();
+export const dataPath=path.join(projectRoot,"src/data/prophet-identity-graph.v2.0.json");
+export const webDataPath=path.join(projectRoot,"web/public/prophet-identity-graph.v2.0.json");
+export const corpusRegistryPath=path.join(projectRoot,"src/data/v2/corpus-registry.v2.0.json");
+export const genealogyPath=path.join(projectRoot,"src/data/v2/genealogy-relations.v2.0.json");
+export const timelinePath=path.join(projectRoot,"src/data/v2/timeline-eras.v2.0.json");
+export const conflictsPath=path.join(projectRoot,"src/data/v2/conflict-cases.v2.0.json");
+export const preferencePath=path.join(projectRoot,"src/data/v2/human-preference.v2.0.json");
+export const documentationRegistryPath=path.join(projectRoot,"src/data/v2/documentation-registry.v2.3.json");
+export const sourceEditionsPath=path.join(projectRoot,"src/data/v2/source-editions.v2.0.json");

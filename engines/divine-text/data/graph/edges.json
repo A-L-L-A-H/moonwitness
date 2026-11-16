@@ -1,0 +1,9 @@
+{
+  "version":"5.0.0",
+  "edges":[
+    {"from":"INJIL-001","to":"INJIL-002","type":"not_equivalent","reason":"Qur'an explicitly identifies Injil as given to Isa; the candidate mapping to four canonical Gospels is a separate claim requiring evidence."},
+    {"from":"TORAH-001","to":"TORAH-002","type":"not_equivalent","reason":"Qur'an's statement that Allah sent down the Torah does not by itself identify every modern Pentateuchal text as identical to that revelation."},
+    {"from":"ZABUR-001","to":"INJIL-001","type":"qualifies","reason":"Both are named revelations in the Quran, but they have different recipients and should not be collapsed into one text tradition."},
+    {"from":"QURAN-001","to":"INJIL-001","type":"qualifies","reason":"Quranic revelation claims are distinct source records and should not be merged into later textual identification claims."}
+  ]
+}

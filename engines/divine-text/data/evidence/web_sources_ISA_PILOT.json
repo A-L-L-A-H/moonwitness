@@ -1,0 +1,7 @@
+{
+  "sources": [
+    {"id":"QURAN-5-46","url":"https://quran.com/5/46","supports":["ISA-001"]},
+    {"id":"QURAN-4-171","url":"https://quran.com/4/171","supports":["ISA-002"]},
+    {"id":"BIBLEGATEWAY-MATT24","url":"https://www.biblegateway.com/passage/?search=Matt.24","supports":["ISA-003"]}
+  ]
+}

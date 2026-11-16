@@ -1,0 +1,66 @@
+version: 2
+status: locked
+rules:
+  - layer: core
+    may_depend_on: []
+  - layer: domain
+    may_depend_on: [core, domain]
+  - layer: runtime
+    may_depend_on: [core, domain]
+  - layer: transport
+    may_depend_on: [core, domain, runtime]
+  - layer: application
+    may_depend_on: [core, domain, runtime, transport, frontend-platform]
+  - layer: frontend-platform
+    may_depend_on: []
+repositories:
+  moonwitness-core:
+    layer: core
+  moonwitness-corpus:
+    layer: domain
+  moonwitness-cosmic:
+    layer: domain
+  moonwitness-crayon:
+    layer: domain
+  moonwitness-prophetic:
+    layer: domain
+  moonwitness-runtime:
+    layer: runtime
+  moonwitness-worker:
+    layer: runtime
+  moonwitness-api:
+    layer: transport
+  moonwitness-sdk:
+    layer: transport
+  moonwitness-frontend-platform:
+    layer: frontend-platform
+  moonwitness-wheremythfadetolegend:
+    layer: application
+    role: primary-public-web
+  moonwitness-web:
+    layer: application
+    role: legacy-public-web
+    status: paused
+  moonwitness-commandcenter:
+    layer: application
+    status: hold
+  moonwitness-crayon-lab:
+    layer: application
+forbidden:
+  - application-to-database-direct-access
+  - ui-to-domain-database-access
+  - domain-to-api-import
+  - domain-to-application-import
+  - cross-repository-deep-source-import
+  - duplicated-canonical-contract
+  - sibling-cycle
+  - transport-to-transport-dependency
+  - application-to-legacy-repo-at-runtime
+  - web-to-postgresql-direct-access
+  - web-to-coolify-internal-access
+integration:
+  primary_public_web:
+    repository: moonwitness-wheremythfadetolegend
+    api_client: moonwitness-sdk
+    transport_boundary: moonwitness-api
+    historical_data_adapter: github-versioned-json

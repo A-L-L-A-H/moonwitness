@@ -1,0 +1,7 @@
+{
+  "release_version": "2.1.0",
+  "schema_version": "2.0",
+  "api_major": "v2",
+  "documentation_status": "RESEARCH_SPEC_COMPLETE_WITH_OPEN_TODO",
+  "open_todo_path": "docs/project/TODO.md"
+}

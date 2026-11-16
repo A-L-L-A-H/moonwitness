@@ -1,0 +1,25 @@
+version: 1
+status: locked
+unit_of_measurement:
+  - cost_per_api_request
+  - cost_per_research_run
+  - cost_per_ai_call
+  - cost_per_corpus_build
+  - cost_per_artifact_gb_month
+  - cost_per_worker_minute
+  - cost_per_telemetry_gb
+budgeting:
+  development: budget_and_alert
+  production: budget_and_alert
+attribution:
+  required_dimensions:
+    - repository
+    - capability_id
+    - workload_type
+    - environment
+    - provider
+rules:
+  - ai_cost_must_be_observable_per_run
+  - runaway_workloads_must_have_limits
+  - budgets_do_not_replace_correctness_or_security_gates
+  - unbudgeted_external_services_require_adr

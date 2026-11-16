@@ -1,0 +1,25 @@
+{
+  "sources": [
+    {
+      "source_id": "SRC-MUSLIM-INTRO-ISNAD",
+      "title": "Sahih Muslim — Introduction, sections on isnad and narrator criticism",
+      "type": "PRIMARY_TRADITIONAL",
+      "relevance": "Shows the classical methodology explicitly discussing chains, trustworthy narrators, and criticism of narrators.",
+      "url": "https://sunnah.com/muslim/introduction/25"
+    },
+    {
+      "source_id": "SRC-MUSLIM-ABOUT-METHODOLOGY",
+      "title": "Sahih Muslim — About / methodology overview",
+      "type": "SECONDARY_DESCRIPTIVE",
+      "relevance": "Describes narrator-level evaluation and attention to wording variants in the collection.",
+      "url": "https://sunnah.com/muslim/about"
+    },
+    {
+      "source_id": "SRC-OXFORD-HADITH",
+      "title": "Hadith — Oxford Bibliographies in Islamic Studies",
+      "type": "ACADEMIC",
+      "relevance": "Separates matn and isnad and summarizes the historical development of hadith studies.",
+      "url": "https://academic.oup.com/reference/62361/reference-article-abstract/554579067"
+    }
+  ]
+}

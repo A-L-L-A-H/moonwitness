@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type {
+  CodexGovernanceSnapshot,
   EcosystemEdgeStatus,
   EcosystemGitStatus,
   EcosystemRuntimeMode,
@@ -17,6 +18,7 @@ export interface EcosystemTelemetryState {
   readonly services: readonly EcosystemServiceStatus[];
   readonly edges: readonly EcosystemEdgeStatus[];
   readonly git: EcosystemGitStatus | null;
+  readonly codexGovernance: CodexGovernanceSnapshot | null;
   readonly generatedAt: string | null;
   readonly refreshing: boolean;
   readonly refresh: () => void;
@@ -31,6 +33,7 @@ interface EcosystemHealthPayload {
   readonly services?: readonly EcosystemServiceStatus[];
   readonly edges?: readonly EcosystemEdgeStatus[];
   readonly git?: EcosystemGitStatus;
+  readonly codexGovernance?: CodexGovernanceSnapshot | null;
   readonly generatedAt?: string;
 }
 
@@ -45,6 +48,7 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
     services: [],
     edges: [],
     git: null,
+    codexGovernance: null,
     generatedAt: null,
     refreshing: false,
   });
@@ -75,6 +79,7 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
             services: Array.isArray(payload.services) ? payload.services : [],
             edges: Array.isArray(payload.edges) ? payload.edges : [],
             git: payload.git ?? null,
+            codexGovernance: payload.codexGovernance ?? null,
             generatedAt: payload.generatedAt ?? null,
             refreshing: false,
           });
@@ -102,6 +107,7 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
             services: [],
             edges: [],
             git: null,
+            codexGovernance: null,
             generatedAt: new Date().toISOString(),
             refreshing: false,
           });
@@ -135,6 +141,7 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
           services: [],
           edges: [],
           git: null,
+          codexGovernance: null,
           generatedAt: new Date().toISOString(),
           refreshing: false,
         });
@@ -149,6 +156,7 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
             services: [],
             edges: [],
             git: null,
+            codexGovernance: null,
             generatedAt: null,
             refreshing: false,
           });

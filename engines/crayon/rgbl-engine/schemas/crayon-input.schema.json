@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bjo163/ALLAH-CRAYON-RGBL-ENGINE/schemas/crayon-input.schema.json",
+  "title": "CRAYON Input with RGBL R&D v0.8 extensions",
+  "type": "object",
+  "required": ["question"],
+  "$defs": {
+    "level": {"enum":["R1","G2","B3","L4"]},
+    "claimType": {"enum":["observation","measurement","source-statement","pattern","relation","model","causal-hypothesis","inference","interpretation","entity","agency","intention","impact","value","decision","caution","theological-claim"]},
+    "evidenceClass": {"enum":["empirical","testimonial","documentary","philosophical","revelation","mixed","unspecified"]},
+    "stringArray": {"type":"array","items":{"type":"string"}}
+  },
+  "properties": {
+    "domain": {"enum":["allah","human","nature","justice","general"]},
+    "question": {"type":"string","minLength":1},
+    "observations": {"$ref":"#/$defs/stringArray"},
+    "evidence": {"$ref":"#/$defs/stringArray"},
+    "assumptions": {"$ref":"#/$defs/stringArray"},
+    "patterns": {"$ref":"#/$defs/stringArray"},
+    "relations": {"$ref":"#/$defs/stringArray"},
+    "actors": {"$ref":"#/$defs/stringArray"},
+    "intentions": {"$ref":"#/$defs/stringArray"},
+    "impacts": {"$ref":"#/$defs/stringArray"},
+    "values": {"$ref":"#/$defs/stringArray"},
+    "interpretations": {"$ref":"#/$defs/stringArray"},
+    "problems": {"$ref":"#/$defs/stringArray"},
+    "risks": {"$ref":"#/$defs/stringArray"},
+    "possibilities": {"$ref":"#/$defs/stringArray"},
+    "benefits": {"$ref":"#/$defs/stringArray"},
+    "cautions": {"$ref":"#/$defs/stringArray"},
+    "nextActions": {"$ref":"#/$defs/stringArray"},
+    "confidence": {"type":"number","minimum":0,"maximum":1},
+    "levelConfidence": {"type":"object","properties":{"R1":{"type":"number","minimum":0,"maximum":1},"G2":{"type":"number","minimum":0,"maximum":1},"B3":{"type":"number","minimum":0,"maximum":1},"L4":{"type":"number","minimum":0,"maximum":1}},"additionalProperties": false},
+    "sources": {"type":"array","items":{"type":"object","required":["label","type"],"properties":{"id":{"type":"string","minLength":1},"label":{"type":"string","minLength":1},"type":{"enum":["observation","measurement","document","testimony","reasoning","revelation","other"]},"reference":{"type":"string"},"note":{"type":"string"}},"additionalProperties":false}},
+    "structuredClaims": {"type":"array","items":{"type":"object","required":["id","text","level","type"],"properties":{"id":{"type":"string","minLength":1},"text":{"type":"string","minLength":1},"level":{"$ref":"#/$defs/level"},"type":{"$ref":"#/$defs/claimType"},"facet":{"type":"string"},"sourceRefs":{"$ref":"#/$defs/stringArray"},"dependsOn":{"$ref":"#/$defs/stringArray"},"confidence":{"type":"number","minimum":0,"maximum":1},"evidenceClass":{"$ref":"#/$defs/evidenceClass"}},"additionalProperties":false}},
+    "conflicts": {"type":"array","items":{"type":"object","required":["description"],"properties":{"id":{"type":"string"},"description":{"type":"string","minLength":1},"claimIds":{"$ref":"#/$defs/stringArray"},"sourceRefs":{"$ref":"#/$defs/stringArray"},"resolution":{"type":"string"}},"additionalProperties":false}}
+  },
+  "additionalProperties": false
+}

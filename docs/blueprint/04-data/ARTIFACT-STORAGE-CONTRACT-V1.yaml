@@ -1,0 +1,26 @@
+version: 1
+status: locked
+storage:
+  metadata: owning_database
+  binary_large_artifacts: object_storage
+  search_indexes: derived_rebuildable_store
+ownership:
+  canonical_artifact: owning_capability
+  derived_artifact: producer
+required_metadata:
+  - artifact_id
+  - artifact_type
+  - schema_version
+  - owner_capability_id
+  - classification
+  - content_hash
+  - created_at
+  - provenance
+immutability:
+  canonical: immutable
+  derived: replaceable
+rules:
+  - object_storage_is_not_source_of_truth_without_owner_record
+  - indexes_are_rebuildable
+  - artifacts_are_addressable_without_private_source_imports
+  - deletion_and_retention_follow_data_classification

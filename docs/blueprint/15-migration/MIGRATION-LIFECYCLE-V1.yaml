@@ -1,0 +1,34 @@
+version: 1
+status: locked
+states:
+  - DISCOVERED
+  - MAPPED
+  - EXTRACTED
+  - IMPLEMENTED
+  - SHADOWED
+  - PARITY_VERIFIED
+  - CUTOVER
+  - DEPRECATED
+  - ARCHIVED
+allowed_transitions:
+  - {from: DISCOVERED, to: MAPPED}
+  - {from: MAPPED, to: EXTRACTED}
+  - {from: EXTRACTED, to: IMPLEMENTED}
+  - {from: IMPLEMENTED, to: SHADOWED}
+  - {from: SHADOWED, to: PARITY_VERIFIED}
+  - {from: PARITY_VERIFIED, to: CUTOVER}
+  - {from: CUTOVER, to: DEPRECATED}
+  - {from: DEPRECATED, to: ARCHIVED}
+requirements:
+  mapped: source_paths_and_capability_ids
+  extracted: canonical_owner_and_contract
+  implemented: tests_and_contract_validation
+  shadowed: observable_parallel_comparison
+  parity_verified: golden_fixture_pass
+  cutover: rollback_ready
+  deprecated: replacement_and_sunset_recorded
+  archived: evidence_retained
+rules:
+  - no_directory_clone_as_migration_strategy
+  - cutover_requires_evidence
+  - legacy_runtime_dependency_forbidden_after_archived

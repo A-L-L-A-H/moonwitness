@@ -1,0 +1,376 @@
+{
+  "version": "2.3.2",
+  "schema_version": "2.0",
+  "status": "FINAL_HANDOFF_READY_V2_3_2",
+  "documents": [
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "path": "docs/architecture/ARCHITECTURE.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "architecture_diagram",
+      "title": "Architecture Diagram",
+      "path": "docs/architecture/ARCHITECTURE-DIAGRAM.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "database_architecture",
+      "title": "Database Architecture",
+      "path": "docs/architecture/DATABASE-ARCHITECTURE.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "web_ui",
+      "title": "Web/UI Spec",
+      "path": "docs/architecture/WEB-UI-SPEC.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "adr_index",
+      "title": "ADR Index",
+      "path": "docs/architecture/adr/README.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_four_corpus",
+      "title": "ADR 0001 — Four-Corpus Source Model",
+      "path": "docs/architecture/adr/0001-FOUR-CORPUS-SOURCE-MODEL.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_scoring",
+      "title": "ADR 0002 — Evidence Score Is Not Prophet Worth",
+      "path": "docs/architecture/adr/0002-EVIDENCE-SCORE-NOT-PROPHET-WORTH.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_bible",
+      "title": "ADR 0003 — Bible as Witness Container",
+      "path": "docs/architecture/adr/0003-BIBLE-AS-WITNESS-CONTAINER.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_versioning",
+      "title": "ADR 0004 — Release vs Schema Versioning",
+      "path": "docs/architecture/adr/0004-RELEASE-VS-SCHEMA-VERSIONING.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "four_corpus",
+      "title": "Four-Corpus Model",
+      "path": "docs/corpus/FOUR-CORPUS-MODEL.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "quran",
+      "title": "Qur’an Corpus",
+      "path": "docs/corpus/quran/QURAN-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "taurat",
+      "title": "Taurat Corpus",
+      "path": "docs/corpus/taurat/TAURAT-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "zabur",
+      "title": "Zabur Corpus",
+      "path": "docs/corpus/zabur/ZABUR-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "injil",
+      "title": "Injil Corpus",
+      "path": "docs/corpus/injil/INJIL-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "bible_witness",
+      "title": "Bible Witness Concept",
+      "path": "docs/corpus/bible/BIBLE-WITNESS-CONCEPT.md",
+      "category": "bible_witness",
+      "status": "complete"
+    },
+    {
+      "id": "crosswalk",
+      "title": "Scripture Crosswalk",
+      "path": "docs/corpus/SCRIPTURE-CROSSWALK.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "source_versioning",
+      "title": "Source Versioning",
+      "path": "docs/corpus/SOURCE-VERSIONING.md",
+      "category": "provenance",
+      "status": "complete"
+    },
+    {
+      "id": "provenance_spec",
+      "title": "Provenance Spec",
+      "path": "docs/research/PROVENANCE-SPEC.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "provenance_model",
+      "title": "Provenance Model",
+      "path": "docs/research/PROVENANCE-MODEL.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "evidence",
+      "title": "Evidence Spec",
+      "path": "docs/research/EVIDENCE-SPEC.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "uncertainty",
+      "title": "Uncertainty",
+      "path": "docs/research/UNCERTAINTY.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "methodology",
+      "title": "Research Methodology",
+      "path": "docs/research/RESEARCH-METHODOLOGY.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "preference",
+      "title": "Preference Calibration",
+      "path": "docs/research/PREFERENCE-CALIBRATION.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "scoring_arch",
+      "title": "Scoring Architecture",
+      "path": "docs/scoring/SCORING-ARCHITECTURE.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "scoring_math",
+      "title": "Scoring Math",
+      "path": "docs/scoring/SCORING-MATH.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "context_scoring",
+      "title": "Context Scoring",
+      "path": "docs/scoring/CONTEXT-SCORING.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "world_trait",
+      "title": "World Trait Scoring",
+      "path": "docs/scoring/WORLD-TRAIT-SCORING.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "api",
+      "title": "API v2",
+      "path": "docs/api/API-v2.md",
+      "category": "api",
+      "status": "complete"
+    },
+    {
+      "id": "repo_structure",
+      "title": "Repository Structure",
+      "path": "docs/project/REPOSITORY-STRUCTURE.md",
+      "category": "project",
+      "status": "complete"
+    },
+    {
+      "id": "changelog",
+      "title": "Changelog",
+      "path": "docs/project/CHANGELOG.md",
+      "category": "project",
+      "status": "complete"
+    },
+    {
+      "id": "todo",
+      "title": "TODO",
+      "path": "docs/project/TODO.md",
+      "category": "todo",
+      "status": "complete"
+    },
+    {
+      "id": "roadmap",
+      "title": "Roadmap",
+      "path": "docs/project/ROADMAP.md",
+      "category": "roadmap",
+      "status": "complete"
+    },
+    {
+      "id": "final_status",
+      "title": "Final Status",
+      "path": "docs/project/FINAL-STATUS.md",
+      "category": "status",
+      "status": "complete"
+    },
+    {
+      "id": "milestones",
+      "title": "Milestones v1.4–v2.0",
+      "path": "docs/project/MILESTONES-v1.4-v2.0.md",
+      "category": "history",
+      "status": "complete"
+    },
+    {
+      "id": "source_editions_registry",
+      "title": "Source Editions Registry",
+      "path": "src/data/v2/source-editions.v2.0.json",
+      "category": "provenance",
+      "status": "complete"
+    },
+    {
+      "id": "sqlite_architecture",
+      "title": "SQLite Architecture",
+      "path": "docs/architecture/SQLITE-ARCHITECTURE.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "adr_stack_v22",
+      "title": "ADR 0005 — React/Vite + Node + SQLite",
+      "path": "docs/architecture/adr/0005-REACT-VITE-NODE-SQLITE.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "application_stack_v23",
+      "title": "Application Stack v2.3",
+      "path": "docs/architecture/APPLICATION-STACK-v2.3.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "ui_testing_v23",
+      "title": "UI Testing v2.3",
+      "path": "docs/architecture/UI-TESTING-v2.3.md",
+      "category": "testing",
+      "status": "complete"
+    },
+    {
+      "id": "sqlite_runtime_v23",
+      "title": "SQLite Runtime v2.3",
+      "path": "docs/architecture/SQLITE-RUNTIME-v2.3.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "scoring_audit_v23",
+      "title": "Scoring Audit v2.3",
+      "path": "docs/scoring/SCORING-AUDIT-v2.3.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "local_api_v23",
+      "title": "Local API v2.3",
+      "path": "docs/api/LOCAL-API-v2.3.md",
+      "category": "api",
+      "status": "complete"
+    },
+    {
+      "id": "audit_v23",
+      "title": "Audit & Hardening v2.3",
+      "path": "docs/project/AUDIT-v2.3.md",
+      "category": "project",
+      "status": "complete"
+    },
+    {
+      "id": "dependency_audit_v23",
+      "title": "Dependency Audit v2.3",
+      "path": "docs/project/DEPENDENCY-AUDIT-v2.3.md",
+      "category": "project",
+      "status": "complete"
+    },
+    {
+      "id": "handoff_root",
+      "title": "Final Handoff",
+      "path": "HANDOFF.md",
+      "category": "handoff",
+      "status": "complete"
+    },
+    {
+      "id": "install_runbook",
+      "title": "Install & Runbook v2.3",
+      "path": "docs/project/INSTALL-RUNBOOK.md",
+      "category": "handoff",
+      "status": "complete"
+    },
+    {
+      "id": "handoff_checklist",
+      "title": "Handoff Checklist v2.3",
+      "path": "docs/project/HANDOFF-CHECKLIST.md",
+      "category": "handoff",
+      "status": "complete"
+    },
+    {
+      "id": "e2e_handoff",
+      "title": "Production E2E Handoff",
+      "path": "docs/architecture/E2E-HANDOFF.md",
+      "category": "testing",
+      "status": "complete"
+    },
+    {
+      "id": "user_guide",
+      "title": "User Guide v2.3.2",
+      "path": "docs/project/USER-GUIDE.md",
+      "category": "user_guide",
+      "status": "complete"
+    },
+    {
+      "id": "issues_known_limitations",
+      "title": "Issues & Known Limitations v2.3.2",
+      "path": "docs/project/ISSUES-KNOWN-LIMITATIONS.md",
+      "category": "issues",
+      "status": "complete"
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting v2.3.2",
+      "path": "docs/project/TROUBLESHOOTING.md",
+      "category": "support",
+      "status": "complete"
+    }
+  ],
+  "governance": {
+    "todo_path": "docs/project/TODO.md",
+    "roadmap_path": "docs/project/ROADMAP.md",
+    "changelog_path": "docs/project/CHANGELOG.md",
+    "rule": "TODO and roadmap items are not evidence until implemented, tested, and audited.",
+    "handoff_path": "HANDOFF.md",
+    "install_runbook_path": "docs/project/INSTALL-RUNBOOK.md",
+    "handoff_result_path": "handoff/HANDOFF-RESULT.json",
+    "user_guide_path": "docs/project/USER-GUIDE.md",
+    "issues_path": "docs/project/ISSUES-KNOWN-LIMITATIONS.md",
+    "troubleshooting_path": "docs/project/TROUBLESHOOTING.md"
+  }
+}

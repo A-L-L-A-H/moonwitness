@@ -1,0 +1,118 @@
+version: 1
+status: design-locked
+base_path: /v1
+operations:
+  - id: health.get
+    method: GET
+    path: /health
+    capability: network
+    response: service-health
+  - id: readiness.get
+    method: GET
+    path: /readiness
+    capability: network
+    response: service-readiness
+  - id: research-runs.create
+    method: POST
+    path: /research-runs
+    capability: workflow
+    request: research-run-create
+    response: research-run
+    idempotency: required
+  - id: research-runs.get
+    method: GET
+    path: /research-runs/{id}
+    capability: workflow
+    response: research-run
+  - id: research-runs.list
+    method: GET
+    path: /research-runs
+    capability: workflow
+    response: research-run-list
+  - id: research-runs.cancel
+    method: POST
+    path: /research-runs/{id}/cancel
+    capability: workflow
+    request: command
+    response: research-run
+    idempotency: required
+  - id: research-runs.events
+    method: GET
+    path: /research-runs/{id}/events
+    capability: workflow
+    transport: sse
+    response: event-envelope
+  - id: workflows.create
+    method: POST
+    path: /workflows
+    capability: workflow
+    request: workflow-create
+    response: workflow
+    idempotency: required
+  - id: workflows.get
+    method: GET
+    path: /workflows/{id}
+    capability: workflow
+    response: workflow
+  - id: workflows.cancel
+    method: POST
+    path: /workflows/{id}/cancel
+    capability: workflow
+    request: command
+    response: workflow
+    idempotency: required
+  - id: jobs.get
+    method: GET
+    path: /jobs/{id}
+    capability: async-execution
+    response: job
+  - id: jobs.list
+    method: GET
+    path: /jobs
+    capability: async-execution
+    response: job-list
+  - id: knowledge.search
+    method: GET
+    path: /knowledge/search
+    capability: knowledge
+    response: knowledge-search-result
+  - id: knowledge.get
+    method: GET
+    path: /knowledge/{id}
+    capability: knowledge
+    response: knowledge-document
+  - id: evidence.get
+    method: GET
+    path: /evidence/{id}
+    capability: provenance-contract
+    response: evidence
+  - id: evidence.list
+    method: GET
+    path: /evidence
+    capability: provenance-contract
+    response: evidence-list
+  - id: analysis.submit
+    method: POST
+    path: /analysis
+    capability: intelligence
+    request: analysis-request
+    response: research-run
+    idempotency: required
+  - id: metadata.capabilities
+    method: GET
+    path: /metadata/capabilities
+    capability: contracts
+    response: capability-list
+  - id: metadata.versions
+    method: GET
+    path: /metadata/versions
+    capability: contracts
+    response: version-metadata
+rules:
+  - every_operation_maps_to_one_capability
+  - all_mutations_define_idempotency_behavior
+  - long_operations_return_execution_reference
+  - list_endpoints_use_pagination_contract
+  - all_errors_use_problem-details
+  - auth_is_applied_at_network_boundary
+  - domain_code_is_transport_agnostic

@@ -1,0 +1,18 @@
+version: 1
+status: locked
+controls:
+  dependency_lockfile: required
+  dependency_review: required
+  secret_scanning: required
+  code_scanning: required_when_supported
+  sbom: required_for_release_artifacts
+  provenance_attestation: required_for_release_artifacts
+  signed_release_artifact: recommended_and_target
+  license_policy: required
+  malicious_package_review: required_for_new_high_risk_dependencies
+rules:
+  - dependencies_are_pinned_through_lockfiles
+  - no_install_scripts_without_review_when_risk_is_material
+  - release_artifacts_are_traceable_to_commit
+  - CI_runs_with_least_privilege
+  - secrets_are_never_written_to_logs

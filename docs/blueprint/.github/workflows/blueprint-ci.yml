@@ -1,0 +1,135 @@
+name: Blueprint Integrity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Required top-level sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          for d in \
+            00-constitution 01-architecture 02-domain 03-contracts \
+            04-data 05-engineering 06-api 07-ui-ux 08-ai 09-security \
+            10-observability 11-performance 12-reliability 13-deployment \
+            14-governance 15-migration 16-repositories 17-genesis; do
+            test -f "$d/README.md" || { echo "Missing $d/README.md"; exit 1; }
+          done
+
+      - name: Required canonical files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f README.md
+          test -f DECISION-REGISTRY.md
+          test -f DOCUMENT-CATALOG.md
+          test -f GENESIS-READINESS-CHECKLIST.md
+          test -f 06-api/openapi/openapi.yaml
+          test -f 16-repositories/repository-manifest.yaml
+          test -f 15-migration/migration-manifest.yaml
+
+      - name: Detect accidental secret material
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -n -E '(^|[^A-Za-z])(sk-[A-Za-z0-9]|ghp_[A-Za-z0-9]|BEGIN (RSA|OPENSSH|EC|DSA) PRIVATE KEY)' \
+            --exclude-dir=.git . || { echo 'Potential secret material found'; exit 1; }
+
+      - name: Validate JSON schemas
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          for path in Path('03-contracts/schemas').glob('*.json'):
+              json.loads(path.read_text(encoding='utf-8'))
+              print('VALID_JSON', path)
+          PY
+
+      - name: Validate YAML documents
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby -e "require 'yaml'; YAML.load_file('06-api/openapi/openapi.yaml'); YAML.load_file('06-api/API-OPERATION-CATALOG-V1.yaml'); YAML.load_file('06-api/OPENAPI-CONTRACT-COVERAGE-MATRIX-V1.yaml'); YAML.load_file('16-repositories/repository-manifest.yaml'); YAML.load_file('15-migration/migration-manifest.yaml'); puts 'VALID_YAML'"
+
+      - name: Enforce catalog to OpenAPI parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          ruby <<'RUBY'
+          require 'yaml'
+          catalog = YAML.load_file('06-api/API-OPERATION-CATALOG-V1.yaml')
+          spec = YAML.load_file('06-api/openapi/openapi.yaml')
+          verbs = %w[get post put patch delete options head trace]
+          normalize = ->(path) { path.gsub(/\{[^}]+\}/, '{}') }
+          base = catalog.fetch('base_path')
+          expected = catalog.fetch('operations').map do |op|
+            [op.fetch('method').downcase, normalize.call(base + op.fetch('path'))]
+          end.sort
+          operation_ids = []
+          actual = spec.fetch('paths').flat_map do |path, item|
+            item.keys.grep(Regexp.union(verbs)).map do |method|
+              operation = item.fetch(method)
+              operation_id = operation['operationId']
+              raise "Missing operationId for #{method.upcase} #{path}" unless operation_id
+              operation_ids << operation_id
+              [method, normalize.call(path)]
+            end
+          end.sort
+          unless operation_ids.uniq.length == operation_ids.length
+            abort "Duplicate OpenAPI operationId detected"
+          end
+          unless expected == actual
+            warn "CATALOG_ONLY=#{(expected - actual).inspect}"
+            warn "OPENAPI_ONLY=#{(actual - expected).inspect}"
+            abort "Catalog/OpenAPI method-path parity failed"
+          end
+          puts "CATALOG_OPENAPI_PARITY PASS operations=#{actual.length}"
+          RUBY
+
+      - name: Validate local markdown links
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          root = Path('.')
+          bad = []
+          for path in root.rglob('*.md'):
+              if '.git' in path.parts:
+                  continue
+              text = path.read_text(encoding='utf-8', errors='ignore')
+              for target in re.findall(r'\[[^\]]+\]\(([^)]+)\)', text):
+                  if target.startswith(('http://','https://','#','mailto:')):
+                      continue
+                  target = target.split('#',1)[0]
+                  if not target:
+                      continue
+                  resolved = (path.parent / target).resolve()
+                  if not resolved.exists():
+                      bad.append((str(path), target))
+          if bad:
+              for item in bad[:50]:
+                  print('BROKEN_LINK', item)
+              raise SystemExit(1)
+          PY
+
+      - name: Verify one-door policy markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -R -n "HTTPS + OpenAPI" README.md 00-constitution 06-api 14-governance >/dev/null
+          grep -R -n "tRPC.*not.*platform\|tRPC is not\|not an ecosystem standard" README.md 00-constitution 06-api 14-governance >/dev/null

@@ -1,0 +1,13 @@
+{
+  "version": "6.0.0",
+  "mode": "deterministic_autopilot",
+  "tasks": [
+    "parse_question",
+    "resolve_entities",
+    "retrieve_local_corpus",
+    "build_evidence_graph",
+    "score_evidence",
+    "check_review_gate",
+    "generate_report"
+  ]
+}

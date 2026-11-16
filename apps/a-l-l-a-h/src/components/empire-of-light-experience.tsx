@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import type { RenderingCapabilityTier } from "@/data/design-tokens";
 import {
@@ -28,6 +30,7 @@ import { UniversalSearchModal } from "./universal-search-modal";
 import { WorldsSanctum } from "./worlds-sanctum";
 
 export function EmpireOfLightExperience() {
+  const { locale, toggleLocale } = useSanctuaryLocale();
   const [activeNavTab, setActiveNavTab] = useState<NavigationSectionId>("the-gate");
   const [activeWorldId, setActiveWorldId] = useState<WorldIdentifier>("qalam");
   const [activeDoorId, setActiveDoorId] = useState<EntryDoorId>("story-universe");
@@ -244,7 +247,7 @@ export function EmpireOfLightExperience() {
             : "bg-gradient-to-b from-[#040509]/70 via-[#040509]/25 to-transparent"
         }`}
       >
-        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 py-3 sm:px-8 sm:py-3.5 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 xl:px-10">
           {/* Brand Emblem & Title */}
           <a
             href="#the-gate"
@@ -252,18 +255,18 @@ export function EmpireOfLightExperience() {
               event.preventDefault();
               navigateToSection("the-gate");
             }}
-            className="group flex min-h-[44px] items-center gap-2.5 sm:gap-3.5 focus:outline-none"
+            className="group flex min-h-[44px] shrink-0 items-center gap-2.5 sm:gap-3 focus:outline-none"
           >
             <OctagramMandalaIcon className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 transition-transform duration-700 group-hover:rotate-45" />
-            <div className="flex items-center gap-2.5 sm:gap-3.5 whitespace-nowrap">
-              <span className="font-monument text-sm md:text-xs lg:text-lg tracking-[0.14em] lg:tracking-[0.16em] text-[#f7efe0] font-normal">
+            <div className="flex items-center gap-2.5 sm:gap-3 whitespace-nowrap">
+              <span className="font-monument text-sm md:text-xs lg:text-base xl:text-lg tracking-[0.14em] text-[#f7efe0] font-normal">
                 A-L-L-A-H.COM
               </span>
               <span
-                className="hidden h-4 w-px bg-[#d6b46c]/45 lg:inline-block"
+                className="hidden h-4 w-px bg-[#d6b46c]/45 2xl:inline-block"
                 aria-hidden="true"
               />
-              <span className="hidden font-monument text-[10px] sm:text-xs tracking-[0.22em] text-[#dfd5c0]/85 uppercase lg:inline-block">
+              <span className="hidden font-monument text-[11px] tracking-[0.2em] text-[#dfd5c0]/85 uppercase 2xl:inline-block">
                 EMPIRE OF THE LIGHT
               </span>
             </div>
@@ -272,7 +275,7 @@ export function EmpireOfLightExperience() {
           {/* Center Navigation Tabs (Desktop & Tablet Large) */}
           <nav
             aria-label="Primary Empire Navigation"
-            className="hidden md:flex items-center gap-3 lg:gap-8"
+            className="hidden md:flex min-w-0 items-center gap-3.5 lg:gap-5 xl:gap-7"
           >
             {NAVIGATION_TABS.map((navTab) => {
               const isTabActive = activeNavTab === navTab.id;
@@ -285,7 +288,7 @@ export function EmpireOfLightExperience() {
                     navigateToSection(navTab.id);
                   }}
                   aria-current={isTabActive ? "page" : undefined}
-                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-monument text-[10px] lg:text-[13px] tracking-[0.12em] lg:tracking-[0.2em] uppercase transition-colors ${
+                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-monument text-[10px] lg:text-[11.5px] xl:text-[12.5px] tracking-[0.12em] xl:tracking-[0.16em] uppercase transition-colors ${
                     isTabActive
                       ? "text-[#fff8e8] drop-shadow-[0_0_10px_rgba(248,234,198,0.65)]"
                       : "text-[#d8ceba]/80 hover:text-[#fff6df]"
@@ -307,7 +310,7 @@ export function EmpireOfLightExperience() {
           </nav>
 
           {/* Right Utility Controls */}
-          <div className="flex items-center gap-1.5 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
@@ -333,6 +336,16 @@ export function EmpireOfLightExperience() {
               }`}
             >
               <CrescentStarIcon className="h-5 w-5" />
+            </button>
+
+            <button
+              type="button"
+              onClick={toggleLocale}
+              aria-label={locale === "en" ? "Switch to Indonesian" : "Switch to English"}
+              title={locale === "en" ? "Ganti ke Bahasa Indonesia" : "Switch to English"}
+              className="btn-luxe-secondary hidden sm:inline-flex items-center px-3 text-[10px] font-mono tracking-[0.18em] text-[#f5dfa6] uppercase cursor-pointer"
+            >
+              {locale.toUpperCase()}
             </button>
 
             <button
@@ -405,6 +418,13 @@ export function EmpireOfLightExperience() {
               </button>
               <button
                 type="button"
+                onClick={toggleLocale}
+                className="btn-luxe-secondary px-3.5 py-2 font-mono text-[11px] tracking-[0.16em] text-[#f5dfa6] uppercase cursor-pointer"
+              >
+                {locale.toUpperCase()}
+              </button>
+              <button
+                type="button"
                 onClick={handleReplayEntrance}
                 className="btn-luxe-secondary flex-1 px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#f5efe2] uppercase cursor-pointer"
               >
@@ -433,7 +453,7 @@ export function EmpireOfLightExperience() {
             }}
           >
             <Image
-              src="/art/celestial-gate-bg.jpg"
+              src="/art/celestial-gate-bg.webp"
               alt=""
               fill
               priority
@@ -485,11 +505,14 @@ export function EmpireOfLightExperience() {
 
           {/* A world to witness. A world to learn. A world to build. */}
           <p className="mt-3 sm:mt-4 font-serif text-sm sm:text-base md:text-[19px] tracking-[0.04em] text-[#f5efe2]/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
-            A world to witness. A world to learn. A world to build.
+            {locale === "id"
+              ? "Dunia untuk bersaksi. Dunia untuk belajar. Dunia untuk membangun."
+              : "A world to witness. A world to learn. A world to build."}
           </p>
           <p className="mt-1.5 max-w-2xl font-sans text-xs sm:text-[13px] tracking-[0.06em] text-[#d8ceba]/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.95)]">
-            Accountable Life, Learning &amp; Action Hub — honoring Taurat, Zabur, Injīl &amp;
-            Al-Qur’ān alongside principled open engineering.
+            {locale === "id"
+              ? "Accountable Life, Learning & Action Hub — memuliakan Taurat, Zabur, Injīl & Al-Qur’ān bersama rekayasa terbuka yang jujur."
+              : "Accountable Life, Learning & Action Hub — honoring Taurat, Zabur, Injīl & Al-Qur’ān alongside principled open engineering."}
           </p>
 
           {/* Interactive Gate Threshold with Magnetic Portal */}
@@ -590,8 +613,18 @@ export function EmpireOfLightExperience() {
                 className="btn-luxe-secondary group inline-flex items-center gap-2.5 px-6 py-2.5 font-monument text-[11px] tracking-[0.2em] text-[#f5dfa6] uppercase hover:text-white cursor-pointer"
               >
                 <DiamondStarOrnament className="h-2.5 w-2.5 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-90" />
-                <span>FOUR SCRIPTURES · COVENANT</span>
+                <span>
+                  {locale === "id" ? "EMPAT KITAB · KOVENAN" : "FOUR SCRIPTURES · COVENANT"}
+                </span>
               </button>
+
+              <Link
+                href="/scriptures"
+                className="btn-luxe-secondary inline-flex items-center gap-2 px-5 py-2.5 font-mono text-[10.5px] tracking-[0.16em] text-[#e6decb] uppercase hover:text-white"
+              >
+                <span>{locale === "id" ? "STUDIO 4 KITAB" : "SCRIPTURE ENGINE"}</span>
+                <span aria-hidden="true">&rsaquo;</span>
+              </Link>
             </div>
 
             {/* Bottom Ornament Line with Center 4-Point Diamond Star */}

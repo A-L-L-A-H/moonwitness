@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { SanctuaryLocaleProvider } from "@/lib/sanctuary-locale";
 import "./globals.css";
 
 const cinzel = localFont({
@@ -13,12 +14,45 @@ const cinzel = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://a-l-l-a-h.com"),
   title: {
     default: "A-L-L-A-H.COM — Empire of the Light",
     template: "%s | A-L-L-A-H.COM",
   },
   description:
-    "In the Name of Allah. A-L-L-A-H.COM (Accountable Life, Learning & Action Hub) — Empire of the Light. A neutral sanctuary uniting witness chronicles, comparative study across Taurat, Zabur, Injīl & Al-Qur'ān, and sovereign engineering.",
+    "In the Name of Allah. A-L-L-A-H.COM (Accountable Life, Learning & Action Hub) — Empire of the Light. A neutral sanctuary uniting witness chronicles, comparative study across Taurat, Zabur, Injīl & Al-Qur’ān, explainable M-Time, and open engineering.",
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icon-192.png", sizes: "192x192", type: "image/png" }],
+  },
+  openGraph: {
+    type: "website",
+    url: "https://a-l-l-a-h.com",
+    siteName: "A-L-L-A-H.COM — Empire of the Light",
+    title: "A-L-L-A-H.COM — Empire of the Light",
+    description:
+      "Neutral monocentric sanctuary uniting four revealed scriptural witnesses (Taurat, Zabur, Injīl, Al-Qur’ān), explainable calendrics, and accountable craft.",
+    images: [
+      {
+        url: "/og-empire-light.jpg",
+        width: 1200,
+        height: 630,
+        alt: "A-L-L-A-H.COM — Empire of the Light",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "A-L-L-A-H.COM — Empire of the Light",
+    description:
+      "Neutral sanctuary uniting Taurat, Zabur, Injīl & Al-Qur’ān comparative study, M-Time calendrics, and open engineering.",
+    images: ["/og-empire-light.jpg"],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -31,7 +65,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to main content
         </a>
-        {children}
+        <SanctuaryLocaleProvider>{children}</SanctuaryLocaleProvider>
       </body>
     </html>
   );

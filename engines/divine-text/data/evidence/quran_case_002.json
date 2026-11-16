@@ -1,0 +1,19 @@
+{
+  "case_id": "QURAN-TX-002",
+  "source_type": "QURAN",
+  "source_level": "L3",
+  "claim": "Early Quranic manuscripts provide strong evidence for written transmission close to the first Islamic century.",
+  "evidence": [
+    {
+      "witness_id": "BIRMINGHAM-MINGANA-1572A",
+      "finding": "Parchment dated 568-645 CE at 95.4% probability; manuscript contains parts of Surahs 18-20."
+    }
+  ],
+  "limitations": [
+    "Radiocarbon dates parchment material rather than the exact ink-writing event.",
+    "One manuscript is not the entire transmission history."
+  ],
+  "source_urls": [
+    "https://www.birmingham.ac.uk/facilities/cadbury/TheBirminghamQuranManuscript"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "contract_version": "1.0.0",
+  "ontology": "Universal Ontology v1.0.0",
+  "hierarchy": [
+    "UNIVERSE", "CREATION", "ORDER", "REALITY", "REALM", "WORLD", "DOMAIN",
+    "ECOSYSTEM", "ORGANIZATION", "COMMUNITY", "REGION", "ENVIRONMENT", "NETWORK", "CONTEXT",
+    "PURPOSE", "MISSION", "OBJECTIVE", "PROGRAM", "PROJECT", "PRODUCT", "SYSTEM",
+    "REPOSITORY", "SOURCE", "UNIT", "MODULE", "SUBSYSTEM", "COMPONENT", "ELEMENT",
+    "SYMBOL", "ENTITY", "PROPERTY", "RELATION", "OPERATION", "FUNCTION", "BEHAVIOR",
+    "STATE", "EVENT", "PROCESS", "FLOW", "TRANSITION", "ACTION", "EXECUTION",
+    "INSTRUCTION", "EXPRESSION", "VALUE", "DATA", "TOKEN", "CHARACTER", "BIT"
+  ],
+  "zones": 7,
+  "levelsPerZone": 7,
+  "canonicalLevels": 49,
+  "optionalLevels": ["ORGANIZATION", "DOMAIN"],
+  "rules": {
+    "singleFoundation": true,
+    "semanticDirectories": false,
+    "externalSystems": "relationship",
+    "stableIdentity": true,
+    "typeIsCanonicalLevel": true,
+    "kindIsSpecialization": true,
+    "projectionDistinctFromContainment": true,
+    "representationDistinctFromSemantics": true,
+    "intermediateLevelsMayBeUnmaterialized": true
+  }
+}

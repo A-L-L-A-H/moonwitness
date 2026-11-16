@@ -1,0 +1,11 @@
+export {createCrayonEngine} from "./core/engine.js";
+export {validateCrayonInput, CrayonValidationError} from "./core/validate.js";
+export {NINE_GATE, RGBL_PERCEPTION} from "./gate/nine-gate.js";
+export {THIRTEEN_WAY} from "./way/thirteen-way.js";
+export {DOMAIN_PROFILES} from "./domains/index.js";
+export {ENGINE_VERSION, RESULT_SCHEMA_VERSION, RND_MODEL_VERSION, RESEARCH_STACK_VERSION, RELEASE_STATUS, VALIDATION_STATUS} from "./version.js";
+export {buildRndAnalysis, RGBL_FACETS, CLAIM_LEVEL_ADMISSIBILITY, TRANSITION_RULES, isClaimAdmissibleAtLevel} from "./rnd/model.js";
+export {BENCHMARK_DIMENSIONS, scoreBenchmark} from "./rnd/benchmark.js";
+export type {BenchmarkDimension, BenchmarkScore, BenchmarkScores} from "./rnd/benchmark.js";
+export * from "./research/index.js";
+export type {ClaimType,Completeness,ConflictInput,ConflictRecord,CrayonInput,CrayonResult,Diagnostic,DiagnosticSeverity,Domain,EpistemicYield,EvidenceClass,FailureCode,LevelConfidence,QualityCheck,ResearchStatus,RgblLevel,RndAnalysis,SinCanResult,SourceRecord,SourceType,StructuredClaim,TransitionRecord,TransitionStatus,UnknownReason,UnknownRecord} from "./core/types.js";

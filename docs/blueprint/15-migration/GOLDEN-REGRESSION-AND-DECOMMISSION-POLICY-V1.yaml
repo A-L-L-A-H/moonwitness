@@ -1,0 +1,38 @@
+version: 1
+status: hardening
+principle: behavior-first-migration
+source_repositories:
+  - bjo163/moonwitness@dev
+  - bjo163/moonwitness-corpus@dev
+  - bjo163/cosmic@dev
+  - bjo163/ALLAH-CRAYON-RGBL-ENGINE@dev
+  - bjo163/propetic@main
+fixture_classes:
+  - api_behavior
+  - domain_computation
+  - corpus_materialization
+  - provenance_integrity
+  - scoring_evaluation
+  - workflow_lifecycle
+  - ui_contract
+parity:
+  rule: compare_legacy_and_gen2_on_same_fixture
+  allowed_difference: documented_intentional_change
+  undocumented_difference: fail
+decommission:
+  prerequisites:
+    - replacement_capability_passes_contract_tests
+    - golden_regression_passes
+    - production_observation_window_complete
+    - rollback_artifact_available
+    - consumer_migration_complete
+  action: remove_or_archive_legacy_path
+  no_silent_delete: true
+mapping_required:
+  - source_path
+  - capability
+  - canonical_owner
+  - target_package
+  - migration_action
+  - fixture
+  - acceptance_test

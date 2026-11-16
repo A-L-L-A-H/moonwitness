@@ -1,0 +1,27 @@
+version: 1
+status: locked
+standard: HTTP-Idempotency-Key
+required_for:
+  - create_research_run
+  - retryable_mutations
+  - externally_retried_commands
+key:
+  client_generated: true
+  opaque: true
+  max_length: 255
+scope:
+  principal: required
+  operation: required
+  resource_scope: required
+storage:
+  source_of_truth: owning_durable_store
+  ttl: implementation_specific_with_explicit_policy
+behavior:
+  same_key_same_fingerprint: return_original_result
+  same_key_different_fingerprint: reject_conflict
+  expired_key: treat_as_new_request
+  concurrent_duplicate: single_winner_semantics
+rules:
+  - idempotency_must_cover_network_retries
+  - idempotency_must_not_depend_on_process_memory
+  - keys_must_not_contain_secrets

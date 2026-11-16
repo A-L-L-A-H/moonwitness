@@ -164,4 +164,48 @@ describe("ecosystem-probe", () => {
       }
     }
   });
+
+  it("queries live D1 governance counts, releases, and docs when DB binding is present", async () => {
+    const mockDb = {
+      prepare(sql: string) {
+        return {
+          async all<T>() {
+            if (sql.includes("UNION ALL")) {
+              return {
+                results: [
+                  { tbl: "milestones", cnt: 5 },
+                  { tbl: "tasks", cnt: 18 },
+                  { tbl: "docs", cnt: 7 },
+                  { tbl: "releases", cnt: 2 },
+                ] as T[],
+              };
+            }
+            if (sql.includes("codex_releases")) {
+              return {
+                results: [
+                  { tag_name: "v0.4.2", title: "Release v0.4.2", channel: "stable" },
+                ] as T[],
+              };
+            }
+            return {
+              results: [
+                { id: "doc-rule-01", category: "RULE", title: "RULE-01", version: "v0.4.0" },
+              ] as T[],
+            };
+          },
+        };
+      },
+    };
+
+    const snapshot = await probeEcosystemHealth({
+      fetchFn: async () => new Response("ok", { status: 200 }),
+      gitRunner: async () => null,
+      db: mockDb,
+    });
+
+    expect(snapshot.codexGovernance.source).toBe("cloudflare-d1");
+    expect(snapshot.codexGovernance.milestonesCount).toBe(5);
+    expect(snapshot.codexGovernance.releasesCount).toBe(2);
+    expect(snapshot.codexGovernance.latestReleases[0]?.tag).toBe("v0.4.2");
+  });
 });

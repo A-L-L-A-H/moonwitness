@@ -1,0 +1,6 @@
+{
+"Taurat":{"quranic_recipient":"Musa","candidate_modern_witnesses":["Torah/Pentateuch"],"identification_status":"NOT_AUTOMATIC"},
+"Zabur":{"quranic_recipient":"Dawud","candidate_modern_witnesses":["Psalms"],"identification_status":"NOT_AUTOMATIC"},
+"Injil":{"quranic_recipient":"Isa","candidate_modern_witnesses":["Matthew","Mark","Luke","John"],"identification_status":"NOT_AUTOMATIC"},
+"Al-Quran":{"quranic_recipient":"Muhammad","candidate_modern_witnesses":["Quran Arabic text traditions"],"identification_status":"DIRECT_TEXTUAL_TRADITION_IN_ISLAM"}
+}

@@ -1,0 +1,40 @@
+version: 1
+strategy: capability-first
+source_repositories:
+  - bjo163/moonwitness@dev
+  - bjo163/moonwitness-corpus@dev
+  - bjo163/cosmic@dev
+  - bjo163/ALLAH-CRAYON-RGBL-ENGINE@dev
+  - bjo163/propetic@main
+rules:
+  copy_entire_repository: false
+  preserve_behavior_before_refactor: true
+  canonical_contract_before_extraction: true
+  compatibility_adapter_allowed: true
+  direct_database_coupling_for_cross_repo: false
+classification:
+  moonwitness:
+    action: split-by-capability
+    primary_targets: [moonwitness-core, moonwitness-api, moonwitness-wheremythfadetolegend, moonwitness-web, moonwitness-commandcenter, moonwitness-frontend-platform]
+  moonwitness-corpus:
+    action: preserve-and-extract
+    primary_targets: [moonwitness-corpus]
+  cosmic:
+    action: preserve-and-extract
+    primary_targets: [moonwitness-cosmic, moonwitness-runtime, moonwitness-worker, moonwitness-api]
+  ALLAH-CRAYON-RGBL-ENGINE:
+    action: preserve-and-extract
+    primary_targets: [moonwitness-crayon, moonwitness-crayon-lab]
+  propetic:
+    action: bounded-domain-migration
+    primary_targets: [moonwitness-prophetic]
+  moonwitness-web:
+    action: deprecate-and-pause
+    primary_targets: [moonwitness-wheremythfadetolegend]
+actions:
+  PRESERVE: keep validated behavior and tests.
+  EXTRACT: move a reusable capability behind a stable package boundary.
+  ADAPT: keep legacy callers working through a compatibility layer.
+  REWRITE: replace architecture where coupling or correctness requires it.
+  DEPRECATE: mark superseded implementation with a retirement condition.
+  ARCHIVE: retain historical evidence without active runtime dependency.

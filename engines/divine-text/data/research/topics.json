@@ -1,0 +1,5 @@
+{
+  "isa":{"label":"Isa / Jesus","queries":["عيسى","المسيح","الإنجيل","يسوع"]},
+  "musa":{"label":"Musa / Moses","queries":["موسى","التوراة"]},
+  "dawud":{"label":"Dawud / David","queries":["داود","زبور"]}
+}

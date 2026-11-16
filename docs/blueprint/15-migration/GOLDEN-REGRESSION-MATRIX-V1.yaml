@@ -1,0 +1,83 @@
+version: 1
+status: migration-gate
+principle: legacy_behavior_is_preserved_only_where_explicitly_accepted
+cases:
+  - id: moonwitness-api-health
+    source: bjo163/moonwitness@dev
+    capability: network
+    target: moonwitness-api
+    priority: P0
+    verify: HTTP health contract and service identity
+  - id: moonwitness-research-run-lifecycle
+    source: bjo163/moonwitness@dev
+    capability: workflow
+    target: moonwitness-runtime
+    priority: P0
+    verify: queued-running-terminal transitions and idempotent retry
+  - id: cosmic-semantic-analysis
+    source: bjo163/cosmic@dev
+    capability: intelligence
+    target: moonwitness-cosmic
+    priority: P0
+    verify: representative semantic analysis fixtures
+  - id: cosmic-witness-integrity
+    source: bjo163/cosmic@dev
+    capability: provenance-contract
+    target: moonwitness-cosmic
+    priority: P0
+    verify: witness/provenance integrity and recovery fixtures
+  - id: corpus-upstream-validation
+    source: bjo163/moonwitness-corpus@dev
+    capability: knowledge
+    target: moonwitness-corpus
+    priority: P0
+    verify: source registry, validation and release-freeze invariants
+  - id: corpus-materialization-reproducibility
+    source: bjo163/moonwitness-corpus@dev
+    capability: knowledge
+    target: moonwitness-corpus
+    priority: P0
+    verify: deterministic artifact/materialization fixtures
+  - id: crayon-scoring
+    source: bjo163/ALLAH-CRAYON-RGBL-ENGINE@dev
+    capability: methodology
+    target: moonwitness-crayon
+    priority: P0
+    verify: representative scoring and robustness fixtures
+  - id: crayon-lab-boundary
+    source: bjo163/ALLAH-CRAYON-RGBL-ENGINE@dev
+    capability: application-crayon-lab
+    target: moonwitness-crayon-lab
+    priority: P1
+    verify: lab UI contract without engine/UI coupling
+  - id: prophetic-handoff
+    source: bjo163/propetic@main
+    capability: prophetic-domain
+    target: moonwitness-prophetic
+    priority: P0
+    verify: handoff/scoring/offline contract fixtures
+  - id: prophetic-ui-contract
+    source: bjo163/propetic@main
+    capability: application-crayon-lab
+    target: application-specific
+    priority: P1
+    verify: domain presentation parity without shared database access
+  - id: cross-runtime-api
+    source: legacy-representative
+    capability: network
+    target: moonwitness-api
+    priority: P0
+    verify: same request semantics in serverless adapter and Docker server
+  - id: sse-research-progress
+    source: cosmic-and-moonwitness
+    capability: network
+    target: moonwitness-api
+    priority: P0
+    verify: ordered event stream, reconnect behavior and terminal event
+rules:
+  - P0_cases_block_migration_release
+  - P1_cases_must_be_planned_before_feature_parity_claim
+  - fixtures_must_be_versioned
+  - expected_outputs_must_be_reviewable
+  - tolerance_must_be_explicit_for_nondeterministic_ai
+  - legacy_source_is_read_only_for_gen2_workers

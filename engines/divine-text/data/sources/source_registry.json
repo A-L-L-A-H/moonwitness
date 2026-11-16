@@ -1,0 +1,36 @@
+{
+  "sources": [
+    {
+      "source_id": "SRC-HADITH-OXFORD-2009",
+      "title": "Hadith — Oxford Bibliographies in Islamic Studies",
+      "publisher": "Oxford University Press",
+      "type": "ACADEMIC",
+      "relevance": "Defines hadith as reports attributed to Muhammad, distinguishing matn and isnad, and summarizes the historical development of hadith criticism.",
+      "url": "https://academic.oup.com/reference/62361/reference-article-abstract/554579067"
+    },
+    {
+      "source_id": "SRC-MUSLIM-INTRODUCTION",
+      "title": "Sahih Muslim — Introduction",
+      "publisher": "Sunnah.com / Sahih Muslim text",
+      "type": "PRIMARY_TRADITIONAL",
+      "relevance": "Contains classical Muslim material on isnad, trustworthy narrators, and narrator criticism.",
+      "url": "https://sunnah.com/muslim/introduction"
+    },
+    {
+      "source_id": "SRC-CORPUS-CORANICUM",
+      "title": "Corpus Coranicum",
+      "publisher": "Berlin-Brandenburg Academy / Corpus Coranicum",
+      "type": "ACADEMIC_DATABASE",
+      "relevance": "Manuscripts, variants, readings, and textual research for the Qur'an.",
+      "url": "https://corpuscoranicum.org/en"
+    },
+    {
+      "source_id": "SRC-BIRMINGHAM-QURAN",
+      "title": "Birmingham Qur'an Manuscript",
+      "publisher": "University of Birmingham",
+      "type": "INSTITUTIONAL_MANUSCRIPT_SOURCE",
+      "relevance": "Institutional information about the manuscript, radiocarbon range of the parchment, and paleographic context.",
+      "url": "https://www.birmingham.ac.uk/facilities/cadbury/birmingham-quran-mingana-collection/birmingham-quran/what-is"
+    }
+  ]
+}

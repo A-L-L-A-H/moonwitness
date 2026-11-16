@@ -1,0 +1,293 @@
+{
+  "version": "2.2.0",
+  "schema_version": "2.0",
+  "status": "RESEARCH_SPEC_COMPLETE_WITH_APPLICATION_STACK_V2_2",
+  "documents": [
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "path": "docs/architecture/ARCHITECTURE.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "architecture_diagram",
+      "title": "Architecture Diagram",
+      "path": "docs/architecture/ARCHITECTURE-DIAGRAM.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "database_architecture",
+      "title": "Database Architecture",
+      "path": "docs/architecture/DATABASE-ARCHITECTURE.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "web_ui",
+      "title": "Web/UI Spec",
+      "path": "docs/architecture/WEB-UI-SPEC.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "adr_index",
+      "title": "ADR Index",
+      "path": "docs/architecture/adr/README.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_four_corpus",
+      "title": "ADR 0001 — Four-Corpus Source Model",
+      "path": "docs/architecture/adr/0001-FOUR-CORPUS-SOURCE-MODEL.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_scoring",
+      "title": "ADR 0002 — Evidence Score Is Not Prophet Worth",
+      "path": "docs/architecture/adr/0002-EVIDENCE-SCORE-NOT-PROPHET-WORTH.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_bible",
+      "title": "ADR 0003 — Bible as Witness Container",
+      "path": "docs/architecture/adr/0003-BIBLE-AS-WITNESS-CONTAINER.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "adr_versioning",
+      "title": "ADR 0004 — Release vs Schema Versioning",
+      "path": "docs/architecture/adr/0004-RELEASE-VS-SCHEMA-VERSIONING.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "four_corpus",
+      "title": "Four-Corpus Model",
+      "path": "docs/corpus/FOUR-CORPUS-MODEL.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "quran",
+      "title": "Qur’an Corpus",
+      "path": "docs/corpus/quran/QURAN-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "taurat",
+      "title": "Taurat Corpus",
+      "path": "docs/corpus/taurat/TAURAT-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "zabur",
+      "title": "Zabur Corpus",
+      "path": "docs/corpus/zabur/ZABUR-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "injil",
+      "title": "Injil Corpus",
+      "path": "docs/corpus/injil/INJIL-CORPUS.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "bible_witness",
+      "title": "Bible Witness Concept",
+      "path": "docs/corpus/bible/BIBLE-WITNESS-CONCEPT.md",
+      "category": "bible_witness",
+      "status": "complete"
+    },
+    {
+      "id": "crosswalk",
+      "title": "Scripture Crosswalk",
+      "path": "docs/corpus/SCRIPTURE-CROSSWALK.md",
+      "category": "corpus",
+      "status": "complete"
+    },
+    {
+      "id": "source_versioning",
+      "title": "Source Versioning",
+      "path": "docs/corpus/SOURCE-VERSIONING.md",
+      "category": "provenance",
+      "status": "complete"
+    },
+    {
+      "id": "provenance_spec",
+      "title": "Provenance Spec",
+      "path": "docs/research/PROVENANCE-SPEC.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "provenance_model",
+      "title": "Provenance Model",
+      "path": "docs/research/PROVENANCE-MODEL.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "evidence",
+      "title": "Evidence Spec",
+      "path": "docs/research/EVIDENCE-SPEC.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "uncertainty",
+      "title": "Uncertainty",
+      "path": "docs/research/UNCERTAINTY.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "methodology",
+      "title": "Research Methodology",
+      "path": "docs/research/RESEARCH-METHODOLOGY.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "preference",
+      "title": "Preference Calibration",
+      "path": "docs/research/PREFERENCE-CALIBRATION.md",
+      "category": "research",
+      "status": "complete"
+    },
+    {
+      "id": "scoring_arch",
+      "title": "Scoring Architecture",
+      "path": "docs/scoring/SCORING-ARCHITECTURE.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "scoring_math",
+      "title": "Scoring Math",
+      "path": "docs/scoring/SCORING-MATH.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "context_scoring",
+      "title": "Context Scoring",
+      "path": "docs/scoring/CONTEXT-SCORING.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "world_trait",
+      "title": "World Trait Scoring",
+      "path": "docs/scoring/WORLD-TRAIT-SCORING.md",
+      "category": "scoring",
+      "status": "complete"
+    },
+    {
+      "id": "api",
+      "title": "API v2",
+      "path": "docs/api/API-v2.md",
+      "category": "api",
+      "status": "complete"
+    },
+    {
+      "id": "repo_structure",
+      "title": "Repository Structure",
+      "path": "docs/project/REPOSITORY-STRUCTURE.md",
+      "category": "project",
+      "status": "complete"
+    },
+    {
+      "id": "changelog",
+      "title": "Changelog",
+      "path": "docs/project/CHANGELOG.md",
+      "category": "project",
+      "status": "complete"
+    },
+    {
+      "id": "todo",
+      "title": "TODO",
+      "path": "docs/project/TODO.md",
+      "category": "todo",
+      "status": "complete"
+    },
+    {
+      "id": "roadmap",
+      "title": "Roadmap",
+      "path": "docs/project/ROADMAP.md",
+      "category": "roadmap",
+      "status": "complete"
+    },
+    {
+      "id": "final_status",
+      "title": "Final Status",
+      "path": "docs/project/FINAL-STATUS.md",
+      "category": "status",
+      "status": "complete"
+    },
+    {
+      "id": "milestones",
+      "title": "Milestones v1.4–v2.0",
+      "path": "docs/project/MILESTONES-v1.4-v2.0.md",
+      "category": "history",
+      "status": "complete"
+    },
+    {
+      "id": "source_editions_registry",
+      "title": "Source Editions Registry",
+      "path": "src/data/v2/source-editions.v2.0.json",
+      "category": "provenance",
+      "status": "complete"
+    },
+    {
+      "id": "application_stack_v22",
+      "title": "Application Stack v2.2",
+      "path": "docs/architecture/APPLICATION-STACK-v2.2.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "sqlite_architecture",
+      "title": "SQLite Architecture",
+      "path": "docs/architecture/SQLITE-ARCHITECTURE.md",
+      "category": "architecture",
+      "status": "complete"
+    },
+    {
+      "id": "ui_testing_v22",
+      "title": "UI Testing v2.2",
+      "path": "docs/architecture/UI-TESTING-v2.2.md",
+      "category": "testing",
+      "status": "complete"
+    },
+    {
+      "id": "adr_stack_v22",
+      "title": "ADR 0005 — React/Vite + Node + SQLite",
+      "path": "docs/architecture/adr/0005-REACT-VITE-NODE-SQLITE.md",
+      "category": "adr",
+      "status": "complete"
+    },
+    {
+      "id": "local_api_v22",
+      "title": "Local API v2.2",
+      "path": "docs/api/LOCAL-API-v2.2.md",
+      "category": "api",
+      "status": "complete"
+    }
+  ],
+  "governance": {
+    "todo_path": "docs/project/TODO.md",
+    "roadmap_path": "docs/project/ROADMAP.md",
+    "changelog_path": "docs/project/CHANGELOG.md",
+    "rule": "TODO and roadmap items are not evidence until implemented, tested, and audited."
+  }
+}

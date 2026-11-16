@@ -1,0 +1,12 @@
+[package]
+name = "ontology-rust"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+ontology-core = { path = "../ontology-core" }
+proc-macro2.workspace = true
+serde.workspace = true
+syn.workspace = true
+thiserror.workspace = true

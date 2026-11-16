@@ -1,0 +1,30 @@
+{
+  "case_id": "QURAN-TX-001",
+  "source_type": "QURAN",
+  "source_level": "L6",
+  "revelation_claim": "The Quran presents itself as revelation from Allah.",
+  "quran_references": ["3:3", "15:9"],
+  "manuscript_witnesses": [
+    {
+      "witness_id": "BIRMINGHAM-MINGANA-1572A",
+      "repository": "University of Birmingham Cadbury Research Library",
+      "contents": "Parts of Surahs 18, 19 and 20",
+      "date_statement": "Parchment radiocarbon range 568-645 CE at 95.4% probability",
+      "dating_method": "Radiocarbon dating of parchment; paleography identifies Hijazi script",
+      "dating_limitations": "Radiocarbon dates the parchment material, not the exact moment ink was written.",
+      "source_urls": ["https://www.birmingham.ac.uk/facilities/cadbury/TheBirminghamQuranManuscript"]
+    }
+  ],
+  "variants": [],
+  "transmission_summary": "Early manuscript evidence places Quranic text in the first century of Islam; textual and reading variants must be audited separately rather than equated with absence of preservation.",
+  "historical_assessment": "Strong early manuscript evidence; full preservation score remains a composite research question.",
+  "project_score": {
+    "status": "pending",
+    "total": null,
+    "confidence": null
+  },
+  "non_equivalence": {
+    "manuscript_date_is_not_divine_origin_proof": true,
+    "early_textual_evidence_is_not_zero_variation_claim": true
+  }
+}

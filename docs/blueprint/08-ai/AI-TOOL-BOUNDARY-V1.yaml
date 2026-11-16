@@ -1,0 +1,20 @@
+version: 1
+status: locked
+principles:
+  - tools_are_explicit_capabilities
+  - allowlist_by_agent_and_use_case
+  - validate_arguments_before_execution
+  - least_privilege_credentials
+  - tool_results_are_untrusted_input
+  - tool_invocation_is_traceable
+execution:
+  timeout_required: true
+  cancellation_supported: true
+  idempotency_required_for_mutations: true
+  result_schema_required: true
+  error_taxonomy: CON-AI-ERROR
+security:
+  outbound_network_default: deny
+  filesystem_default: deny
+  database_default: deny
+  secret_access: explicit_scope_only

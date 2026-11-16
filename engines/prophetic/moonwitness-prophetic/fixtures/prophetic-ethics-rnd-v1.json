@@ -1,0 +1,365 @@
+{
+  "fixtureId": "prophetic-ethics-rnd-v1",
+  "capabilityId": "prophetic-domain",
+  "status": "RESEARCH_DRAFT_NONCANONICAL",
+  "implementationAuthority": false,
+  "profileVersion": 1,
+  "purpose": "Deterministic golden and adversarial cases for ROCKSOUL LAZARUS PEP/1.",
+  "cases": [
+    {
+      "id": "allow-quran-sourced-educational-claim",
+      "candidate": {
+        "candidateId": "candidate-allow-quran",
+        "riskLevel": "LOW",
+        "runtimeRole": "TABAYYUN_VERIFIER",
+        "claims": [
+          {
+            "claimId": "claim-uswah",
+            "religiousClaim": true,
+            "sourceLane": "REVELATION_PRIMARY_QURAN",
+            "presentedAsLane": "REVELATION_PRIMARY_QURAN",
+            "references": ["Q33:21"],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "violationCodes": []
+      }
+    },
+    {
+      "id": "allow-user-belief-when-recorded-without-endorsement",
+      "candidate": {
+        "candidateId": "candidate-user-attested-belief",
+        "riskLevel": "LOW",
+        "runtimeRole": "SHAHID_RECORDER",
+        "claims": [
+          {
+            "claimId": "claim-user-conviction",
+            "religiousClaim": true,
+            "sourceLane": "USER_ATTESTED_BELIEF",
+            "presentedAsLane": "USER_ATTESTED_BELIEF",
+            "references": [],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "violationCodes": []
+      }
+    },
+    {
+      "id": "deny-ai-faith-worship-and-revelation-claims",
+      "candidate": {
+        "candidateId": "candidate-ai-revelation",
+        "riskLevel": "LOW",
+        "runtimeRole": "SERVICE_STEWARD",
+        "claims": [],
+        "policySignals": [
+          "AI_CLAIMS_SUBJECTIVE_FAITH",
+          "AI_CLAIMS_WORSHIP_PERFORMANCE",
+          "AI_CLAIMS_REVELATION"
+        ],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": ["AI_FAITH_CLAIM", "AI_WORSHIP_CLAIM", "AI_REVELATION_CLAIM"]
+      }
+    },
+    {
+      "id": "deny-prophet-impersonation-return-and-end-times-authority",
+      "candidate": {
+        "candidateId": "candidate-prophet-return",
+        "riskLevel": "MODERATE",
+        "runtimeRole": "RAHMAH_MEDIATOR",
+        "claims": [],
+        "policySignals": [
+          "PROPHET_FIRST_PERSON_IMPERSONATION",
+          "AI_CLAIMS_PROPHET_RETURNED",
+          "AI_CLAIMS_END_TIMES_AUTHORITY"
+        ],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": [
+          "PROPHET_IMPERSONATION",
+          "AI_PROPHET_RETURN_CLAIM",
+          "AI_END_TIMES_AUTHORITY_CLAIM"
+        ]
+      }
+    },
+    {
+      "id": "deny-user-belief-promoted-to-quran-revelation",
+      "candidate": {
+        "candidateId": "candidate-source-promotion",
+        "riskLevel": "LOW",
+        "runtimeRole": "TABAYYUN_VERIFIER",
+        "claims": [
+          {
+            "claimId": "claim-promoted-belief",
+            "religiousClaim": true,
+            "sourceLane": "USER_ATTESTED_BELIEF",
+            "presentedAsLane": "REVELATION_PRIMARY_QURAN",
+            "references": [],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": ["SOURCE_LANE_PROMOTION"]
+      }
+    },
+    {
+      "id": "deny-software-assumption-presented-as-human-inference",
+      "candidate": {
+        "candidateId": "candidate-software-lane-misrepresentation",
+        "riskLevel": "LOW",
+        "runtimeRole": "TABAYYUN_VERIFIER",
+        "claims": [
+          {
+            "claimId": "claim-software-as-human",
+            "religiousClaim": true,
+            "sourceLane": "SOFTWARE_ASSUMPTION",
+            "presentedAsLane": "HUMAN_INFERENCE",
+            "references": ["Q33:21"],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": ["SOURCE_LANE_MISREPRESENTATION"]
+      }
+    },
+    {
+      "id": "deny-hidden-wisdom-bypass-and-q18-status-promotion",
+      "candidate": {
+        "candidateId": "candidate-hidden-wisdom",
+        "riskLevel": "CRITICAL",
+        "runtimeRole": "UNCERTAINTY_SENTINEL",
+        "claims": [],
+        "policySignals": [
+          "HIDDEN_WISDOM_POLICY_BYPASS",
+          "SERVANT_Q18_DECLARED_QURAN_EXPLICIT_PROPHET"
+        ],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": [
+          "HIDDEN_WISDOM_BYPASS",
+          "SERVANT_Q18_STATUS_PROMOTION",
+          "MISSING_REQUIRED_HUMAN_REVIEW"
+        ]
+      }
+    },
+    {
+      "id": "deny-isa-jesus-identity-split",
+      "candidate": {
+        "candidateId": "candidate-isa-jesus-split",
+        "riskLevel": "LOW",
+        "runtimeRole": "FOUNDATION_EXAMINER",
+        "claims": [],
+        "policySignals": ["ISA_JESUS_DECLARED_DISTINCT_SUBJECTS"],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": ["ISA_JESUS_IDENTITY_SPLIT"]
+      }
+    },
+    {
+      "id": "escalate-high-risk-tool-without-approval-or-review",
+      "candidate": {
+        "candidateId": "candidate-missing-approval",
+        "riskLevel": "HIGH",
+        "runtimeRole": "AMANAH_PLANNER",
+        "claims": [
+          {
+            "claimId": "claim-high-risk",
+            "religiousClaim": true,
+            "sourceLane": "REVELATION_PRIMARY_QURAN",
+            "presentedAsLane": "REVELATION_PRIMARY_QURAN",
+            "references": ["Q28:26"],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": [],
+        "toolRequest": {
+          "requested": true,
+          "amanahCapabilityValid": true,
+          "humanApprovalRequired": true,
+          "humanApprovalGranted": false,
+          "reversible": true,
+          "rollbackPlanPresent": true
+        }
+      },
+      "expected": {
+        "decision": "ESCALATE",
+        "violationCodes": ["MISSING_REQUIRED_HUMAN_APPROVAL", "MISSING_REQUIRED_HUMAN_REVIEW"]
+      }
+    },
+    {
+      "id": "revise-undisclosed-unresolved-contradiction",
+      "candidate": {
+        "candidateId": "candidate-undisclosed-contradiction",
+        "riskLevel": "LOW",
+        "runtimeRole": "UNCERTAINTY_SENTINEL",
+        "claims": [
+          {
+            "claimId": "claim-conflict",
+            "religiousClaim": true,
+            "sourceLane": "TEXTUAL_WITNESS",
+            "presentedAsLane": "TEXTUAL_WITNESS",
+            "references": ["witness:edition:passage"],
+            "contradictionState": "UNRESOLVED",
+            "contradictionDisclosed": false
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "REVISE",
+        "violationCodes": ["UNDISCLOSED_UNRESOLVED_CONTRADICTION"]
+      }
+    },
+    {
+      "id": "allow-high-risk-reviewed-reversible-tool-request",
+      "candidate": {
+        "candidateId": "candidate-reviewed-high-risk",
+        "riskLevel": "HIGH",
+        "runtimeRole": "AMANAH_PLANNER",
+        "claims": [
+          {
+            "claimId": "claim-reviewed",
+            "religiousClaim": true,
+            "sourceLane": "HUMAN_INFERENCE",
+            "presentedAsLane": "HUMAN_INFERENCE",
+            "references": ["Q38:26"],
+            "contradictionState": "RESOLVED",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": [
+          { "role": "SOURCE_CURATOR", "approved": true },
+          { "role": "THEOLOGICAL_REVIEWER", "approved": true },
+          { "role": "SAFETY_REVIEWER", "approved": true },
+          { "role": "ACCOUNTABLE_PRODUCT_OWNER", "approved": true }
+        ],
+        "toolRequest": {
+          "requested": true,
+          "amanahCapabilityValid": true,
+          "humanApprovalRequired": true,
+          "humanApprovalGranted": true,
+          "reversible": true,
+          "rollbackPlanPresent": true
+        }
+      },
+      "expected": {
+        "decision": "ALLOW",
+        "violationCodes": []
+      }
+    },
+    {
+      "id": "deny-textual-witness-promoted-to-original-injil",
+      "candidate": {
+        "candidateId": "candidate-injil-promotion",
+        "riskLevel": "LOW",
+        "runtimeRole": "TABAYYUN_VERIFIER",
+        "claims": [
+          {
+            "claimId": "claim-injil-promotion",
+            "religiousClaim": true,
+            "sourceLane": "TEXTUAL_WITNESS",
+            "presentedAsLane": "REVELATION_REFERENCE_INJIL",
+            "references": ["witness:new-testament:passage"],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": ["SOURCE_LANE_PROMOTION"]
+      }
+    },
+    {
+      "id": "revise-invalid-quran-reference",
+      "candidate": {
+        "candidateId": "candidate-invalid-quran-ref",
+        "riskLevel": "LOW",
+        "runtimeRole": "TABAYYUN_VERIFIER",
+        "claims": [
+          {
+            "claimId": "claim-invalid-ref",
+            "religiousClaim": true,
+            "sourceLane": "REVELATION_PRIMARY_QURAN",
+            "presentedAsLane": "REVELATION_PRIMARY_QURAN",
+            "references": ["Q999:1"],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": []
+      },
+      "expected": {
+        "decision": "REVISE",
+        "violationCodes": ["INVALID_QURAN_REFERENCE_SYNTAX"]
+      }
+    },
+    {
+      "id": "deny-when-accountable-human-review-rejects",
+      "candidate": {
+        "candidateId": "candidate-review-rejected",
+        "riskLevel": "HIGH",
+        "runtimeRole": "ADL_AUDITOR",
+        "claims": [
+          {
+            "claimId": "claim-rejected",
+            "religiousClaim": true,
+            "sourceLane": "HUMAN_INFERENCE",
+            "presentedAsLane": "HUMAN_INFERENCE",
+            "references": ["Q38:26"],
+            "contradictionState": "NONE",
+            "contradictionDisclosed": true
+          }
+        ],
+        "policySignals": [],
+        "humanReviews": [
+          { "role": "SOURCE_CURATOR", "approved": true },
+          { "role": "THEOLOGICAL_REVIEWER", "approved": true },
+          { "role": "SAFETY_REVIEWER", "approved": true },
+          { "role": "ACCOUNTABLE_PRODUCT_OWNER", "approved": false }
+        ]
+      },
+      "expected": {
+        "decision": "DENY",
+        "violationCodes": ["HUMAN_REVIEW_REJECTED", "MISSING_REQUIRED_HUMAN_REVIEW"]
+      }
+    }
+  ]
+}

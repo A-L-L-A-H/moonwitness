@@ -1,0 +1,39 @@
+name: m-time-m20-review-kit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "reviews/external/**"
+      - "scripts/build_review_kit.sh"
+      - "scripts/review_packet_readiness.py"
+      - ".github/workflows/m20-review-kit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-kit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Validate packet index
+        run: python scripts/review_packet_readiness.py
+
+      - name: Build and self-verify frozen reviewer kit
+        run: bash scripts/build_review_kit.sh /tmp/mtime-m20-review-kit
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mtime-m20-review-kit
+          path: |
+            /tmp/mtime-m20-review-kit/
+            /tmp/mtime-m20-review-kit.tar.gz
+            /tmp/mtime-m20-review-kit.tar.gz.sha256
+          if-no-files-found: error

@@ -1,0 +1,52 @@
+version: 1
+status: design-locked
+layers:
+  foundation:
+    - moonwitness-core
+  domain:
+    - moonwitness-corpus
+    - moonwitness-cosmic
+    - moonwitness-crayon
+    - moonwitness-prophetic
+  execution:
+    - moonwitness-runtime
+    - moonwitness-worker
+  transport:
+    - moonwitness-api
+    - moonwitness-sdk
+  presentation:
+    - moonwitness-frontend-platform
+    - moonwitness-wheremythfadetolegend
+    - moonwitness-web
+    - moonwitness-commandcenter
+    - moonwitness-crayon-lab
+allowed:
+  moonwitness-core: []
+  moonwitness-corpus: [moonwitness-core]
+  moonwitness-cosmic: [moonwitness-core, moonwitness-corpus]
+  moonwitness-crayon: [moonwitness-core, moonwitness-corpus]
+  moonwitness-prophetic: [moonwitness-core, moonwitness-corpus, moonwitness-crayon]
+  moonwitness-runtime: [moonwitness-core, moonwitness-cosmic, moonwitness-crayon, moonwitness-prophetic]
+  moonwitness-worker: [moonwitness-core, moonwitness-runtime, moonwitness-cosmic, moonwitness-corpus, moonwitness-crayon]
+  moonwitness-api: [moonwitness-core, moonwitness-runtime, moonwitness-worker, moonwitness-corpus, moonwitness-cosmic, moonwitness-crayon, moonwitness-prophetic]
+  moonwitness-sdk: [moonwitness-core]
+  moonwitness-frontend-platform: []
+  moonwitness-wheremythfadetolegend: [moonwitness-frontend-platform, moonwitness-sdk]
+  moonwitness-web: [moonwitness-frontend-platform, moonwitness-sdk]
+  moonwitness-commandcenter: [moonwitness-frontend-platform, moonwitness-sdk]
+  moonwitness-crayon-lab: [moonwitness-frontend-platform, moonwitness-sdk, moonwitness-crayon]
+forbidden:
+  - domain_to_application
+  - ui_to_database
+  - api_to_foreign_database
+  - package_to_private_source_path_of_other_repo
+  - sibling_cycle
+  - transport_to_transport_dependency
+  - application_to_legacy_repo_at_runtime
+  - public_web_to_database
+  - public_web_to_coolify_internal_services
+primary_public_web:
+  repository: moonwitness-wheremythfadetolegend
+  client: moonwitness-sdk
+  transport: moonwitness-api
+  historical_data: github-versioned-json

@@ -1,0 +1,10 @@
+[
+{"id":"T1","subject":"Musa","claim":"Allah sent down the Torah","source_type":"QURAN","reference":"5:44","source_level":"L6","status":"QURAN_EXPLICIT"},
+{"id":"T2","subject":"Torah/Pentateuch","claim":"The current Jewish Torah/Pentateuch is five books","source_type":"JEWISH_TEXTUAL_TRADITION","reference":"Genesis; Exodus; Leviticus; Numbers; Deuteronomy","source_level":"L3","status":"TEXTUAL_TRADITION"},
+{"id":"T3","subject":"Dead Sea Scrolls","claim":"The Dead Sea Scrolls include the oldest known copies of biblical texts","source_type":"MANUSCRIPT","reference":"Leon Levy Dead Sea Scrolls Digital Library","source_level":"L3","status":"HISTORICAL_EVIDENCE"},
+{"id":"Z1","subject":"Dawud","claim":"Allah gave Dawud the Zabur","source_type":"QURAN","reference":"4:163; 17:55","source_level":"L6","status":"QURAN_EXPLICIT"},
+{"id":"Z2","subject":"Psalms","claim":"Psalms is a book within the Tanakh/Old Testament textual tradition","source_type":"JEWISH_TEXTUAL_TRADITION","reference":"Tanakh","source_level":"L3","status":"TEXTUAL_TRADITION"},
+{"id":"I1","subject":"Isa","claim":"Allah gave Isa the Injil","source_type":"QURAN","reference":"5:46","source_level":"L6","status":"QURAN_EXPLICIT"},
+{"id":"I2","subject":"Gospels","claim":"Matthew, Mark, Luke, and John are the four canonical Gospels in mainstream Christian Bible structure","source_type":"CHRISTIAN_CANON","reference":"New Testament","source_level":"L3","status":"CANONICAL_TRADITION"},
+{"id":"I3","subject":"Injil/Gospels","claim":"Matthew, Mark, Luke, and John are identical to the original Injil given to Isa","source_type":"IDENTIFICATION_CLAIM","reference":null,"source_level":"L1","status":"UNVERIFIED"}
+]

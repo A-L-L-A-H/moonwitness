@@ -1,0 +1,131 @@
+{
+  "version": "2.0",
+  "scale": "relative_historical_era_not_absolute_dates",
+  "eras": {
+    "adam": {
+      "era": "PRIMORDIAL_HUMANITY",
+      "confidence": 0.45,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "idris": {
+      "era": "EARLY_HUMANITY",
+      "confidence": 0.3,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "nuh": {
+      "era": "EARLY_HUMANITY",
+      "confidence": 0.45,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "hud": {
+      "era": "ANCIENT_ARABIA",
+      "confidence": 0.5,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "salih": {
+      "era": "ANCIENT_ARABIA",
+      "confidence": 0.5,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "ibrahim": {
+      "era": "PATRIARCHAL_SEMITIC",
+      "confidence": 0.7,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "lut": {
+      "era": "PATRIARCHAL_LEVANT",
+      "confidence": 0.65,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "ismail": {
+      "era": "PATRIARCHAL_ARABIAN_ASSOCIATION",
+      "confidence": 0.55,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "ishaq": {
+      "era": "PATRIARCHAL_CANAAN",
+      "confidence": 0.65,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "yaqub": {
+      "era": "PATRIARCHAL_CANAAN",
+      "confidence": 0.7,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "yusuf": {
+      "era": "EGYPTIAN_PATRIARCHAL",
+      "confidence": 0.7,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "ayyub": {
+      "era": "ANCIENT_SEMITIC_UNCERTAIN",
+      "confidence": 0.3,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "shuayb": {
+      "era": "ANCIENT_MADYAN",
+      "confidence": 0.5,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "musa": {
+      "era": "EGYPT_SINAI_EXODUS",
+      "confidence": 0.8,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "harun": {
+      "era": "EGYPT_SINAI_EXODUS",
+      "confidence": 0.8,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "dhulkifl": {
+      "era": "UNKNOWN_HISTORICAL_ERA",
+      "confidence": 0.15,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "dawud": {
+      "era": "ISRAELITE_MONARCHY",
+      "confidence": 0.8,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "sulayman": {
+      "era": "ISRAELITE_MONARCHY",
+      "confidence": 0.8,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "ilyas": {
+      "era": "ISRAELITE_PROPHETIC_PERIOD",
+      "confidence": 0.6,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "alyasa": {
+      "era": "ISRAELITE_PROPHETIC_PERIOD",
+      "confidence": 0.55,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "yunus": {
+      "era": "ISRAELITE_PROPHETIC_PERIOD",
+      "confidence": 0.55,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "zakariya": {
+      "era": "LATE_ISRAELITE_SECOND_TEMPLE",
+      "confidence": 0.65,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "yahya": {
+      "era": "SECOND_TEMPLE",
+      "confidence": 0.8,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "isa": {
+      "era": "SECOND_TEMPLE",
+      "confidence": 0.9,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    },
+    "muhammad": {
+      "era": "LATE_ANTIQUITY_ARABIA",
+      "confidence": 1,
+      "note": "Historical placement aid; not a Qur’anic chronological date."
+    }
+  }
+}

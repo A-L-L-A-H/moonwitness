@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { LUMINOUS_NAMES_OF_ALLAH, TASBIH_PHRASES } from "@/data/remembrance-sanctuary";
 import type { WorldIdentifier } from "@/data/empire-registry";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
@@ -16,10 +17,26 @@ const TASBIH_STORAGE_KEY = "allah-tasbih-state-v1";
 const MUHASABAH_STORAGE_KEY = "allah-muhasabah-v1";
 
 const MUHASABAH_PLEDGES = [
-  { id: "restitution", label: "Fulfill trust & settle any debt owed" },
-  { id: "gentle-speech", label: "Guard tongue from mockery or falsehood" },
-  { id: "hidden-mercy", label: "Offer unseen kindness without applause" },
-  { id: "honest-craft", label: "Deliver clean, verifiable work as worship" },
+  {
+    id: "restitution",
+    labelEn: "Fulfill trust & settle any debt owed",
+    labelId: "Tunaikan amanah & lunasi hak sesama",
+  },
+  {
+    id: "gentle-speech",
+    labelEn: "Guard tongue from mockery or falsehood",
+    labelId: "Jaga lisan dari dusta & merendahkan",
+  },
+  {
+    id: "hidden-mercy",
+    labelEn: "Offer unseen kindness without applause",
+    labelId: "Beri kebaikan senyap tanpa mencari pujian",
+  },
+  {
+    id: "honest-craft",
+    labelEn: "Deliver clean, verifiable work as worship",
+    labelId: "Hasilkan karya jujur & teruji sebagai ibadah",
+  },
 ] as const;
 
 interface PersistedTasbihState {
@@ -36,6 +53,7 @@ export function RemembranceSanctuary({
   readonly quietMode?: boolean;
   readonly onNavigateToWorld?: (worldId: WorldIdentifier) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const [selectedNameId, setSelectedNameId] = useState<string>(LUMINOUS_NAMES_OF_ALLAH[0]!.id);
   const [activePhraseId, setActivePhraseId] = useState<string>(TASBIH_PHRASES[0]!.id);
   const [beadCount, setBeadCount] = useState<number>(0);
@@ -119,6 +137,22 @@ export function RemembranceSanctuary({
     setPledgeIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  };
+
+  const exportPrivateMuhasabahJson = () => {
+    const snapshot = {
+      exportedAt: new Date().toISOString(),
+      privacyNote: "Exported strictly on-device. Zero server telemetry or public leaderboard.",
+      tasbih: { activePhraseId, beadCount, cyclesCompleted, totalWitnessed },
+      muhasabahPledges: MUHASABAH_PLEDGES.filter((p) => pledgeIds.includes(p.id)).map((p) => p.id),
+    };
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `allah-muhasabah-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   useEffect(() => {
@@ -266,7 +300,7 @@ export function RemembranceSanctuary({
                 {/* Hand-crafted Obsidian & Gold-Leaf Nonagram Rosette Dial */}
                 <div className="pointer-events-none absolute inset-4 overflow-hidden rounded-full border border-[#d6b46c]/40 bg-[#05070e] shadow-[0_0_54px_rgba(223,192,123,0.14),inset_0_0_36px_rgba(0,0,0,0.92)]">
                   <Image
-                    src="/art/nonagram-sanctuary-dial.png"
+                    src="/art/nonagram-sanctuary-dial.webp"
                     alt=""
                     fill
                     loading="eager"
@@ -575,7 +609,11 @@ export function RemembranceSanctuary({
           {/* Quiet On-Device Private Muhasabah Checklist */}
           <div className="mt-5 border-t border-[#d6b46c]/20 pt-4">
             <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#dfc07b] uppercase">
-              <span>PRIVATE MUḤĀSABAH · ON-DEVICE ONLY</span>
+              <span>
+                {locale === "id"
+                  ? "MUḤĀSABAH PRIVAT · KHUSUS PERANGKAT INI"
+                  : "PRIVATE MUḤĀSABAH · ON-DEVICE ONLY"}
+              </span>
               <span>
                 {pledgeIds.length}/{MUHASABAH_PLEDGES.length}
               </span>
@@ -601,29 +639,43 @@ export function RemembranceSanctuary({
                           : "border-[#dfc07b]/60 bg-transparent"
                       }`}
                     />
-                    <span>{item.label}</span>
+                    <span>{locale === "id" ? item.labelId : item.labelEn}</span>
                   </button>
                 );
               })}
             </div>
+            <p className="mt-2.5 font-mono text-[9.5px] leading-relaxed text-[#bfb59e]">
+              {locale === "id"
+                ? "AMAL NYATA (0% POTONGAN): Salurkan zakat/sedekah langsung kepada tetangga, anak yatim, atau pihak yang berhak di sekitar Anda."
+                : "DIRECT SERVICE (0% PLATFORM FEE): Channel kindness, fair wages & zakat directly to neighbors, orphans, and those around you."}
+            </p>
           </div>
 
           <div
             aria-live="polite"
-            className="mt-4 flex items-center justify-between border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
+            className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
           >
             <span>CYCLES: {cyclesCompleted}</span>
-            <span>TOTAL REMEMBRANCES: {totalWitnessed}</span>
-            <button
-              type="button"
-              onClick={() => {
-                setBeadCount(0);
-                setJustCompletedCycle(false);
-              }}
-              className="btn-luxe-secondary px-3.5 py-1 hover:text-[#fff6df] cursor-pointer"
-            >
-              RESET RING
-            </button>
+            <span>TOTAL: {totalWitnessed}</span>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={exportPrivateMuhasabahJson}
+                className="btn-luxe-secondary px-3 py-1 text-[#f5dfa6] hover:text-white cursor-pointer"
+              >
+                EXPORT JSON
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setBeadCount(0);
+                  setJustCompletedCycle(false);
+                }}
+                className="btn-luxe-secondary px-3 py-1 hover:text-[#fff6df] cursor-pointer"
+              >
+                RESET RING
+              </button>
+            </div>
           </div>
         </div>
       </div>

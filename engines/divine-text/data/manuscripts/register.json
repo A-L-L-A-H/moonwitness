@@ -1,0 +1,8 @@
+{
+  "register_version": "1.0",
+  "witnesses": [
+    {"id":"QURAN-BIRMINGHAM","tradition":"Quran","status":"REGISTERED","note":"Early Quranic parchment witness; date claim must distinguish parchment from ink."},
+    {"id":"DSS","tradition":"Hebrew Bible","status":"REGISTERED","note":"Dead Sea Scrolls witness family; manuscript-specific dating and coverage required."},
+    {"id":"SINAITICUS","tradition":"Christian Bible","status":"REGISTERED","note":"4th-century codex witness; manuscript-level analysis required."}
+  ]
+}

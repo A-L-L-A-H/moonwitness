@@ -1,0 +1,59 @@
+name: m-time-pages
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "crates/mtime-wasm/**"
+      - "crates/mtime-core/**"
+      - "crates/mtime-timescales/**"
+      - "crates/mtime-hijri/**"
+      - "spec/**"
+      - "docs/**"
+      - ".github/workflows/pages-mtime.yml"
+permissions:
+  contents: read
+  actions: read
+  pages: write
+  id-token: write
+concurrency:
+  group: m-time-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - run: cargo install wasm-pack --locked
+      - run: wasm-pack build crates/mtime-wasm --target web --out-dir ../../web/pkg --release
+      - uses: actions/configure-pages@v5
+      - name: Assemble site
+        run: |
+          set -euo pipefail
+          mkdir _site
+          cp -R web/* _site/
+          cp -R spec _site/spec
+          cp -R docs _site/docs
+          cp -R data _site/data
+          VERSION="$(python3 - <<'PY'
+          import re
+          text=open("Cargo.toml").read()
+          m=re.search(r'\[workspace\.package\][\s\S]*?\nversion = "([^"]+)"',text)
+          print(m.group(1))
+          PY
+          )"
+          COMMIT="$(git rev-parse HEAD)"
+          DEPLOYED_AT="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          printf '{"version":"%s","commit":"%s","deployed_at":"%s","branch":"main"}\n'             "$VERSION" "$COMMIT" "$DEPLOYED_AT" > _site/build-info.json
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

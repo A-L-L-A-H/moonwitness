@@ -1,0 +1,40 @@
+version: 1
+status: hardening
+principles:
+  system_of_record_is_explicit: true
+  databases_are_private: true
+  cross_repository_data_uses_contracts_or_artifacts: true
+  tenant_scope_is_required_for_tenant_owned_resources: true
+stores:
+  corpus:
+    owner: moonwitness-corpus
+    purpose: knowledge/source/materialization metadata
+    production: postgresql-compatible
+    development: neon-or-supabase-postgresql
+  application:
+    owner: moonwitness-runtime
+    purpose: workflows/research-run/job state and application metadata
+    production: postgresql-compatible
+    development: neon-or-supabase-postgresql
+  object_artifacts:
+    owner: capability-specific
+    purpose: immutable corpus, evidence, reports and export artifacts
+    production: s3-compatible-object-storage
+    development: provider-compatible-object-storage
+rules:
+  - no_shared_database_schema_between_repositories
+  - no_direct_reads_of_foreign_private_tables
+  - foreign_data_access_requires_api_or_exported_artifact
+  - migrations_are_owned_by_store_owner
+  - destructive_migrations_require_backup_and_rollback_plan
+  - tenant_key_required_where_resource_is_tenant_scoped
+  - audit_and_provenance_records_are_not_silently_deleted
+classification:
+  public: safe_for_public_product_output
+  internal: operational_only
+  confidential: restricted_project_or_tenant_data
+  sensitive: identity_security_or_high_risk_data
+retention:
+  default: explicit_per_resource_policy
+  legal_or_audit_records: policy_driven
+  temporary_processing_artifacts: cleanup_after_successful_promotion

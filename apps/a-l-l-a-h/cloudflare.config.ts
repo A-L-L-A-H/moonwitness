@@ -13,6 +13,10 @@ export default defineConfig({
     },
     env: {
       ASSETS: bindings.assets(),
+      DB: bindings.d1({
+        id: "3dc374d8-ae42-4086-9879-eb1730c89f11",
+        name: "sovereign-codex-db",
+      }),
     },
   }),
 });

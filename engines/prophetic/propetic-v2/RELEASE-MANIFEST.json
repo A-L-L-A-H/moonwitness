@@ -1,0 +1,75 @@
+{
+  "release": "2.3.2",
+  "research_schema": "2.0",
+  "api_major": "v2",
+  "status": "FINAL_HANDOFF_READY_V2_3_2",
+  "stack": {
+    "frontend": "React + Vite + TypeScript + shadcn-style source components + Tailwind",
+    "backend": "Node.js local API",
+    "database": "SQLite"
+  },
+  "quick_start": {
+    "windows": [
+      "INSTALL-WINDOWS.cmd",
+      "RUN-WINDOWS.cmd",
+      "VERIFY-WINDOWS.cmd"
+    ],
+    "terminal": [
+      "npm run setup:e2e",
+      "npm start",
+      "npm run verify"
+    ],
+    "url": "http://127.0.0.1:4310",
+    "return_file": "handoff/HANDOFF-RESULT.json"
+  },
+  "counts": {
+    "profiles": 25,
+    "positive_rid": 25,
+    "total_edges": 74,
+    "asma_edges": 37,
+    "provenance_claims": 399,
+    "event_nodes": 200,
+    "genealogy_relations": 8,
+    "conflict_cases": 3,
+    "active_docs": 51,
+    "repository_files": 454
+  },
+  "packaging_verification": {
+    "core_tests": "40/40 PASS",
+    "sqlite_api_integration": "PASS",
+    "http_25_profile_sweep": "PASS",
+    "scoped_events": "200/200",
+    "scoped_provenance": "399/399",
+    "react_source_contract": "PASS",
+    "scoring_audit": "PASS",
+    "handoff_contract": "PASS",
+    "documentation_integrity": "PASS",
+    "offline_frontend_typecheck": "PASS",
+    "verify_handoff": "PASS",
+    "fresh_npm_install": "NOT_RUN_NETWORK_DEPENDENCY",
+    "vite_dependency_build": "NOT_RUN_NETWORK_DEPENDENCY",
+    "playwright_browser_e2e": "PACKAGED_FOR_RECIPIENT"
+  },
+  "scoring_diagnostic": {
+    "trait_target_top1_rate": 0.8235,
+    "trait_target_recall_at_3": 0.8235,
+    "note": "internal diagnostic only; not independent accuracy or probability"
+  },
+  "docs": {
+    "user_guide": "docs/project/USER-GUIDE.md",
+    "issues": "docs/project/ISSUES-KNOWN-LIMITATIONS.md",
+    "troubleshooting": "docs/project/TROUBLESHOOTING.md",
+    "architecture": "docs/architecture/ARCHITECTURE.md",
+    "four_corpus": "docs/corpus/FOUR-CORPUS-MODEL.md",
+    "bible_witness": "docs/corpus/bible/BIBLE-WITNESS-CONCEPT.md",
+    "todo": "docs/project/TODO.md",
+    "roadmap": "docs/project/ROADMAP.md"
+  },
+  "checksums": {
+    "dataset_sha256": "d31eda396c6cdfdc891f8185bee11b26cd95dbaa9abd6785f68c2bdc16c13e0f",
+    "sqlite_schema_sha256": "06d3c8aaf2add71d89a682c16491f2eac229ecffa50764ad559870f0f4181f80",
+    "package_json_sha256": "61d0276ac4ea36392e8fde42ceeee83eb8b9207f041cfb128610ffd6278180d8",
+    "sqlite_sha256": "4fd0ee9d80e7f26e52b9851fb8c5e0e4db86f34617ef422cf38a88c723bf3a3d",
+    "documentation_registry_sha256": "482016e486c0151ce716d86e3f3585d63237a9144d0e608f14271ebbb821774d"
+  }
+}
