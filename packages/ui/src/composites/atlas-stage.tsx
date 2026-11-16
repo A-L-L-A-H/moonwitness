@@ -20,7 +20,7 @@ export function AtlasStage({
   className,
   ...props
 }: AtlasStageProps) {
-  const { getClasses, effects: presetEffects } = useSkin();
+  const { getClasses } = useSkin();
   return (
     <div {...props} data-atlas-stage className={cn("atlas-stage @container min-w-0", className)}>
       <div
@@ -38,21 +38,10 @@ export function AtlasStage({
               <div className="absolute inset-0 bg-[color-mix(in_srgb,var(--ink)_55%,transparent)]" />
             </div>
           )}
-          <div
-            aria-hidden="true"
-            className={cn("pointer-events-none absolute inset-0", presetEffects)}
-          >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0">
             {effects}
           </div>
-          <div className="relative min-w-0">
-            {children}
-            <div
-              className="pointer-events-none absolute inset-0 z-10"
-              style={{
-                boxShadow: "inset 0 0 60px rgba(0,0,0,0.4), inset 0 0 2px var(--line)",
-              }}
-            />
-          </div>
+          <div className="relative min-w-0">{children}</div>
           {controls && <div className="relative mt-3">{controls}</div>}
         </div>
         {details && <div className="min-w-0">{details}</div>}

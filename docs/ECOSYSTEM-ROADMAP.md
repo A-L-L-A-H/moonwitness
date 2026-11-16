@@ -66,5 +66,5 @@
 - [x] **40.** Designate the single canonical `ARSY` control plane across competing Go/Rust/TS incarnations (`cp/arsy`, `ARSY-x`, `MWX`) per `MASTER-CANON-CROSS-REPO-CODEX.md §VII.3`.
 - [x] **41.** Format, typecheck, Playwright-verify, and commit the 108 concurrent working-tree changes (`apps/web`, `packages/ui`, `packages/assets`, `packages/types`) on `dev`.
 - [x] **42.** Add cross-world WCAG & Playwright visual regression gates in CI verifying both `01-imperium-lumen` and zine worlds cleanly.
-- [ ] **43.** Deploy unified `apps/web` (`moonwitness.biz.id`), `apps/a-l-l-a-h`, and unified `@moonwitness/ui` ecosystem targets together after full monorepo gate pass.
-- [ ] **44.** Execute final `pnpm gate:release` promotion (`dev → main`) with synchronized changelog and version tags.
+- [x] **43.** Deploy unified `apps/web` (`moonwitness.biz.id`), `apps/a-l-l-a-h`, and unified `@moonwitness/ui` ecosystem targets together after full monorepo gate pass.
+- [ ] **44.** Execute final `pnpm gate:release` promotion (`dev → main`) with synchronized changelog and version tags. _(v0.4.0 manifest, CHANGELOG, and PR `#145` synchronized on `dev`; `main` promotion awaits owner PR merge per `.githooks/pre-push` & `.github/workflows/auto-promote.yml`.)_

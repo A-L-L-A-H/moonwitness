@@ -39,12 +39,15 @@ export function CommandCenter() {
     >
       <CommandHero project={featuredProject} />
       <div className="px-4 py-6 sm:px-8">
-        {/* Row 1: Universe Status | Quick Actions | Ideas In Motion */}
-        <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-          <UniverseStatus stats={cc.stats} status={cc.statsStatus} />
-          <QuickActions actions={quickActions} onAction={cc.onAction} />
-          <div className="md:col-span-2 xl:col-span-1">
-            <IdeasInMotion />
+        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(16rem,1fr)]">
+          <UniverseMap
+            cities={mapCities}
+            selectedId={cc.selectedCity}
+            onSelect={cc.setSelectedCity}
+          />
+          <div className="grid min-w-0 gap-6 md:grid-cols-2 xl:grid-cols-1">
+            <UniverseStatus stats={cc.stats} status={cc.statsStatus} />
+            <QuickActions actions={quickActions} onAction={cc.onAction} />
           </div>
         </div>
 
@@ -54,7 +57,6 @@ export function CommandCenter() {
           <Pipeline columns={cc.visible.pipeline} onOpenCard={cc.onOpenCard} />
         </div>
 
-        {/* Row 3: Collections | Studios | Universe Map */}
         <div className="mt-4 grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)]">
           <Collections
             collections={cc.visible.collections}
@@ -62,11 +64,7 @@ export function CommandCenter() {
           />
           <Studios modules={modules} onOpen={cc.onOpenModule} />
           <div className="md:col-span-2 xl:col-span-1">
-            <UniverseMap
-              cities={mapCities}
-              selectedId={cc.selectedCity}
-              onSelect={cc.setSelectedCity}
-            />
+            <IdeasInMotion />
           </div>
         </div>
 

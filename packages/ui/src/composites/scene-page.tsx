@@ -36,7 +36,7 @@ export function ScenePanel({
   className,
   ...props
 }: ScenePanelProps) {
-  const { getClasses, effects: presetEffects } = useSkin();
+  const { getClasses } = useSkin();
   return (
     <article
       {...props}
@@ -54,7 +54,7 @@ export function ScenePanel({
           {scrim !== "none" && <div className="scene-scrim absolute inset-0" />}
         </div>
       )}
-      <div aria-hidden="true" className={cn("pointer-events-none absolute inset-0", presetEffects)}>
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
         {effects}
       </div>
       <div className="relative min-w-0">{children}</div>

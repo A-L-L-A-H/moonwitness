@@ -3,7 +3,10 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorldMap, type MapCityItem } from "./world-map";
-import { SkinProvider, useSkin } from "../skin";
+import { SkinProvider, useSkin, type SkinName } from "../skin";
+
+const SKINS: SkinName[] = ["default", "riot", "editorial", "technical", "archive", "transmission"];
+const EFFECTS = ".halftone, .grain, .scanlines, .cmyk-slip, .duotone, .brush-underline, .sticker";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -89,10 +92,10 @@ describe("WorldMap atlas contract", () => {
     expect(container.querySelectorAll("line")).toHaveLength(0);
   });
 
-  it("responds to live skin changes on the atlas surface", () => {
+  it.each(SKINS)("switches the atlas frame to %s without automatic effects", (skin) => {
     function Switch() {
       const { setSkin } = useSkin();
-      return <button onClick={() => setSkin("archive")}>Archive skin</button>;
+      return <button onClick={() => setSkin(skin)}>Switch</button>;
     }
     act(() =>
       root.render(
@@ -103,7 +106,9 @@ describe("WorldMap atlas contract", () => {
       ),
     );
     expect(container.querySelector(".atlas-layer.skin-default")).not.toBeNull();
+    expect(container.querySelector(EFFECTS)).toBeNull();
     act(() => container.querySelector<HTMLButtonElement>("button")?.click());
-    expect(container.querySelector(".atlas-layer.skin-archive")).not.toBeNull();
+    expect(container.querySelector(`.atlas-layer.skin-${skin}`)).not.toBeNull();
+    expect(container.querySelector(EFFECTS)).toBeNull();
   });
 });

@@ -183,6 +183,23 @@ for (const viewport of viewports) {
       await noHorizontalOverflow(page);
     });
 
+    test("Atlas leads the workspace with a readable command-stage composition", async ({
+      page,
+    }) => {
+      await openConsole(page);
+      const atlas = page.getByRole("region", { name: /universe\s*map/i });
+      const workspace = page.getByRole("region", { name: /recent workspace/i });
+      const atlasBox = await box(atlas);
+      const workspaceBox = await box(workspace);
+      expect(atlasBox.y + atlasBox.height).toBeLessThanOrEqual(workspaceBox.y);
+      if (viewport.width >= 1024) {
+        const mainBox = await box(page.getByRole("main"));
+        expect(atlasBox.width).toBeGreaterThan(mainBox.width * 0.6);
+        expect(atlasBox.y).toBeLessThan(viewport.height * 0.55);
+      }
+      await noHorizontalOverflow(page);
+    });
+
     test("search finds golden results, handles no matches, and resets", async ({ page }) => {
       await openConsole(page);
       const search = page.getByRole("textbox", { name: /search projects/i });
@@ -380,13 +397,16 @@ test("landing Storytelling renders existing stories through ScenePanel and FilmS
     await heading.scrollIntoViewIfNeeded();
     await expect(heading).toBeInViewport();
     await expect(scene.locator("img")).toBeVisible();
-    expect(
-      await scene
-        .locator("img")
-        .evaluate(
-          (image) => image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
-        ),
-    ).toBe(true);
+    await expect
+      .poll(() =>
+        scene
+          .locator("img")
+          .evaluate(
+            (image) =>
+              image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
+          ),
+      )
+      .toBe(true);
   }
   await noHorizontalOverflow(page);
 });

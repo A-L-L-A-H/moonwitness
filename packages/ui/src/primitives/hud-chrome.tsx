@@ -48,14 +48,13 @@ export function TopRail({
   className,
 }: TopRailProps) {
   const BrandLink = linkAs ?? "a";
-  const { getClasses, effects: presetEffects } = useSkin();
+  const { getClasses } = useSkin();
   return (
     <header
       className={cn(
         "hud-panel hud-edge-bottom hud-top-rail sticky top-0 z-40 shrink-0",
         getClasses("hudPanel"),
         className,
-        presetEffects,
       )}
     >
       <BrandLink href={brandHref} className="hud-brand flex min-h-11 items-center gap-2">
@@ -129,11 +128,11 @@ export function SideRail({
   className,
 }: SideRailProps) {
   const NavLink = linkAs ?? "a";
-  const { getClasses, effects: presetEffects } = useSkin();
+  const { getClasses } = useSkin();
   return (
     <nav
       aria-label={navLabel}
-      className={cn("hud-panel hud-side-rail", getClasses("hudPanel"), className, presetEffects)}
+      className={cn("hud-panel hud-side-rail", getClasses("hudPanel"), className)}
     >
       <div className="hud-nav-items" onKeyDown={navigateRail}>
         {items.map((item) => {
@@ -184,14 +183,13 @@ export interface CommandStripProps {
 }
 
 export function CommandStrip({ left, right, className }: CommandStripProps) {
-  const { getClasses, effects: presetEffects } = useSkin();
+  const { getClasses } = useSkin();
   return (
     <footer
       className={cn(
         "hud-panel hud-edge-top flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-[10px] tracking-widest text-[var(--paper)]",
         getClasses("hudPanel"),
         className,
-        presetEffects,
       )}
     >
       <span className="min-w-0 break-words">{left}</span>

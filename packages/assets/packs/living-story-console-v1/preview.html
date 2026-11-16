@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src 'self' file:; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"
+    />
+    <title>MoonWitness | Living story console asset pack</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #121219;
+        --paper: #f4f0e6;
+        --accent: #f7d65a;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--ink);
+        color: var(--paper);
+        font:
+          1rem/1.65 system-ui,
+          sans-serif;
+      }
+      header,
+      main,
+      footer {
+        max-width: 74rem;
+        margin: auto;
+        padding: 2rem clamp(1rem, 4vw, 3rem);
+      }
+      h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        line-height: 1.15;
+        max-width: 24ch;
+      }
+      h2 {
+        font-size: 1.5rem;
+        line-height: 1.3;
+      }
+      small {
+        display: block;
+        font-size: 1rem;
+        font-weight: 400;
+      }
+      p,
+      figcaption {
+        max-width: 75ch;
+      }
+      section {
+        padding-block: 2rem;
+        border-top: 1px solid var(--paper);
+      }
+      figure {
+        margin: 1.5rem 0;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        max-height: 38rem;
+      }
+      figcaption {
+        margin-top: 1rem;
+      }
+      a {
+        color: var(--accent);
+        cursor: pointer;
+        display: inline-block;
+        padding: 0.65rem 0.25rem;
+        overflow-wrap: anywhere;
+      }
+      a:hover {
+        text-decoration-thickness: 3px;
+      }
+      a:active {
+        text-decoration-style: double;
+      }
+      a:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 3px;
+      }
+      .downloads,
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.5rem;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        padding: 1rem;
+        border: 1px solid var(--paper);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Living story console</h1>
+      <p>
+        Reusable MoonWitness artwork for Scene, Atlas and HUD surfaces. Curated from existing
+        project artwork, not newly generated art. The prior generation request was denied with HTTP
+        403 (pricing).
+      </p>
+      <p>Project UNLICENSED. No external licensing or redistribution rights are claimed.</p>
+      <nav aria-label="Pack resources">
+        <a href="manifest.json">Asset manifest</a><a href="#usage">Component usage</a>
+      </nav>
+    </header>
+    <main>
+      <section aria-labelledby="shadow-command-hero">
+        <h2 id="shadow-command-hero">Command scene <small>Scene</small></h2>
+        <figure>
+          <img
+            src="shadow-command-hero-1440.webp"
+            width="1440"
+            height="823"
+            alt="Command scene"
+            fetchpriority="high"
+            style="object-fit: cover; object-position: 50% 50%"
+          />
+          <figcaption>
+            Center is a starting point; review the crop at each breakpoint and keep faces
+            unobscured.
+          </figcaption>
+        </figure>
+        <p>
+          1440 × 823 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="shadow-command-hero.png" download>PNG 1792 × 1024 (3,531,178 bytes)</a>
+          <a href="shadow-command-hero-1440.webp" download>WEBP 1440 × 823 (257,284 bytes)</a>
+          <a href="shadow-command-hero-480.webp" download>WEBP 480 × 274 (29,752 bytes)</a>
+        </div>
+      </section>
+      <section aria-labelledby="crew-rooftop">
+        <h2 id="crew-rooftop">Rooftop crew scene <small>Scene</small></h2>
+        <figure>
+          <img
+            src="crew-rooftop-1440.webp"
+            width="1440"
+            height="823"
+            alt="Rooftop crew scene"
+            loading="lazy"
+            style="object-fit: cover; object-position: 50% 50%"
+          />
+          <figcaption>
+            Center is a starting point; review the crop at each breakpoint and keep faces
+            unobscured.
+          </figcaption>
+        </figure>
+        <p>
+          1440 × 823 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="crew-rooftop.png" download>PNG 1792 × 1024 (4,014,254 bytes)</a>
+          <a href="crew-rooftop-1440.webp" download>WEBP 1440 × 823 (400,046 bytes)</a>
+          <a href="crew-rooftop-480.webp" download>WEBP 480 × 274 (47,890 bytes)</a>
+        </div>
+      </section>
+      <section aria-labelledby="world-map-atlas">
+        <h2 id="world-map-atlas">Illustrated atlas backdrop <small>Atlas</small></h2>
+        <figure>
+          <img
+            src="world-map-atlas-1440.webp"
+            width="1440"
+            height="960"
+            alt="Illustrated atlas backdrop"
+            loading="lazy"
+            style="object-fit: contain; object-position: 50% 50%"
+          />
+          <figcaption>
+            Keep the whole illustration visible. Do not infer coordinates from painted landmarks.
+          </figcaption>
+        </figure>
+        <p>
+          1440 × 960 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="world-map-atlas.png" download>PNG 1536 × 1024 (3,350,273 bytes)</a>
+          <a href="world-map-atlas-1440.webp" download>WEBP 1440 × 960 (344,664 bytes)</a>
+          <a href="world-map-atlas-480.webp" download>WEBP 480 × 320 (42,520 bytes)</a>
+        </div>
+      </section>
+      <section aria-labelledby="command-eye">
+        <h2 id="command-eye">Command eye accent <small>HUD</small></h2>
+        <figure>
+          <img
+            src="command-eye-1024.webp"
+            width="1024"
+            height="1536"
+            alt="Command eye accent"
+            loading="lazy"
+            style="object-fit: contain; object-position: 50% 50%"
+          />
+          <figcaption>
+            Keep the complete silhouette visible; do not stretch or flatten transparency.
+          </figcaption>
+        </figure>
+        <p>
+          1024 × 1536 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="command-eye.png" download>PNG 1024 × 1536 (3,600,317 bytes)</a>
+          <a href="command-eye-1024.webp" download>WEBP 1024 × 1536 (481,962 bytes)</a>
+          <a href="command-eye-480.webp" download>WEBP 480 × 720 (108,668 bytes)</a>
+        </div>
+      </section>
+      <section aria-labelledby="city-shadow">
+        <h2 id="city-shadow">City establishing scene <small>Scene</small></h2>
+        <figure>
+          <img
+            src="city-shadow-1440.webp"
+            width="1440"
+            height="823"
+            alt="City establishing scene"
+            loading="lazy"
+            style="object-fit: cover; object-position: 50% 50%"
+          />
+          <figcaption>
+            Center is a starting point; review the crop at each breakpoint and keep faces
+            unobscured.
+          </figcaption>
+        </figure>
+        <p>
+          1440 × 823 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="city-shadow.png" download>PNG 1792 × 1024 (2,837,815 bytes)</a>
+          <a href="city-shadow-1440.webp" download>WEBP 1440 × 823 (227,594 bytes)</a>
+          <a href="city-shadow-480.webp" download>WEBP 480 × 274 (29,268 bytes)</a>
+        </div>
+      </section>
+      <section aria-labelledby="sidebar-witness">
+        <h2 id="sidebar-witness">Witness rail artwork <small>HUD</small></h2>
+        <figure>
+          <img
+            src="sidebar-witness-1024.webp"
+            width="1024"
+            height="1536"
+            alt="Witness rail artwork"
+            loading="lazy"
+            style="object-fit: cover; object-position: 50% 50%"
+          />
+          <figcaption>
+            Center is a starting point; review the crop at each breakpoint and keep faces
+            unobscured.
+          </figcaption>
+        </figure>
+        <p>
+          1024 × 1536 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="sidebar-witness.png" download>PNG 1024 × 1536 (3,640,476 bytes)</a>
+          <a href="sidebar-witness-1024.webp" download>WEBP 1024 × 1536 (513,906 bytes)</a>
+          <a href="sidebar-witness-480.webp" download>WEBP 480 × 720 (107,272 bytes)</a>
+        </div>
+      </section>
+      <section aria-labelledby="hero-moon-v2">
+        <h2 id="hero-moon-v2">Transparent moon overlay <small>HUD</small></h2>
+        <figure>
+          <img
+            src="hero-moon-v2-1024.webp"
+            width="1024"
+            height="1024"
+            alt="Transparent moon overlay"
+            loading="lazy"
+            style="object-fit: contain; object-position: 50% 50%"
+          />
+          <figcaption>
+            Keep the complete silhouette visible; do not stretch or flatten transparency.
+          </figcaption>
+        </figure>
+        <p>
+          1024 × 1024 WebP. Use alt=&quot;&quot; for decorative art. Keep headings, controls and
+          meaningful information in accessible HTML. If the image conveys unique information, supply
+          contextual alt outside aria-hidden art slots.
+        </p>
+        <div class="downloads">
+          <a href="hero-moon-v2.png" download>PNG 1024 × 1024 (1,355,156 bytes)</a>
+          <a href="hero-moon-v2-1024.webp" download>WEBP 1024 × 1024 (134,450 bytes)</a>
+          <a href="hero-moon-v2-480.webp" download>WEBP 480 × 480 (41,920 bytes)</a>
+        </div>
+      </section>
+      <section id="usage">
+        <h2>Component usage</h2>
+        <p>
+          Effects are opt-in; source artwork is already textured. This preview adds no texture or
+          motion. Current working-tree ScenePanel and AtlasStage components use explicit effects.
+          Older versions may inherit skin preset effects even when the effects prop is omitted.
+          Check the installed UI version before adding effects.
+        </p>
+        <p>
+          These JSX examples require the existing MoonWitness UI styles and skin setup. Copy this
+          folder into your application's public assets before using the example URL. Art slots are
+          decorative and hidden from assistive technology; keep meaningful content outside them.
+          Verify text contrast and cropping in the consuming layout.
+        </p>
+        <pre><code>import { ScenePanel, AtlasStage } from &quot;@moonwitness/ui&quot;;
+
+// Copy the pack into your public asset directory and set its deployed URL.
+const packUrl = &quot;/packs/living-story-console-v1&quot;;
+
+&lt;ScenePanel
+  scrim=&quot;left&quot;
+  art={&lt;img src={`${packUrl}/shadow-command-hero-1440.webp`} alt=&quot;&quot;
+    width={1440} height={823}
+    style={{ width: &quot;100%&quot;, height: &quot;100%&quot;, objectFit: &quot;cover&quot;, objectPosition: &quot;50% 50%&quot; }} /&gt;}
+&gt;
+  &lt;div style={{ minHeight: &quot;20rem&quot;, padding: &quot;2rem&quot; }}&gt;
+    &lt;h2&gt;Command scene&lt;/h2&gt;
+    &lt;p&gt;Keep live information in HTML, not in the artwork.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/ScenePanel&gt;
+
+&lt;AtlasStage
+  backdrop={&lt;img src={`${packUrl}/world-map-atlas-1440.webp`} alt=&quot;&quot;
+    width={1440} height={960}
+    style={{ width: &quot;100%&quot;, height: &quot;100%&quot;, objectFit: &quot;contain&quot;, objectPosition: &quot;50% 50%&quot; }} /&gt;}
+&gt;
+  &lt;div style={{ minHeight: &quot;24rem&quot; }}&gt;
+    &lt;h2&gt;World atlas&lt;/h2&gt;
+    &lt;p&gt;Illustrated backdrop, not geographic data.&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/AtlasStage&gt;</code></pre>
+      </section>
+    </main>
+    <footer>
+      <p>
+        Preview design: dark ink isolates the existing textured artwork; paper-colored system
+        typography keeps technical guidance readable offline. Spacious catalogue rows make crops and
+        download sizes easy to compare. Yellow marks links only. No external requests, fonts or
+        scripts.
+      </p>
+    </footer>
+  </body>
+</html>

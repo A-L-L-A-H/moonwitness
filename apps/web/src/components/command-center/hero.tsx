@@ -42,7 +42,7 @@ export function CommandHero({ project }: { project: Project }) {
       />
       <Star4 className="absolute right-[34%] top-10 hidden h-6 w-6 text-[var(--yellow)] opacity-70 lg:block" />
 
-      <div className="relative z-10 grid gap-6 px-4 pb-8 pt-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)] lg:items-end lg:gap-10 lg:pt-20">
+      <div className="relative z-10 grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)] lg:items-center lg:gap-10">
         <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <DistressedSticker variant="hazard" text="SAME MOON DIFFERENT PEOPLE" />
@@ -57,7 +57,7 @@ export function CommandHero({ project }: { project: Project }) {
           </p>
           <h1
             id="cc-top"
-            className="cmyk-slip mt-2 max-w-full scroll-mt-24 font-brush text-4xl leading-[0.9] tracking-tight text-white drop-shadow-[4px_4px_0_rgba(0,0,0,0.9)] sm:text-6xl xl:text-8xl"
+            className="cmyk-slip mt-2 max-w-full scroll-mt-24 font-brush text-4xl leading-[0.95] tracking-tight text-[var(--paper)] sm:text-5xl xl:text-6xl"
           >
             <span className="block">SHADOW</span>
             <span className="block text-[var(--pink)]">COMMAND CENTER</span>

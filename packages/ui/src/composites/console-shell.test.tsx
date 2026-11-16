@@ -133,14 +133,9 @@ describe("ConsoleShell", () => {
       for (const surface of surfaces) {
         expect(surface.classList.contains(`skin-${skin}`)).toBe(true);
         expect(surface.classList.contains("hud-layer")).toBe(true);
-        // Effects from preset are now applied by default to match mockup visuals
-        const hasPresetEffects =
-          /halftone|grain|scanlines|cmyk-slip|duotone|brush-underline|sticker/.test(
-            surface.className,
-          );
-        if (skin !== "default" && skin !== "technical") {
-          expect(hasPresetEffects).toBe(true);
-        }
+        expect(surface.className).not.toMatch(
+          /halftone|grain|scanlines|cmyk-slip|duotone|brush-underline|sticker/,
+        );
       }
       const header = container.querySelector("header");
       if (!header) throw new Error("Missing header");

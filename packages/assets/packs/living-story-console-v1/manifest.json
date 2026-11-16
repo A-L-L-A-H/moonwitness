@@ -1,0 +1,403 @@
+{
+  "schemaVersion": 1,
+  "id": "living-story-console-v1",
+  "title": "MoonWitness living story console",
+  "provenance": "Curated copies and resized derivatives of existing project artwork. No new artwork generated.",
+  "license": "UNLICENSED",
+  "licensingNote": "Project UNLICENSED; no external licensing or redistribution rights are claimed.",
+  "generation": {
+    "status": "NOT GENERATED",
+    "reason": "Prior provider request denied with HTTP 403 (pricing), as reported in the task. This build makes no external calls."
+  },
+  "build": {
+    "script": "packages/assets/scripts/build-console-pack.mjs",
+    "sharp": "0.35.5",
+    "libvips": "8.18.7",
+    "widths": [1440, 480],
+    "withoutEnlargement": true,
+    "webp": {
+      "quality": 82,
+      "alphaQuality": 100,
+      "effort": 6
+    },
+    "reproducibility": "No timestamps. Byte reproducibility requires identical source bytes and sharp/libvips versions."
+  },
+  "guidance": {
+    "effects": "Effects are opt-in; source artwork is already textured. Avoid stacking grain, halftone or scanlines.",
+    "componentBoundary": "ScenePanel art and AtlasStage backdrop are aria-hidden. Current working-tree components use explicit effects; older versions may also inherit skin preset effects. Review the installed UI version before adding effects.",
+    "paths": "Source paths are repository-relative; original and derivative paths are pack-relative."
+  },
+  "assets": [
+    {
+      "id": "shadow-command-hero",
+      "title": "Command scene",
+      "role": "Scene",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/shadow-command-hero.png",
+        "format": "png",
+        "width": 1792,
+        "height": 1024,
+        "hasAlpha": false,
+        "bytes": 3531178,
+        "sha256": "053408905d50286170e5a347e31a724594e23e441f9be88f7c0c86b1df332569"
+      },
+      "original": {
+        "path": "shadow-command-hero.png",
+        "format": "png",
+        "width": 1792,
+        "height": 1024,
+        "hasAlpha": false,
+        "bytes": 3531178,
+        "sha256": "053408905d50286170e5a347e31a724594e23e441f9be88f7c0c86b1df332569"
+      },
+      "derivatives": [
+        {
+          "path": "shadow-command-hero-1440.webp",
+          "format": "webp",
+          "width": 1440,
+          "height": 823,
+          "hasAlpha": false,
+          "bytes": 257284,
+          "sha256": "aef91ba286d048b7e0abf449817689c9be7e57c505ef85e1d86c7cfa9312914a"
+        },
+        {
+          "path": "shadow-command-hero-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 274,
+          "hasAlpha": false,
+          "bytes": 29752,
+          "sha256": "0625c71a7e3ea1e5433163fcc53e2e5b29a18bad5c89ebfc4dc08234c6095cbe"
+        }
+      ],
+      "positioning": {
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "guidance": "Center is a starting point; review the crop at each breakpoint and keep faces unobscured."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    },
+    {
+      "id": "crew-rooftop",
+      "title": "Rooftop crew scene",
+      "role": "Scene",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/crew-rooftop.png",
+        "format": "png",
+        "width": 1792,
+        "height": 1024,
+        "hasAlpha": false,
+        "bytes": 4014254,
+        "sha256": "291979cb174af8dbaf035b5febe8f7e340cd40aa2875a469b3d01b90a8c4f7d3"
+      },
+      "original": {
+        "path": "crew-rooftop.png",
+        "format": "png",
+        "width": 1792,
+        "height": 1024,
+        "hasAlpha": false,
+        "bytes": 4014254,
+        "sha256": "291979cb174af8dbaf035b5febe8f7e340cd40aa2875a469b3d01b90a8c4f7d3"
+      },
+      "derivatives": [
+        {
+          "path": "crew-rooftop-1440.webp",
+          "format": "webp",
+          "width": 1440,
+          "height": 823,
+          "hasAlpha": false,
+          "bytes": 400046,
+          "sha256": "dfdd4092503b8056db6182f1a9a2c11579fb4d46ece9203693eaf52f52c36a1a"
+        },
+        {
+          "path": "crew-rooftop-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 274,
+          "hasAlpha": false,
+          "bytes": 47890,
+          "sha256": "152e9c9aeeb977c6a67fc4ef14fd2ef9d5ef5459e61677a4114b329597247f60"
+        }
+      ],
+      "positioning": {
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "guidance": "Center is a starting point; review the crop at each breakpoint and keep faces unobscured."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    },
+    {
+      "id": "world-map-atlas",
+      "title": "Illustrated atlas backdrop",
+      "role": "Atlas",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/world-map-atlas.png",
+        "format": "png",
+        "width": 1536,
+        "height": 1024,
+        "hasAlpha": false,
+        "bytes": 3350273,
+        "sha256": "1fb83e022161de1f59d4f261267c7773d7cab01c8763f565a08e396cdb0e484e"
+      },
+      "original": {
+        "path": "world-map-atlas.png",
+        "format": "png",
+        "width": 1536,
+        "height": 1024,
+        "hasAlpha": false,
+        "bytes": 3350273,
+        "sha256": "1fb83e022161de1f59d4f261267c7773d7cab01c8763f565a08e396cdb0e484e"
+      },
+      "derivatives": [
+        {
+          "path": "world-map-atlas-1440.webp",
+          "format": "webp",
+          "width": 1440,
+          "height": 960,
+          "hasAlpha": false,
+          "bytes": 344664,
+          "sha256": "28c5603396f11f7c00e19d324092145be55bf9c866db232f20a5cbabe95fd887"
+        },
+        {
+          "path": "world-map-atlas-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 320,
+          "hasAlpha": false,
+          "bytes": 42520,
+          "sha256": "df3d3a740fd0425a06f5e455fd9fedf2f8cd723912aeb60203f315b48c365331"
+        }
+      ],
+      "positioning": {
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "guidance": "Keep the whole illustration visible. Do not infer coordinates from painted landmarks."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    },
+    {
+      "id": "command-eye",
+      "title": "Command eye accent",
+      "role": "HUD",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/command-eye.png",
+        "format": "png",
+        "width": 1024,
+        "height": 1536,
+        "hasAlpha": false,
+        "bytes": 3600317,
+        "sha256": "64dd6aa6ac20d9361a72ffb33afdbee837c8bdae99c04222a0e3a4f272bcf4c2"
+      },
+      "original": {
+        "path": "command-eye.png",
+        "format": "png",
+        "width": 1024,
+        "height": 1536,
+        "hasAlpha": false,
+        "bytes": 3600317,
+        "sha256": "64dd6aa6ac20d9361a72ffb33afdbee837c8bdae99c04222a0e3a4f272bcf4c2"
+      },
+      "derivatives": [
+        {
+          "path": "command-eye-1024.webp",
+          "format": "webp",
+          "width": 1024,
+          "height": 1536,
+          "hasAlpha": false,
+          "bytes": 481962,
+          "sha256": "49b700ead40bfcf83ba02a4d38fd51ffe1a6b2694809400066901d980b2b29e4"
+        },
+        {
+          "path": "command-eye-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 720,
+          "hasAlpha": false,
+          "bytes": 108668,
+          "sha256": "d8d79a68d0767676386901dc17d12a61ceceb0e3b2a66c0c2a3c936a2a469d33"
+        }
+      ],
+      "positioning": {
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "guidance": "Keep the complete silhouette visible; do not stretch or flatten transparency."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    },
+    {
+      "id": "city-shadow",
+      "title": "City establishing scene",
+      "role": "Scene",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/city-shadow.png",
+        "format": "png",
+        "width": 1792,
+        "height": 1024,
+        "hasAlpha": true,
+        "bytes": 2837815,
+        "sha256": "f377db0fd49fa75839dba2033468a076382927483f9f9e80d723440ed30b9128"
+      },
+      "original": {
+        "path": "city-shadow.png",
+        "format": "png",
+        "width": 1792,
+        "height": 1024,
+        "hasAlpha": true,
+        "bytes": 2837815,
+        "sha256": "f377db0fd49fa75839dba2033468a076382927483f9f9e80d723440ed30b9128"
+      },
+      "derivatives": [
+        {
+          "path": "city-shadow-1440.webp",
+          "format": "webp",
+          "width": 1440,
+          "height": 823,
+          "hasAlpha": true,
+          "bytes": 227594,
+          "sha256": "720d7139f3c44661966d1499bfbe15cb0b21d6dcb9e894215cb6a2435e33a5ba"
+        },
+        {
+          "path": "city-shadow-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 274,
+          "hasAlpha": true,
+          "bytes": 29268,
+          "sha256": "4e11a9ad5cb9cf7f96baa5e36324fadfc74f982062910775354a2301e5a5192b"
+        }
+      ],
+      "positioning": {
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "guidance": "Center is a starting point; review the crop at each breakpoint and keep faces unobscured."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    },
+    {
+      "id": "sidebar-witness",
+      "title": "Witness rail artwork",
+      "role": "HUD",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/sidebar-witness.png",
+        "format": "png",
+        "width": 1024,
+        "height": 1536,
+        "hasAlpha": false,
+        "bytes": 3640476,
+        "sha256": "1b75999faca3326147c77f8a00846acdb07c989055c29c57c42b01395fc170f7"
+      },
+      "original": {
+        "path": "sidebar-witness.png",
+        "format": "png",
+        "width": 1024,
+        "height": 1536,
+        "hasAlpha": false,
+        "bytes": 3640476,
+        "sha256": "1b75999faca3326147c77f8a00846acdb07c989055c29c57c42b01395fc170f7"
+      },
+      "derivatives": [
+        {
+          "path": "sidebar-witness-1024.webp",
+          "format": "webp",
+          "width": 1024,
+          "height": 1536,
+          "hasAlpha": false,
+          "bytes": 513906,
+          "sha256": "0c2dbdab5318bf104ef372f7970a8cc5531f242a9ba70b06b9d46a59b0cc45e8"
+        },
+        {
+          "path": "sidebar-witness-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 720,
+          "hasAlpha": false,
+          "bytes": 107272,
+          "sha256": "20db938a80ce9fb2d6594cfac8754ce6a93fa247b49efac9dc0404cce78e961b"
+        }
+      ],
+      "positioning": {
+        "objectFit": "cover",
+        "objectPosition": "50% 50%",
+        "guidance": "Center is a starting point; review the crop at each breakpoint and keep faces unobscured."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    },
+    {
+      "id": "hero-moon-v2",
+      "title": "Transparent moon overlay",
+      "role": "HUD",
+      "provenance": "existing project artwork",
+      "source": {
+        "path": "apps/web/public/art/hero-moon-v2.png",
+        "format": "png",
+        "width": 1024,
+        "height": 1024,
+        "hasAlpha": true,
+        "bytes": 1355156,
+        "sha256": "08e507d5a44147c3d7487f91cdc82f3488a8173c75706f88d3a1b22a95b32b62"
+      },
+      "original": {
+        "path": "hero-moon-v2.png",
+        "format": "png",
+        "width": 1024,
+        "height": 1024,
+        "hasAlpha": true,
+        "bytes": 1355156,
+        "sha256": "08e507d5a44147c3d7487f91cdc82f3488a8173c75706f88d3a1b22a95b32b62"
+      },
+      "derivatives": [
+        {
+          "path": "hero-moon-v2-1024.webp",
+          "format": "webp",
+          "width": 1024,
+          "height": 1024,
+          "hasAlpha": true,
+          "bytes": 134450,
+          "sha256": "35812c4fd6a186c45ba87010180e653d8da31f377a4e585a7d7bbd2a09dda49c"
+        },
+        {
+          "path": "hero-moon-v2-480.webp",
+          "format": "webp",
+          "width": 480,
+          "height": 480,
+          "hasAlpha": true,
+          "bytes": 41920,
+          "sha256": "3d0ab36a4e6325633a93f03ba7a291145cc6e0dcfe470dc8db3485778ee19710"
+        }
+      ],
+      "positioning": {
+        "objectFit": "contain",
+        "objectPosition": "50% 50%",
+        "guidance": "Keep the complete silhouette visible; do not stretch or flatten transparency."
+      },
+      "accessibility": {
+        "decorativeAlt": "",
+        "guidance": "Use alt=\"\" for decorative art. Keep headings, controls and meaningful information in accessible HTML. If the image conveys unique information, supply contextual alt outside aria-hidden art slots."
+      }
+    }
+  ]
+}

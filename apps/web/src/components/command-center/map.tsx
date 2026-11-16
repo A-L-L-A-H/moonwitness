@@ -22,7 +22,7 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
         accent="MAP"
         note={`${cities.length} cities`}
       />
-      <div className="grid grid-cols-1 items-start gap-4 @[40rem]:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
+      <div className="grid grid-cols-1 items-start gap-4">
         <div className="relative min-w-0">
           <WorldMap
             cities={cities}
@@ -33,7 +33,7 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
                 src={artSrc("world-map-atlas")}
                 alt=""
                 fill
-                sizes="(max-width: 767px) 100vw, 40vw"
+                sizes="(min-width: 1280px) 65vw, 100vw"
                 className="object-cover object-center"
               />
             }
@@ -44,13 +44,13 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
             className="pointer-events-none inset-x-4 top-4 z-[1] h-64 mix-blend-screen opacity-80 @[34rem]:h-80"
           />
         </div>
-        <Card className="min-w-0 p-4">
+        <Card className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-4">
           <h3 className="flex items-center gap-2 font-brush text-lg text-white">
             <GlobeIcon className="h-4 w-4 text-[var(--blue)]" />
             CITY DETAIL
           </h3>
           {selected ? (
-            <dl className="mt-3 space-y-2">
+            <dl className="flex flex-wrap items-center gap-x-8 gap-y-2">
               <div>
                 <dt className="text-[11px] tracking-wider text-zinc-400">CITY</dt>
                 <dd className="font-brush text-2xl text-[var(--pink)]">{selected.city}</dd>
