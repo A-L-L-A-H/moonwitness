@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const apiPort = process.env.PLAYWRIGHT_API_PORT || "3002";
+const webPort = process.env.PLAYWRIGHT_WEB_PORT || "3000";
+
 export default defineConfig({
   testDir: "./apps/web/e2e",
   fullyParallel: true,
@@ -8,7 +11,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [["html", { outputFolder: "apps/web/playwright-report" }], ["list"]],
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || "http://localhost:3000",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${webPort}`,
     reducedMotion: "no-preference",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
@@ -40,24 +43,25 @@ export default defineConfig({
     {
       command: "pnpm dev",
       cwd: "./apps/api",
-      url: "http://127.0.0.1:3002/api/v1/readyz",
+      url: `http://127.0.0.1:${apiPort}/api/v1/readyz`,
       reuseExistingServer: !process.env.CI,
       timeout: 120000,
       env: {
         DATABASE_URL: "./playwright.db",
         HOST: "127.0.0.1",
-        PORT: "3002",
+        PORT: apiPort,
         SEED: "1",
       },
     },
     {
       command: process.env.CI ? "pnpm start" : "pnpm dev",
       cwd: "./apps/web",
-      url: "http://localhost:3000",
+      url: `http://localhost:${webPort}`,
       reuseExistingServer: !process.env.CI,
       timeout: 120000,
       env: {
-        API_INTERNAL_URL: "http://127.0.0.1:3002",
+        PORT: webPort,
+        API_INTERNAL_URL: `http://127.0.0.1:${apiPort}`,
       },
     },
   ],

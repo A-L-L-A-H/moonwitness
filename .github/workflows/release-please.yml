@@ -17,7 +17,7 @@ concurrency:
 jobs:
   release-please:
     name: Prepare release
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 15
     steps:
       - name: Run Release Please

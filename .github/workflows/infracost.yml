@@ -13,7 +13,7 @@ permissions:
 jobs:
   infracost:
     name: Infracost PR Cost Estimation
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 15
     steps:
       - name: Checkout

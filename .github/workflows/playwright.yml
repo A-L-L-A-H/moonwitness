@@ -9,7 +9,7 @@ on:
 jobs:
   e2e-tests:
     name: E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -33,7 +33,32 @@ jobs:
 
       - name: Install Playwright browsers
         working-directory: ./apps/web
-        run: pnpm exec playwright install --with-deps chromium
+        run: pnpm exec playwright install chromium
+
+      - name: Allocate isolated test ports
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const net = require("node:net");
+            const freePort = () => new Promise((resolve, reject) => {
+              const s = net.createServer();
+              s.listen(0, "127.0.0.1", () => {
+                const { port } = s.address();
+                s.close((err) => err ? reject(err) : resolve(port));
+              });
+            });
+            (async () => {
+              const apiPort = await freePort();
+              let webPort = await freePort();
+              while (webPort === apiPort) webPort = await freePort();
+              fs.appendFileSync(process.env.GITHUB_ENV, [
+                `PLAYWRIGHT_API_PORT=${apiPort}`,
+                `PLAYWRIGHT_WEB_PORT=${webPort}`,
+                `PLAYWRIGHT_BASE_URL=http://localhost:${webPort}`,
+                `API_INTERNAL_URL=http://127.0.0.1:${apiPort}`,
+              ].join("\n") + "\n");
+            })();
+          '
 
       - name: Build web
         working-directory: ./apps/web
