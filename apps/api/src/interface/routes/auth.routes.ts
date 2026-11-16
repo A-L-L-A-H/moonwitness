@@ -5,10 +5,10 @@
 
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import rateLimit from "@fastify/rate-limit";
+import { resolveRequestIdentity } from "../../middleware/auth";
 import {
   createSession,
   getSessionCookieOptions,
-  getSessionWithUser,
   revokeSession,
   SESSION_COOKIE_NAME,
 } from "../../services/session";
@@ -99,26 +99,15 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     // GET /api/v1/auth/me
     authScope.get("/auth/me", async (request: FastifyRequest, reply: FastifyReply) => {
-      const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
-      if (!sessionId) {
+      const { user, expiredSessionCookie } = await resolveRequestIdentity(request);
+      if (!user) {
+        if (expiredSessionCookie) {
+          reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+          return reply.code(401).send({ error: "Session expired or invalid" });
+        }
         return reply.code(401).send({ error: "Not authenticated" });
       }
-
-      const session = await getSessionWithUser(sessionId);
-      if (!session) {
-        reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
-        return reply.code(401).send({ error: "Session expired or invalid" });
-      }
-
-      return reply.send({
-        user: {
-          id: session.userId,
-          username: session.username,
-          email: session.email,
-          role: session.role,
-          displayName: session.displayName,
-        },
-      });
+      return reply.send({ user });
     });
   });
 }
