@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "@moonwitness/core";
 import { requireAuth } from "../../middleware/auth";
 import { env, validateMemoryRuntimeConfig } from "../../shared/env";
+import { getUpstreamBridgeHeaders } from "../../shared/upstream";
 
 const memorySystemSchema = z.object({
   mode: z.string(),
@@ -84,7 +85,7 @@ class MemoryUpstreamError extends Error {
 async function fetchMemoryJson<T>(url: URL, schema: z.ZodType<T>, timeoutMs: number): Promise<T> {
   const response = await fetch(url, {
     method: "GET",
-    headers: { accept: "application/json" },
+    headers: getUpstreamBridgeHeaders({ accept: "application/json" }),
     signal: AbortSignal.timeout(timeoutMs),
   });
   if (!response.ok) {
@@ -212,6 +213,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         const upstreamUrl = new URL("/api/export.ndjson", bridge.baseUrl);
         const upstream = await fetch(upstreamUrl, {
           method: "GET",
+          headers: getUpstreamBridgeHeaders(),
           signal: AbortSignal.timeout(env.MEMORY_API_TIMEOUT_MS),
         });
         if (!upstream.ok) {

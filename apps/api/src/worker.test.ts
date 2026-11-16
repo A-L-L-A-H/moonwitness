@@ -204,5 +204,65 @@ describe("API Cloudflare Worker adapter", () => {
       configured: false,
       reachable: false,
     });
+
+    const seenBridgeHeaders: string[] = [];
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+      const targetUrl =
+        typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (targetUrl.startsWith("https://memory-edge.example.invalid")) {
+        const hdrs = new Headers(init?.headers);
+        seenBridgeHeaders.push(hdrs.get("x-moonwitness-bridge-token") ?? "");
+        if (targetUrl.endsWith("/api/system")) {
+          return new Response(
+            JSON.stringify({
+              mode: "local-first",
+              gemini_configured: true,
+              gemini_model: "gemini-3.8-flash",
+              embeddings_enabled: true,
+              embedding_model: "miniLM",
+              drive_configured: false,
+              moonwitness_sync_configured: false,
+              max_upload_gb: 500,
+            }),
+            { status: 200 },
+          );
+        }
+        return new Response(
+          JSON.stringify({
+            archives: 1,
+            messages: 2,
+            knowledge: 3,
+            active_jobs: 0,
+            failed_jobs: 0,
+          }),
+          { status: 200 },
+        );
+      }
+      return origFetch(input, init);
+    }) as typeof fetch;
+
+    try {
+      const configuredEnv: ApiWorkerEnv = {
+        ...env,
+        MEMORY_API_URL: "https://memory-edge.example.invalid",
+        BRIDGE_SHARED_TOKEN: "test-bridge-token-abcdef",
+      };
+      const bridgedRes = await worker.fetch(
+        new Request("https://api.moonwitness.biz.id/api/v1/memory/status", {
+          headers: { cookie: cookieHeader },
+        }),
+        configuredEnv,
+      );
+      expect(bridgedRes.status).toBe(200);
+      expect(await bridgedRes.json()).toMatchObject({
+        configured: true,
+        reachable: true,
+        counts: { knowledge: 3 },
+      });
+      expect(seenBridgeHeaders).toEqual(["test-bridge-token-abcdef", "test-bridge-token-abcdef"]);
+    } finally {
+      globalThis.fetch = origFetch;
+    }
   });
 });

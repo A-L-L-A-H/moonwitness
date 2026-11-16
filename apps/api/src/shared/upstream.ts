@@ -46,3 +46,14 @@ export function getEdgeLoopbackErrorPayload(
     mode: "cloudflare-edge",
   };
 }
+
+/** Attaches optional shared bridge secret header when calling tunneled host services. */
+export function getUpstreamBridgeHeaders(
+  baseHeaders: Record<string, string> = {},
+): Record<string, string> {
+  const token = typeof process !== "undefined" ? process.env.BRIDGE_SHARED_TOKEN?.trim() : "";
+  if (token) {
+    return { ...baseHeaders, "x-moonwitness-bridge-token": token };
+  }
+  return { ...baseHeaders };
+}
