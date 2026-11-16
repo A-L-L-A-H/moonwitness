@@ -291,24 +291,79 @@ export function DockMatrixSection({
                     </button>
                   </div>
 
-                  {/* Live API Bridge Status & Cross-Portal Links to @moonwitness/web */}
+                  {/* Live Multi-Node Observatory, Git Workspace & Cross-Portal Links */}
                   <div className="mt-5 border-t border-[#d6b46c]/20 pt-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
                       <span className="text-[#d6b46c]">ECOSYSTEM API BRIDGE (/api/v1)</span>
-                      <span
-                        className={`border px-2 py-0.5 ${
-                          telemetry.status === "online"
-                            ? "border-[#e6c987]/55 bg-[#d6b46c]/15 text-[#fff6df]"
-                            : "border-[#d6b46c]/25 bg-[#080a12] text-[#bfb59e]"
-                        }`}
-                      >
-                        {telemetry.status === "checking"
-                          ? "CHECKING LIVE API…"
-                          : telemetry.status === "online"
-                            ? `ONLINE · DB:${(telemetry.databaseStatus ?? "OK").toUpperCase()} · ${telemetry.timelineTotal ?? 0} EVENTS · ${telemetry.erasCount ?? 0} ERAS`
-                            : "CANON SPEC MODE · LIVE API (:3002) OFFLINE"}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={`border px-2 py-0.5 ${
+                            telemetry.status === "online"
+                              ? "border-[#e6c987]/55 bg-[#d6b46c]/15 text-[#fff6df]"
+                              : "border-[#d6b46c]/25 bg-[#080a12] text-[#bfb59e]"
+                          }`}
+                        >
+                          {telemetry.status === "checking"
+                            ? "CHECKING LIVE API…"
+                            : telemetry.status === "online"
+                              ? `ONLINE · DB:${(telemetry.databaseStatus ?? "OK").toUpperCase()} · ${telemetry.timelineTotal ?? 0} EVENTS · ${telemetry.erasCount ?? 0} ERAS`
+                              : "CANON SPEC MODE · LIVE API (:3002) OFFLINE"}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={telemetry.refresh}
+                          disabled={telemetry.refreshing}
+                          className="min-h-[30px] border border-[#d6b46c]/35 bg-[#080b14] px-2.5 py-0.5 font-mono text-[10px] text-[#f5dfa6] hover:border-[#fff4d2] hover:text-white disabled:opacity-50 cursor-pointer"
+                        >
+                          {telemetry.refreshing ? "PROBING…" : "REFRESH"}
+                        </button>
+                      </div>
                     </div>
+
+                    {telemetry.services.length > 0 && (
+                      <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 font-mono text-[10px]">
+                        {telemetry.services.map((svc) => (
+                          <div
+                            key={svc.id}
+                            className={`border px-2.5 py-1.5 ${
+                              svc.status === "online"
+                                ? "border-[#e6c987]/45 bg-[#d6b46c]/10 text-[#fff6df]"
+                                : svc.status === "degraded"
+                                  ? "border-[#e6c987]/35 bg-[#1a1408] text-[#f5dfa6]"
+                                  : "border-[#d6b46c]/15 bg-[#060911] text-[#9c927d]"
+                            }`}
+                          >
+                            <div className="font-bold tracking-[0.04em]">
+                              {svc.name.toUpperCase()}
+                            </div>
+                            <div className="mt-0.5 text-[9.5px]">
+                              {svc.status === "online"
+                                ? `ONLINE · ${svc.latencyMs ?? 0}ms`
+                                : svc.status.toUpperCase()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {telemetry.git?.available && (
+                      <div className="flex flex-wrap items-center justify-between gap-2 border border-[#d6b46c]/20 bg-[#060911] px-3 py-2 font-mono text-[10px] text-[#e0d7c4]">
+                        <span>
+                          GIT WORKSPACE:{" "}
+                          <strong className="text-[#fff6df]">
+                            {telemetry.git.branch ?? "HEAD"} ({telemetry.git.headShort ?? "—"})
+                          </strong>
+                        </span>
+                        <span className="text-[#f5dfa6]">
+                          {telemetry.git.dirtyCount > 0
+                            ? `${telemetry.git.dirtyCount} CHANGED FILES`
+                            : "CLEAN TREE"}
+                          {telemetry.git.lastCommitSubject
+                            ? ` · ${telemetry.git.lastCommitSubject}`
+                            : ""}
+                        </span>
+                      </div>
+                    )}
 
                     <div className="flex flex-wrap items-center gap-1.5">
                       {WEB_PORTAL_LINKS.map((link) => (

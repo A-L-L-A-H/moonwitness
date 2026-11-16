@@ -232,4 +232,23 @@ describe("ROCKSOUL browser-preview workflow", () => {
       }),
     ).rejects.toMatchObject({ message: "Git write operations require the native desktop app." });
   });
+
+  it("returns honest empty telemetry for monitor_snapshot and enforces ecosystem URL allowlist", async () => {
+    storage.set(
+      "rocksoul:repositories",
+      JSON.stringify([{ id: "r1", name: "moonwitness", path: "Z:/repo/mw", branch: "dev", default_branch: "dev" }]),
+    );
+    const snapshot = await call("get_monitor_snapshot");
+    expect(snapshot.disks).toEqual([]);
+    expect(snapshot.repositories[0]).toMatchObject({ id: "r1", name: "moonwitness", branch: "dev" });
+
+    const openSpy = vi.fn();
+    vi.stubGlobal("open", openSpy);
+    await call("open_ecosystem_url", { url: "http://127.0.0.1:3003" });
+    expect(openSpy).toHaveBeenCalledWith("http://127.0.0.1:3003", "_blank", "noopener,noreferrer");
+
+    await expect(call("open_ecosystem_url", { url: "https://example.com" })).rejects.toMatchObject({
+      message: expect.stringContaining("3000, 3002, 3003, 8000, or 8787"),
+    });
+  });
 });

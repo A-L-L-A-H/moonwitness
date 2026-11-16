@@ -3,33 +3,78 @@ import { ArrowUpRight, GitCommitHorizontal, Plus, Radio, ShieldAlert } from "luc
 import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
 import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
-import type { ActivityEvent, Issue, Repository } from "../lib/contracts";
+import type { ActivityEvent, Issue, MonitorSnapshot, Repository } from "../lib/contracts";
 
 export interface DeckProps {
   issues: Issue[];
   repositories: Repository[];
   events: ActivityEvent[];
+  monitor?: MonitorSnapshot | null | undefined;
   dataReady: boolean;
   loading: boolean;
   onCreate: () => void;
   onStatusChange: (issueId: string, status: any) => void;
   onNavigate: (page: any) => void;
+  onInspectRepo?: ((repositoryId: string) => void) | undefined;
+  onOpenUrl?: ((url: string) => void) | undefined;
 }
 
 export default function Deck({
   issues,
   repositories,
   events,
+  monitor,
   dataReady,
   loading,
   onCreate,
   onStatusChange,
   onNavigate,
+  onInspectRepo,
+  onOpenUrl,
 }: DeckProps) {
   const activeIssues = issues.filter((item) => !["done", "closed"].includes(item.status)).slice(0, 4);
   const unavailableMessage = loading ? "READING LOCAL WORKSPACE." : "LOCAL DATA UNAVAILABLE.";
+  const primaryDisk = monitor?.disks?.[0];
+  const onlineServices = monitor?.services?.filter((svc) => svc.status === "online").length ?? 0;
+  const dirtyFiles = (monitor?.repositories ?? []).reduce((acc, repo) => acc + repo.dirty_count, 0);
+  const latestSession = monitor?.agent_sessions?.[0];
   return (
     <main className="page-content deck-page">
+      {monitor && (
+        <section className="deck-overseer-strip" aria-label="Live Overseer summary">
+          <div className="deck-overseer-metrics">
+            <span>
+              DISK {primaryDisk?.drive ?? "C:"}{" "}
+              <b>{primaryDisk?.available ? `${primaryDisk.free_gb.toFixed(1)} GB (${primaryDisk.tier.toUpperCase()})` : "LOCAL"}</b>
+            </span>
+            <span>
+              GIT DELTA: <b>{dirtyFiles} FILE(S)</b>
+            </span>
+            <span>
+              NODES: <b>{onlineServices}/{monitor.services.length || 5} ONLINE</b>
+            </span>
+            {latestSession && (
+              <span>
+                AGENT: <b>{latestSession.last_tool} ({latestSession.step_count} steps)</b>
+              </span>
+            )}
+          </div>
+          <div className="deck-overseer-actions">
+            {onOpenUrl && (
+              <button
+                type="button"
+                className="outline-button"
+                onClick={() => onOpenUrl("http://127.0.0.1:3003")}
+              >
+                A-L-L-A-H :3003 <ArrowUpRight size={13} />
+              </button>
+            )}
+            <button type="button" className="outline-button" onClick={() => onNavigate("monitor")}>
+              OPEN OVERSEER <ArrowUpRight size={13} />
+            </button>
+          </div>
+        </section>
+      )}
       <section className="deck-hero">
         <div className="hero-copy">
           <span className="eyebrow">
@@ -118,7 +163,12 @@ export default function Deck({
           ) : repositories.length ? (
             <div className="repo-list">
               {repositories.slice(0, 3).map((repo) => (
-                <div className="repo-row" key={repo.id}>
+                <button
+                  type="button"
+                  className="repo-row repo-row-btn"
+                  key={repo.id}
+                  onClick={() => (onInspectRepo ? onInspectRepo(repo.id) : onNavigate("git"))}
+                >
                   <span className="repo-glyph">⑂</span>
                   <div>
                     <b>{repo.name}</b>
@@ -126,7 +176,7 @@ export default function Deck({
                   </div>
                   <span className="repo-dot" />
                   <small>LOCAL</small>
-                </div>
+                </button>
               ))}
             </div>
           ) : (

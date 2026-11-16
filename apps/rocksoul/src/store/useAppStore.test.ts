@@ -113,4 +113,31 @@ describe("useAppStore actions", () => {
       ["add_repository", { path: "C:/repo" }],
     ]);
   });
+
+  it("refreshes live monitor snapshot and opens allowlisted ecosystem URLs", async () => {
+    const sampleSnapshot = {
+      generated_at: "2026-11-16T07:05:00Z",
+      disks: [],
+      services: [],
+      agent_sessions: [],
+      repositories: [],
+      plans: [],
+    };
+    mockedCall.mockImplementation(async (command: string) => {
+      if (command === "get_monitor_snapshot") return sampleSnapshot;
+      return undefined;
+    });
+
+    await useAppStore.getState().refreshMonitor();
+    expect(useAppStore.getState().monitor).toEqual(sampleSnapshot);
+    expect(useAppStore.getState().monitorLoading).toBe(false);
+
+    useAppStore.getState().setAutoMonitor(false);
+    useAppStore.getState().setGitPresetView("patch");
+    expect(useAppStore.getState().autoMonitor).toBe(false);
+    expect(useAppStore.getState().gitPresetView).toBe("patch");
+
+    await useAppStore.getState().openEcosystemUrl("http://127.0.0.1:3003");
+    expect(mockedCall).toHaveBeenCalledWith("open_ecosystem_url", { url: "http://127.0.0.1:3003" });
+  });
 });

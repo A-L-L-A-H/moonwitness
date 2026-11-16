@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Command, Search, X } from "lucide-react";
 import { CreateIssueDialog, EditIssueDialog, RiotRail, SettingsDialog, Topbar } from "./components";
 import { IllustratedStage } from "./components/ui/IllustratedStage";
-import { Deck, Git, Noise, Pit, WarRoom } from "./features";
+import { Deck, Git, Monitor, Noise, Pit, WarRoom } from "./features";
 import { isDesktop } from "./lib";
 import { useAppStore } from "./store";
 import { Awakening, PreviewRoom, RoomReturnButton, Threshold } from "./features/World";
@@ -12,6 +12,7 @@ import type { Issue, IssueStatus, MilestoneStatus, UpdateIssueArgs } from "./lib
 
 const pageTitles: Record<string, string> = {
   deck: "WORKBENCH",
+  monitor: "OVERSEER",
   pit: "THE PIT",
   git: "GIT JUNGLE",
   "war-room": "WAR ROOM",
@@ -32,7 +33,16 @@ export default function App() {
     page,
     setPage,
     refresh,
+    refreshMonitor,
+    openEcosystemUrl,
     loading,
+    monitor,
+    monitorLoading,
+    monitorError,
+    autoMonitor,
+    gitPresetView,
+    setAutoMonitor,
+    setGitPresetView,
     issues,
     repositories,
     projects,
@@ -58,13 +68,22 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    refresh().finally(() => {
+    Promise.all([refresh(), refreshMonitor()]).finally(() => {
       if (active) setHasLoaded(true);
     });
     return () => {
       active = false;
     };
-  }, [refresh]);
+  }, [refresh, refreshMonitor]);
+
+  useEffect(() => {
+    if (!autoMonitor) return;
+    if (destination !== "riot-deck" && !pageRoutes.includes(destination as any)) return;
+    const interval = window.setInterval(() => {
+      void refreshMonitor();
+    }, 10_000);
+    return () => window.clearInterval(interval);
+  }, [autoMonitor, destination, refreshMonitor]);
 
   useEffect(() => {
     if (pageRoutes.includes(destination as any)) {
@@ -92,7 +111,7 @@ export default function App() {
     setCommandOpen(false);
     setCommandQuery("");
     if (item === "create") setCreateOpen(true);
-    else setPage(item as any);
+    else navigateDestination(item);
   };
 
   const removeIssue = async (issue: Issue) => {
@@ -106,7 +125,7 @@ export default function App() {
 
   const showProjectIssues = (projectId: string) => {
     setProjectFilter(projectId);
-    setPage("pit");
+    navigateDestination("pit");
   };
 
   const setIssueStatus = async (issueId: string, status: IssueStatus) => {
@@ -137,12 +156,35 @@ export default function App() {
     navigateWorld(dest as any);
   };
 
+  const inspectRepoFromOverseer = (repositoryId: string, view: "status" | "patch" = "patch") => {
+    setSelectedRepository(repositoryId);
+    setGitPresetView(view);
+    navigateDestination("git");
+  };
+
+  const refreshAll = async () => {
+    await Promise.all([refresh(), refreshMonitor()]);
+  };
+
+  const primaryDisk = monitor?.disks?.[0];
+  const onlineServices = monitor?.services?.filter((svc) => svc.status === "online").length ?? 0;
+  const topbarMonitorSummary = monitor
+    ? `${primaryDisk?.available ? `${primaryDisk.free_gb.toFixed(1)}G` : "LOCAL"} · ${onlineServices}/${monitor.services.length || 5}`
+    : "OVERSEER";
+
   const filtered = Object.entries(pageTitles).filter(([key, title]) =>
     (title + " " + key).toLowerCase().includes(commandQuery.toLowerCase()),
   );
 
   if (destination === "awakening")
-    return <Awakening onEnter={() => navigateWorld("threshold")} reducedMotion={reducedMotion} />;
+    return (
+      <Awakening
+        onEnter={() => navigateWorld("threshold")}
+        reducedMotion={reducedMotion}
+        onQuickWorkbench={() => navigateDestination("riot-deck")}
+        onQuickMonitor={() => navigateDestination("monitor")}
+      />
+    );
 
   if (destination === "threshold")
     return (
@@ -176,7 +218,7 @@ export default function App() {
   return (
     <div className="app-shell riot-room-shell" data-reduced-motion={reducedMotion}>
       <IllustratedStage scene="riot-deck" destination="riot-deck" reducedMotion={reducedMotion} subtle />
-      <RiotRail page={page} onNavigate={setPage} onSwitchboard={() => setCommandOpen(true)} />
+      <RiotRail page={page} onNavigate={navigateDestination} onSwitchboard={() => setCommandOpen(true)} />
       <div className="app-main">
         <Topbar
           repositories={repositories}
@@ -184,6 +226,11 @@ export default function App() {
           onRepositoryChange={setSelectedRepository}
           onCommand={() => setCommandOpen(true)}
           onSettings={() => setSettingsOpen(true)}
+          onOpenMonitor={() => navigateDestination("monitor")}
+          onRefresh={() => {
+            void refreshAll();
+          }}
+          monitorSummary={topbarMonitorSummary}
         />
         <RoomReturnButton
           onReturn={returnToThreshold}
@@ -205,11 +252,33 @@ export default function App() {
             issues={issues}
             repositories={repositories}
             events={events}
+            monitor={monitor}
             dataReady={hasLoaded && !loading && !error}
             loading={loading || !hasLoaded}
             onCreate={() => setCreateOpen(true)}
             onStatusChange={setIssueStatus}
-            onNavigate={setPage}
+            onNavigate={navigateDestination}
+            onInspectRepo={(repoId) => inspectRepoFromOverseer(repoId, "status")}
+            onOpenUrl={(url) => {
+              void openEcosystemUrl(url);
+            }}
+          />
+        )}
+        {page === "monitor" && (
+          <Monitor
+            snapshot={monitor}
+            loading={monitorLoading}
+            error={monitorError}
+            autoMonitor={autoMonitor}
+            desktop={isDesktop()}
+            onToggleAuto={setAutoMonitor}
+            onRefresh={() => {
+              void refreshMonitor();
+            }}
+            onInspectRepoPatch={(repoId) => inspectRepoFromOverseer(repoId, "patch")}
+            onOpenUrl={(url) => {
+              void openEcosystemUrl(url);
+            }}
           />
         )}
         {page === "pit" && (
@@ -225,7 +294,13 @@ export default function App() {
           />
         )}
         {page === "git" && (
-          <Git repositories={repositories} onAddRepository={addRepository} onRefresh={refresh} />
+          <Git
+            repositories={repositories}
+            initialSelectedId={selectedRepository}
+            initialView={gitPresetView ?? undefined}
+            onAddRepository={addRepository}
+            onRefresh={refreshAll}
+          />
         )}
         {page === "war-room" && (
           <WarRoom

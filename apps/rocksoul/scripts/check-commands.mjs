@@ -4,6 +4,7 @@ const commandFiles = [
   "src-tauri/src/commands/cloud_backup.rs",
   "src-tauri/src/commands/issues.rs",
   "src-tauri/src/commands/milestones.rs",
+  "src-tauri/src/commands/monitor.rs",
   "src-tauri/src/commands/projects.rs",
   "src-tauri/src/commands/repositories.rs",
   "src-tauri/src/commands/s3_gateway.rs",
@@ -20,6 +21,12 @@ const rustModels = [
   { rustName: "Dashboard", contractName: "Dashboard" },
   { rustName: "GitSnapshot", contractName: "GitSnapshot" },
   { rustName: "Milestone", contractName: "Milestone" },
+  { rustName: "DiskVolumeStatus", contractName: "DiskVolumeStatus" },
+  { rustName: "EcosystemServiceStatus", contractName: "EcosystemServiceStatus" },
+  { rustName: "AgentSessionActivity", contractName: "AgentSessionActivity" },
+  { rustName: "RepoMonitorEntry", contractName: "RepoMonitorEntry" },
+  { rustName: "PlanTrackerEntry", contractName: "PlanTrackerEntry" },
+  { rustName: "MonitorSnapshot", contractName: "MonitorSnapshot" },
 ];
 const [contracts, registration, models, ...sources] = await Promise.all([
   readFile("src/lib/contracts.d.ts", "utf8"),
@@ -55,6 +62,8 @@ const nativeCommandSources = [registration, ...sources];
 const commandArgs = {
   get_dashboard: [],
   list_events: [],
+  get_monitor_snapshot: [],
+  open_ecosystem_url: ["url"],
   list_issues: [],
   list_repositories: [],
   list_projects: [],

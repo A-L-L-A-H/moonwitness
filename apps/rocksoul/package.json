@@ -25,6 +25,7 @@
   "dependencies": {
     "@fontsource/barlow-condensed": "^5.2.6",
     "@fontsource/ibm-plex-mono": "^5.2.6",
+    "@moonwitness/canon": "workspace:*",
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
     "@react-three/postprocessing": "^3.2.2",

@@ -1,27 +1,76 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import type { EcosystemGitStatus, EcosystemServiceStatus } from "./ecosystem-probe";
 
 export interface EcosystemTelemetryState {
   readonly status: "checking" | "online" | "offline";
   readonly databaseStatus: string | null;
   readonly timelineTotal: number | null;
   readonly erasCount: number | null;
+  readonly services: readonly EcosystemServiceStatus[];
+  readonly git: EcosystemGitStatus | null;
+  readonly generatedAt: string | null;
+  readonly refreshing: boolean;
+  readonly refresh: () => void;
+}
+
+interface EcosystemHealthPayload {
+  readonly status?: "online" | "offline";
+  readonly databaseStatus?: string | null;
+  readonly timelineTotal?: number | null;
+  readonly erasCount?: number | null;
+  readonly services?: readonly EcosystemServiceStatus[];
+  readonly git?: EcosystemGitStatus;
+  readonly generatedAt?: string;
 }
 
 export function useEcosystemTelemetry(): EcosystemTelemetryState {
-  const [state, setState] = useState<EcosystemTelemetryState>({
+  const [refreshTick, setRefreshTick] = useState<number>(0);
+  const [state, setState] = useState<Omit<EcosystemTelemetryState, "refresh">>({
     status: "checking",
     databaseStatus: null,
     timelineTotal: null,
     erasCount: null,
+    services: [],
+    git: null,
+    generatedAt: null,
+    refreshing: false,
   });
+
+  const refresh = useCallback(() => {
+    setState((prev) => ({ ...prev, refreshing: true }));
+    setRefreshTick((n) => n + 1);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
-    const timer = window.setTimeout(() => controller.abort(), 2500);
+    const timer = window.setTimeout(() => controller.abort(), 4000);
 
     async function probe(): Promise<void> {
+      try {
+        const res = await fetch("/api/ecosystem-health", {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (res.ok) {
+          const payload = (await res.json()) as EcosystemHealthPayload;
+          setState({
+            status: payload.status === "online" ? "online" : "offline",
+            databaseStatus: payload.databaseStatus ?? null,
+            timelineTotal: typeof payload.timelineTotal === "number" ? payload.timelineTotal : null,
+            erasCount: typeof payload.erasCount === "number" ? payload.erasCount : null,
+            services: Array.isArray(payload.services) ? payload.services : [],
+            git: payload.git ?? null,
+            generatedAt: payload.generatedAt ?? null,
+            refreshing: false,
+          });
+          return;
+        }
+      } catch {
+        // Fallback to direct API rewrite probe below.
+      }
+
       try {
         const [healthRes, readyRes, statsRes, erasRes] = await Promise.all([
           fetch("/api/v1/healthz", { signal: controller.signal }),
@@ -36,6 +85,10 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
             databaseStatus: null,
             timelineTotal: null,
             erasCount: null,
+            services: [],
+            git: null,
+            generatedAt: new Date().toISOString(),
+            refreshing: false,
           });
           return;
         }
@@ -63,6 +116,10 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
           databaseStatus: dbState,
           timelineTotal,
           erasCount,
+          services: [],
+          git: null,
+          generatedAt: new Date().toISOString(),
+          refreshing: false,
         });
       } catch {
         if (!controller.signal.aborted) {
@@ -71,6 +128,10 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
             databaseStatus: null,
             timelineTotal: null,
             erasCount: null,
+            services: [],
+            git: null,
+            generatedAt: null,
+            refreshing: false,
           });
         }
       }
@@ -82,7 +143,10 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, []);
+  }, [refreshTick]);
 
-  return state;
+  return {
+    ...state,
+    refresh,
+  };
 }

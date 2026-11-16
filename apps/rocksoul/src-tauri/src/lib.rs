@@ -2,12 +2,15 @@ mod commands;
 mod db;
 mod models;
 
+use crate::commands::repositories;
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .manage(commands::s3_gateway::S3GatewayState::default())
         .setup(|app| {
             db::init(app.handle()).map_err(std::io::Error::other)?;
+            let _ = repositories::ensure_default_workspace_repository(app.handle());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -21,6 +24,8 @@ pub fn run() {
             commands::s3_gateway::stop_s3_gateway,
             commands::system::get_dashboard,
             commands::system::list_events,
+            commands::monitor::get_monitor_snapshot,
+            commands::monitor::open_ecosystem_url,
             commands::issues::list_issues,
             commands::issues::create_issue,
             commands::issues::update_issue,

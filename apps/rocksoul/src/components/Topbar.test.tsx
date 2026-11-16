@@ -3,10 +3,12 @@ import { describe, expect, it, vi } from "vitest";
 import Topbar from "./Topbar";
 
 describe("Topbar", () => {
-  it("renders repositories and triggers repository, command, and settings callbacks", () => {
+  it("renders repositories and triggers repository, command, monitor, refresh, and settings callbacks", () => {
     const onRepositoryChange = vi.fn();
     const onCommand = vi.fn();
     const onSettings = vi.fn();
+    const onOpenMonitor = vi.fn();
+    const onRefresh = vi.fn();
 
     render(
       <Topbar
@@ -15,8 +17,17 @@ describe("Topbar", () => {
         onRepositoryChange={onRepositoryChange}
         onCommand={onCommand}
         onSettings={onSettings}
+        onOpenMonitor={onOpenMonitor}
+        onRefresh={onRefresh}
+        monitorSummary="12.5G · 2/5"
       />,
     );
+
+    fireEvent.click(screen.getByRole("button", { name: /12\.5G/ }));
+    expect(onOpenMonitor).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "Refresh workspace" }));
+    expect(onRefresh).toHaveBeenCalledTimes(1);
 
     fireEvent.change(screen.getByLabelText("Selected repository"), {
       target: { value: "repo-1" },

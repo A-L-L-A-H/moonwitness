@@ -2,7 +2,7 @@ export type IssueStatus = "open" | "blocked" | "done" | "closed";
 export type IssuePriority = "P0" | "P1" | "P2" | "P3";
 export type ProjectStatus = "active" | "paused" | "done" | "archived";
 export type MilestoneStatus = "planned" | "in_progress" | "done" | "blocked";
-export type GitView = "status" | "log" | "diff" | "branches";
+export type GitView = "status" | "log" | "diff" | "patch" | "branches";
 export type GitOperation =
   | "create_branch"
   | "switch_branch"
@@ -101,6 +101,67 @@ export interface S3GatewayStatus {
   secret_key: string | null;
 }
 
+export interface DiskVolumeStatus {
+  drive: string;
+  mount_path: string;
+  available: boolean;
+  total_gb: number;
+  free_gb: number;
+  used_pct: number;
+  tier: string;
+}
+
+export interface EcosystemServiceStatus {
+  id: string;
+  name: string;
+  url: string;
+  status: string;
+  http_status: number | null;
+  latency_ms: number | null;
+}
+
+export interface AgentSessionActivity {
+  session_id: string;
+  updated_at: string;
+  step_count: number;
+  last_type: string;
+  last_status: string;
+  last_tool: string;
+}
+
+export interface RepoMonitorEntry {
+  id: string;
+  name: string;
+  path: string;
+  branch: string;
+  head_hash: string;
+  head_subject: string;
+  head_age: string;
+  dirty_count: number;
+  staged_count: number;
+  untracked_count: number;
+  worktree_count: number;
+  changed_files: string[];
+  recent_commits: string[];
+}
+
+export interface PlanTrackerEntry {
+  name: string;
+  path: string;
+  total_tasks: number;
+  completed_tasks: number;
+  partial_tasks: number;
+}
+
+export interface MonitorSnapshot {
+  generated_at: string;
+  disks: DiskVolumeStatus[];
+  services: EcosystemServiceStatus[];
+  agent_sessions: AgentSessionActivity[];
+  repositories: RepoMonitorEntry[];
+  plans: PlanTrackerEntry[];
+}
+
 export interface CreateIssueArgs {
   title: string;
   description?: string | undefined;
@@ -154,6 +215,8 @@ export interface GitExecuteArgs {
 export interface NativeCommands {
   get_dashboard: { args: Record<string, never>; result: Dashboard };
   list_events: { args: Record<string, never>; result: ActivityEvent[] };
+  get_monitor_snapshot: { args: Record<string, never>; result: MonitorSnapshot };
+  open_ecosystem_url: { args: { url: string }; result: void };
   list_issues: { args: Record<string, never>; result: Issue[] };
   list_repositories: { args: Record<string, never>; result: Repository[] };
   list_projects: { args: Record<string, never>; result: Project[] };

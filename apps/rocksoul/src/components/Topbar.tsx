@@ -1,5 +1,5 @@
 import React from "react";
-import { Activity, ChevronDown, Command, FolderGit2, Settings2 } from "lucide-react";
+import { Activity, ChevronDown, Command, FolderGit2, RefreshCw, Settings2 } from "lucide-react";
 import { CrimsonCrownSvg } from "./ui/RocksoulVectors";
 import type { Repository } from "../lib/contracts";
 
@@ -9,6 +9,9 @@ export interface TopbarProps {
   onRepositoryChange: (repositoryId: string) => void;
   onCommand: () => void;
   onSettings: () => void;
+  onOpenMonitor?: (() => void) | undefined;
+  onRefresh?: (() => void) | undefined;
+  monitorSummary?: string | undefined;
 }
 
 export default function Topbar({
@@ -17,6 +20,9 @@ export default function Topbar({
   onRepositoryChange,
   onCommand,
   onSettings,
+  onOpenMonitor,
+  onRefresh,
+  monitorSummary,
 }: TopbarProps) {
   return (
     <header className="topbar">
@@ -56,7 +62,24 @@ export default function Topbar({
         </span>
       </div>
       <div className="topbar-actions">
-        <Activity size={18} className="system-pulse" />
+        {onOpenMonitor ? (
+          <button
+            type="button"
+            className="shortcut monitor-pill-btn"
+            onClick={onOpenMonitor}
+            title="Open Overseer Monitor"
+          >
+            <Activity size={15} className="system-pulse" />
+            <span>{monitorSummary || "OVERSEER"}</span>
+          </button>
+        ) : (
+          <Activity size={18} className="system-pulse" />
+        )}
+        {onRefresh && (
+          <button type="button" className="icon-button" aria-label="Refresh workspace" onClick={onRefresh}>
+            <RefreshCw size={17} />
+          </button>
+        )}
         <button className="shortcut" onClick={onCommand}>
           <Command size={14} /> CTRL + K
         </button>

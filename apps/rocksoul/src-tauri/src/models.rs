@@ -94,3 +94,70 @@ pub struct Milestone {
     pub due_at: Option<String>,
     pub status: String,
 }
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DiskVolumeStatus {
+    pub drive: String,
+    pub mount_path: String,
+    pub available: bool,
+    pub total_gb: f64,
+    pub free_gb: f64,
+    pub used_pct: f64,
+    pub tier: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct EcosystemServiceStatus {
+    pub id: String,
+    pub name: String,
+    pub url: String,
+    pub status: String,
+    pub http_status: Option<u16>,
+    pub latency_ms: Option<u64>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct AgentSessionActivity {
+    pub session_id: String,
+    pub updated_at: String,
+    pub step_count: usize,
+    pub last_type: String,
+    pub last_status: String,
+    pub last_tool: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct RepoMonitorEntry {
+    pub id: String,
+    pub name: String,
+    pub path: String,
+    pub branch: String,
+    pub head_hash: String,
+    pub head_subject: String,
+    pub head_age: String,
+    pub dirty_count: usize,
+    pub staged_count: usize,
+    pub untracked_count: usize,
+    pub worktree_count: usize,
+    pub changed_files: Vec<String>,
+    pub recent_commits: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct PlanTrackerEntry {
+    pub name: String,
+    pub path: String,
+    pub total_tasks: usize,
+    pub completed_tasks: usize,
+    pub partial_tasks: usize,
+}
+
+#[derive(Debug, Serialize)]
+pub struct MonitorSnapshot {
+    pub generated_at: String,
+    pub disks: Vec<DiskVolumeStatus>,
+    pub services: Vec<EcosystemServiceStatus>,
+    pub agent_sessions: Vec<AgentSessionActivity>,
+    pub repositories: Vec<RepoMonitorEntry>,
+    pub plans: Vec<PlanTrackerEntry>,
+}
