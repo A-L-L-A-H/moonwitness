@@ -1,0 +1,36 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "moonwitness-id",
+  "account_id": "5e743e388c349ee7a340be8ba91665fa",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-16",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "traces": {
+      "enabled": true,
+    },
+  },
+  "routes": [
+    {
+      "pattern": "id.moonwitness.biz.id",
+      "custom_domain": true,
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "rocksoul-auth-db",
+      "database_id": "6fc89089-5dda-420e-bae1-019d8c6b2d65",
+    },
+  ],
+  "vars": {
+    "ISSUER_URL": "https://id.moonwitness.biz.id",
+    "ACCESS_TOKEN_TTL_SEC": "900",
+    "ID_TOKEN_TTL_SEC": "3600",
+    "REFRESH_TOKEN_TTL_SEC": "604800",
+    "SESSION_TTL_SEC": "604800",
+    "COOKIE_DOMAIN": ".moonwitness.biz.id",
+    "CORS_ORIGINS": "https://moonwitness.biz.id,https://a-l-l-a-h.com,https://codex.a-l-l-a-h.com,https://community.moonwitness.biz.id,https://igate.moonwitness.biz.id,https://api.moonwitness.biz.id",
+  },
+}
