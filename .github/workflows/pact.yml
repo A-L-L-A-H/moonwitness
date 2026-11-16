@@ -35,6 +35,8 @@ jobs:
       - name: Run Pact consumer tests
         working-directory: ./apps/web
         run: pnpm test:pact
+        env:
+          PACT_DO_NOT_TRACK: "true"
 
       - name: Upload Pact contracts
         uses: actions/upload-artifact@v4
@@ -77,6 +79,20 @@ jobs:
         working-directory: ./apps/api
         run: pnpm build
 
+      - name: Allocate provider port
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const net = require("node:net");
+            const s = net.createServer();
+            s.listen(0, "127.0.0.1", () => {
+              const { port } = s.address();
+              s.close(() => {
+                fs.appendFileSync(process.env.GITHUB_ENV, `PACT_API_PORT=${port}\n`);
+              });
+            });
+          '
+
       - name: Start seeded API
         working-directory: ./apps/api
         run: |
@@ -85,13 +101,13 @@ jobs:
         env:
           DATABASE_URL: ./pact-provider.db
           HOST: 127.0.0.1
-          PORT: 3002
+          PORT: ${{ env.PACT_API_PORT }}
           SEED: "1"
 
       - name: Wait for API readiness
         run: |
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:3002/api/v1/readyz; then
+            if curl --fail --silent "http://127.0.0.1:${PACT_API_PORT}/api/v1/readyz"; then
               exit 0
             fi
             sleep 1
@@ -103,4 +119,12 @@ jobs:
         working-directory: ./apps/api
         run: pnpm verify:pact
         env:
-          PACT_PROVIDER_URL: http://127.0.0.1:3002
+          PACT_DO_NOT_TRACK: "true"
+          PACT_PROVIDER_URL: http://127.0.0.1:${{ env.PACT_API_PORT }}
+
+      - name: Stop seeded API
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/moonwitness-api.pid" ]; then
+            kill "$(cat "$RUNNER_TEMP/moonwitness-api.pid")" >/dev/null 2>&1 || true
+          fi

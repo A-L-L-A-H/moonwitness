@@ -39,6 +39,30 @@ jobs:
         working-directory: ./apps/web
         run: pnpm build
 
+      - name: Allocate isolated test ports
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const net = require("node:net");
+            const freePort = () => new Promise((resolve, reject) => {
+              const s = net.createServer();
+              s.listen(0, "127.0.0.1", () => {
+                const { port } = s.address();
+                s.close((err) => err ? reject(err) : resolve(port));
+              });
+            });
+            (async () => {
+              const apiPort = await freePort();
+              let webPort = await freePort();
+              while (webPort === apiPort) webPort = await freePort();
+              fs.appendFileSync(process.env.GITHUB_ENV, [
+                `PLAYWRIGHT_API_PORT=${apiPort}`,
+                `PLAYWRIGHT_WEB_PORT=${webPort}`,
+                `PLAYWRIGHT_BASE_URL=http://localhost:${webPort}`,
+              ].join("\n") + "\n");
+            })();
+          '
+
       - name: Run Playwright tests
         working-directory: ./apps/web
         run: pnpm exec playwright test --config ../../playwright.config.ts --project=chromium
