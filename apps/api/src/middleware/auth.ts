@@ -5,6 +5,7 @@
 
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { getSessionWithUser, SESSION_COOKIE_NAME } from "../services/session";
+import { verifyMidBearerToken } from "./mid-jwt";
 
 export interface AuthenticatedRequest extends FastifyRequest {
   user?: {
@@ -18,6 +19,36 @@ export interface AuthenticatedRequest extends FastifyRequest {
 
 type AuthenticatedUser = NonNullable<AuthenticatedRequest["user"]>;
 
+/** Resolve caller identity from session cookie or MoonWitness ID Bearer JWT. */
+export async function resolveRequestIdentity(request: FastifyRequest): Promise<{
+  user: AuthenticatedUser | null;
+  expiredSessionCookie: boolean;
+}> {
+  const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
+  if (sessionId) {
+    const session = await getSessionWithUser(sessionId);
+    if (session) {
+      return {
+        user: {
+          id: session.userId,
+          username: session.username,
+          email: session.email,
+          role: session.role,
+          displayName: session.displayName,
+        },
+        expiredSessionCookie: false,
+      };
+    }
+  }
+
+  const bearerUser = await verifyMidBearerToken(request.headers.authorization);
+  if (bearerUser) {
+    return { user: bearerUser, expiredSessionCookie: false };
+  }
+
+  return { user: null, expiredSessionCookie: Boolean(sessionId) };
+}
+
 async function resolveAuthenticatedUser(
   request: FastifyRequest,
   reply: FastifyReply,
@@ -27,26 +58,18 @@ async function resolveAuthenticatedUser(
   const typedReq = request as AuthenticatedRequest;
   if (typedReq.user) return typedReq.user;
 
-  const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
-  if (!sessionId) {
-    reply.code(401).send({ error: "Not authenticated" });
+  const { user, expiredSessionCookie } = await resolveRequestIdentity(request);
+  if (!user) {
+    if (expiredSessionCookie) {
+      reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+      reply.code(401).send({ error: "Session expired or invalid" });
+    } else {
+      reply.code(401).send({ error: "Not authenticated" });
+    }
     return null;
   }
 
-  const session = await getSessionWithUser(sessionId);
-  if (!session) {
-    reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
-    reply.code(401).send({ error: "Session expired or invalid" });
-    return null;
-  }
-
-  typedReq.user = {
-    id: session.userId,
-    username: session.username,
-    email: session.email,
-    role: session.role,
-    displayName: session.displayName,
-  };
+  typedReq.user = user;
   return typedReq.user;
 }
 
@@ -74,19 +97,11 @@ export function requireRole(...allowedRoles: ("admin" | "editor" | "viewer")[]) 
 export function optionalAuth() {
   return async (request: FastifyRequest, _reply: FastifyReply) => {
     if (request.method === "OPTIONS") return;
-    const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
-    if (!sessionId) return;
-
-    const session = await getSessionWithUser(sessionId);
-    if (session) {
-      const typedReq = request as AuthenticatedRequest;
-      typedReq.user = {
-        id: session.userId,
-        username: session.username,
-        email: session.email,
-        role: session.role,
-        displayName: session.displayName,
-      };
+    const typedReq = request as AuthenticatedRequest;
+    if (typedReq.user) return;
+    const { user } = await resolveRequestIdentity(request);
+    if (user) {
+      typedReq.user = user;
     }
   };
 }

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ConsoleShell, Input, type HudNavItem } from "@moonwitness/ui";
 import { Crown, SearchIcon } from "@moonwitness/ui/icons";
 import { useSavedAvatar } from "@/lib/avatar-store";
+import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { SkinSwitcher } from "@/components/skin-switcher";
 import { activeByPath, navHref, navItems, operationsNavItems } from "./nav-items";
@@ -56,6 +57,7 @@ export function ConsoleShellAdapter({
   }, []);
 
   function exitShadow() {
+    clearStoredMidSession();
     fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
     router.push("/");
   }

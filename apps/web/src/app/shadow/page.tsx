@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ArrowRight, Crown, EyeIcon, Smiley, Splatter, Star4 } from "@moonwitness/ui/icons";
 import { Grain, Tape, ZineInput } from "@moonwitness/ui";
 import { authenticate } from "@/lib/auth";
+import { startMidLogin } from "@/lib/mid-oidc";
 import { notifySessionChange } from "@/lib/session";
 import { artSrc } from "@/lib/art";
 
@@ -190,6 +191,14 @@ export default function ShadowPage() {
                     ENTER THE SHADOW <ArrowRight className="h-5 w-5" />
                   </>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => void startMidLogin("/mission-control")}
+                className="btn-zine btn-yellow w-full px-5 py-3 text-sm"
+              >
+                SIGN IN VIA MOONWITNESS ID <ArrowRight className="h-4 w-4" />
               </button>
 
               <div className="flex items-center gap-3 pt-1 text-[11px] text-zinc-500">
