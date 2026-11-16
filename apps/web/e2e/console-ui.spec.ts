@@ -316,7 +316,7 @@ for (const viewport of viewports) {
           expect
             .soft(hasCanvasChild, `${preset.id}: HUD chrome has no canvas/texture children`)
             .toBe(0);
-          if (preset.id === "default" || preset.id === "technical") {
+          {
             const injectedOverlay = await surface.evaluate((element) =>
               element.matches(".halftone, .halftone-pink, .grain, .scanlines"),
             );
@@ -410,3 +410,45 @@ test("landing Storytelling renders existing stories through ScenePanel and FilmS
   }
   await noHorizontalOverflow(page);
 });
+
+test("normal motion preserves Atlas selection and reveals story panels", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await openConsole(page);
+  const atlas = page.getByRole("region", { name: /universe\s*map/i });
+  await atlas.getByRole("button", { name: "Select TOKYO", exact: true }).click();
+  await expect(atlas.locator("dl dd")).toHaveText(["TOKYO", "501"]);
+  await page.goto("/");
+  const storytelling = page.locator("#storytelling");
+  await storytelling.getByRole("heading", { level: 2 }).scrollIntoViewIfNeeded();
+  await expect(storytelling.locator("[data-story-unit]")).toHaveCount(4);
+  for (const panel of await storytelling.locator("[data-story-unit]").all()) {
+    await expect(panel).toHaveCSS("opacity", "1");
+  }
+  await noHorizontalOverflow(page);
+});
+
+for (const viewport of viewports) {
+  test(`story panels preserve manga composition at ${viewport.width}`, async ({ page }, info) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    const section = page.locator("#storytelling");
+    await section.getByRole("heading", { level: 2 }).scrollIntoViewIfNeeded();
+    const scenes = section.locator("[data-scene-panel]");
+    await expect(scenes).toHaveCount(4);
+    const first = await box(scenes.nth(0));
+    const second = await box(scenes.nth(1));
+    const third = await box(scenes.nth(2));
+    if (viewport.width >= 1024) {
+      expect(first.width).toBeGreaterThan(second.width * 1.4);
+      expect(Math.abs(second.y - third.y)).toBeLessThan(10);
+    } else {
+      expect(second.y).toBeGreaterThan(first.y);
+      expect(third.y).toBeGreaterThan(second.y);
+    }
+    await section.screenshot({
+      path: info.outputPath(`story-panels-${viewport.width}.png`),
+      animations: "disabled",
+    });
+    await noHorizontalOverflow(page);
+  });
+}

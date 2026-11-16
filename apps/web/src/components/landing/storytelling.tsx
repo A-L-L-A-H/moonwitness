@@ -126,81 +126,87 @@ export function Storytelling() {
               </a>
             ))}
           </FilmStrip>
-          {STORIES.map((story, i) => {
-            const artRight = i % 2 === 1;
-            const art = ARTWORK[story.art];
-            return (
-              <div
-                key={story.id}
-                data-story-unit
-                className="transition-[opacity,transform] ease-[var(--ease-ink-out)] motion-reduce:transition-none"
-                style={{
-                  transitionDuration: `${SETTLE_S}s`,
-                  transitionDelay: `${i * STAGGER_S}s`,
-                  opacity: revealed ? 1 : 0,
-                  transform: revealed ? "none" : `translateX(${artRight ? 40 : -40}px)`,
-                }}
-              >
-                <div style={{ transform: `rotate(${story.rotation}deg)` }}>
-                  <ScenePanel
-                    id={`story-${story.id}`}
-                    aria-labelledby={`story-title-${story.id}`}
-                    scrim={artRight ? "left" : "right"}
-                    className="group scroll-mt-28"
-                    art={
-                      <Image
-                        src={artSrc(story.art)}
-                        alt=""
-                        fill
-                        sizes="(min-width: 1280px) 1200px, 100vw"
-                        className="object-cover"
-                        style={{ objectPosition: art.position }}
-                      />
-                    }
-                    effects={
-                      <>
-                        <Staple className="-top-1 left-5 z-10 -rotate-12" />
-                        <TactileTape
-                          variant="black"
-                          label={story.tag}
-                          width={70}
-                          className="-top-2 right-4 z-10 rotate-3 text-[9px]"
+          <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-5">
+            {STORIES.map((story, i) => {
+              const artRight = i % 2 === 1;
+              const art = ARTWORK[story.art];
+              return (
+                <div
+                  key={story.id}
+                  data-story-unit
+                  className={`min-w-0 transition-[opacity,transform] ease-[var(--ease-ink-out)] motion-reduce:transition-none ${i === 0 ? "lg:col-span-3" : ""}`}
+                  style={{
+                    transitionDuration: `${SETTLE_S}s`,
+                    transitionDelay: `${i * STAGGER_S}s`,
+                    opacity: revealed ? 1 : 0,
+                    transform: revealed ? "none" : `translateX(${artRight ? 40 : -40}px)`,
+                  }}
+                >
+                  <div style={{ transform: `rotate(${story.rotation}deg)` }}>
+                    <ScenePanel
+                      id={`story-${story.id}`}
+                      aria-labelledby={`story-title-${story.id}`}
+                      scrim={artRight ? "left" : "right"}
+                      className="group scroll-mt-28"
+                      art={
+                        <Image
+                          src={artSrc(story.art)}
+                          alt=""
+                          fill
+                          sizes={
+                            i === 0
+                              ? "(min-width: 1280px) 1200px, 100vw"
+                              : "(min-width: 1024px) 33vw, 100vw"
+                          }
+                          className="object-cover"
+                          style={{ objectPosition: art.position }}
                         />
-                      </>
-                    }
-                  >
-                    <div
-                      className={`flex min-h-[26rem] flex-col justify-end px-6 py-8 @[40rem]:min-h-[30rem] @[40rem]:px-10 ${artRight ? "" : "@[40rem]:items-end"}`}
+                      }
+                      effects={
+                        <>
+                          <Staple className="-top-1 left-5 z-10 -rotate-12" />
+                          <TactileTape
+                            variant="black"
+                            label={story.tag}
+                            width={70}
+                            className="-top-2 right-4 z-10 rotate-3 text-[9px]"
+                          />
+                        </>
+                      }
                     >
-                      <div className="max-w-md">
-                        <span
-                          className="font-mono text-xs font-black tracking-widest"
-                          style={{ color: story.tagColor }}
-                        >
-                          [{story.tag}] / 0{i + 1}
-                        </span>
-                        <h3
-                          id={`story-title-${story.id}`}
-                          className="cmyk-slip mt-3 font-brush text-4xl leading-tight text-[var(--paper)] @[40rem]:text-5xl"
-                        >
-                          {story.title}
-                        </h3>
-                        <p className="mt-4 font-mono text-sm leading-relaxed text-[var(--paper)]">
-                          {story.excerpt}
-                        </p>
-                        <p
-                          aria-hidden="true"
-                          className="mt-6 font-hand text-sm text-[var(--yellow)]"
-                        >
-                          {story.marginalia}
-                        </p>
+                      <div
+                        className={`flex min-h-[26rem] flex-col justify-end px-6 py-8 @[40rem]:min-h-[30rem] @[40rem]:px-10 ${artRight ? "" : "@[40rem]:items-end"}`}
+                      >
+                        <div className="max-w-md">
+                          <span
+                            className="font-mono text-xs font-black tracking-widest"
+                            style={{ color: story.tagColor }}
+                          >
+                            [{story.tag}] / 0{i + 1}
+                          </span>
+                          <h3
+                            id={`story-title-${story.id}`}
+                            className="cmyk-slip mt-3 font-brush text-4xl leading-tight text-[var(--paper)] @[40rem]:text-5xl"
+                          >
+                            {story.title}
+                          </h3>
+                          <p className="mt-4 font-mono text-sm leading-relaxed text-[var(--paper)]">
+                            {story.excerpt}
+                          </p>
+                          <p
+                            aria-hidden="true"
+                            className="mt-6 font-hand text-sm text-[var(--yellow)]"
+                          >
+                            {story.marginalia}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </ScenePanel>
+                    </ScenePanel>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </ScenePage>
       </div>
     </section>

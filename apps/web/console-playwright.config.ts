@@ -7,7 +7,7 @@ export default defineConfig({
   reporter: "list",
   outputDir: "../../.verify/console-results",
   use: {
-    baseURL: "http://localhost:3015",
+    baseURL: process.env.CONSOLE_BASE_URL ?? "http://localhost:3015",
     browserName: "chromium",
   },
 });

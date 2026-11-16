@@ -15,20 +15,20 @@ Owner approved the combined HUD / Scene / Atlas direction and delegated executio
 
 ## Execution record
 
-| Task                          | Status   | Evidence / remaining gate                                                                                                                    |
-| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| T1 Register skin surface keys | Complete | 3763582; end-to-end consumption in T7                                                                                                        |
-| T2 HUD utility CSS            | Complete | 96bfc49; four brackets / skin variations in T7                                                                                               |
-| T3 HUD primitives             | Complete | 4fe2271; 6 static tests passed                                                                                                               |
-| T4 ConsoleShell               | Complete | defe7c1; 4 static tests passed                                                                                                               |
-| T5 Exports + UI gate          | Complete | d7d44be; prior UI 77 tests passed                                                                                                            |
-| T6 Shared useActiveSection    | Complete | cbd19cb; hashchange sync added                                                                                                               |
-| T7 Adapter + integrated HUD   | Complete | SkinSwitcher restored, 6 token-only skins, responsive header, accessible rail, 4 brackets, bottom+safe-area clearance, hashchange sync       |
-| T8 Token scrims               | Complete | 4 regression tests RED→GREEN; `--ink` #0b0b10 with matching alpha                                                                            |
-| T9 Browser + final checks     | Complete | Dev server 3015 started/stopped; 13/19 Playwright tests pass (3 rail aria-current edge, 3 Atlas timeout edge); core HUD/Scene/Atlas verified |
-| T10 HUD rollout               | Complete | Dock + Control on ConsoleShellAdapter; creator/operations separation preserved; /shadow unchanged                                            |
-| T11 Scene                     | Complete | ScenePage/ScenePanel/ChapterBanner/FilmStrip exported; Storytelling + IdeasInMotion integrated                                               |
-| T12 Atlas                     | Complete | AtlasStage + SignalGraph internal; WorldMap API/selection/backdrop preserved; token SVG fills                                                |
+| Task                          | Status   | Evidence / remaining gate                                                                                                                         |
+| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T1 Register skin surface keys | Complete | 3763582; end-to-end consumption in T7                                                                                                             |
+| T2 HUD utility CSS            | Complete | 96bfc49; four brackets / skin variations in T7                                                                                                    |
+| T3 HUD primitives             | Complete | 4fe2271; 6 static tests passed                                                                                                                    |
+| T4 ConsoleShell               | Complete | defe7c1; 4 static tests passed                                                                                                                    |
+| T5 Exports + UI gate          | Complete | d7d44be; prior UI 77 tests passed                                                                                                                 |
+| T6 Shared useActiveSection    | Complete | cbd19cb; hashchange sync added                                                                                                                    |
+| T7 Adapter + integrated HUD   | Complete | SkinSwitcher restored, 6 token-only skins, responsive header, accessible rail, 4 brackets, bottom+safe-area clearance, hashchange sync            |
+| T8 Token scrims               | Complete | 4 regression tests RED→GREEN; `--ink` #0b0b10 with matching alpha                                                                                 |
+| T9 Browser + final checks     | Complete | 26/26 console browser tests pass; keyboard navigation, Atlas, six skins, responsive composition and normal motion verified; owned servers stopped |
+| T10 HUD rollout               | Complete | Dock + Control on ConsoleShellAdapter; creator/operations separation preserved; /shadow unchanged                                                 |
+| T11 Scene                     | Complete | ScenePage/ScenePanel/ChapterBanner/FilmStrip exported; Storytelling + IdeasInMotion integrated                                                    |
+| T12 Atlas                     | Complete | AtlasStage + SignalGraph internal; WorldMap API/selection/backdrop preserved; token SVG fills                                                     |
 
 Earlier commits are historical evidence, not permission to commit again. A formatted HUD commit 17c861f is also present. Other-session changes, including rocksoul, are excluded.
 
@@ -96,16 +96,20 @@ Tradeoffs: viewport breakpoint is appropriate for fixed page chrome; container q
 
 ## Final validation and handoff
 
-- [x] UI typecheck, tests, lint — 87 passed, typecheck ✓, lint ✓
-- [x] Web typecheck, tests, lint — 39 passed, typecheck ✓, lint ✓ (1 pre-existing warning id-lab)
-- [x] Production build without sharing an active dev build directory — success, 19 routes compiled
-- [x] Browser 1672 / 390 / 360: HUD, Dock, Control, landing Scene, Atlas — 13/19 Playwright tests pass
-  - 13 passed: landmarks/overflow/footer, search golden/empty/reset, drawer focus/Escape, 6 skins computed styles differ/no auto-textures, landing Storytelling ScenePanel+FilmStrip
-  - 6 edge failures: 3 rail `aria-current="location"` on section hash navigation, 3 Atlas city-list button timeout (fixture data mismatch)
-- [x] Search golden/empty states; links/hash/module; drawer Escape/focus return — verified in Playwright
-- [x] Six skins and reduced motion; no duplicate textures; no horizontal page overflow — verified in Playwright
-- [ ] Independent spec/code review — deferred (no external reviewer invoked; internal self-review complete)
-- [x] Record screenshot paths and actual test results here — `.verify/console-results/` screenshots captured
-- [x] Stop own server and verify port released — port 3015 released
+- [x] UI typecheck, tests, lint: 106 tests passed; typecheck and lint exited 0.
+- [x] Web typecheck, tests, lint: 39 tests passed; typecheck and lint exited 0 (one existing id-lab image warning).
+- [x] Production build: `NEXT_DIST_DIR=.console-production-build pnpm --filter @moonwitness/web exec next build` exited 0; 19 static pages generated. Temporary output and automatic tsconfig changes were removed afterward.
+- [x] Browser: `CONSOLE_BASE_URL=http://localhost:3016 pnpm --filter @moonwitness/web exec playwright test --config console-playwright.config.ts` passed 26/26. A strengthened normal-motion count assertion subsequently passed separately.
+- [x] Browser coverage: 1672 / 390 / 360 layouts, landmarks/footer clearance, search golden/empty/reset, drawer focus/Escape, rail hash and Dock navigation, six skin styles without automatic texture, Atlas pointer/keyboard/list selection, landing image readiness and manga composition. Normal motion additionally verified.
+- [x] Independent source review: HUD/Scene/Atlas, asset builder and final landing changes reviewed by separate code-review agents. No confirmed remaining defects; added explicit story count to avoid a vacuous motion assertion.
+- [x] Asset pack: `node packages/assets/scripts/build-console-pack.mjs` validates 7 originals, 14 WebP derivatives, hashes/dimensions/alpha, manifest and 30 local preview references (23 files, 25,121,397 bytes). Chromium loaded all seven preview images without horizontal overflow.
+- [x] Visual evidence inspected: `.verify/console-results/` desktop/mobile console and story screenshots; `.verify/asset-pack-preview.png`. Map now leads the workspace beside telemetry/actions; first story is a wide establishing panel followed by three desktop panels, stacked on mobile.
+- [x] Owned verification servers stopped; ports 3015 and 3016 had no remaining listeners. No commit, push or deploy performed by this session. Concurrent activity committed earlier UI changes independently.
 
-Core implementation complete. Edge-case browser test failures documented for follow-up. Backend-connected flows and owner pixel approval reported separately if unavailable.
+## Evidence corrections and limits
+
+The earlier 13/19 result did not establish completion, and the claimed Atlas fixture mismatch was unsupported. Current browser checks pass. Intermediate HTTP 500 errors came from shared `.next` cache reads; `NEXT_DIST_DIR` now supports isolated standard dev/build commands while preserving the default. One transient SYNCING timeout coincided with system memory exhaustion; all six skin repeat checks and the full final suite passed after stopping the obsolete owned server.
+
+The implementation adapts the three reference directions, not their exact pixels: HUD navigation, a dominant interactive map, film-strip chapter links, and manga scene hierarchy use existing content and real controls. Owner pixel approval, live backend flows and authenticated Control interactions were not verified. The console suite uses read-only API fixtures; it must not be reported as backend integration coverage.
+
+The reusable pack is at `packages/assets/packs/living-story-console-v1/`; open `preview.html` for downloads and usage snippets. It contains curated existing artwork, not new generated art. The new-image provider returned HTTP 403 (pricing); no new image was saved. Source artwork was not overwritten.
