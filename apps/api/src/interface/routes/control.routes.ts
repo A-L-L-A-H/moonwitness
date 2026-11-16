@@ -96,6 +96,33 @@ function upstreamHeaders(request: FastifyRequest): Record<string, string> {
   return headers;
 }
 
+function extractArsySessionCookie(cookieHeader: string | undefined): string | null {
+  if (!cookieHeader) return null;
+  const match = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith("arsy_session="));
+  return match ?? null;
+}
+
+function buildControlUpstreamHeaders(request: FastifyRequest): Record<string, string> {
+  const headers = upstreamHeaders(request);
+  const arsySession = extractArsySessionCookie(headers.cookie);
+  if (arsySession) {
+    headers.cookie = arsySession;
+    return headers;
+  }
+  // Never forward MoonWitness D1 session cookies to arsy; attach server-side bearer token when configured.
+  delete headers.cookie;
+  const isWrite = request.method !== "GET" && request.method !== "HEAD";
+  const { readonlyToken, adminToken } = getArsyTokens();
+  const fallback = isWrite ? adminToken : readonlyToken || adminToken;
+  if (fallback) {
+    headers.authorization = `Bearer ${fallback}`;
+  }
+  return headers;
+}
+
 function forwardCookies(reply: FastifyReply, upstream: Response) {
   for (const cookie of upstream.headers.getSetCookie()) {
     // Buang atribut Domain agar cookie menempel ke host web, bukan host arsy.
@@ -142,24 +169,11 @@ async function forward(request: FastifyRequest, reply: FastifyReply, subPath: st
   const arsyUrl = getArsyUrl();
   const target = `${arsyUrl}/v1/${subPath}${query}`;
 
-  // Data control diteruskan dengan cookie sesi pengguna. Token server-side
-  // hanya dipakai bila pemanggil tidak membawa sesi (integrasi non-manusia).
-  // Operasi tulis memakai token admin; operasi baca memakai token read-only.
-  const headers = upstreamHeaders(request);
-  if (!headers.cookie) {
-    const isWrite = request.method !== "GET" && request.method !== "HEAD";
-    const { readonlyToken, adminToken } = getArsyTokens();
-    const fallback = isWrite ? adminToken : readonlyToken || adminToken;
-    if (!fallback) {
-      return reply.code(401).send({ error: "butuh login" });
-    }
-    headers.authorization = `Bearer ${fallback}`;
-  }
-
   const edgeGuard = getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", arsyUrl);
   if (edgeGuard) {
     return reply.code(503).header("cache-control", "no-store").send(edgeGuard);
   }
+  const headers = buildControlUpstreamHeaders(request);
 
   let response: Response;
   try {
@@ -247,7 +261,7 @@ export async function controlRoutes(fastify: FastifyInstance) {
           .header("cache-control", "no-store")
           .send({ ...edgeGuard, arsyUrl });
       }
-      const headers = upstreamHeaders(request);
+      const headers = buildControlUpstreamHeaders(request);
       const [hostRes, metricsRes] = await Promise.all([
         fetch(`${arsyUrl}/v1/host`, { headers, signal: AbortSignal.timeout(5_000) }).catch(
           () => null,
