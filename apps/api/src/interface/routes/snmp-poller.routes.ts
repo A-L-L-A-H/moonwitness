@@ -1,6 +1,10 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth, requireRole } from "../../middleware/auth";
-import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
+import {
+  getEdgeLoopbackErrorPayload,
+  getUpstreamBridgeHeaders,
+  resolveUpstreamServiceUrl,
+} from "../../shared/upstream";
 
 function getSnmpPollerUrl(): string {
   return resolveUpstreamServiceUrl("SNMP_POLLER_URL", "http://127.0.0.1:8094");
@@ -22,7 +26,7 @@ function redactSensitiveFields(value: unknown): unknown {
 function forwardHeaders(request: FastifyRequest): Record<string, string> {
   const headers: Record<string, string> = {};
   if (request.body) headers["content-type"] = "application/json";
-  return headers;
+  return getUpstreamBridgeHeaders(headers);
 }
 
 async function forward(

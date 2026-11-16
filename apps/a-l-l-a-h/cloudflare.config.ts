@@ -25,6 +25,8 @@ export default defineConfig({
       }),
       WEB_INTERNAL_URL: bindings.text("https://moonwitness.biz.id"),
       API_INTERNAL_URL: bindings.text("https://api.moonwitness.biz.id"),
+      ARSY_URL: bindings.text("https://arsy-edge.moonwitness.biz.id"),
+      MEMORY_API_URL: bindings.text("https://memory-edge.moonwitness.biz.id"),
     },
   }),
 });

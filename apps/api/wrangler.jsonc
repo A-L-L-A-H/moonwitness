@@ -28,5 +28,11 @@
     "SEED": "0",
     "ALLOW_DEMO_SEED": "0",
     "SESSION_MAX_AGE_DAYS": "7",
+    "ARSY_URL": "https://arsy-edge.moonwitness.biz.id",
+    "MEMORY_API_URL": "https://memory-edge.moonwitness.biz.id",
+    "RADIUS_URL": "https://radius-edge.moonwitness.biz.id",
+    "STORAGE_URL": "https://storage-edge.moonwitness.biz.id",
+    "SYSLOG_URL": "https://syslog-edge.moonwitness.biz.id",
+    "SNMP_POLLER_URL": "https://snmp-edge.moonwitness.biz.id",
   },
 }

@@ -22,6 +22,7 @@ export interface ApiWorkerEnv {
   ARSY_TOKEN_ADMIN?: string;
   ARSY_AUTH_RATE_MAX?: string;
   ARSY_AUTH_RATE_WINDOW_MS?: string;
+  BRIDGE_SHARED_TOKEN?: string;
   RIOT_AI_BASE_URL?: string;
   RIOT_AI_MODEL?: string;
   MEMORY_API_URL?: string;

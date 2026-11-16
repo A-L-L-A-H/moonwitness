@@ -1,6 +1,10 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { requireAuth } from "../../middleware/auth";
-import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
+import {
+  getEdgeLoopbackErrorPayload,
+  getUpstreamBridgeHeaders,
+  resolveUpstreamServiceUrl,
+} from "../../shared/upstream";
 
 function getSyslogUrl(): string {
   return resolveUpstreamServiceUrl("SYSLOG_URL", "http://127.0.0.1:8093");
@@ -9,7 +13,7 @@ function getSyslogUrl(): string {
 function forwardHeaders(request: FastifyRequest): Record<string, string> {
   const headers: Record<string, string> = {};
   if (request.body) headers["content-type"] = "application/json";
-  return headers;
+  return getUpstreamBridgeHeaders(headers);
 }
 
 async function forward(
