@@ -35,10 +35,6 @@ jobs:
         working-directory: ./apps/web
         run: pnpm exec playwright install chromium
 
-      - name: Build web
-        working-directory: ./apps/web
-        run: pnpm build
-
       - name: Allocate isolated test ports
         run: |
           node -e '
@@ -59,9 +55,14 @@ jobs:
                 `PLAYWRIGHT_API_PORT=${apiPort}`,
                 `PLAYWRIGHT_WEB_PORT=${webPort}`,
                 `PLAYWRIGHT_BASE_URL=http://localhost:${webPort}`,
+                `API_INTERNAL_URL=http://127.0.0.1:${apiPort}`,
               ].join("\n") + "\n");
             })();
           '
+
+      - name: Build web
+        working-directory: ./apps/web
+        run: pnpm build
 
       - name: Run Playwright tests
         working-directory: ./apps/web
