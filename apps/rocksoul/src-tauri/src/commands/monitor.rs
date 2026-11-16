@@ -23,7 +23,7 @@ const PATCH_MAX_BYTES: usize = 24_576;
 const TRANSCRIPT_TAIL_BYTES: usize = 65_536;
 const MAX_AGENT_SESSIONS: usize = 5;
 const MAX_CHANGED_FILES: usize = 25;
-const SERVICE_TIMEOUT_MS: u64 = 650;
+const SERVICE_TIMEOUT_MS: u64 = 150;
 
 const ALLOWLISTED_ORIGINS: [&str; 10] = [
     "http://127.0.0.1:3000",
@@ -309,17 +309,6 @@ fn parse_transcript_summary(
 
     let total_len = meta.len();
     let tail_start = total_len.saturating_sub(TRANSCRIPT_TAIL_BYTES as u64);
-    let mut step_count = 0usize;
-
-    // Fast line estimate when file is reasonable size; avoid blocking on huge logs.
-    if total_len <= 16 * 1024 * 1024 {
-        let mut reader = BufReader::new(&file);
-        let mut line = String::new();
-        while reader.read_line(&mut line).unwrap_or(0) > 0 {
-            step_count += 1;
-            line.clear();
-        }
-    }
 
     if file.seek(SeekFrom::Start(tail_start)).is_err() {
         return fallback;
@@ -334,7 +323,7 @@ fn parse_transcript_summary(
     let mut last_type = "SESSION".to_string();
     let mut last_status = "ACTIVE".to_string();
     let mut last_tool = "-".to_string();
-    let mut max_step_index = step_count;
+    let mut max_step_index = 0usize;
 
     for raw_line in tail_text.lines().rev() {
         let trimmed = raw_line.trim();
@@ -369,8 +358,17 @@ fn parse_transcript_summary(
                 }
             }
         }
-        if last_type != "SESSION" && last_tool != "-" {
+        if last_type != "SESSION" && last_tool != "-" && max_step_index > 0 {
             break;
+        }
+    }
+
+    if max_step_index == 0 && total_len <= 256 * 1024 && file.seek(SeekFrom::Start(0)).is_ok() {
+        let mut reader = BufReader::new(&file);
+        let mut line = String::new();
+        while reader.read_line(&mut line).unwrap_or(0) > 0 {
+            max_step_index += 1;
+            line.clear();
         }
     }
 
@@ -495,12 +493,15 @@ fn collect_plans(repositories: &[Repository]) -> Vec<PlanTrackerEntry> {
 }
 
 fn run_git_readonly(path: &Path, args: &[&str]) -> Option<String> {
-    let output = Command::new("git")
-        .arg("-C")
-        .arg(path)
-        .args(args)
-        .output()
-        .ok()?;
+    let mut command = Command::new("git");
+    command.arg("-C").arg(path).args(args);
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+    let output = command.output().ok()?;
     if !output.status.success() {
         return None;
     }
@@ -531,12 +532,28 @@ fn inspect_repository_activity(repo: &Repository) -> RepoMonitorEntry {
         };
     }
 
-    let branch = run_git_readonly(root, &["branch", "--show-current"])
+    let (branch_opt, log_raw, porcelain, worktree_raw) = std::thread::scope(|scope| {
+        let branch_job = scope.spawn(|| run_git_readonly(root, &["branch", "--show-current"]));
+        let log_job = scope.spawn(|| {
+            run_git_readonly(root, &["log", "-8", "--format=%h\x1f%an\x1f%ar\x1f%s"])
+                .unwrap_or_default()
+        });
+        let porcelain_job =
+            scope.spawn(|| run_git_readonly(root, &["status", "--porcelain"]).unwrap_or_default());
+        let worktree_job = scope.spawn(|| {
+            run_git_readonly(root, &["worktree", "list", "--porcelain"]).unwrap_or_default()
+        });
+        (
+            branch_job.join().ok().flatten(),
+            log_job.join().unwrap_or_default(),
+            porcelain_job.join().unwrap_or_default(),
+            worktree_job.join().unwrap_or_default(),
+        )
+    });
+
+    let branch = branch_opt
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| repo.branch.clone());
-
-    let log_raw = run_git_readonly(root, &["log", "-8", "--format=%h\x1f%an\x1f%ar\x1f%s"])
-        .unwrap_or_default();
     let mut head_hash = String::new();
     let mut head_subject = String::new();
     let mut head_age = String::new();
@@ -557,7 +574,6 @@ fn inspect_repository_activity(repo: &Repository) -> RepoMonitorEntry {
         }
     }
 
-    let porcelain = run_git_readonly(root, &["status", "--porcelain"]).unwrap_or_default();
     let mut dirty_count = 0usize;
     let mut staged_count = 0usize;
     let mut untracked_count = 0usize;
@@ -579,8 +595,6 @@ fn inspect_repository_activity(repo: &Repository) -> RepoMonitorEntry {
         }
     }
 
-    let worktree_raw =
-        run_git_readonly(root, &["worktree", "list", "--porcelain"]).unwrap_or_default();
     let worktree_count = worktree_raw
         .lines()
         .filter(|line| line.starts_with("worktree "))
@@ -641,27 +655,37 @@ pub fn validate_ecosystem_url(raw: &str) -> Result<String, String> {
     )
 }
 
+fn collect_monitor_snapshot(repositories: Vec<Repository>) -> MonitorSnapshot {
+    std::thread::scope(|scope| {
+        let disks_job = scope.spawn(|| collect_disks(&repositories));
+        let services_job = scope.spawn(probe_all_services);
+        let sessions_job = scope.spawn(collect_agent_sessions);
+        let plans_job = scope.spawn(|| collect_plans(&repositories));
+        let repos_job = scope.spawn(|| {
+            repositories
+                .iter()
+                .map(inspect_repository_activity)
+                .collect::<Vec<_>>()
+        });
+
+        MonitorSnapshot {
+            generated_at: Utc::now().to_rfc3339(),
+            disks: disks_job.join().unwrap_or_default(),
+            services: services_job.join().unwrap_or_default(),
+            agent_sessions: sessions_job.join().unwrap_or_default(),
+            repositories: repos_job.join().unwrap_or_default(),
+            plans: plans_job.join().unwrap_or_default(),
+        }
+    })
+}
+
 #[tauri::command]
-pub fn get_monitor_snapshot(app: AppHandle) -> Result<MonitorSnapshot, String> {
+pub async fn get_monitor_snapshot(app: AppHandle) -> Result<MonitorSnapshot, String> {
     let connection = db::connect(&app)?;
     let repositories = query_repositories(&connection)?;
-    let disks = collect_disks(&repositories);
-    let services = probe_all_services();
-    let agent_sessions = collect_agent_sessions();
-    let plans = collect_plans(&repositories);
-    let repo_entries = repositories
-        .iter()
-        .map(inspect_repository_activity)
-        .collect();
-
-    Ok(MonitorSnapshot {
-        generated_at: Utc::now().to_rfc3339(),
-        disks,
-        services,
-        agent_sessions,
-        repositories: repo_entries,
-        plans,
-    })
+    tauri::async_runtime::spawn_blocking(move || collect_monitor_snapshot(repositories))
+        .await
+        .map_err(|error| format!("Monitor worker failed: {error}"))
 }
 
 #[tauri::command]

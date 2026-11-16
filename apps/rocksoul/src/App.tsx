@@ -81,8 +81,9 @@ export default function App() {
     if (!autoMonitor) return;
     if (destination !== "riot-deck" && !pageRoutes.includes(destination as any)) return;
     const interval = window.setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
       void refreshMonitor();
-    }, 10_000);
+    }, 15_000);
     return () => window.clearInterval(interval);
   }, [autoMonitor, destination, refreshMonitor]);
 

@@ -80,6 +80,7 @@ export const useAppStore = create<AppState>((setState, getState) => ({
   setAutoMonitor: (autoMonitor) => setState({ autoMonitor }),
   setGitPresetView: (gitPresetView) => setState({ gitPresetView }),
   refreshMonitor: async () => {
+    if (getState().monitorLoading) return;
     setState({ monitorLoading: true, monitorError: "" });
     try {
       const monitor = await call("get_monitor_snapshot");
@@ -95,6 +96,7 @@ export const useAppStore = create<AppState>((setState, getState) => ({
     await call("open_ecosystem_url", { url });
   },
   refresh: async () => {
+    if (getState().loading) return;
     setState({ loading: true, error: "" });
     try {
       const dashboard = await call("get_dashboard");

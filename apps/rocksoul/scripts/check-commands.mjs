@@ -43,7 +43,7 @@ const registeredCommands = new Set(
   [...registration.matchAll(/commands::[a-z][a-z0-9_]*::([a-z][a-z0-9_]*)/g)].map((match) => match[1]),
 );
 const implementedCommands = new Set(
-  [...source.matchAll(/#\[tauri::command\]\s*pub fn ([a-z][a-z0-9_]*)/g)].map((match) => match[1]),
+  [...source.matchAll(/#\[tauri::command\]\s*pub (?:async )?fn ([a-z][a-z0-9_]*)/g)].map((match) => match[1]),
 );
 const violations = [];
 
@@ -122,10 +122,10 @@ for (const command of declaredCommands) {
   }
 }
 for (const command of declaredCommands) {
-  const commandPattern = new RegExp(`#\\[tauri::command\\]\\s*pub fn ${command}\\(`);
+  const commandPattern = new RegExp(`#\\[tauri::command\\]\\s*pub (?:async )?fn ${command}\\(`);
   const commandSource = nativeCommandSources.find(candidate => commandPattern.test(candidate));
   const functionDeclaration = commandSource
-    ? new RegExp(`pub fn ${command}\\(`).exec(commandSource)
+    ? new RegExp(`pub (?:async )?fn ${command}\\(`).exec(commandSource)
     : undefined;
   const signatureStart = functionDeclaration?.index;
   let signature;
