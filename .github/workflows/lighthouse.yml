@@ -14,7 +14,7 @@ permissions:
 jobs:
   lighthouse:
     name: Lighthouse CI
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -56,7 +56,7 @@ jobs:
   comment:
     name: Post Lighthouse Results
     needs: lighthouse
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     if: github.event_name == 'pull_request'
     steps:
       - name: Download Lighthouse report

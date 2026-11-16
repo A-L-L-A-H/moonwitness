@@ -12,7 +12,7 @@ permissions:
 jobs:
   label:
     name: Auto Label
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     permissions:
       contents: read
       pull-requests: write
@@ -30,7 +30,7 @@ jobs:
 
   assign:
     name: Auto Assign
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     permissions:
       pull-requests: write
       issues: write

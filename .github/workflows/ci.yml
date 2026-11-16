@@ -17,7 +17,7 @@ concurrency:
 jobs:
   verify:
     name: Verify (lint, typecheck, test, build)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -65,7 +65,7 @@ jobs:
 
   arsy:
     name: Verify arsy control plane (Go)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -90,7 +90,7 @@ jobs:
 
   storage:
     name: Verify storage service (Rust)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -115,7 +115,7 @@ jobs:
 
   syslog:
     name: Verify syslog service (Rust)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -140,7 +140,7 @@ jobs:
 
   snmp-poller:
     name: Verify snmp-poller service (Rust)
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, vps]
     timeout-minutes: 20
     steps:
       - name: Checkout
