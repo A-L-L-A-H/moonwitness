@@ -79,9 +79,9 @@ export function Landing() {
           size="sm"
           aria-pressed={paused}
           onClick={() => setPaused((p) => !p)}
-          className="fixed bottom-4 left-4 z-40 min-h-11 px-4 py-2 font-mono text-xs motion-reduce:hidden"
+          className="fixed bottom-6 left-6 z-40 hidden min-h-11 px-4 py-2 font-mono text-xs sm:[@media(prefers-reduced-motion:no-preference)]:inline-flex"
         >
-          PAUSE MOTION
+          {paused ? "RESUME MOTION" : "PAUSE MOTION"}
         </Button>
       </div>
     </MotionPauseContext.Provider>

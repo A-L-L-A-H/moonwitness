@@ -1,3 +1,4 @@
+import { ECOSYSTEM_HEALTH_CONTRACT_VERSION } from "@moonwitness/canon";
 import { getCloudflareWorkerEnv, type D1DatabaseLike } from "./cloudflare-runtime";
 
 export type ServiceHealthState = "online" | "degraded" | "offline";
@@ -13,7 +14,7 @@ export interface EcosystemServiceStatus {
 }
 
 export interface EcosystemEdgeStatus {
-  readonly id: "codex-edge" | "community";
+  readonly id: "codex-edge" | "community" | "radio";
   readonly name: string;
   readonly url: string;
   readonly status: ServiceHealthState;
@@ -50,6 +51,7 @@ export interface CodexGovernanceSnapshot {
 }
 
 export interface EcosystemSnapshot {
+  readonly healthContract: typeof ECOSYSTEM_HEALTH_CONTRACT_VERSION;
   readonly generatedAt: string;
   readonly runtimeMode: EcosystemRuntimeMode;
   readonly status: "online" | "offline";
@@ -133,13 +135,19 @@ function buildEdgeTargets(): readonly ProbeTarget<EcosystemEdgeStatus["id"]>[] {
       id: "codex-edge",
       name: "Sovereign Codex Edge",
       displayUrl: "https://codex.a-l-l-a-h.com",
-      probeUrl: "https://codex.a-l-l-a-h.com/",
+      probeUrl: "https://codex.a-l-l-a-h.com/health",
     },
     {
       id: "community",
       name: "Rocksoul Community",
       displayUrl: "https://community.moonwitness.biz.id",
       probeUrl: "https://community.moonwitness.biz.id/",
+    },
+    {
+      id: "radio",
+      name: "MoonWitness Radio",
+      displayUrl: "https://moonwitness-radio.bjo163.workers.dev",
+      probeUrl: "https://moonwitness-radio.bjo163.workers.dev/health",
     },
   ];
 }
@@ -391,6 +399,7 @@ export async function probeEcosystemHealth(options?: {
   }
 
   return {
+    healthContract: ECOSYSTEM_HEALTH_CONTRACT_VERSION,
     generatedAt: new Date().toISOString(),
     runtimeMode,
     status: apiOnline ? "online" : "offline",

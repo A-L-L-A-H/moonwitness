@@ -12,7 +12,8 @@ import {
   type WorldIdentifier,
 } from "@/data/empire-registry";
 import { LUMINOUS_NAMES_OF_ALLAH } from "@/data/remembrance-sanctuary";
-import { SearchLensIcon, WorldEmblemById } from "./sacred-icons";
+import { SearchLensIcon } from "@moonwitness/ui/imperium";
+import { WorldEmblemById } from "./sacred-icons";
 
 export function UniversalSearchModal({
   isOpen,
@@ -126,6 +127,11 @@ export function UniversalSearchModal({
           >
             ESC
           </button>
+        </div>
+
+        <div className="mt-2.5 flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#9f9580] uppercase">
+          <span>CTRL/⌘ + K TOGGLE · ESC CLOSE</span>
+          <span>5 WORLD REALMS · 4 SCRIPTURES · CODEX DOORS</span>
         </div>
 
         <div className="mt-5 max-h-[65vh] overflow-y-auto space-y-5 pr-1">

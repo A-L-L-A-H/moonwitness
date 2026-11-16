@@ -3,7 +3,7 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { EraId, TimelineEvent } from "@moonwitness/types";
-import { EmpireShell } from "../shell";
+import { ConsoleShellAdapter } from "../shell/console-shell-adapter";
 import { Star4 } from "@moonwitness/ui/icons";
 import { EraBand } from "@moonwitness/ui";
 import { DockHero } from "./hero";
@@ -154,7 +154,7 @@ export function Dock() {
   const chronicleLoading = eventsQuery.isLoading || erasQuery.isLoading || statsQuery.isLoading;
 
   return (
-    <EmpireShell
+    <ConsoleShellAdapter
       breadcrumb="Dock / Lighthouse"
       search={{
         value: queryInput,
@@ -226,17 +226,17 @@ export function Dock() {
             >
               <div className="zine-card-rough p-3">
                 <p className="font-brush text-2xl text-[var(--yellow)]">{stats?.total ?? "—"}</p>
-                <p className="text-[10px] tracking-widest text-zinc-400">ARCHIVE EVENTS</p>
+                <p className="text-[11px] tracking-widest text-zinc-300">ARCHIVE EVENTS</p>
               </div>
               <div className="zine-card-rough p-3">
                 <p className="font-brush text-2xl text-[var(--blue)]">{eras.length}</p>
-                <p className="text-[10px] tracking-widest text-zinc-400">ERAS</p>
+                <p className="text-[11px] tracking-widest text-zinc-300">ERAS</p>
               </div>
               <div className="zine-card-rough p-3">
                 <p className="font-brush text-2xl text-[var(--pink)]">
                   {Object.keys(stats?.byKind ?? {}).length}
                 </p>
-                <p className="text-[10px] tracking-widest text-zinc-400">EVENT TYPES</p>
+                <p className="text-[11px] tracking-widest text-zinc-300">EVENT TYPES</p>
               </div>
             </section>
 
@@ -331,6 +331,6 @@ export function Dock() {
       )}
 
       <Star4 className="pointer-events-none fixed bottom-24 right-6 hidden h-6 w-6 text-[var(--yellow)] opacity-50 xl:block" />
-    </EmpireShell>
+    </ConsoleShellAdapter>
   );
 }

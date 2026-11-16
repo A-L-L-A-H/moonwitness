@@ -111,7 +111,7 @@ export function Signals() {
             variant="black"
             label="SEALED"
             width={80}
-            className="-top-1 -left-3 -rotate-12 text-[9px]"
+            className="-top-1 left-2 -rotate-12 text-[9px]"
           />
 
           <div className="relative h-48 overflow-hidden bg-black/60">

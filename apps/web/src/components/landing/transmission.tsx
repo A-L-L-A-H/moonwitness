@@ -64,7 +64,7 @@ export function Transmission() {
               <div className="absolute inset-0 bg-[var(--pink)] opacity-25 mix-blend-color" />
             </div>
             <figcaption className="border-t-2 border-[var(--line)] px-4 py-2 font-mono text-[11px] text-zinc-400">
-              Existing MoonWitness story art, reused for this fiction file.
+              TRANSMISSION ARCHIVE // RECOVERED TAPE 001 · FICTIONAL STORY FILE
             </figcaption>
           </figure>
 

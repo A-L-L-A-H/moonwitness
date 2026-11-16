@@ -10,11 +10,123 @@ import {
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament } from "./sacred-icons";
-import { AstrolabeSealMedallion, SacredCornerBrackets } from "./sacred-illustrations";
+import { DiamondStarOrnament, SacredCornerBrackets } from "@moonwitness/ui/imperium";
+import { AstrolabeSealMedallion } from "./sacred-illustrations";
 
 const TASBIH_STORAGE_KEY = "allah-tasbih-state-v1";
 const MUHASABAH_STORAGE_KEY = "allah-muhasabah-v1";
+const MUHASABAH_JOURNAL_LS_KEY = "allah-muhasabah-journal-v1";
+const MUHASABAH_IDB_NAME = "allah-sanctuary-local";
+const MUHASABAH_IDB_STORE = "journal";
+
+interface PrivateJournalEntry {
+  readonly id: string;
+  readonly createdAt: string;
+  readonly text: string;
+}
+
+function readIdbJournalEntries(): Promise<readonly PrivateJournalEntry[]> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      resolve([]);
+      return;
+    }
+    try {
+      const req = window.indexedDB.open(MUHASABAH_IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(MUHASABAH_IDB_STORE)) {
+          db.createObjectStore(MUHASABAH_IDB_STORE, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction(MUHASABAH_IDB_STORE, "readonly");
+        const store = tx.objectStore(MUHASABAH_IDB_STORE);
+        const allReq = store.getAll();
+        allReq.onsuccess = () => {
+          const rows = Array.isArray(allReq.result) ? (allReq.result as PrivateJournalEntry[]) : [];
+          resolve(rows.sort((a, b) => b.createdAt.localeCompare(a.createdAt)));
+          db.close();
+        };
+        allReq.onerror = () => {
+          resolve([]);
+          db.close();
+        };
+      };
+      req.onerror = () => resolve([]);
+    } catch {
+      resolve([]);
+    }
+  });
+}
+
+function writeIdbJournalEntry(entry: PrivateJournalEntry): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      resolve(false);
+      return;
+    }
+    try {
+      const req = window.indexedDB.open(MUHASABAH_IDB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(MUHASABAH_IDB_STORE)) {
+          db.createObjectStore(MUHASABAH_IDB_STORE, { keyPath: "id" });
+        }
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction(MUHASABAH_IDB_STORE, "readwrite");
+        tx.objectStore(MUHASABAH_IDB_STORE).put(entry);
+        tx.oncomplete = () => {
+          db.close();
+          resolve(true);
+        };
+        tx.onerror = () => {
+          db.close();
+          resolve(false);
+        };
+      };
+      req.onerror = () => resolve(false);
+    } catch {
+      resolve(false);
+    }
+  });
+}
+
+function deleteIdbJournalEntry(id: string): Promise<void> {
+  return new Promise((resolve) => {
+    if (typeof window === "undefined" || !("indexedDB" in window)) {
+      resolve();
+      return;
+    }
+    try {
+      const req = window.indexedDB.open(MUHASABAH_IDB_NAME, 1);
+      req.onsuccess = () => {
+        const db = req.result;
+        if (db.objectStoreNames.contains(MUHASABAH_IDB_STORE)) {
+          const tx = db.transaction(MUHASABAH_IDB_STORE, "readwrite");
+          tx.objectStore(MUHASABAH_IDB_STORE).delete(id);
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            resolve();
+          };
+        } else {
+          db.close();
+          resolve();
+        }
+      };
+      req.onerror = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
 
 const MUHASABAH_PLEDGES = [
   {
@@ -64,6 +176,11 @@ export function RemembranceSanctuary({
   const [breathPhaseIndex, setBreathPhaseIndex] = useState<number>(0);
   const [justCompletedCycle, setJustCompletedCycle] = useState<boolean>(false);
   const [pledgeIds, setPledgeIds] = useState<readonly string[]>([]);
+  const [journalDraft, setJournalDraft] = useState<string>("");
+  const [journalEntries, setJournalEntries] = useState<readonly PrivateJournalEntry[]>([]);
+  const [journalEngine, setJournalEngine] = useState<
+    "INDEXEDDB_ON_DEVICE" | "LOCAL_STORAGE_ON_DEVICE"
+  >("LOCAL_STORAGE_ON_DEVICE");
   const audioCtxRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
@@ -123,6 +240,39 @@ export function RemembranceSanctuary({
     } catch {
       // Ignore storage access failures in private browsing contexts
     }
+
+    let cancelled = false;
+    void (async () => {
+      const idbRows = await readIdbJournalEntries();
+      if (cancelled) return;
+      if (idbRows.length > 0) {
+        setJournalEntries(idbRows);
+        setJournalEngine("INDEXEDDB_ON_DEVICE");
+        return;
+      }
+      if (typeof window !== "undefined" && "indexedDB" in window) {
+        setJournalEngine("INDEXEDDB_ON_DEVICE");
+      }
+      try {
+        const rawJournal = window.localStorage.getItem(MUHASABAH_JOURNAL_LS_KEY);
+        if (rawJournal) {
+          const parsed = JSON.parse(rawJournal) as unknown;
+          if (Array.isArray(parsed)) {
+            setJournalEntries(
+              parsed.filter((row): row is PrivateJournalEntry =>
+                Boolean(row && typeof row === "object" && "id" in row && "text" in row),
+              ),
+            );
+          }
+        }
+      } catch {
+        // Ignore restricted storage contexts
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -139,12 +289,44 @@ export function RemembranceSanctuary({
     );
   };
 
+  const saveJournalNote = async () => {
+    const clean = journalDraft.trim();
+    if (!clean) return;
+    const entry: PrivateJournalEntry = {
+      id: `note-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      text: clean.slice(0, 600),
+    };
+    const next = [entry, ...journalEntries].slice(0, 24);
+    setJournalEntries(next);
+    setJournalDraft("");
+    const idbOk = await writeIdbJournalEntry(entry);
+    setJournalEngine(idbOk ? "INDEXEDDB_ON_DEVICE" : "LOCAL_STORAGE_ON_DEVICE");
+    try {
+      window.localStorage.setItem(MUHASABAH_JOURNAL_LS_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore storage quota issues
+    }
+  };
+
+  const removeJournalNote = async (id: string) => {
+    const next = journalEntries.filter((e) => e.id !== id);
+    setJournalEntries(next);
+    await deleteIdbJournalEntry(id);
+    try {
+      window.localStorage.setItem(MUHASABAH_JOURNAL_LS_KEY, JSON.stringify(next));
+    } catch {
+      // Ignore storage issues
+    }
+  };
+
   const exportPrivateMuhasabahJson = () => {
     const snapshot = {
       exportedAt: new Date().toISOString(),
       privacyNote: "Exported strictly on-device. Zero server telemetry or public leaderboard.",
       tasbih: { activePhraseId, beadCount, cyclesCompleted, totalWitnessed },
       muhasabahPledges: MUHASABAH_PLEDGES.filter((p) => pledgeIds.includes(p.id)).map((p) => p.id),
+      muhasabahJournal: journalEntries,
     };
     const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -649,6 +831,64 @@ export function RemembranceSanctuary({
                 ? "AMAL NYATA (0% POTONGAN): Salurkan zakat/sedekah langsung kepada tetangga, anak yatim, atau pihak yang berhak di sekitar Anda."
                 : "DIRECT SERVICE (0% PLATFORM FEE): Channel kindness, fair wages & zakat directly to neighbors, orphans, and those around you."}
             </p>
+
+            {/* On-Device Reflection Journal (IndexedDB + LocalStorage, 0% Server Transmission) */}
+            <div className="mt-3.5 border-t border-[#d6b46c]/15 pt-3 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9.5px] text-[#dfc07b]">
+                <span>
+                  {locale === "id"
+                    ? "JURNAL MUḤĀSABAH PRIVAT (LOKAL SAJA)"
+                    : "ON-DEVICE REFLECTION JOURNAL (LOCAL ONLY)"}
+                </span>
+                <span className="text-[#9f9580]">{journalEngine}</span>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  type="text"
+                  value={journalDraft}
+                  onChange={(e) => setJournalDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void saveJournalNote();
+                    }
+                  }}
+                  placeholder={
+                    locale === "id"
+                      ? "Tulis refleksi jujur untuk diri sendiri..."
+                      : "Write a private self-reflection note..."
+                  }
+                  aria-label="Private on-device Muhasabah reflection journal"
+                  className="flex-1 border border-[#d6b46c]/30 bg-[#05070e] px-3 py-1.5 font-serif text-xs text-[#fff8e6] placeholder-[#8f8572] focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void saveJournalNote()}
+                  className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] text-[#f5dfa6] uppercase cursor-pointer"
+                >
+                  {locale === "id" ? "SIMPAN LOKAL" : "SEAL LOCALLY"}
+                </button>
+              </div>
+              {journalEntries.length > 0 && (
+                <ul className="space-y-1.5">
+                  {journalEntries.slice(0, 3).map((note) => (
+                    <li
+                      key={note.id}
+                      className="flex items-start justify-between gap-2 border border-[#d6b46c]/20 bg-[#080c17] px-3 py-1.5 font-serif text-xs text-[#e6decb]"
+                    >
+                      <span>{note.text}</span>
+                      <button
+                        type="button"
+                        onClick={() => void removeJournalNote(note.id)}
+                        className="shrink-0 font-mono text-[9px] text-[#bfb59e] hover:text-white cursor-pointer"
+                      >
+                        DELETE
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
 
           <div

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Era, EraId } from "@moonwitness/types";
-import { Card, cn } from "@moonwitness/ui";
+import { cn } from "@moonwitness/ui";
 
 export type SortKey = "newest" | "oldest";
 
@@ -25,10 +25,14 @@ export function FilterBar({
   onViewChange,
 }: FilterBarProps) {
   return (
-    <Card className="flex flex-wrap items-center gap-3 p-3">
-      <span className="font-brush text-sm text-white">FILTER BY ERA</span>
+    <div className="flex flex-col gap-3 border-2 border-[var(--line)] bg-[var(--panel)] p-3 lg:flex-row lg:flex-nowrap lg:items-center">
+      <span className="shrink-0 font-brush text-sm text-white">FILTER BY ERA</span>
 
-      <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by era">
+      <div
+        className="flex flex-wrap gap-1.5 lg:flex-nowrap lg:overflow-x-auto"
+        role="group"
+        aria-label="Filter by era"
+      >
         <button
           type="button"
           onClick={() => onEraChange("all")}
@@ -62,7 +66,7 @@ export function FilterBar({
         ))}
       </div>
 
-      <div className="ml-auto flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 lg:ml-auto lg:flex-nowrap">
         <label className="sr-only" htmlFor="dock-sort">
           Sort events
         </label>
@@ -124,6 +128,6 @@ export function FilterBar({
           </button>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

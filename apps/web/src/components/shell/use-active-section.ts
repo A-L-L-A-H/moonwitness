@@ -1,12 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { NavItem } from "./nav-items";
 
-/** Mengamati anchor section (item target.kind === "section" milik halaman ini)
- *  dan mengembalikan id item yang sedang terlihat di viewport. */
+function matchSectionFromHash(items: NavItem[], pathname: string, rawHash: string): string | null {
+  const hash = rawHash.replace(/^#/, "");
+  if (!hash) return null;
+  const hit = items.find(
+    (item) =>
+      item.target.kind === "section" &&
+      item.target.href === pathname &&
+      item.target.anchor === hash,
+  );
+  return hit?.id ?? null;
+}
+
+/**
+ * Tracks active anchor section (`kind === "section"`) via URL hash updates and viewport intersection.
+ */
 export function useActiveSection(items: NavItem[], pathname: string): string | null {
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return matchSectionFromHash(items, pathname, window.location.hash);
+  });
+  const suppressObserverUntilRef = useRef<number>(0);
 
   const sectionAnchors = useMemo(
     () =>
@@ -21,22 +38,61 @@ export function useActiveSection(items: NavItem[], pathname: string): string | n
       setActiveSection(null);
       return;
     }
+
+    const fromHash = matchSectionFromHash(items, pathname, window.location.hash);
+    if (fromHash) {
+      suppressObserverUntilRef.current = Date.now() + 350;
+      setActiveSection(fromHash);
+    }
+
     const observer = new IntersectionObserver(
       (entries) => {
+        if (Date.now() < suppressObserverUntilRef.current) return;
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           const hit = sectionAnchors.find((i) => i.anchor === entry.target.id);
           if (hit) setActiveSection(hit.id);
         }
       },
-      { rootMargin: "-40% 0px -55% 0px" },
+      { rootMargin: "-72px 0px -55% 0px" },
     );
     for (const item of sectionAnchors) {
       const el = document.getElementById(item.anchor);
       if (el) observer.observe(el);
     }
     return () => observer.disconnect();
-  }, [sectionAnchors]);
+  }, [items, pathname, sectionAnchors]);
+
+  useEffect(() => {
+    const syncFromHash = () => {
+      const matched = matchSectionFromHash(items, pathname, window.location.hash);
+      if (matched) {
+        suppressObserverUntilRef.current = Date.now() + 350;
+        setActiveSection(matched);
+      }
+    };
+    const onAnchorClick = (event: MouseEvent) => {
+      const anchor = (event.target as HTMLElement | null)?.closest?.("a[href]");
+      if (!anchor) return;
+      const href = anchor.getAttribute("href") ?? "";
+      const hashIdx = href.indexOf("#");
+      if (hashIdx === -1) return;
+      const candidateHash = href.slice(hashIdx + 1);
+      const matched = matchSectionFromHash(items, pathname, candidateHash);
+      if (matched) {
+        suppressObserverUntilRef.current = Date.now() + 350;
+        setActiveSection(matched);
+      }
+    };
+    window.addEventListener("hashchange", syncFromHash);
+    window.addEventListener("popstate", syncFromHash);
+    document.addEventListener("click", onAnchorClick, true);
+    return () => {
+      window.removeEventListener("hashchange", syncFromHash);
+      window.removeEventListener("popstate", syncFromHash);
+      document.removeEventListener("click", onAnchorClick, true);
+    };
+  }, [items, pathname]);
 
   return activeSection;
 }

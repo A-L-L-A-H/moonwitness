@@ -1,7 +1,9 @@
+import Image from "next/image";
 import type { MapCity } from "@moonwitness/types";
 import { WorldMap, Card } from "@moonwitness/ui";
 import { GlobeIcon } from "@moonwitness/ui/icons";
 import { AtmosphereField } from "@/components/atmosphere";
+import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";
 
 export interface UniverseMapProps {
@@ -13,20 +15,33 @@ export interface UniverseMapProps {
 export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) {
   const selected = cities.find((c) => c.id === selectedId);
   return (
-    <section aria-labelledby="cc-map-heading" className="scroll-mt-24">
+    <section aria-labelledby="cc-map-heading" className="@container scroll-mt-24">
       <SectionHeading
         id="cc-map-heading"
         title="UNIVERSE"
         accent="MAP"
         note={`${cities.length} cities`}
       />
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,320px)]">
+      <div className="grid grid-cols-1 items-start gap-4 @[40rem]:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
         <div className="relative min-w-0">
-          <WorldMap cities={cities} selectedId={selectedId} onSelect={onSelect} />
+          <WorldMap
+            cities={cities}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            backdrop={
+              <Image
+                src={artSrc("world-map-atlas")}
+                alt=""
+                fill
+                sizes="(max-width: 767px) 100vw, 40vw"
+                className="object-cover object-center"
+              />
+            }
+          />
           <AtmosphereField
             variant="map"
             cities={cities}
-            className="inset-x-4 top-4 z-[1] h-64 mix-blend-screen opacity-80 sm:h-80"
+            className="pointer-events-none inset-x-4 top-4 z-[1] h-64 mix-blend-screen opacity-80 @[34rem]:h-80"
           />
         </div>
         <Card className="min-w-0 p-4">
@@ -37,16 +52,16 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
           {selected ? (
             <dl className="mt-3 space-y-2">
               <div>
-                <dt className="text-[10px] tracking-wider text-zinc-500">CITY</dt>
+                <dt className="text-[11px] tracking-wider text-zinc-400">CITY</dt>
                 <dd className="font-brush text-2xl text-[var(--pink)]">{selected.city}</dd>
               </div>
               <div>
-                <dt className="text-[10px] tracking-wider text-zinc-500">SIGNALS</dt>
+                <dt className="text-[11px] tracking-wider text-zinc-400">SIGNALS</dt>
                 <dd className="text-sm text-zinc-200">{selected.signals}</dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-3 text-xs leading-relaxed text-zinc-500">
+            <p className="mt-3 text-xs leading-relaxed text-zinc-400">
               Pick a node on the map, or use the city list beside it.
             </p>
           )}

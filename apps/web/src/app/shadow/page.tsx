@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -41,7 +39,7 @@ export default function ShadowPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-clip">
       <Grain />
       <Image
         src={artSrc("city-shadow")}
@@ -56,22 +54,32 @@ export default function ShadowPage() {
       <Star4 className="absolute right-[16%] top-40 hidden h-10 w-10 text-[var(--pink)] lg:block" />
 
       {/* top bar */}
-      <header className="relative z-10 flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-8">
-        <Link href="/" className="flex items-center gap-2 max-lg:min-h-11">
-          <Crown className="h-5 w-8 text-[var(--yellow)]" />
-          <span className="font-brush text-xl text-white sm:text-2xl">
+      <header className="relative z-10 flex min-h-16 items-center justify-between gap-2 border-b border-white/10 px-4 py-2 sm:px-8">
+        <Link href="/" className="flex min-w-0 items-center gap-2 max-lg:min-h-11">
+          <Crown className="h-5 w-8 shrink-0 text-[var(--yellow)]" />
+          <span className="font-brush text-lg text-white sm:text-2xl">
             MOON<span className="text-[var(--pink)]">WITNESS</span>
           </span>
           <span className="ml-2 hidden font-hand text-lg text-zinc-400 md:inline">
             Empire of the light
           </span>
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-3">
           <span className="hidden font-hand text-lg text-zinc-300 sm:inline">
             Same moon. Different people.
           </span>
-          <Link href="/dock" className="btn-zine btn-yellow px-4 py-2 text-sm">
+          <Link
+            href="/dock"
+            className="btn-zine btn-yellow hidden items-center gap-2 px-4 py-2 text-sm sm:inline-flex"
+          >
             FOLLOW THE SIGNAL <ArrowRight className="h-4 w-4" />
+          </Link>
+          <Link
+            href="/dock"
+            aria-label="Follow the signal to the archive"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center border-2 border-[var(--yellow)] bg-[var(--yellow)] text-black sm:hidden"
+          >
+            <ArrowRight className="h-5 w-5" />
           </Link>
         </div>
       </header>
@@ -219,12 +227,12 @@ export default function ShadowPage() {
         </div>
       </main>
 
-      <footer className="relative z-10 flex items-center justify-between border-t border-white/10 px-4 py-4 text-[11px] text-zinc-500 sm:px-8">
+      <footer className="relative z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-white/10 px-4 py-4 text-[11px] text-zinc-400 sm:px-8">
         <span className="flex items-center gap-2">
           <Smiley className="h-4 w-4 text-[var(--yellow)]" />
           Moonwitness // Create · Curate · Publish
         </span>
-        <nav className="flex gap-4">
+        <nav className="flex flex-wrap gap-x-4 gap-y-2">
           <Link href="/" className="hover:text-[var(--pink)] max-lg:min-h-11 max-lg:min-w-11">
             Home
           </Link>

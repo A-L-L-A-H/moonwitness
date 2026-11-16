@@ -17,8 +17,15 @@ test.describe("Skin Laboratory & Canon Integration", () => {
       "MYCELIUM",
       "SIMPUL NUSANTARA",
     ]) {
-      await expect(page.getByRole("button", { name: new RegExp(label, "i") })).toBeVisible();
+      const btn = page.getByRole("button", { name: new RegExp(label, "i") });
+      await expect(btn).toBeVisible();
     }
+
+    // Activate 01-imperium-lumen world and assert SkinScope renders scoped [data-dna] & Imperium CTA
+    await page.getByRole("button", { name: /IMPERIUM LUMEN/i }).click();
+    const scope = page.locator('[data-dna="01-imperium-lumen"]').first();
+    await expect(scope).toBeVisible();
+    await expect(scope.locator(".btn-chamfer").first()).toBeVisible();
 
     await page.getByRole("tab", { name: "7-WORLD AUDIT GRID" }).click();
     await expect(page.getByText("ALL PASS")).toHaveCount(7);

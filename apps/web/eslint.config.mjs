@@ -5,6 +5,8 @@ export default [
   {
     ignores: [
       ".next/**",
+      ".vinext/**",
+      ".cloudflare/**",
       "out/**",
       "playwright-report/**",
       "test-results/**",

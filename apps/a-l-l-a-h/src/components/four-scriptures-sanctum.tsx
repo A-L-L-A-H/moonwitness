@@ -9,8 +9,7 @@ import {
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament } from "./sacred-icons";
-import { SacredCornerBrackets } from "./sacred-illustrations";
+import { DiamondStarOrnament, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 
 export function FourScripturesSanctum({
   quietMode = false,

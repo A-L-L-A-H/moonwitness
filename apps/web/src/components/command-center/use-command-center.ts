@@ -62,6 +62,7 @@ export interface CommandCenterState {
   onDismissAlert: (id: string) => void;
   onToggleWorkflow: (id: string) => void;
   stats: CommandCenterStats | null;
+  statsStatus: "loading" | "live" | "offline";
   previousFocus: HTMLElement | null;
   setPreviousFocus: (el: HTMLElement | null) => void;
 }
@@ -73,6 +74,7 @@ export function useCommandCenter(): CommandCenterState {
   const [workflows, setWorkflows] = useState<Workflow[]>(initialWorkflows);
   const [alerts, setAlerts] = useState<MissionAlert[]>(initialAlerts);
   const [stats, setStats] = useState<CommandCenterStats | null>(null);
+  const [statsStatus, setStatsStatus] = useState<"loading" | "live" | "offline">("loading");
   const [toast, setToast] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [detail, setDetail] = useState<ItemDrawerDetail | null>(null);
@@ -93,9 +95,11 @@ export function useCommandCenter(): CommandCenterState {
         setWorkflows(snapshot.workflows);
         setAlerts(snapshot.alerts);
         setStats(statsSnapshot);
+        setStatsStatus("live");
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
+        setStatsStatus("offline");
         if (error instanceof CommandCenterApiError && error.status === 401) {
           setToast("Read-only preview: sign in via /shadow to save workflows and alerts.");
           return;
@@ -281,6 +285,7 @@ export function useCommandCenter(): CommandCenterState {
     onDismissAlert,
     onToggleWorkflow,
     stats,
+    statsStatus,
     previousFocus,
     setPreviousFocus,
   };

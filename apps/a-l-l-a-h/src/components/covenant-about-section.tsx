@@ -11,7 +11,8 @@ import {
   triggerSacredViewTransition,
 } from "./motion-primitives";
 import { RemembranceSanctuary } from "./remembrance-sanctuary";
-import { DiamondStarOrnament, OctagramMandalaIcon } from "./sacred-icons";
+import { DiamondStarOrnament, OctagramMandalaIcon } from "@moonwitness/ui/imperium";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { AstrolabeSealMedallion } from "./sacred-illustrations";
 
 export function CovenantAboutSection({
@@ -31,6 +32,7 @@ export function CovenantAboutSection({
   readonly onInspectCorpusDoor?: () => void;
   readonly onReturnToGate: () => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const [focusedPillar, setFocusedPillar] = useState<string>(COVENANT_PILLARS[0]?.numeral ?? "I");
 
   return (
@@ -52,11 +54,12 @@ export function CovenantAboutSection({
               id="about-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              ARCHITECTURE OF THE LIGHT
+              {locale === "id" ? "ARSITEKTUR CAHAYA" : "ARCHITECTURE OF THE LIGHT"}
             </h2>
             <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[#e6decb]">
-              A neutral, monocentric gateway uniting honest witness, comparative study across
-              revealed scriptures, and principled craft without cult or coercion.
+              {locale === "id"
+                ? "Gerbang monosentris netral yang menyatukan kesaksian jujur, kajian komparatif lintas kitab wahyu, dan karya beramanah tanpa kultus maupun paksaan."
+                : "A neutral, monocentric gateway uniting honest witness, comparative study across revealed scriptures, and principled craft without cult or coercion."}
             </p>
           </div>
         </ScrollChapterReveal>

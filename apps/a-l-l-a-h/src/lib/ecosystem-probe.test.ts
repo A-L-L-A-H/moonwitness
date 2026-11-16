@@ -111,6 +111,9 @@ describe("ecosystem-probe", () => {
       if (url.startsWith("https://community.moonwitness.biz.id")) {
         return new Response("ok", { status: 200 });
       }
+      if (url.startsWith("https://moonwitness-radio.bjo163.workers.dev")) {
+        return new Response("ok", { status: 200 });
+      }
       throw new Error("connection refused");
     };
 
@@ -120,10 +123,12 @@ describe("ecosystem-probe", () => {
       runtimeMode: "cloudflare-edge",
     });
 
+    expect(snapshot.healthContract).toBe("moonwitness.health/v1");
     expect(snapshot.runtimeMode).toBe("cloudflare-edge");
     expect(snapshot.edges.map((e) => [e.id, e.status, e.httpStatus])).toEqual([
       ["codex-edge", "online", 200],
       ["community", "online", 200],
+      ["radio", "online", 200],
     ]);
   });
 
@@ -146,8 +151,9 @@ describe("ecosystem-probe", () => {
       expect(snapshot.git.available).toBe(false);
       expect(requestedUrls.some((url) => url.includes("127.0.0.1"))).toBe(false);
       expect(requestedUrls).toEqual([
-        "https://codex.a-l-l-a-h.com/",
+        "https://codex.a-l-l-a-h.com/health",
         "https://community.moonwitness.biz.id/",
+        "https://moonwitness-radio.bjo163.workers.dev/health",
       ]);
       expect(
         snapshot.services.every((svc) => svc.status === "offline" && svc.httpStatus === null),

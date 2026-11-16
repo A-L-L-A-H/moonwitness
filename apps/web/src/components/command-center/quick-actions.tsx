@@ -9,9 +9,11 @@ export interface QuickActionsProps {
 
 export function QuickActions({ actions, onAction }: QuickActionsProps) {
   return (
-    <section aria-labelledby="cc-quick-heading" className="scroll-mt-24">
+    <section aria-labelledby="cc-quick-heading" className="flex h-full flex-col scroll-mt-24">
       <SectionHeading id="cc-quick-heading" title="QUICK" accent="ACTIONS" />
-      <QuickActionGrid actions={actions} onAction={onAction} />
+      <div className="flex-1">
+        <QuickActionGrid actions={actions} onAction={onAction} />
+      </div>
     </section>
   );
 }

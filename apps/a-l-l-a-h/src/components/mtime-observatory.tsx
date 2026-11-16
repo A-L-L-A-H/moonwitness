@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   MTIME_HISTORICAL_BENCHMARKS,
@@ -10,8 +10,8 @@ import {
   type MTimeElongationBasis,
   type MTimeProfileId,
 } from "@moonwitness/canon";
+import { DnaBadge, DnaButton, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
-import { SacredCornerBrackets } from "./sacred-illustrations";
 import { SiteSubpageHeader } from "./site-subpage-header";
 
 const HISTORICAL_DATE_PRESETS = [
@@ -22,7 +22,19 @@ const HISTORICAL_DATE_PRESETS = [
     iso: "2026-05-16T11:00:00Z",
     label: "Dhulhijjah 1447 Eve (2026-05-16)",
   },
+  {
+    id: "ramadan-1446",
+    iso: "2025-02-28T11:00:00Z",
+    label: "Ramadan 1446 Eve (2025-02-28)",
+  },
 ] as const;
+
+const BENCHMARK_EVE_MAP: Readonly<Record<string, string>> = {
+  "ID-RAMADAN-1447": "2026-02-17T11:00:00Z",
+  "ID-SHAWWAL-1447": "2026-03-19T11:00:00Z",
+  "ID-DHULHIJJAH-1447": "2026-05-16T11:00:00Z",
+  "ID-RAMADAN-1446": "2025-02-28T11:00:00Z",
+};
 
 export function MTimeInteractiveEngine({ compact = false }: { readonly compact?: boolean }) {
   const { locale } = useSanctuaryLocale();
@@ -32,6 +44,43 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
   const [elongationBasis, setElongationBasis] = useState<MTimeElongationBasis>(
     "GEOCENTRIC_CENTER_TO_CENTER",
   );
+  const [copiedScenario, setCopiedScenario] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const presetParam = params.get("preset");
+    const criterionParam = params.get("criterion");
+    const siteParam = params.get("site");
+    const matchedPreset = HISTORICAL_DATE_PRESETS.find((p) => p.id === presetParam);
+    if (matchedPreset) {
+      setDateIso(matchedPreset.iso);
+    }
+    if (criterionParam === "MABIMS_ID_2026" || criterionParam === "DIYANET_1978") {
+      setProfileId(criterionParam);
+    }
+    if (siteParam && MTIME_OBSERVER_SITES.some((s) => s.id === siteParam)) {
+      setSiteId(siteParam);
+    }
+  }, []);
+
+  const copyScenarioDeepLink = async () => {
+    const url = new URL(window.location.href);
+    const matched = HISTORICAL_DATE_PRESETS.find((p) => p.iso === dateIso);
+    if (matched) {
+      url.searchParams.set("preset", matched.id);
+    } else {
+      url.searchParams.delete("preset");
+    }
+    url.searchParams.set("criterion", profileId);
+    url.searchParams.set("site", siteId);
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setCopiedScenario(true);
+      window.setTimeout(() => setCopiedScenario(false), 2000);
+    } catch {
+      // Ignore clipboard denials
+    }
+  };
 
   const activeSite = MTIME_OBSERVER_SITES.find((s) => s.id === siteId) ?? MTIME_OBSERVER_SITES[0]!;
   const geometry = computeMTimeSolarLunarEstimate(dateIso, activeSite);
@@ -63,15 +112,15 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
           />
           <div className="flex flex-wrap gap-1.5">
             {HISTORICAL_DATE_PRESETS.map((preset) => (
-              <button
+              <DnaButton
                 key={preset.id}
-                type="button"
+                tone="secondary"
                 aria-pressed={dateIso === preset.iso}
                 onClick={() => setDateIso(preset.iso)}
-                className="btn-luxe-secondary px-3 py-1 font-mono text-[10px] text-[#e6decb] cursor-pointer"
+                className="px-3 py-1 text-[10px] text-[#e6decb]"
               >
                 {preset.label}
-              </button>
+              </DnaButton>
             ))}
           </div>
 
@@ -81,15 +130,15 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
             </div>
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
               {MTIME_OBSERVER_SITES.map((s) => (
-                <button
+                <DnaButton
                   key={s.id}
-                  type="button"
+                  tone="secondary"
                   aria-pressed={s.id === activeSite.id}
                   onClick={() => setSiteId(s.id)}
-                  className="btn-luxe-secondary px-3 py-1.5 text-left font-mono text-[10px] text-[#f5efe2] cursor-pointer"
+                  className="px-3 py-1.5 justify-start text-left text-[10px] text-[#f5efe2]"
                 >
                   {s.label}
-                </button>
+                </DnaButton>
               ))}
             </div>
           </div>
@@ -137,18 +186,18 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {(["MABIMS_ID_2026", "DIYANET_1978"] as const).map((id) => (
-                  <button
+                  <DnaButton
                     key={id}
-                    type="button"
+                    tone="secondary"
                     aria-pressed={profileId === id}
                     onClick={() => setProfileId(id)}
-                    className="btn-luxe-secondary px-3 py-1 font-mono text-[10px] text-[#f5efe2] cursor-pointer"
+                    className="px-3 py-1 text-[10px] text-[#f5efe2]"
                   >
                     {id}
-                  </button>
+                  </DnaButton>
                 ))}
-                <button
-                  type="button"
+                <DnaButton
+                  tone="secondary"
                   aria-pressed={elongationBasis === "GEOCENTRIC_APPARENT"}
                   onClick={() =>
                     setElongationBasis((prev) =>
@@ -157,13 +206,13 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                         : "GEOCENTRIC_CENTER_TO_CENTER",
                     )
                   }
-                  className="btn-luxe-secondary px-3 py-1 font-mono text-[10px] text-[#d8ceba] cursor-pointer"
+                  className="px-3 py-1 text-[10px] text-[#d8ceba]"
                 >
                   BASIS:{" "}
                   {elongationBasis === "GEOCENTRIC_CENTER_TO_CENTER"
                     ? "CENTER-TO-CENTER"
                     : "APPARENT"}
-                </button>
+                </DnaButton>
               </div>
             </div>
 
@@ -197,9 +246,26 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                 VERDICT: <strong className="text-[#fff8e6]">{criterion.verdict}</strong> · ACTION:{" "}
                 <strong className="text-[#f5dfa6]">{criterion.computedAction}</strong>
               </span>
-              <span className="text-[10px] text-[#cfc5b0]">
-                OBSERVATION &amp; AUTHORITY REMAIN SEPARATE
-              </span>
+              <div className="flex items-center gap-2">
+                <DnaButton
+                  tone="secondary"
+                  onClick={() => void copyScenarioDeepLink()}
+                  className="px-3 py-1 text-[10px] text-[#f5dfa6]"
+                >
+                  {copiedScenario
+                    ? locale === "id"
+                      ? "DISALIN"
+                      : "COPIED"
+                    : locale === "id"
+                      ? "SALIN TAUTAN"
+                      : "SHARE SCENARIO"}
+                </DnaButton>
+                <span className="text-[10px] text-[#cfc5b0]">
+                  {locale === "id"
+                    ? "OBSERVASI & OTORITAS TETAP TERPISAH"
+                    : "OBSERVATION & AUTHORITY REMAIN SEPARATE"}
+                </span>
+              </div>
             </div>
             <p className="text-[11px] font-sans text-[#bfb59e]">{geometry.methodNote}</p>
           </div>
@@ -227,14 +293,32 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                   <span className="text-[#f5dfa6] font-bold">
                     {item.id} · {item.officialMonthStart}
                   </span>
-                  <span className="border border-[#d6b46c]/35 px-2 py-0.5 text-[#fff4d2]">
+                  <DnaBadge className="font-mono text-[10px] text-[#fff4d2]">
                     {item.criterionStatus}
-                  </span>
+                  </DnaBadge>
                 </div>
                 <div className="font-mono text-[10px] text-[#dfc07b]">
                   {item.sourceAuthority} · {item.observationStatus}
                 </div>
                 <p className="font-serif text-xs text-[#e6decb]">{item.sourceNote}</p>
+                <div className="pt-1">
+                  <DnaButton
+                    tone="secondary"
+                    onClick={() => {
+                      const targetIso =
+                        BENCHMARK_EVE_MAP[item.id] ?? `${item.officialMonthStart}T11:00:00Z`;
+                      setDateIso(targetIso);
+                      setProfileId("MABIMS_ID_2026");
+                      setSiteId("ID-JAKARTA");
+                      if (typeof window !== "undefined") {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }
+                    }}
+                    className="px-3 py-1 text-[10px] text-[#f5dfa6] uppercase"
+                  >
+                    {locale === "id" ? "MUAT KE EVALUATOR" : "LOAD INTO EVALUATOR"}
+                  </DnaButton>
+                </div>
               </div>
             ))}
           </div>

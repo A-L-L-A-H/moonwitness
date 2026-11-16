@@ -185,12 +185,21 @@ export function SkinLaboratory() {
                   >
                     01 BUTTON · 02 BADGE
                   </span>
-                  <Badge className={activeWorld.badgeClass}>
+                  <Badge
+                    variant={activeWorld.id === "01-imperium-lumen" ? "imperium" : "dna"}
+                    className={activeWorld.badgeClass}
+                  >
                     {activeAudit.passed ? "WCAG AA PASS" : "CHECK"}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <Button type="button" className={activeWorld.buttonClass}>
+                  <Button
+                    type="button"
+                    variant={activeWorld.id === "01-imperium-lumen" ? "imperiumPrimary" : "dna"}
+                    className={
+                      activeWorld.id === "01-imperium-lumen" ? "px-6" : activeWorld.buttonClass
+                    }
+                  >
                     Primary Action
                   </Button>
                   <Button
@@ -208,7 +217,10 @@ export function SkinLaboratory() {
               </div>
 
               {/* 3. Card */}
-              <Card className={activeWorld.cardClass}>
+              <Card
+                skin={activeWorld.id === "01-imperium-lumen" ? "imperium" : "dna"}
+                className={activeWorld.cardClass}
+              >
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-base" style={{ color: activeWorld.palette.text }}>
                     03 CARD · World Container

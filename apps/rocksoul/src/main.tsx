@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HashRouter } from "react-router-dom";
+import { SkinRoot } from "@moonwitness/ui/imperium";
 import "@fontsource/barlow-condensed/700.css";
 import "@fontsource/barlow-condensed/800.css";
 import "@fontsource/barlow-condensed/900.css";
@@ -22,8 +23,10 @@ if (!rootElement) {
 
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
-    <HashRouter>
-      <App />
-    </HashRouter>
+    <SkinRoot dnaId="03-rocksoul" className="min-h-full">
+      <HashRouter>
+        <App />
+      </HashRouter>
+    </SkinRoot>
   </React.StrictMode>,
 );

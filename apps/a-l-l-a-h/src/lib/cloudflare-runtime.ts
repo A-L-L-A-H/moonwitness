@@ -10,9 +10,25 @@ export interface AssetsFetcherLike {
   fetch(input: string | Request): Promise<Response>;
 }
 
+export interface R2ObjectBodyLike {
+  json<T = unknown>(): Promise<T>;
+  text(): Promise<string>;
+}
+
+export interface R2BucketLike {
+  get(key: string): Promise<R2ObjectBodyLike | null>;
+}
+
+export interface KVNamespaceLike {
+  get<T = unknown>(key: string, type: "json"): Promise<T | null>;
+  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
+}
+
 export interface SanctuaryWorkerEnv {
   readonly DB?: D1DatabaseLike;
   readonly ASSETS?: AssetsFetcherLike;
+  readonly CORPUS_BUCKET?: R2BucketLike;
+  readonly CACHE_KV?: KVNamespaceLike;
 }
 
 /**
@@ -44,12 +60,24 @@ export async function loadPublicJsonAsset<T>(assetPath: string): Promise<T | nul
         return (await response.json()) as T;
       }
     } catch {
+      // Fall through to R2 or local Node filesystem loader
+    }
+  }
+
+  if (cfEnv?.CORPUS_BUCKET && typeof cfEnv.CORPUS_BUCKET.get === "function") {
+    try {
+      const r2Key = `a-l-l-a-h/${normalized.replace(/^\/+/, "")}`;
+      const r2Obj = await cfEnv.CORPUS_BUCKET.get(r2Key);
+      if (r2Obj) {
+        return await r2Obj.json<T>();
+      }
+    } catch {
       // Fall through to local Node filesystem loader
     }
   }
 
   try {
-    const fsModName = ["node", "fs", "promises"].join(":");
+    const fsModName = ["node", "fs/promises"].join(":");
     const pathModName = ["node", "path"].join(":");
     // Fixed dynamic import via non-literal specifiers to isolate Node fs fallback cleanly
     const fsMod = (await import(/* webpackIgnore: true */ /* @vite-ignore */ fsModName)) as {

@@ -15,7 +15,7 @@ export function SectionHeading({ id, title, accent, note }: SectionHeadingProps)
         {accent && <span className="text-[var(--pink)]"> {accent}</span>}
       </h2>
       {note && (
-        <span className="flex items-center gap-2 text-[10px] tracking-wider text-zinc-500">
+        <span className="flex items-center gap-2 text-[11px] tracking-wider text-zinc-400">
           <Star4 className="h-3.5 w-3.5 text-[var(--yellow)]" />
           {note.toUpperCase()}
         </span>

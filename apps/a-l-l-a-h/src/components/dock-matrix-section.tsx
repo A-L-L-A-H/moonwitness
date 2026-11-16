@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import {
+  DiamondStarOrnament,
+  DnaBadge,
+  DnaButton,
+  SacredCornerBrackets,
+} from "@moonwitness/ui/imperium";
 import { ECOSYSTEM_RUNTIME_CATALOG } from "@/data/empire-canon-codex";
 import {
   DOCK_TELEMETRY_NODES,
@@ -9,18 +15,15 @@ import {
   type DockNodeTelemetry,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { useEcosystemTelemetry } from "@/lib/use-ecosystem-telemetry";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament, WorldEmblemById } from "./sacred-icons";
-import {
-  AstrolabeOrreryMap,
-  GatewayWaveformSvg,
-  SacredCornerBrackets,
-} from "./sacred-illustrations";
+import { WorldEmblemById } from "./sacred-icons";
+import { AstrolabeOrreryMap, GatewayWaveformSvg } from "./sacred-illustrations";
 
 const CONFIGURED_WEB_URL = process.env.NEXT_PUBLIC_WEB_URL?.replace(/\/+$/, "") ?? null;
 
@@ -47,6 +50,7 @@ export function DockMatrixSection({
   readonly quietMode?: boolean;
   readonly onLaunchWorld: (worldId: WorldIdentifier) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const telemetry = useEcosystemTelemetry();
   const [filterState, setFilterState] = useState<DockFilterState>("ALL");
   const [selectedNodeCode, setSelectedNodeCode] = useState<string>(
@@ -114,11 +118,12 @@ export function DockMatrixSection({
               id="dock-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              THE DOCK · SOVEREIGN MATRIX
+              {locale === "id" ? "DERMAGA · MATRIKS BERDAULAT" : "THE DOCK · SOVEREIGN MATRIX"}
             </h2>
             <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
-              Interactive heliocentric astrolabe plotting the five Empire gateways around one
-              monocentric light core. Select any orbital node to lock sextant telemetry and launch.
+              {locale === "id"
+                ? "Astrolabe heliosentris interaktif yang memetakan lima gerbang ekosistem di sekitar satu inti cahaya monosentris. Pilih titik orbit untuk membaca telemetri."
+                : "Interactive heliocentric astrolabe plotting the five Empire gateways around one monocentric light core. Select any orbital node to lock sextant telemetry and launch."}
             </p>
 
             {/* Filter by Gateway Class */}
@@ -130,17 +135,17 @@ export function DockMatrixSection({
               {DOCK_FILTER_OPTIONS.map((option) => {
                 const isActive = filterState === option.id;
                 return (
-                  <button
+                  <DnaButton
                     key={option.id}
-                    type="button"
+                    tone="secondary"
                     aria-pressed={isActive}
                     onClick={() => handleSelectFilter(option.id)}
-                    className={`btn-luxe-secondary px-4.5 py-1.5 font-mono text-[11px] tracking-[0.18em] uppercase cursor-pointer ${
+                    className={`px-4.5 py-1.5 text-[11px] tracking-[0.18em] uppercase ${
                       isActive ? "text-[#fff6df]" : "text-[#c8beaa] hover:text-[#fff6df]"
                     }`}
                   >
                     {option.label}
-                  </button>
+                  </DnaButton>
                 );
               })}
             </div>
@@ -414,12 +419,12 @@ export function DockMatrixSection({
                         {telemetry.codexGovernance.latestReleases.length > 0 && (
                           <div className="flex flex-wrap gap-1.5 text-[9.5px] text-[#e0d7c4]">
                             {telemetry.codexGovernance.latestReleases.slice(0, 2).map((rel) => (
-                              <span
+                              <DnaBadge
                                 key={rel.tag}
-                                className="border border-[#d6b46c]/25 bg-[#0a0f1c] px-2 py-0.5 text-[#f5dfa6]"
+                                className="font-mono text-[9.5px] text-[#f5dfa6]"
                               >
                                 {rel.tag} ({rel.channel})
-                              </span>
+                              </DnaBadge>
                             ))}
                           </div>
                         )}

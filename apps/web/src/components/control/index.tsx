@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Sticker, Tape, Card, Badge, Progress, ZineCardRough } from "@moonwitness/ui";
 import { Crown, Star4 } from "@moonwitness/ui/icons";
-import { OperationsShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
   useControlAudit,
   useControlResources,
@@ -350,7 +350,8 @@ function ControlDashboard() {
   }
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="Control Plane"
       search={{ value: query, onChange: setQuery, placeholder: "Filter host state…" }}
     >
@@ -466,6 +467,6 @@ function ControlDashboard() {
           )
         )}
       </div>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }

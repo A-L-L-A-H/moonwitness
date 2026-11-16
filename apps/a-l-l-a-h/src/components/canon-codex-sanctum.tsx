@@ -1,13 +1,15 @@
 "use client";
 
+import { DiamondStarOrnament } from "@moonwitness/ui/imperium";
 import { FOUR_ENTRY_DOORS, SUPREME_IDENTITY, type EntryDoorId } from "@/data/empire-canon-codex";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { DoorEpistemicPanel } from "./canon-doors/door-epistemic-panel";
 import { DoorOrganizationPanel } from "./canon-doors/door-organization-panel";
 import { DoorSovereignPanel } from "./canon-doors/door-sovereign-panel";
 import { DoorUniversePanel } from "./canon-doors/door-universe-panel";
 import { ScrollChapterReveal, SpatialTiltCard } from "./motion-primitives";
-import { DiamondStarOrnament } from "./sacred-icons";
 import { DoorPortalGlyph } from "./sacred-illustrations";
+import { CodexWorkbench } from "./codex-workbench";
 
 export function CanonCodexSanctum({
   activeDoorId,
@@ -18,6 +20,7 @@ export function CanonCodexSanctum({
   readonly quietMode?: boolean;
   readonly onSelectDoor: (doorId: EntryDoorId) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const activeDoor =
     FOUR_ENTRY_DOORS.find((door) => door.id === activeDoorId) ?? FOUR_ENTRY_DOORS[0]!;
 
@@ -56,12 +59,12 @@ export function CanonCodexSanctum({
               id="codex-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              THE CANON CODEX
+              {locale === "id" ? "KODEKS KANON" : "THE CANON CODEX"}
             </h2>
             <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#e6decb] leading-relaxed">
-              Four architectural gallery doors organizing MoonWitness chronicles, neutral
-              comparative study across Taurat, Zabur, Injīl &amp; Al-Qur’ān, unassigned human
-              stewardship ethics, and the unified multi-runtime ecosystem.
+              {locale === "id"
+                ? "Empat pintu galeri arsitektur yang mengorganisasi kronik MoonWitness, kajian netral lintas Taurat, Zabur, Injīl & Al-Qur’ān, etika amanah manusia tanpa kultus, dan ekosistem multi-runtime."
+                : "Four architectural gallery doors organizing MoonWitness chronicles, neutral comparative study across Taurat, Zabur, Injīl & Al-Qur’ān, unassigned human stewardship ethics, and the unified multi-runtime ecosystem."}
             </p>
             <div className="mt-3 font-mono text-[11px] tracking-[0.16em] text-[#f5dfa6]">
               {SUPREME_IDENTITY.tawhidPrinciple}
@@ -145,6 +148,8 @@ export function CanonCodexSanctum({
             {activeDoor.id === "empire-organization" && <DoorOrganizationPanel />}
             {activeDoor.id === "sovereign-runtimes" && <DoorSovereignPanel />}
           </div>
+
+          <CodexWorkbench />
         </ScrollChapterReveal>
       </div>
     </section>

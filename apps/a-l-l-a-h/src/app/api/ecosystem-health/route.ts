@@ -8,6 +8,7 @@ export async function GET(): Promise<NextResponse> {
   return NextResponse.json(snapshot, {
     headers: {
       "cache-control": "no-store",
+      "x-health-contract": snapshot.healthContract,
     },
   });
 }

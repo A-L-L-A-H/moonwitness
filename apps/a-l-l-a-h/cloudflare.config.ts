@@ -17,6 +17,12 @@ export default defineConfig({
         id: "3dc374d8-ae42-4086-9879-eb1730c89f11",
         name: "sovereign-codex-db",
       }),
+      CORPUS_BUCKET: bindings.r2({
+        name: "moonwitness",
+      }),
+      CACHE_KV: bindings.kv({
+        id: "997db1a68d914df6a3a2531ca4c7b314",
+      }),
     },
   }),
 });

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { SkinRoot } from "@moonwitness/ui/imperium";
 import { SanctuaryLocaleProvider } from "@/lib/sanctuary-locale";
 import "./globals.css";
 
@@ -65,7 +66,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to main content
         </a>
-        <SanctuaryLocaleProvider>{children}</SanctuaryLocaleProvider>
+        <SkinRoot dnaId="01-imperium-lumen">
+          <SanctuaryLocaleProvider>{children}</SanctuaryLocaleProvider>
+        </SkinRoot>
       </body>
     </html>
   );

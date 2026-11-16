@@ -385,7 +385,7 @@ test.describe("Navigation & Active-Route", () => {
       // marked as the current page for assistive technology.
       const sidebarLink = page.getByRole("navigation").getByRole("link", { name: sidebarLabel });
       await expect(sidebarLink).toHaveAttribute("aria-current", "page");
-      await expect(sidebarLink).toHaveClass(/bg-\[var\(--blue\)\]/);
+      await expect(sidebarLink).toHaveClass(/(?:bg-\[var\(--blue\)\]|hud-nav-link)/);
     });
   }
 });

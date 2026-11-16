@@ -2,18 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { DiamondStarOrnament } from "@moonwitness/ui/imperium";
 import {
   SIDRA_KNOWLEDGE_AXIOMS,
   WORLD_DOMAINS,
   type WorldDomainEntry,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament, WorldEmblemById } from "./sacred-icons";
+import { WorldEmblemById } from "./sacred-icons";
 import { MeridianConstellationMapSvg, WorldChamberWatermarkSvg } from "./sacred-illustrations";
 
 const QALAM_STORAGE_KEY = "allah-qalam-folios-v1";
@@ -107,6 +109,7 @@ export function WorldsSanctum({
   readonly quietMode?: boolean;
   readonly onSelectWorld: (worldId: WorldIdentifier) => void;
 }) {
+  const { locale } = useSanctuaryLocale();
   const activeWorld: WorldDomainEntry =
     WORLD_DOMAINS.find((domain) => domain.id === activeWorldId) ?? WORLD_DOMAINS[0]!;
 
@@ -523,11 +526,12 @@ export function WorldsSanctum({
               id="worlds-heading"
               className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
             >
-              THE WORLDS OF LIGHT
+              {locale === "id" ? "ALAM-ALAM CAHAYA" : "THE WORLDS OF LIGHT"}
             </h2>
             <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
-              Five interconnected sanctuaries rising around the Central Gate—each dedicated to a
-              noble pillar of witness, infrastructure, authorship, wisdom, and creation.
+              {locale === "id"
+                ? "Lima ruang karya terhubung mengelilingi Gerbang Utama—masing-masing berkhidmat pada kesaksian jujur, infrastruktur terbuka, penulisan, hikmah, dan penciptaan."
+                : "Five interconnected sanctuaries rising around the Central Gate—each dedicated to a noble pillar of witness, infrastructure, authorship, wisdom, and creation."}
             </p>
           </div>
         </ScrollChapterReveal>
