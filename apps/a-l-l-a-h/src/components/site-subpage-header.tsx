@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { OctagramMandalaIcon } from "./sacred-icons";
+import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
 
 export function SiteSubpageHeader({
   activeRoute,
@@ -61,6 +62,7 @@ export function SiteSubpageHeader({
           >
             {locale.toUpperCase()}
           </button>
+          <SanctuaryIdentityControl />
         </nav>
       </div>
     </header>

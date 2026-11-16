@@ -26,6 +26,7 @@ import {
   SearchLensIcon,
   WorldEmblemById,
 } from "./sacred-icons";
+import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
 import { UniversalSearchModal } from "./universal-search-modal";
 import { WorldsSanctum } from "./worlds-sanctum";
 
@@ -348,6 +349,10 @@ export function EmpireOfLightExperience() {
               {locale.toUpperCase()}
             </button>
 
+            <div className="hidden lg:inline-flex">
+              <SanctuaryIdentityControl />
+            </div>
+
             <button
               type="button"
               aria-pressed={quietMode}
@@ -430,6 +435,7 @@ export function EmpireOfLightExperience() {
               >
                 REPLAY ENTRANCE
               </button>
+              <SanctuaryIdentityControl compact />
             </div>
           </div>
         )}
