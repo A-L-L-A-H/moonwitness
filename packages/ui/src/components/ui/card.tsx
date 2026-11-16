@@ -1,12 +1,20 @@
 import * as React from "react";
 import { cn } from "../../lib/utils";
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => (
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  readonly skin?: "zine" | "dna" | "imperium";
+}
+
+const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, skin = "zine", ...props }, ref) => (
     <div
       ref={ref}
       className={cn(
-        "rounded-lg border border-[var(--line)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm",
+        skin === "imperium"
+          ? "octa-bevel-shell relative rounded-none text-[#f5efe2]"
+          : skin === "dna"
+            ? "mw-dna-surface rounded-none border border-[var(--dna-border,#d6b46c)] bg-[var(--dna-surface,#080b14)] text-[var(--dna-text,#f5efe2)]"
+            : "rounded-lg border border-[var(--line)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm",
         className,
       )}
       {...props}

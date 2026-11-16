@@ -18,6 +18,11 @@ const buttonVariants = cva(
           "bg-[var(--yellow)] text-[var(--ink)] hover:bg-[var(--yellow)]/90 shadow-[0_4px_0_rgba(255,210,31,0.6)]",
         ghost: "bg-transparent hover:bg-[var(--panel)] text-[var(--paper)]",
         link: "text-[var(--pink)] underline-offset-4 hover:underline",
+        dna: "mw-dna-button rounded-none border border-[var(--dna-border,#d6b46c)] bg-[var(--dna-accent,#d6b46c)] text-[var(--dna-accent-fg,#040509)] hover:brightness-110",
+        imperiumPrimary:
+          "btn-chamfer font-monument rounded-none text-[#fff6df] tracking-[0.2em] uppercase hover:text-white",
+        imperiumSecondary:
+          "btn-luxe-secondary font-mono rounded-none text-[#f0e5cf] tracking-[0.16em] uppercase hover:text-[#fff6df]",
       },
       size: {
         default: "h-10 px-4 py-2",

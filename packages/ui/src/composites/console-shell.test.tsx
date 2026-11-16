@@ -1,54 +1,160 @@
-import { describe, expect, it } from "vitest";
-import { renderToStaticMarkup } from "react-dom/server";
+// @vitest-environment jsdom
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { act, type ReactNode } from "react";
+import { createRoot, type Root } from "react-dom/client";
 import { ConsoleShell, type ConsoleShellProps } from "./console-shell";
-import type { HudNavItem } from "../primitives/hud-chrome";
+import { SkinProvider, useSkin, type SkinName } from "../skin";
 
-const ITEMS: HudNavItem[] = [
-  { id: "dashboard", label: "Dashboard", iconPath: "M4 4 L20 4", href: "/mission-control" },
-];
+let container: HTMLDivElement;
+let root: Root;
+let style: HTMLStyleElement;
+
+beforeEach(() => {
+  vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+  localStorage.clear();
+  container = document.createElement("div");
+  document.body.append(container);
+  root = createRoot(container);
+  style = document.createElement("style");
+  const css = readFileSync(resolve(import.meta.dirname, "../base.css"), "utf8");
+  // Isolate the actual HUD rules: jsdom does not support the surrounding Tailwind layer.
+  style.textContent = css.slice(
+    css.indexOf("/* ---- HUD console"),
+    css.indexOf("/* ---- riot grunge"),
+  );
+  document.head.append(style);
+});
+afterEach(() => {
+  act(() => root.unmount());
+  container.remove();
+  style.remove();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+});
 
 function shell(overrides: Partial<ConsoleShellProps> = {}) {
-  return renderToStaticMarkup(
-    <ConsoleShell title="Shadow Command Center" items={ITEMS} active="dashboard" {...overrides}>
-      <p>body-content</p>
-    </ConsoleShell>,
+  return (
+    <ConsoleShell
+      title="Shadow Command Center"
+      items={[
+        { id: "dashboard", label: "Dashboard", iconPath: "M4 4 L20 4", href: "/mission-control" },
+      ]}
+      active="dashboard"
+      {...overrides}
+    >
+      <h1>Mission control</h1>
+    </ConsoleShell>
+  );
+}
+function render(node: ReactNode) {
+  act(() => root.render(node));
+}
+
+const SKINS: SkinName[] = ["default", "riot", "editorial", "technical", "archive", "transmission"];
+function SwitchSkin() {
+  const { setSkin } = useSkin();
+  return (
+    <>
+      {SKINS.map((skin) => (
+        <button key={skin} onClick={() => setSkin(skin)}>
+          {skin}
+        </button>
+      ))}
+    </>
   );
 }
 
 describe("ConsoleShell", () => {
-  it("renders header, nav, main landmark and footer strip", () => {
-    const html = shell();
-    expect(html).toContain("<header");
-    expect(html).toContain("<nav");
-    expect(html).toContain("<main");
-    expect(html).toContain("<footer");
-    expect(html).toContain("body-content");
-    expect(html).toContain("Shadow Command Center");
+  it("renders one navigation tree and leaves the page heading to main", () => {
+    render(shell());
+    for (const landmark of ["header", "nav", "main#main", "footer"]) {
+      expect(container.querySelectorAll(landmark)).toHaveLength(1);
+    }
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelector("main h1")?.textContent).toBe("Mission control");
+    expect(container.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
   });
 
-  it("maps slots into rails", () => {
-    const html = shell({
-      headerActions: <span data-slot="actions" />,
-      railFooter: <span data-slot="rail-footer" />,
-      commandLeft: <span data-slot="cmd-left" />,
-      commandRight: <span data-slot="cmd-right" />,
-    });
-    expect(html).toContain('data-slot="actions"');
-    expect(html).toContain('data-slot="rail-footer"');
-    expect(html).toContain('data-slot="cmd-left"');
-    expect(html).toContain('data-slot="cmd-right"');
+  it("places the bottom-nav reservation around main AND footer, including safe-area space", () => {
+    render(shell({ commandLeft: "Footer remains reachable" }));
+    const shellRoot = container.firstElementChild;
+    expect(shellRoot?.classList.contains("console-shell")).toBe(true);
+    if (!shellRoot) throw new Error("Missing shell");
+    const computed = getComputedStyle(shellRoot);
+    expect(computed.paddingBottom).toBe("var(--hud-bottom-space)");
+    expect(computed.getPropertyValue("--hud-bottom-space")).toContain("env(safe-area-inset-bottom");
+    expect(shellRoot.querySelector("footer")?.textContent).toContain("Footer remains reachable");
+    expect(getComputedStyle(container.querySelector("main") as HTMLElement).paddingBottom).not.toBe(
+      "var(--hud-bottom-space)",
+    );
   });
 
-  it("keeps scroll area shrinkable (min-h-0 chain for flex overflow)", () => {
-    const html = shell();
-    expect(html).toContain("min-h-0");
-    expect(html).toContain("min-w-0");
+  it("maps the slots and calls the optional navigation callback through an injected native link", () => {
+    const navigate = vi.fn();
+    render(
+      shell({
+        headerSearch: <input aria-label="Search" />,
+        headerActions: <button>Actions</button>,
+        railFooter: <span>Rail footer</span>,
+        commandLeft: <span>Left</span>,
+        commandRight: <span>Right</span>,
+        onNavigate: navigate,
+        linkAs: (props) => <a {...props} data-injected="true" />,
+      }),
+    );
+    expect(container.querySelector("header input")?.getAttribute("aria-label")).toBe("Search");
+    expect(container.querySelector("header button")?.textContent).toBe("Actions");
+    expect(container.querySelector("nav")?.textContent).toContain("Rail footer");
+    expect(container.querySelector("footer")?.textContent).toBe("LeftRight");
+    const link = container.querySelector<HTMLAnchorElement>("nav a");
+    expect(link?.dataset.injected).toBe("true");
+    link?.addEventListener("click", (event) => event.preventDefault());
+    act(() => link?.click());
+    expect(navigate).toHaveBeenCalledTimes(1);
   });
 
-  it("renders mobile bottom rail with the same items", () => {
-    const html = shell();
-    const navs = html.match(/<nav /g) ?? [];
-    expect(navs.length).toBeGreaterThanOrEqual(2);
-    expect(html).toContain("fixed inset-x-0 bottom-0");
+  it("updates every actual HUD surface and its rendered style when the provider skin switches", () => {
+    render(
+      <SkinProvider>
+        <SwitchSkin />
+        {shell()}
+      </SkinProvider>,
+    );
+    const signatures = new Set<string>();
+    for (const skin of SKINS) {
+      const button = Array.from(container.querySelectorAll("button")).find(
+        (item) => item.textContent === skin,
+      );
+      act(() => button?.click());
+      const surfaces = container.querySelectorAll(".hud-panel");
+      expect(surfaces).toHaveLength(3);
+      for (const surface of surfaces) {
+        expect(surface.classList.contains(`skin-${skin}`)).toBe(true);
+        expect(surface.classList.contains("hud-layer")).toBe(true);
+        // Effects from preset are now applied by default to match mockup visuals
+        const hasPresetEffects =
+          /halftone|grain|scanlines|cmyk-slip|duotone|brush-underline|sticker/.test(
+            surface.className,
+          );
+        if (skin !== "default" && skin !== "technical") {
+          expect(hasPresetEffects).toBe(true);
+        }
+      }
+      const header = container.querySelector("header");
+      if (!header) throw new Error("Missing header");
+      const computed = getComputedStyle(header);
+      signatures.add(
+        [
+          computed.borderTopStyle,
+          computed.borderTopWidth,
+          computed.boxShadow,
+          computed.getPropertyValue("--hud-accent"),
+        ].join("|"),
+      );
+      expect(localStorage.getItem("mw-skin")).toBe(skin);
+    }
+    expect(signatures.size).toBe(6);
   });
 });

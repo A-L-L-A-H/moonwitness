@@ -11,7 +11,12 @@
     "fog-voices": "apps/web/public/art/fog-voices.png",
     "mirror-archive": "apps/web/public/art/mirror-archive.png",
     "crew-wall": "apps/web/public/art/crew-wall.png",
-    "crowd-moon": "apps/web/public/art/crowd-moon.png"
+    "crowd-moon": "apps/web/public/art/crowd-moon.png",
+    "shadow-command-hero": "apps/web/public/art/shadow-command-hero.png",
+    "command-eye": "apps/web/public/art/command-eye.png",
+    "world-map-atlas": "apps/web/public/art/world-map-atlas.png",
+    "sidebar-witness": "apps/web/public/art/sidebar-witness.png",
+    "dock-chronicle-hero": "apps/web/public/art/dock-chronicle-hero.png"
   },
   "legacySourceWidths": {
     "hero-witness": 1536,
@@ -24,7 +29,12 @@
     "fog-voices": 1792,
     "mirror-archive": 1792,
     "crew-wall": 1792,
-    "crowd-moon": 1792
+    "crowd-moon": 1792,
+    "shadow-command-hero": 1792,
+    "command-eye": 1024,
+    "world-map-atlas": 1536,
+    "sidebar-witness": 1024,
+    "dock-chronicle-hero": 1792
   },
   "hero": {
     "city": {

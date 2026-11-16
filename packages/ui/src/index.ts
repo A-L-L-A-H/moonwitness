@@ -86,6 +86,17 @@ export {
   type CollectionItem,
 } from "./composites/collections-grid";
 export { WorldMap, type WorldMapProps, type MapCityItem } from "./composites/world-map";
+export { AtlasStage, type AtlasStageProps } from "./composites/atlas-stage";
+export {
+  ScenePage,
+  ScenePanel,
+  ChapterBanner,
+  FilmStrip,
+  type ScenePageProps,
+  type ScenePanelProps,
+  type ChapterBannerProps,
+  type FilmStripProps,
+} from "./composites/scene-page";
 export {
   TopRail,
   SideRail,
@@ -94,6 +105,11 @@ export {
   Gauge,
   type HudNavItem,
   type HudLinkComponent,
+  type TopRailProps,
+  type SideRailProps,
+  type CommandStripProps,
+  type CornerBracketsProps,
+  type GaugeProps,
 } from "./primitives/hud-chrome";
 export { ConsoleShell, type ConsoleShellProps } from "./composites/console-shell";
 

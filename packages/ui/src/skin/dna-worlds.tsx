@@ -286,7 +286,7 @@ export function useDnaWorld(): MasterDnaWorldSpec {
 export interface SkinScopeProps {
   dnaId: MasterDnaId;
   children: ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function SkinScope({ dnaId, children, className }: SkinScopeProps) {
@@ -314,7 +314,7 @@ export function SkinScope({ dnaId, children, className }: SkinScopeProps) {
 export interface SkinRootProps {
   dnaId: MasterDnaId;
   children: ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function SkinRoot({ dnaId, children, className }: SkinRootProps) {

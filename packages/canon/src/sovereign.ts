@@ -396,6 +396,8 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
   },
 ] as const;
 
+export const ECOSYSTEM_HEALTH_CONTRACT_VERSION = "moonwitness.health/v1" as const;
+
 export const ECOSYSTEM_RUNTIME_CATALOG = {
   monorepoSlug: "A-L-L-A-H/moonwitness",
   liveEdges: [
@@ -404,6 +406,7 @@ export const ECOSYSTEM_RUNTIME_CATALOG = {
       hostname: "a-l-l-a-h.com",
       url: "https://a-l-l-a-h.com",
       workerName: "allah-sanctuary",
+      healthPath: "/api/ecosystem-health",
       layer: "Cloudflare Workers · vinext",
       role: "Primary Sanctuary Gateway, Four Scriptures Covenant & 4-Door Canon Codex",
     },
@@ -412,6 +415,7 @@ export const ECOSYSTEM_RUNTIME_CATALOG = {
       hostname: "codex.a-l-l-a-h.com",
       url: "https://codex.a-l-l-a-h.com",
       workerName: "sovereign-codex-edge",
+      healthPath: "/health",
       layer: "Cloudflare Workers · D1 Edge",
       role: "Autonomous 9-Node Edge Pulse, Roadmap Progress & Public Comments Codex",
     },
@@ -420,8 +424,18 @@ export const ECOSYSTEM_RUNTIME_CATALOG = {
       hostname: "community.moonwitness.biz.id",
       url: "https://community.moonwitness.biz.id",
       workerName: "rocksoul-community",
+      healthPath: "/",
       layer: "Cloudflare Workers · SPA Edge",
       role: "Source-Aware Community Participation Portal for MoonWitness × Rocksoul",
+    },
+    {
+      id: "radio",
+      hostname: "moonwitness-radio.bjo163.workers.dev",
+      url: "https://moonwitness-radio.bjo163.workers.dev",
+      workerName: "moonwitness-radio",
+      healthPath: "/health",
+      layer: "Cloudflare Workers · Audio Broadcast",
+      role: "MoonWitness Acoustic Broadcast & Contemplative Radio Telemetry Edge",
     },
   ] as readonly EcosystemEdgeNode[],
   workspaceNodes: [

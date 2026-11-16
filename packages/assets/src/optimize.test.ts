@@ -40,16 +40,21 @@ describe("ARTWORK manifest", () => {
     expect(KEYS.sort()).toEqual(
       [
         "city-shadow",
+        "command-eye",
         "crew-rooftop",
         "crew-wall",
         "crowd-moon",
+        "dock-chronicle-hero",
         "fog-voices",
         "hero-witness",
         "mirror-archive",
         "night-shift",
         "shadow-command",
+        "shadow-command-hero",
+        "sidebar-witness",
         "signal-sky",
         "signal-tunnel",
+        "world-map-atlas",
       ].sort(),
     );
   });

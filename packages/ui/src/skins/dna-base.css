@@ -1,0 +1,43 @@
+/* MoonWitness 7-Master-DNA Scoped Design Tokens & Primitives
+   Strictly scoped under [data-dna] so importing apps never suffer :root/body collisions. */
+
+[data-dna] .mw-dna-surface {
+  background-color: var(--dna-surface, #080b14);
+  color: var(--dna-text, #f5efe2);
+  border-color: var(--dna-border, #d6b46c);
+}
+
+[data-dna] .mw-dna-surface-elevated {
+  background-color: var(--dna-surface-elevated, #0e1322);
+  color: var(--dna-text, #f5efe2);
+  border-color: var(--dna-border, #d6b46c);
+}
+
+[data-dna] .mw-dna-button {
+  background-color: var(--dna-accent, #d6b46c);
+  color: var(--dna-accent-fg, #040509);
+  border-color: var(--dna-border, #d6b46c);
+}
+
+[data-dna] .mw-dna-button-secondary {
+  background-color: var(--dna-surface-elevated, #0e1322);
+  color: var(--dna-text, #f5efe2);
+  border-color: var(--dna-border, #d6b46c);
+}
+
+[data-dna] .mw-dna-badge {
+  background-color: var(--dna-surface-elevated, #0e1322);
+  color: var(--dna-focus, #fff4d2);
+  border-color: var(--dna-border, #d6b46c);
+}
+
+[data-dna] .mw-dna-input {
+  background-color: var(--dna-canvas, #040509);
+  color: var(--dna-text, #f5efe2);
+  border-color: var(--dna-border, #d6b46c);
+}
+
+[data-dna] :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--dna-focus, #fff4d2);
+  outline-offset: 3px;
+}

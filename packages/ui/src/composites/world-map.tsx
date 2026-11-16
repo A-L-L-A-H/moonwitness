@@ -1,7 +1,8 @@
 "use client";
 
-import { Halftone } from "../primitives/texture";
-import { ZineCardRough } from "../primitives/zine-card";
+import type { ReactNode } from "react";
+import { AtlasStage } from "./atlas-stage";
+import { SignalGraph } from "./signal-graph";
 
 export interface MapCityItem {
   id: string;
@@ -15,71 +16,36 @@ export interface WorldMapProps<T extends MapCityItem = MapCityItem> {
   cities: T[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  backdrop?: ReactNode;
 }
 
-/** Peta sinyal stylized: bukan proyeksi geografis, hanya posisi relatif dari data. */
 export function WorldMap<T extends MapCityItem>({
   cities,
   selectedId,
   onSelect,
+  backdrop,
 }: WorldMapProps<T>) {
   return (
-    <ZineCardRough className="relative overflow-hidden p-4">
-      <Halftone className="absolute inset-0 opacity-30" />
-      <svg
-        viewBox="0 0 100 80"
-        className="relative h-64 w-full sm:h-80"
-        role="group"
-        aria-label="Universe map"
-      >
-        {cities.map((a, i) =>
-          cities
-            .slice(i + 1)
-            .map((b) => (
-              <line
-                key={`${a.id}-${b.id}`}
-                x1={a.x}
-                y1={a.y * 0.8}
-                x2={b.x}
-                y2={b.y * 0.8}
-                stroke={i % 2 ? "#ff2d78" : "#2ea8ff"}
-                strokeWidth="0.18"
-                strokeDasharray="1.2 1.6"
-                opacity="0.4"
-              />
-            )),
-        )}
-        {cities.map((c) => (
-          <circle
-            key={c.id}
-            cx={c.x}
-            cy={c.y * 0.8}
-            r={selectedId === c.id ? 2.2 : 1.3}
-            fill={selectedId === c.id ? "#ffd21f" : "#ff2d78"}
-            className="pulse-dot"
-            style={{ animationDelay: `${c.x * 20}ms` }}
-          />
-        ))}
-      </svg>
-      <ul className="relative mt-3 flex flex-wrap gap-2">
-        {cities.map((c) => (
-          <li key={c.id}>
-            <button
-              type="button"
-              onClick={() => onSelect(c.id)}
-              aria-pressed={selectedId === c.id}
-              className={`zine-card min-h-11 px-3 py-2 text-[11px] tracking-widest transition-colors ${
-                selectedId === c.id
-                  ? "border-[var(--yellow)] bg-[var(--yellow)] text-black"
-                  : "text-zinc-300 hover:border-[var(--pink)] hover:text-[var(--pink)]"
-              }`}
-            >
-              {c.city}
-              <span className="ml-2 text-[10px] text-zinc-500">{c.signals}</span>
-            </button>
-          </li>
-        ))}
-      </ul>
-    </ZineCardRough>
+    <AtlasStage
+      backdrop={backdrop}
+      controls={
+        <ul className="flex flex-wrap gap-2" aria-label="Cities">
+          {cities.map((city) => (
+            <li key={city.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(city.id)}
+                aria-pressed={selectedId === city.id}
+                className={`zine-card min-h-11 px-3 py-2 text-[11px] tracking-widest transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--yellow)] ${selectedId === city.id ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]" : "text-[var(--paper)] hover:border-[var(--pink)] hover:text-[var(--pink)]"}`}
+              >
+                {city.city} <span className="ml-2 opacity-80">{city.signals}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      }
+    >
+      <SignalGraph cities={cities} selectedId={selectedId} onSelect={onSelect} />
+    </AtlasStage>
   );
 }

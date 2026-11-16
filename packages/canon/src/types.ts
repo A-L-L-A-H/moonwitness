@@ -181,12 +181,21 @@ export interface FourCorpusConcordanceTheme {
 }
 
 export interface EcosystemEdgeNode {
-  readonly id: "sanctuary" | "codex-edge" | "community";
+  readonly id: "sanctuary" | "codex-edge" | "community" | "radio";
   readonly hostname: string;
   readonly url: string;
   readonly workerName: string;
+  readonly healthPath: string;
   readonly layer: string;
   readonly role: string;
+}
+
+export interface StandardEdgeHealthPayload {
+  readonly contractVersion: "moonwitness.health/v1";
+  readonly service: string;
+  readonly status: "online" | "degraded" | "offline";
+  readonly checkedAt: string;
+  readonly latencyMs: number | null;
 }
 
 export interface EcosystemWorkspaceNode {

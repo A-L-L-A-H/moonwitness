@@ -46,10 +46,20 @@ import {
   WORLD_PATCH_HIGHLIGHTS,
   WORLD_PATCHES_REGISTRY,
   computeMTimeSolarLunarEstimate,
+  evaluateDhgsAssuranceLoop,
   evaluateMTimeCriterion,
+  evaluateSrgblModel,
+  evaluateWsiSemanticFrame,
   normalizeArabicScript,
+  normalizeGreekScript,
+  normalizeHebrewScript,
+  queryOxDxHierarchy,
+  resolvePropheticMissionSource,
   searchCompactQuranTuples,
+  searchCompactScriptureTuples,
+  searchFourCorpora,
   stripUthmaniMacros,
+  tokenizeAndParseAqel,
 } from "./index";
 
 describe("@moonwitness/canon SSOT invariants", () => {
@@ -184,5 +194,70 @@ describe("@moonwitness/canon SSOT invariants", () => {
     ];
     expect(searchCompactQuranTuples(sample, "2:256")[0]?.reference).toBe("2:256");
     expect(searchCompactQuranTuples(sample, "الله")[0]?.surah).toBe(1);
+  });
+
+  it("normalizes Hebrew/Greek tuples and searches all 4 corpora cleanly", () => {
+    expect(normalizeHebrewScript("בְּרֵאשִׁית")).toBe("בראשית");
+    expect(normalizeGreekScript("Ἐν ἀρχῇ ἦν ὁ Λόγος")).toBe("εν αρχη ην ο λογος");
+
+    const bundles = {
+      quran: [[2, 256, "Al-Baqarah", "لَآ إِكْرَاهَ فِى ٱلدِّينِ"] as const],
+      taurat: [["Gen", 1, 1, "בְּרֵאשִׁ֖ית בָּרָ֣א אֱלֹהִ֑ים"] as const],
+      zabur: [["Ps", 23, 1, "מִזְמ֥וֹר לְדָוִ֑ד"] as const],
+      injil: [["John", 1, 1, "Ἐν ἀρχῇ ἦν ὁ λόγος"] as const],
+    };
+
+    expect(searchCompactScriptureTuples("SRC-TOR", bundles.taurat, "Gen 1:1")[0]?.reference).toBe(
+      "Gen 1:1",
+    );
+    expect(searchCompactScriptureTuples("SRC-ZAB", bundles.zabur, "לדוד")[0]?.reference).toBe(
+      "Ps 23:1",
+    );
+    expect(searchCompactScriptureTuples("SRC-INJ", bundles.injil, "λογος")[0]?.reference).toBe(
+      "John 1:1",
+    );
+    expect(searchFourCorpora(bundles, "", "ALL", 2)).toHaveLength(4);
+  });
+
+  it("executes WSI, SRGBL, Prophetic, DHGS, OX-DX, and AQEL runtime engines deterministically", () => {
+    const wsiOffside = evaluateWsiSemanticFrame({
+      statement: "Universal duty claim",
+      sourceRef: "QS 37:30",
+      agent: "community",
+      swingDepth: 99,
+    });
+    expect(wsiOffside.frameStatus).toBe("OFFSIDE");
+    expect(wsiOffside.maxDepthApplied).toBe(3);
+
+    const srgblUnknown = evaluateSrgblModel({
+      question: "Empty evidence gate",
+      observations: [],
+      governanceRules: ["PC01"],
+      actorsAndMeanings: [],
+      responsibleActions: [],
+      weightedCriteria: [{ weight: 0, confidence: 1, intensity: 1, direction: 2 }],
+    });
+    expect(srgblUnknown.weightedScore).toBe("UNKNOWN");
+    expect(srgblUnknown.completeness.filledLevels).toBe(1);
+
+    const prophetic = resolvePropheticMissionSource(
+      { dawn: { summary: "Patience", refs: ["QS 2:153"], evidence: "Q1" } },
+      [],
+      "dawn",
+    );
+    expect(prophetic.source).toBe("AL-QURAN");
+
+    const dhgs = evaluateDhgsAssuranceLoop(["RECEIVE", "KNOW", "VERIFY"]);
+    expect(dhgs.completedCount).toBe(3);
+    expect(dhgs.nextRequiredStep).toBe("04 ASSIGN");
+
+    expect(queryOxDxHierarchy("01 UNIVERSE")).toHaveLength(1);
+    expect(queryOxDxHierarchy("")).toHaveLength(49);
+
+    const aqel = tokenizeAndParseAqel(
+      'عرّف شاهد = "MoonWitness"\nحقيقة أمانة = (1 == 1)\n# comment\nتحقق أمانة',
+    );
+    expect(aqel.statements).toHaveLength(3);
+    expect(aqel.diagnostics).toHaveLength(0);
   });
 });

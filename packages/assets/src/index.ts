@@ -119,6 +119,36 @@ export const ARTWORK = {
     "50% 30%",
     "05-style-ska-poster.png",
   ),
+  "shadow-command-hero": entry(
+    "shadow-command-hero",
+    "Dua saksi bertudung di atap menghadap bulan biru raksasa di atas kota neon",
+    "70% center",
+    "06-shadow-command-center.png",
+  ),
+  "command-eye": entry(
+    "command-eye",
+    "Close-up mata manga hitam-putih dengan cipratan magenta dan kuning",
+    "72% 30%",
+    "06-shadow-command-center.png",
+  ),
+  "world-map-atlas": entry(
+    "world-map-atlas",
+    "Peta dunia malam bergaya atlas zine dengan garis sinyal dan penanda mahkota",
+    "center",
+    "06-shadow-command-center.png",
+  ),
+  "sidebar-witness": entry(
+    "sidebar-witness",
+    "Potret vertikal saksi bertudung dengan jaket magenta di depan graffiti mahkota",
+    "50% 20%",
+    "06-shadow-command-center.png",
+  ),
+  "dock-chronicle-hero": entry(
+    "dock-chronicle-hero",
+    "Kerumunan di atap menghadap bulan biru dan skyline neon",
+    "62% center",
+    "04-dock-timeline.png",
+  ),
 } satisfies Record<ArtKey, ArtEntry>;
 
 export { ART_SOURCES, ART_WIDTHS, outputNames } from "./optimize";

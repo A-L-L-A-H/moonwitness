@@ -10,7 +10,12 @@ export type ArtKey =
   | "fog-voices"
   | "mirror-archive"
   | "crew-wall"
-  | "crowd-moon";
+  | "crowd-moon"
+  | "shadow-command-hero"
+  | "command-eye"
+  | "world-map-atlas"
+  | "sidebar-witness"
+  | "dock-chronicle-hero";
 
 export type EraId = "origins" | "neon" | "fracture" | "rebuilding" | "expansions";
 

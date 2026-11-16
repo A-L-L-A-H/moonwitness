@@ -213,3 +213,35 @@ export function skinCn(baseVariants: Record<string, unknown>, skin: SkinName, co
 export { skinPresets, getPreset, applyPreset, listPresets } from './presets';
 export { composeEffects, effectPresets, halftone, grain, cmykSlip, duotone, tape, sticker, brushUnderline } from './effects';
 export { eventCardVariants, kanbanColumnVariants, moduleCardVariants, buttonSkinCompositions, inputSkinCompositions, badgeSkinCompositions, cardSkinCompositions } from './compositions';
+export {
+  DnaButton,
+  DnaChamber,
+  DnaPortalArch,
+  DnaBadge,
+  type DnaButtonProps,
+  type DnaChamberProps,
+  type DnaPortalArchProps,
+  type DnaBadgeProps,
+} from './imperium';
+export {
+  SacredCornerBrackets,
+  OctagramMandalaIcon,
+  SearchLensIcon,
+  CrescentStarIcon,
+  DiamondStarOrnament,
+} from './imperium-icons';
+export {
+  MASTER_DNA_IDS,
+  MASTER_DNA_WORLDS,
+  getDnaWorld,
+  listDnaWorlds,
+  dnaWorldCssVariables,
+  useDnaWorld,
+  SkinScope,
+  SkinRoot,
+  type MasterDnaId,
+  type DnaWorldPalette,
+  type MasterDnaWorldSpec,
+  type SkinScopeProps,
+  type SkinRootProps,
+} from './dna-worlds';
