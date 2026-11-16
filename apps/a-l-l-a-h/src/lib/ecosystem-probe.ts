@@ -1,5 +1,9 @@
 import { ECOSYSTEM_HEALTH_CONTRACT_VERSION } from "@moonwitness/canon";
-import { getCloudflareWorkerEnv, type D1DatabaseLike } from "./cloudflare-runtime";
+import {
+  getCloudflareWorkerEnv,
+  type D1DatabaseLike,
+  type SanctuaryWorkerEnv,
+} from "./cloudflare-runtime";
 
 export type ServiceHealthState = "online" | "degraded" | "offline";
 export type EcosystemRuntimeMode = "local-node" | "cloudflare-edge";
@@ -105,9 +109,23 @@ function isLoopbackUrl(url: string): boolean {
   return /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/i.test(url);
 }
 
-function buildProbeTargets(): readonly ProbeTarget<EcosystemServiceStatus["id"]>[] {
-  const webBase = (process.env.WEB_INTERNAL_URL ?? "http://127.0.0.1:3000").replace(/\/+$/, "");
-  const apiBase = (process.env.API_INTERNAL_URL ?? "http://127.0.0.1:3002").replace(/\/+$/, "");
+function buildProbeTargets(
+  cfEnv?: SanctuaryWorkerEnv | null,
+): readonly ProbeTarget<EcosystemServiceStatus["id"]>[] {
+  const webBase = (
+    cfEnv?.WEB_INTERNAL_URL ??
+    process.env.WEB_INTERNAL_URL ??
+    "http://127.0.0.1:3000"
+  )
+    .trim()
+    .replace(/\/+$/, "");
+  const apiBase = (
+    cfEnv?.API_INTERNAL_URL ??
+    process.env.API_INTERNAL_URL ??
+    "http://127.0.0.1:3002"
+  )
+    .trim()
+    .replace(/\/+$/, "");
   const arsyBase = (process.env.ARSY_URL ?? "http://127.0.0.1:8787").replace(/\/+$/, "");
   const memoryBase = (process.env.MEMORY_API_URL ?? "http://127.0.0.1:8000").replace(/\/+$/, "");
 
@@ -353,14 +371,21 @@ export async function probeEcosystemHealth(options?: {
   readonly gitRunner?: GitRunnerLike;
   readonly runtimeMode?: EcosystemRuntimeMode;
   readonly db?: D1DatabaseLike | null;
+  readonly cfEnv?: SanctuaryWorkerEnv | null;
 }): Promise<EcosystemSnapshot> {
   const fetchFn = options?.fetchFn ?? ((input: string, init?: RequestInit) => fetch(input, init));
   const gitRunner = options?.gitRunner ?? defaultGitRunner;
   const runtimeMode: EcosystemRuntimeMode =
     options?.runtimeMode ?? (isNodeRuntime() ? "local-node" : "cloudflare-edge");
   const skipLoopbackOnEdge = !options?.fetchFn && runtimeMode === "cloudflare-edge";
+  const cfEnv =
+    options?.cfEnv !== undefined
+      ? options.cfEnv
+      : options?.fetchFn
+        ? null
+        : await getCloudflareWorkerEnv();
 
-  const targets = buildProbeTargets();
+  const targets = buildProbeTargets(cfEnv);
   const edgeTargets = buildEdgeTargets();
   const apiBase = targets.find((item) => item.id === "api")!.displayUrl;
 
@@ -372,7 +397,7 @@ export async function probeEcosystemHealth(options?: {
       fetchJsonSafe(fetchFn, `${apiBase}/api/v1/readyz`, skipLoopbackOnEdge),
       fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/stats`, skipLoopbackOnEdge),
       fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/eras`, skipLoopbackOnEdge),
-      probeCodexGovernance(options?.db),
+      probeCodexGovernance(options?.db ?? cfEnv?.DB),
     ]);
 
   const apiService = services.find((item) => item.id === "api");

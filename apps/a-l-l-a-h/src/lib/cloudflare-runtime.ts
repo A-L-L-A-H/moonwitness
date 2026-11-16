@@ -29,6 +29,8 @@ export interface SanctuaryWorkerEnv {
   readonly ASSETS?: AssetsFetcherLike;
   readonly CORPUS_BUCKET?: R2BucketLike;
   readonly CACHE_KV?: KVNamespaceLike;
+  readonly WEB_INTERNAL_URL?: string;
+  readonly API_INTERNAL_URL?: string;
 }
 
 /**

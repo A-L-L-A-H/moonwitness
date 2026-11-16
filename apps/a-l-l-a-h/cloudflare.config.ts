@@ -23,6 +23,8 @@ export default defineConfig({
       CACHE_KV: bindings.kv({
         id: "997db1a68d914df6a3a2531ca4c7b314",
       }),
+      WEB_INTERNAL_URL: bindings.text("https://moonwitness.biz.id"),
+      API_INTERNAL_URL: bindings.text("https://api.moonwitness.biz.id"),
     },
   }),
 });

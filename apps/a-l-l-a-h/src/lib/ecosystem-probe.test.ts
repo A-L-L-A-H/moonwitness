@@ -214,4 +214,55 @@ describe("ecosystem-probe", () => {
     expect(snapshot.codexGovernance.releasesCount).toBe(2);
     expect(snapshot.codexGovernance.latestReleases[0]?.tag).toBe("v0.4.2");
   });
+
+  it("uses cfEnv WEB_INTERNAL_URL and API_INTERNAL_URL in cloudflare-edge mode", async () => {
+    const requestedUrls: string[] = [];
+    const fetchFn: FetchLike = async (url) => {
+      requestedUrls.push(url);
+      if (url === "https://api.moonwitness.biz.id/api/v1/healthz") {
+        return new Response(JSON.stringify({ status: "ok" }), { status: 200 });
+      }
+      if (url === "https://api.moonwitness.biz.id/api/v1/readyz") {
+        return new Response(JSON.stringify({ status: "ok", database: "ok" }), { status: 200 });
+      }
+      if (url === "https://api.moonwitness.biz.id/api/v1/timeline/stats") {
+        return new Response(JSON.stringify({ data: { total: 22 } }), { status: 200 });
+      }
+      if (url === "https://api.moonwitness.biz.id/api/v1/timeline/eras") {
+        return new Response(
+          JSON.stringify({ data: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }] }),
+          { status: 200 },
+        );
+      }
+      return new Response("ok", { status: 200 });
+    };
+
+    const snapshot = await probeEcosystemHealth({
+      runtimeMode: "cloudflare-edge",
+      fetchFn,
+      gitRunner: async () => null,
+      db: null,
+      cfEnv: {
+        WEB_INTERNAL_URL: "https://moonwitness.biz.id/",
+        API_INTERNAL_URL: "https://api.moonwitness.biz.id/",
+      },
+    });
+
+    expect(requestedUrls).toContain("https://moonwitness.biz.id");
+    expect(requestedUrls).toContain("https://api.moonwitness.biz.id/api/v1/healthz");
+    expect(requestedUrls).toContain("https://api.moonwitness.biz.id/api/v1/readyz");
+    expect(snapshot.runtimeMode).toBe("cloudflare-edge");
+    expect(snapshot.status).toBe("online");
+    expect(snapshot.databaseStatus).toBe("ok");
+    expect(snapshot.timelineTotal).toBe(22);
+    expect(snapshot.erasCount).toBe(5);
+    expect(snapshot.services.find((svc) => svc.id === "web")).toMatchObject({
+      status: "online",
+      httpStatus: 200,
+    });
+    expect(snapshot.services.find((svc) => svc.id === "api")).toMatchObject({
+      status: "online",
+      httpStatus: 200,
+    });
+  });
 });
