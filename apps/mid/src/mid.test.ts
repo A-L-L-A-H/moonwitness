@@ -362,5 +362,23 @@ describe("@moonwitness/mid OIDC & SSO Worker", () => {
     expect(createdClientRes.status).toBe(201);
     const createdPayload = (await createdClientRes.json()) as { clientSecret: string };
     expect(createdPayload.clientSecret.startsWith("mws_")).toBe(true);
+
+    // 7. RFC 8252 dynamic loopback port matching for moonwitness-cli while rejecting unregistered origins/paths
+    const loopChallenge = await sha256Base64Url("cli_loopback_verifier_payload_at_least_43_chars");
+    const dynamicLoopback = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=moonwitness-cli&redirect_uri=${encodeURIComponent("http://127.0.0.1:49152/callback")}&response_type=code&scope=openid%20profile&state=st_cli&nonce=nc_cli&code_challenge=${loopChallenge}&code_challenge_method=S256`,
+      ),
+      env,
+    );
+    expect(dynamicLoopback.status).toBe(200);
+
+    const rejectedLoopbackPath = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=moonwitness-cli&redirect_uri=${encodeURIComponent("http://127.0.0.1:49152/other")}&response_type=code&scope=openid%20profile&state=st_cli&nonce=nc_cli&code_challenge=${loopChallenge}&code_challenge_method=S256`,
+      ),
+      env,
+    );
+    expect(rejectedLoopbackPath.status).toBe(400);
   });
 });
