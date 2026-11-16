@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { getDb } from "./driver.js";
-import type { LibSqlDriver, LibSqlExecutor } from "./drivers/sqlite.driver.js";
+import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 import { ConflictError } from "./errors.js";
 import type { BaseMetadata, RecordSource, RecordStatus } from "./base-metadata.js";
 import type { ActorContext } from "./actor-context.js";
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS _orm_audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_model_entity ON _orm_audit_log (model, entity_id, changed_at);
 `.trim();
 
-const auditedDrivers = new WeakSet<LibSqlDriver>();
+const auditedDrivers = new WeakSet<LibSqlExecutor>();
 
 async function ensureAuditTable(): Promise<void> {
   const db = getDb();

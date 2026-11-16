@@ -3,8 +3,6 @@ import Fastify from "fastify";
 import type { FastifyError } from "fastify";
 import FastifyCookie from "@fastify/cookie";
 import FastifyCors from "@fastify/cors";
-import FastifySwagger from "@fastify/swagger";
-import FastifySwaggerUi from "@fastify/swagger-ui";
 import { env, parseCorsOrigins } from "../../shared/env";
 import { createRateLimiter, resolveRateLimitKey } from "../rate-limit";
 import { registerHealthRoutes } from "../../interface/routes/health.routes";
@@ -24,6 +22,7 @@ import { seedBootstrapAdmin } from "../../services/user";
 
 export interface BootstrapOptions {
   prefix?: string;
+  disableDocs?: boolean;
 }
 
 function corsOrigin(): string[] | false {
@@ -102,7 +101,11 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     return reply.code(status).send({ error: error.message });
   });
 
-  if (env.NODE_ENV !== "production") {
+  if (env.NODE_ENV !== "production" && !options.disableDocs) {
+    const [{ default: FastifySwagger }, { default: FastifySwaggerUi }] = await Promise.all([
+      import("@fastify/swagger"),
+      import("@fastify/swagger-ui"),
+    ]);
     await fastify.register(FastifySwagger, {
       openapi: {
         openapi: "3.0.0",

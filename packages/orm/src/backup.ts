@@ -1,4 +1,3 @@
-import { copyFile } from "node:fs/promises";
 import { getDb } from "./driver.js";
 
 /**
@@ -25,5 +24,6 @@ export async function restoreDatabase(backupPath: string, targetPath: string): P
   if (!backupPath || !targetPath) {
     throw new Error("restore requires both a backup path and a target path");
   }
+  const { copyFile } = await import("node:fs/promises");
   await copyFile(backupPath, targetPath);
 }
