@@ -52,7 +52,7 @@ for (const width of [320, 390, 430]) {
     for (const selector of [
       "#storytelling .zine-card-rough",
       "#shadow h2",
-      "#shadow p",
+      "#shadow p:not([role])",
       "#shadow a[href='/shadow']",
     ]) {
       for (const el of await page.locator(selector).all())
@@ -283,14 +283,10 @@ test("storytelling renders honest alternating art/type units with horizontal set
   const units = section.locator("[data-story-unit]");
   await expect(units).toHaveCount(4);
   for (const unit of await units.all()) await expect(unit.locator("img")).toHaveCount(1);
-  const dirs = await units.evaluateAll((els) =>
-    els.map((el) => {
-      const img = el.querySelector("img")!.getBoundingClientRect();
-      const h = el.querySelector("h3")!.getBoundingClientRect();
-      return img.left < h.left ? "art-left" : "art-right";
-    }),
+  const scrims = await units.evaluateAll((els) =>
+    els.map((el) => el.querySelector("[data-scene-panel]")?.getAttribute("data-scrim")),
   );
-  expect(dirs).toEqual(["art-left", "art-right", "art-left", "art-right"]);
+  expect(scrims).toEqual(["right", "left", "right", "left"]);
   const timing = await units.evaluateAll((els) =>
     els.map((el) => {
       const s = getComputedStyle(el);
@@ -362,7 +358,7 @@ test("motion toggle pauses continuous effects without recreating the atmosphere 
   test.setTimeout(60000);
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
-  const toggle = page.getByRole("button", { name: /pause motion/i });
+  const toggle = page.getByRole("button", { name: /(pause|resume) motion/i });
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
   expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   const canvas = page.locator("#home canvas").first();

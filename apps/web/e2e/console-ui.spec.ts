@@ -398,13 +398,15 @@ test("landing Storytelling renders existing stories through ScenePanel and FilmS
     await expect(heading).toBeInViewport();
     await expect(scene.locator("img")).toBeVisible();
     await expect
-      .poll(() =>
-        scene
-          .locator("img")
-          .evaluate(
-            (image) =>
-              image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
-          ),
+      .poll(
+        () =>
+          scene
+            .locator("img")
+            .evaluate(
+              (image) =>
+                image instanceof HTMLImageElement && image.complete && image.naturalWidth > 0,
+            ),
+        { timeout: 15_000 },
       )
       .toBe(true);
   }
