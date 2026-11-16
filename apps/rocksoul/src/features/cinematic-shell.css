@@ -1,4 +1,12 @@
-/* === CINEMATIC GPU STAGE + UNIFIED CITADEL HUD ARCHITECTURE === */
+/* === ZERO-LAG GPU STAGE + KATANA CUT-SCREEN ENGINE × ASTROLABE HUD === */
+
+/* Eliminate Chromium/WebView2 ANGLE compositor readback stalls caused by backdrop-filter blur over WebGL2 */
+*,
+*::before,
+*::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
 
 .world-gpu-canvas {
   position: absolute;
@@ -14,10 +22,6 @@
   background: #050508;
 }
 
-.world-canvas.is-gpu .world-artwork-stage {
-  z-index: 0;
-}
-
 .world-canvas.is-gpu.is-subtle {
   opacity: 1;
 }
@@ -28,14 +32,14 @@
   z-index: 2;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 54% 44%, transparent 0%, rgba(5, 5, 9, 0.34) 64%, rgba(5, 5, 9, 0.76) 100%),
-    linear-gradient(180deg, rgba(5, 5, 9, 0.52) 0%, transparent 24%, transparent 72%, rgba(5, 5, 9, 0.84) 100%);
+    radial-gradient(ellipse at 54% 44%, transparent 0%, rgba(5, 5, 9, 0.3) 64%, rgba(5, 5, 9, 0.72) 100%),
+    linear-gradient(180deg, rgba(5, 5, 9, 0.48) 0%, transparent 22%, transparent 72%, rgba(5, 5, 9, 0.82) 100%);
 }
 
 .world-canvas.is-subtle .world-gpu-veil {
   background:
-    radial-gradient(ellipse at 56% 38%, rgba(8, 8, 14, 0.22) 0%, rgba(5, 5, 9, 0.62) 74%, rgba(5, 5, 9, 0.84) 100%),
-    linear-gradient(180deg, rgba(5, 5, 9, 0.58) 0%, rgba(5, 5, 9, 0.26) 38%, rgba(5, 5, 9, 0.44) 72%, rgba(5, 5, 9, 0.88) 100%);
+    radial-gradient(ellipse at 54% 40%, rgba(8, 8, 14, 0.14) 0%, rgba(5, 5, 9, 0.56) 76%, rgba(5, 5, 9, 0.8) 100%),
+    linear-gradient(180deg, rgba(5, 5, 9, 0.56) 0%, rgba(5, 5, 9, 0.18) 38%, rgba(5, 5, 9, 0.36) 72%, rgba(5, 5, 9, 0.86) 100%);
 }
 
 /* === AWAKENING & THRESHOLD HD REFINEMENTS === */
@@ -69,13 +73,10 @@
 .awakening-copy,
 .universe-copy {
   position: relative;
-  border: 1px solid rgba(243, 235, 217, 0.16);
+  border: 1px solid rgba(243, 235, 217, 0.18);
   border-left: 3px solid #e53e38 !important;
-  background:
-    linear-gradient(135deg, rgba(10, 11, 16, 0.82) 0%, rgba(8, 9, 14, 0.56) 72%, rgba(8, 9, 14, 0.18) 100%) !important;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.62),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(8, 9, 14, 0.88) 0%, rgba(8, 9, 14, 0.64) 76%, rgba(8, 9, 14, 0.25) 100%) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.62);
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
@@ -98,29 +99,26 @@
   font-weight: 800 !important;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  text-shadow: 0 0 16px rgba(229, 62, 56, 0.45);
 }
 
-/* Make Threshold destination cards true HD widescreen portals instead of 58px slits */
 .universe-destination {
-  border: 1px solid rgba(243, 235, 217, 0.22) !important;
-  background: linear-gradient(180deg, rgba(10, 11, 16, 0.78), rgba(7, 8, 12, 0.9)) !important;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  border: 1px solid rgba(243, 235, 217, 0.24) !important;
+  background: linear-gradient(180deg, rgba(10, 11, 16, 0.84), rgba(7, 8, 12, 0.94)) !important;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
 }
 
 .universe-destination-thumb {
   height: clamp(94px, 11.5vh, 124px) !important;
-  border-bottom: 1px solid rgba(229, 62, 56, 0.32) !important;
+  border-bottom: 1px solid rgba(229, 62, 56, 0.36) !important;
 }
 
 .universe-destination-thumb img {
   object-position: center 36% !important;
-  filter: brightness(0.96) contrast(1.08) saturate(1.08) !important;
+  filter: brightness(0.98) contrast(1.08) saturate(1.08) !important;
 }
 
 .universe-destination-thumb::after {
-  background:
-    linear-gradient(180deg, rgba(7, 8, 12, 0.12) 0%, transparent 45%, rgba(7, 8, 12, 0.86) 100%) !important;
+  background: linear-gradient(180deg, rgba(7, 8, 12, 0.1) 0%, transparent 45%, rgba(7, 8, 12, 0.86) 100%) !important;
 }
 
 .universe-destination em {
@@ -133,375 +131,589 @@
   font-size: 10px !important;
 }
 
-/* === RIOT WORK CHAMBERS: UNIFIED LIVING CITADEL HUD (NO SAAS BOXINESS) === */
+/* === CONCEPT 08: KATANA CUT-SCREEN MANGA ENGINE (NO SAAS SIDEBAR) === */
 
-.riot-room-shell {
+.katana-cut-shell.riot-room-shell {
   position: relative;
+  display: flex;
+  flex-direction: column !important;
   background: #050508 !important;
   isolation: isolate;
-  padding: 12px 16px 12px 12px;
-  gap: 14px;
+  padding: 8px 18px 8px !important;
+  gap: 0 !important;
 }
 
-.riot-room-shell > .app-main,
-.riot-room-shell > .riot-rail {
+.katana-cut-shell > .app-main {
   position: relative;
   z-index: 2;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
-/* Floating Tactical Waypoint Spine instead of flat grey SaaS sidebar */
-.riot-room-shell .riot-rail {
-  width: 88px;
-  flex: 0 0 88px;
-  height: calc(100vh - 24px);
-  background: linear-gradient(180deg, rgba(9, 10, 15, 0.84) 0%, rgba(6, 7, 11, 0.72) 100%);
-  border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 2px solid #e53e38;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-}
-
-.riot-room-shell .rail-mark {
-  height: 64px;
-  border-bottom: 1px solid rgba(243, 235, 217, 0.12);
-  background: radial-gradient(circle at 50% 50%, rgba(229, 62, 56, 0.2), transparent 72%);
-}
-
-.riot-room-shell .rail-emblem-img {
-  width: 28px;
-  height: 28px;
-  color: #f4eee4;
-}
-
-.riot-room-shell .rail-item {
-  height: 62px;
-  border-bottom: 1px solid rgba(243, 235, 217, 0.06);
-  color: #b8b0a2;
-  font-size: 11px;
-  letter-spacing: 0.08em;
-  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
-}
-
-.riot-room-shell .rail-item:hover {
-  color: #f4eee4;
-  background: rgba(229, 62, 56, 0.12);
-}
-
-.riot-room-shell .rail-item.active {
-  background: linear-gradient(90deg, rgba(229, 62, 56, 0.36) 0%, rgba(229, 62, 56, 0.08) 100%);
-  color: #f4eee4;
-  border-left: 3px solid #d7ff36;
-  box-shadow: inset 0 0 22px rgba(229, 62, 56, 0.25);
-}
-
-.riot-room-shell .rail-item.active svg {
-  color: #d7ff36;
-  filter: drop-shadow(0 0 8px rgba(215, 255, 54, 0.55));
-}
-
-.riot-room-shell .rail-sticker {
-  display: none;
-}
-
-.riot-room-shell .rail-bottom {
-  padding: 8px;
-  gap: 6px;
-}
-
-.riot-room-shell .switchboard {
-  background: rgba(12, 13, 19, 0.78);
-  border: 1px solid rgba(229, 62, 56, 0.42);
-  color: #f4eee4;
-}
-
-/* Unified Floating Top HUD Bridge (collapsing 3-bar SaaS stack) */
-.riot-room-shell .topbar {
-  height: 56px;
-  flex: 0 0 56px;
-  padding: 0 18px;
-  gap: 16px;
-  background: linear-gradient(90deg, rgba(9, 10, 15, 0.84) 0%, rgba(9, 10, 15, 0.66) 100%);
-  border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 3px solid #e53e38;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
-}
-
-.riot-room-shell .topbar-brand {
-  min-width: 210px;
-}
-
-.riot-room-shell .brand-crown-img {
-  width: 34px;
-  height: 24px;
-}
-
-.riot-room-shell .topbar-brand > span:nth-child(2) {
-  font-size: 21px;
-  letter-spacing: -0.03em;
-}
-
-.riot-room-shell .topbar-brand small {
-  font-size: 8.5px;
-  letter-spacing: 0.1em;
-}
-
-.riot-room-shell .context-chip,
-.riot-room-shell .shortcut {
-  background: rgba(6, 7, 11, 0.68);
-  border: 1px solid rgba(243, 235, 217, 0.18);
-  padding: 6px 10px;
-}
-
-/* Merge RoomContextBar + ScreenHeading into a sleek 28px HUD telemetry sub-strip */
-.riot-room-shell .room-context-bar {
-  min-height: 28px;
-  height: 28px;
-  padding: 0 14px;
-  margin-top: 6px;
-  background: rgba(7, 8, 12, 0.56);
-  border: 1px solid rgba(243, 235, 217, 0.1);
-  border-bottom: 0;
-}
-
-.riot-room-shell .screen-heading {
-  height: 24px;
-  flex: 0 0 24px;
-  padding: 3px 14px 0;
-  background: rgba(7, 8, 12, 0.42);
-  border: 1px solid rgba(243, 235, 217, 0.08);
-  border-top: 0;
-  color: #b8b0a2;
-}
-
-.riot-room-shell .page-content {
-  padding: 12px 4px 18px 2px;
-}
-
-.riot-room-shell .app-footer {
-  height: 28px;
-  flex: 0 0 28px;
-  padding: 0 14px;
-  background: rgba(7, 8, 12, 0.68);
-  border: 1px solid rgba(243, 235, 217, 0.12);
-}
-
-/* === CHAMFERED OBSIDIAN HUD SLATES (ZERO PER-PANEL BLUR LAG) === */
-
-.riot-room-shell .riot-panel,
-.riot-room-shell .monitor-service-card,
-.riot-room-shell .monitor-stat-card,
-.riot-room-shell .monitor-repo-card,
-.riot-room-shell .project-card,
-.riot-room-shell .milestone-board,
-.riot-room-shell .repo-panel,
-.riot-room-shell .deck-overseer-strip,
-.riot-room-shell .monitor-canon-strip {
-  position: relative;
-  background:
-    linear-gradient(155deg, rgba(16, 17, 25, 0.76) 0%, rgba(8, 9, 14, 0.66) 100%);
-  border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 2px solid rgba(229, 62, 56, 0.72);
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.52),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
-}
-
-/* Replace solid pastel/cream/salmon SaaS header bars with laser-etched dark HUD headers */
-.riot-room-shell .panel-heading,
-.riot-room-shell .panel-heading.cream,
-.riot-room-shell .panel-heading.pink,
-.riot-room-shell .panel-heading.purple-head {
-  height: 34px;
-  padding: 0 12px;
-  color: #f4eee4;
-  background:
-    linear-gradient(90deg, rgba(229, 62, 56, 0.28) 0%, rgba(229, 62, 56, 0.06) 55%, rgba(10, 11, 16, 0.3) 100%);
-  border-bottom: 1px solid rgba(243, 235, 217, 0.14);
-  font-size: 13px;
-  letter-spacing: 0.1em;
-}
-
-.riot-room-shell .panel-heading.purple-head {
-  background:
-    linear-gradient(90deg, rgba(116, 168, 220, 0.28) 0%, rgba(101, 85, 255, 0.08) 55%, transparent 100%);
-}
-
-.riot-room-shell .panel-heading button {
-  color: #d7ff36;
-  font: 9.5px "IBM Plex Mono", monospace;
-  letter-spacing: 0.08em;
-}
-
-/* === DECK CHAMBER REFINEMENTS === */
-
-.riot-room-shell .deck-overseer-strip {
-  padding: 7px 12px;
-  margin-bottom: 10px;
-  border-left-color: #d7ff36;
-}
-
-.riot-room-shell .deck-hero {
-  grid-template-columns: 1.05fr 1fr;
-  gap: 16px;
-  min-height: 188px;
-  padding: 14px 16px;
-  border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 3px solid #e53e38;
-  background:
-    linear-gradient(120deg, rgba(9, 10, 15, 0.82) 0%, rgba(9, 10, 15, 0.46) 62%, rgba(9, 10, 15, 0.72) 100%);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.52);
+/* Compact top telemetry strip replacing tall enterprise app chrome */
+.katana-cut-shell .topbar {
+  height: 48px !important;
+  flex: 0 0 48px !important;
+  padding: 0 16px !important;
+  gap: 14px !important;
+  background: linear-gradient(90deg, rgba(10, 11, 16, 0.94) 0%, rgba(12, 13, 20, 0.84) 70%, rgba(229, 62, 56, 0.14) 100%) !important;
+  border: 1px solid rgba(243, 235, 217, 0.18) !important;
+  border-left: 4px solid #e53e38 !important;
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
-.riot-room-shell .hero-copy h1 {
-  font-size: clamp(38px, 3.8vw, 58px);
-  line-height: 0.86;
+.katana-cut-shell .topbar-brand {
+  min-width: 195px !important;
 }
 
-.riot-room-shell .hero-art {
-  min-height: 164px;
-  border: 1px solid rgba(229, 62, 56, 0.42);
-  background: #07080c;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+.katana-cut-shell .brand-crown-img {
+  width: 30px !important;
+  height: 22px !important;
 }
 
-.riot-room-shell .hero-art-backdrop {
-  object-position: center 34%;
-  filter: brightness(0.92) contrast(1.08) saturate(1.06);
+.katana-cut-shell .topbar-brand > span:nth-child(2) {
+  font-size: 19px !important;
 }
 
-.riot-room-shell .hero-art-scrim {
-  background:
-    linear-gradient(180deg, rgba(7, 8, 12, 0.18) 0%, rgba(7, 8, 12, 0.1) 50%, rgba(7, 8, 12, 0.84) 100%);
+.katana-cut-shell .topbar-brand small {
+  font-size: 8px !important;
+  letter-spacing: 0.11em !important;
 }
 
-.riot-room-shell .hero-waveform {
-  top: auto !important;
-  bottom: 10px !important;
-  left: 118px !important;
-  right: 12px !important;
-  width: auto !important;
-  height: 26px !important;
-  transform: none !important;
-  opacity: 0.92;
+.katana-cut-shell .context-chip,
+.katana-cut-shell .shortcut {
+  background: rgba(6, 7, 11, 0.86) !important;
+  border: 1px solid rgba(243, 235, 217, 0.2) !important;
+  padding: 5px 9px !important;
+  clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
 }
 
-.riot-room-shell .deck-grid {
-  grid-template-rows: 195px 175px;
+/* Horizontal Angled Katana Eyecatch Blade Bar (transforms vertical RiotRail!) */
+.katana-hud-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 6px;
+  min-height: 36px;
 }
 
-.riot-room-shell .create-chaos {
-  right: 28px !important;
-  bottom: 48px !important;
-  width: 224px !important;
-  height: 52px !important;
-  transform: none !important;
-  background: linear-gradient(90deg, rgba(229, 62, 56, 0.92) 0%, rgba(164, 32, 28, 0.92) 100%) !important;
-  border: 1px solid #ff8b80 !important;
-  color: #f4eee4 !important;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 22px rgba(229, 62, 56, 0.32) !important;
-  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)) !important;
+.katana-cut-shell .riot-rail {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: auto !important;
+  flex: 1 1 auto !important;
+  height: 36px !important;
+  padding: 0 4px !important;
+  gap: 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
-.riot-room-shell .create-chaos > b {
-  font-size: 18px !important;
-  line-height: 0.92 !important;
-}
-
-.riot-room-shell .create-chaos small {
+.katana-cut-shell .riot-rail .rail-mark,
+.katana-cut-shell .riot-rail .rail-sticker,
+.katana-cut-shell .riot-rail .rail-version {
   display: none !important;
 }
 
-/* === PIT, GIT & WORKSPACE CHAMBERS === */
+.katana-cut-shell .riot-rail .rail-nav {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: stretch !important;
+  gap: 6px !important;
+  flex: 0 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
-.riot-room-shell .workspace-title {
-  padding: 12px 16px;
-  border: 1px solid rgba(243, 235, 217, 0.15);
+.katana-cut-shell .riot-rail .rail-item {
+  width: auto !important;
+  height: 34px !important;
+  padding: 0 14px !important;
+  flex-direction: row !important;
+  gap: 7px !important;
+  border: 1px solid rgba(243, 235, 217, 0.2) !important;
+  border-left: 3px solid rgba(229, 62, 56, 0.55) !important;
+  background: rgba(8, 9, 14, 0.86) !important;
+  color: #cfc6b6 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: background-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+
+.katana-cut-shell .riot-rail .rail-item svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.katana-cut-shell .riot-rail .rail-item:hover {
+  background: rgba(229, 62, 56, 0.22) !important;
+  border-color: #e53e38 !important;
+  color: #f4eee4 !important;
+  transform: translateY(-1px);
+}
+
+.katana-cut-shell .riot-rail .rail-item.active {
+  background: linear-gradient(90deg, #e53e38 0%, #b3221d 100%) !important;
+  border-color: #f4eee4 !important;
+  border-left: 4px solid #d7ff36 !important;
+  color: #f4eee4 !important;
+  box-shadow: 0 6px 20px rgba(229, 62, 56, 0.42);
+}
+
+.katana-cut-shell .riot-rail .rail-item.active svg {
+  color: #d7ff36 !important;
+}
+
+.katana-cut-shell .riot-rail .rail-bottom {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin-left: auto !important;
+}
+
+.katana-cut-shell .switchboard {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 6px !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  width: auto !important;
+  background: rgba(8, 9, 14, 0.9) !important;
+  border: 1px solid rgba(215, 255, 54, 0.42) !important;
+  color: #d7ff36 !important;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.katana-cut-shell .switchboard br {
+  display: none;
+}
+
+.katana-cut-shell .room-context-bar {
+  flex: 0 0 auto !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  gap: 10px !important;
+  background: rgba(8, 9, 14, 0.88) !important;
+  border: 1px solid rgba(243, 235, 217, 0.16) !important;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+}
+
+.katana-cut-shell .room-context-title {
+  display: none !important;
+}
+
+.katana-cut-shell .screen-heading {
+  height: 22px !important;
+  flex: 0 0 22px !important;
+  margin-top: 4px !important;
+  padding: 2px 10px 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(229, 62, 56, 0.25) !important;
+  color: #bdb4a4 !important;
+}
+
+.katana-cut-shell .page-content {
+  padding: 10px 0 14px !important;
+}
+
+/* === CONCEPT 08: SKY SNIPER RETICLES & CONCEPT 05: ASTROLABE CROWN === */
+
+.katana-sky-beacons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+
+.katana-reticle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border: 1px solid rgba(243, 235, 217, 0.2);
+  background: rgba(7, 8, 12, 0.78);
+  color: #dfd6c7;
+  font: 9.5px "IBM Plex Mono", monospace;
+  letter-spacing: 0.06em;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  transition: border-color 0.14s ease, color 0.14s ease, transform 0.14s ease;
+}
+
+.katana-reticle i {
+  width: 6px;
+  height: 6px;
+  transform: rotate(45deg);
+  background: #e53e38;
+}
+
+.katana-reticle b {
+  color: #f4eee4;
+}
+
+.katana-reticle.status-online {
+  border-color: rgba(215, 255, 54, 0.55);
+  color: #d7ff36;
+}
+
+.katana-reticle.status-online i {
+  background: #d7ff36;
+  box-shadow: 0 0 8px #d7ff36;
+}
+
+.katana-reticle:hover {
+  border-color: #d7ff36;
+  transform: translateY(-1px);
+}
+
+.astrolabe-crown {
+  position: relative;
+  padding: 8px 14px 10px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(229, 62, 56, 0.34);
   border-left: 3px solid #e53e38;
-  background: linear-gradient(90deg, rgba(9, 10, 15, 0.82) 0%, rgba(9, 10, 15, 0.45) 100%);
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  background: radial-gradient(ellipse at 50% 45%, rgba(229, 62, 56, 0.12) 0%, rgba(7, 8, 12, 0.78) 70%);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
 }
 
-.riot-room-shell .workspace-art-plate {
-  width: 220px;
-  height: 76px;
-  border: 1px solid rgba(229, 62, 56, 0.45);
-  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+.astrolabe-ring-wrap {
+  position: relative;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.riot-room-shell .workspace-art-plate img {
-  object-position: center 36%;
-  filter: brightness(0.95) contrast(1.08);
+.astrolabe-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.85;
 }
 
-.riot-room-shell .large-issue-list {
-  min-height: 220px;
-  background:
-    radial-gradient(circle at 50% 50%, rgba(229, 62, 56, 0.08) 0%, transparent 65%),
-    linear-gradient(160deg, rgba(12, 13, 19, 0.72) 0%, rgba(7, 8, 12, 0.58) 100%);
+.astrolabe-nodes {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.astrolabe-monolith {
+  display: grid;
+  gap: 2px;
+  padding: 7px 10px;
+  text-align: left;
+  border: 1px solid rgba(243, 235, 217, 0.22);
+  background: rgba(8, 9, 14, 0.86);
+  color: #f4eee4;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.astrolabe-monolith:hover {
+  border-color: #d7ff36;
+  transform: translateY(-2px);
+}
+
+.astrolabe-monolith.status-online {
+  border-color: rgba(215, 255, 54, 0.65);
+  box-shadow: inset 0 0 18px rgba(215, 255, 54, 0.08);
+}
+
+.astrolabe-reticle-head {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #e53e38;
+  font: 9px "IBM Plex Mono", monospace;
+}
+
+.astrolabe-monolith.status-online .astrolabe-reticle-head {
+  color: #d7ff36;
+}
+
+.astrolabe-monolith strong {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.astrolabe-monolith small {
+  color: #a9a092;
+  font: 8.5px "IBM Plex Mono", monospace;
+}
+
+.astrolabe-meta-strip {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(243, 235, 217, 0.14);
+  font: 9.5px "IBM Plex Mono", monospace;
+  color: #b8b0a2;
+}
+
+.astrolabe-meta-strip b {
+  color: #d7ff36;
+}
+
+/* === KATANA SHARDS: CHAMFERED MANGA PANELS INSTEAD OF SAAS CARDS === */
+
+.katana-cut-shell .riot-panel,
+.katana-cut-shell .monitor-service-card,
+.katana-cut-shell .monitor-stat-card,
+.katana-cut-shell .monitor-repo-card,
+.katana-cut-shell .project-card,
+.katana-cut-shell .milestone-board,
+.katana-cut-shell .repo-panel,
+.katana-cut-shell .deck-overseer-strip,
+.katana-cut-shell .monitor-canon-strip {
+  position: relative;
+  background: linear-gradient(145deg, rgba(13, 14, 21, 0.84) 0%, rgba(7, 8, 12, 0.78) 100%) !important;
+  border: 1px solid rgba(243, 235, 217, 0.16) !important;
+  border-left: 3px solid #e53e38 !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+.katana-cut-shell .panel-heading,
+.katana-cut-shell .panel-heading.cream,
+.katana-cut-shell .panel-heading.pink,
+.katana-cut-shell .panel-heading.purple-head {
+  height: 32px !important;
+  padding: 0 12px !important;
+  color: #f4eee4 !important;
+  background: linear-gradient(90deg, rgba(229, 62, 56, 0.34) 0%, rgba(229, 62, 56, 0.06) 55%, rgba(8, 9, 14, 0.4) 100%) !important;
+  border-bottom: 1px solid rgba(243, 235, 217, 0.14) !important;
+  font-size: 12.5px !important;
+  letter-spacing: 0.12em !important;
+}
+
+.katana-cut-shell .panel-heading.purple-head {
+  background: linear-gradient(90deg, rgba(116, 168, 220, 0.28) 0%, rgba(101, 85, 255, 0.08) 55%, transparent 100%) !important;
+}
+
+.katana-cut-shell .panel-heading button {
+  color: #d7ff36 !important;
+  font: 9.5px "IBM Plex Mono", monospace !important;
+}
+
+/* Deck Katana Split Geometry */
+.katana-cut-shell .deck-overseer-strip {
+  padding: 6px 12px !important;
+  margin-bottom: 8px !important;
+  border-left-color: #d7ff36 !important;
+}
+
+.katana-cut-shell .deck-hero {
+  grid-template-columns: 1.02fr 1.1fr;
+  gap: 24px;
+  min-height: 176px;
+  padding: 12px 16px;
   border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 2px solid #e53e38;
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+  border-left: 4px solid #e53e38;
+  background: linear-gradient(110deg, rgba(8, 9, 14, 0.86) 0%, rgba(8, 9, 14, 0.38) 52%, rgba(8, 9, 14, 0.78) 100%);
+  clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
 
-.riot-room-shell .empty-state.large-empty {
+.katana-cut-shell .hero-copy h1 {
+  font-size: clamp(38px, 3.6vw, 56px);
+  line-height: 0.85;
+}
+
+.katana-cut-shell .hero-art {
+  min-height: 156px;
+  border: 1px solid rgba(229, 62, 56, 0.48);
+  background: #07080c;
+  clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
+}
+
+.katana-cut-shell .hero-art-backdrop {
+  object-position: center 34%;
+  filter: brightness(0.95) contrast(1.08) saturate(1.08);
+}
+
+.katana-cut-shell .hero-art-scrim {
+  background: linear-gradient(180deg, rgba(7, 8, 12, 0.16) 0%, rgba(7, 8, 12, 0.08) 50%, rgba(7, 8, 12, 0.84) 100%);
+}
+
+.katana-cut-shell .hero-waveform {
+  top: auto !important;
+  bottom: 10px !important;
+  left: 118px !important;
+  right: 18px !important;
+  width: auto !important;
+  height: 26px !important;
+  transform: none !important;
+}
+
+.katana-cut-shell .deck-grid {
+  grid-template-rows: 186px 168px;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.katana-cut-shell .deck-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.katana-cut-shell .deck-page .create-chaos {
+  position: static !important;
+  align-self: flex-end;
+  margin-top: 10px !important;
+  width: 224px !important;
+  height: 48px !important;
+  transform: none !important;
+  background: linear-gradient(90deg, #e53e38 0%, #a4201c 100%) !important;
+  border: 1px solid #ff8b80 !important;
+  color: #f4eee4 !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65) !important;
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%) !important;
+}
+
+.katana-cut-shell .deck-page .create-chaos > b {
+  font-size: 17px !important;
+  line-height: 0.92 !important;
+}
+
+.katana-cut-shell .deck-page .create-chaos small {
+  display: none !important;
+}
+
+/* Pit, Git & Workspace Chambers */
+.katana-cut-shell .workspace-title {
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 4px solid #e53e38;
+  background: linear-gradient(90deg, rgba(8, 9, 14, 0.88) 0%, rgba(8, 9, 14, 0.46) 100%);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+.katana-cut-shell .workspace-title h1 {
+  font-size: clamp(36px, 3.8vw, 54px);
+}
+
+.katana-cut-shell .workspace-art-plate {
+  width: 220px;
+  height: 70px;
+  border: 1px solid rgba(229, 62, 56, 0.5);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+}
+
+.katana-cut-shell .workspace-art-plate img {
+  object-position: center 36%;
+  filter: brightness(0.96) contrast(1.08);
+}
+
+.katana-cut-shell .large-issue-list {
+  min-height: 220px;
+  background: linear-gradient(155deg, rgba(11, 12, 18, 0.82) 0%, rgba(7, 8, 12, 0.68) 100%) !important;
+  border: 1px solid rgba(243, 235, 217, 0.16) !important;
+  border-left: 3px solid #e53e38 !important;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+.katana-cut-shell .empty-state.large-empty {
   min-height: 210px;
   background:
-    linear-gradient(90deg, rgba(243, 235, 217, 0.03) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(243, 235, 217, 0.03) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(243, 235, 217, 0.025) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(243, 235, 217, 0.025) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* === OVERSEER (MONITOR) DENSITY & CLIPPING FIX === */
-
-.riot-room-shell .monitor-page {
-  gap: 10px;
-  padding-bottom: 24px;
+/* Overseer (Monitor) Density */
+.katana-cut-shell .monitor-page {
+  gap: 9px;
+  padding-bottom: 18px;
 }
 
-.riot-room-shell .monitor-summary-grid {
-  gap: 10px;
+.katana-cut-shell .monitor-summary-grid,
+.katana-cut-shell .monitor-grid {
+  gap: 9px;
 }
 
-.riot-room-shell .monitor-stat-card {
-  padding: 10px 14px;
+.katana-cut-shell .monitor-stat-card {
+  padding: 9px 12px;
 }
 
-.riot-room-shell .monitor-stat-value {
-  font-size: 26px;
+.katana-cut-shell .monitor-stat-value {
+  font-size: 24px;
 }
 
-.riot-room-shell .monitor-grid {
-  gap: 10px;
+.katana-cut-shell .monitor-panel-body {
+  padding: 9px 12px;
 }
 
-.riot-room-shell .monitor-panel-body {
-  padding: 10px 12px;
+/* Anime Subtitle Bottom Ticker Bar */
+.katana-cut-shell .app-footer {
+  height: 28px !important;
+  flex: 0 0 28px !important;
+  padding: 0 14px !important;
+  background: rgba(6, 7, 11, 0.92) !important;
+  border: 1px solid rgba(229, 62, 56, 0.32) !important;
+  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
 }
 
-.riot-room-shell .monitor-services-grid {
-  gap: 8px;
-  padding: 10px 12px;
+.anime-subtitle-trace {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #f4eee4;
+  font: 10px "IBM Plex Mono", monospace;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.riot-room-shell .monitor-canon-strip {
-  padding: 10px 14px;
+.anime-subtitle-trace b {
+  color: #e53e38;
+  font-weight: 700;
 }
 
-.riot-room-shell .command-panel,
-.riot-room-shell .issue-dialog,
-.riot-room-shell .settings-dialog,
-.riot-room-shell .git-confirm-dialog {
-  background: rgba(9, 10, 15, 0.92);
-  border: 1px solid rgba(243, 235, 217, 0.22);
-  border-left: 3px solid #e53e38;
-  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.78);
+.anime-subtitle-trace svg {
+  color: #d7ff36;
+  flex: 0 0 auto;
+}
+
+.katana-cut-shell .command-panel,
+.katana-cut-shell .issue-dialog,
+.katana-cut-shell .settings-dialog,
+.katana-cut-shell .git-confirm-dialog {
+  background: rgba(9, 10, 15, 0.96);
+  border: 1px solid rgba(243, 235, 217, 0.24);
+  border-left: 4px solid #e53e38;
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.78);
+}
+
+@media (max-width: 1180px) {
+  .astrolabe-nodes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .katana-hud-bar {
+    flex-wrap: wrap;
+  }
 }

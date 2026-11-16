@@ -62,15 +62,15 @@ vec3 sampleFlip(vec2 uv) {
 
 float emberField(vec2 uv, float aspect) {
   vec2 grid = uv * vec2(18.0 * aspect, 18.0);
-  grid.y -= uTime * 0.18;
+  grid.y -= uTime * 0.16;
   vec2 cell = floor(grid);
   vec2 local = fract(grid) - 0.5;
   float rnd = hash21(cell);
-  if (rnd < 0.78) return 0.0;
+  if (rnd < 0.8) return 0.0;
   vec2 offset = vec2(fract(rnd * 13.7) - 0.5, fract(rnd * 29.3) - 0.5) * 0.55;
   offset.x += sin(uTime * 0.9 + rnd * 6.283) * 0.12;
   float d = length(local - offset);
-  float pulse = 0.6 + 0.4 * sin(uTime * 2.1 + rnd * 31.0);
+  float pulse = 0.65 + 0.35 * sin(uTime * 2.0 + rnd * 31.0);
   return smoothstep(0.085, 0.0, d) * pulse;
 }
 
@@ -80,10 +80,10 @@ void main() {
   vec2 centered = (uv - 0.5) * vec2(aspect, 1.0);
   float radius = length(centered);
 
-  vec2 parallax = uMouse * mix(0.012, 0.005, uCalm);
+  vec2 parallax = uMouse * mix(0.011, 0.004, uCalm);
   vec2 sceneUv = coverUv(uv) + parallax;
 
-  // 5-tap Contrast-Adaptive Sharpening (CAS) for crisp HD desktop presentation
+  // 5-tap Contrast-Adaptive Sharpening (CAS) for crisp 1080p presentation
   vec2 texel = 1.0 / max(uTexSize, vec2(1.0));
   vec3 c = sampleFlip(sceneUv);
   vec3 n = sampleFlip(sceneUv + vec2(0.0, -texel.y));
@@ -93,30 +93,24 @@ void main() {
 
   vec3 minNeighbor = min(min(n, s), min(e, w));
   vec3 maxNeighbor = max(max(n, s), max(e, w));
-  vec3 contrast = clamp(1.0 - (maxNeighbor - minNeighbor), 0.15, 1.0);
-  float sharpenStrength = mix(0.32, 0.16, uCalm);
-  vec3 sharpened = clamp(c + (c - (n + s + e + w) * 0.25) * contrast * sharpenStrength * 1.8, 0.0, 1.0);
+  vec3 contrast = clamp(1.0 - (maxNeighbor - minNeighbor), 0.18, 1.0);
+  float sharpenStrength = mix(0.32, 0.2, uCalm);
+  vec3 col = clamp(c + (c - (n + s + e + w) * 0.25) * contrast * sharpenStrength * 1.8, 0.0, 1.0);
 
-  vec3 col = sharpened;
-
-  // Subtle anamorphic key glow + atmospheric tint
   vec2 glowPos = vec2(uGlow.x, 1.0 - uGlow.y);
   float glowDist = length((uv - glowPos) * vec2(aspect, 1.0));
-  col += uAccent * smoothstep(0.85, 0.0, glowDist) * mix(0.18, 0.11, uCalm);
+  col += uAccent * smoothstep(0.85, 0.0, glowDist) * mix(0.16, 0.1, uCalm);
 
-  // Crisp GPU ember motes
   float sparks = emberField(uv, aspect);
-  col += mix(uAccent, vec3(1.0, 0.78, 0.45), 0.45) * sparks * mix(0.85, 0.42, uCalm);
+  col += mix(uAccent, vec3(1.0, 0.78, 0.45), 0.45) * sparks * mix(0.8, 0.35, uCalm);
 
-  // Cinema contrast & shadow floor grade
   float luma = dot(col, vec3(0.299, 0.587, 0.114));
   col = mix(vec3(luma), col, 1.12);
-  col = clamp((col - 0.5) * 1.07 + 0.5, 0.0, 1.0);
+  col = clamp((col - 0.5) * 1.06 + 0.5, 0.0, 1.0);
 
-  // Vignette & work-chamber exposure balance (keep architecture clearly visible!)
-  float vignette = smoothstep(1.18, 0.26, radius);
-  col *= mix(0.46, 1.0, vignette);
-  col *= mix(1.0, 0.72, uCalm);
+  float vignette = smoothstep(1.22, 0.28, radius);
+  col *= mix(0.5, 1.0, vignette);
+  col *= mix(1.0, 0.76, uCalm);
 
   col = mix(vec3(0.02, 0.02, 0.03), col, uFade);
   outColor = vec4(col, 1.0);
@@ -167,9 +161,9 @@ interface SceneUniforms {
 }
 
 /**
- * Lightweight hardware-accelerated WebGL2 stage with 5-tap Contrast-Adaptive
- * Sharpening (CAS), anamorphic key light, and smart frame pacing so desktop GPU
- * rendering stays razor-sharp without continuous 60fps shader bloat.
+ * Demand-driven hardware WebGL2 stage with 5-tap CAS sharpening.
+ * Sleeps at 0 FPS idle in work chambers (calm > 0) and wakes cleanly only on
+ * scene changes, resize, fade-in, or brief pointer parallax so UI stays 60fps.
  */
 export function GpuScene({
   artworkSrc,
@@ -186,6 +180,7 @@ export function GpuScene({
   const paramsRef = useRef({ accent, glow, pan, zoom, calm, reducedMotion, visible });
   const imageSrcRef = useRef(artworkSrc);
   const reloadRef = useRef<((src: string) => void) | null>(null);
+  const wakeRef = useRef<(() => void) | null>(null);
 
   paramsRef.current = { accent, glow, pan, zoom, calm, reducedMotion, visible };
 
@@ -251,7 +246,7 @@ export function GpuScene({
 
     let textureWidth = 1920;
     let textureHeight = 1080;
-    let fade = 0.25;
+    let fade = 0.4;
     let disposed = false;
     let rafId = 0;
     let lastFrame = 0;
@@ -265,8 +260,7 @@ export function GpuScene({
     const anisotropy = gl.getExtension("EXT_texture_filter_anisotropic");
 
     const resize = () => {
-      const maxDpr = paramsRef.current.calm > 0.2 ? 1.35 : 2;
-      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
       const width = Math.max(1, Math.floor((canvas.clientWidth || window.innerWidth) * dpr));
       const height = Math.max(1, Math.floor((canvas.clientHeight || window.innerHeight) * dpr));
       if (canvas.width !== width || canvas.height !== height) {
@@ -275,14 +269,14 @@ export function GpuScene({
       }
       gl.viewport(0, 0, canvas.width, canvas.height);
     };
+    resize();
 
     const draw = (now: number) => {
       if (disposed) return;
       const params = paramsRef.current;
-      resize();
-      mouseX += (targetX - mouseX) * 0.08;
-      mouseY += (targetY - mouseY) * 0.08;
-      fade = Math.min(1, fade + 0.08);
+      mouseX += (targetX - mouseX) * 0.14;
+      mouseY += (targetY - mouseY) * 0.14;
+      fade = Math.min(1, fade + 0.12);
       const seconds = (now - startedAt) / 1000;
       gl.useProgram(program);
       gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
@@ -300,6 +294,38 @@ export function GpuScene({
       gl.uniform1f(uniforms.calm, params.calm);
       gl.uniform1f(uniforms.fade, fade);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+    };
+
+    const needsAnimation = (now: number) => {
+      const params = paramsRef.current;
+      if (!params.visible) return false;
+      if (fade < 0.995) return true;
+      if (params.reducedMotion) return false;
+      if (params.calm <= 0.2) return true;
+      return now - lastInteraction < 450;
+    };
+
+    const scheduleTick = () => {
+      if (rafId || disposed) return;
+      if (!needsAnimation(performance.now())) return;
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    const tick = (now: number) => {
+      rafId = 0;
+      if (disposed || !needsAnimation(now)) return;
+      const interval = paramsRef.current.calm > 0.2 ? 1000 / 24 : 1000 / 16;
+      if (now - lastFrame >= interval - 1) {
+        lastFrame = now;
+        draw(now);
+      }
+      scheduleTick();
+    };
+
+    wakeRef.current = () => {
+      lastInteraction = performance.now();
+      draw(lastInteraction);
+      scheduleTick();
     };
 
     const loadTexture = (src: string) => {
@@ -328,39 +354,28 @@ export function GpuScene({
         }
         textureWidth = image.naturalWidth || 1920;
         textureHeight = image.naturalHeight || 1080;
-        fade = 0.35;
+        fade = 0.55;
         lastInteraction = performance.now();
         draw(lastInteraction);
+        scheduleTick();
       };
       image.src = src;
     };
     reloadRef.current = loadTexture;
     loadTexture(imageSrcRef.current);
 
-    const frameInterval = (now: number) => {
-      const activePointer = now - lastInteraction < 650 || fade < 0.99;
-      if (activePointer) return 1000 / 60;
-      return paramsRef.current.calm > 0.2 ? 1000 / 15 : 1000 / 24;
-    };
-
-    const tick = (now: number) => {
-      rafId = window.requestAnimationFrame(tick);
-      const params = paramsRef.current;
-      if (!params.visible || (params.reducedMotion && fade >= 1)) return;
-      if (now - lastFrame < frameInterval(now) - 1) return;
-      lastFrame = now;
-      draw(now);
-    };
-
     const handlePointer = (event: PointerEvent) => {
       lastInteraction = performance.now();
       targetX = (event.clientX / (window.innerWidth || 1) - 0.5) * 2;
       targetY = (event.clientY / (window.innerHeight || 1) - 0.5) * -2;
+      scheduleTick();
     };
 
     const handleResize = () => {
+      resize();
       lastInteraction = performance.now();
       draw(lastInteraction);
+      scheduleTick();
     };
 
     const handleLost = (event: Event) => {
@@ -371,12 +386,13 @@ export function GpuScene({
     window.addEventListener("pointermove", handlePointer, { passive: true });
     window.addEventListener("resize", handleResize);
     canvas.addEventListener("webglcontextlost", handleLost);
-    rafId = window.requestAnimationFrame(tick);
+    scheduleTick();
 
     return () => {
       disposed = true;
       reloadRef.current = null;
-      window.cancelAnimationFrame(rafId);
+      wakeRef.current = null;
+      if (rafId) window.cancelAnimationFrame(rafId);
       window.removeEventListener("pointermove", handlePointer);
       window.removeEventListener("resize", handleResize);
       canvas.removeEventListener("webglcontextlost", handleLost);
@@ -388,10 +404,13 @@ export function GpuScene({
   }, [onUnsupported]);
 
   useEffect(() => {
-    if (imageSrcRef.current === artworkSrc) return;
-    imageSrcRef.current = artworkSrc;
-    reloadRef.current?.(artworkSrc);
-  }, [artworkSrc]);
+    if (imageSrcRef.current !== artworkSrc) {
+      imageSrcRef.current = artworkSrc;
+      reloadRef.current?.(artworkSrc);
+      return;
+    }
+    wakeRef.current?.();
+  }, [artworkSrc, calm, pan, zoom, reducedMotion, visible]);
 
   return <canvas ref={canvasRef} className="world-gpu-canvas" data-renderer="webgl2" />;
 }

@@ -310,13 +310,6 @@ export function IllustratedStage({
         data-destination={resolvedDestination}
         data-scene={scene}
       >
-        <div className="world-artwork-stage">
-          <img
-            src={artworkSrc}
-            alt=""
-            className={`world-artwork-img${scene === "awakening" ? " is-awakening" : ""}`}
-          />
-        </div>
         <GpuScene
           artworkSrc={artworkSrc}
           accent={focus.accentRgb}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Command, Search, X } from "lucide-react";
 import { CreateIssueDialog, EditIssueDialog, RiotRail, SettingsDialog, Topbar } from "./components";
 import { IllustratedStage } from "./components/ui/IllustratedStage";
+import { KatanaAgentSubtitle } from "./components/ui/KatanaSkyHud";
 import { Deck, Git, Monitor, Noise, Pit, WarRoom } from "./features";
 import { isDesktop } from "./lib";
 import { useAppStore } from "./store";
@@ -225,9 +226,8 @@ export default function App() {
           : "riot-deck";
 
   return (
-    <div className="app-shell riot-room-shell" data-reduced-motion={reducedMotion} data-sector={page}>
+    <div className="app-shell riot-room-shell katana-cut-shell" data-reduced-motion={reducedMotion} data-sector={page}>
       <IllustratedStage scene={sectorScene} destination={sectorScene} reducedMotion={reducedMotion} subtle />
-      <RiotRail page={page} onNavigate={navigateDestination} onSwitchboard={() => setCommandOpen(true)} />
       <div className="app-main">
         <Topbar
           repositories={repositories}
@@ -241,12 +241,15 @@ export default function App() {
           }}
           monitorSummary={topbarMonitorSummary}
         />
-        <RoomReturnButton
-          onReturn={returnToThreshold}
-          reducedMotion={reducedMotion}
-          systemReducedMotion={systemReducedMotion}
-          onToggleMotion={toggleMotion}
-        />
+        <div className="katana-hud-bar">
+          <RiotRail page={page} onNavigate={navigateDestination} onSwitchboard={() => setCommandOpen(true)} />
+          <RoomReturnButton
+            onReturn={returnToThreshold}
+            reducedMotion={reducedMotion}
+            systemReducedMotion={systemReducedMotion}
+            onToggleMotion={toggleMotion}
+          />
+        </div>
         <div className="screen-heading">
           <span>
             THE RIOT DECK / <b>{pageTitles[page]}</b>
@@ -331,9 +334,13 @@ export default function App() {
           <span>
             ROCKSOUL - DX <b>0.1.0</b>
           </span>
-          <span>YOUR MACHINE / YOUR CREW / YOUR RULES</span>
+          <KatanaAgentSubtitle
+            monitor={monitor}
+            branch={repositories.find((repo) => repo.id === selectedRepository)?.branch || repositories[0]?.branch}
+            pageTitle={pageTitles[page] || "WORKBENCH"}
+          />
           <span>
-            LOCAL FIRST <i />
+            YOUR MACHINE · LOCAL FIRST <i />
           </span>
         </footer>
       </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { ArrowUpRight, GitCommitHorizontal, Plus, Radio, ShieldAlert } from "lucide-react";
 import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
+import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
 import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
 import type { ActivityEvent, Issue, MonitorSnapshot, Repository } from "../lib/contracts";
 
@@ -75,6 +76,7 @@ export default function Deck({
           </div>
         </section>
       )}
+      <KatanaSkyHud monitor={monitor} mode="compact" onOpenUrl={onOpenUrl} />
       <section className="deck-hero">
         <div className="hero-copy">
           <span className="eyebrow">

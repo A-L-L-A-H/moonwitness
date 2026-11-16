@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { FOUR_ENTRY_DOORS, PRIME_CODE_AXIOMS, SUPREME_IDENTITY } from "@moonwitness/canon";
 import { thumbSignalUrl } from "../assets/art";
+import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
 import { AnarchyStarSigil } from "../components/ui/RocksoulVectors";
 import type { MonitorSnapshot } from "../lib/contracts";
 
@@ -113,6 +114,8 @@ export default function Monitor({
           BROWSER PREVIEW MODE — Native C:/Z: disk steward, Antigravity session scanner, and live loopback TCP probes run inside the desktop Tauri app.
         </p>
       )}
+
+      <KatanaSkyHud monitor={snapshot} mode="astrolabe" onOpenUrl={onOpenUrl} />
 
       <div className="monitor-summary-grid">
         <article className="riot-panel monitor-stat-card">
