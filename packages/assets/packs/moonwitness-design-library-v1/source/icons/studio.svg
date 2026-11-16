@@ -1,3 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-  <path d="M6 10l5-5h6l5 5v6l-5 5h-6l-5-5zM10 10v6M14 10v6M12 8v8"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" data-rough="1"><defs>
+  <filter id="rough-studio" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="42" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="ink-studio" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" seed="78" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="0.6"/>
+  </filter>
+</defs><g clip-path="inset(2px round 2px)" transform="translate(12,12) scale(0.8) translate(-12,-12)" filter="url(#rough-studio)" stroke="currentColor">
+  <path d="M6 10l4.98-5.18h6.29l4.72 5.04v6.33l-5.14 5.16h-6.3l-5.03-5.18zM10.27 10.08v5.65M13.93 9.93v6.1M11.98 7.93v7.83"/>
+</g><g opacity="0.55" stroke="currentColor" stroke-width="0.7" fill="none">
+    <path d="M3 3 l3 1"/>
+    <path d="M19 19 l-2 2"/>
+    <path d="M4 19 l2 -1"/>
+  </g></svg>

@@ -1,4 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
-  <path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Zm6-3v15m6-12v15"/>
-  <path d="m3 13 6-3 6 4 6-4"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" data-rough="1"><defs>
+  <filter id="rough-atlas" x="-20%" y="-20%" width="140%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="35" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.2" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+  <filter id="ink-atlas" x="-10%" y="-10%" width="120%" height="120%">
+    <feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="3" seed="65" result="t"/>
+    <feDisplacementMap in="SourceGraphic" in2="t" scale="0.6"/>
+  </filter>
+</defs><g clip-path="inset(1px round 2px)" transform="translate(12,12) scale(0.92) translate(-12,-12)" filter="url(#rough-atlas)" stroke="currentColor">
+  <path d="m2.96 6.09 6.19-3.07 6.08 2.76 5.71-2.69v15.11l-6.21 3.09-5.83-3.15-6.21 3.14Zm6.31-3.11v14.94m6.02-12.14v15.26"/>
+  <path d="m2.96 13.09 6.19-3.07 6.08 3.76 5.71-3.69"/>
+</g><g opacity="0.55" stroke="currentColor" stroke-width="0.7" fill="none">
+    <path d="M4 4 l4 1"/>
+    <path d="M20 18 l-3 2"/>
+    <path d="M5 18 l2 -2"/>
+  </g></svg>

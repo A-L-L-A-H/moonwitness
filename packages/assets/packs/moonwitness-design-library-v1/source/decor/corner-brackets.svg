@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="320" viewBox="0 0 512 320" fill="none" color="#f4eede">
-  <path fill="currentColor" d="M12 48V24l12-12h56v6H27l-9 9v21Zm420-36h56l12 12v24h-6V27l-9-9h-53ZM12 272h6v21l9 9h53v6H24l-12-12Zm482 0h6v24l-12 12h-56v-6h53l9-9Z"/>
-  <path stroke="currentColor" stroke-width="2" d="M24 58V32l8-8h58m332 0h58l8 8v26M24 262v26l8 8h58m332 0h58l8-8v-26"/>
-  <path fill="currentColor" d="M34 12h18l-6 6H28Zm428 0h18l4 6h-16ZM28 302h18l6 6H34Zm440 0h16l-4 6h-18Z"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="320" viewBox="0 0 512 320" fill="none" color="#f4eede" stroke-width="3" data-rough="1"><defs><filter id="rough-corner-brackets" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="41.4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/></filter></defs><g filter="url(#rough-corner-brackets)">
+  <path fill="currentColor" d="M12.4 47.46V24.55l12.25-12.11h56.41v6.09H26.92l-9.07 8.53v21.59Zm419.44-35.45h56.16l12.43 12.32v24.26h-5.72V27l-9.39-9.01h-52.57ZM11.67 272.3h6.51v20.52l9.06 9.21h52.92v5.89H24.41l-12.52-11.6Zm482.39 -0.19h6.1v24.11l-11.55 11.98h-56.18v-6.59h52.4l9.5-9.01Z"/>
+  <path stroke="currentColor" stroke-width="2" d="M24.4 57.46V32.55l8.25-8.11h58.41m332.09 -0.08h57.93l7.53 8.59v25.44M24.55 262.16v26.43l8.32 8.26h58.28m332 -0.39h57.99l8.43-8.33v-25.7"/>
+  <path fill="currentColor" d="M34.4 11.46h18.55l-5.75 5.89H28.41Zm428.09 -0.08h17.93l3.53 6.59h-16.56ZM28.55 302.16h18.43l6.32 6.26H34.28Zm440 -0.39h15.99l-3.57 5.67h-17.7Z"/>
+<g opacity="0.45" stroke="currentColor" stroke-width="1" fill="none"><path d="M20 20 l40 8"/><path d="M80 40 l-30 12"/></g></g></svg>

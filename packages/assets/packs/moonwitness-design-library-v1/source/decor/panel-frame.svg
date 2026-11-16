@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="320" viewBox="0 0 512 320" fill="none" color="#f4eede" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="320" viewBox="0 0 512 320" fill="none" color="#f4eede" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" data-rough="1"><defs><filter id="rough-panel-frame" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="46.19" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="1.8"/></filter></defs><g filter="url(#rough-panel-frame)">
   <rect x="16" y="16" width="480" height="288" rx="8"/>
   <rect x="32" y="32" width="448" height="256" rx="4"/>
-  <path d="M48 48h416M48 272h416M48 48v224M464 48v224"/>
-  <path stroke-width="1" d="M80 80h352M80 240h352M80 80v160M432 80v160"/>
-</svg>
+  <path d="M48.19 48.23h415.71M47.69 272.4h415.54M48.31 48.29v223.47M464.05 47.5v223.75"/>
+  <path stroke-width="1" d="M80.19 80.23h351.71M79.69 240.4h351.54M80.31 80.29v159.47M432.05 79.5v159.75"/>
+<g opacity="0.45" stroke="currentColor" stroke-width="1" fill="none"><path d="M20 20 l40 8"/><path d="M80 40 l-30 12"/></g></g></svg>
