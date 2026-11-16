@@ -1,0 +1,128 @@
+{
+  "schema_version": "rocksoul.research-steward-policy.v2",
+  "canonical_issue_contract": "contracts/research-issue-contract.v1.json",
+  "canonical_topology": "contracts/research-steward-topology.v1.json",
+  "principles": {
+    "issue_first": true,
+    "progression_before_discovery": true,
+    "hourly_does_not_force_discovery": true,
+    "domain_owners_do_not_mint_relationship_edges": true,
+    "correlation_is_event_driven": true
+  },
+  "decision_order": [
+    "HEALTH",
+    "BACKLOG",
+    "BLOCKERS",
+    "PROGRESSION",
+    "CANDIDATE_STAGING",
+    "CONVERGENCE",
+    "RELATIONSHIP_HANDOFF",
+    "DISCOVERY",
+    "VALIDATION",
+    "SIGNAL"
+  ],
+  "actionable_lifecycle_states": [
+    "discovered",
+    "triaged",
+    "needs_sources",
+    "source_inspected",
+    "ready_for_observation"
+  ],
+  "progression_priority": {
+    "ready_for_observation": 100,
+    "source_inspected": 90,
+    "needs_sources": 70,
+    "triaged": 55,
+    "discovered": 35
+  },
+  "shared_slot_context_protocol": {
+    "story-history-bootstrap": [
+      { "operation": "RUN_DOMAIN_PASS", "domain": "STORY", "repository": "rocksoul-mftl" },
+      { "operation": "RESET_CONTEXT" },
+      { "operation": "RUN_DOMAIN_PASS", "domain": "EVENT", "repository": "rocksoul-legend" }
+    ],
+    "attestation-bootstrap": [
+      { "operation": "RUN_DOMAIN_PASS", "domain": "TEXT", "repository": "rocksoul-rgbl" },
+      { "operation": "RESET_CONTEXT" },
+      { "operation": "RUN_DOMAIN_PASS", "domain": "PERSON", "repository": "rocksoul-superhero" }
+    ]
+  },
+  "wip_backpressure": {
+    "configurable": true,
+    "defaults": {
+      "soft_actionable_limit": 8,
+      "hard_actionable_limit": 16,
+      "source_inspected_to_candidate_ratio_limit": 2
+    },
+    "behavior": {
+      "at_soft_limit": "PREFER_PROGRESSION",
+      "at_hard_limit": "SUPPRESS_ROUTINE_DISCOVERY",
+      "candidate_lag": "SUPPRESS_ROUTINE_DISCOVERY"
+    },
+    "never_suppress": [
+      "SAFETY_OR_INTEGRITY_BLOCKER",
+      "SOURCE_FRESHNESS_CRITICAL",
+      "EXPLICIT_HUMAN_REQUEST"
+    ]
+  },
+  "rps_v1": {
+    "name": "RPS_V1",
+    "scale": { "minimum": 0, "maximum": 100 },
+    "formula": "clamp(0,100,progression_value+evidence_gain+cross_domain_value+freshness_value+novelty_value-diversity_redundancy_penalty-wip_discovery_penalty)",
+    "dimensions": {
+      "progression_value": { "maximum": 30, "description": "Value of advancing existing actionable work toward its next evidence gate." },
+      "evidence_gain": { "maximum": 25, "description": "Expected increase in qualified evidence or reduction in uncertainty." },
+      "cross_domain_value": { "maximum": 15, "description": "Value to another owner domain without minting foreign canon." },
+      "freshness_value": { "maximum": 10, "description": "Time sensitivity of the evidence or source state." },
+      "novelty_value": { "maximum": 20, "description": "Non-duplicative informational value after diversity checks." }
+    },
+    "penalties": {
+      "diversity_redundancy_penalty": { "maximum": 20 },
+      "wip_discovery_penalty": { "maximum": 30, "applies_to": "DISCOVERY" }
+    },
+    "tie_breakers": [
+      "higher_progression_value",
+      "higher_evidence_gain",
+      "older_actionable_issue",
+      "stable_identifier"
+    ]
+  },
+  "diversity_governor": {
+    "dimensions": [
+      "source_class",
+      "publisher_or_institution",
+      "geography",
+      "language",
+      "actor_class",
+      "framing"
+    ],
+    "rules": [
+      "ARTICLE_COUNT_IS_NOT_CONSENSUS",
+      "REPEATED_SIMILAR_SOURCES_ARE_NOT_DIVERSITY",
+      "SOURCE_CLUSTER_REDUNDANCY_REDUCES_NOVELTY",
+      "MISSING_DIVERSITY_DATA_REMAINS_UNKNOWN"
+    ]
+  },
+  "relationship_handoff": {
+    "schema": "contracts/relationship-handoff.v1.json",
+    "producer_may_propose": true,
+    "producer_may_create_canonical_edge": false,
+    "reviewer_repository": "rocksoul-correlation",
+    "review_mode": "EVENT_DRIVEN_REVIEW"
+  },
+  "research_signal": {
+    "schema": "contracts/research-signal.v1.json",
+    "structured_json_is_source_of_truth": true,
+    "human_rendering_is_derived": true
+  },
+  "allowed_terminal_run_outcomes": [
+    "ADVANCED",
+    "STAGED",
+    "ROUTED",
+    "HANDOFF",
+    "CONVERGENCE",
+    "DISCOVERED",
+    "BLOCKED",
+    "NO_UPDATE"
+  ]
+}

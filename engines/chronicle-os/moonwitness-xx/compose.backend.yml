@@ -1,0 +1,64 @@
+services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    profiles: ["operations"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in your environment or .env}
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: ${API_PORT:-4000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      CORS_ORIGINS: ${CORS_ORIGINS:?Set CORS_ORIGINS in your environment or .env}
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in your environment or .env}
+      REDIS_URL: ${REDIS_URL:?Set REDIS_URL in your environment or .env}
+    ports:
+      - "${API_PORT:-4000}:4000"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4000/health/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in your environment or .env}
+      REDIS_URL: ${REDIS_URL:?Set REDIS_URL in your environment or .env}
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-5}
+      OUTBOX_BATCH_SIZE: ${OUTBOX_BATCH_SIZE:-25}
+      OUTBOX_LEASE_SECONDS: ${OUTBOX_LEASE_SECONDS:-60}
+      OUTBOX_RETRY_DELAY_SECONDS: ${OUTBOX_RETRY_DELAY_SECONDS:-30}
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

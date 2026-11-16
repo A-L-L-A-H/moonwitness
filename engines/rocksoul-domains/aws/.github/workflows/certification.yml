@@ -1,0 +1,273 @@
+name: AWS CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aws-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify, test, certify, and containerize
+    runs-on: self-hosted
+    timeout-minutes: 90
+
+    env:
+      STORAGE_DRIVER: postgres
+      PGHOST: 127.0.0.1
+      PGPORT: 5432
+      PGUSER: postgres
+      PGPASSWORD: postgres-ci-only
+      PGDATABASE: moonwitness_ci
+      AWS_PG_CONTAINER: aws-postgres-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      AWS_PG_TEST_CONTAINER: aws-postgres-test-${{ github.run_id }}-${{ github.run_attempt }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node 26
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+          cache: npm
+
+      - name: Start PostgreSQL 18
+        run: |
+          set -euo pipefail
+          docker rm -f "$AWS_PG_CONTAINER" >/dev/null 2>&1 || true
+          docker run -d --name "$AWS_PG_CONTAINER" \
+            -e POSTGRES_USER=postgres \
+            -e POSTGRES_PASSWORD=postgres-ci-only \
+            -e POSTGRES_DB=moonwitness_ci \
+            --health-cmd="pg_isready -U postgres -d moonwitness_ci" \
+            --health-interval=2s \
+            --health-timeout=5s \
+            --health-retries=30 \
+            postgres:18
+          for i in $(seq 1 60); do
+            status=$(docker inspect --format='{{.State.Health.Status}}' "$AWS_PG_CONTAINER" 2>/dev/null || true)
+            if [ "$status" = "healthy" ]; then
+              echo "PostgreSQL is ready inside aws-postgres-ci"
+              break
+            fi
+            if [ "$status" = "unhealthy" ]; then
+              docker logs "$AWS_PG_CONTAINER" || true
+              exit 1
+            fi
+            sleep 2
+          done
+          status=$(docker inspect --format='{{.State.Health.Status}}' "$AWS_PG_CONTAINER")
+          test "$status" = healthy
+          docker exec "$AWS_PG_CONTAINER" pg_isready -U postgres -d moonwitness_ci
+
+      - name: Synchronize lockfile with manifest
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Dependency integrity
+        run: npm run dependency:integrity
+
+      - name: Dependency audit
+        run: npm run dependency:audit
+
+      - name: Documentation check
+        run: npm run docs:check
+
+      - name: Architecture check
+        run: npm run architecture:check
+
+      - name: Engine-only release scope
+        run: node scripts/release-scope-check.mjs
+
+      - name: Package build and runtime contracts
+        run: npm run test:package-runtime
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Release versioning policy
+        run: npm run test:release-versioning
+
+      - name: Release identity
+        run: npm run release:identity
+
+      - name: Generate verified release provenance
+        env:
+          RELEASE_EVIDENCE_DIR: ${{ runner.temp }}/aws-release-evidence
+        run: |
+          set -euo pipefail
+          mkdir -p "$RELEASE_EVIDENCE_DIR"
+          npm run release:provenance -- --output "$RELEASE_EVIDENCE_DIR/release-provenance.json"
+          npm run release:provenance -- --verify "$RELEASE_EVIDENCE_DIR/release-provenance.json"
+
+      - name: Release core suites
+        run: >-
+          node scripts/transpile-runner.mjs
+          tests/release/engine-only-scope.test.ts
+          tests/release/semantic/index.test.ts
+          tests/release/witness/index.test.ts
+          tests/release/revelation/index.test.ts
+          tests/release/event/index.test.ts
+          tests/release/security/index.test.ts
+          tests/release/persistence/index.test.ts
+          tests/release/production/index.test.ts
+
+      - name: Release platform contracts
+        run: npm run test:platform-contracts
+
+      - name: Release witness recovery
+        run: npm run test:witness-recovery
+
+      - name: Release PostgreSQL idempotency contract
+        run: npm run test:postgres-idempotency
+
+      - name: Release database backup contract
+        run: npm run test:database-backup
+
+      - name: Release witness integrity contract
+        run: npm run test:witness-integrity
+
+      - name: Release persistence adapter contract
+        run: npm run test:persistence-adapter
+
+      - name: Release evidence contract
+        run: npm run test:release-evidence
+
+      - name: Release idempotency contract
+        run: npm run test:idempotency
+
+      - name: Release authorization matrix
+        run: npm run test:authorization-matrix
+
+      - name: Release SDK compatibility
+        run: npm run test:sdk-compatibility
+
+      - name: Release deployment configuration
+        run: npm run test:deployment-config
+
+      - name: Release SDK runtime resilience
+        run: npm run test:sdk-runtime-resilience
+
+      - name: Release worker queue
+        run: npm run test:worker-queue
+
+      - name: Release API route inventory
+        run: npm run test:api-route-inventory
+
+      - name: Release AI provider governance
+        run: npm run test:ai-provider-governance
+
+      - name: Generate API application test cases
+        run: |
+          set -euo pipefail
+          cd apps/api
+          node tests/generate-test-cases.js
+
+      - name: Build API application test target
+        run: npm --prefix apps/api run build
+
+      - name: Stage API data-driven test cases
+        run: |
+          set -euo pipefail
+          cd apps/api
+          node -e "const fs=require('fs'); fs.readdirSync('tests').filter(f=>f.startsWith('test-cases-')).forEach(f=>fs.cpSync('tests/'+f, 'dist/apps/api/tests/'+f))"
+
+      - name: Release API unit tests
+        run: |
+          set -euo pipefail
+          cd apps/api
+          node --test --test-concurrency=1 dist/apps/api/tests/api.test.js
+
+      - name: Release API E2E tests
+        run: |
+          set -euo pipefail
+          cd apps/api
+          node --test --test-concurrency=1 dist/apps/api/tests/api-e2e.test.js
+
+      - name: Release API data-driven tests
+        run: |
+          set -euo pipefail
+          cd apps/api
+          node --test --test-concurrency=1 dist/apps/api/tests/api-data-driven.test.js
+
+      - name: PostgreSQL certification
+        run: |
+          set -euo pipefail
+          docker rm -f "$AWS_PG_TEST_CONTAINER" >/dev/null 2>&1 || true
+          docker create \
+            --name "$AWS_PG_TEST_CONTAINER" \
+            --network "container:$AWS_PG_CONTAINER" \
+            -w /workspace \
+            -e STORAGE_DRIVER=postgres \
+            -e PGHOST=127.0.0.1 \
+            -e PGPORT=5432 \
+            -e PGUSER=postgres \
+            -e PGPASSWORD=postgres-ci-only \
+            -e PGDATABASE=moonwitness_ci \
+            node:26-bookworm \
+            bash -lc 'npm run test:postgres'
+          docker cp "$GITHUB_WORKSPACE/." "$AWS_PG_TEST_CONTAINER:/workspace"
+          docker start -a "$AWS_PG_TEST_CONTAINER"
+
+      - name: Build API
+        run: npm run build:api
+
+      - name: Final certification
+        run: npm run certify:current
+
+      - name: Build Docker image
+        env:
+          RELEASE_EVIDENCE_DIR: ${{ runner.temp }}/aws-release-evidence
+        run: |
+          set -euo pipefail
+          docker pull ghcr.io/${{ github.repository }}:latest || true
+          docker build --cache-from ghcr.io/${{ github.repository }}:latest -t rocksoul-aws:${{ github.sha }} .
+          image_id=$(docker image inspect --format='{{.Id}}' "rocksoul-aws:${{ github.sha }}")
+          created=$(docker image inspect --format='{{.Created}}' "rocksoul-aws:${{ github.sha }}")
+          cat > "$RELEASE_EVIDENCE_DIR/container-image.json" <<EOF
+          {
+            "protocol": "AWS_CONTAINER_IMAGE_V1",
+            "source": {
+              "repository": "${{ github.repository }}",
+              "gitSha": "${{ github.sha }}",
+              "runId": "${{ github.run_id }}",
+              "runAttempt": "${{ github.run_attempt }}"
+            },
+            "image": {
+              "tag": "rocksoul-aws:${{ github.sha }}",
+              "imageId": "$image_id",
+              "created": "$created"
+            }
+          }
+          EOF
+
+      - name: Upload release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aws-release-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/aws-release-evidence
+          if-no-files-found: warn
+          retention-days: 90
+
+      - name: Cleanup PostgreSQL
+        if: always()
+        run: |
+          docker rm -f "$AWS_PG_TEST_CONTAINER" >/dev/null 2>&1 || true
+          docker rm -f "$AWS_PG_CONTAINER" >/dev/null 2>&1 || true

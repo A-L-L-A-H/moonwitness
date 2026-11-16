@@ -1,0 +1,148 @@
+export const metadata = {
+  title: "Deploy SvelteKit With SSR and API Routes",
+  description: "Deploy SvelteKit with SSR and API routes on your own VPS, with automatic HTTPS, preview deployments and zero cold starts. A self-hosted Vercel alternative.",
+  alternates: {
+    canonical: "/docs/deploy-svelte",
+  },
+  openGraph: {
+    title: "Deploy SvelteKit With SSR and API Routes",
+    description: "Deploy SvelteKit with SSR and API routes on your own VPS, with automatic HTTPS, preview deployments and zero cold starts. A self-hosted Vercel alternative.",
+    images: [{ url: "/og/docs/deploy-svelte.png", width: 1200, height: 630, alt: "Deploy SvelteKit" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy SvelteKit With SSR and API Routes",
+    description: "Deploy SvelteKit with SSR and API routes on your own VPS, with automatic HTTPS, preview deployments and zero cold starts. A self-hosted Vercel alternative.",
+    images: ["/og/docs/deploy-svelte.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'Node adapter setup', id: 'node-adapter-setup' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Environment variables', id: 'environment-variables' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+]
+
+# Deploy SvelteKit on Your Own Server
+
+**Push to your branch and Temps takes it from there** — SvelteKit applications with server-side rendering, API endpoints, and form actions are built with the Node adapter and live in about 2 minutes. No config files needed. No downtime. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up" },
+]} />
+
+SvelteKit needs the **Autopack (Node.js)** preset (`nixpacks-node`), which runs your app as a Node.js server:
+
+<CliCommands commands={[
+  { args: "up --preset nixpacks-node" },
+]} />
+
+Or pick it under **Project → Settings → Build & deploy → Build → Framework**.
+
+<Note>
+SvelteKit projects have a `vite.config.js` or `vite.config.ts`, so Temps detects them as the static **Vite** preset. That preset only serves files from `dist/` and can't run the SvelteKit server, so switch the project to Autopack (Node.js).
+</Note>
+
+With Autopack (Node.js), Temps runs your `build` script and starts the app with your `start` script. If there's no `start` script, it runs `node build/index.js`, which is where the Node adapter writes the server. A `web:` line in a `Procfile` takes priority over both.
+
+---
+
+## Node adapter setup {{ anchor: true, id: 'node-adapter-setup' }}
+
+SvelteKit requires the Node adapter for production deployments on Temps:
+
+<CodeGroup>
+
+```bash {{ title: 'npm' }}
+npm install -D @sveltejs/adapter-node
+```
+
+```bash {{ title: 'bun' }}
+bun add -D @sveltejs/adapter-node
+```
+
+```bash {{ title: 'pnpm' }}
+pnpm add -D @sveltejs/adapter-node
+```
+
+```bash {{ title: 'yarn' }}
+yarn add -D @sveltejs/adapter-node
+```
+
+</CodeGroup>
+
+```js
+// svelte.config.js
+import adapter from '@sveltejs/adapter-node';
+
+export default {
+  kit: {
+    adapter: adapter()
+  }
+};
+```
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | Your `build` script (for example `npm run build`) |
+| Start | Your `start` script, or `node build/index.js` if there isn't one |
+| HTTPS | Let's Encrypt, auto-renewed |
+| Port | `PORT` env var injected, defaults to 3000 |
+| API endpoints | Fully supported via Node adapter |
+| Form actions | Fully supported |
+| Static prerendering | Prerendered pages are served by the Node server |
+
+---
+
+## Environment variables {{ anchor: true, id: 'environment-variables' }}
+
+<CliCommands commands={[
+  { args: "environments vars set DATABASE_URL \"postgres://...\" -e production" },
+  { args: "environments vars set SECRET \"your-secret\" -e production" },
+]} />
+
+Public variables use the `PUBLIC_` prefix in SvelteKit.
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+  <Button href="/docs/set-up-preview-deployments" variant="text" arrow="right">
+    Preview deployments
+  </Button>
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Add a database
+  </Button>
+</div>

@@ -1,0 +1,98 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backend-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Install, test, migrate, build, and package backend
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: moonwitness
+          POSTGRES_USER: moonwitness
+          POSTGRES_PASSWORD: moonwitness
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U moonwitness -d moonwitness"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7.4-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://moonwitness:moonwitness@127.0.0.1:5432/moonwitness
+      REDIS_URL: redis://127.0.0.1:6379
+      CORS_ORIGINS: http://localhost:3000
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12.19.0
+
+      - name: Install workspace from committed lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate syntax and package scripts
+        run: pnpm check
+
+      - name: Run workspace unit tests
+        run: pnpm test
+
+      - name: Apply database migrations
+        run: pnpm db:migrate
+
+      - name: Verify PostgreSQL outbox to BullMQ relay
+        run: pnpm test:integration
+
+      - name: Verify migrations are idempotent
+        run: pnpm db:migrate
+
+      - name: Build API production image
+        run: docker build --file Dockerfile.api --tag moonwitness-api:ci .
+
+      - name: Build worker production image
+        run: docker build --file Dockerfile.worker --tag moonwitness-worker:ci .
+
+      - name: Package backend source
+        run: pnpm package:backend
+
+      - name: Upload backend package
+        uses: actions/upload-artifact@v4
+        with:
+          name: moonwitness-backend
+          path: dist/moonwitness-backend.zip
+          if-no-files-found: error
+          retention-days: 30

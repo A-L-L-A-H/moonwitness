@@ -1,0 +1,322 @@
+export const metadata = {
+  title: "Deploy Next.js With SSR and API Routes",
+  description: "Deploy Next.js apps with SSR, API routes and automatic HTTPS on infrastructure you own. No Vercel required, no per-seat pricing, set up in a few minutes.",
+  alternates: {
+    canonical: "/docs/deploy-nextjs",
+  },
+  openGraph: {
+    title: "Deploy Next.js With SSR and API Routes",
+    description: "Deploy Next.js apps with SSR, API routes and automatic HTTPS on infrastructure you own. No Vercel required, no per-seat pricing, set up in a few minutes.",
+    images: [{ url: "/og/docs/deploy-nextjs.png", width: 1200, height: 630, alt: "Deploy Next.js" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Next.js With SSR and API Routes",
+    description: "Deploy Next.js apps with SSR, API routes and automatic HTTPS on infrastructure you own. No Vercel required, no per-seat pricing, set up in a few minutes.",
+    images: ["/og/docs/deploy-nextjs.png"],
+  }
+};
+
+export const sections = [
+  { title: "Prerequisites", id: "prerequisites" },
+  { title: "How Temps runs Next.js", id: "required-standalone-output" },
+  { title: "Quickstart", id: "quickstart" },
+  { title: "What Temps handles automatically", id: "what-temps-handles-automatically" },
+  { title: "Environment Variables", id: "environment-variables" },
+  { title: "API Routes and Route Handlers", id: "api-routes-and-route-handlers" },
+  { title: "Middleware", id: "middleware" },
+  { title: "ISR and Caching", id: "isr-and-caching" },
+  { title: "Monorepos", id: "monorepos" },
+  { title: "Troubleshooting", id: "troubleshooting" },
+  { title: "Switching from Vercel", id: "switching-from-vercel" },
+  { title: "Platform behavior", id: "platform-behavior" },
+];
+
+# Deploy Next.js on Temps
+
+**Deploy Next.js on your own infrastructure and skip the Vercel bill** — full SSR, API routes, middleware, image optimization, and ISR, all running on a VPS you control with automatic HTTPS. {{ className: 'lead' }}
+
+---
+
+## Prerequisites {{ anchor: true, id: 'prerequisites' }}
+
+- A running Temps instance ([quickstart](/docs/quickstart))
+- A Next.js project in a GitHub, GitLab, Bitbucket, or Gitea repository
+- A `next.config.js`, `next.config.mjs` or `next.config.ts` file in the project root, which is how Temps detects Next.js
+
+---
+
+## How Temps runs Next.js {{ anchor: true, id: 'required-standalone-output' }}
+
+Temps builds your app with your package manager's `build` script and runs it with `next start` as a persistent Node.js process. You don't need `output: 'standalone'` in your `next.config.ts`; the image contains the full build and `node_modules`.
+
+Temps runs `next start` directly, so your `package.json` `start` script isn't used. If your app needs a custom server (for example a `server.js`), deploy it with your own `Dockerfile` instead.
+
+Builds use a Node.js 22 image, and the app runs on Node.js 22 (Alpine). The Node.js version isn't read from your project.
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+<AgentPath
+  title="Deploy your Next.js app"
+  instruction="Deploy the Next.js app in my current directory to my Temps instance as a project named my-app."
+  command="bunx @temps-sdk/cli up --name my-app"
+  verify="bunx @temps-sdk/cli deployments list --project my-app"
+  dashboard={[
+    "Go to Projects then New Project in the dashboard.",
+    "Connect your GitHub, GitLab, Bitbucket, or Gitea repository.",
+    "Temps detects Next.js and configures the build automatically.",
+    {
+      text: "Click Deploy. Your app goes live with HTTPS in about 2 minutes.",
+      verify: "Open the deployment and confirm the health check passes and the assigned URL serves your app.",
+    },
+  ]}
+/>
+
+First, authenticate the CLI against your Temps instance (one time per machine):
+
+<CliCommands commands={[
+  { comment: "Replace with your own Temps URL, then approve in the browser", args: "login https://temps.example.com" },
+]} />
+
+<Note>
+`up` only works after `login` succeeds — it needs the credentials saved by the login step. See the [CLI getting started guide](/docs/cli-getting-started) for the full authentication flow.
+</Note>
+
+From your Next.js project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up" },
+]} />
+
+Or via the Temps dashboard:
+
+1. Go to **Projects → New Project**
+2. Connect your repository
+3. Temps detects Next.js and configures the build automatically
+4. Click **Deploy** — your app is live with HTTPS in about 2 minutes
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+Temps automates the build, TLS, port binding, zero-downtime deploys and rollbacks, and runs your app the same way `next start` does anywhere else — you can trigger a rollback from the dashboard or CLI at any time.
+
+<AgentPath
+  title="Roll back a deployment"
+  instruction="Roll back the production environment of my-app to the previous working deployment."
+  command="bunx @temps-sdk/cli rollback --project my-app -e production"
+  verify="bunx @temps-sdk/cli deployments list --project my-app"
+  dashboard={[
+    "Open your project in the dashboard and go to the Deployments tab.",
+    "Find a previous successful deployment and choose Rollback to this.",
+    {
+      text: "Confirm the rollback.",
+      verify: "Confirm the rollback target now appears as the most recent deployment in the list.",
+    },
+  ]}
+/>
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | Your `build` script (for example `next build`), then `next start` |
+| HTTPS | Let's Encrypt certificate, auto-renewed |
+| Port | Port 3000 by default; Temps sets `PORT` and `HOSTNAME=0.0.0.0` |
+| ISR | Works; the cache lives in the container and starts empty after each deploy |
+| Image optimization | `next/image` works as it does under `next start` |
+| Preview deployments | Opt-in; once enabled, each branch gets its own preview environment |
+| Rollbacks | **Rollback to this** in the dashboard or the `rollback` CLI command |
+| Zero-downtime deploys | New container starts before old one stops |
+
+---
+
+## Environment Variables {{ anchor: true, id: 'environment-variables' }}
+
+<AgentPath
+  title="Set an environment variable"
+  instruction="Set DATABASE_URL to postgres://user:pass@host:5432/db for the production environment of my-app."
+  command={'bunx @temps-sdk/cli environments vars set DATABASE_URL "postgres://user:pass@host:5432/db" -p my-app -e production'}
+  verify="bunx @temps-sdk/cli environments vars list -p my-app -e production"
+  dashboard={[
+    "Open your project and go to Settings then Environment Variables.",
+    "Add the variable name and value, e.g. DATABASE_URL.",
+    "Pick the environments it applies to (for example production).",
+    {
+      text: "Save the variable.",
+      verify: "Confirm the variable appears in the Environment Variables list for the chosen environment, then redeploy so it takes effect.",
+    },
+  ]}
+/>
+
+Set variables in **Project → Environment Variables** or via CLI:
+
+<Note>
+The `-e` flag is the short form of `--environments` (plural). It accepts a comma-separated list of environment names, for example `-e production,staging`.
+</Note>
+
+<CliCommands commands={[
+  { comment: "Set a variable for production", args: "environments vars set DATABASE_URL \"postgres://user:pass@host:5432/db\" -e production" },
+  { comment: "Set a variable for production and staging", args: "environments vars set NEXT_PUBLIC_API_URL \"https://api.yourdomain.com\" -e production,staging" },
+]} />
+
+If you leave out `-e`, the CLI asks which environments to set the variable for.
+
+Your project's variables are passed to the build as well as to the running app. Next.js inlines variables prefixed with `NEXT_PUBLIC_` into the browser bundle at build time; all other variables are read by the server at runtime.
+
+Variables are applied when a deployment starts, so changing one doesn't affect the running app until you redeploy:
+
+<AgentPath
+  title="Redeploy after a runtime variable change"
+  instruction="Trigger a fresh production deployment of my-app so a runtime environment variable change takes effect."
+  command="bunx @temps-sdk/cli deploy --project my-app -e production"
+  verify="bunx @temps-sdk/cli deployments list --project my-app"
+  dashboard={[
+    "Open your project in the dashboard and go to the Deployments tab.",
+    "Trigger a new deployment for the target environment (production).",
+    {
+      text: "Wait for the new deployment to finish.",
+      verify: "Confirm the latest deployment is live and serving the updated runtime variable.",
+    },
+  ]}
+/>
+
+<CliCommands commands={[
+  { comment: "After changing a runtime variable, trigger a redeploy", args: "deploy --project my-app" },
+]} />
+
+---
+
+## API Routes and Route Handlers {{ anchor: true, id: 'api-routes-and-route-handlers' }}
+
+API routes (`/app/api/` or `/pages/api/`) work without any changes. Temps runs your app as a persistent Node.js process, so there are **no cold starts** — the first request is as fast as any subsequent one.
+
+```ts
+// app/api/hello/route.ts — works on Temps without changes
+export async function GET() {
+  return Response.json({ message: "Hello from Temps" });
+}
+```
+
+---
+
+## Middleware {{ anchor: true, id: 'middleware' }}
+
+Middleware works on Temps without changes. It runs inside the `next start` server, so the same rules apply as for any self-hosted Next.js app.
+
+---
+
+## ISR and Caching {{ anchor: true, id: 'isr-and-caching' }}
+
+Incremental Static Regeneration (ISR) works on Temps. The cache is stored on disk inside the container, so it persists between requests.
+
+On redeploy, Temps starts the new container before stopping the old one (zero-downtime). The new container starts with an empty cache, so the first request to each ISR page after a deploy regenerates it, and later requests are served from cache. Temps doesn't offer a persistent volume for the cache; if you need a cache that survives deploys, configure a custom cache handler in Next.js that stores it outside the container.
+
+---
+
+## Monorepos {{ anchor: true, id: 'monorepos' }}
+
+If your Next.js app is inside a monorepo, set the **Root directory** in project settings to the subdirectory containing `package.json`:
+
+```text
+my-monorepo/
+├── apps/
+│   └── web/          ← set Root directory to "apps/web"
+│       ├── package.json
+│       └── next.config.ts
+└── packages/
+```
+
+See [Deploy a Project](/docs/your-first-deployment) for workspace-aware builds.
+
+---
+
+## Troubleshooting {{ anchor: true, id: 'troubleshooting' }}
+
+### Health check failing after deploy
+
+Check the deployment logs. A common cause is an app that crashes on startup, for example because of a missing environment variable.
+
+<CliCommands commands={[
+  { comment: "View live deployment logs", args: "deployments logs --project my-app --follow" },
+]} />
+
+### Build running out of memory
+
+Next.js builds can be memory-intensive. If the build fails with an out-of-memory error:
+
+```text
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+```
+
+Set a higher memory limit as an environment variable in your project settings:
+
+```text
+NODE_OPTIONS=--max-old-space-size=4096
+```
+
+### Environment variables not available at runtime
+
+Check that the variable is set in the correct environment (production vs staging), then redeploy: variables are applied when a deployment starts.
+
+### `next/image` returning 404 for external images
+
+Add your image domains to `next.config.ts`:
+
+```ts
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      { protocol: "https", hostname: "your-image-cdn.com" },
+    ],
+  },
+};
+```
+
+### Port mismatch
+
+Temps sets the `PORT` variable for your app (3000 by default), and `next start` listens on it. To use a different port, set it under **Project → Settings → Build & deploy → Deployment**. Setting `PORT` yourself has no effect, because Temps overrides it.
+
+---
+
+## Switching from Vercel {{ anchor: true, id: 'switching-from-vercel' }}
+
+If you're migrating from Vercel, see the [Migrate from Vercel](/docs/from-vercel) guide. Most Next.js apps migrate in under 30 minutes — the main changes are replacing Vercel-specific storage (KV, Blob, Postgres) with standard alternatives.
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Add a database
+  </Button>
+  <Button href="/docs/set-up-preview-deployments" variant="text" arrow="right">
+    Preview deployments
+  </Button>
+  <Button href="/docs/manage-environment-variables" variant="text" arrow="right">
+    Environment variables in depth
+  </Button>
+  <Button href="/docs/from-vercel" variant="text" arrow="right">
+    Migrate from Vercel
+  </Button>
+  <Button href="/docs/debug-a-failed-deployment" variant="text" arrow="right">
+    Debug a failed deployment
+  </Button>
+</div>

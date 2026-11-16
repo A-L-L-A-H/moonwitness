@@ -1,0 +1,161 @@
+export const metadata = {
+  title: "Deploy Rust Services With Automatic HTTPS",
+  description:
+    "Deploy Rust apps (Axum, Actix-web, Warp) on your own VPS with automatic HTTPS and zero-downtime deployments. Self-hosted alternative to Railway for Rust.",
+  alternates: {
+    canonical: "/docs/deploy-rust",
+  },
+  openGraph: {
+    title: "Deploy Rust Services With Automatic HTTPS",
+    description: "Deploy Rust apps (Axum, Actix-web, Warp) on your own VPS with automatic HTTPS and zero-downtime deployments. Self-hosted alternative to Railway for Rust.",
+    images: [{ url: "/og/docs/deploy-rust.png", width: 1200, height: 630, alt: "Deploy Rust" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Rust Services With Automatic HTTPS",
+    description: "Deploy Rust apps (Axum, Actix-web, Warp) on your own VPS with automatic HTTPS and zero-downtime deployments. Self-hosted alternative to Railway for Rust.",
+    images: ["/og/docs/deploy-rust.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Custom Dockerfile (optional)', id: 'dockerfile-with-cargo-chef' },
+  { title: 'Reading PORT from environment', id: 'reading-port-from-environment' },
+  { title: 'Axum example', id: 'axum-example' },
+  { title: 'Managed PostgreSQL', id: 'managed-postgresql' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+]
+
+# Deploy Rust on Your Own Server
+
+**Push your Rust project and Temps compiles a release build in a multi-stage Docker image** — BuildKit cache mounts keep the Cargo registry and `target/` directory between builds, and the binary runs on a Debian slim image. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up" },
+]} />
+
+Temps detects your `Cargo.toml`, compiles a release build, and runs it on a Debian slim image. The toolchain comes from `rust-toolchain.toml` or `rust-toolchain`, and defaults to `stable`. The first build compiles every dependency; later builds reuse the cached registry and `target/` directory.
+
+Temps builds the binary named by `default-run` in `Cargo.toml`, otherwise the only `[[bin]]`, otherwise the package name. If `Cargo.toml` declares several binaries, set `default-run` to choose one.
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | `cargo build --release --bin <name>` (with `--locked` when `Cargo.lock` is committed) |
+| Caching | BuildKit cache mounts for the Cargo registry, git dependencies and `target/` |
+| Image | Multi-stage: the binary is copied into a Debian slim runtime image |
+| HTTPS | Let's Encrypt, auto-renewed |
+| Port | `PORT` env var injected, defaults to 8080 |
+| Startup | Near-instant, a single compiled binary |
+
+---
+
+## Custom Dockerfile (optional) {{ anchor: true, id: 'dockerfile-with-cargo-chef' }}
+
+If you want full control over the build, add your own `Dockerfile`; Temps uses it instead of generating one. For example, with `cargo-chef`:
+
+```dockerfile
+FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+WORKDIR /app
+
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+COPY . .
+RUN cargo build --release --bin my-app
+
+FROM debian:bookworm-slim AS runtime
+WORKDIR /app
+COPY --from=builder /app/target/release/my-app /usr/local/bin
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/bin/my-app"]
+```
+
+---
+
+## Reading PORT from environment {{ anchor: true, id: 'reading-port-from-environment' }}
+
+```rust
+use std::env;
+
+let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+let addr = format!("0.0.0.0:{}", port);
+```
+
+---
+
+## Axum example {{ anchor: true, id: 'axum-example' }}
+
+```rust
+use axum::{routing::get, Router};
+use std::env;
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new().route("/", get(|| async { "Hello from Temps!" }));
+    let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port))
+        .await
+        .unwrap();
+    axum::serve(listener, app).await.unwrap();
+}
+```
+
+---
+
+## Managed PostgreSQL {{ anchor: true, id: 'managed-postgresql' }}
+
+Create a PostgreSQL database under **Databases → Create database**, then link it from your project's **Databases** page. Temps injects the connection string as `POSTGRES_URL`; read it with `sqlx` or `diesel`:
+
+```rust
+let pool = sqlx::PgPool::connect(&std::env::var("POSTGRES_URL")?).await?;
+```
+
+See [Deploy with a Database](/docs/deploy-with-database) for all the injected variables.
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/docker-containers" variant="text" arrow="right">
+    Custom Dockerfiles
+  </Button>
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Deploy with a database
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+</div>

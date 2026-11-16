@@ -1,0 +1,172 @@
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+
+const root=process.cwd();
+const cfg=JSON.parse(fs.readFileSync(path.join(root,"data/research-scout/topics.json"),"utf8"));
+const repo=process.env.GITHUB_REPOSITORY;
+const token=process.env.GITHUB_TOKEN;
+const laneFilter=process.env.RESEARCH_SCOUT_LANE??"";
+const maxNew=Number(process.env.RESEARCH_SCOUT_MAX_NEW??2);
+const outputPath=process.env.RESEARCH_SCOUT_OUTPUT??"";
+const findings=[];
+const dryRun=process.env.RESEARCH_SCOUT_DRY_RUN==="1"||(!outputPath&&(!repo||!token));
+const minYear=Number(cfg.minimum_publication_year??2018);
+
+function clean(v=""){return String(v).replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim()}
+function hash(v){return crypto.createHash("sha256").update(v).digest("hex").slice(0,16)}
+async function jfetch(url,options={}){
+  const r=await fetch(url,{...options,headers:{"accept":"application/json","user-agent":"rocksoul-mftl-steward/0.1",...(options.headers??{})},signal:AbortSignal.timeout(15000)});
+  if(!r.ok) throw new Error(`HTTP ${r.status} ${url}`);
+  return r.json();
+}
+function locator(x){return x.doi?`https://doi.org/${x.doi}`:x.url}
+function fingerprint(x){return hash([x.doi??"",clean(x.title).toLowerCase(),x.year??"",locator(x)??""].join("|"))}
+
+async function openAlex(query){
+  const u=new URL("https://api.openalex.org/works");
+  u.searchParams.set("search",query); u.searchParams.set("per-page","8"); u.searchParams.set("sort","cited_by_count:desc");
+  const d=await jfetch(u);
+  return (d.results??[]).map(w=>({provider:"OpenAlex",title:w.display_name,year:w.publication_year??null,doi:w.doi?.replace(/^https?:\/\/(dx\.)?doi\.org\//i,"")??null,url:w.primary_location?.landing_page_url??w.id,venue:w.primary_location?.source?.display_name??null,citations:Number(w.cited_by_count??0),source_type:w.type??"academic_work"}));
+}
+async function crossref(query){
+  const u=new URL("https://api.crossref.org/works");
+  u.searchParams.set("query.bibliographic",query); u.searchParams.set("rows","8"); u.searchParams.set("sort","is-referenced-by-count"); u.searchParams.set("order","desc");
+  const d=await jfetch(u);
+  return (d.message?.items??[]).map(w=>({provider:"Crossref",title:Array.isArray(w.title)?w.title[0]:w.title,year:w.published?.["date-parts"]?.[0]?.[0]??null,doi:w.DOI??null,url:w.URL??null,venue:Array.isArray(w["container-title"])?w["container-title"][0]:null,citations:Number(w["is-referenced-by-count"]??0),source_type:w.type??"journal-article"}));
+}
+async function seenFingerprints(){
+  const seen=new Set(); if(dryRun||outputPath)return seen;
+  const [owner,name]=repo.split("/");
+  for(let page=1;page<=5;page++){
+    const items=await jfetch(`https://api.github.com/repos/${owner}/${name}/issues?state=all&per_page=100&page=${page}`,{headers:{authorization:`Bearer ${token}`,"x-github-api-version":"2022-11-28"}});
+    for(const i of items){for(const m of String(i.body??"").matchAll(/(?:ROCKSOUL-RESEARCH-FP|AUTO-RESEARCH-FP):([a-f0-9]{16})/g))seen.add(m[1])}
+    if(items.length<100)break;
+  }
+  return seen;
+}
+function score(x){return (x.doi?20:0)+Math.min(25,Math.log10(1+x.citations)*10)+(x.year&&x.year>=minYear?10:0)+(x.venue?5:0)}
+function body(topic,query,x,fp){
+  const conspiracy=topic.candidate_type==="conspiracy_narrative";
+  return [
+    "![ROCKSOUL STORY research](https://raw.githubusercontent.com/bjo163/rocksoul-assets/main/moonwitness/cinematic-hero-pack/png/archive-room.png)",
+    "",
+    "## Research Card",
+    "",
+    "| Field | Value |",
+    "|---|---|",
+    "| Domain | **STORY** |",
+    "| Canonical owner | \`rocksoul-mftl\` |",
+    "| State | \`discovered\` |",
+    `| Lane | \`${topic.id}\` |`,
+    "| Origin | \`mftl-scout\` |",
+    "",
+    "## Research Question",
+    "",
+    "> **What was told?**",
+    "",
+    `Investigate whether the discovered scholarly work materially informs the STORY lane **${topic.id}** without treating metadata as evidence.`,
+    "",
+    "## Why This Matters",
+    "",
+    `Potential source for a reviewable ${topic.candidate_type} lead. It must be inspected before claim-level or narrative extraction.`,
+    "",
+    "## Discovery Snapshot",
+    "",
+    `- **Title:** ${clean(x.title)}`,
+    `- **Year:** ${x.year??"unknown"}`,
+    `- **Venue:** ${clean(x.venue??"unknown")}`,
+    `- **Provider:** ${x.provider}`,
+    `- **Locator:** ${locator(x)??"unknown"}`,
+    `- **Citation signal:** ${x.citations}`,
+    `- **Query:** ${query}`,
+    "",
+    "## Source Candidates",
+    "",
+    "| Source | Type | Date | Link / locator | What it may support |",
+    "|---|---|---|---|---|",
+    `| ${clean(x.title).replace(/\\|/g,"\\\\|")} | ${x.source_type??"academic_work"} | ${x.year??"unknown"} | ${locator(x)??"unknown"} | STORY research lead; source inspection required |`,
+    "",
+    "## STORY Lens",
+    "",
+    `Suggested candidate type: **${topic.candidate_type}**. Examine narrative provenance, variants, motifs, transmission, and how claims are framed. Do not infer EVENT truth from STORY evidence.`,
+    conspiracy?"\n**Conspiracy guardrail:** document provenance, evidence claims, counterevidence and transmission. Popularity is not evidence that the alleged conspiracy occurred.":"",
+    "",
+    "## Counterevidence & Uncertainty",
+    "",
+    "- Source content not yet inspected.",
+    "- Topic inference is based on discovery metadata.",
+    "- Competing interpretations and counterevidence remain unreviewed.",
+    "",
+    "## Coverage Gaps / Missing Voices",
+    "",
+    "- Check primary/traditional sources, alternative versions, relevant languages and regional scholarship.",
+    "",
+    "## Duplicate Check",
+    "",
+    "- [ ] Existing research issues checked",
+    "- [ ] Existing candidates checked",
+    "- [ ] Existing STORY records checked",
+    "",
+    "## Cross-Domain Routing",
+    "",
+    "Route EVENT/PERSON/TEXT/LAW/PERSPECTIVE questions to their canonical owners; do not mint them here.",
+    "",
+    "## Steward Gate",
+    "",
+    "- [x] Issue exists before candidate work",
+    "- [ ] Actual source content inspected",
+    "- [x] Discovery metadata marked non-canonical",
+    "- [x] STORY ownership boundary preserved",
+    "",
+    "## Suggested Next Action",
+    "",
+    "- [x] Steward triage required",
+    "- [ ] Stage needs_sources candidate",
+    "- [ ] Inspect source",
+    "- [ ] Prepare reviewable STORY extraction",
+    "- [ ] Reject / duplicate",
+    "",
+    "## Machine Metadata",
+    "",
+    "\`\`\`text",
+    "ROCKSOUL-RESEARCH-CONTRACT:v1",
+    "ROCKSOUL-RESEARCH-DOMAIN:STORY",
+    "ROCKSOUL-RESEARCH-OWNER:rocksoul-mftl",
+    "ROCKSOUL-RESEARCH-ORIGIN:mftl-scout",
+    `ROCKSOUL-RESEARCH-FP:${fp}`,
+    "ROCKSOUL-RESEARCH-STATE:discovered",
+    `AUTO-RESEARCH-FP:${fp}`,
+    `AUTO-RESEARCH-LANE:${topic.id}`,
+    `AUTO-RESEARCH-SCORE:${Math.round(score(x))}`,
+    "AUTO-RESEARCH-STATE:discovered",
+    "\`\`\`",
+    "",
+    "> **ISSUE FIRST. SOURCE SECOND. CANON LAST.**"
+  ].join("\\n");
+}
+async function createIssue(topic,query,x,fp){
+  if(outputPath){findings.push({topic,query,item:x,fingerprint:fp,score:score(x)});return}
+  const payload={title:`[AUTO-RESEARCH] STORY · ${clean(x.title).slice(0,100)}`,body:body(topic,query,x,fp)};
+  if(dryRun){console.log(JSON.stringify(payload,null,2));return}
+  const [owner,name]=repo.split("/");
+  await jfetch(`https://api.github.com/repos/${owner}/${name}/issues`,{method:"POST",headers:{authorization:`Bearer ${token}`,"content-type":"application/json","x-github-api-version":"2022-11-28"},body:JSON.stringify(payload)});
+}
+
+const seen=await seenFingerprints();
+const day=Math.floor(Date.now()/86400000);
+const topics=cfg.topics.filter(t=>!laneFilter||t.id===laneFilter);
+let created=0;
+for(const topic of topics){
+  if(created>=maxNew)break;
+  const query=topic.queries[(day+topic.id.length)%topic.queries.length];
+  const settled=await Promise.allSettled([openAlex(query),crossref(query)]);
+  const pool=settled.flatMap(r=>r.status==="fulfilled"?r.value:[]).filter(x=>x.title&&(!x.year||x.year>=minYear)).sort((a,b)=>score(b)-score(a));
+  const unique=new Map(); for(const x of pool){const k=(x.doi??clean(x.title)).toLowerCase();if(!unique.has(k))unique.set(k,x)}
+  for(const x of unique.values()){
+    const fp=fingerprint(x); if(seen.has(fp))continue;
+    await createIssue(topic,query,x,fp); seen.add(fp); created++; if(created>=maxNew)break;
+  }
+}
+if(outputPath){fs.mkdirSync(path.dirname(outputPath),{recursive:true});fs.writeFileSync(outputPath,JSON.stringify(findings,null,2)+"\n")}
+console.log(`MFTL scout: lane=${laneFilter||"all"} findings=${findings.length} created=${created} dry_run=${dryRun}`);

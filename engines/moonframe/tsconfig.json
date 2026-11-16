@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "skipLibCheck": false,
+    "paths": {
+      "@moonwitness/moonframe": ["./src/index.d.ts"],
+      "@moonwitness/moonframe/skins": ["./src/skins.d.ts"],
+      "@moonwitness/moonframe/theme": ["./src/theme.d.ts"]
+    }
+  },
+  "include": ["src/**/*.d.ts", "tests/types.tsx"],
+  "exclude": ["apps", "node_modules"]
+}

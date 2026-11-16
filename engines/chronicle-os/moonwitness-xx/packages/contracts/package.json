@@ -1,0 +1,17 @@
+{
+  "name": "@moonwitness/contracts",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./health": "./src/health.js",
+    "./jobs": "./src/jobs.js",
+    "./envelopes": "./src/envelopes.js"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "catalog:"
+  },
+  "scripts": {
+    "test": "node --test"
+  }
+}

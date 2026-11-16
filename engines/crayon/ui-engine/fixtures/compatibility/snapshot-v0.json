@@ -1,0 +1,16 @@
+{
+  "envelopeVersion": "0",
+  "kind": "snapshot",
+  "semanticVersion": "0",
+  "payload": {
+    "version": "0",
+    "situationId": "situation:compatibility",
+    "generatedAt": "2026-08-25T00:00:00Z",
+    "anchor": { "id": "resource:1", "type": "resource" },
+    "knowledge": [],
+    "possibilities": [],
+    "witness": [],
+    "history": [],
+    "context": []
+  }
+}

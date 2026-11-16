@@ -1,0 +1,8 @@
+import type { ModelMetadata } from '@/metadata-runtime/contracts'
+
+export type CalendarView = 'month' | 'week' | 'day' | 'agenda'
+export interface CalendarAdapter { readonly model: string; readonly titleField: string; readonly dateField: string; readonly timeField?: string; readonly durationField?: string; readonly allDayField?: string }
+export interface CalendarEvent { readonly id: string; readonly title: string; readonly start: Date; readonly end: Date; readonly allDay: boolean; readonly record: Record<string, unknown> }
+const durationMinutes = (value: unknown) => { const match = String(value ?? '').match(/(\d+(?:\.\d+)?)\s*(h|hour|hours|m|min|minutes)?/i); if (!match) return 60; const amount = Number(match[1]); return (match[2]?.toLowerCase().startsWith('h') ? amount * 60 : amount) }
+export const normalizeEvent = (metadata: ModelMetadata, adapter: CalendarAdapter, record: Record<string, unknown>): CalendarEvent | undefined => { const rawDate = String(record[adapter.dateField] ?? ''); if (!rawDate) return undefined; const rawTime = adapter.timeField ? String(record[adapter.timeField] ?? '00:00') : '00:00'; const start = new Date(`${rawDate.includes('T') ? rawDate : `${rawDate}T${rawTime}`}`); if (Number.isNaN(start.valueOf())) return undefined; const end = new Date(start.getTime() + durationMinutes(adapter.durationField ? record[adapter.durationField] : undefined) * 60_000); return { id: String(record[metadata.primaryKey]), title: String(record[adapter.titleField] ?? record[metadata.primaryKey]), start, end, allDay: adapter.allDayField ? Boolean(record[adapter.allDayField]) : false, record } }
+export const overlaps = (event: CalendarEvent, start: Date, end: Date) => event.start < end && event.end > start

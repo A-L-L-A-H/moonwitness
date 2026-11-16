@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "declaration": true,
+    "outDir": "dist",
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "allah-crayon-kernel": ["packages/kernel/src/index.ts"],
+      "allah-crayon-physics": ["packages/physics/src/index.ts"],
+      "allah-crayon-snapshot": ["packages/snapshot/src/index.ts"],
+      "allah-crayon-rir": ["packages/rir/src/index.ts"],
+      "allah-crayon-inspector": ["packages/inspector/src/index.ts"],
+      "allah-crayon-agent": ["packages/renderer-agent/src/index.ts"],
+      "allah-crayon-voice": ["packages/renderer-voice/src/index.ts"],
+      "allah-crayon-react": ["packages/renderer-web/src/index.tsx"]
+    }
+  },
+  "include": ["packages/**/*.ts", "packages/**/*.tsx"]
+}

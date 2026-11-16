@@ -53,6 +53,9 @@ jobs:
       - name: Test
         run: pnpm test
 
+      - name: Cross-World WCAG Contrast Guard
+        run: pnpm ui:contrast
+
       - name: Build
         run: pnpm build
 

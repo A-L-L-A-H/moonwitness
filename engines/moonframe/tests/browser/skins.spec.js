@@ -1,0 +1,951 @@
+import { test, expect } from '@playwright/test';
+import { skins } from '../../src/skins.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { writeSkinCaptureProvenance } from '../../scripts/skin-capture-provenance.mjs';
+
+const captureDir = path.resolve('artifacts/skins');
+fs.mkdirSync(captureDir, { recursive: true });
+const captureVariants = [
+  { viewport: '1440x960', state: 'default' },
+  { viewport: '1440x960', state: 'decoration-off' },
+  { viewport: '1440x960', state: 'grayscale' },
+  { viewport: '1440x960', state: 'reduced-motion' },
+  { viewport: '1440x960', state: 'forced-colors' },
+  { viewport: '768x1024', state: 'default' },
+  { viewport: '360x800', state: 'default' },
+];
+
+function skinCaptureFilename(skin, mode, viewport, state) {
+  return `${skin.id}-${mode}-${viewport}-${state}.png`;
+}
+
+test('skin capture filenames uniquely encode skin, mode, viewport, and state', () => {
+  const filenames = skins.flatMap(skin => ['light', 'dark'].flatMap(mode => captureVariants.map(({ viewport, state }) => (
+    skinCaptureFilename(skin, mode, viewport, state)
+  ))));
+  expect(new Set(filenames).size).toBe(filenames.length);
+  for (const skin of skins) for (const mode of ['light', 'dark']) for (const { viewport, state } of captureVariants) {
+    expect(skinCaptureFilename(skin, mode, viewport, state)).toBe(`${skin.id}-${mode}-${viewport}-${state}.png`);
+  }
+});
+
+async function waitForFontsReady(page) {
+  const status = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.status;
+  });
+  expect(status, 'document fonts should finish loading before capture').toBe('loaded');
+}
+
+test('legacy defaults have no brand overlay, first-paint flash, or cross-consumer persistence', async ({ browser }) => {
+  const firstContext = await browser.newContext();
+  const firstPage = await firstContext.newPage();
+  const initialStates = [];
+  await firstPage.addInitScript(() => { window.__initialThemeState = null; });
+  await firstPage.goto('/lab');
+  await expect(firstPage.locator('.mf-root')).toBeVisible();
+  const firstPaintState = await firstPage.locator('.mf-root').evaluate((node) => ({
+    skin: node.getAttribute('data-skin'),
+    mode: node.getAttribute('data-mode'),
+    brand: node.getAttribute('data-brand'),
+    brandProperties: [...getComputedStyle(node).cssText.matchAll(/--mf-brand-[^:]+/g)].map((match) => match[0]),
+    storageKeys: Object.keys(localStorage).filter((key) => /brand/i.test(key)),
+  }));
+  expect(firstPaintState.brand).toBeNull();
+  expect(firstPaintState.brandProperties).toEqual([]);
+  expect(firstPaintState.storageKeys).toEqual([]);
+  for (const skin of skins) for (const mode of ['light', 'dark']) {
+    const page = await firstContext.newPage();
+    await page.goto('/lab');
+    await page.getByRole('button', { name: skin.name, exact: false }).filter({ has: page.locator('.demo-swatch') }).click();
+    await page.getByLabel('Appearance', { exact: true }).selectOption(mode);
+    const state = await page.locator('.mf-root').evaluate((node) => ({
+      skin: node.getAttribute('data-skin'),
+      mode: node.getAttribute('data-mode'),
+      brand: node.getAttribute('data-brand'),
+      brandProperties: Object.keys(node.style).filter((key) => key.startsWith('--mf-brand-')),
+    }));
+    expect(state).toEqual({ skin: skin.id, mode, brand: null, brandProperties: [] });
+    initialStates.push({ skin: skin.id, mode });
+    await page.close();
+  }
+  expect(initialStates).toHaveLength(30);
+  const secondContext = await browser.newContext();
+  const secondPage = await secondContext.newPage();
+  await secondPage.goto(new URL('/lab', firstPage.url()).toString());
+  await expect(secondPage.locator('.mf-root')).not.toHaveAttribute('data-brand');
+  await expect(secondPage.locator('.mf-root')).toHaveAttribute('data-skin', 'classic');
+  await expect(secondPage.locator('.mf-root')).toHaveAttribute('data-mode', 'light');
+  expect(await secondPage.evaluate(() => Object.keys(localStorage).filter((key) => /brand/i.test(key)))).toEqual([]);
+  await firstContext.close();
+  await secondContext.close();
+});
+
+for (const skin of skins) for (const mode of ['light', 'dark']) {
+  test(`${skin.id} ${mode}: rendered, contrast, responsive and RTL`, async ({ page, browser }) => {
+    const errors = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await page.clock.setFixedTime(new Date('2026-10-25T12:00:00.000Z'));
+    await page.goto('/lab');
+    await page.getByRole('button', { name: skin.name, exact: false }).filter({ has: page.locator('.demo-swatch') }).click();
+    await page.getByLabel('Appearance', { exact: true }).selectOption(mode);
+    await waitForFontsReady(page);
+    const mainNavigation = page.getByRole('navigation', { name: 'Main navigation' });
+    const mainNavigationItems = mainNavigation.locator('.mf-nav-item');
+    const breadcrumb = page.locator('.demo-breadcrumb');
+    await expect(mainNavigationItems).toHaveCount(2);
+    await expect(mainNavigationItems.nth(0)).toContainText('Overview');
+    await expect(mainNavigationItems.nth(0)).toHaveAttribute('aria-current', 'page');
+    await expect(mainNavigationItems.nth(1)).toContainText('Components');
+    await expect(mainNavigationItems.nth(1)).not.toHaveAttribute('aria-current', 'page');
+    await expect(breadcrumb).toContainText('Workspace');
+    await expect(breadcrumb).toContainText('Overview');
+    await mainNavigationItems.nth(1).click();
+    await expect(mainNavigationItems.nth(1)).toHaveAttribute('aria-current', 'page');
+    await expect(mainNavigationItems.nth(0)).not.toHaveAttribute('aria-current', 'page');
+    await expect(breadcrumb).toContainText('Components');
+    await mainNavigationItems.nth(0).click();
+    await expect(mainNavigationItems.nth(0)).toHaveAttribute('aria-current', 'page');
+    await expect(breadcrumb).toContainText('Overview');
+    const dashboardFixture = page.locator('[data-fixture="dashboard-overview"]');
+    const missionHeroGrid = dashboardFixture.locator('.fixture-dashboard-content');
+    await expect(missionHeroGrid).toHaveCSS('display', 'grid');
+    await expect(missionHeroGrid).toHaveCSS('grid-template-columns', /[\d.]+px [\d.]+px/);
+    await expect(dashboardFixture.getByRole('heading', { level: 2, name: 'Overview' })).toBeVisible();
+    await expect(dashboardFixture.getByRole('link', { name: 'Northstar Studio', exact: true })).toBeVisible();
+    await expect(dashboardFixture.getByText('Sunday, October 25, 2026', { exact: true })).toBeVisible();
+    const fixtureNavigation = dashboardFixture.getByRole('navigation', { name: 'Workspace sections' });
+    const fixtureNavItems = fixtureNavigation.getByRole('button');
+    for (const [index, label] of ['Overview', 'Projects', 'Tasks', 'Reports', 'Settings'].entries()) {
+      await expect(fixtureNavItems.nth(index)).toHaveAccessibleName(label);
+    }
+    await expect(fixtureNavItems.nth(0)).toHaveAttribute('aria-current', 'page');
+    await fixtureNavigation.getByRole('button', { name: 'Reports', exact: true }).click();
+    await expect(fixtureNavigation.getByRole('button', { name: 'Reports', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(fixtureNavItems.nth(0)).not.toHaveAttribute('aria-current', 'page');
+    await fixtureNavigation.getByRole('button', { name: 'Overview', exact: true }).click();
+    await expect(fixtureNavItems.nth(0)).toHaveAttribute('aria-current', 'page');
+    for (const [label, value] of [['Open tasks', '12'], ['In progress', '4'], ['Completed this week', '18']]) {
+      await expect(dashboardFixture.locator('.fixture-dashboard-metric').filter({ hasText: label })).toContainText(value);
+    }
+    await expect(dashboardFixture.getByRole('heading', { level: 3, name: 'Recent project activity' })).toBeVisible();
+    const activityList = dashboardFixture.locator('.fixture-dashboard-activity');
+    for (const task of ['Confirm migration checklist', 'Review workspace permissions', 'Publish release notes draft', 'Verify scheduled export', 'Test recovery procedure']) {
+      await expect(activityList.getByText(task, { exact: true })).toBeVisible();
+    }
+    await expect(dashboardFixture.locator('.fixture-dashboard-note').getByText('Quarterly migration readiness — confirm access, review the rollback checklist, and notify the operations group before the maintenance window.', { exact: true })).toBeVisible();
+    const fixtureTaskTable = dashboardFixture.getByRole('table', { name: 'Project tasks' });
+    const fixtureTaskNames = fixtureTaskTable.locator('.fixture-task-name');
+    await expect(fixtureTaskTable.getByRole('columnheader')).toHaveText(['Task', 'Owner', 'Status', 'Due date', 'Estimate']);
+    await expect(fixtureTaskNames).toHaveText([
+      'Verify scheduled export',
+      'Confirm migration checklist',
+      'Review workspace permissions',
+      'Publish release notes draft',
+      'Test recovery procedure',
+    ]);
+    for (const [id, owner, status, date, estimate] of [
+      ['T-1042', 'Amina Yusuf', 'In progress', '2026-10-27', '3 h'],
+      ['T-1043', 'Leo Martin', 'Needs review', '2026-10-28', '2 h'],
+      ['T-1044', 'Nia Patel', 'Not started', '2026-10-30', '4 h'],
+      ['T-1045', 'Mateo Silva', 'Complete', '2026-10-24', '1 h'],
+      ['T-1046', 'Hana Kim', 'Blocked', '2026-10-31', '5 h'],
+    ]) {
+      const rowText = await fixtureTaskTable.getByRole('row').filter({ hasText: id }).innerText();
+      for (const value of [id, owner, status, date, estimate]) expect(rowText).toContain(value);
+    }
+    await dashboardFixture.getByLabel('Sort project tasks', { exact: true }).selectOption('task');
+    await expect(fixtureTaskNames).toHaveText([
+      'Confirm migration checklist',
+      'Publish release notes draft',
+      'Review workspace permissions',
+      'Test recovery procedure',
+      'Verify scheduled export',
+    ]);
+    await dashboardFixture.getByLabel('Search project tasks', { exact: true }).fill('Hana Kim');
+    await expect(fixtureTaskNames).toHaveText(['Test recovery procedure']);
+    await expect(dashboardFixture.getByText('1 of 5 tasks', { exact: true })).toBeVisible();
+    await dashboardFixture.getByLabel('Search project tasks', { exact: true }).fill('');
+    await dashboardFixture.getByLabel('Sort project tasks', { exact: true }).selectOption('due-date');
+    await expect(fixtureTaskNames).toHaveText([
+      'Verify scheduled export',
+      'Confirm migration checklist',
+      'Review workspace permissions',
+      'Publish release notes draft',
+      'Test recovery procedure',
+    ]);
+    const profileFixture = dashboardFixture.getByRole('region', { name: 'Workspace profile' });
+    await expect(profileFixture.getByLabel('Workspace name', { exact: true })).toHaveValue('Northstar Studio');
+    const profileUrl = profileFixture.getByLabel('Workspace URL', { exact: true });
+    await expect(profileUrl).toHaveValue('https://northstar.example/workspace');
+    await expect(profileUrl).toHaveAttribute('required', '');
+    await expect(profileFixture.getByText('Use the address your team recognizes.', { exact: true })).toBeVisible();
+    await expect(profileFixture.getByLabel('Description', { exact: true })).toHaveValue('Quarterly migration readiness — confirm access, review the rollback checklist, and notify the operations group before the maintenance window.');
+    await expect(profileFixture.getByLabel('Default report time', { exact: true })).toHaveValue('09:30');
+    await expect(profileFixture.getByText('UTC', { exact: true }).last()).toBeVisible();
+    await expect(profileFixture.getByRole('checkbox', { name: 'Email me about task changes' })).toBeChecked();
+    await expect(profileFixture.getByRole('button', { name: 'Cancel', exact: true })).toBeVisible();
+    const saveProfileButton = profileFixture.getByRole('button', { name: 'Save changes', exact: true });
+    await expect(saveProfileButton).toBeVisible();
+    await profileUrl.fill('not a valid workspace URL');
+    await saveProfileButton.click();
+    await expect(profileUrl).toHaveAttribute('aria-invalid', 'true');
+    await expect(profileUrl).toHaveAttribute('aria-describedby', 'fixture-workspace-url-error');
+    await expect(profileFixture.getByText('Enter a valid workspace URL.', { exact: true })).toBeVisible();
+    await profileUrl.fill('https://northstar.example/workspace');
+    await page.clock.pauseAt(new Date('2026-10-25T12:00:00.000Z'));
+    await saveProfileButton.click();
+    await expect(profileFixture.locator('.fixture-profile-status')).toHaveText('Saving…');
+    await page.clock.fastForward(180);
+    await expect(profileFixture.locator('.fixture-profile-status')).toHaveText('Workspace profile saved.');
+    await profileFixture.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(profileUrl).toHaveValue('https://northstar.example/workspace');
+    const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+    const shell = page.locator('.mf-shell');
+    const decorativeSwatches = page.locator('.demo-swatch');
+    const decorativeProjectSymbols = page.locator('.demo-project-symbol');
+    const decorativeBrandMarks = page.locator('.demo-mark, .demo-workspace-icon, .mf-nav-item svg, .demo-skin-option svg');
+    await expect(decorationToggle).not.toBeChecked();
+    await expect(decorativeSwatches.first()).toBeVisible();
+    await expect(decorativeProjectSymbols.first()).toBeVisible();
+    await decorationToggle.check();
+    await expect(shell).toHaveAttribute('data-decorations', 'off');
+    await expect(decorativeSwatches.first()).toHaveCSS('display', 'none');
+    await expect(decorativeProjectSymbols.first()).toHaveCSS('display', 'none');
+    await expect(decorativeBrandMarks.first()).toHaveCSS('display', 'none');
+    await expect(page.getByRole('button', { name: 'Overview', exact: false }).first()).toBeVisible();
+    await expect(page.locator('.demo-skin-option[data-active="true"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(fixtureNavItems.nth(0)).toHaveAttribute('aria-current', 'page');
+    await expect(fixtureTaskNames).toHaveCount(5);
+    await expect(fixtureTaskTable.getByText('Blocked', { exact: true })).toBeVisible();
+    await expect(profileFixture.getByLabel('Workspace name', { exact: true })).toHaveValue('Northstar Studio');
+    await expect(profileFixture.getByText('Use the address your team recognizes.', { exact: true })).toBeVisible();
+    await decorationToggle.focus();
+    await expect(decorationToggle).toBeFocused();
+    await profileUrl.fill('not a valid workspace URL');
+    await profileFixture.getByRole('button', { name: 'Save changes', exact: true }).click();
+    await expect(profileFixture.getByText('Enter a valid workspace URL.', { exact: true })).toBeVisible();
+    await expect(profileUrl).toHaveAttribute('aria-describedby', 'fixture-workspace-url-error');
+    await profileUrl.fill('https://northstar.example/workspace');
+    await expect(profileFixture.getByText('Use the address your team recognizes.', { exact: true })).toBeVisible();
+    await profileFixture.getByRole('button', { name: 'Cancel', exact: true }).click();
+    const decorationOffScreenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '1440x960', 'decoration-off'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: decorationOffScreenshotPath, fullPage: true, animations: 'disabled' });
+    const decorationOffCapture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, task table and profile form; decoration-off state',
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(decorationOffScreenshotPath, { ...decorationOffCapture, browserName: browser.browserType().name(), browserVersion: browser.version() });
+    await decorationToggle.uncheck();
+    await expect(shell).not.toHaveAttribute('data-decorations', 'off');
+    await expect(decorativeSwatches.first()).toBeVisible();
+    await expect(decorativeProjectSymbols.first()).toBeVisible();
+    const root = page.locator('.mf-root');
+    await expect(root).toHaveAttribute('data-skin', skin.id);
+    await expect(root).toHaveAttribute('data-mode', mode);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    const contrast = await root.evaluate(node => {
+      const style = getComputedStyle(node);
+      const rgb = token => {
+        const probe = document.createElement('span');
+        probe.style.color = style.getPropertyValue(token);
+        node.append(probe);
+        const channels = getComputedStyle(probe).color.match(/[\d.]+/g).slice(0, 3).map(Number);
+        probe.remove();
+        const linear = channels.map(v => {
+          v /= 255;
+          return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+      };
+      const ratio = (a, b) => {
+        const x = rgb(a);
+        const y = rgb(b);
+        return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+      };
+      return {
+        text: ratio('--mf-text', '--mf-bg'),
+        surface: ratio('--mf-text', '--mf-surface'),
+        muted: ratio('--mf-muted', '--mf-surface'),
+        raised: ratio('--mf-muted', '--mf-surface-raised'),
+        action: ratio('--mf-accent-text', '--mf-accent'),
+      };
+    });
+    for (const [role, ratio] of Object.entries(contrast)) {
+      expect(ratio, `${skin.id}/${mode} ${role} contrast`).toBeGreaterThanOrEqual(4.5);
+    }
+    const renderedSurfaceStyles = await dashboardFixture.evaluate(node => {
+      const card = node.querySelector('.fixture-dashboard-note');
+      const cardText = card.querySelector('.mf-card-title');
+      const input = node.querySelector('.fixture-dashboard-utility-actions .mf-input');
+      const read = element => {
+        const style = getComputedStyle(element);
+        return { color: style.color, backgroundColor: style.backgroundColor };
+      };
+      return { nestedCard: read(card), control: read(input), nestedCardText: read(cardText) };
+    });
+    for (const [surface, styles] of Object.entries(renderedSurfaceStyles)) {
+      expect(styles.color, `${skin.id}/${mode} ${surface} rendered foreground`).not.toBe('rgba(0, 0, 0, 0)');
+      if (surface !== 'nestedCardText') expect(styles.backgroundColor, `${skin.id}/${mode} ${surface} rendered background`).not.toBe('rgba(0, 0, 0, 0)');
+    }
+    const toolbarInput = dashboardFixture.locator('.fixture-dashboard-utility-actions .mf-input');
+    await toolbarInput.focus();
+    const focusStyle = await toolbarInput.evaluate(element => {
+      const style = getComputedStyle(element);
+      return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth, outlineColor: style.outlineColor };
+    });
+    expect(focusStyle.outlineStyle, `${skin.id}/${mode} actual control focus style`).not.toBe('none');
+    expect(parseFloat(focusStyle.outlineWidth), `${skin.id}/${mode} actual control focus width`).toBeGreaterThan(0);
+    await page.getByRole('button', { name: 'New project', exact: true }).click();
+    const projectDialog = page.getByRole('dialog', { name: 'Give your idea a home.' });
+    await expect(projectDialog).toBeVisible();
+    const overlayStyles = await projectDialog.evaluate(element => ({
+      color: getComputedStyle(element).color,
+      backgroundColor: getComputedStyle(element).backgroundColor,
+      backdropColor: getComputedStyle(element, '::backdrop').backgroundColor,
+    }));
+    expect(overlayStyles.color, `${skin.id}/${mode} overlay foreground`).not.toBe('rgba(0, 0, 0, 0)');
+    expect(overlayStyles.backgroundColor, `${skin.id}/${mode} dialog surface`).not.toBe('rgba(0, 0, 0, 0)');
+    expect(overlayStyles.backdropColor, `${skin.id}/${mode} actual dialog backdrop`).not.toBe('rgba(0, 0, 0, 0)');
+    await projectDialog.getByRole('button', { name: 'Cancel', exact: true }).click();
+    await expect(projectDialog).toBeHidden();
+    const screenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '1440x960', 'default'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: screenshotPath, fullPage: true, animations: 'disabled' });
+    const capture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, workspace nav, task table and profile form; decorations on',
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(screenshotPath, {
+      ...capture,
+      browserName: browser.browserType().name(),
+      browserVersion: browser.version(),
+    });
+    const grayscaleStyle = await page.addStyleTag({ content: 'html { filter: grayscale(1) !important; }' });
+    await expect(page.locator('html')).toHaveCSS('filter', 'grayscale(1)');
+    await expect(dashboardFixture.getByRole('heading', { level: 2, name: 'Overview' })).toBeVisible();
+    await expect(fixtureTaskNames).toHaveCount(5);
+    await expect(profileFixture.getByLabel('Workspace name', { exact: true })).toHaveValue('Northstar Studio');
+    expect(await page.evaluate(() => `${window.innerWidth}x${window.innerHeight}`)).toBe('1440x960');
+    const grayscaleScreenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '1440x960', 'grayscale'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: grayscaleScreenshotPath, fullPage: true, animations: 'disabled' });
+    const grayscaleCapture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, workspace nav, task table and profile form; grayscale filter applied to full page',
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(grayscaleScreenshotPath, {
+      ...grayscaleCapture,
+      browserName: browser.browserType().name(),
+      browserVersion: browser.version(),
+    });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(root).toHaveAttribute('data-motion', 'reduced');
+    await expect(dashboardFixture.getByRole('heading', { level: 2, name: 'Overview' })).toBeVisible();
+    await expect(dashboardFixture.locator('.fixture-dashboard-metric').filter({ hasText: 'Open tasks' })).toContainText('12');
+    await expect(fixtureNavItems.nth(0)).toHaveAttribute('aria-current', 'page');
+    await expect(fixtureTaskNames).toHaveCount(5);
+    await expect(fixtureTaskTable.getByText('Blocked', { exact: true })).toBeVisible();
+    await expect(profileFixture.getByLabel('Workspace name', { exact: true })).toHaveValue('Northstar Studio');
+    const reducedMotionButton = page.locator('.mf-button').first();
+    const reducedTransitionDurations = await reducedMotionButton.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(duration => Number.parseFloat(duration)));
+    expect(reducedTransitionDurations.every(duration => duration === 0), 'reduced motion removes animated transition time').toBe(true);
+    const reducedMotionScreenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '1440x960', 'reduced-motion'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: reducedMotionScreenshotPath, fullPage: true, animations: 'disabled' });
+    const reducedMotionCapture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, workspace nav, task table and profile form; reduced-motion preference active',
+      state: 'reduced-motion',
+      motionPreference: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduce' : 'no-preference',
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(reducedMotionScreenshotPath, {
+      ...reducedMotionCapture,
+      browserName: browser.browserType().name(),
+      browserVersion: browser.version(),
+    });
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await expect(root).toHaveAttribute('data-motion', 'full');
+    await page.emulateMedia({ forcedColors: 'active' });
+    expect(await page.evaluate(() => window.matchMedia('(forced-colors: active)').matches)).toBe(true);
+    await expect(page.getByLabel('Appearance', { exact: true })).toBeVisible();
+    await expect(dashboardFixture.getByRole('button', { name: 'Overview', exact: true })).toHaveAttribute('aria-current', 'page');
+    await expect(dashboardFixture.getByLabel('Search project tasks', { exact: true })).toBeVisible();
+    await expect(dashboardFixture.getByLabel('Sort project tasks', { exact: true })).toBeVisible();
+    await expect(fixtureTaskNames).toHaveCount(5);
+    await expect(fixtureTaskTable.getByText('Blocked', { exact: true })).toBeVisible();
+    await expect(profileFixture.getByLabel('Workspace name', { exact: true })).toHaveValue('Northstar Studio');
+    const forcedColorsFocusTarget = profileFixture.getByLabel('Workspace name', { exact: true });
+    await forcedColorsFocusTarget.focus();
+    await expect(forcedColorsFocusTarget).toBeFocused();
+    const forcedColorsFocusStyle = await forcedColorsFocusTarget.evaluate(node => ({
+      outlineWidth: getComputedStyle(node).outlineWidth,
+      outlineStyle: getComputedStyle(node).outlineStyle,
+      borderWidth: getComputedStyle(node).borderTopWidth,
+      borderStyle: getComputedStyle(node).borderTopStyle,
+    }));
+    expect(parseFloat(forcedColorsFocusStyle.outlineWidth), 'forced-colors focus indicator remains visible').toBeGreaterThanOrEqual(2);
+    expect(forcedColorsFocusStyle.outlineStyle).toBe('solid');
+    expect(forcedColorsFocusStyle.borderWidth).toBe('1px');
+    expect(forcedColorsFocusStyle.borderStyle).toBe('solid');
+    const forcedColorsScreenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '1440x960', 'forced-colors'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: forcedColorsScreenshotPath, fullPage: true, animations: 'disabled' });
+    const forcedColorsCapture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, workspace nav, task table and profile form; forced-colors active with Workspace name focus',
+      state: 'forced-colors',
+      forcedColors: window.matchMedia('(forced-colors: active)').matches ? 'active' : 'none',
+      focusedControl: document.activeElement?.getAttribute('aria-label') || document.activeElement?.getAttribute('name'),
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(forcedColorsScreenshotPath, {
+      ...forcedColorsCapture,
+      browserName: browser.browserType().name(),
+      browserVersion: browser.version(),
+    });
+    await forcedColorsFocusTarget.evaluate(node => node.blur());
+    await page.emulateMedia({ forcedColors: 'none' });
+    expect(await page.evaluate(() => window.matchMedia('(forced-colors: active)').matches)).toBe(false);
+    await grayscaleStyle.evaluate(style => style.remove());
+    await expect(page.locator('html')).not.toHaveCSS('filter', 'grayscale(1)');
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await expect.poll(() => page.evaluate(() => `${window.innerWidth}x${window.innerHeight}`)).toBe('768x1024');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'No horizontal page overflow at 768px').toBe(true);
+    const tabletScreenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '768x1024', 'default'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: tabletScreenshotPath, fullPage: true, animations: 'disabled' });
+    const tabletCapture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, workspace nav, task table and profile form; decorations on',
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(tabletScreenshotPath, {
+      ...tabletCapture,
+      browserName: browser.browserType().name(),
+      browserVersion: browser.version(),
+    });
+    await page.setViewportSize({ width: 360, height: 800 });
+    await expect(missionHeroGrid).toHaveCSS('grid-template-columns', /^[\d.]+px$/);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'No horizontal page overflow at 360px').toBe(true);
+    await expect.poll(() => page.evaluate(() => `${window.innerWidth}x${window.innerHeight}`)).toBe('360x800');
+    const phoneScreenshotPath = path.join(captureDir, skinCaptureFilename(skin, mode, '360x800', 'default'));
+    await waitForFontsReady(page);
+    await page.screenshot({ path: phoneScreenshotPath, fullPage: true, animations: 'disabled' });
+    const phoneCapture = await page.evaluate(() => ({
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      locale: navigator.language,
+      direction: document.documentElement.dir || getComputedStyle(document.documentElement).direction,
+      timezoneId: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      frozenTime: new Date().toISOString(),
+      fixture: '/lab default PropsPlayground (Button / primary / md / Explore Moonframe) + fixed Northstar Studio dashboard, workspace nav, task table and profile form; decorations on',
+      fontStack: getComputedStyle(document.querySelector('.mf-root')).fontFamily,
+      fontLoadStatus: document.fonts.status,
+      userAgent: navigator.userAgent,
+    }));
+    writeSkinCaptureProvenance(phoneScreenshotPath, {
+      ...phoneCapture,
+      browserName: browser.browserType().name(),
+      browserVersion: browser.version(),
+    });
+    const appearanceControl = page.getByLabel('Appearance', { exact: true });
+    await appearanceControl.focus();
+    await expect(appearanceControl).toBeFocused();
+    const focusBounds = await appearanceControl.boundingBox();
+    expect(focusBounds, 'Appearance control remains within the phone viewport').not.toBeNull();
+    expect(focusBounds.x).toBeGreaterThanOrEqual(0);
+    expect(focusBounds.x + focusBounds.width).toBeLessThanOrEqual(361);
+    await page.getByLabel('Direction', { exact: true }).selectOption('rtl');
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), 'No RTL page overflow').toBe(true);
+    expect(errors).toEqual([]);
+  });
+}
+
+test('system mode follows OS, manual choice persists, unavailable storage is safe', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+  await page.goto('/lab');
+  await page.getByLabel('Appearance', { exact: true }).selectOption('system');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-mode', 'dark');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-motion', 'reduced');
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-mode', 'light');
+  await page.getByLabel('Appearance', { exact: true }).selectOption('dark');
+  await page.reload();
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-mode', 'dark');
+  await page.addInitScript(() => {
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new Error('Storage unavailable');
+      },
+    });
+  });
+  await page.reload();
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await page.getByLabel('Appearance', { exact: true }).selectOption('light');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-mode', 'light');
+});
+
+test('forced colors retains controls and theme contrast is independently selectable', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('/lab');
+  await page.getByLabel('Contrast', { exact: true }).selectOption('high');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-contrast', 'high');
+  await expect(page.getByLabel('Appearance', { exact: true })).toBeVisible();
+  await page.getByLabel('Density', { exact: true }).selectOption('compact');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-density', 'compact');
+});
+
+test('reduced motion, forced colors, keyboard focus, RTL and long text stay usable together', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'active' });
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto('/lab');
+  await page.getByLabel('Direction', { exact: true }).selectOption('rtl');
+  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-motion', 'reduced');
+  const heading = page.getByRole('heading', { level: 1 });
+  await expect(heading).toBeVisible();
+  const button = page.locator('.mf-button').first();
+  await button.focus();
+  await expect(button).toBeFocused();
+  const focusAndMotion = await button.evaluate((node) => ({
+    outlineWidth: getComputedStyle(node).outlineWidth,
+    transitionDuration: getComputedStyle(node).transitionDuration,
+  }));
+  expect(parseFloat(focusAndMotion.outlineWidth)).toBeGreaterThanOrEqual(2);
+  expect(focusAndMotion.transitionDuration.split(',').every((duration) => parseFloat(duration) === 0)).toBe(true);
+  const description = page.locator('.mf-card-description').first();
+  await expect(description).toBeVisible();
+  const textFits = await description.evaluate((node) => node.scrollWidth <= node.clientWidth);
+  expect(textFits, 'long card description remains readable without horizontal clipping').toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});
+
+test('reduced motion keeps the active navigation highlight immediate and identifiable', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/lab');
+  await page.locator('html').evaluate(node => node.setAttribute('data-skin', 'moonpunk'));
+  const navigation = page.getByRole('navigation', { name: 'Workspace sections' });
+  const overview = navigation.getByRole('button', { name: 'Overview', exact: true });
+  const reports = navigation.getByRole('button', { name: 'Reports', exact: true });
+
+  await expect(overview).toHaveAttribute('aria-current', 'page');
+  const initialState = await overview.evaluate(node => ({
+    transform: getComputedStyle(node).transform,
+    transitionDuration: getComputedStyle(node).transitionDuration,
+  }));
+  expect(initialState.transitionDuration.split(',').every(duration => parseFloat(duration) === 0)).toBe(true);
+
+  await reports.click();
+  await expect(reports).toHaveAttribute('aria-current', 'page');
+  await expect(overview).not.toHaveAttribute('aria-current', 'page');
+  const activeState = await reports.evaluate(node => ({
+    background: getComputedStyle(node).backgroundColor,
+    transform: getComputedStyle(node).transform,
+    transitionDuration: getComputedStyle(node).transitionDuration,
+  }));
+  const inactiveBackground = await overview.evaluate(node => getComputedStyle(node).backgroundColor);
+  expect(activeState.transitionDuration.split(',').every(duration => parseFloat(duration) === 0)).toBe(true);
+  expect(activeState.background).not.toBe(inactiveBackground);
+});
+
+test('Moonzine decoration-off preserves content and reduced-motion keeps editorial layout static', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=moonzine');
+  await expect(page.locator('.mf-root')).toHaveAttribute('data-skin', 'moonzine');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const nav = page.locator('.mf-nav-item').first();
+  const card = page.locator('.mf-grid > *').nth(1);
+  const navTransformBefore = await nav.evaluate(node => getComputedStyle(node).transform);
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(card).toBeVisible();
+
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(card).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+
+  const motionState = await root.evaluate(node => {
+    const grid = node.querySelector('.mf-grid');
+    const staggered = node.querySelector('.mf-grid > :nth-child(3n + 2)');
+    return {
+      preference: node.getAttribute('data-motion'),
+      transitionDuration: getComputedStyle(grid).transitionDuration,
+      cardTranslate: getComputedStyle(staggered).translate,
+    };
+  });
+  expect(motionState.preference).toBe('reduced');
+  expect(motionState.transitionDuration.split(',').every(value => Number.parseFloat(value) === 0)).toBe(true);
+  expect(motionState.cardTranslate).toBe('none');
+  expect(await nav.evaluate(node => getComputedStyle(node).transform)).toBe(navTransformBefore);
+});
+
+test('Mooncrash decoration-off removes rack indices without hiding navigation or actions', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=mooncrash');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const nav = page.locator('.mf-nav-item').first();
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  const navIndexBefore = await nav.evaluate(node => getComputedStyle(node, '::before').content);
+  expect(navIndexBefore).not.toBe('none');
+
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  expect(await nav.evaluate(node => getComputedStyle(node, '::before').content)).toBe('none');
+
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration === 0)).toBe(true);
+});
+
+test('Moonpanel decoration-off removes icon frames without hiding content or actions', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=moonpanel');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: 'Overview', exact: true });
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await expect(root).toHaveAttribute('data-skin', 'moonpanel');
+  await shell.evaluate(node => {
+    const icon = document.createElement('span');
+    icon.className = 'mf-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '•';
+    node.append(icon);
+  });
+  const iconFrame = shell.locator('.mf-icon');
+  await expect(iconFrame).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).not.toBe('0px');
+
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(iconFrame).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).toBe('0px');
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration === 0)).toBe(true);
+});
+
+test('Moonraw decoration-off removes ruled icon frames without hiding content or actions', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=moonraw');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: 'Overview', exact: true });
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await expect(root).toHaveAttribute('data-skin', 'moonraw');
+  await shell.evaluate(node => {
+    const icon = document.createElement('span');
+    icon.className = 'mf-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '+';
+    node.append(icon);
+  });
+  const iconFrame = shell.locator('.mf-icon');
+  await expect(iconFrame).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).not.toBe('0px');
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).boxShadow)).not.toBe('none');
+
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(iconFrame).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).toBe('0px');
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).boxShadow)).toBe('none');
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration === 0)).toBe(true);
+});
+
+test('Moonchrome decoration-off removes machined rims without hiding content or actions', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=moonchrome');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const hero = page.locator('.mf-hero');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: 'Overview', exact: true });
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await expect(root).toHaveAttribute('data-skin', 'moonchrome');
+  await shell.evaluate(node => {
+    const icon = document.createElement('span');
+    icon.className = 'mf-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '+';
+    node.append(icon);
+  });
+  const iconFrame = shell.locator('.mf-icon');
+  await expect(iconFrame).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).not.toBe('0px');
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).boxShadow)).not.toBe('none');
+  expect(await hero.evaluate(node => getComputedStyle(node).boxShadow)).not.toBe('none');
+
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(iconFrame).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).toBe('0px');
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).boxShadow)).toBe('none');
+  expect(await hero.evaluate(node => getComputedStyle(node).boxShadow)).toBe('none');
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration === 0)).toBe(true);
+});
+
+test('Classic decoration-off removes pill rims without hiding content or actions', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=classic');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const hero = page.locator('.mf-hero');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: 'Overview', exact: true });
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await expect(root).toHaveAttribute('data-skin', 'classic');
+  await shell.evaluate(node => {
+    const icon = document.createElement('span');
+    icon.className = 'mf-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '+';
+    node.append(icon);
+  });
+  const iconFrame = shell.locator('.mf-icon');
+  await expect(iconFrame).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).not.toBe('0px');
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).boxShadow)).not.toBe('none');
+  expect(await hero.evaluate(node => getComputedStyle(node).boxShadow)).not.toBe('none');
+
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(iconFrame).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).toBe('0px');
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).boxShadow)).toBe('none');
+  expect(await hero.evaluate(node => getComputedStyle(node).boxShadow)).toBe('none');
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration === 0)).toBe(true);
+});
+
+test('Moonhalftone decoration-off removes screentone icon frames without hiding content or actions', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=moonhalftone');
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: 'Overview', exact: true });
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await expect(root).toHaveAttribute('data-skin', 'moonhalftone');
+  await shell.evaluate(node => {
+    const icon = document.createElement('span');
+    icon.className = 'mf-search-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    icon.textContent = '⌕';
+    node.append(icon);
+  });
+  const iconFrame = shell.locator('.mf-search-icon');
+  await expect(iconFrame).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).not.toBe('0px');
+
+  await decorationToggle.check();
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(iconFrame).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  expect(await iconFrame.evaluate(node => getComputedStyle(node).borderTopWidth)).toBe('0px');
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration === 0)).toBe(true);
+});
+
+test('Moonscrawl decoration-off preserves content, focus, and reduced-motion behavior', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto('/lab?skin=moonscrawl');
+
+  const root = page.locator('.mf-root');
+  const shell = page.locator('.mf-shell');
+  const nav = page.getByRole('navigation', { name: 'Workspace sections' }).getByRole('button', { name: 'Overview', exact: true });
+  const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+  await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+  await decorationToggle.check();
+
+  await expect(root).toHaveAttribute('data-skin', 'moonscrawl');
+  await expect(root).toHaveAttribute('data-motion', 'reduced');
+  await expect(shell).toHaveAttribute('data-decorations', 'off');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(nav).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+  await decorationToggle.focus();
+  await expect(decorationToggle).toBeFocused();
+
+  const durations = await shell.evaluate(node => getComputedStyle(node).transitionDuration.split(',').map(value => Number.parseFloat(value)));
+  expect(durations.every(duration => duration <= 0.01)).toBe(true);
+});
+
+// One invariant for all fifteen identities: the documented hook must leave no decorative paint behind.
+test('every skin leaves no decorative paint under data-decorations="off"', async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 1440, height: 960 });
+
+  for (const skin of skins) {
+    await page.goto(`/lab?skin=${skin.id}`);
+    await expect(page.locator('.mf-root')).toHaveAttribute('data-skin', skin.id);
+    await page.getByLabel('Motion', { exact: true }).selectOption('reduced');
+    const decorationToggle = page.getByRole('switch', { name: 'Hide decorative elements', exact: true });
+    await decorationToggle.check();
+    await expect(page.locator('.mf-shell')).toHaveAttribute('data-decorations', 'off');
+
+    const survivors = await page.evaluate(() => {
+      const groups = [
+        ['.mf-shell, .mf-main, .mf-hero, .mf-sidebar', 'backgroundImage'],
+        ['.mf-card, .mf-button, .mf-nav-item, .mf-hero, .mf-header, .mf-sidebar, .mf-input, .mf-select, .mf-textarea, .mf-table-row', 'boxShadow'],
+        ['.mf-icon, .mf-search-icon, .mf-timeline-marker, .mf-callout-icon, .mf-empty-icon, .mf-nav-item > svg, .mf-button > svg, .mf-stat-header > svg', 'backgroundImage'],
+        ['.mf-icon, .mf-search-icon, .mf-timeline-marker, .mf-callout-icon, .mf-empty-icon, .mf-nav-item > svg, .mf-button > svg, .mf-stat-header > svg', 'filter'],
+      ];
+      const offenders = [];
+      for (const [selectors, property] of groups) {
+        for (const el of document.querySelectorAll(`.mf-shell :is(${selectors}), .mf-shell:is(${selectors})`)) {
+          const value = getComputedStyle(el)[property];
+          if (value !== 'none') {
+            offenders.push(`${el.tagName.toLowerCase()}.${(el.getAttribute('class') || '').split(/\s+/)[0]} ${property}:${value}`);
+          }
+        }
+      }
+      for (const el of document.querySelectorAll('.mf-shell :is(.mf-hero, .mf-sidebar, .mf-nav-item)')) {
+        for (const pseudo of ['::before', '::after']) {
+          const value = getComputedStyle(el, pseudo).content;
+          if (value !== 'none' && value !== 'normal') offenders.push(`${el.tagName.toLowerCase()}.${(el.getAttribute('class') || '').split(/\s+/)[0]}${pseudo} content:${value}`);
+        }
+      }
+      return [...new Set(offenders)];
+    });
+
+    expect(survivors, `${skin.id} still paints ${survivors.join(', ')}`).toEqual([]);
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    await expect(page.locator('.mf-nav-item').first()).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Create project', exact: true })).toBeVisible();
+    await decorationToggle.focus();
+    await expect(decorationToggle).toBeFocused();
+  }
+});
+
+test('critical lab actions and readable content work without artwork or custom fonts', async ({ page }) => {
+  const blockedRequests = [];
+  await page.route(/\.(?:png|jpe?g|webp|avif|woff2?|ttf|otf)(?:[?#]|$)/i, async route => {
+    blockedRequests.push(route.request().url());
+    await route.abort();
+  });
+  await page.goto('/lab');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Northstar Studio', exact: true })).toBeVisible();
+  const fixtureNavigation = page.getByRole('navigation', { name: 'Workspace sections' });
+  await expect(fixtureNavigation.getByRole('button', { name: 'Overview', exact: true })).toBeVisible();
+
+  const search = page.getByRole('textbox', { name: 'Search project tasks' });
+  await search.fill('T-1045');
+  await expect(page.getByText('1 of 5 tasks')).toBeVisible();
+  await expect(page.getByRole('list').getByText('Verify scheduled export', { exact: true })).toBeVisible();
+  await page.getByLabel('Sort project tasks').selectOption('task');
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Reports', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.getByRole('button', { name: 'Save changes', exact: true }).click();
+  await expect(page.locator('.fixture-profile-status')).toHaveText('Workspace profile saved.');
+
+  const typography = await page.locator('[data-fixture="dashboard-overview"]').evaluate(node => ({
+    fontFamily: getComputedStyle(node).fontFamily,
+    text: node.innerText,
+    fontStatus: document.fonts.status,
+  }));
+  expect(typography.fontFamily).toMatch(/sans-serif|serif|monospace/i);
+  expect(typography.text).toContain('Project tasks');
+  expect(typography.fontStatus).toBe('loaded');
+  expect(blockedRequests.every(url => /\.(?:png|jpe?g|webp|avif|woff2?|ttf|otf)(?:[?#]|$)/i.test(url))).toBe(true);
+});

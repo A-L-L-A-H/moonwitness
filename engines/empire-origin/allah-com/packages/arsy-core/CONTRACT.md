@@ -1,0 +1,29 @@
+---
+contract: unit
+id: PKG_ARSY_CORE
+tier: package
+name: @allah/arsy-core
+owner: platform-core
+version: 1.0.0
+status: released
+last_verified: 2026-11-05
+summary: Shared kernel for app services and resolver-aware outbound HTTP
+publicSurface: [logger, AppError, resolveLocalSecret, ssrfSafeFetch, validatePublicUrlSsrf]
+depends: []
+---
+
+# @allah/arsy-core — Unit Contract
+
+The shared kernel every backend package and app depends on: the response
+envelope, the `AppError` type, structured `logger`, the DI container/kernel, the
+request principal, local secret/config resolution, and resolver-aware outbound
+HTTP protection.
+
+## Public surface
+
+`logger`, `AppError`, `resolveLocalSecret`, `ssrfSafeFetch`,
+`validatePublicUrlSsrf`, and `SsrfBlockedError` are re-exported from `src/index.ts`.
+
+## Depends
+
+Workspace-internal dependencies: none. External runtime: `pino`, `undici`.

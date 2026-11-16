@@ -1,0 +1,317 @@
+{
+  "version": "0",
+  "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+  "captures": [
+    {
+      "scenario": "Banking",
+      "theme": "Dark Flagship",
+      "detail": "standard",
+      "viewport": "desktop",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "banking-dark-standard-desktop.png",
+      "screenshotSha256": "4b89373bbfb9ebf389218b9e9200337a06a4287c6c98a85695d39c9fbe0482b7",
+      "semantic": {
+        "situationId": "situation:transfer-14200",
+        "detail": "standard",
+        "paths": [
+          {
+            "semanticRef": "possibility:transfer-14200",
+            "availability": "available",
+            "resistance": "explicit-preview"
+          }
+        ],
+        "epistemic": [
+          {
+            "semanticRef": "account:A.balance",
+            "epistemic": "fact"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "epistemic": "fact"
+          },
+          {
+            "semanticRef": "transfer.settlement.estimate",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "account:A.balance",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "account:A.balance",
+            "epistemic": "claim"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "epistemic": "unknown"
+          }
+        ],
+        "witness": [
+          {
+            "semanticRef": "account:A.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "account:A.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "witness:transfer-14200",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "temporal:transfer-14200",
+            "status": "partial"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "Banking",
+      "theme": "Light Companion",
+      "detail": "standard",
+      "viewport": "mobile",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "banking-light-standard-mobile.png",
+      "screenshotSha256": "f19579254b240425d785187bd42b90b0dd408e6dc25174ae44e57dc8f29a382f",
+      "semantic": {
+        "situationId": "situation:transfer-14200",
+        "detail": "standard",
+        "paths": [
+          {
+            "semanticRef": "possibility:transfer-14200",
+            "availability": "available",
+            "resistance": "explicit-preview"
+          }
+        ],
+        "epistemic": [
+          {
+            "semanticRef": "account:A.balance",
+            "epistemic": "fact"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "epistemic": "fact"
+          },
+          {
+            "semanticRef": "transfer.settlement.estimate",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "account:A.balance",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "account:A.balance",
+            "epistemic": "claim"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "epistemic": "unknown"
+          }
+        ],
+        "witness": [
+          {
+            "semanticRef": "account:A.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "account:A.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "account:B.balance",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "witness:transfer-14200",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "temporal:transfer-14200",
+            "status": "partial"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "File",
+      "theme": "Dark Flagship",
+      "detail": "compact",
+      "viewport": "desktop",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "file-dark-compact-desktop.png",
+      "screenshotSha256": "4b9a41e0f18416f2ba8b6b2fcd1bb05d8105fb6e9921206422a4feffc1c4ba68",
+      "semantic": {
+        "situationId": "situation:file",
+        "detail": "compact",
+        "paths": [
+          {
+            "semanticRef": "possibility:file",
+            "availability": "available",
+            "resistance": "visible-consequence"
+          }
+        ],
+        "epistemic": [],
+        "witness": []
+      }
+    },
+    {
+      "scenario": "Email",
+      "theme": "Light Companion",
+      "detail": "expanded",
+      "viewport": "desktop",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "email-light-expanded-desktop.png",
+      "screenshotSha256": "979bd4ef97c6393475ea23a68d1e2a07bfc6dba319aa4e9f1b61058074039044",
+      "semantic": {
+        "situationId": "situation:email",
+        "detail": "expanded",
+        "paths": [
+          {
+            "semanticRef": "possibility:email",
+            "availability": "available",
+            "resistance": "explicit-preview"
+          }
+        ],
+        "epistemic": [
+          {
+            "semanticRef": "message:draft.status",
+            "epistemic": "fact"
+          }
+        ],
+        "witness": []
+      }
+    },
+    {
+      "scenario": "ERP",
+      "theme": "Dark Flagship",
+      "detail": "expanded",
+      "viewport": "mobile",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "erp-dark-expanded-mobile.png",
+      "screenshotSha256": "da0b655b23e799077a82f0c7f752bfa6554c57b32aa340eaa7df0af7c1bc62bb",
+      "semantic": {
+        "situationId": "situation:erp",
+        "detail": "expanded",
+        "paths": [
+          {
+            "semanticRef": "possibility:erp",
+            "availability": "available",
+            "resistance": "explicit-preview"
+          }
+        ],
+        "epistemic": [
+          {
+            "semanticRef": "order:po-42.status",
+            "epistemic": "fact"
+          }
+        ],
+        "witness": []
+      }
+    },
+    {
+      "scenario": "Deploy",
+      "theme": "Light Companion",
+      "detail": "compact",
+      "viewport": "desktop",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "deploy-light-compact-desktop.png",
+      "screenshotSha256": "3b0cef411570032ca295789035fd2431342d23c11364c07aa4c19c30879e9792",
+      "semantic": {
+        "situationId": "situation:deploy",
+        "detail": "compact",
+        "paths": [
+          {
+            "semanticRef": "possibility:deploy",
+            "availability": "available",
+            "resistance": "explicit-preview"
+          }
+        ],
+        "epistemic": [
+          {
+            "semanticRef": "service:api.version",
+            "epistemic": "estimate"
+          },
+          {
+            "semanticRef": "service:api.fleet-a",
+            "epistemic": "claim"
+          },
+          {
+            "semanticRef": "service:api.fleet-b",
+            "epistemic": "claim"
+          }
+        ],
+        "witness": [
+          {
+            "semanticRef": "service:api.version",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "service:api.fleet-a",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "service:api.fleet-b",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "witness:deploy-v42",
+            "status": "partial"
+          },
+          {
+            "semanticRef": "temporal:deploy-v42",
+            "status": "partial"
+          }
+        ]
+      }
+    },
+    {
+      "scenario": "AI",
+      "theme": "Dark Flagship",
+      "detail": "standard",
+      "viewport": "mobile",
+      "sourceSha": "2ef4439f5bd6ecc0963665961c4d7ad15cea7509",
+      "file": "ai-dark-standard-mobile.png",
+      "screenshotSha256": "8cd66645b2f85a4fa77a6cdb9c7673a39ab8f72d7f888d98615fe82a49c9f88c",
+      "semantic": {
+        "situationId": "situation:ai",
+        "detail": "standard",
+        "paths": [
+          {
+            "semanticRef": "possibility:ai",
+            "availability": "available",
+            "resistance": "visible-consequence"
+          }
+        ],
+        "epistemic": [
+          {
+            "semanticRef": "change:42.reviewState",
+            "epistemic": "fact"
+          }
+        ],
+        "witness": []
+      }
+    }
+  ]
+}

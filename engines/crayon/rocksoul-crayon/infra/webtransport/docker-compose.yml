@@ -1,0 +1,30 @@
+services:
+  webtransport:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      WT_ADDR: ":6121"
+      WT_CERT_FILE: /certs/cert.pem
+      WT_KEY_FILE: /certs/key.pem
+      WT_ALLOWED_ORIGIN: https://browser:8443
+    ports:
+      - "6121:6121/udp"
+    volumes:
+      - ./certs/generated:/certs:ro
+    restart: "no"
+
+  browser:
+    build:
+      context: ../..
+      dockerfile: infra/webtransport/browser.Dockerfile
+    depends_on:
+      - webtransport
+    environment:
+      WT_URL: https://webtransport:6121/webtransport
+      WT_PAGE_URL: https://browser:8443/
+      WT_PAGE_CERT_FILE: /certs/page-cert.pem
+      WT_PAGE_KEY_FILE: /certs/page-key.pem
+    volumes:
+      - ./certs/generated:/certs:ro
+    profiles: [e2e]

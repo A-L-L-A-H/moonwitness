@@ -1,0 +1,76 @@
+name: rocksoul-monorepo
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rocksoul_fastify_api
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - DATABASE_URL=file:/app/data/sqlite.db
+    volumes:
+      - rocksoul_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+      args:
+        - VITE_API_URL=${VITE_API_URL:-}
+    container_name: rocksoul_web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:5173"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:5173/ || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: packages/scheduler/Dockerfile
+    container_name: rocksoul_scheduler
+    restart: unless-stopped
+    ports:
+      - "${SCHEDULER_PORT:-3002}:3002"
+    environment:
+      NODE_ENV: production
+      SCHEDULER_HOST: 0.0.0.0
+      SCHEDULER_PORT: 3002
+      SCHEDULER_DATABASE_URL: file:/app/data/scheduler.db
+      ROCKSOUL_API_BASE_URL: http://api:3000
+      WHATSAPP_BASE_URL: ${WHATSAPP_BASE_URL:-http://whatsapp:3001}
+    volumes:
+      - scheduler_data:/app/data
+    depends_on:
+      api:
+        condition: service_healthy
+
+
+volumes:
+  rocksoul_data:
+    name: rocksoul_data
+  scheduler_data:
+    name: scheduler_data

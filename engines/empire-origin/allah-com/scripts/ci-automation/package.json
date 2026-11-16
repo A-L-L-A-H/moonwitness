@@ -1,0 +1,17 @@
+{
+  "name": "ci-automation",
+  "version": "1.0.0",
+  "description": "CI Monitor & Auto-Fix Automation for A-L-L-A-H.COM",
+  "main": "monitor.mts",
+  "type": "module",
+  "scripts": {
+    "monitor": "tsx monitor.mts",
+    "monitor:daemon": "tsx monitor.mts --daemon",
+    "monitor:check": "tsx monitor.mts --check",
+    "test": "tsx monitor.mts --check"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=20"
+  }
+}

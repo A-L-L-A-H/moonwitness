@@ -1,0 +1,305 @@
+export const metadata = {
+  title: 'Backups',
+  description: 'Automatically backup your applications, databases, and data with configurable schedules.',
+  alternates: {
+    canonical: '/docs/backups',
+  },
+}
+
+# Backups
+
+Protect your applications and data with automated backups. Configure backup schedules, store backups securely, and restore quickly when needed.
+
+<Mermaid chart={`
+sequenceDiagram
+    participant Schedule
+    participant Temps
+    participant App
+    participant Storage
+
+    Schedule->>Temps: Backup Triggered
+    Temps->>App: Capture Snapshot
+    App-->>Temps: Application Data
+    Temps->>Storage: Store Backup
+    Storage-->>Temps: Backup Complete
+
+    Note over Temps: Restore Process
+    Temps->>Storage: Retrieve Backup
+    Storage-->>Temps: Backup Data
+    Temps->>App: Restore Data
+    App-->>Temps: Restore Complete
+`} />
+
+## Quick Start
+
+### Enable Automatic Backups
+
+1. **Open the database** - From **Storage**, or from your project's **Databases** page (row menu → **Backups**).
+2. **Add a backup destination if you have none** - With no S3-compatible destination configured, the **Backups** card says so and links to **Create destination**.
+3. **Click "Schedule backups"** - The schedule form opens on your default destination with this database already selected. Pick a frequency and retention.
+4. **Done** - Backups run automatically and appear in the database's **Backups** card.
+
+### Create Backup Now
+
+Backups are written to an S3-compatible **source** (destination). Find the IDs you need first, then run a backup of one managed service:
+
+```bash
+# Find the service ID and the S3 source ID
+temps services list
+temps backups sources list
+
+# Back up one managed service right now
+temps backups run-service --id 12 --s3-source-id 1
+
+# Back up Temps' own database (projects, settings, encrypted secrets) to a source
+temps backups sources run --id 1
+
+# Follow the backup until it completes
+temps backups show --id <backup-id>
+```
+
+Both commands start the backup in the background and print its ID. If `backups sources list` is empty, create a destination first (see [Configure Storage](#configure-storage)).
+
+## What Gets Backed Up
+
+### Managed Services
+
+Each managed service is backed up with its engine's own tooling:
+
+- **PostgreSQL** - WAL-G or `pg_dump` backups, with point-in-time recovery where WAL archiving is enabled
+- **MariaDB** - Physical backups when the point-in-time tools are available, database dumps otherwise
+- **Redis** - RDB snapshots
+- **MongoDB** - Archive dumps
+- **Object storage** - Bucket contents
+
+### Temps Itself
+
+The **control plane** backup is a copy of Temps' own database: users, projects, environments, deployments, domains, environment variables (still encrypted), service and backup configuration, and permissions. It also carries the instance's `encryption_key` and `auth_secret`, sealed in a recovery manifest, so the whole instance can be rebuilt on a new host; see [Restore a Temps instance from S3](/docs/restore-instance-from-s3).
+
+### Not Backed Up
+
+Files written inside application containers are not backed up. Keep persistent application data in a managed service or object storage.
+
+## Backup Schedules
+
+### Create Schedule
+
+Schedules use a six-field cron expression with **seconds first**: `sec min hour day-of-month month day-of-week`.
+
+```bash
+# Daily at 02:00, keep 30 days, store on S3 source 1
+temps backups schedules create \
+  --name nightly --type full \
+  --schedule "0 0 2 * * *" \
+  --retention 30 --s3-source-id 1 --yes
+
+# Weekly on Sundays at 03:00, keep 90 days
+temps backups schedules create \
+  --name weekly --type full \
+  --schedule "0 0 3 * * SUN" \
+  --retention 90 --s3-source-id 1 --yes
+
+# Every 6 hours, keep 7 days
+temps backups schedules create \
+  --name every-6h --type full \
+  --schedule "0 0 */6 * * *" \
+  --retention 7 --s3-source-id 1 --yes
+
+# Review, pause and resume schedules
+temps backups schedules list
+temps backups schedules disable --id 3
+temps backups schedules enable --id 3
+```
+
+Without `--yes` and all of the flags above, `schedules create` asks for the missing values interactively.
+
+### Schedule Options
+
+**Frequency:**
+- Any cron expression whose runs are **at least one hour apart**. A more frequent schedule is rejected with `Backup schedule must be at least 1 hour apart`.
+
+**Targets:**
+- A schedule created from the CLI backs up every managed service on the host, including services created later, plus Temps' own database. To back up only selected databases, create the schedule from the database's **Backups** card in the console.
+
+**Retention:**
+- Keep backups for the given number of days
+- Expired backups are removed automatically; `temps backups cleanup` removes them on demand
+
+## Backup Storage
+
+### Storage Options
+
+Backups are stored in an **S3-compatible bucket** that you configure as a backup source:
+
+- AWS S3, MinIO, DigitalOcean Spaces, or any other S3-compatible endpoint
+- Off-site from the Temps server, so a lost host does not take its backups with it
+- One or more sources per instance; each schedule writes to one source
+
+### Configure Storage
+
+```bash
+# Add an S3 source (AWS S3)
+temps backups sources create \
+  --name offsite \
+  --bucket my-backups \
+  --region us-east-1 \
+  --access-key YOUR_KEY \
+  --secret-key YOUR_SECRET \
+  --yes
+
+# S3-compatible storage: also pass the endpoint
+temps backups sources create \
+  --name minio \
+  --bucket my-backups \
+  --region us-east-1 \
+  --endpoint https://minio.example.com \
+  --access-key YOUR_KEY \
+  --secret-key YOUR_SECRET \
+  --prefix temps/ \
+  --yes
+
+# Check the configured sources
+temps backups sources list
+```
+
+Passing secrets as flags stores them in your shell history. Omit `--access-key`, `--secret-key` and `--yes` to be prompted for them instead.
+
+## Restore from Backup
+
+### Restore from the console
+
+- **From a backup**: open the backup (from the database's **Backups** card or **Backups → source**) and click **Restore this backup**. The restore page opens with that backup, its source and in-place mode already selected.
+- **From a database**: use **Actions → Restore…** on the database page, or **Restore…** in the row menu on your project's **Databases** page.
+
+Your choices (source, backup and mode) are kept in the page address, so a reload or a shared link keeps them. Once a restore starts, the page follows the run: it shows which backup is being restored (with a link to it), each phase, and the outcome. While a restore runs, the database's own page shows a banner linking back to it.
+
+### Cancel a running restore
+
+A restore can be cancelled only while stopping it is safe:
+
+| Mode | Can be cancelled during | What cancelling does |
+|---|---|---|
+| In place / point-in-time in place | Preparing and **downloading** the backup | Stops before anything is written. The database keeps its current data and the partial download is deleted. |
+| New service / point-in-time to a new service | Preparing, downloading, provisioning and recovering | Stops and removes the partially created container and volume, so nothing is left behind. |
+
+The separate download phase applies to PostgreSQL (WAL-G and `pg_dump` backups, single-node) and MongoDB archive backups, which are fully staged before the database is touched. Other engines (Redis, MariaDB, object storage, PostgreSQL clusters) write while they read, so in place they can only be cancelled while the restore is still preparing.
+
+Once an in-place restore starts writing data (or a new service is being registered), **Cancel restore** is replaced by an explanation of why the run can no longer be stopped, and the API answers `409 restore-not-cancellable` for `POST /restore-runs/{id}/cancel`. Cancelled runs end with the status `cancelled`, keep the phase they stopped in, and are recorded in the audit log.
+
+### List Backups
+
+```bash
+# Backups produced by one schedule
+temps backups list --schedule-id 3
+
+# Backups stored on an S3 source, with the IDs a restore needs
+temps services list-backups --s3-source-id 1
+
+# Details of one backup (state, size, location)
+temps backups show --id <backup-id>
+```
+
+### Restore Backup
+
+Restores run per managed service. Check what the service supports first, then restore in place or into a new service:
+
+```bash
+# Which restore modes this service supports (in place, new service, point in time)
+temps services restore-capabilities --id 12
+
+# Restore a backup over the existing service (asks for confirmation)
+temps services restore --id 12 --backup-id <backup-id>
+
+# Restore into a new service, leaving the original untouched
+temps services restore --id 12 --backup-id <backup-id> --new-service
+
+# Point-in-time recovery into a new service (PITR-capable backups only)
+temps services restore --id 12 --backup-id <backup-id> \
+  --pitr 2026-01-15T09:30:00Z --new-service
+
+# Follow and cancel restore runs
+temps services restore-runs --id 12
+temps services restore-cancel --id <run-id>
+```
+
+`services restore` waits and prints each phase until the run finishes; pass `--no-wait` to return immediately. Restoring a backup that came from a *different* service in place also needs `--confirm-cross-service`.
+
+To restore a whole Temps instance (its own database) onto a new host, use the server binary instead; see [Restore a Temps instance from S3](/docs/restore-instance-from-s3).
+
+### What Gets Restored
+
+A service restore replaces (or, with `--new-service`, recreates) the data of **one managed service**. Projects, deployments, environment variables and users are not changed by a service restore.
+
+## Backup Best Practices
+
+### Regular Backups
+
+- **Daily for production** - Critical applications
+- **Weekly for staging** - Less critical environments
+- **Before major changes** - Manual backup before migrations
+- **After deployments** - Backup after successful deployments
+
+### Test Restores
+
+Regularly test your restore process:
+
+```bash
+# Restore the latest backup into a throwaway service
+temps services list-backups --s3-source-id 1
+temps services restore --id 12 --backup-id <backup-id> --new-service restore-test
+
+# Verify data integrity and application behaviour against restore-test,
+# then remove it
+temps services list
+temps services remove --id <restore-test-service-id>
+```
+
+### Backup Verification
+
+- **Automatic verification** - Backups verified after creation
+- **Integrity checks** - Checksums verified
+- **Restore testing** - Periodic restore tests
+- **Alert on failure** - Notified if backup fails
+
+## Disaster Recovery
+
+### Recovery Plan
+
+1. **Identify the issue** - What data was lost?
+2. **Find the backup** - Locate the right backup
+3. **Restore backup** - Restore to staging first
+4. **Verify data** - Check data integrity
+5. **Restore to production** - Restore when verified
+6. **Monitor closely** - Watch for issues
+
+### Recovery Time
+
+- **Backup retrieval** - Seconds to minutes
+- **Data restoration** - Minutes to hours (depends on size)
+- **Application restart** - Minutes
+- **Total recovery** - Usually under 1 hour
+
+## Backup Management
+
+### Delete Old Backups
+
+```bash
+# Delete one finished backup (asks for confirmation)
+temps backups delete --id <backup-id>
+
+# Preview, then delete, backups past their schedule's retention period
+temps backups cleanup --dry-run
+temps backups cleanup --schedule-id 3 --yes
+```
+
+Retention is set per schedule, not per command. To keep backups longer or shorter, edit the schedule's retention in the console.
+
+### Export Backups
+
+There is no download or export command. Backups are ordinary objects in your S3 bucket: copy them with your storage provider's tools, for example `aws s3 cp` or `aws s3 sync` against the bucket and prefix of the source. `temps backups show --id <backup-id>` prints the object location.
+
+## Next Steps
+
+- **[Rollbacks](/docs/rollbacks)** - Quick recovery from bad deployments
+- **[Monitoring](/docs/monitoring)** - Monitor backup success
+- **[Managed Services](/docs/managed-services)** - Database backup options

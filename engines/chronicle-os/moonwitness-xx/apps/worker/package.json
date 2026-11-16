@@ -1,0 +1,21 @@
+{
+  "name": "@moonwitness/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/worker.js",
+    "start": "node src/worker.js",
+    "test": "node --test test/unit/*.test.js",
+    "check": "node --check src/worker.js",
+    "test:integration": "node --test test/integration/outbox.integration.test.js"
+  },
+  "dependencies": {
+    "@moonwitness/config": "workspace:*",
+    "@moonwitness/contracts": "workspace:*",
+    "@moonwitness/queue": "workspace:*",
+    "bullmq": "catalog:",
+    "ioredis": "catalog:",
+    "@moonwitness/database": "workspace:*",
+    "@moonwitness/core": "workspace:*"
+  }
+}

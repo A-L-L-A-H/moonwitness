@@ -1,6 +1,12 @@
 :root {
   font-family: Inter, Arial, sans-serif;
   background: var(--mw-surface-page);
+  /* Harmonized fallback alignment with @moonwitness/ui Master DNA 02-lunar-chronicles / 03-rocksoul */
+  --dna-canvas: var(--mw-surface-page, #0b0b0b);
+  --dna-surface: var(--mw-surface-elevated, #121722);
+  --dna-border: var(--mw-border-default, #4e6d96);
+  --dna-text: var(--mw-text-primary, #f3efe6);
+  --dna-accent: var(--mw-brand-crimson, #f5b027);
 }
 
 html {

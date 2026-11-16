@@ -1,0 +1,146 @@
+export const metadata = {
+  title: "Deploy Go Services With Automatic HTTPS",
+  description:
+    "Deploy Go apps (Gin, Echo, Chi, Fiber) on your own VPS with automatic HTTPS and zero-downtime deployments. Compiled to a static binary on a Debian slim image.",
+  alternates: {
+    canonical: "/docs/deploy-go",
+  },
+  openGraph: {
+    title: "Deploy Go Services With Automatic HTTPS",
+    description: "Deploy Go apps (Gin, Echo, Chi, Fiber) on your own VPS with automatic HTTPS and zero-downtime deployments. Compiled to a static binary on a Debian slim image.",
+    images: [{ url: "/og/docs/deploy-go.png", width: 1200, height: 630, alt: "Deploy Go" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Go Services With Automatic HTTPS",
+    description: "Deploy Go apps (Gin, Echo, Chi, Fiber) on your own VPS with automatic HTTPS and zero-downtime deployments. Compiled to a static binary on a Debian slim image.",
+    images: ["/og/docs/deploy-go.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Dockerfile (optional)', id: 'dockerfile-optional' },
+  { title: 'Reading PORT from environment', id: 'reading-port-from-environment' },
+  { title: 'Managed PostgreSQL', id: 'managed-postgresql' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+];
+
+# Deploy Go on Your Own Server
+
+Deploy Go web applications as small container images. Go compiles to a single static binary, so startup is near-instant. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up" },
+]} />
+
+Temps detects your `go.mod`, compiles a static binary with `go build`, and runs it on a Debian slim image. The Go version comes from the `go` line in `go.mod`, and defaults to 1.23. Zero cold starts.
+
+Temps builds the `main` package in the repository root, or the single `cmd/<name>/main.go` if there is no root `main.go`. If your repository has several commands under `cmd/`, pick one in a `.temps.yaml` file:
+
+```yaml
+build:
+  build_command: go build -o /app/bin/app ./cmd/api
+```
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | `go build -ldflags='-s -w'` with `CGO_ENABLED=0` (a static binary) |
+| Image | Multi-stage build: the binary is copied into a Debian slim runtime image |
+| HTTPS | Let's Encrypt, auto-renewed |
+| Port | `PORT` env var injected, defaults to 8080 |
+| Health checks | HTTP check on `/` at deploy time, or the path set in `.temps.yaml` |
+| Startup | Near-instant — static binary, no runtime |
+
+---
+
+## Dockerfile (optional) {{ anchor: true, id: 'dockerfile-optional' }}
+
+Temps auto-generates a Dockerfile for Go projects. If you want full control, add your own:
+
+```dockerfile
+# Build stage
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN go build -o app .
+
+# Run stage
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
+WORKDIR /app
+COPY --from=builder /app/app .
+EXPOSE 8080
+CMD ["./app"]
+```
+
+---
+
+## Reading PORT from environment {{ anchor: true, id: 'reading-port-from-environment' }}
+
+Make sure your server reads the `PORT` environment variable:
+
+```go
+port := os.Getenv("PORT")
+if port == "" {
+    port = "8080"
+}
+log.Fatal(http.ListenAndServe(":"+port, nil))
+```
+
+---
+
+## Managed PostgreSQL {{ anchor: true, id: 'managed-postgresql' }}
+
+Create a PostgreSQL database under **Databases → Create database**, then link it from your project's **Databases** page. Temps injects the connection string as `POSTGRES_URL`:
+
+```go
+db, err := sql.Open("pgx", os.Getenv("POSTGRES_URL"))
+```
+
+See [Deploy with a Database](/docs/deploy-with-database) for all the injected variables.
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/docker-containers" variant="text" arrow="right">
+    Custom Dockerfiles
+  </Button>
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Deploy with a database
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+</div>

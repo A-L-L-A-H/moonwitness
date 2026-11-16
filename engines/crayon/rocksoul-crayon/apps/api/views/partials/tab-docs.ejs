@@ -1,0 +1,27 @@
+<!-- TAB: CONSOLE SPECS & README VISUALIZATION -->
+<div id="tab-docs" class="tab-content">
+  <div class="box-card" style="margin-bottom: 20px;">
+    <div class="box-header" style="flex-wrap: wrap; gap: 12px;">
+      <div class="box-title">
+        <span style="font-size: 18px;">📖</span>
+        <div>
+          <div>RockSoul CRAYON &mdash; Ecosystem Console Specification</div>
+          <div style="font-size: 12px; font-weight: normal; color: var(--text-muted); margin-top: 2px;">
+            Live dynamic reflection of <code>README.md</code> directly from the workspace root
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <span class="badge badge-blue">Sourced: Root README.md</span>
+        <span class="badge badge-green">Visual Contract: rocksoul-assets</span>
+        <a href="https://github.com/bjo163/rocksoul-crayon" target="_blank" class="btn btn-secondary" style="font-size: 12px; padding: 4px 10px;">
+          ↗ GitHub Repo
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="box-card markdown-body" style="padding: 32px 36px; line-height: 1.7; background: #101014; border-color: rgba(255, 255, 255, 0.1);">
+    <%- data.readmeHtml %>
+  </div>
+</div>

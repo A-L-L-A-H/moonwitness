@@ -1,0 +1,17 @@
+{
+  "name": "@moonwitness/core",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./editorial": "./src/editorial.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/editorial.js && node --check src/events.js && node --check src/messaging.js"
+  },
+  "dependencies": {
+    "@moonwitness/contracts": "workspace:*",
+    "@sinclair/typebox": "catalog:"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "moonwitness",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.19.0",
+  "engines": {
+    "node": ">=26 <27",
+    "pnpm": ">=12 <13"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --recursive --if-present dev",
+    "dev:api": "pnpm --filter @moonwitness/api dev",
+    "dev:worker": "pnpm --filter @moonwitness/worker dev",
+    "test": "pnpm --recursive --if-present test",
+    "check": "pnpm --recursive --if-present check",
+    "db:migrate": "pnpm --filter @moonwitness/database migrate",
+    "db:create-migration": "pnpm --filter @moonwitness/database create-migration",
+    "auth:bootstrap-owner": "pnpm --filter @moonwitness/auth bootstrap-owner",
+    "test:integration": "pnpm --filter @moonwitness/worker test:integration",
+    "package:backend": "bash ./scripts/package-backend.sh"
+  }
+}

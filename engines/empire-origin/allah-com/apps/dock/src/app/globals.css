@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@import "@moonwitness/ui/theme.css";
+@import "@moonwitness/ui/skins.css";
+@import "tw-animate-css";
+
+/* The entry page only decides rhythm: the shared blocks own colour, type, radius and shape. */
+.dock-shell {
+  --mw-route-gap: clamp(2.5rem, 5vw, 4.5rem);
+}
+
+.dock-index {
+  display: grid;
+  gap: var(--mw-card-padding);
+}

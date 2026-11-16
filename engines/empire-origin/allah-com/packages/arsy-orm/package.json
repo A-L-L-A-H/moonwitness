@@ -1,0 +1,28 @@
+{
+  "name": "@allah/arsy-orm",
+  "version": "0.1.0",
+  "description": "Declarative ORM and embedded PGlite engine with auto-DDL synchronization and multi-tenant isolation",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "tsx --test test/**/*.test.mjs"
+  },
+  "dependencies": {
+    "@allah/arsy-core": "workspace:*",
+    "@electric-sql/pglite": "^0.2.16"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1",
+    "typescript": "^5.8.2"
+  }
+}

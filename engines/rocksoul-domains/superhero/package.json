@@ -1,0 +1,38 @@
+{
+  "name": "rocksoul-superhero",
+  "version": "0.5.0",
+  "private": true,
+  "type": "module",
+  "description": "Actor & Transmission Intelligence for the Rocksoul Research ecosystem.",
+  "engines": {
+    "node": "22.x"
+  },
+  "scripts": {
+    "snapshot": "node scripts/build-web-snapshot.mjs",
+    "dev": "npm run snapshot && vite",
+    "validate": "node scripts/validate.mjs",
+    "index": "node scripts/build-index.mjs",
+    "build:data": "npm run validate && npm run index && npm run snapshot",
+    "typecheck": "tsc --noEmit",
+    "audit:ui": "node scripts/ui-audit.mjs",
+    "build": "npm run build:data && npm run typecheck && vite build",
+    "ci": "npm run build && npm run test && npm run audit:ui",
+    "preview": "vite preview",
+    "test": "node --test tests/*.test.mjs",
+    "research:steward": "node scripts/research-steward.mjs"
+  },
+  "dependencies": {
+    "@rocksoul/ui": "github:bjo163/rocksoul-ui#main",
+    "ajv": "^8.17.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  },
+  "packageManager": "npm@11.6.0"
+}

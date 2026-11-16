@@ -1,0 +1,83 @@
+version: 2
+updates:
+  # npm/pnpm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 10
+    allow:
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    ignore:
+      # Ignore major version updates for these packages
+      - dependency-name: "next"
+        update-type: "version-update:semver-major"
+      - dependency-name: "react"
+        update-type: "version-update:semver-major"
+      - dependency-name: "react-dom"
+        update-type: "version-update:semver-major"
+      - dependency-name: "typescript"
+        update-type: "version-update:semver-major"
+    labels:
+      - "dependencies"
+      - "npm"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    reviewers:
+      - "bjo163"
+    assignees:
+      - "bjo163"
+    # Auto-merge is handled by .github/workflows/auto-merge-dependabot.yml
+    # (dependabot.yml `auto-merge` requires branch protection `merge queue` and
+    # silently no-ops otherwise).
+
+  # GitHub Actions dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(deps)"
+    reviewers:
+      - "bjo163"
+    assignees:
+      - "bjo163"
+
+  # Docker base images. Dependabot scans <directory>/Dockerfile, so each
+  # service Dockerfile needs its own entry — the repo root has no Dockerfile.
+  - package-ecosystem: "docker"
+    directories:
+      - "/apps/arsy"
+      - "/apps/gate"
+      - "/apps/dock"
+      - "/apps/headquarter"
+      - "/apps/id"
+      - "/apps/jizz"
+      - "/apps/sentinel"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Asia/Jakarta"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(deps)"
+    reviewers:
+      - "bjo163"
+    assignees:
+      - "bjo163"

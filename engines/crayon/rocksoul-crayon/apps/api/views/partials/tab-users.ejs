@@ -1,0 +1,213 @@
+<div id="tab-users" class="tab-content">
+  <!-- Users Section Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+        👥 User Management & Access Control
+      </h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+        Manage registered system operators, roles, and granular model authorizations
+      </p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modalCreateUser')">
+      ➕ Add New User
+    </button>
+  </div>
+
+  <!-- Users Table -->
+  <div class="table-box" style="margin-bottom: 32px;">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role</th>
+          <th>Plan & Status</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="usersTableBody">
+        <% if (data.users.length === 0) { %>
+          <tr><td colspan="5" style="text-align:center; padding: 24px; color: var(--text-dim);">No users found in database.</td></tr>
+        <% } else { %>
+          <% data.users.forEach(function(u) { %>
+            <tr id="user-row-<%= u.id %>">
+              <td>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff;">
+                    <%= u.name.substring(0, 2).toUpperCase() %>
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; color: #fff;"><%= u.name %></div>
+                    <div class="mono" style="font-size: 11px; color: var(--text-muted);"><%= u.email %></div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="badge <%= u.role === 'admin' ? 'badge-rose' : 'badge-blue' %>">
+                  <%= u.role.toUpperCase() %>
+                </span>
+              </td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="badge badge-cyan"><%= u.plan || 'Standard' %></span>
+                  <span class="badge <%= u.isActive ? 'badge-green' : 'badge-amber' %>">
+                    <%= u.isActive ? 'ACTIVE' : 'INACTIVE' %>
+                  </span>
+                </div>
+              </td>
+              <td class="mono" style="font-size: 11px; color: var(--text-dim);">
+                <%= u.createdAt ? u.createdAt.split('T')[0] : '-' %>
+              </td>
+              <td>
+                <button
+                  class="btn btn-secondary"
+                  style="padding: 4px 10px; font-size: 11px;"
+                  onclick="toggleUserStatus('<%= u.id %>')"
+                >
+                  <%= u.isActive ? 'Deactivate' : 'Activate' %>
+                </button>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- API Keys Section Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+    <div>
+      <h3 style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+        🔑 API Key Management & Token Scopes
+      </h3>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 2px;">
+        Generate and revoke high-performance machine-to-machine tokens with scoped capabilities
+      </p>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modalCreateApiKey')">
+      ➕ Generate API Key
+    </button>
+  </div>
+
+  <!-- API Keys Table -->
+  <div class="table-box">
+    <table>
+      <thead>
+        <tr>
+          <th>Key Name</th>
+          <th>Key Identifier</th>
+          <th>Scopes</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="apiKeysTableBody">
+        <% if (data.apiKeys.length === 0) { %>
+          <tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-dim);">No API keys generated yet.</td></tr>
+        <% } else { %>
+          <% data.apiKeys.forEach(function(k) { %>
+            <tr id="key-row-<%= k.id %>">
+              <td style="font-weight: 700; color: #fff;"><%= k.name %></td>
+              <td>
+                <span class="mono" style="background: #1e1e26; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); color: #a5b4fc;">
+                  <%= k.keyPrefix %>••••••••
+                </span>
+              </td>
+              <td>
+                <% (k.scopes || []).forEach(function(sc) { %>
+                  <span class="badge badge-blue mono" style="margin-right: 4px;"><%= sc %></span>
+                <% }); %>
+              </td>
+              <td>
+                <span class="badge <%= k.isActive ? 'badge-green' : 'badge-amber' %>">
+                  <%= k.isActive ? 'ACTIVE' : 'REVOKED' %>
+                </span>
+              </td>
+              <td class="mono" style="font-size: 11px; color: var(--text-dim);">
+                <%= k.createdAt ? k.createdAt.split('T')[0] : '-' %>
+              </td>
+              <td>
+                <% if (k.isActive) { %>
+                  <button
+                    class="btn btn-secondary"
+                    style="padding: 4px 10px; font-size: 11px; border-color: rgba(244,63,94,0.3); color: var(--rose);"
+                    onclick="revokeApiKey('<%= k.id %>')"
+                  >
+                    Revoke
+                  </button>
+                <% } else { %>
+                  <span style="font-size: 11px; color: var(--text-dim);">Revoked</span>
+                <% } %>
+              </td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Create User -->
+<div id="modalCreateUser" class="modal-backdrop" style="display: none;">
+  <div class="modal-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="font-size: 17px; font-weight: 700;">Create User Account</h3>
+      <button onclick="closeModal('modalCreateUser')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+    </div>
+    <form onsubmit="handleCreateUser(event)">
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="label">Full Name</label>
+        <input type="text" id="newUserName" class="input-field" placeholder="e.g. Alex Rivera" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="label">Email Address</label>
+        <input type="email" id="newUserEmail" class="input-field" placeholder="alex@example.com" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="label">Password</label>
+        <input type="password" id="newUserPassword" class="input-field" placeholder="Minimum 6 characters" required minlength="6">
+      </div>
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label class="label">System Role</label>
+        <select id="newUserRole" class="input-field">
+          <option value="user">User (Standard Access)</option>
+          <option value="admin">Admin (Full Control)</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalCreateUser')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create User</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Create API Key -->
+<div id="modalCreateApiKey" class="modal-backdrop" style="display: none;">
+  <div class="modal-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h3 style="font-size: 17px; font-weight: 700;">Generate New API Key</h3>
+      <button onclick="closeModal('modalCreateApiKey')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
+    </div>
+    <form onsubmit="handleCreateApiKey(event)">
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="label">Key Description / Name</label>
+        <input type="text" id="newKeyName" class="input-field" placeholder="e.g. CI/CD Deployment Token" required>
+      </div>
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label class="label">Allowed Scopes (comma separated)</label>
+        <input type="text" id="newKeyScopes" class="input-field" placeholder="*, models:read, users:write" value="*">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modalCreateApiKey')">Cancel</button>
+        <button type="submit" class="btn btn-primary">Generate Key</button>
+      </div>
+    </form>
+    <div id="generatedKeyBox" style="display:none; margin-top:16px; padding:14px; background:#181822; border:1px solid #3f3f46; border-radius:10px;">
+      <div style="font-size:12px; color:var(--text-muted); margin-bottom:6px;">⚠️ Copy this key now. It won't be shown again:</div>
+      <input type="text" id="generatedKeyVal" readonly class="input-field mono" style="background:#09090b; color:#a5b4fc; font-size:12px; cursor:pointer;" onclick="this.select()">
+    </div>
+  </div>
+</div>

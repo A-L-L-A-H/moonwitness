@@ -1,0 +1,118 @@
+export const metadata = {
+  title: "Deploy Remix With SSR and Nested Routes",
+  description: "Deploy Remix with SSR and nested routes on your own VPS, with automatic HTTPS, preview deployments and no cold starts. A self-hosted alternative to Vercel.",
+  alternates: {
+    canonical: "/docs/deploy-remix",
+  },
+  openGraph: {
+    title: "Deploy Remix With SSR and Nested Routes",
+    description: "Deploy Remix with SSR and nested routes on your own VPS, with automatic HTTPS, preview deployments and no cold starts. A self-hosted alternative to Vercel.",
+    images: [{ url: "/og/docs/deploy-remix.png", width: 1200, height: 630, alt: "Deploy Remix" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Remix With SSR and Nested Routes",
+    description: "Deploy Remix with SSR and nested routes on your own VPS, with automatic HTTPS, preview deployments and no cold starts. A self-hosted alternative to Vercel.",
+    images: ["/og/docs/deploy-remix.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Managed PostgreSQL', id: 'managed-postgresql' },
+  { title: 'Environment variables', id: 'environment-variables' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+]
+
+# Deploy Remix on Your Own Server
+
+**Deploy Remix and your loaders, actions, and server rendering run without cold starts** — Temps runs your app as a persistent Node.js process with automatic HTTPS on infrastructure you own. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up" },
+]} />
+
+Remix needs the **Autopack (Node.js)** preset (`nixpacks-node`), which runs your app as a Node.js server:
+
+<CliCommands commands={[
+  { args: "up --preset nixpacks-node" },
+]} />
+
+Or pick it under **Project → Settings → Build & deploy → Build → Framework**.
+
+<Note>
+A Vite-based Remix app has a `vite.config.js` or `vite.config.ts`, so Temps detects it as the static **Vite** preset. That preset only serves files from `dist/` and can't run the Remix server, so switch the project to Autopack (Node.js). A classic `remix.config.js` project isn't detected at all and needs the same preset.
+</Note>
+
+With Autopack (Node.js), Temps runs your `build` script, then starts the app with your `start` script (for example `remix-serve ./build/server/index.js`). A `web:` line in a `Procfile` takes priority over the `start` script. The Node.js version comes from `.nvmrc`, `.node-version` or `engines.node` in `package.json`, and defaults to 24.
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | Your `build` script (for example `npm run build`) |
+| Start | Your `start` script, or a `Procfile` `web:` line |
+| HTTPS | Let's Encrypt, auto-renewed |
+| Port | `PORT` env var injected, defaults to 3000 |
+| Loaders and actions | Fully supported via Node.js runtime |
+| No cold starts | Persistent Node.js process |
+| Preview deployments | Opt-in; once enabled, each branch gets its own preview environment |
+
+---
+
+## Managed PostgreSQL {{ anchor: true, id: 'managed-postgresql' }}
+
+Remix apps need a database for session storage and application data. Create a PostgreSQL database under **Databases → Create database**, then link it from your project's **Databases** page. Temps injects the connection string as `POSTGRES_URL`, so point Prisma or Drizzle at that variable (for Prisma, `url = env("POSTGRES_URL")`). See [Deploy with a Database](/docs/deploy-with-database).
+
+Temps doesn't run migrations for you. Run them yourself, for example from CI, or as part of your `start` script:
+
+<CliCommands pkg="prisma" commands={[{ args: "migrate deploy" }]} />
+
+---
+
+## Environment variables {{ anchor: true, id: 'environment-variables' }}
+
+<CliCommands commands={[
+  { args: "environments vars set SESSION_SECRET \"your-secret\" -e production" },
+]} />
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Deploy with a database
+  </Button>
+  <Button href="/docs/set-up-preview-deployments" variant="text" arrow="right">
+    Preview deployments
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+</div>

@@ -1,0 +1,57 @@
+{
+  "name": "@moonwitness/ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./components": {
+      "import": "./src/components/index.ts",
+      "types": "./src/components/index.ts"
+    },
+    "./blocks": {
+      "import": "./src/blocks/index.ts",
+      "types": "./src/blocks/index.ts"
+    },
+    "./primitives": {
+      "import": "./src/primitives/index.ts",
+      "types": "./src/primitives/index.ts"
+    },
+    "./raw": {
+      "import": "./src/raw/index.ts",
+      "types": "./src/raw/index.ts"
+    },
+    "./sfx": {
+      "import": "./src/sfx/index.ts",
+      "types": "./src/sfx/index.ts"
+    },
+    "./skins.css": "./src/skins.css",
+    "./theme.css": "./src/theme.css",
+    "./tokens": {
+      "import": "./src/tokens/index.ts",
+      "types": "./src/tokens/index.ts"
+    }
+  },
+  "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.487.0",
+    "tailwind-merge": "^3.0.2",
+    "@moonwitness/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5"
+  }
+}

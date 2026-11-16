@@ -1,0 +1,10 @@
+export type FlowStatus = 'draft' | 'active' | 'paused' | 'archived';
+export type TriggerType = 'manual' | 'schedule' | 'webhook';
+export type FlowNodeType = 'manual-trigger' | 'schedule-trigger' | 'webhook-trigger' | 'http' | 'condition' | 'transform' | 'rocksoul-capability' | 'ai-agent' | 'whatsapp';
+export type FlowNode = { id: string; type: FlowNodeType; position: { x: number; y: number }; data: Record<string, unknown> };
+export type FlowEdge = { id: string; source: string; target: string; sourceHandle?: 'true' | 'false' };
+export type FlowDefinition = { nodes: FlowNode[]; edges: FlowEdge[] };
+export type ValidationIssue = { nodeId?: string; path?: string; code: string; message: string; severity: 'error' | 'warning' };
+export type FlowRecord = { id: string; ownerUserId: string; name: string; description: string | null; status: FlowStatus; draftDefinition: FlowDefinition; currentVersion: number | null; currentVersionId: string | null; createdAt: string; updatedAt: string };
+export type NodeMetadata = { type: FlowNodeType; name: string; description: string; category: 'trigger' | 'action' | 'logic'; config: Record<string, unknown> };
+export type ExecutionContext = { executionId: string; ownerUserId: string; triggerType: TriggerType; idempotencyKey: string; triggerInput?: unknown; signal?: AbortSignal; invokeCapability?: (capability: string, input: unknown, key: string) => Promise<unknown>; invokeAi?: (input: Record<string, unknown>, key: string) => Promise<unknown>; invokeWhatsApp?: (input: Record<string, unknown>, key: string) => Promise<unknown> };

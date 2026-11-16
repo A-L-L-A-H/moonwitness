@@ -1,0 +1,119 @@
+export const metadata = {
+  title: "Deploy Node.js: Express, Fastify or Hono",
+  description: "Deploy Node.js apps built on Express, Fastify or Hono with automatic HTTPS, zero-downtime deploys and managed databases on your own VPS. No cold starts.",
+  alternates: {
+    canonical: "/docs/deploy-nodejs",
+  },
+  openGraph: {
+    title: "Deploy Node.js: Express, Fastify or Hono",
+    description: "Deploy Node.js apps built on Express, Fastify or Hono with automatic HTTPS, zero-downtime deploys and managed databases on your own VPS. No cold starts.",
+    images: [{ url: "/og/docs/deploy-nodejs.png", width: 1200, height: 630, alt: "Deploy Node.js" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Node.js: Express, Fastify or Hono",
+    description: "Deploy Node.js apps built on Express, Fastify or Hono with automatic HTTPS, zero-downtime deploys and managed databases on your own VPS. No cold starts.",
+    images: ["/og/docs/deploy-nodejs.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Managed services', id: 'managed-services' },
+  { title: 'Environment variables', id: 'environment-variables' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+]
+
+# Deploy Node.js on Your Own Server
+
+**Deploy any Node.js application and Temps handles the rest** — installing dependencies, running your build and start scripts, and keeping it live with automatic HTTPS and zero-downtime deploys on a VPS you own. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up --preset nixpacks-node" },
+]} />
+
+Temps doesn't detect a plain Node.js service from its `package.json`, so choose the **Autopack (Node.js)** preset (`nixpacks-node`), as above or under **Project → Settings → Build & deploy → Build → Framework**.
+
+With that preset, Temps installs dependencies with the package manager your lockfile or `packageManager` field points to, runs your `build` script if there is one, and starts the app. Your app is live with HTTPS in a few minutes.
+
+The start command is the first of these that exists:
+
+1. The `web:` line in a `Procfile`
+2. Your `start` script
+3. The `main` file in `package.json`, run with `node`
+4. A common entry file, run with `node`: `server.js`, `server.mjs`, `index.js`, `index.mjs`, `app.js`, `src/index.js`, `dist/index.js` or `build/index.js`
+
+If none of them exists, the build stops and asks for a start command. The Node.js version comes from `.nvmrc`, `.node-version` or `engines.node` in `package.json`, and defaults to 24. Temps sets `NODE_ENV=production` for you.
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | Installs dependencies, then runs your `build` script if there is one |
+| Start | `Procfile` `web:` line, `start` script, `main` or a common entry file |
+| HTTPS | Let's Encrypt certificate, auto-renewed |
+| Port | Your app reads `PORT`, which Temps sets (3000 unless you change the project's port) |
+| WebSockets | Fully supported via reverse proxy |
+| Health checks | HTTP check on `/` at deploy time, or the path set in `.temps.yaml` |
+| Preview deployments | Opt-in; once enabled, each branch gets its own preview environment |
+
+---
+
+## Managed services {{ anchor: true, id: 'managed-services' }}
+
+Create PostgreSQL or Redis under **Databases → Create database**, then link it from your project's **Databases** page. Temps injects the connection details into your app, such as `POSTGRES_URL` for PostgreSQL and `REDIS_URL` for Redis. It doesn't inject `DATABASE_URL`, so read `POSTGRES_URL` in your code or set `DATABASE_URL` yourself.
+
+See [Deploy with a Database](/docs/deploy-with-database) for the full guide.
+
+---
+
+## Environment variables {{ anchor: true, id: 'environment-variables' }}
+
+Set your own variables per environment:
+
+<CliCommands commands={[
+  { args: "environments vars set API_KEY \"your-api-key\" -e production" },
+]} />
+
+Changing a variable doesn't redeploy the app; deploy again for the new value to take effect.
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Add PostgreSQL or Redis
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+  <Button href="/docs/ci-cd-setup" variant="text" arrow="right">
+    Set up CI/CD
+  </Button>
+</div>

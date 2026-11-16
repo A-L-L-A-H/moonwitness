@@ -1,0 +1,183 @@
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Run migrations', id: 'migrations' },
+  { title: 'Required Settings', id: 'required-settings' },
+  { title: 'Environment Variables', id: 'environment-variables' },
+  { title: 'Managed PostgreSQL', id: 'managed-postgresql' },
+  { title: 'Platform behavior', id: 'platform-behavior' },
+];
+
+export const metadata = {
+  title: "Deploy Django With Postgres and HTTPS",
+  description:
+    "Deploy Django with managed PostgreSQL, Gunicorn, and static file serving on your own VPS. No Heroku or Railway required.",
+  alternates: {
+    canonical: "/docs/deploy-django",
+  },
+  openGraph: {
+    title: "Deploy Django With Postgres and HTTPS",
+    description: "Deploy Django with managed PostgreSQL, Gunicorn, and static file serving on your own VPS. No Heroku or Railway required.",
+    images: [{ url: "/og/docs/deploy-django.png", width: 1200, height: 630, alt: "Deploy Django" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy Django With Postgres and HTTPS",
+    description: "Deploy Django with managed PostgreSQL, Gunicorn, and static file serving on your own VPS. No Heroku or Railway required.",
+    images: ["/og/docs/deploy-django.png"],
+  }
+};
+
+# Deploy Django on Your Own Server
+
+Deploy Django applications with managed PostgreSQL and Gunicorn. Static files and migrations need one setup step each — see below. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up --preset python" },
+]} />
+
+Temps installs your dependencies and starts your app with Gunicorn. When it finds a `manage.py` and a `<project>/wsgi.py`, it runs `gunicorn <project>.wsgi:application --bind 0.0.0.0:$PORT`, and adds Gunicorn to the build if your dependencies don't include it. The Python version comes from `.python-version`, `runtime.txt` or `requires-python` in `pyproject.toml`, and defaults to 3.12.
+
+Temps doesn't create a database for you. To use PostgreSQL, add one as described in [Managed PostgreSQL](#managed-postgresql).
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Install | uv, Poetry, Pipenv or pip, chosen from your lockfile or manifest (for example `pip install -r requirements.txt`) |
+| WSGI server | Gunicorn with its default settings (one worker); set your own command in a `Procfile` |
+| Static files | Collected during the build on recent versions; needs `STATIC_ROOT` — see [Required Settings](#required-settings) |
+| HTTPS | Let's Encrypt certificate, auto-renewed |
+| Port | `PORT` env var injected, defaults to 8000 |
+| Health checks | HTTP check on `/` at deploy time, or the path set in `.temps.yaml` |
+
+Database migrations are **not** run automatically — see [Run migrations](#migrations) below.
+
+---
+
+## Run migrations {{ anchor: true, id: 'migrations' }}
+
+Temps does not have a remote "run one command" CLI action yet, so migrations are run directly against the container over SSH. Find the container name, then run the migration:
+
+```bash
+bunx @temps-sdk/cli projects show -p my-django-app --json   # note the numeric "id"
+bunx @temps-sdk/cli containers list -p <project-id>          # note the container_name
+ssh your-server 'docker exec <container_name> python manage.py migrate'
+```
+
+Run this manually (or from your CI/CD pipeline right after the deploy step) every time a deploy includes a schema change.
+
+On the first deploy the tables don't exist yet. If your app's `/` needs the database, the deploy fails its health check before you can migrate, so point the health check at a view that doesn't, such as a simple `/health` view, with `health.path` in `.temps.yaml` (see [Health checks](#health-checks)).
+
+Do not add `python manage.py migrate` to your Dockerfile's `CMD` or start command — with rolling deploys, restarts, or multiple replicas, the container start command can run more than once, and concurrent migration runs against the same database can conflict or corrupt data.
+
+---
+
+## Required Settings {{ anchor: true, id: 'required-settings' }}
+
+Ensure your `settings.py` is production-ready:
+
+```python
+# settings.py
+import os
+
+# Temps does not inject your domain into the container, so set this yourself
+# as a project environment variable, e.g.
+#   ALLOWED_HOSTS=app.example.com,www.example.com
+# Defaulting to "*" would turn off Django's Host header validation.
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "").split(",") if h.strip()]
+
+# Use the managed PostgreSQL database when one is linked; Temps injects
+# these variables. Otherwise your existing DATABASES setting stays in place.
+if os.environ.get("POSTGRES_HOST"):
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("POSTGRES_DB"),
+            "USER": os.environ.get("POSTGRES_USER"),
+            "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+            "HOST": os.environ["POSTGRES_HOST"],
+            "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        }
+    }
+
+# Serve static files from the app with WhiteNoise (add `whitenoise` to your dependencies)
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
+}
+
+# Keep your existing middleware and add WhiteNoise right after SecurityMiddleware
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    # ...the rest of your existing middleware, unchanged
+]
+```
+
+Recent Temps versions run `python manage.py collectstatic --noinput` during the build, so `STATIC_ROOT` must be set as above. On older versions, collect the files when the container starts by adding a `Procfile` to your repository root, replacing `myproject` with your project's package name:
+
+```text {{ title: 'Procfile' }}
+web: python manage.py collectstatic --noinput && gunicorn myproject.wsgi:application --bind 0.0.0.0:$PORT
+```
+
+A `web:` line in a `Procfile` replaces the start command Temps would otherwise generate. Temps then no longer adds Gunicorn for you, so make sure `gunicorn` and `whitenoise` are in your `requirements.txt` or `pyproject.toml`; otherwise the container exits with `gunicorn: not found`.
+
+---
+
+## Environment Variables {{ anchor: true, id: 'environment-variables' }}
+
+<CliCommands commands={[
+  { args: "environments vars set SECRET_KEY \"your-secret-key\" -e production" },
+  { args: "environments vars set DEBUG \"False\" -e production" },
+  { args: "environments vars set ALLOWED_HOSTS \"yourdomain.com\" -e production" },
+]} />
+
+When a managed PostgreSQL database is linked, Temps injects `POSTGRES_URL`, `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER` and `POSTGRES_PASSWORD`. It doesn't inject `DATABASE_URL`.
+
+---
+
+## Managed PostgreSQL {{ anchor: true, id: 'managed-postgresql' }}
+
+Create a PostgreSQL database under **Databases → Create database**, then link it from your project's **Databases** page, or use the `services create` and `services link` CLI commands. Temps injects the connection details as the `POSTGRES_*` variables used in [Required Settings](#required-settings). Run migrations yourself as described in [Run migrations](#migrations).
+
+---
+
+## Platform behavior {{ anchor: true, id: 'platform-behavior' }}
+
+These rules apply to every app deployed on Temps, regardless of framework.
+
+<PortBinding />
+
+### Health checks
+
+<HealthChecks />
+
+### Auto-injected environment variables
+
+<InjectedEnvVars />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/deploy-with-database" variant="text" arrow="right">
+    Deploy with a database
+  </Button>
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+  <Button href="/docs/ci-cd-setup" variant="text" arrow="right">
+    Set up CI/CD
+  </Button>
+</div>

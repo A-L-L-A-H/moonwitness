@@ -1,0 +1,25 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+artifacts/*
+!artifacts/skins/
+artifacts/skins/*
+!artifacts/skins/moonriot-light-1440x960-default.png
+!artifacts/skins/moonriot-light-1440x960-default.png.provenance.json
+!artifacts/skins/moonriot-light-360x800-default.png
+!artifacts/skins/moonriot-light-360x800-default.png.provenance.json
+!artifacts/skins/moonriot-dark-1440x960-default.png
+!artifacts/skins/moonriot-dark-1440x960-default.png.provenance.json
+!artifacts/skins/moonriot-dark-360x800-default.png
+!artifacts/skins/moonriot-dark-360x800-default.png.provenance.json
+*.tgz
+.next/
+**/.next/
+*.tsbuildinfo
+.DS_Store
+.env
+.env.*
+
+# Unattended Codex scratch output, transcripts and local checkpoints
+.m13-autopilot/

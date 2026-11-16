@@ -1,0 +1,47 @@
+name: Build Photographic Hero Masters
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "source-inputs/hero/**"
+      - "tools/assets/build-photographic-hero.sh"
+      - ".github/workflows/build-photographic-hero.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout canonical main
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Install image tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick webp
+      - name: Build masters
+        run: bash tools/assets/build-photographic-hero.sh
+      - name: Commit generated masters
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add moonwitness/cinematic-hero-pack/webp
+          if git diff --cached --quiet; then
+            echo "Photographic hero masters are already current."
+            exit 0
+          fi
+          git commit -m "assets: build photographic hero masters"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            test "$attempt" -lt 3
+            sleep 2
+          done

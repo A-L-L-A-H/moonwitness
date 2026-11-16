@@ -1,0 +1,15 @@
+FROM node:26-bookworm-slim AS build
+WORKDIR /app
+
+RUN npm install --global pnpm@12.19.0
+COPY . .
+RUN pnpm install --prod --frozen-lockfile
+
+FROM node:26-bookworm-slim AS runtime
+ENV NODE_ENV=production
+WORKDIR /app
+
+COPY --from=build --chown=node:node /app /app
+USER node
+
+CMD ["node", "apps/worker/src/worker.js"]

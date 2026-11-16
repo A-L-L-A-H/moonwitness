@@ -1,0 +1,445 @@
+export const metadata = {
+  title: "Logs & Debugging",
+  description:
+    "Access real-time application logs, filter by severity, search across deployments, and debug issues with built-in log aggregation in Temps.",
+  alternates: {
+    canonical: "/docs/logs",
+  },
+};
+
+# Logs & Debugging
+
+Access real-time application logs, build logs, and deployment logs to debug issues quickly. Search, filter, and stream logs directly from the dashboard or via API. {{ className: 'lead' }}
+
+---
+
+## Structured telemetry from Sentry SDKs
+
+Open **Projects → your project → Telemetry logs** to search structured application logs sent by an official Sentry SDK. These are the same native telemetry records queried by Temps' OpenTelemetry APIs. They are separate from container stdout, build logs and rrweb replay console events; a replay console breadcrumb does not automatically create a telemetry log.
+
+For the verified Node 11.8.0 setup:
+
+```javascript
+import * as Sentry from '@sentry/node';
+
+Sentry.init({
+  dsn: process.env.TEMPS_SENTRY_DSN,
+  enableLogs: true,
+  dataCollection: { userInfo: false },
+  sendClientReports: false,
+});
+
+Sentry.logger.info('Import completed', {
+  'service.name': 'scheduled-worker',
+  records: 42,
+});
+await Sentry.flush(5000);
+```
+
+Use `Sentry.logger`, or explicitly configure the SDK's console logging integration. Plain `console.log` alone is not this structured-log signal. In a browser, use only the public Temps DSN, never a server OTLP token. Avoid logging credentials, personal input values or full request bodies.
+
+If no logs appear, confirm `enableLogs`, the selected project/time range and `service.name` filter, flush short-lived processes, then check the ingestion response and native log query. The [Sentry compatibility contract](/docs/error-tracking#sentry-compatibility) describes versions, typed-attribute preservation and partial-ingestion limits.
+
+---
+
+## Types of Logs
+
+Temps provides several types of logs to help you understand what's happening with your application:
+
+<Row>
+  <Col>
+    **Application Logs** - Runtime logs from your running containers - Standard
+    output (stdout) and error output (stderr) - Real-time streaming available -
+    Searchable and filterable **Build Logs** - Output from build processes -
+    Docker build logs - Dependency installation logs - Build errors and warnings
+  </Col>
+  <Col>
+    **Deployment Logs** - Deployment workflow execution - Step-by-step
+    deployment progress - Configuration and setup logs - Success/failure
+    messages **Audit Logs** - System events and user actions - Security-relevant
+    operations - Configuration changes - Access attempts
+  </Col>
+</Row>
+
+---
+
+## Accessing Logs
+
+### Via Dashboard
+
+**Application Logs:**
+
+1. Navigate to **Projects** → Select your project
+2. Choose an **Environment**
+3. Click on a **Container**
+4. Open the **Logs** tab
+5. View real-time logs or search historical logs
+
+**Build Logs:**
+
+1. Go to **Projects** → Select your project
+2. Open **Deployments**
+3. Click on a deployment
+4. View build logs in the deployment details
+
+**Deployment Logs:**
+
+1. Navigate to **Deployments**
+2. Select a deployment
+3. View step-by-step deployment logs
+4. See which steps succeeded or failed
+
+### Via CLI
+
+The CLI has three log commands. `runtime-logs` (alias `rlogs`) reads a running container, `deployments logs` reads a deployment's build and deploy steps, and `logs` searches collected logs across every project you can access.
+
+```bash
+# Last 100 lines from the production container of a project
+temps runtime-logs --project my-project --environment production --tail 100
+
+# Follow container logs in real time (Ctrl+C to stop)
+temps rlogs -p my-project -e production -f
+
+# Build and deploy step logs for a specific deployment
+temps deployments logs --project my-project --deployment 123
+
+# Search the last 6 hours of collected logs for errors in one project
+temps logs search --project my-project --level ERROR --since 6h
+```
+
+If `runtime-logs` reports **No running containers found**, the environment has no live container: check `temps deployments list --project my-project` for a failed or stopped deployment. To read a container that belonged to a failed deployment, pass its ID with `--deployment`. If `logs search` returns nothing, run `temps logs capabilities` to check whether container logs are being collected.
+
+### Via API
+
+Live container logs are streamed over a **WebSocket**, not plain HTTP, so `curl` cannot read them. Use a WebSocket client and send your API key in the `Authorization` header:
+
+```bash
+# List the containers of an environment to get a container_id
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/environments/{environment_id}/containers"
+
+# Read the last 100 lines and close (follow=false), using websocat
+websocat -H "Authorization: Bearer YOUR_TOKEN" \
+  "wss://your-temps-instance.com/api/projects/{project_id}/environments/{environment_id}/containers/{container_id}/logs?tail=100&follow=false"
+```
+
+Build and deploy step logs are plain text, one file per deployment job:
+
+```bash
+# List the jobs (build, deploy, …) of a deployment to get a job_id
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/deployments/{deployment_id}/jobs"
+
+# Read the last 500 lines of one job's log
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/deployments/{deployment_id}/jobs/{job_id}/logs?tail=500"
+```
+
+When a deployment is replaced, Temps saves the logs of its containers before removing them. List and read those saved logs with:
+
+```bash
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/deployments/{deployment_id}/container-logs"
+
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/deployments/{deployment_id}/container-logs/{log_id}"
+```
+
+---
+
+## Log Levels
+
+Temps supports structured logging with different log levels:
+
+<Properties>
+  <Property name="Success">
+    Successful operations, completions, and positive outcomes. Look for ✅ emoji
+    indicators.
+  </Property>
+
+  <Property name="Info">
+    General informational messages about application flow and state.
+  </Property>
+
+  <Property name="Warning">
+    Warnings about potential issues that don't prevent operation.
+  </Property>
+
+  <Property name="Error">
+    Error messages indicating failures or problems. Look for ❌ emoji
+    indicators.
+  </Property>
+</Properties>
+
+---
+
+## Searching and Filtering Logs
+
+### Search by Text
+
+Use the search box in the logs viewer to find specific messages:
+
+- **Exact match:** `"error connecting to database"`
+- **Case-insensitive:** `ERROR` matches `error`, `Error`, `ERROR`
+- **Partial match:** `database` finds all lines containing "database"
+
+### Filter by Log Level
+
+Filter logs to show only specific levels:
+
+1. Click the **Filter** button in the logs viewer
+2. Select log levels (Success, Info, Warning, Error)
+3. View filtered results
+
+### Filter by Time Range
+
+View logs from specific time periods:
+
+1. Use the **Time Range** selector
+2. Choose:
+   - Last hour
+   - Last 24 hours
+   - Last 7 days
+   - Custom range
+3. Logs update to show only the selected period
+
+### Filter by Deployment
+
+View logs for a specific deployment:
+
+1. Go to **Deployments**
+2. Select a deployment
+3. View logs specific to that deployment
+4. Compare logs across different deployments
+
+---
+
+## Real-Time Log Streaming
+
+Stream logs in real-time to see events as they happen:
+
+### In Dashboard
+
+1. Open the **Logs** tab for a container
+2. Click **Follow** or **Stream** button
+3. Logs update automatically as new entries arrive
+4. Scroll to bottom to see latest logs
+
+### Via API
+
+Container logs stream over a WebSocket. Each message is one log line as raw text. The stream stays open while `follow=true` (the default) and closes with code `1000` when it ends normally. Code `1011` means the stream failed after it started: the close reason says why. Do not parse the message payload to detect errors, because your application's own log lines can contain JSON with an `error` field.
+
+Browsers cannot set the `Authorization` header on a WebSocket (the console uses its session cookie instead), so connect from a server-side runtime:
+
+```javascript {{ title: 'Bun' }}
+// Bun's built-in WebSocket accepts request headers.
+const url =
+  `wss://your-temps-instance.com/api/projects/${projectId}` +
+  `/environments/${environmentId}/containers/${containerId}/logs?tail=100&follow=true`;
+
+const socket = new WebSocket(url, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+socket.onmessage = (event) => console.log(String(event.data).trimEnd());
+socket.onclose = (event) => {
+  if (event.code !== 1000) {
+    console.error(`Log stream closed (${event.code}): ${event.reason}`);
+  }
+};
+```
+
+```javascript {{ title: 'Node.js' }}
+// Node's built-in WebSocket cannot send headers; use the `ws` package
+// (npm install ws).
+import WebSocket from "ws";
+
+const url =
+  `wss://your-temps-instance.com/api/projects/${projectId}` +
+  `/environments/${environmentId}/containers/${containerId}/logs?tail=100&follow=true`;
+
+const socket = new WebSocket(url, {
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+socket.on("message", (data) => console.log(data.toString().trimEnd()));
+socket.on("close", (code, reason) => {
+  if (code !== 1000) {
+    console.error(`Log stream closed (${code}): ${reason.toString()}`);
+  }
+});
+```
+
+To stream a deployment's build log while it runs, connect to `/api/projects/{project_id}/deployments/{deployment_id}/jobs/{job_id}/logs/tail` the same way.
+
+---
+
+## Structured Logging Best Practices
+
+To get the most out of Temps logging, use structured logging in your application:
+
+### JSON Logging
+
+```javascript
+// Node.js example
+console.log(
+  JSON.stringify({
+    level: "info",
+    message: "User logged in",
+    userId: 123,
+    timestamp: new Date().toISOString(),
+  }),
+);
+```
+
+```python
+# Python example
+import json
+import logging
+
+logging.info(json.dumps({
+    'level': 'info',
+    'message': 'User logged in',
+    'user_id': 123,
+    'timestamp': datetime.now().isoformat()
+}))
+```
+
+### Log Levels
+
+Use appropriate log levels:
+
+```javascript
+// Debug - detailed information for debugging
+console.debug("Processing request", { requestId, userId });
+
+// Info - general informational messages
+console.info("User logged in", { userId });
+
+// Warning - potential issues
+console.warn("Rate limit approaching", { userId, requests: 95 });
+
+// Error - errors that need attention
+console.error("Database connection failed", { error: err.message });
+```
+
+### Include Context
+
+Always include relevant context in logs:
+
+```javascript
+// Good: Includes context
+console.log(
+  JSON.stringify({
+    level: "error",
+    message: "Payment processing failed",
+    userId: 123,
+    orderId: 456,
+    amount: 99.99,
+    error: error.message,
+    timestamp: new Date().toISOString(),
+  }),
+);
+
+// Bad: Missing context
+console.error("Payment failed");
+```
+
+---
+
+## Log Retention
+
+<Properties>
+  <Property name="Application Logs">
+    - **Retention:** Fixed at 30 days for raw log chunks, not configurable
+    - **Access:** Available via dashboard and API
+  </Property>
+
+  <Property name="Build Logs">
+    - **Retention:** No automatic, time-based expiry - **Access:** Available
+    for successful and failed builds
+  </Property>
+
+  <Property name="Deployment Logs">
+    - **Retention:** No automatic, time-based expiry - **Access:** Available
+    for all deployment attempts
+  </Property>
+
+  <Property name="Audit Logs">
+    - **Retention:** Indefinite, not configurable - **Storage:** Securely
+    stored for compliance - **Access:** Admin access only
+  </Property>
+</Properties>
+
+---
+
+## Downloading Logs
+
+Save logs for offline analysis or archival:
+
+### Via Dashboard
+
+Logs saved from a replaced deployment's containers have a **Download** button. Open the deployment, find the saved container logs, and click **Download** to save them as a `.log` text file.
+
+### Via API
+
+There is no separate download endpoint. Save the response of the endpoints above to a file:
+
+```bash
+# A saved container log from a replaced deployment (JSON with the log content)
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/deployments/{deployment_id}/container-logs/{log_id}" \
+  -o container-log.json
+
+# One deployment job's build or deploy log (plain text)
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  "https://your-temps-instance.com/api/projects/{project_id}/deployments/{deployment_id}/jobs/{job_id}/logs" \
+  -o deployment-job.log
+```
+
+---
+
+## Troubleshooting with Logs
+
+<Properties>
+  <Property name="Application Crashes">
+    **Symptoms:** Container restarts, 502 errors **What to check:** 1. Look for
+    error logs before restart 2. Check for out-of-memory errors 3. Review
+    exception stack traces 4. Check for unhandled promise rejections (Node.js)
+    **Example log pattern:** ``` ERROR: Unhandled exception TypeError: Cannot
+    read property 'id' of undefined at /app/src/routes/users.js:45:12 ```
+  </Property>
+
+  <Property name="Slow Performance">
+    **Symptoms:** High response times, timeouts **What to check:** 1. Search for
+    "slow" or "timeout" in logs 2. Look for database query logs 3. Check for
+    external API call delays 4. Review request processing times **Example log
+    pattern:** ``` WARN: Database query took 5.2s INFO: External API call
+    completed in 3.1s ```
+  </Property>
+
+  <Property name="Deployment Failures">
+    **Symptoms:** Deployments failing to complete **What to check:** 1. Review
+    build logs for compilation errors 2. Check for missing dependencies 3. Look
+    for configuration errors 4. Review deployment step logs **Example log
+    pattern:** ``` ERROR: Build failed npm ERR! code ELIFECYCLE npm ERR! errno 1
+    npm ERR! build: `next build` ```
+  </Property>
+
+  <Property name="Connection Issues">
+    **Symptoms:** Database or external service connection errors **What to
+    check:** 1. Search for "connection" or "connect" errors 2. Look for timeout
+    messages 3. Check for authentication failures 4. Review network-related
+    errors **Example log pattern:** ``` ERROR: Failed to connect to database
+    Error: connect ECONNREFUSED 127.0.0.1:5432 ```
+  </Property>
+</Properties>
+
+---
+
+## Next Steps
+
+- [Monitor Application Metrics](/docs/monitoring) to correlate logs with performance
+- [Set Up Error Tracking](/docs/error-tracking) to automatically capture errors
+- [Log Retention](/docs/logs#log-retention) - retention windows are fixed per log type and are not currently user-configurable
+- [Integrate with External Tools](/docs/logs) to send logs to external log management services

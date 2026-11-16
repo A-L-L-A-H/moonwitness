@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "[HUSKY] Checking staged whitespace and conflict markers..."
+git diff --cached --check || exit 1

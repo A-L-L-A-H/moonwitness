@@ -1,0 +1,412 @@
+{
+  "schemaVersion": "0.1.0",
+  "contractVersion": "0.1.0",
+  "contractId": "MF-ASSETS-001",
+  "status": "specification-only-no-assets",
+  "canonicalVectorFormat": "SVG source where appropriate; PNG/WebP/AVIF are generated exports",
+  "plannedPerSkin": [
+    {
+      "skinId": "moonpunk",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonriot",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonzine",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonhalftone",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonglitch",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonsmash",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonink",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "mooncrash",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonpanel",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonscrawl",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonraw",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonchrome",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "classic",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonquest",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    },
+    {
+      "skinId": "moonledger",
+      "status": "not-produced",
+      "briefStatus": "required-before-production",
+      "categories": [
+        "primary-mark-svg",
+        "wordmark-svg",
+        "compact-mark-svg",
+        "app-icon-svg",
+        "favicon-export",
+        "png-transparent-exports",
+        "decorative-texture",
+        "illustration",
+        "skin-lab-preview",
+        "optional-special-icons"
+      ],
+      "assets": []
+    }
+  ],
+  "requiredAssetRecordFields": [
+    "id",
+    "skinId",
+    "category",
+    "purpose",
+    "sourcePath",
+    "exports",
+    "dimensionsOrViewBox",
+    "supportedModes",
+    "creator",
+    "provenance",
+    "license",
+    "licenseApproval",
+    "generationNotes",
+    "altTreatment",
+    "checksum",
+    "version",
+    "approvalState",
+    "fallback"
+  ],
+  "supportedApprovalStates": [
+    "proposed",
+    "rights-pending",
+    "design-review",
+    "approved",
+    "rejected",
+    "deprecated"
+  ],
+  "securityRules": [
+    "No untrusted inline SVG or event handlers/scripts/external references",
+    "Optimize and sanitize SVG with explicit allowlist",
+    "Treat remote media as untrusted; do not inject HTML",
+    "Decorative files do not encode exclusive business meaning",
+    "Verify font/icon/illustration licenses; AI-generated is not automatic rights clearance"
+  ],
+  "reviewRequirements": [
+    "human uniqueness review",
+    "license evidence",
+    "light/dark/fallback",
+    "dimensions/viewBox checks",
+    "accessibility alt or decorative-hidden",
+    "checksum",
+    "source/export parity"
+  ],
+  "examplesAreNotProduced": true,
+  "brandAuthority": "docs/brand/original-asset-brand-bible.md",
+  "designBriefRef": "moonframe-skin-asset-briefs-v0.1.json",
+  "recordSchemaRef": "../schemas/moonframe-asset-record.schema.json",
+  "pipelineAdrRef": "docs/adr/0006-original-asset-pipeline-and-brand.md",
+  "brandHierarchy": {
+    "status": "maintainer-approved-structure-no-mark-clearance",
+    "model": "one-umbrella-brand-with-15-visual-editions",
+    "coreBrandMarkStatus": "not-produced",
+    "coreWordmarkStatus": "not-produced",
+    "independentLegalBrands": false,
+    "skinBadgePolicy": "optional-by-reviewed-need; not always a different logo",
+    "hostBrand": "consumer-app-owns-logo-and-favicon"
+  },
+  "categoriesAreCandidatePoolNotRequiredPerSkin": true,
+  "categoriesClarification": "Historical plannedPerSkin.categories lists candidate categories NOT ten mandatory produced asset families. No standalone skin logo obligation. Approved minimum scoped by documented skin brief.",
+  "approvedAssets": [],
+  "assetRegistryPolicy": {
+    "status": "planned-no-assets",
+    "namespaceProposed": "mf.brand.*, mf.skin.<canonicalSkinId>.*, mf.icon.*, mf.illustration.*, mf.font.*, mf.sound.optional.*",
+    "filePathSemantics": "logical ID stable; generated paths versioned/content-hashed and never source of truth",
+    "distributableRequirements": [
+      "accepted status backed by reviewer/time",
+      "rights/provenance cleared and license text evidence",
+      "real source and exports exist and path safe",
+      "SHA-256 source/output recorded",
+      "SVG vetted safe content and markup",
+      "accessible context-tested variant or fallback",
+      "distribution rights for package clear"
+    ],
+    "prohibited": [
+      "claim produced from empty array",
+      "publish unreviewed generated artwork",
+      "copy unlabeled online asset",
+      "ship source without license",
+      "infinite SVG references",
+      "unsafe inline SVG",
+      "font without RFN/redistribution check"
+    ],
+    "fallback": "missing decorative asset renders without decoration; missing functional asset blocks release"
+  },
+  "approvalWorkflow": {
+    "stages": [
+      "requested",
+      "brief-approved",
+      "source-created",
+      "provenance-reviewed",
+      "license-cleared",
+      "accessibility-reviewed",
+      "optimized",
+      "visual-reviewed",
+      "accepted",
+      "published",
+      "deprecated"
+    ],
+    "holds": [
+      "quarantined",
+      "rejected"
+    ],
+    "currentStage": "requested",
+    "approvalsCompleted": [],
+    "evidenceCount": 0
+  },
+  "licenseGovernance": {
+    "repoCodeLicense": "MIT-code-only-decision-recorded",
+    "repoCodeLicenseRef": "../../LICENSE",
+    "brandTrademarkStatus": "reserved-no-clearance-or-license-granted",
+    "brandMarkLicense": "no-license-granted",
+    "fontsLicense": "per-file-not-selected",
+    "soundRights": "not-selected",
+    "publicRedistribution": "code-MIT-only-no-artwork-or-mark-rights-granted",
+    "spdxCurrentVersionSeen": "3.29.0 2026-09-16"
+  },
+  "creativeReferenceProvenance": {
+    "source": "User-supplied visual examples in conversation, not repository binary files",
+    "referenceContract": "moonframe-creative-reference-contract-v0.1.json",
+    "artDirection": "Cinematic Manga-Punk Neo-Brutalism for Moonpunk plus influences; not 15 per-skin legal logos",
+    "referenceBinaryCommitted": false,
+    "derivativeLicenseGranted": false,
+    "approvedReusableSourceAssetsFromReferences": 0,
+    "consumerBrandExcluded": [
+      "MOONWITNESS wordmark",
+      "MOONWITNESS symbolic crown",
+      "named characters/campaign project covers",
+      "song lyrics and performer likenesses",
+      "story-specific typography or slogans"
+    ],
+    "status": "reference-only-no-source-production"
+  }
+}

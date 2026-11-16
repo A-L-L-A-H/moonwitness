@@ -1,0 +1,32 @@
+name: rocksoul-whatsapp
+
+services:
+  whatsapp-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rocksoul_wa_gateway
+    restart: unless-stopped
+    ports:
+      - "${WA_PORT:-3001}:3001"
+    environment:
+      - NODE_ENV=production
+      - WA_PORT=3001
+      - WA_HOST=0.0.0.0
+      - WA_DASHBOARD_PASSWORD=${WA_DASHBOARD_PASSWORD:-210491}
+      - WA_DATABASE_URL=file:/app/data/whatsapp.db
+      - WA_SESSIONS_DIR=/app/data/whatsapp-sessions
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    volumes:
+      - wa_data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:3001/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  wa_data:
+    name: rocksoul_wa_data

@@ -1,0 +1,16 @@
+.scenario-rail { max-width:1540px; margin:0 auto 18px; display:grid; grid-template-columns:repeat(6,1fr); border:1px solid var(--lab-line); border-radius:var(--lab-radius); overflow:hidden; background:color-mix(in srgb, var(--lab-surface) 90%, transparent); box-shadow:var(--lab-shadow); }
+.scenario-rail button { min-width:0; border:0; border-right:1px solid var(--lab-line); background:transparent; padding:13px 14px; text-align:left; cursor:pointer; opacity:.62; display:grid; gap:5px; color:var(--lab-text); }
+.scenario-rail button:last-child { border-right:0; }
+.scenario-rail button.is-active { opacity:1; background:var(--lab-accent-soft); box-shadow:inset 0 -3px var(--lab-accent); }
+.scenario-rail strong { font-size:12px; letter-spacing:.01em; }
+.scenario-rail span { font-size:10px; line-height:1.35; color:var(--lab-muted); }
+.representation-toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:0 0 14px; margin-bottom:14px; border-bottom:1px solid var(--lab-line); }
+.physics-readout { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; background:var(--lab-line); margin:28px 0 16px; border:1px solid var(--lab-line); border-radius:7px; overflow:hidden; }
+.physics-readout>div { background:var(--lab-surface); padding:11px; display:grid; gap:4px; min-width:0; }
+.physics-readout span { font:8px ui-monospace,monospace; letter-spacing:.1em; color:var(--lab-muted); }
+.physics-readout strong { font-size:26px; line-height:1; letter-spacing:-.06em; font-weight:520; color:var(--lab-text); }
+.physics-readout em { font:8px ui-monospace,monospace; font-style:normal; color:var(--lab-accent-strong); overflow:hidden; text-overflow:ellipsis; }
+.physics-readout>div:nth-child(4) em { color:var(--lab-witness); }
+@media (max-width:1250px) { .physics-readout { grid-template-columns:repeat(3,1fr); } }
+@media (max-width:1050px) { .scenario-rail { grid-template-columns:repeat(3,1fr); } .scenario-rail button:nth-child(3) { border-right:0; } }
+@media (max-width:720px) { .scenario-rail { grid-template-columns:1fr 1fr; } .scenario-rail button:nth-child(3) { border-right:1px solid var(--lab-line); } .scenario-rail button:nth-child(even) { border-right:0; } .physics-readout { grid-template-columns:1fr 1fr; } .representation-toolbar { align-items:flex-start; flex-direction:column; } }

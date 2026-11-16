@@ -1,0 +1,199 @@
+export const metadata = {
+  title: 'Projects and Services',
+  description:
+    'A Service is one deployable app in Temps. A Project groups the services that ship together so they share a repository, variables and path routes.',
+  alternates: {
+    canonical: '/docs/projects',
+  },
+}
+
+export const sections = [
+  { title: 'Services and projects', id: 'services-and-projects' },
+  { title: 'What a service contains', id: 'what-a-service-contains' },
+  { title: 'Service sources', id: 'service-sources' },
+  { title: 'What a project shares', id: 'what-a-project-shares' },
+  { title: 'What stays per service', id: 'what-stays-per-service' },
+  { title: 'Naming and subdomains', id: 'naming-and-subdomains' },
+  { title: 'Service settings', id: 'service-settings' },
+  { title: 'When to create a project', id: 'when-to-create-a-project' },
+  { title: 'Projects in the CLI', id: 'projects-in-the-cli' },
+]
+
+# Projects and Services
+
+A **Service** is one deployable app: a web app, an API, a worker, a static site. A **Project** groups the services that ship together, such as a frontend, its API and a background worker, so they can share a repository, variables and path routes. Projects are optional: a service works on its own exactly as before. {{ className: 'lead' }}
+
+<Note>
+Earlier versions of Temps called each app a "project". Those are now **Services**, with the same slugs, URLs, domains, deployments and variables. A **Project** is new: it is a group of services, and upgrading does not create any for you. See [Upgrade Temps](/docs/upgrade-temps#upgrading-to-projects-and-services).
+</Note>
+
+---
+
+## Services and projects {{ anchor: true, id: 'services-and-projects' }}
+
+A service maps a **source** (a Git repository, a Docker image, or a static file bundle) to a **running application** on your server. You tell Temps where the code lives and how to build it; Temps clones, builds, deploys, routes, issues certificates and monitors it. Deployments, environments, domains, analytics, error tracking and logs all belong to a service.
+
+A project sits one level above. It has a name, a slug and a list of services. Each service belongs to at most one project; moving a service into a project takes it out of the one it was in.
+
+<Mermaid chart={`
+graph TD
+    P[Project: Shop] --> W[Service: web]
+    P --> A[Service: api]
+    P --> K[Service: worker]
+    P -.shares.-> R[Repository and branch]
+    P -.shares.-> V[Shared variables]
+    P -.shares.-> RT[Path routes: /api on web goes to api]
+    W --> E1[Environment: production]
+    W --> E2[Environment: preview/feature-x]
+    E1 --> D1[Deployments]
+`} />
+
+---
+
+## What a service contains {{ anchor: true, id: 'what-a-service-contains' }}
+
+| Component | Description |
+|-----------|-------------|
+| **Environments** | At least one (production). Additional environments for staging, preview branches, etc. Each has its own containers, domains, and deployment config. |
+| **Deployments** | The history of every build and deploy. Each deployment is linked to a Git commit (or an image/bundle). |
+| **Environment Variables** | Key-value pairs injected into containers at deploy time. Scoped per environment. |
+| **Domains** | Custom domains with SSL certificates, assigned per environment. |
+| **Linked databases** | Managed databases and storage (PostgreSQL, Redis, MongoDB, S3) connected to the service. |
+| **Analytics** | Page views, visitors, custom events, funnels, and session replays. |
+| **Error Tracking** | Captured errors with stack traces, grouped by type. Each service has its own DSN. |
+| **Monitors** | Uptime checks that verify the application is healthy. |
+| **Webhooks** | Outbound HTTP notifications for deployment events. |
+
+---
+
+## Service sources {{ anchor: true, id: 'service-sources' }}
+
+| Source type | How it works |
+|------------|-------------|
+| **Git repository** | Temps clones the repo, detects the framework, builds a Docker image, and deploys it. Pushes to the tracked branch trigger automatic deploys. |
+| **Docker image** | You provide a registry image (or upload a tarball). Temps pulls and deploys it without building. |
+| **Static files** | You upload a zip or tar.gz of pre-built static files. Temps serves them directly. |
+| **Template** | Temps creates the service (or several, in a project) from the template catalog. |
+| **External** | The app runs somewhere else (Vercel, Netlify, your own VPS). Temps never deploys it; it only receives its analytics, errors and traces. See [Track an app hosted elsewhere](/docs/track-an-app-hosted-elsewhere). |
+
+Git-based services additionally have a **main branch** that maps to the production environment, a **framework preset** (auto-detected), and optional **build command** and **app directory** overrides.
+
+---
+
+## What a project shares {{ anchor: true, id: 'what-a-project-shares' }}
+
+A project can hold three things for its services. Each one is optional.
+
+<Properties>
+  <Property name="Repository">
+    One repository and branch for the whole project, for monorepos. Services that **follow** the project's repository build from it, each from its own directory. Changing the project's repository or branch updates every service that follows it. A service can stop following and keep its current settings. See [Import services from a monorepo](/docs/import-services-from-a-monorepo).
+  </Property>
+  <Property name="Shared variables">
+    Variables every service in the project receives, for example `LOG_LEVEL` or `API_BASE_URL`. A service's own variable with the same name wins. See [Share variables across services](/docs/share-variables-across-services).
+  </Property>
+  <Property name="Path routes">
+    Serve a path of one service's domains from another service, for example `/api` on the frontend's domain from the API service, so the browser sees one origin. See [Route a path to another service](/docs/route-a-path-to-another-service).
+  </Property>
+</Properties>
+
+---
+
+## What stays per service {{ anchor: true, id: 'what-stays-per-service' }}
+
+Grouping services does not merge them. Each service keeps its own:
+
+- builds and deployment history, and whether it deploys on push
+- environments, domains and certificates
+- preset, directory, resources, replicas and health check
+- environment variables (which override the project's shared ones)
+- linked databases
+- analytics, error tracking, logs and monitors
+- protections: password, attack mode and limits. A request routed from another service's domain gets the **target** service's protections.
+
+Removing a service from a project, or deleting the project, never stops or deletes a service: it keeps running as a standalone service and stops receiving the project's shared variables on its next deployment. Path routes that involve it are removed.
+
+---
+
+## Naming and subdomains {{ anchor: true, id: 'naming-and-subdomains' }}
+
+A service's name determines its default subdomain:
+
+| Service name | Slug | Default URL |
+|-------------|------|-------------|
+| My App | `my-app` | `my-app.yourdomain.com` |
+| API Service | `api-service` | `api-service.yourdomain.com` |
+
+The slug is generated from the name: lowercased, spaces and special characters replaced with hyphens. It is used in the default subdomain, container names (e.g. `my-app-production`), per-service database names (e.g. `my_app_production`) and file paths for static deployments.
+
+A project has its own slug too, used in its console URL. It does not change any service's hostnames. You can add custom domains to override a service's default subdomain. See [Add a Custom Domain](/docs/add-a-custom-domain).
+
+---
+
+## Service settings {{ anchor: true, id: 'service-settings' }}
+
+<Properties>
+  <Property name="Name">
+    Display name. Changing the name does not change the slug or existing URLs.
+  </Property>
+  <Property name="Branch">
+    The Git branch that maps to the production environment. Default: `main`. For a service that follows its project's repository, the project sets it.
+  </Property>
+  <Property name="Framework Preset">
+    The detected or manually set framework. Affects how Temps builds the service.
+  </Property>
+  <Property name="Build Command">
+    Override the auto-detected build command (e.g. `npm run build`).
+  </Property>
+  <Property name="App Directory">
+    For monorepos, the subdirectory containing the application.
+  </Property>
+  <Property name="Preview Environments">
+    Toggle automatic preview environments for non-main branches.
+  </Property>
+  <Property name="Hosting">
+    **Hosted** (Temps builds and runs it) or **External** (it runs elsewhere and Temps only receives its telemetry).
+  </Property>
+  <Property name="Deployment Config">
+    Default CPU, memory, replicas, and exposed port for new environments.
+  </Property>
+</Properties>
+
+---
+
+## When to create a project {{ anchor: true, id: 'when-to-create-a-project' }}
+
+**Create a project when services ship together:**
+
+- A monorepo with several deployable apps (web, API, workers) on one branch
+- A frontend that calls a same-origin `/api` served by another service
+- Several services that need the same configuration (`LOG_LEVEL`, an external API key)
+- A multi-service template, such as an app with a backend and a frontend
+
+**Keep a standalone service when:**
+
+- The app is self-contained and shares nothing with other services
+- You are deploying a single container or static site
+
+**Create a separate service, not an environment, when** the code is a different deployable app (different build, different domain, separate analytics). **Use environments within one service** for staging and branch previews of the same app.
+
+---
+
+## Projects in the CLI {{ anchor: true, id: 'projects-in-the-cli' }}
+
+The CLI keeps its command names, so the words differ from the console:
+
+| Console | CLI command | Manages |
+|---------|-------------|---------|
+| Service | `projects` | Each deployable app |
+| Project | `project-groups` | Groups of services |
+| Databases and storage | `services` | Managed PostgreSQL, Redis, MongoDB, S3 |
+
+```bash
+# Create a project with two existing services
+bunx @temps-sdk/cli project-groups create --name "Acme Shop" --service web --service api
+
+# Which project is a service in?
+bunx @temps-sdk/cli projects group -p web
+```
+
+See the [CLI reference](/docs/cli) for every command.

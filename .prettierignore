@@ -28,3 +28,6 @@ docs/CONSOLIDATION-CATALOG.md
 content/chronicles
 engines
 apps/a-l-l-a-h/public/data/quran-uthmani.json
+apps/a-l-l-a-h/public/data/taurat-wlc.json
+apps/a-l-l-a-h/public/data/zabur-wlc.json
+apps/a-l-l-a-h/public/data/injil-sblgnt.json

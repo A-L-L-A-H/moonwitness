@@ -1,0 +1,1 @@
+import { notifications, notificationRecipients } from './schema/notifications.js'; export * from './schema/notifications.js'; export const notificationSchema = { notifications, notificationRecipients };

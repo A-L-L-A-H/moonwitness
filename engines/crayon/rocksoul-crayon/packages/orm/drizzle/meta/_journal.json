@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1788774803746,
+      "tag": "0000_careless_blazing_skull",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788775346119,
+      "tag": "0001_amazing_stature",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788776566581,
+      "tag": "0002_talented_kree",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1788871484283,
+      "tag": "0003_brown_korg",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788871600000,
+      "tag": "0004_operational_console",
+      "breakpoints": true
+    }
+  ]
+}

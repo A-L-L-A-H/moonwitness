@@ -1,0 +1,101 @@
+export const metadata = {
+  title: "Deploy a React App Built With Vite or CRA",
+  description: "Deploy React apps built with Vite or Create React App to your own VPS, with automatic HTTPS, preview deployments and built-in analytics. No Vercel needed.",
+  alternates: {
+    canonical: "/docs/deploy-react",
+  },
+  openGraph: {
+    title: "Deploy a React App Built With Vite or CRA",
+    description: "Deploy React apps built with Vite or Create React App to your own VPS, with automatic HTTPS, preview deployments and built-in analytics. No Vercel needed.",
+    images: [{ url: "/og/docs/deploy-react.png", width: 1200, height: 630, alt: "Deploy React" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Deploy a React App Built With Vite or CRA",
+    description: "Deploy React apps built with Vite or Create React App to your own VPS, with automatic HTTPS, preview deployments and built-in analytics. No Vercel needed.",
+    images: ["/og/docs/deploy-react.png"],
+  }
+};
+
+export const sections = [
+  { title: 'Quickstart', id: 'quickstart' },
+  { title: 'What Temps handles automatically', id: 'what-temps-handles-automatically' },
+  { title: 'Environment variables', id: 'environment-variables' },
+  { title: 'Backend API', id: 'backend-api' },
+  { title: 'SPA routing', id: 'spa-routing' },
+  { title: 'Caching', id: 'compression-and-caching' },
+]
+
+# Deploy React on Your Own Server
+
+**Deploy your React app and Temps serves it as static files** — running your build, serving the `dist/` or `build/` output from the Temps proxy with no container running, and routing all paths through `index.html` for client-side navigation. {{ className: 'lead' }}
+
+---
+
+## Quickstart {{ anchor: true, id: 'quickstart' }}
+
+From your project root, deploy with your preferred package manager:
+
+<CliCommands commands={[
+  { args: "up" },
+]} />
+
+Temps detects a Vite app from its `vite.config.js` or `vite.config.ts` and uses the **Vite** preset. Create React App projects aren't detected from the repository, so choose the **React App** preset (`react-app`), with `up --preset react-app` or under **Project → Settings → Build & deploy → Build → Framework**.
+
+Both presets install dependencies with the package manager your lockfile points to, so commit your lockfile (for example `package-lock.json`). They then run its `build` script (for example `npm run build`) and serve the output. Your app is live with HTTPS in a few minutes.
+
+---
+
+## What Temps handles automatically {{ anchor: true, id: 'what-temps-handles-automatically' }}
+
+| Feature | How Temps handles it |
+| ------- | -------------------- |
+| Build | Your package manager's `build` script |
+| Output | Serves `dist/` (Vite, or the `build.output_dir` set in `.temps.yaml`) or `build/` (Create React App) |
+| HTTPS | Let's Encrypt certificate, auto-renewed |
+| Client-side routing | 404 → index.html fallback configured automatically |
+| Cache headers | Hashed assets get long-lived cache headers |
+| Preview deployments | Opt-in; once enabled, each branch gets its own preview environment |
+
+---
+
+## Environment variables {{ anchor: true, id: 'environment-variables' }}
+
+Vite environment variables (prefixed `VITE_`) are embedded at build time:
+
+<CliCommands commands={[
+  { args: "environments vars set VITE_API_URL \"https://api.example.com\" -e production" },
+]} />
+
+These values are baked into the bundle when it's built. Changing a variable doesn't redeploy the app; deploy again for the new value to take effect. Create React App works the same way with `REACT_APP_` variables.
+
+---
+
+## Backend API {{ anchor: true, id: 'backend-api' }}
+
+If your React app calls a backend API, deploy your backend as a separate Temps project and set `VITE_API_URL` to its URL. For full-stack apps in a monorepo, set the **Root directory** in project settings for each app — see [Deploy a Project](/docs/your-first-deployment).
+
+---
+
+## SPA routing {{ anchor: true, id: 'spa-routing' }}
+
+<SpaRouting />
+
+---
+
+## Caching {{ anchor: true, id: 'compression-and-caching' }}
+
+<StaticAssets />
+
+---
+
+## Next Steps
+
+<div className="not-prose">
+  <Button href="/docs/environment-variables" variant="text" arrow="right">
+    Environment variables
+  </Button>
+  <Button href="/docs/set-up-preview-deployments" variant="text" arrow="right">
+    Preview deployments
+  </Button>
+</div>

@@ -1,0 +1,1 @@
+import { reviewItems, reviewAssignments, reviewDecisions, reviewComments, publicationRequests, correlationDrafts } from './schema/reviews.js'; export * from './schema/reviews.js'; export const reviewSchema = { reviewItems, reviewAssignments, reviewDecisions, reviewComments, publicationRequests, correlationDrafts };

@@ -1,0 +1,12 @@
+{
+  "name": "orbit",
+  "version": "0.1.0",
+  "category": "Cloud",
+  "summary": "ORBIT Cloud Compute & Hosting Customer Experience",
+  "depends": ["base"],
+  "models": ["orbit.instance", "orbit.template", "orbit.volume"],
+  "views": [],
+  "data": ["data/index.ts"],
+  "installable": true,
+  "application": true
+}

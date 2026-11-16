@@ -1,0 +1,270 @@
+{
+  "schemaVersion": "0.1.0",
+  "contractVersion": "0.1.0",
+  "contractId": "MF-SFX-001",
+  "status": "specification-only-no-audio",
+  "defaultEnabled": false,
+  "requiresExplicitConsent": true,
+  "autoplayOnLoad": false,
+  "audioIsSupplementary": true,
+  "userPreferences": {
+    "mute": true,
+    "volumeRange": [
+      0,
+      1
+    ],
+    "categoriesCanDisable": true,
+    "persistOnlyWithConsent": true
+  },
+  "events": [
+    {
+      "id": "success",
+      "role": "short affirmative, optional",
+      "defaultEnabled": false,
+      "minimumGapMs": 1000,
+      "deduplicateWithinMs": 2000,
+      "requiresUserGesture": true,
+      "semanticEligibility": "trusted user-requested successful discrete operation",
+      "visualEquivalent": "visible confirmed operation text/status",
+      "assistiveTechnologyEquivalent": "aria-live polite or app-owned equivalent",
+      "candidateProfiles": [
+        "core-user-confirmation"
+      ],
+      "skinSpecificAllowed": false,
+      "playbackPolicy": "explicitly user-enabled, active visible app, master unmuted, category enabled, event rate allowed, asset license approved; otherwise silent",
+      "status": "specified-not-implemented",
+      "proof": {
+        "mediaFile": null,
+        "audioTest": null,
+        "licenseApproval": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "warning",
+      "role": "low intensity, supplementary",
+      "defaultEnabled": false,
+      "minimumGapMs": 1000,
+      "deduplicateWithinMs": 2000,
+      "requiresUserGesture": true,
+      "semanticEligibility": "rare actionable warning after confirmed condition",
+      "visualEquivalent": "persistent warning message+action",
+      "assistiveTechnologyEquivalent": "appropriately scoped status/alert",
+      "candidateProfiles": [
+        "consumer-notification"
+      ],
+      "skinSpecificAllowed": false,
+      "playbackPolicy": "explicitly user-enabled, active visible app, master unmuted, category enabled, event rate allowed, asset license approved; otherwise silent",
+      "status": "specified-not-implemented",
+      "proof": {
+        "mediaFile": null,
+        "audioTest": null,
+        "licenseApproval": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "error",
+      "role": "non-punitive, supplementary",
+      "defaultEnabled": false,
+      "minimumGapMs": 1000,
+      "deduplicateWithinMs": 2000,
+      "requiresUserGesture": true,
+      "semanticEligibility": "discrete meaningful failed action, NOT auth/financial scare",
+      "visualEquivalent": "visible error message and retry",
+      "assistiveTechnologyEquivalent": "proper error association/alert",
+      "candidateProfiles": [
+        "consumer-notification"
+      ],
+      "skinSpecificAllowed": false,
+      "playbackPolicy": "explicitly user-enabled, active visible app, master unmuted, category enabled, event rate allowed, asset license approved; otherwise silent",
+      "status": "specified-not-implemented",
+      "proof": {
+        "mediaFile": null,
+        "audioTest": null,
+        "licenseApproval": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "notification",
+      "role": "throttled, not per item",
+      "defaultEnabled": false,
+      "minimumGapMs": 1000,
+      "deduplicateWithinMs": 2000,
+      "requiresUserGesture": true,
+      "semanticEligibility": "user-opted incoming event at bounded rate",
+      "visualEquivalent": "notification list/badge count and readable text",
+      "assistiveTechnologyEquivalent": "polite announcement at reasonable rate",
+      "candidateProfiles": [
+        "consumer-notification"
+      ],
+      "skinSpecificAllowed": false,
+      "playbackPolicy": "explicitly user-enabled, active visible app, master unmuted, category enabled, event rate allowed, asset license approved; otherwise silent",
+      "status": "specified-not-implemented",
+      "proof": {
+        "mediaFile": null,
+        "audioTest": null,
+        "licenseApproval": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "confirmation",
+      "role": "nonintrusive on explicit user action",
+      "defaultEnabled": false,
+      "minimumGapMs": 1000,
+      "deduplicateWithinMs": 2000,
+      "requiresUserGesture": true,
+      "semanticEligibility": "explicit non-destructive intent confirmed by trusted app",
+      "visualEquivalent": "persistent confirmation label",
+      "assistiveTechnologyEquivalent": "status text/acknowledgement",
+      "candidateProfiles": [
+        "core-user-confirmation"
+      ],
+      "skinSpecificAllowed": false,
+      "playbackPolicy": "explicitly user-enabled, active visible app, master unmuted, category enabled, event rate allowed, asset license approved; otherwise silent",
+      "status": "specified-not-implemented",
+      "proof": {
+        "mediaFile": null,
+        "audioTest": null,
+        "licenseApproval": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "quest-reward",
+      "role": "optional only for Moonquest presentation",
+      "defaultEnabled": false,
+      "minimumGapMs": 1000,
+      "deduplicateWithinMs": 2000,
+      "requiresUserGesture": true,
+      "semanticEligibility": "consumer-verified game-like reward/progression UI only",
+      "visualEquivalent": "readable static reward and progress detail",
+      "assistiveTechnologyEquivalent": "stateful label/progress accessible as text",
+      "candidateProfiles": [
+        "moonquest-optional"
+      ],
+      "skinSpecificAllowed": true,
+      "playbackPolicy": "explicitly user-enabled, active visible app, master unmuted, category enabled, event rate allowed, asset license approved; otherwise silent",
+      "status": "specified-not-implemented",
+      "proof": {
+        "mediaFile": null,
+        "audioTest": null,
+        "licenseApproval": null,
+        "reviewer": null
+      }
+    }
+  ],
+  "neverSound": [
+    "page load",
+    "typing each key",
+    "every mouse hover",
+    "focus navigation",
+    "screen-reader-only updates",
+    "rapid repetitive data events",
+    "critical alert without visual/text equivalent"
+  ],
+  "reducedStimulation": "disable sound by default when explicit reduced-stimulation preference is set; never infer medical status",
+  "gracefulFailure": "if blocked or missing asset remain silent without throwing",
+  "assetRecordFields": [
+    "id",
+    "eventId",
+    "sourcePath",
+    "exportPath",
+    "format",
+    "durationMs",
+    "sizeBytes",
+    "normalizationTarget",
+    "creator",
+    "license",
+    "checksum",
+    "version",
+    "approvalState"
+  ],
+  "formatsPlan": [
+    "short compressed web audio format with fallback after browser proof"
+  ],
+  "producedAssets": [],
+  "assetProvenancePolicyRef": "docs/brand/original-asset-brand-bible.md",
+  "assetRecordSchemaRef": "schemas/moonframe-asset-record.schema.json",
+  "productionGates": {
+    "status": "planned-no-files",
+    "sourceRights": "none-cleared",
+    "codecChoice": "pending-browser-and-format-spike",
+    "normalizationTargets": "not-set-until-real-audio-metrics",
+    "consentBehavior": "existing defaultEnabled/explicitConsent/mute and event taxonomy authoritative",
+    "distinguishSoundSignature": "common neutral cues if approved; skin-specific celebratory cues optional only",
+    "evidence": "no media test/binaries/published pack"
+  },
+  "specVersion": "0.1-proposed-extension",
+  "eventIdsStableNoRename": true,
+  "legacyTimingApproval": "Historical minimumGapMs=1000 and deduplicateWithinMs=2000 values are untested provisional design candidates; preserve existing values until consumer/UX review and explicit semver decision",
+  "playbackDecision": {
+    "status": "proposed-not-implemented",
+    "default": "built-in-WebAudio-synth-present-off-by-default; no licensed media pack",
+    "candidateOptions": [
+      "no-engine-in-core",
+      "lazy-native-html-media",
+      "web-audio-if-mixing-needed",
+      "third-party-only-after-licensing-bundle-proof"
+    ],
+    "globalGateOrder": [
+      "explicit user consent from trusted user gesture",
+      "master mute=false and effective volume>0",
+      "event category enabled",
+      "consumer context allowed (security/auth/finance/destructive excluded by default)",
+      "confirmed semantic event and cooldown/dedupe",
+      "visible tab and user preference allows stimulus",
+      "released and rights-cleared asset present",
+      "browser playback permitted"
+    ],
+    "unknownEvent": "silent-no-op",
+    "missingOrUnsupportedAsset": "silent-no-op",
+    "browserBlocked": "silent-no-op",
+    "reducedStimulation": "opt out/silent if user reduced stimulation, without inferring medical state",
+    "userMuteMidPlayback": "stop active audio",
+    "pageLoadOrHydration": "never play",
+    "backgroundTab": "skip or stop audio; no catch-up sounds",
+    "noAudioEquivalent": "always available persistent status and correct semantic role",
+    "consentStorage": "opt-in app-owned, failure to read storage defaults to mute/off"
+  },
+  "assetSchemaOwnership": "schemas/moonframe-asset-record.schema.json and contracts/moonframe-asset-manifest-v0.1.json (no duplicate binary record)",
+  "eventAliases": {
+    "status": "runtime-supported-compatibility-aliases-v0.1; no removal or remapping within this contract version",
+    "candidates": {
+      "confirm.success": "success",
+      "confirm.warning": "warning",
+      "confirm.error": "error",
+      "notification.incoming": "notification",
+      "operation.progress-complete": "success",
+      "game.reward": "quest-reward"
+    },
+    "rule": "Six aliases remain accepted at runtime and in the TypeScript input union for compatibility in contract v0.1. Do not add aliases or rename/remap existing aliases within v0.1. Future removal or semantic changes require a major-version and migration decision; this record does not claim owner approval or a broader release."
+  },
+  "skinSoundProfiles": {
+    "policy": "common opt-in events first, no 15 independent packs",
+    "candidateSkinOverrides": [
+      "moonquest-optional-reward-only"
+    ],
+    "approvedProfiles": [],
+    "licenseAndMediaApprovals": 0
+  },
+  "statusClarification": "Legacy status means no approved external/binary audio asset pack; in src/components.js a WebAudio synth runtime already exists. No visual/UX/product approval inferred.",
+  "runtimeReconciliation": {
+    "observedOn": "2026-10-26",
+    "source": "src/components.js",
+    "runtime": "SFXProvider and useSFX implemented, six synthesized cue event profiles",
+    "eventIdsParity": "6/6 exact",
+    "aliasesParity": "6/6 exact but originally spec-only",
+    "defaultMuted": true,
+    "defaultEnabled": false,
+    "consentGap": "MF-PF-007 implemented and locally verified: defaultEnabled does not grant consent; only a trusted user gesture can grant consent.",
+    "playbackTruthGap": "MF-PF-009 implemented and verified locally: unsupported AudioContext returns played:false/unsupported; suspended or closed contexts and scheduling errors return played:false/blocked. Unit and browser regressions pass; broader runtime/release approval remains separate.",
+    "lifecycleGap": "MF-PF-010 and MF-PF-011 implemented and verified locally: one provider-owned AudioContext is reused and closed on unmount; active oscillators are stopped and disconnected synchronously on mute, consent revocation, or volume zero. Unit, type, build, and browser regressions pass; broader release approval remains separate.",
+    "categoryAndSecurityContextGap": "MF-PF-014 implemented and locally verified: SFX runtime blocks auth/authentication, finance/financial, destructive and security contexts via provider context or root data-sfx-context.",
+    "requiredAction": "Continue remaining SFX timing, alias and browser regressions; production feature release remains gated on asset/license approval and release review.",
+    "producedAudioFiles": 0,
+    "releaseStatus": "BLOCKED_FOR_SFX_FEATURE_RELEASE"
+  }
+}

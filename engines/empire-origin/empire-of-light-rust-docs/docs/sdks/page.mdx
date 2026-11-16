@@ -1,0 +1,1187 @@
+export const metadata = {
+  title: 'Temps SDKs',
+  description: 'Official Temps SDKs for React, Vue, Svelte, vanilla JS analytics, Node.js integration, key-value storage, and blob storage. Add observability to your app in minutes.',
+  alternates: {
+    canonical: '/docs/sdks',
+  },
+}
+
+export const sections = [
+  { title: 'Analytics SDKs Overview', id: 'analytics-overview' },
+  { title: 'Externally Hosted Apps', id: 'external-hosting' },
+  { title: 'React Analytics', id: 'react-analytics' },
+  { title: 'Vanilla JS Analytics', id: 'vanilla-analytics' },
+  { title: 'Vue Analytics', id: 'vue-analytics' },
+  { title: 'Svelte Analytics', id: 'svelte-analytics' },
+  { title: 'Analytics Core', id: 'analytics-core' },
+  { title: 'Node.js SDK', id: 'node-sdk' },
+  { title: 'Key-Value Store', id: 'kv' },
+  { title: 'Blob Storage', id: 'blob' },
+]
+
+# Temps SDKs
+
+Official SDKs and libraries to integrate Temps into your applications. Choose the right SDK for your use case—from framework-specific analytics to server-side API access. {{ className: 'lead' }}
+
+---
+
+## Analytics SDKs Overview {{ anchor: true, id: 'analytics-overview' }}
+
+Temps provides analytics SDKs for every major frontend runtime. They all capture the same signals — pageviews, custom events, Web Vitals, engagement heartbeats, page-leave events, and optional session recording — and send them to the same `/api/_temps` endpoints on your Temps instance.
+
+| Package | Use for | Install |
+|---------|---------|---------|
+| [`@temps-sdk/react-analytics`](#react-analytics) | React / Next.js apps | `npm install @temps-sdk/react-analytics` |
+| [`@temps-sdk/analytics-browser`](#vanilla-analytics) | Plain HTML pages, Astro islands, non-React SPAs | `npm install @temps-sdk/analytics-browser` |
+| [`@temps-sdk/vue-analytics`](#vue-analytics) | Vue 3 apps | `npm install @temps-sdk/vue-analytics` |
+| [`@temps-sdk/svelte-analytics`](#svelte-analytics) | Svelte 4 / 5 and SvelteKit apps | `npm install @temps-sdk/svelte-analytics` |
+| [`@temps-sdk/analytics-core`](#analytics-core) | Building your own framework adapter | `npm install @temps-sdk/analytics-core` |
+
+Every SDK wraps the same framework-agnostic `@temps-sdk/analytics-core`, so behavior — payload shape, localhost detection, session recording, retry logic — is identical across frameworks. Pick the one that matches your stack.
+
+<Note>
+  **What gets tracked by default?** Pageviews (on route change), Web Vitals (LCP, FID, CLS, FCP, TTFB, INP), engagement heartbeats (every 30s while active), and a `page_leave` event on unload. Session recording is opt-in via `enableSessionRecording`.
+</Note>
+
+---
+
+## Externally Hosted Apps (Cross-Origin Ingest) {{ anchor: true, id: 'external-hosting' }}
+
+Every example above assumes Temps deployed your frontend, so `/api/_temps/*` requests are same-origin and Temps can read/write its own session cookies. If your frontend is hosted elsewhere — a separate static/JS hosting platform, your own nginx — and you're pointing it at a **self-hosted Temps backend on a different domain**, use a **keyed ingest key** instead. This is a first-class, supported topology ("bring your own hosting, use Temps for analytics"), not a workaround.
+
+<Note>
+  **What breaks without a key:** the public ingest endpoints resolve `project_id`/`environment_id` by matching the request's `Host` header against Temps' own route table. A backend-only Temps instance has no route-table entry for a domain it didn't deploy, so every request 404s before identity is even considered.
+</Note>
+
+### 1. Mint an ingest key
+
+Create a key scoped to the project (and optionally one environment):
+
+```bash
+bunx @temps-sdk/cli analytics keys create \
+  --project <project-slug-or-id> \
+  --name "Production frontend" \
+  --allowed-origins https://your-app.example.com
+```
+
+This mints a `pa_`-prefixed key. It's shown once in full and is safe to ship in client-side JS — it's write-only, rate-limited per key, and (when `--allowed-origins` is set) rejected for requests carrying any other `Origin`. You can also manage keys from the project's Analytics settings in the Console.
+
+### 2. Point the SDK at your Temps backend
+
+```tsx
+<TempsAnalyticsProvider
+  basePath="https://api.your-domain.example.com/api/_temps"
+  ingestKey="pa_..."
+>
+  {children}
+</TempsAnalyticsProvider>
+```
+
+`ingestKey` is sent as the `X-Temps-Analytics-Key` header on ordinary fetch requests. Reliable unload delivery instead appends it as the `temps_key` query parameter, because `navigator.sendBeacon` — used for the `page_leave` event on unload — cannot set custom headers at all. This alone works, but every request now crosses origins: Temps' ingest endpoints answer with `Access-Control-Allow-Origin: *` and no credentials, so cookies never round-trip. Both constraints are why step 3 is recommended over calling the backend directly.
+
+### 3. Recommended: proxy through your own domain
+
+Route ingest calls through a same-origin API route on your frontend's own domain instead of calling the Temps backend directly. This keeps ingest same-origin from the browser's perspective (simpler CSP, no CORS surface to reason about) and gives beacon traffic a place to ride without headers.
+
+```ts
+// app/api/_temps/[...path]/route.ts  (Next.js App Router)
+const TEMPS_BACKEND = 'https://api.your-domain.example.com/api/_temps';
+const INGEST_KEY = process.env.TEMPS_ANALYTICS_INGEST_KEY!;
+
+async function handler(req: Request, { params }: { params: Promise<{ path: string[] }> }) {
+  const url = new URL(req.url);
+  const { path } = await params;
+  const target = `${TEMPS_BACKEND}/${path.join('/')}${url.search}`;
+
+  const upstream = await fetch(target, {
+    method: req.method,
+    headers: {
+      'content-type': req.headers.get('content-type') ?? 'application/json',
+      'x-temps-analytics-key': INGEST_KEY,
+      // Forward the browser's real Origin -- required if the key has allowed_origins set.
+      origin: req.headers.get('origin') ?? url.origin,
+    },
+    body: req.method === 'GET' ? undefined : await req.text(),
+  });
+
+  // Ingest returns 204 on success; a Response can't carry a body on 204.
+  if (upstream.status === 204) return new Response(null, { status: 204 });
+  return new Response(await upstream.text(), { status: upstream.status });
+}
+
+export { handler as GET, handler as POST };
+```
+
+```tsx
+<TempsAnalyticsProvider basePath="/api/_temps">
+  {children}
+</TempsAnalyticsProvider>
+```
+
+With the proxy in place, drop `ingestKey` from the provider — the key stays server-side in `TEMPS_ANALYTICS_INGEST_KEY` and never ships to the browser.
+
+<Note>
+  **Next.js gotcha:** a literal `_temps` folder under `app/api/` is treated as a private folder and silently excluded from routing. Percent-encode the leading underscore in the directory name (`app/api/%5Ftemps/[...path]/route.ts`) so Next.js registers the route.
+</Note>
+
+### 4. Identity: visitor_id and session_id
+
+On the Temps-hosted path, identity comes from encrypted `_temps_visitor_id` / `_temps_sid` cookies that Temps itself issues — those never exist cross-origin (no shared cookie jar, and CORS ingest doesn't send credentials anyway). Instead, `@temps-sdk/analytics-core` generates a `visitor_id` and a `session_id` client-side (persisted to `localStorage`, session id rolls over after 30 minutes of inactivity) and attaches both to every event payload. On the keyed-ingest path, the server trusts this payload identity; on the Temps-hosted path it deliberately does not, since that request could be from an unauthenticated visitor with no key at all. No extra configuration is needed for this — it's automatic once `ingestKey`/keyed `basePath` is configured — but returning visitors get a *new* identity if they clear `localStorage`, since there's no cookie fallback to survive that on this path.
+
+### Gotchas
+
+- **`sendBeacon` can't set headers.** The `page_leave` event fires via `navigator.sendBeacon` on unload, which ignores custom headers entirely. The SDK falls back to appending `?temps_key=pa_...` to the URL for beacon requests — sufficient on its own, but going through the proxy in step 3 means the key never appears in a URL at all.
+- **`allowed_origins` requires an exact `Origin` match.** Requests with no `Origin` header (i.e. `curl`) or a foreign one are rejected with 403 once you've set `--allowed-origins`. Leave it unset while testing to allow any origin (the key is still rate-limited).
+- **Returning visitors need identity that outlives short-lived cookies.** If you bootstrap your own identity cookies in the proxy layer for server-side attribution, mirror them to `localStorage` too — the browser tab may outlive the cookie.
+
+For the full design and security rationale behind keyed ingest, see [ADR-076](https://github.com/gotempsh/temps/blob/main/docs/adr/076-analytics-ingest-keys.md).
+
+---
+
+## React Analytics {{ anchor: true, id: 'react-analytics' }}
+
+Track pageviews, custom events, performance metrics, and session replays in your React applications.
+
+### Installation
+
+```bash
+npm install @temps-sdk/react-analytics
+```
+
+### Quick Start
+
+```tsx
+import { TempsAnalyticsProvider, useTrackEvent } from '@temps-sdk/react-analytics';
+
+function App() {
+  return (
+    <TempsAnalyticsProvider>
+      <YourApp />
+    </TempsAnalyticsProvider>
+  );
+}
+
+function YourComponent() {
+  const trackEvent = useTrackEvent();
+
+  const handleClick = () => {
+    trackEvent('button_clicked', {
+      buttonId: 'cta-button',
+      location: 'homepage'
+    });
+  };
+
+  return <button onClick={handleClick}>Click me</button>;
+}
+```
+
+### Features
+
+<Properties>
+  <Property name="Automatic Pageview Tracking">
+    Automatically tracks pageviews on route changes (Next.js App Router, Pages Router, React Router).
+
+    ```tsx
+    <TempsAnalyticsProvider autoTrackPageviews={true}>
+      {children}
+    </TempsAnalyticsProvider>
+    ```
+  </Property>
+
+  <Property name="Custom Event Tracking">
+    Track custom events with properties:
+
+    ```tsx
+    const trackEvent = useTrackEvent();
+    trackEvent('purchase_completed', {
+      productId: '123',
+      amount: 99.99,
+      currency: 'USD'
+    });
+    ```
+  </Property>
+
+  <Property name="Session Replay">
+    Record and replay user sessions for debugging:
+
+    ```tsx
+    <TempsAnalyticsProvider
+      sessionReplay={{
+        enabled: true,
+        sampling: 0.1, // Record 10% of sessions
+        privacy: {
+          maskAllInputs: false,
+          blockSelector: '.sensitive-data'
+        }
+      }}
+    >
+      {children}
+    </TempsAnalyticsProvider>
+    ```
+  </Property>
+
+  <Property name="Performance Metrics">
+    Automatic Web Vitals tracking (LCP, FID, CLS, FCP, TTFB).
+  </Property>
+
+  <Property name="Engagement Tracking">
+    Track user engagement time, scroll depth, and interaction patterns.
+  </Property>
+</Properties>
+
+### Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `basePath` | `string` | `/api/_temps` | Base endpoint path for analytics. Can be an absolute URL pointing at a different origin — see [Externally Hosted Apps](#external-hosting) |
+| `ingestKey` | `string` | — | Keyed-ingest credential for apps not deployed by Temps — see [Externally Hosted Apps](#external-hosting) |
+| `disabled` | `boolean` | `false` | Disable analytics completely |
+| `ignoreLocalhost` | `boolean` | `true` | Ignore localhost traffic |
+| `domain` | `string` | `window.location.hostname` | Custom domain for analytics |
+| `autoTrackPageviews` | `boolean` | `true` | Automatically track pageviews |
+| `autoTrackPageLeave` | `boolean` | `true` | Track page leave events |
+| `pageLeaveEventName` | `string` | `page_leave` | Custom event name for page leave |
+| `autoTrackSpeedAnalytics` | `boolean` | `true` | Track Web Vitals automatically |
+| `autoTrackEngagement` | `boolean` | `true` | Track user engagement with heartbeats |
+| `heartbeatInterval` | `number` | `30000` | Heartbeat interval in milliseconds |
+| `inactivityTimeout` | `number` | `30000` | Inactivity timeout in milliseconds |
+| `engagementThreshold` | `number` | `10000` | Engagement threshold in milliseconds |
+| `enableSessionRecording` | `boolean` | `false` | Enable session recording |
+| `sessionRecordingConfig` | `object` | `{}` | Session recording configuration |
+
+### Next.js Integration
+
+**App Router:**
+```tsx
+// app/layout.tsx
+import { TempsAnalyticsProvider } from '@temps-sdk/react-analytics';
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <TempsAnalyticsProvider>
+          {children}
+        </TempsAnalyticsProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+**Pages Router:**
+```tsx
+// pages/_app.tsx
+import { TempsAnalyticsProvider } from '@temps-sdk/react-analytics';
+
+export default function App({ Component, pageProps }) {
+  return (
+    <TempsAnalyticsProvider>
+      <Component {...pageProps} />
+    </TempsAnalyticsProvider>
+  );
+}
+```
+
+---
+
+## Vanilla JS Analytics {{ anchor: true, id: 'vanilla-analytics' }}
+
+Framework-free analytics for plain HTML pages, Astro islands, Alpine.js, htmx, or any JS runtime without a framework wrapper.
+
+### Installation
+
+```bash
+npm install @temps-sdk/analytics-browser
+```
+
+### Quick Start (programmatic)
+
+```ts
+import { init, trackEvent } from '@temps-sdk/analytics-browser';
+
+// Boot once, typically in your entry file
+init({
+  basePath: '/api/_temps',
+  autoTrackPageviews: true,
+  autoTrackSpeedAnalytics: true,
+  autoTrackEngagement: true,
+});
+
+// Later, anywhere
+trackEvent('signup_clicked', { plan: 'pro' });
+```
+
+`init()` returns an `AnalyticsApi` and also attaches it to `window.temps` so other scripts can call `window.temps.trackEvent(...)` without importing.
+
+### Quick Start (script tag)
+
+Drop-in for static sites — no bundler required. The `/auto` entrypoint reads `data-*` attributes from its own `<script>` tag and boots on `DOMContentLoaded`:
+
+```html
+<script
+  src="https://unpkg.com/@temps-sdk/analytics-browser/dist/auto.js"
+  data-domain="mysite.com"
+  data-base-path="/api/_temps"
+  data-session-recording="true"
+  data-excluded-paths="/admin/*,/internal/*"
+  defer
+></script>
+```
+
+Supported `data-*` attributes:
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `data-domain` | string | Override `window.location.hostname` |
+| `data-base-path` | string | Endpoint path (default `/api/_temps`) |
+| `data-disabled` | `true` / `false` | Disable entirely |
+| `data-ignore-localhost` | `true` / `false` | Skip localhost (default `true`) |
+| `data-auto-track-pageviews` | `true` / `false` | Auto-track route changes |
+| `data-auto-track-page-leave` | `true` / `false` | Track `page_leave` events |
+| `data-auto-track-speed` | `true` / `false` | Track Web Vitals |
+| `data-auto-track-engagement` | `true` / `false` | Heartbeat engagement tracking |
+| `data-session-recording` | `true` / `false` | Enable rrweb session recording |
+| `data-excluded-paths` | comma list | Paths to skip for recording, supports `*` |
+| `data-session-sample-rate` | `0`–`1` | Fraction of sessions to record |
+| `data-heartbeat-interval` | number (ms) | Heartbeat interval |
+| `data-inactivity-timeout` | number (ms) | Inactivity timeout |
+| `data-engagement-threshold` | number (ms) | When a session becomes "engaged" |
+
+### API
+
+```ts
+import {
+  init,
+  getAnalytics,
+  trackEvent,
+  trackPageview,
+  destroy,
+} from '@temps-sdk/analytics-browser';
+
+init(options);                // Boot. Safe to call once per page.
+getAnalytics();               // Returns current AnalyticsApi or null.
+trackEvent(name, data?);      // Async — fires and forgets.
+trackPageview();              // Manual pageview. Usually not needed with auto-tracking.
+destroy();                    // Tear down listeners, timers, and session recorder.
+```
+
+---
+
+## Vue Analytics {{ anchor: true, id: 'vue-analytics' }}
+
+First-class Vue 3 support via a plugin + composables. Works with Nuxt, Vite, and any Vue 3 SPA.
+
+### Installation
+
+```bash
+npm install @temps-sdk/vue-analytics
+```
+
+### Quick Start
+
+```ts
+// main.ts
+import { createApp } from 'vue';
+import { TempsAnalyticsPlugin } from '@temps-sdk/vue-analytics';
+import App from './App.vue';
+
+const app = createApp(App);
+
+app.use(TempsAnalyticsPlugin, {
+  basePath: '/api/_temps',
+  autoTrackPageviews: true,
+  enableSessionRecording: false,
+});
+
+app.mount('#app');
+```
+
+### Composables
+
+```vue
+<script setup lang="ts">
+import {
+  useTempsAnalytics,
+  useTrackEvent,
+  useTrackPageview,
+  usePageLeave,
+  useEngagementTracking,
+  useScrollVisibility,
+  useSessionRecording,
+} from '@temps-sdk/vue-analytics';
+
+// Raw API
+const analytics = useTempsAnalytics();
+
+// Convenience helpers
+const trackEvent = useTrackEvent();
+const trackPageview = useTrackPageview();
+
+function onCtaClick() {
+  trackEvent('cta_clicked', { location: 'hero' });
+}
+
+// Track when the current page is about to be left
+usePageLeave((data) => {
+  console.log('Leaving with engagement:', data.engagement_time_seconds);
+});
+
+// Reactive engagement signal
+const { engagement, isEngaged } = useEngagementTracking();
+
+// Scroll visibility for a ref
+import { ref } from 'vue';
+const pricingSection = ref<HTMLElement | null>(null);
+useScrollVisibility(pricingSection, () => {
+  trackEvent('pricing_viewed');
+});
+
+// Session recording toggle
+const { isEnabled, enable, disable, toggle } = useSessionRecording();
+</script>
+
+<template>
+  <button @click="onCtaClick">Get started</button>
+  <section ref="pricingSection">…</section>
+</template>
+```
+
+### Global property
+
+The plugin also registers `$temps` as a global property for Options API components:
+
+```vue
+<script>
+export default {
+  methods: {
+    handleClick() {
+      this.$temps.trackEvent('legacy_button');
+    },
+  },
+};
+</script>
+```
+
+### Nuxt 3
+
+In `plugins/temps.client.ts`:
+
+```ts
+import { TempsAnalyticsPlugin } from '@temps-sdk/vue-analytics';
+
+export default defineNuxtPlugin((nuxtApp) => {
+  nuxtApp.vueApp.use(TempsAnalyticsPlugin, {
+    basePath: '/api/_temps',
+  });
+});
+```
+
+---
+
+## Svelte Analytics {{ anchor: true, id: 'svelte-analytics' }}
+
+Store-based analytics for Svelte 4, Svelte 5 runes mode, and SvelteKit.
+
+### Installation
+
+```bash
+npm install @temps-sdk/svelte-analytics
+```
+
+### Quick Start
+
+```ts
+// src/lib/analytics.ts
+import { initTempsAnalytics } from '@temps-sdk/svelte-analytics';
+
+export const analytics = initTempsAnalytics({
+  basePath: '/api/_temps',
+  autoTrackPageviews: true,
+  autoTrackSpeedAnalytics: true,
+});
+```
+
+Call `initTempsAnalytics()` once in your root layout (browser-only — wrap in `if (browser)` on SvelteKit):
+
+```svelte
+<!-- src/routes/+layout.svelte -->
+<script lang="ts">
+  import { browser } from '$app/environment';
+  import { onMount } from 'svelte';
+  import { initTempsAnalytics } from '@temps-sdk/svelte-analytics';
+
+  onMount(() => {
+    if (browser) {
+      initTempsAnalytics({ basePath: '/api/_temps' });
+    }
+  });
+</script>
+
+<slot />
+```
+
+### Tracking events
+
+```svelte
+<script lang="ts">
+  import { getTempsAnalytics } from '@temps-sdk/svelte-analytics';
+
+  function onClick() {
+    getTempsAnalytics()?.trackEvent('hero_cta_clicked', { variant: 'a' });
+  }
+</script>
+
+<button on:click={onClick}>Get started</button>
+```
+
+### The `trackVisibility` action
+
+Fire an event when an element scrolls into view:
+
+```svelte
+<script lang="ts">
+  import { trackVisibility } from '@temps-sdk/svelte-analytics';
+</script>
+
+<section
+  use:trackVisibility={{
+    eventName: 'pricing_viewed',
+    once: true,
+    threshold: 0.5,
+    data: { section: 'pricing' },
+  }}
+>
+  <h2>Pricing</h2>
+</section>
+```
+
+### Engagement store
+
+```svelte
+<script lang="ts">
+  import { engagementStore } from '@temps-sdk/svelte-analytics';
+  const engagement = engagementStore();
+</script>
+
+<p>Engagement: {$engagement.engagement_time_seconds}s</p>
+{#if $engagement.is_engaged}
+  <span>Active visitor</span>
+{/if}
+```
+
+### Session recording store
+
+```svelte
+<script lang="ts">
+  import { sessionRecordingStore } from '@temps-sdk/svelte-analytics';
+  const recording = sessionRecordingStore();
+</script>
+
+<button on:click={recording.toggle}>
+  {$recording.enabled ? 'Stop' : 'Start'} recording
+</button>
+```
+
+### `analyticsStore` readable
+
+A Svelte readable that resolves to the current `AnalyticsApi` (or `null` before init completes). Handy for reactive templates:
+
+```svelte
+<script lang="ts">
+  import { analyticsStore } from '@temps-sdk/svelte-analytics';
+</script>
+
+{#if $analyticsStore}
+  <p>Analytics ready on {$analyticsStore.enabled ? 'prod' : 'local'}</p>
+{/if}
+```
+
+---
+
+## Analytics Core {{ anchor: true, id: 'analytics-core' }}
+
+`@temps-sdk/analytics-core` is the framework-agnostic engine behind the React, Vue, Svelte, and vanilla packages. Use it directly only when building a custom integration (Solid, Qwik, Preact, Web Components, etc.).
+
+### Installation
+
+```bash
+npm install @temps-sdk/analytics-core
+```
+
+### API
+
+```ts
+import {
+  createAnalytics,
+  EngagementTracker,
+  SpeedTracker,
+  SessionRecorder,
+  sendAnalytics,
+  sendAnalyticsReliable,
+  DEFAULT_BASE_PATH,
+  type AnalyticsApi,
+  type AnalyticsOptions,
+  type EngagementData,
+  type SpeedMetric,
+} from '@temps-sdk/analytics-core';
+
+const analytics: AnalyticsApi = createAnalytics({
+  basePath: DEFAULT_BASE_PATH, // "/api/_temps"
+  autoTrackPageviews: true,
+  autoTrackSpeedAnalytics: true,
+  autoTrackEngagement: true,
+  enableSessionRecording: false,
+});
+
+analytics.trackEvent('custom_event', { foo: 'bar' });
+analytics.trackPageview();
+analytics.enableSessionRecording();
+// When your app unmounts
+analytics.destroy();
+```
+
+### Building your own adapter
+
+The individual trackers are standalone classes:
+
+```ts
+import { EngagementTracker, SpeedTracker, SessionRecorder } from '@temps-sdk/analytics-core';
+
+const engagement = new EngagementTracker({
+  basePath: '/api/_temps',
+  heartbeatInterval: 30000,
+  onHeartbeat: (data) => console.log('beat', data),
+});
+
+const speed = new SpeedTracker({ basePath: '/api/_temps' });
+
+const session = new SessionRecorder({
+  basePath: '/api/_temps',
+  enabled: true,
+  excludedPaths: ['/admin/*'],
+});
+session.start();
+
+// Later
+engagement.destroy();
+speed.destroy();
+session.destroy();
+```
+
+All trackers are safe to call in SSR contexts — they no-op when `window` is undefined.
+
+---
+
+## Node.js SDK {{ anchor: true, id: 'node-sdk' }}
+
+Complete TypeScript SDK for accessing the Temps API from Node.js, Bun, or serverless environments.
+
+### Installation
+
+```bash
+npm install @temps-sdk/node-sdk
+```
+
+### Quick Start
+
+```typescript
+import { TempsClient } from '@temps-sdk/node-sdk';
+
+const client = new TempsClient({
+  baseUrl: 'https://your-temps-instance.com',
+  apiKey: 'your-api-key'
+});
+
+// List projects
+const projects = await client.projects.list();
+
+// Create a deployment
+const deployment = await client.deployments.create({
+  projectId: 1,
+  environment: 'production',
+  branch: 'main'
+});
+
+// Get analytics metrics
+const metrics = await client.analytics.getAnalyticsMetrics({
+  projectId: 1,
+  from: '2024-01-01',
+  to: '2024-01-31'
+});
+```
+
+### Available APIs
+
+The Node.js SDK provides access to all Temps API endpoints:
+
+<Properties>
+  <Property name="Projects">
+    Create, update, delete, and manage projects:
+
+    ```typescript
+    await client.projects.create({ name: 'my-app', ... });
+    await client.projects.list();
+    await client.projects.get(projectId);
+    await client.projects.update(projectId, { ... });
+    ```
+  </Property>
+
+  <Property name="Deployments">
+    Trigger deployments, check status, view logs:
+
+    ```typescript
+    await client.deployments.create({ projectId, environment, branch });
+    await client.deployments.list({ projectId });
+    await client.deployments.get(deploymentId);
+    await client.deployments.getLogs(deploymentId);
+    ```
+  </Property>
+
+  <Property name="Analytics">
+    Query analytics data, metrics, visitors, sessions:
+
+    ```typescript
+    await client.analytics.getAnalyticsMetrics({ projectId, from, to });
+    await client.analytics.getVisitors({ projectId });
+    await client.analytics.getSessionDetails(sessionId);
+    ```
+  </Property>
+
+  <Property name="Domains">
+    Manage custom domains and SSL certificates:
+
+    ```typescript
+    await client.domains.create({ projectId, hostname });
+    await client.domains.provision(domainId);
+    await client.domains.list({ projectId });
+    ```
+  </Property>
+
+  <Property name="Services">
+    Manage PostgreSQL, Redis, and S3 services:
+
+    ```typescript
+    await client.services.create({ type: 'postgres', name: 'db' });
+    await client.services.linkToProject(serviceId, projectId);
+    ```
+  </Property>
+
+  <Property name="API Keys">
+    Create and manage API keys:
+
+    ```typescript
+    await client.apiKeys.create({ name: 'my-key', permissions: [...] });
+    await client.apiKeys.list();
+    ```
+  </Property>
+
+  <Property name="Webhooks">
+    Configure webhooks for events:
+
+    ```typescript
+    await client.webhooks.create({
+      projectId,
+      url: 'https://example.com/webhook',
+      events: ['deployment.succeeded']
+    });
+    ```
+  </Property>
+
+  <Property name="Error Tracking">
+    Query error tracking data:
+
+    ```typescript
+    await client.errorTracking.getErrors({ projectId });
+    await client.errorTracking.getErrorDetails(errorId);
+    ```
+  </Property>
+</Properties>
+
+### Authentication
+
+**Using API Keys:**
+```typescript
+const client = new TempsClient({
+  baseUrl: 'https://your-temps-instance.com',
+  apiKey: 'your-api-key'
+});
+```
+
+**Using Deployment Tokens:**
+```typescript
+const client = new TempsClient({
+  baseUrl: 'https://your-temps-instance.com',
+  apiKey: 'your-deployment-token'
+});
+```
+
+**Environment Variables:**
+```bash
+TEMPS_API_URL=https://your-temps-instance.com
+TEMPS_API_KEY=your-api-key
+# or
+TEMPS_TOKEN=your-deployment-token
+```
+
+```typescript
+// Automatically uses environment variables
+const client = new TempsClient();
+```
+
+---
+
+## Key-Value Store {{ anchor: true, id: 'kv' }}
+
+Lightweight SDK for Temps KV (key-value store) operations. Perfect for caching, sessions, and temporary data.
+
+### Installation
+
+```bash
+npm install @temps-sdk/kv
+```
+
+### Quick Start
+
+```typescript
+import { kv, createClient } from '@temps-sdk/kv';
+
+// Using default client (uses env vars)
+await kv.set('user:123', { name: 'John', email: 'john@example.com' });
+const user = await kv.get('user:123');
+await kv.del('user:123');
+
+// With expiration
+await kv.set('session:abc', sessionData, { ex: 3600 }); // 1 hour
+
+// Increment counter
+const count = await kv.incr('page:views');
+
+// Pattern matching
+const keys = await kv.keys('user:*');
+```
+
+### Custom Client
+
+```typescript
+import { createClient } from '@temps-sdk/kv';
+
+const client = createClient({
+  apiUrl: 'https://your-temps-instance.com',
+  token: 'your-deployment-token',
+  projectId: 1 // Required for API keys, optional for deployment tokens
+});
+
+await client.set('key', 'value');
+const value = await client.get('key');
+```
+
+### API Reference
+
+<Properties>
+  <Property name="get&lt;T&gt;(key)">
+    Get the value of a key. Returns `null` if key doesn't exist.
+
+    ```typescript
+    const value = await kv.get<string>('my-key');
+    ```
+  </Property>
+
+  <Property name="set(key, value, options?)">
+    Set a key-value pair. Supports expiration.
+
+    ```typescript
+    await kv.set('key', 'value');
+    await kv.set('key', 'value', { ex: 60 }); // Expire in 60 seconds
+    ```
+  </Property>
+
+  <Property name="del(...keys)">
+    Delete one or more keys. Returns count of deleted keys.
+
+    ```typescript
+    await kv.del('key1', 'key2', 'key3');
+    ```
+  </Property>
+
+  <Property name="incr(key)">
+    Increment a numeric value. Returns new value.
+
+    ```typescript
+    const count = await kv.incr('counter');
+    ```
+  </Property>
+
+  <Property name="expire(key, seconds)">
+    Set expiration on an existing key.
+
+    ```typescript
+    await kv.expire('key', 3600); // Expire in 1 hour
+    ```
+  </Property>
+
+  <Property name="ttl(key)">
+    Get time-to-live of a key. Returns seconds remaining or `-1` if no expiration.
+
+    ```typescript
+    const ttl = await kv.ttl('key');
+    ```
+  </Property>
+
+  <Property name="keys(pattern)">
+    Find keys matching a pattern (supports `*` wildcard).
+
+    ```typescript
+    const userKeys = await kv.keys('user:*');
+    ```
+  </Property>
+</Properties>
+
+### Use Cases
+
+**Session Storage:**
+```typescript
+// Store session
+await kv.set(`session:${sessionId}`, sessionData, { ex: 86400 }); // 24 hours
+
+// Retrieve session
+const session = await kv.get(`session:${sessionId}`);
+```
+
+**Rate Limiting:**
+```typescript
+const key = `rate:${userId}`;
+const count = await kv.incr(key);
+if (count === 1) {
+  await kv.expire(key, 60); // Set expiration on first increment
+}
+if (count > 100) {
+  throw new Error('Rate limit exceeded');
+}
+```
+
+**Caching:**
+```typescript
+const cacheKey = `cache:${query}`;
+let result = await kv.get(cacheKey);
+
+if (!result) {
+  result = await expensiveOperation();
+  await kv.set(cacheKey, result, { ex: 300 }); // Cache for 5 minutes
+}
+```
+
+---
+
+## Blob Storage {{ anchor: true, id: 'blob' }}
+
+SDK for Temps Blob storage—upload, download, and manage files and binary data.
+
+### Installation
+
+```bash
+npm install @temps-sdk/blob
+```
+
+### Quick Start
+
+```typescript
+import { blob, createClient } from '@temps-sdk/blob';
+
+// Upload a file
+const result = await blob.put('uploads/image.jpg', fileBuffer, {
+  contentType: 'image/jpeg'
+});
+console.log(result.url); // Public URL
+
+// Download a file
+const response = await blob.download(result.url);
+const data = await response.arrayBuffer();
+
+// List files
+const list = await blob.list({ prefix: 'uploads/', limit: 10 });
+
+// Delete files
+await blob.del(result.url);
+```
+
+### Custom Client
+
+```typescript
+import { createClient } from '@temps-sdk/blob';
+
+const client = createClient({
+  apiUrl: 'https://your-temps-instance.com',
+  token: 'your-deployment-token',
+  projectId: 1 // Required for API keys
+});
+
+await client.put('path/to/file.txt', 'content');
+```
+
+### API Reference
+
+<Properties>
+  <Property name="put(pathname, body, options?)">
+    Upload a blob. Returns URL and metadata.
+
+    ```typescript
+    const result = await blob.put('uploads/file.txt', 'content', {
+      contentType: 'text/plain',
+      addRandomSuffix: false
+    });
+    ```
+
+    **Body types:** `string`, `Uint8Array`, `Blob`, `ArrayBuffer`
+  </Property>
+
+  <Property name="download(url)">
+    Download a blob. Returns `Response` object.
+
+    ```typescript
+    const response = await blob.download(url);
+    const text = await response.text();
+    const buffer = await response.arrayBuffer();
+    ```
+  </Property>
+
+  <Property name="head(url)">
+    Get blob metadata without downloading content.
+
+    ```typescript
+    const metadata = await blob.head(url);
+    console.log(metadata.size, metadata.contentType);
+    ```
+  </Property>
+
+  <Property name="list(options?)">
+    List blobs with pagination and filtering.
+
+    ```typescript
+    const result = await blob.list({
+      prefix: 'uploads/',
+      limit: 50,
+      cursor: 'next-page-token'
+    });
+    ```
+  </Property>
+
+  <Property name="del(urls)">
+    Delete one or more blobs by URL.
+
+    ```typescript
+    await blob.del(url);
+    await blob.del([url1, url2, url3]);
+    ```
+  </Property>
+
+  <Property name="copy(fromUrl, toPathname)">
+    Copy a blob to a new location.
+
+    ```typescript
+    const newBlob = await blob.copy(oldUrl, 'new/path/file.txt');
+    ```
+  </Property>
+</Properties>
+
+### Use Cases
+
+**File Upload:**
+```typescript
+// Upload from form
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+const file = await fileInput.files[0].arrayBuffer();
+const result = await blob.put(`uploads/${filename}`, file, {
+  contentType: fileInput.files[0].type
+});
+```
+
+**Image Processing:**
+```typescript
+// Upload image
+const imageResult = await blob.put('images/photo.jpg', imageBuffer, {
+  contentType: 'image/jpeg'
+});
+
+// Later, copy to processed folder
+await blob.copy(imageResult.url, 'processed/photo.jpg');
+```
+
+**File Management:**
+```typescript
+// List all files in a directory
+const files = await blob.list({ prefix: 'documents/' });
+
+// Delete old files
+const oldFiles = files.blobs.filter(f =>
+  new Date(f.uploadedAt) < new Date('2024-01-01')
+);
+await blob.del(oldFiles.map(f => f.url));
+```
+
+---
+
+## Environment Variables
+
+All SDKs support configuration via environment variables:
+
+```bash
+# Required
+TEMPS_API_URL=https://your-temps-instance.com
+
+# Authentication (choose one)
+TEMPS_API_KEY=your-api-key
+# or
+TEMPS_TOKEN=your-deployment-token
+
+# Optional (for API keys)
+TEMPS_PROJECT_ID=1
+```
+
+---
+
+## Error Handling
+
+All SDKs provide structured error types:
+
+```typescript
+import { KVError, BlobError } from '@temps-sdk/kv';
+// or
+import { BlobError } from '@temps-sdk/blob';
+
+try {
+  await kv.set('key', 'value');
+} catch (error) {
+  if (error instanceof KVError) {
+    console.error('KV Error:', error.message);
+    console.error('Status:', error.status);
+    console.error('Code:', error.code);
+  }
+}
+```
+
+---
+
+## TypeScript Support
+
+All SDKs are written in TypeScript and provide full type definitions:
+
+```typescript
+// Full type safety
+const user = await kv.get<{ name: string; email: string }>('user:123');
+// user is typed as { name: string; email: string } | null
+
+const deployment = await client.deployments.get(deploymentId);
+// deployment is fully typed based on API response
+```
+
+---
+
+## Next Steps
+
+- [Set Up Analytics](/docs/analytics) to start tracking user behavior
+- [Configure KV Storage](/docs/managed-services) for caching and sessions
+- [Use Blob Storage](/docs/managed-services#s3-object-storage) for file uploads
+- [Explore the API](/docs/api) for advanced integrations

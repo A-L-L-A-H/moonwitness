@@ -1,0 +1,25 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "addons/*"
+
+catalog:
+  fastify: ^5.12.8
+  "@fastify/cors": ^11.4.1
+  "@fastify/cookie": ^11.1.5
+  "@fastify/helmet": ^13.2.0
+  "@fastify/rate-limit": ^11.2.2
+  "@mikro-orm/cli": ^7.2.8
+  "@mikro-orm/core": ^7.2.8
+  argon2: ^0.45.2
+  "@mikro-orm/migrations": ^7.2.5
+  "@mikro-orm/postgresql": ^7.2.8
+  "@sinclair/typebox": ^0.34.52
+  bullmq: ^6.7.2
+  dotenv: ^17.2.3
+  ioredis: ^5.8.2
+  pg: ^8.16.3
+
+allowBuilds:
+  argon2: true
+  msgpackr-extract: false

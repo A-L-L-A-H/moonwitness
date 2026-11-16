@@ -1,0 +1,95 @@
+export type {
+  ChatMessage,
+  ChatCompletionRequest,
+  ChatCompletionResponse,
+  ToolCall,
+  ToolCallFunction,
+  ToolChoice,
+  ToolDefinition,
+  ToolFunction,
+  ToolParameter,
+} from '@moonwitness/types';
+
+export interface StreamDelta {
+  role?: string;
+  content?: string;
+  tool_calls?: Array<{
+    index: number;
+    id?: string;
+    type?: 'function';
+    function: {
+      name?: string;
+      arguments?: string;
+    };
+  }>;
+}
+
+export interface StreamChunk {
+  id: string;
+  object: 'chat.completion.chunk';
+  created: number;
+  model: string;
+  choices: Array<{
+    index: number;
+    delta: StreamDelta;
+    finish_reason: string | null;
+  }>;
+  usage?: UsageInfo;
+}
+
+export interface UsageInfo {
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+  estimated_cost_usd?: number;
+}
+
+export interface ProviderRecord {
+  id: number;
+  name: string;
+  slug: string;
+  provider_type: 'openai_compatible' | 'anthropic' | 'gemini' | 'ollama';
+  base_url: string;
+  encrypted_api_key?: string;
+  priority: number;
+  is_healthy: boolean;
+}
+
+export interface ModelRecord {
+  id: number;
+  name: string;
+  model_id: string;
+  provider_id: number;
+  context_window: number;
+  input_cost_per_m: number;
+  output_cost_per_m: number;
+}
+
+export interface RouteRecord {
+  id: number;
+  name: string;
+  alias: string;
+  strategy: 'fallback' | 'lowest_cost' | 'lowest_latency' | 'weighted_rr';
+}
+
+export interface VirtualKeyRecord {
+  id: number;
+  company_id: number;
+  name: string;
+  key_prefix: string;
+  key_hash: string;
+  revoked?: boolean | null;
+  partner_id?: number;
+  budget_limit?: number;
+  rate_limit_rpm: number;
+  rate_limit_tpm: number;
+}
+
+export interface LlmGatewayOptions {
+  prefix?: string;
+  defaultUpstreamUrl?: string;
+  upstreamApiKey?: string;
+  anthropicApiKey?: string;
+  geminiApiKey?: string;
+  ollamaBaseUrl?: string;
+}

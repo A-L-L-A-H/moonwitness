@@ -1,0 +1,322 @@
+export const metadata = {
+  title: 'Set Up Managed Services',
+  description:
+    'Provision PostgreSQL, MariaDB, Redis, MongoDB, and S3 storage as Docker containers managed by Temps. Link them to projects for automatic credential injection.',
+  alternates: {
+    canonical: '/docs/set-up-managed-services',
+  },
+}
+
+export const sections = [
+  { title: 'Available service types', id: 'available-service-types' },
+  { title: 'Create a service', id: 'create-a-service' },
+  { title: 'Link a service to a project', id: 'link-a-service-to-a-project' },
+  { title: 'Import an existing container', id: 'import-an-existing-container' },
+  { title: 'Manage service lifecycle', id: 'manage-service-lifecycle' },
+  { title: 'Upgrade a service', id: 'upgrade-a-service' },
+]
+
+# Set Up Managed Services
+
+Managed services are databases and storage systems that Temps provisions as Docker containers on your server. You create them once, link them to projects, and Temps handles credential generation, networking, environment variable injection, and backups. {{ className: 'lead' }}
+
+---
+
+## Available service types {{ anchor: true, id: 'available-service-types' }}
+
+| Service | Default Image | Use case |
+|---------|--------------|----------|
+| **PostgreSQL** | `gotempsh/postgres-walg:18-bookworm` | Primary database with WAL-G streaming backups |
+| **MariaDB** | `mariadb:lts` | MySQL-compatible relational database |
+| **Redis** | `gotempsh/redis-walg:8-bookworm` | Caching, sessions, pub/sub, and queues |
+| **MongoDB** | `gotempsh/mongodb-walg:8.0` | Document database |
+| **S3 Storage** | `rustfs/rustfs:1.0.0` | S3-compatible object storage (`rustfs` by default or `garage`) |
+
+Temps also provides higher-level abstractions built on these services:
+
+| Service | Backed by | Purpose |
+|---------|-----------|---------|
+| **KV** | Redis | Key-value storage accessible via the Temps SDK |
+| **Blob** | RustFS | File/blob storage accessible via the Temps SDK |
+
+<Note>
+MariaDB and RustFS-backed services are opt-in. Installing or starting Temps does not pull or run a MariaDB container, and it does not pull or run RustFS unless you create or enable an S3, Blob, or RustFS service. Temps still uses PostgreSQL with TimescaleDB for its own internal database.
+</Note>
+
+---
+
+## Create a service {{ anchor: true, id: 'create-a-service' }}
+
+### From the dashboard
+
+1. In the sidebar, click **Services**
+2. Click **Create Service**
+3. Select the service type
+4. Enter a name and adjust parameters if needed
+5. Click **Create**
+
+### From the API
+
+```bash
+curl -X POST "https://your-temps-instance/api/external-services" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "my-postgres",
+    "service_type": "postgres",
+    "parameters": {
+      "port": "5432",
+      "max_connections": "200"
+    }
+  }'
+```
+
+### Configuration by service type
+
+**PostgreSQL:**
+
+| Parameter | Default | Editable after creation |
+|-----------|---------|----------------------|
+| `port` | Auto-assigned from 5432 | Yes |
+| `docker_image` | `gotempsh/postgres-walg:18-bookworm` | Yes |
+| `max_connections` | `100` | Yes |
+| `ssl_mode` | `disable` | Yes |
+| `database` | `postgres` | No (read-only) |
+| `username` | `postgres` | No (read-only) |
+| `password` | Auto-generated (16 chars) | No (read-only) |
+
+**MariaDB:**
+
+| Parameter | Default | Editable after creation |
+|-----------|---------|----------------------|
+| `port` | Auto-assigned from 3306 | Yes |
+| `docker_image` | `mariadb:lts` | Yes |
+| `size_profile` | `small` | Yes |
+| `database` | `app` | No (read-only) |
+| `username` | `app` | No (read-only) |
+| `password` | Auto-generated | No (read-only) |
+| `root_password` | Auto-generated | No (read-only) |
+
+**Redis:**
+
+| Parameter | Default | Editable after creation |
+|-----------|---------|----------------------|
+| `port` | Auto-assigned from 6379 | Yes |
+| `docker_image` | `gotempsh/redis-walg:8-bookworm` | Yes |
+| `password` | Auto-generated | No (read-only) |
+
+**MongoDB:**
+
+| Parameter | Default | Editable after creation |
+|-----------|---------|----------------------|
+| `port` | Auto-assigned from 27017 | Yes |
+| `docker_image` | `gotempsh/mongodb-walg:8.0` | Yes |
+| `database` | `admin` | No (read-only) |
+| `username` | `admin` | No (read-only) |
+| `password` | Auto-generated | No (read-only) |
+
+**S3-compatible storage:**
+
+| Parameter | Default | Editable after creation |
+|-----------|---------|----------------------|
+| `backend` | `rustfs` (or `garage`) | No (read-only) |
+| `buckets` | none | Yes |
+| `port` | Auto-assigned from 9000 | Yes |
+| `console_port` | Auto-assigned from 9001 | Yes |
+| `docker_image` | `rustfs/rustfs:1.0.0` | Yes |
+| `access_key` | Auto-generated | No (read-only) |
+| `secret_key` | Auto-generated | No (read-only) |
+
+<Note>
+All ports are bound to `127.0.0.1` only — they are not publicly accessible from outside the server. Application containers communicate with services over the Docker network using container names as hostnames.
+</Note>
+
+---
+
+## Link a service to a project {{ anchor: true, id: 'link-a-service-to-a-project' }}
+
+Linking injects the service's connection credentials as environment variables into your project's containers at deploy time.
+
+### From the dashboard
+
+1. Open your project
+2. Click **Services** in the project sidebar
+3. Click **Link Service**
+4. Select the service
+5. Click **Link**
+
+### From the API
+
+```bash
+curl -X POST "https://your-temps-instance/api/external-services/{service_id}/projects" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "project_id": 1
+  }'
+```
+
+### What happens when you link
+
+1. **Per-project isolation** — For PostgreSQL and MariaDB, a dedicated database is created named `{project_slug}_{environment_slug}`. For Redis, a database number (0-15) is assigned. For S3/RustFS, a dedicated bucket is created.
+2. **Environment variables** — Connection credentials are generated using the Docker container name as the hostname (for internal networking) and injected on the next deploy.
+3. **One per type** — Only one service of each type can be linked to a project. To switch database instances of the same type, unlink the current one first.
+
+For MariaDB, Temps injects `DATABASE_URL`, `MYSQL_URL`, `MYSQL_*`, `MARIADB_URL`, and `MARIADB_*` variables. The URL scheme is `mysql://` for compatibility with common MySQL-compatible drivers and frameworks.
+
+### Preview environment variables
+
+To see what variables will be injected without deploying:
+
+```bash
+# Preview variable names
+curl "https://your-temps-instance/api/external-services/{service_id}/preview-environment-names" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Preview with masked values
+curl "https://your-temps-instance/api/external-services/{service_id}/preview-environment-masked" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Get actual values for a project
+curl "https://your-temps-instance/api/external-services/{service_id}/projects/{project_id}/environment" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Unlink a service
+
+```bash
+curl -X DELETE "https://your-temps-instance/api/external-services/{service_id}/projects/{project_id}" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+Unlinking does not delete the database or data inside the service — it only stops injecting environment variables. You can re-link later.
+
+---
+
+## Import an existing container {{ anchor: true, id: 'import-an-existing-container' }}
+
+If you already have a PostgreSQL, MariaDB/MySQL-compatible, Redis, MongoDB, or S3-compatible container running on your server, you can import it into Temps instead of creating a new one.
+
+1. Go to **Services**
+2. Click **Import Container**
+3. Temps scans for running Docker containers that match known service types
+4. Select the container to import
+5. Provide the connection credentials (Temps cannot read them from the container)
+
+From the API:
+
+```bash
+# List importable containers
+curl "https://your-temps-instance/api/external-services/available-containers" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Import one
+curl -X POST "https://your-temps-instance/api/external-services/import" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "container_id": "abc123...",
+    "name": "existing-postgres",
+    "service_type": "postgres",
+    "parameters": {
+      "host": "localhost",
+      "port": "5432",
+      "database": "postgres",
+      "username": "postgres",
+      "password": "your-existing-password"
+    }
+  }'
+```
+
+---
+
+## Manage service lifecycle {{ anchor: true, id: 'manage-service-lifecycle' }}
+
+### Start and stop
+
+Services can be started and stopped independently:
+
+```bash
+# Stop a service (keeps data)
+curl -X POST "https://your-temps-instance/api/external-services/{id}/stop" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Start it again
+curl -X POST "https://your-temps-instance/api/external-services/{id}/start" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+Stopping a service does not delete any data — the Docker volume persists. Applications linked to a stopped service will fail to connect until the service is started again.
+
+### Starting and initialization failures (S3/RustFS)
+
+A RustFS container can accept connections before its storage layer is ready. So after you create, start or upgrade an S3, Blob or RustFS service, it shows as **Starting** until an authenticated `ListBuckets` call made with the service's own credentials succeeds. Only then does it become **Running**. A `/health` response alone does not count. While it is starting, the service page shows the latest probe result, such as `HTTP 503: ... storage layer is not ready`, and how many times the container has restarted.
+
+If the service never becomes ready, its status changes to **Failed** and the service page explains why:
+
+- **Storage initialization failed**: the container logged an initialization error that RustFS does not recover from (for example `store init failed: init retry budget exhausted`).
+- **The container keeps restarting**: it restarted 3 times without answering an authenticated request.
+- **The service did not become ready in time**: it never answered within 180 seconds.
+
+The page shows the reason, the matching container log lines (with credentials masked) and what you can do next: view the logs, start it again, switch to another image version with **Upgrade**, or delete the service and create it again on fresh volumes. Temps never does any of these for you, and it does not stop, recreate or delete the container or its volumes. The same information is in `service.readiness` from `GET /api/external-services/{id}` while `status` is `starting` or `failed`.
+
+If Temps restarts while a service is starting, it resumes the check and keeps the original deadline. Services that were already running are not affected.
+
+### Health check
+
+```bash
+curl "https://your-temps-instance/api/external-services/{id}/health" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Delete a service
+
+```bash
+curl -X DELETE "https://your-temps-instance/api/external-services/{id}" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+<Note>
+**Warning:** Deleting a service removes the Docker container. Data in the Docker volume may be preserved depending on your Docker configuration, but this should not be relied upon. Always back up important data before deleting a service.
+</Note>
+
+---
+
+## Back up a service {{ anchor: true, id: 'back-up-a-service' }}
+
+The service page has a **Backups** card listing this database's backups.
+
+- **No destination yet.** Backups are stored in an S3-compatible bucket (a *backup destination*). Until one exists, the card says **No backup destination configured** and offers **Create destination**. After you save it you land back on the card.
+- **Schedule backups.** **Schedule backups** opens the new-schedule form with only this database selected (`?service_id=<id>`). With more than one destination, pick where the backups go first. Saving or cancelling returns to the service.
+- **From a project.** On a project's **Databases** page, each linked database's row menu has **Backups** (this card) and **Restore…**.
+
+## Restore a service from a backup {{ anchor: true, id: 'restore-a-service' }}
+
+Open the service and choose **Restore…** from its actions menu, or open a completed backup and choose **Restore this backup**, which opens the restore page with that backup already selected. You can restore in place (overwrites this database), into a new service, or to a point in time where the engine supports it.
+
+- **Your choices survive a reload.** The storage source, backup and mode are kept in the page address (`?source=<id>&backup=<id>&mode=<mode>`), so a reload or a shared link reopens the same selection.
+- **The restore keeps running if you leave.** The page address includes the run (`?run=<id>`), and reopening the restore page for the database attaches to any restore that is still running. The run shows which backup it is restoring, with a link to it, and the service page shows a banner while a restore is running.
+- **Cancel before it writes data.** A restore can be cancelled while it is still preparing, before it changes any data: the run ends `cancelled` and the database is untouched. Once it starts writing data it can no longer be cancelled, because stopping it then would leave the database partially restored; it runs to completion. The API is `POST /api/restore-runs/{id}/cancel`, which returns `409` once the run is past that point.
+- **One destructive restore at a time.** Starting a second in-place restore while one is running returns `409 Restore Already In Progress`, naming the active run.
+- **Restarts are reconciled.** If Temps restarts mid-restore, the run is marked `interrupted` on the next start, after any restore helper container still running has been stopped. Nothing is rolled back: check the database's health and data before restoring again. See [Troubleshooting](/docs/troubleshooting#restores).
+
+---
+
+## Upgrade a service {{ anchor: true, id: 'upgrade-a-service' }}
+
+To update the Docker image (e.g. from PostgreSQL 17 to 18):
+
+```bash
+curl -X POST "https://your-temps-instance/api/external-services/{id}/upgrade" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "docker_image": "gotempsh/postgres-walg:18-bookworm"
+  }'
+```
+
+Or from the dashboard, go to the service details page and click **Upgrade**.
+
+<Note>
+**Major version upgrades** (e.g. PostgreSQL 16 to 17) may require data migration. Always back up the service before upgrading. For PostgreSQL, major version upgrades typically require a dump and restore — the Docker image swap alone may not be sufficient. The guided PostgreSQL major upgrade first takes a full backup of the service being upgraded to the default S3 source, so it is refused up front when no default S3 source is configured. If that backup fails, nothing is migrated and the error names the backup's cause.
+</Note>

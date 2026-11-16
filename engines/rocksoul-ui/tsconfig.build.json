@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/index.ts",
+    "src/components/molecules/index.ts",
+    "src/components/organisms/index.ts",
+    "src/components/templates/index.ts",
+    "src/components/feedback/index.ts"
+  ],
+  "exclude": ["src/**/*.stories.ts", "src/**/*.stories.tsx"]
+}

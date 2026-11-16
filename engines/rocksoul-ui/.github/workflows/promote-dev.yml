@@ -1,0 +1,68 @@
+name: Promote dev to main
+
+on:
+  workflow_run:
+    workflows: ["UI CI"]
+    types: [completed]
+    branches: [dev]
+
+permissions:
+  actions: write
+  contents: write
+
+concurrency:
+  group: promote-dev-main
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository history
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Fast-forward exact validated dev head
+        id: promote
+        shell: bash
+        env:
+          VALIDATED_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -euo pipefail
+          git fetch --prune origin main dev
+
+          main_sha="$(git rev-parse origin/main)"
+          dev_sha="$(git rev-parse origin/dev)"
+
+          if [ "$dev_sha" != "$VALIDATED_SHA" ]; then
+            echo "dispatch_main_ci=false" >> "$GITHUB_OUTPUT"
+            echo "Successful UI CI run is stale: validated=$VALIDATED_SHA current-dev=$dev_sha"
+            echo "A newer dev head must pass UI CI before promotion."
+            exit 0
+          fi
+
+          if [ "$main_sha" = "$dev_sha" ]; then
+            echo "main and dev are already synchronized at $dev_sha"
+            echo "dispatch_main_ci=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! git merge-base --is-ancestor "$main_sha" "$dev_sha"; then
+            echo "::error::Promotion refused: main ($main_sha) is not an ancestor of validated dev ($dev_sha)."
+            echo "::error::Reconcile main into dev and rerun UI CI; no force push will be attempted."
+            exit 1
+          fi
+
+          git checkout --detach "$dev_sha"
+          git push origin HEAD:main
+          echo "dispatch_main_ci=true" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch exact main UI CI
+        if: steps.promote.outputs.dispatch_main_ci == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run ci.yml --ref main

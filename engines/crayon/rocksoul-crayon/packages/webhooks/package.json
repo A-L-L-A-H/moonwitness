@@ -1,0 +1,7 @@
+{
+  "name": "@rocksoul/webhooks", "version": "1.0.0", "private": true, "type": "module",
+  "main": "./dist/index.js", "types": "./dist/index.d.ts",
+  "scripts": { "dev": "tsx watch src/server.ts", "build": "tsc", "start": "node dist/server.js", "test": "pnpm build && node --test tests/*.test.js", "clean": "rimraf dist" },
+  "dependencies": { "better-sqlite3": "^13.0.3", "fastify": "^5.2.1", "plainjob": "^0.0.14", "standardwebhooks": "^1.1.1", "zod": "^3.25.76" },
+  "devDependencies": { "@rocksoul/tsconfig": "workspace:*", "@types/better-sqlite3": "^7.6.13", "@types/node": "^22.13.10", "rimraf": "^6.0.1", "tsx": "^4.19.3", "typescript": "^5.8.2" }
+}

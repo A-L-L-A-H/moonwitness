@@ -1,0 +1,11 @@
+import { sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { timestampColumns } from '@rocksoul/orm-base';
+
+export const resourceReferences = sqliteTable('resource_references', {
+  id: text('id').primaryKey(), repository: text('repository').notNull(), domain: text('domain').notNull(), recordType: text('record_type').notNull(), recordId: text('record_id').notNull(),
+  canonicalRef: text('canonical_ref').notNull(), resolution: text('resolution', { enum: ['canonical', 'candidate', 'unresolved', 'missing', 'stale'] }).notNull().default('unresolved'),
+  title: text('title'), summary: text('summary'), sourceRevision: text('source_revision'), contentHash: text('content_hash'), etag: text('etag'), metadataJson: text('metadata_json'), lastResolvedAt: text('last_resolved_at'), lastSyncAt: text('last_sync_at'), ...timestampColumns(),
+}, (t) => ({ canonicalRef: uniqueIndex('resource_references_canonical_ref_uq').on(t.canonicalRef), foreignIdentity: uniqueIndex('resource_references_foreign_identity_uq').on(t.repository, t.recordType, t.recordId) }));
+export const resourceSnapshots = sqliteTable('resource_snapshots', { id: text('id').primaryKey(), resourceReferenceId: text('resource_reference_id').notNull().references(() => resourceReferences.id, { onDelete: 'cascade' }), sourceRevision: text('source_revision'), contentHash: text('content_hash'), projectionJson: text('projection_json').notNull(), fetchedAt: text('fetched_at').notNull(), expiresAt: text('expires_at'), createdAt: text('created_at').notNull().$defaultFn(() => new Date().toISOString()) });
+export const resourceSyncStates = sqliteTable('resource_sync_states', { id: text('id').primaryKey(), resourceReferenceId: text('resource_reference_id').notNull().unique().references(() => resourceReferences.id, { onDelete: 'cascade' }), status: text('status', { enum: ['unknown', 'fresh', 'stale', 'syncing', 'failed', 'missing'] }).notNull().default('unknown'), lastAttemptAt: text('last_attempt_at'), lastSuccessAt: text('last_success_at'), lastSourceRevision: text('last_source_revision'), lastErrorCode: text('last_error_code'), lastErrorMessage: text('last_error_message'), retryAfter: text('retry_after'), ...timestampColumns() });
+export type ResourceReference = typeof resourceReferences.$inferSelect; export type NewResourceReference = typeof resourceReferences.$inferInsert;

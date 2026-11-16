@@ -1,0 +1,48 @@
+<div id="tab-overview" class="tab-content active">
+  <div class="grid-2">
+    <!-- Runtime Telemetry Card -->
+    <div class="box-card">
+      <div class="box-header">
+        <h3 class="box-title">🖥️ Runtime Telemetry</h3>
+        <span class="badge badge-green"><%= data.system.platform %> / <%= data.system.architecture %></span>
+      </div>
+      <table>
+        <tbody>
+          <tr><td style="color: var(--text-muted);">Runtime Engine</td><td class="mono"><%= data.system.runtime %></td></tr>
+          <tr><td style="color: var(--text-muted);">Process ID (PID)</td><td class="mono"><%= data.system.processId %></td></tr>
+          <tr><td style="color: var(--text-muted);">RSS Memory</td><td class="mono"><%= data.system.memory.rss %></td></tr>
+          <tr><td style="color: var(--text-muted);">External Memory</td><td class="mono"><%= data.system.memory.external %></td></tr>
+          <tr><td style="color: var(--text-muted);">CPU User Time</td><td class="mono"><%= (data.system.cpu.userMicros / 1000).toFixed(0) %> ms</td></tr>
+          <tr><td style="color: var(--text-muted);">CPU System Time</td><td class="mono"><%= (data.system.cpu.systemMicros / 1000).toFixed(0) %> ms</td></tr>
+          <tr><td style="color: var(--text-muted);">Telemetry Time</td><td class="mono"><%= data.service.telemetryGenerationTime %></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Connected Services Card -->
+    <div class="box-card">
+      <div class="box-header">
+        <h3 class="box-title">⚡ Connected Gateways & Services</h3>
+        <span class="badge badge-blue"><%= data.connectedServices.length %> Services</span>
+      </div>
+      <table>
+        <tbody>
+          <% data.connectedServices.forEach(function(s) { %>
+            <tr>
+              <td>
+                <strong style="color: #fff;"><%= s.name %></strong>
+                <div style="font-size: 12px; color: var(--text-muted);"><%= s.details %></div>
+              </td>
+              <td class="mono" style="font-size: 11px;"><%= s.endpoint %></td>
+              <td>
+                <span class="badge <%= s.status === 'CONNECTED' || s.status === 'OPERATIONAL' ? 'badge-green' : 'badge-blue' %>">
+                  <%= s.status %>
+                </span>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

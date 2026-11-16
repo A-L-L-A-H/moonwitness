@@ -1,0 +1,81 @@
+name: Validate Asset System
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "manifest.json"
+      - "moonwitness/**"
+      - "penpot/**"
+      - "tools/assets/**"
+      - "tools/docs/**"
+      - "tools/generation/**"
+      - "dist/**"
+      - "showcase/**"
+      - "docs/**"
+      - "README.md"
+      - ".github/workflows/**"
+  push:
+    branches: [main]
+    paths:
+      - "manifest.json"
+      - "moonwitness/**"
+      - "penpot/**"
+      - "tools/assets/**"
+      - "tools/docs/**"
+      - "tools/generation/**"
+      - "dist/**"
+      - "showcase/**"
+      - "docs/**"
+      - "README.md"
+      - ".github/workflows/**"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - name: Setup Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+      - name: Setup Python
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: "3.12"
+      - name: Validate all SVG documents as XML
+        run: python tools/assets/validate-svg-xml.py
+      - name: Validate raster/vector pairing and asset contracts
+        run: node tools/assets/validate.mjs
+      - name: Validate registry integrity
+        run: node tools/assets/validate-registry-integrity.mjs
+      - name: Validate research-domain ownership visual
+        run: node tools/assets/generate-domain-ownership-visual.mjs --check
+      - name: Validate LAW applicability visual
+        run: node tools/assets/generate-legal-intelligence-visual.mjs --check
+      - name: Validate showcase JavaScript syntax
+        run: node --check showcase/showcase.js
+      - name: Validate showcase delivery coverage
+        run: node tools/assets/validate-showcase-coverage.mjs
+      - name: Validate visual asset classification
+        run: node tools/assets/validate-classification.mjs
+      - name: Validate Visual System V2 migration freshness
+        run: python tools/assets/generate_visual_system_v2_migration.py --check
+      - name: Validate Visual System V2 audit freshness
+        run: |
+          node tools/assets/generate-visual-system-v2-audit.mjs --check
+          node tools/assets/validate-visual-system.mjs
+      - name: Validate semantic primitive contract
+        run: node tools/assets/validate-primitives.mjs
+      - name: Validate documentation state
+        run: node tools/docs/validate-docs.mjs
+      - name: Validate workflow branch and runtime policy
+        run: |
+          node tools/ci/validate-branch-policy.mjs
+          node tools/ci/validate-action-runtimes.mjs
+      - name: Validate generation ownership
+        run: node tools/generation/validate-freshness.mjs

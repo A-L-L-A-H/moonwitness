@@ -1,0 +1,147 @@
+{
+  "schema_version": "rocksoul.steward-topology.v1",
+  "mode": "BOOTSTRAP",
+  "canonical_branch": "main",
+  "max_scheduled_slots": 5,
+  "principle": "SHARE THE CLOCK. NEVER SHARE THE CANONICAL MIND.",
+  "bootstrap_policy": {
+    "rationale": "Early-stage ROCKSOUL research corpora are still sparse. All five intelligence slots run hourly to accelerate discovery, routing, and reviewable corpus growth without automatic canonicalization.",
+    "exit_condition": "Reassess cadence only after all research domains have healthy non-duplicate queues, meaningful canonical baseline coverage, and source/geographic diversity. Do not auto-downgrade cadence from a single count threshold.",
+    "no_churn_guard": "Hourly execution may return NO_UPDATE when no meaningful lead, queue item, change, freshness event, CI issue, or ownership action exists."
+  },
+  "slots": [
+    {
+      "slot": 1,
+      "id": "ecosystem-bootstrap",
+      "minute_offset": 0,
+      "cadence": "HOURLY",
+      "operator_repository": "rocksoul-crayon",
+      "role": "ECOSYSTEM_ROUTING",
+      "canonical_domain": null,
+      "max_new_leads_per_run": 3,
+      "responsibilities": [
+        "main-head-health",
+        "ci-health",
+        "cross-repo-freshness",
+        "global-discovery-dedup",
+        "domain-routing",
+        "ownership-drift"
+      ],
+      "canonical_write": false
+    },
+    {
+      "slot": 2,
+      "id": "story-history-bootstrap",
+      "minute_offset": 10,
+      "cadence": "HOURLY",
+      "shared_clock": true,
+      "context_isolation": "REQUIRED",
+      "passes": [
+        {
+          "order": 1,
+          "domain": "STORY",
+          "repository": "rocksoul-mftl",
+          "max_new_leads_per_run": 1
+        },
+        {
+          "order": 2,
+          "domain": "EVENT",
+          "repository": "rocksoul-legend",
+          "max_new_leads_per_run": 1
+        }
+      ],
+      "canonical_write": "OWNER_REPOSITORY_ONLY"
+    },
+    {
+      "slot": 3,
+      "id": "attestation-bootstrap",
+      "minute_offset": 20,
+      "cadence": "HOURLY",
+      "shared_clock": true,
+      "context_isolation": "REQUIRED",
+      "passes": [
+        {
+          "order": 1,
+          "domain": "TEXT",
+          "repository": "rocksoul-rgbl",
+          "max_new_leads_per_run": 1
+        },
+        {
+          "order": 2,
+          "domain": "PERSON",
+          "repository": "rocksoul-superhero",
+          "max_new_leads_per_run": 1
+        }
+      ],
+      "canonical_write": "OWNER_REPOSITORY_ONLY"
+    },
+    {
+      "slot": 4,
+      "id": "law-bootstrap",
+      "minute_offset": 30,
+      "cadence": "HOURLY",
+      "dedicated": true,
+      "domain": "LAW",
+      "repository": "rocksoul-aws",
+      "max_new_leads_per_run": 1,
+      "canonical_write": "OWNER_REPOSITORY_ONLY"
+    },
+    {
+      "slot": 5,
+      "id": "perspective-bootstrap",
+      "minute_offset": 40,
+      "cadence": "HOURLY",
+      "dedicated": true,
+      "domain": "PERSPECTIVE",
+      "repository": "rocksoul-jizz",
+      "max_new_leads_per_run": 2,
+      "canonical_write": "OWNER_REPOSITORY_ONLY"
+    }
+  ],
+  "relationship_layer": {
+    "domain": "RELATIONSHIP",
+    "repository": "rocksoul-correlation",
+    "scheduled_slot": false,
+    "mode": "EVENT_DRIVEN_REVIEW",
+    "triggers": [
+      "domain-research-proposes-relation",
+      "canonical-or-candidate-ref-created-or-changed",
+      "support-or-counterevidence-change",
+      "foreign-ref-freshness-change"
+    ],
+    "guardrail": "DISCOVERY OR SIMILARITY MUST NOT AUTO-PUBLISH A CORRELATION EDGE"
+  },
+  "ownership": {
+    "STORY": "rocksoul-mftl",
+    "EVENT": "rocksoul-legend",
+    "PERSON": "rocksoul-superhero",
+    "TEXT": "rocksoul-rgbl",
+    "LAW": "rocksoul-aws",
+    "PERSPECTIVE": "rocksoul-jizz",
+    "RELATIONSHIP": "rocksoul-correlation"
+  },
+  "research_issue_contract": {
+    "schema_version": "rocksoul.research-issue.v1",
+    "path": "contracts/research-issue-contract.v1.json",
+    "issue_first_required": true,
+    "title_prefixes": [
+      "[AUTO-RESEARCH]",
+      "[RESEARCH]"
+    ],
+    "generic_machine_metadata_required": true,
+    "visual_header_from": "rocksoul-assets/main"
+  },
+  "secondary_automation_policy": {
+    "scheduled_intelligence_slots": 5,
+    "intelligence_cadence": "HOURLY_STAGGERED",
+    "deterministic_provider_jobs_consume_steward_slot": false,
+    "provider_asymmetry_allowed": true,
+    "issue_first_required": true,
+    "rule": "Domain-specific scouts/monitors may differ in provider and cadence, but every discovered research lead must enter the canonical owner repository through ROCKSOUL Research Issue Contract v1 before candidate or canonical promotion.",
+    "examples": {
+      "PERSPECTIVE": "JIZZ GDELT broad-discovery fallback may run separately from the hourly Steward.",
+      "STORY": "MFTL scholarly Scout may use OpenAlex/Crossref without changing STORY ownership or issue flow.",
+      "LAW": "AWS deterministic official-source/freshness monitors may poll independently; legal interpretation remains Steward-gated."
+    }
+  }
+}

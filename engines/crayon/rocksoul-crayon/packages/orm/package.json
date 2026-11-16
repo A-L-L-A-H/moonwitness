@@ -1,0 +1,53 @@
+{
+  "name": "@rocksoul/orm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:migrate": "tsx src/migrate.ts",
+    "seed": "tsx src/seed.ts",
+    "test:operational": "tsx tests/operational-migrations.test.ts",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.18.0",
+    "@rocksoul/orm-base": "workspace:*",
+    "@rocksoul/orm-project": "workspace:*",
+    "@rocksoul/orm-task": "workspace:*",
+    "@rocksoul/orm-calendar": "workspace:*",
+    "@rocksoul/orm-chat": "workspace:*",
+    "@rocksoul/orm-faq": "workspace:*",
+    "@rocksoul/orm-landing": "workspace:*",
+    "@rocksoul/orm-mail": "workspace:*",
+    "@rocksoul/orm-services": "workspace:*",
+    "@rocksoul/orm-resource": "workspace:*",
+    "@rocksoul/orm-case": "workspace:*",
+    "@rocksoul/orm-review": "workspace:*",
+    "@rocksoul/orm-file": "workspace:*",
+    "@rocksoul/orm-notification": "workspace:*",
+    "@rocksoul/orm-research": "workspace:*",
+    "@rocksoul/orm-annotation": "workspace:*",
+    "@rocksoul/orm-activity": "workspace:*",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@rocksoul/tsconfig": "workspace:*",
+    "@types/node": "^22.13.9",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}
