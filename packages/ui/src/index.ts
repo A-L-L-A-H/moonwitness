@@ -86,6 +86,16 @@ export {
   type CollectionItem,
 } from "./composites/collections-grid";
 export { WorldMap, type WorldMapProps, type MapCityItem } from "./composites/world-map";
+export {
+  TopRail,
+  SideRail,
+  CommandStrip,
+  CornerBrackets,
+  Gauge,
+  type HudNavItem,
+  type HudLinkComponent,
+} from "./primitives/hud-chrome";
+export { ConsoleShell, type ConsoleShellProps } from "./composites/console-shell";
 
 /* shadcn/ui compatible components */
 export { Button, type ButtonProps } from "./components/ui/button";
