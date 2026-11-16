@@ -5,18 +5,12 @@ import Link from "next/link";
 import { ArrowRight, CassetteTape, Star4 } from "@moonwitness/ui/icons";
 import { DistressedSticker, Grain, Staple, TactileTape } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
-import { useScrollReveal } from "@/lib/motion/use-scroll-reveal";
 
 export function Transmission() {
-  const [ref, visible] = useScrollReveal(0.1, "0px 0px -40px 0px");
-
   return (
     <section
       id="transmission"
-      ref={ref}
-      className={`relative scroll-mt-20 overflow-hidden border-y-2 border-[var(--line)] bg-[var(--ink)] py-16 transition-opacity duration-700 motion-reduce:opacity-100 motion-reduce:transition-none md:py-20 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
+      className="relative scroll-mt-20 overflow-hidden border-y-2 border-[var(--line)] bg-[var(--ink)] py-16 md:py-20"
     >
       <Grain />
       <div

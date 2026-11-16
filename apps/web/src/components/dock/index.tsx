@@ -309,10 +309,7 @@ export function Dock() {
           relatedEvents={relatedEvents}
           shareUrl={shareUrl}
           onRelated={selectEvent}
-          onClose={() => {
-            setDrawerOpen(false);
-            updateSearchParams({ event: null });
-          }}
+          onClose={() => setDrawerOpen(false)}
         />
       )}
 
