@@ -190,32 +190,39 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
 export function FourCorpusAndWhcmtPanel() {
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-      {/* Four-Corpus Policy */}
-      <div className="lg:col-span-7 border border-[#d6b46c]/25 bg-[#070910] p-5 space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2">
+      {/* Four-Corpus Policy — Balanced Neutral Representation */}
+      <div className="lg:col-span-7 border border-[#d6b46c]/25 bg-[#070910] p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
           <span className="font-monument text-sm tracking-[0.16em] text-[#f5e3b8] uppercase">
-            FOUR-CORPUS POLICY ({FOUR_CORPUS_POLICY.sourceRepo})
+            FOUR SCRIPTURAL WITNESSES ({FOUR_CORPUS_POLICY.sourceRepo})
           </span>
-          <span className="font-mono text-[10px] text-[#f5dfa6]">
+          <span className="font-mono text-[10.5px] text-[#f5dfa6]">
             {FOUR_CORPUS_POLICY.invariant}
           </span>
         </div>
-        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+        <p className="border-l-2 border-[#dfc07b]/60 pl-3 font-serif text-xs sm:text-sm leading-relaxed text-[#e6decb]">
+          {FOUR_CORPUS_POLICY.neutralityPrinciple}
+        </p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {FOUR_CORPUS_POLICY.corpora.map((corpus) => (
-            <div
-              key={corpus.code}
-              className={`border p-3 ${
-                corpus.code === "SRC-QUR"
-                  ? "border-[#e6c987]/55 bg-[#0e1320]"
-                  : "border-[#d6b46c]/20 bg-[#0a0d16]"
-              }`}
-            >
-              <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+            <div key={corpus.code} className="border border-[#d6b46c]/25 bg-[#0a0d16] p-3.5">
+              <div className="flex items-center justify-between font-mono text-[10.5px] text-[#dfc07b]">
                 <span>{corpus.code}</span>
-                <span>{corpus.epistemicRole}</span>
+                <span>{corpus.classicalLanguage}</span>
               </div>
-              <div className="font-monument mt-1 text-sm text-[#fff6df]">{corpus.name}</div>
-              <p className="mt-1 text-xs text-[#cfc5b0]">{corpus.invariant}</p>
+              <div className="mt-1 flex items-baseline justify-between gap-2">
+                <div className="font-monument text-sm text-[#fff6df]">{corpus.name}</div>
+                <div className="font-mono text-[10px] text-[#f5dfa6]">{corpus.prophetAnchor}</div>
+              </div>
+              <div className="mt-1 font-mono text-[10px] text-[#cfc5b0] uppercase">
+                {corpus.epistemicRole}
+              </div>
+              <p className="mt-1.5 font-serif text-xs text-[#e6decb] leading-relaxed">
+                {corpus.neutralSummary}
+              </p>
+              <p className="mt-2 border-t border-[#d6b46c]/15 pt-1.5 text-[11px] text-[#cfc5b0]">
+                {corpus.invariant}
+              </p>
             </div>
           ))}
         </div>
@@ -227,9 +234,9 @@ export function FourCorpusAndWhcmtPanel() {
           WHCMT MATRIX vs BASS-HUNTER BOUNDARY
         </div>
         <div className="border border-[#d6b46c]/25 bg-[#0a0d16] p-3">
-          <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+          <div className="flex items-center justify-between font-mono text-[10.5px] text-[#dfc07b]">
             <span>{WHCMT_VS_BASSHUNTER_SPEC.whcmt.code} (2×4 MATRIX)</span>
-            <span>conversations-002[69]</span>
+            <span>Recovered Matrix Spec</span>
           </div>
           <div className="mt-1 font-serif text-xs text-[#fff6df]">
             {WHCMT_VS_BASSHUNTER_SPEC.whcmt.expansion}

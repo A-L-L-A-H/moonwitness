@@ -1,7 +1,17 @@
 export type ServiceHealthState = "online" | "degraded" | "offline";
+export type EcosystemRuntimeMode = "local-node" | "cloudflare-edge";
 
 export interface EcosystemServiceStatus {
   readonly id: "web" | "api" | "arsy" | "memory";
+  readonly name: string;
+  readonly url: string;
+  readonly status: ServiceHealthState;
+  readonly httpStatus: number | null;
+  readonly latencyMs: number | null;
+}
+
+export interface EcosystemEdgeStatus {
+  readonly id: "codex-edge" | "community";
   readonly name: string;
   readonly url: string;
   readonly status: ServiceHealthState;
@@ -20,11 +30,13 @@ export interface EcosystemGitStatus {
 
 export interface EcosystemSnapshot {
   readonly generatedAt: string;
+  readonly runtimeMode: EcosystemRuntimeMode;
   readonly status: "online" | "offline";
   readonly databaseStatus: string | null;
   readonly timelineTotal: number | null;
   readonly erasCount: number | null;
   readonly services: readonly EcosystemServiceStatus[];
+  readonly edges: readonly EcosystemEdgeStatus[];
   readonly git: EcosystemGitStatus;
 }
 
@@ -33,14 +45,43 @@ export type GitRunnerLike = (args: readonly string[]) => Promise<string | null>;
 
 const PROBE_TIMEOUT_MS = 1200;
 
-interface ProbeTarget {
-  readonly id: EcosystemServiceStatus["id"];
+interface ProbeTarget<TId extends string> {
+  readonly id: TId;
   readonly name: string;
   readonly displayUrl: string;
   readonly probeUrl: string;
 }
 
-function buildProbeTargets(): readonly ProbeTarget[] {
+function isCloudflareWorkersRuntime(): boolean {
+  const userAgent =
+    typeof navigator !== "undefined" && typeof navigator.userAgent === "string"
+      ? navigator.userAgent
+      : "";
+  if (userAgent.includes("Cloudflare-Workers")) {
+    return true;
+  }
+  if (typeof (globalThis as { WebSocketPair?: unknown }).WebSocketPair === "function") {
+    return true;
+  }
+  return (globalThis as { caches?: { default?: unknown } }).caches?.default !== undefined;
+}
+
+function isNodeRuntime(): boolean {
+  if (isCloudflareWorkersRuntime()) {
+    return false;
+  }
+  return (
+    typeof process !== "undefined" &&
+    Boolean(process.versions?.node) &&
+    typeof process.cwd === "function"
+  );
+}
+
+function isLoopbackUrl(url: string): boolean {
+  return /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?(\/|$)/i.test(url);
+}
+
+function buildProbeTargets(): readonly ProbeTarget<EcosystemServiceStatus["id"]>[] {
   const webBase = (process.env.WEB_INTERNAL_URL ?? "http://127.0.0.1:3000").replace(/\/+$/, "");
   const apiBase = (process.env.API_INTERNAL_URL ?? "http://127.0.0.1:3002").replace(/\/+$/, "");
   const arsyBase = (process.env.ARSY_URL ?? "http://127.0.0.1:8787").replace(/\/+$/, "");
@@ -64,12 +105,25 @@ function buildProbeTargets(): readonly ProbeTarget[] {
   ];
 }
 
+function buildEdgeTargets(): readonly ProbeTarget<EcosystemEdgeStatus["id"]>[] {
+  return [
+    {
+      id: "codex-edge",
+      name: "Sovereign Codex Edge",
+      displayUrl: "https://codex.a-l-l-a-h.com",
+      probeUrl: "https://codex.a-l-l-a-h.com/",
+    },
+    {
+      id: "community",
+      name: "Rocksoul Community",
+      displayUrl: "https://community.moonwitness.biz.id",
+      probeUrl: "https://community.moonwitness.biz.id/",
+    },
+  ];
+}
+
 async function defaultGitRunner(args: readonly string[]): Promise<string | null> {
-  if (
-    typeof process === "undefined" ||
-    !process.versions?.node ||
-    typeof process.cwd !== "function"
-  ) {
+  if (!isNodeRuntime()) {
     return null;
   }
   try {
@@ -129,10 +183,29 @@ export async function probeLocalGit(
   };
 }
 
-async function probeServiceTarget(
-  target: ProbeTarget,
+async function probeTarget<TId extends string>(
+  target: ProbeTarget<TId>,
   fetchFn: FetchLike,
-): Promise<EcosystemServiceStatus> {
+  skipLoopbackOnEdge: boolean,
+): Promise<{
+  readonly id: TId;
+  readonly name: string;
+  readonly url: string;
+  readonly status: ServiceHealthState;
+  readonly httpStatus: number | null;
+  readonly latencyMs: number | null;
+}> {
+  // Cloudflare Workers edge isolates cannot connect to origin 127.0.0.1 services (egress returns 403).
+  if (skipLoopbackOnEdge && isLoopbackUrl(target.probeUrl)) {
+    return {
+      id: target.id,
+      name: target.name,
+      url: target.displayUrl,
+      status: "offline",
+      httpStatus: null,
+      latencyMs: null,
+    };
+  }
   const startedAt = Date.now();
   try {
     const response = await fetchFn(target.probeUrl, {
@@ -160,7 +233,14 @@ async function probeServiceTarget(
   }
 }
 
-async function fetchJsonSafe(fetchFn: FetchLike, url: string): Promise<unknown> {
+async function fetchJsonSafe(
+  fetchFn: FetchLike,
+  url: string,
+  skipLoopbackOnEdge: boolean,
+): Promise<unknown> {
+  if (skipLoopbackOnEdge && isLoopbackUrl(url)) {
+    return null;
+  }
   try {
     const response = await fetchFn(url, {
       cache: "no-store",
@@ -176,18 +256,25 @@ async function fetchJsonSafe(fetchFn: FetchLike, url: string): Promise<unknown> 
 export async function probeEcosystemHealth(options?: {
   readonly fetchFn?: FetchLike;
   readonly gitRunner?: GitRunnerLike;
+  readonly runtimeMode?: EcosystemRuntimeMode;
 }): Promise<EcosystemSnapshot> {
   const fetchFn = options?.fetchFn ?? ((input: string, init?: RequestInit) => fetch(input, init));
   const gitRunner = options?.gitRunner ?? defaultGitRunner;
+  const runtimeMode: EcosystemRuntimeMode =
+    options?.runtimeMode ?? (isNodeRuntime() ? "local-node" : "cloudflare-edge");
+  const skipLoopbackOnEdge = !options?.fetchFn && runtimeMode === "cloudflare-edge";
+
   const targets = buildProbeTargets();
+  const edgeTargets = buildEdgeTargets();
   const apiBase = targets.find((item) => item.id === "api")!.displayUrl;
 
-  const [services, git, readyPayload, statsPayload, erasPayload] = await Promise.all([
-    Promise.all(targets.map((target) => probeServiceTarget(target, fetchFn))),
+  const [services, edges, git, readyPayload, statsPayload, erasPayload] = await Promise.all([
+    Promise.all(targets.map((target) => probeTarget(target, fetchFn, skipLoopbackOnEdge))),
+    Promise.all(edgeTargets.map((target) => probeTarget(target, fetchFn, false))),
     probeLocalGit(gitRunner),
-    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/readyz`),
-    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/stats`),
-    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/eras`),
+    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/readyz`, skipLoopbackOnEdge),
+    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/stats`, skipLoopbackOnEdge),
+    fetchJsonSafe(fetchFn, `${apiBase}/api/v1/timeline/eras`, skipLoopbackOnEdge),
   ]);
 
   const apiService = services.find((item) => item.id === "api");
@@ -215,11 +302,13 @@ export async function probeEcosystemHealth(options?: {
 
   return {
     generatedAt: new Date().toISOString(),
+    runtimeMode,
     status: apiOnline ? "online" : "offline",
     databaseStatus,
     timelineTotal,
     erasCount,
     services,
+    edges,
     git,
   };
 }

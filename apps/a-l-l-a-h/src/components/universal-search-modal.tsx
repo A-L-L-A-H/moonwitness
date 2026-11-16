@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CODEX_SEARCH_INDEX, type EntryDoorId } from "@/data/empire-canon-codex";
+import {
+  CODEX_SEARCH_INDEX,
+  FOUR_CORPUS_POLICY,
+  type EntryDoorId,
+} from "@/data/empire-canon-codex";
 import {
   SIDRA_KNOWLEDGE_AXIOMS,
   WORLD_DOMAINS,
@@ -72,6 +76,15 @@ export function UniversalSearchModal({
       entry.repoSource.toLowerCase().includes(normalizedQuery),
   );
 
+  const matchingScriptures = FOUR_CORPUS_POLICY.corpora.filter(
+    (corpus) =>
+      !normalizedQuery ||
+      corpus.name.toLowerCase().includes(normalizedQuery) ||
+      corpus.prophetAnchor.toLowerCase().includes(normalizedQuery) ||
+      corpus.ethicalCore.toLowerCase().includes(normalizedQuery) ||
+      corpus.neutralSummary.toLowerCase().includes(normalizedQuery),
+  );
+
   const matchingAxioms = SIDRA_KNOWLEDGE_AXIOMS.filter(
     (axiom) =>
       !normalizedQuery ||
@@ -100,7 +113,7 @@ export function UniversalSearchModal({
               autoFocus
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Search Worlds, Names of Allah, SRGBL v8, 100CENTER, OX-DX..."
+              placeholder="Search Worlds, Taurat/Zabur/Injīl/Al-Qur’ān, Attributes, SRGBL v8..."
               aria-label="Search query"
               className="font-sans w-full bg-transparent text-sm sm:text-base text-[#fff6df] placeholder-[#a79d86] focus:outline-none"
             />
@@ -146,7 +159,39 @@ export function UniversalSearchModal({
           {onJumpToRemembrance && (
             <div>
               <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
-                REMEMBRANCE &amp; AL-ASMĀ’ AL-ḤUSNĀ ({matchingNames.length})
+                FOUR REVEALED SCRIPTURES ({matchingScriptures.length})
+              </div>
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {matchingScriptures.map((corpus) => (
+                  <button
+                    key={corpus.code}
+                    type="button"
+                    onClick={() => {
+                      onNavigateToDoor("epistemic-corpus");
+                      onClose();
+                    }}
+                    className="min-h-[44px] border border-[#d6b46c]/20 bg-[#0b0e18] p-3 text-left hover:border-[#e6c987] transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between font-mono text-[10px] text-[#dfc07b]">
+                      <span>{corpus.code}</span>
+                      <span>{corpus.prophetAnchor}</span>
+                    </div>
+                    <div className="font-monument mt-0.5 text-xs tracking-[0.1em] text-[#fff6df]">
+                      {corpus.name}
+                    </div>
+                    <div className="font-sans text-[11px] text-[#cfc5b0] truncate">
+                      {corpus.ethicalCore}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {onJumpToRemembrance && (
+            <div>
+              <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+                CONTEMPLATIVE ATTRIBUTES ({matchingNames.length})
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {matchingNames.map((entry) => (

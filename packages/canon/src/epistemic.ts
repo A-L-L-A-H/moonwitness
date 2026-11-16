@@ -185,32 +185,57 @@ export const P18_KEY_WITNESS_SPEC = {
 
 export const FOUR_CORPUS_POLICY = {
   invariant: "REVEALED SOURCE CATEGORY ≠ EXTANT TEXTUAL WITNESS",
+  neutralityPrinciple:
+    "All four revealed books trace to One Creator (ALLAH). Comparative inquiry evaluates textual witnesses without sectarian supremacy, honors conscience without compulsion (QS 2:256), and enforces zero ranking among faith communities.",
   sourceRepo: "bjo163/propetic",
   corpora: [
     {
-      code: "SRC-QUR",
-      name: "AL-QURAN",
-      epistemicRole: "Muhaimin core & normative criterion",
-      invariant: "Primary canonical preservation reference; zero claim of new revelation.",
-    },
-    {
       code: "SRC-TOR",
       name: "TAURAT",
-      epistemicRole: "Supplementary textual witness",
+      prophetAnchor: "Mūsā (Moses)",
+      classicalLanguage: "Hebrew / Aramaic",
+      ethicalCore: "Covenant Law, Justice & Liberation of the Oppressed",
+      epistemicRole: "Revealed Law & Witness Premise",
+      neutralSummary:
+        "Establishes accountable moral law, equitable measure (Qisṭās), and steadfast solidarity against tyranny.",
       invariant:
-        "Evaluated through witness provenance and never equated raw with extant redactions.",
+        "Evaluated through manuscript provenance and never equated uncritically with later redactions.",
     },
     {
       code: "SRC-ZAB",
       name: "ZABUR",
-      epistemicRole: "Supplementary textual witness",
-      invariant: "Distinguish liturgical psalm witnesses from categorical revealed archetype.",
+      prophetAnchor: "Dāwūd (David)",
+      classicalLanguage: "Hebrew",
+      ethicalCore: "Psalms, Gratitude & Conscience in Leadership",
+      epistemicRole: "Revealed Song & Devotional Premise",
+      neutralSummary:
+        "Models unfeigned gratitude, penitent humility (Ḥukm bil-Ḥaqq), and honest accountability under trial.",
+      invariant:
+        "Distinguishes liturgical psalm compilations and poetic transmission from revealed archetype.",
     },
     {
       code: "SRC-INJ",
       name: "INJIL",
-      epistemicRole: "Supplementary textual witness",
-      invariant: "Distinguish gospel manuscript variants from prophetic source premise.",
+      prophetAnchor: "ʿĪsā (Jesus)",
+      classicalLanguage: "Aramaic / Koine Greek",
+      ethicalCore: "Mercy, Forgiveness & Living Renewal",
+      epistemicRole: "Revealed Mercy & Witness Premise",
+      neutralSummary:
+        "Calls humanity past mechanical formalism toward compassion, healing humility (Shifāʾ), and peacemaking.",
+      invariant:
+        "Examines synoptic correspondences and gospel manuscript variants alongside primary prophetic premise.",
+    },
+    {
+      code: "SRC-QUR",
+      name: "AL-QURAN",
+      prophetAnchor: "Muḥammad ﷺ",
+      classicalLanguage: "Arabic",
+      ethicalCore: "Criterion (Furqān), Preservation & Reconciliation",
+      epistemicRole: "Muhaimin Reference & Comparative Criterion",
+      neutralSummary:
+        "Affirms earlier revealed messengers and stands as preserved Arabic reference upholding zero coercion in faith (QS 2:256 · QS 5:48).",
+      invariant:
+        "Primary preserved recitation for cross-witness verification; zero claim of new prophecy after revelation.",
     },
   ] as readonly CorpusAuthorityEntry[],
 } as const;
@@ -219,7 +244,7 @@ export const WHCMT_VS_BASSHUNTER_SPEC = {
   whcmt: {
     code: "WHCMT",
     expansion: "Weighted Hierarchical Constellation Matrix Transformation",
-    source: "Z:\\.raw_archives\\chatgpt_mohrezzafahlevi\\conversations-002.json[69]",
+    source: "Canon Research Ledger (Archive Transcript #002 §69)",
     matrixTopRow: ["1", "3", "4", "5"] as const,
     matrixBottomRow: ["2", "6", "7", "8"] as const,
     role: "Working 2×4 constellation transformation matrix kept distinct from BASS-HUNTER.",

@@ -8,6 +8,7 @@ import {
   CROSS_REPO_TOPOLOGY_ATLAS,
   DHGS_13_STEPS,
   DX_MANGA_FOUR_PANELS,
+  ECOSYSTEM_RUNTIME_CATALOG,
   EIGHT_STORY_ERAS,
   EPISTEMIC_FEDERATION_DOMAINS,
   FIFTEEN_STORY_EPISODES,
@@ -86,6 +87,15 @@ describe("@moonwitness/canon SSOT invariants", () => {
     expect(P18_KEY_WITNESS_SPEC.relations12).toHaveLength(12);
     expect(P18_KEY_WITNESS_SPEC.mandatoryFrameDimensions5).toHaveLength(5);
     expect(FOUR_CORPUS_POLICY.corpora).toHaveLength(4);
+    expect(FOUR_CORPUS_POLICY.corpora.map((c) => c.code)).toEqual([
+      "SRC-TOR",
+      "SRC-ZAB",
+      "SRC-INJ",
+      "SRC-QUR",
+    ]);
+    expect(FOUR_CORPUS_POLICY.neutralityPrinciple.toLowerCase()).toContain("zero ranking");
+    expect(ECOSYSTEM_RUNTIME_CATALOG.liveEdges.length).toBeGreaterThanOrEqual(3);
+    expect(ECOSYSTEM_RUNTIME_CATALOG.workspaceNodes.length).toBeGreaterThanOrEqual(6);
     expect(WHCMT_VS_BASSHUNTER_SPEC.bassHunter.scoringStatus).toBe("UNKNOWN");
   });
 

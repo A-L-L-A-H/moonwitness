@@ -161,8 +161,29 @@ export interface KeyWitnessFamily {
 export interface CorpusAuthorityEntry {
   readonly code: "SRC-QUR" | "SRC-TOR" | "SRC-ZAB" | "SRC-INJ";
   readonly name: string;
+  readonly prophetAnchor: string;
+  readonly classicalLanguage: string;
+  readonly ethicalCore: string;
   readonly epistemicRole: string;
+  readonly neutralSummary: string;
   readonly invariant: string;
+}
+
+export interface EcosystemEdgeNode {
+  readonly id: "sanctuary" | "codex-edge" | "community";
+  readonly hostname: string;
+  readonly url: string;
+  readonly workerName: string;
+  readonly layer: string;
+  readonly role: string;
+}
+
+export interface EcosystemWorkspaceNode {
+  readonly workspacePath: string;
+  readonly name: string;
+  readonly stack: string;
+  readonly dnaWorld: string;
+  readonly responsibility: string;
 }
 
 export interface PrimeCodeAxiom {

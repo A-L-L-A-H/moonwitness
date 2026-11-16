@@ -192,17 +192,18 @@ export function RemembranceSanctuary({
           <div dir="rtl" lang="ar" className="text-2xl sm:text-3xl text-[#f5dfa6] tracking-wide">
             بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
           </div>
-          <div className="mt-3 flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] text-[#d6b46c] uppercase">
+          <div className="mt-3 flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] text-[#dfc07b] uppercase">
             <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d6b46c]" />
-            <span>MĪZĀN AL-QALB · SANCTUARY OF REMEMBRANCE</span>
+            <span>MĪZĀN AL-QALB · CONTEMPLATIVE STILLNESS</span>
             <span className="h-px w-8 bg-gradient-to-l from-transparent to-[#d6b46c]" />
           </div>
           <h3 className="font-monument mt-3 text-2xl sm:text-3xl tracking-[0.16em] text-gold-gradient uppercase">
-            REMEMBRANCE, GRATITUDE &amp; STILLNESS
+            CONTEMPLATION, GRATITUDE &amp; STILLNESS
           </h3>
-          <p className="mt-2.5 max-w-2xl font-serif text-base text-[#e2dac7]/90 leading-relaxed">
-            A quiet chamber dedicated solely to Al-Khāliq—reflecting on His Beautiful Names, marking
-            peaceful remembrance, and aligning intention before every act of creation.
+          <p className="mt-2.5 max-w-2xl font-serif text-base text-[#e6decb] leading-relaxed">
+            A quiet, non-sectarian chamber honoring One Creator—reflecting on universal virtues of
+            Light, Mercy, Wisdom, Gratitude, and Peace while centering conscience before every act
+            of building.
           </p>
         </div>
       </ScrollChapterReveal>
@@ -213,10 +214,10 @@ export function RemembranceSanctuary({
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="font-mono text-[11px] tracking-[0.2em] text-[#dfc07b] uppercase">
-                AL-ASMĀ’ AL-ḤUSNĀ · LUMINOUS CONTEMPLATIONS (9 OF 99)
+                UNIVERSAL ATTRIBUTES · LUMINOUS CONTEMPLATIONS (9 OF 99)
               </span>
-              <span className="font-mono text-[10px] text-[#a79d86]">
-                MONOCENTRIC TAWHID · ZERO IDOLS
+              <span className="font-mono text-[10.5px] text-[#cfc5b0]">
+                MONOCENTRIC UNITY · ZERO HUMAN IDOLS
               </span>
             </div>
 
@@ -510,16 +511,16 @@ export function RemembranceSanctuary({
                   </div>
                   <div className="relative z-10 mt-1 font-mono text-2xl font-semibold text-[#fff8e6]">
                     {beadCount}
-                    <span className="text-xs text-[#9f9580]"> / 33</span>
+                    <span className="text-xs text-[#cfc5b0]"> / 33</span>
                   </div>
                   <div className="relative z-10 mt-1 inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.18em] text-[#dfc07b] uppercase">
-                    <DiamondStarOrnament className="h-2.5 w-2.5" /> RECITE
+                    <DiamondStarOrnament className="h-2.5 w-2.5" /> PAUSE &amp; REFLECT
                   </div>
                 </button>
               </div>
 
               <p className="mt-3 font-serif text-sm text-[#e6decb]">{activePhrase.translation}</p>
-              <p className="mt-1 text-xs text-[#a79d86]">{activePhrase.heartFocus}</p>
+              <p className="mt-1 text-xs text-[#cfc5b0]">{activePhrase.heartFocus}</p>
               {breathActive && (
                 <div
                   role="status"
@@ -535,7 +536,7 @@ export function RemembranceSanctuary({
                   aria-live="polite"
                   className="mt-2 border border-[#fff4d2]/55 bg-[#d6b46c]/20 px-3 py-1 font-mono text-[11px] text-[#fff8e6]"
                 >
-                  Alḥamdulillāh · 33-Bead Cycle Sealed ({cyclesCompleted} total)
+                  33-Bead Contemplation Cycle Sealed ({cyclesCompleted} total)
                 </div>
               )}
             </div>

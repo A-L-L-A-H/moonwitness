@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { COVENANT_PILLARS, type WorldIdentifier } from "@/data/empire-registry";
+import { FourScripturesSanctum } from "./four-scriptures-sanctum";
 import {
   MagneticPortal,
   ScrollChapterReveal,
@@ -18,6 +19,7 @@ export function CovenantAboutSection({
   onReplayEntrance,
   onToggleQuietMode,
   onSelectWorld,
+  onInspectCorpusDoor,
   onReturnToGate,
 }: {
   readonly quietMode?: boolean;
@@ -25,6 +27,7 @@ export function CovenantAboutSection({
   readonly onReplayEntrance?: () => void;
   readonly onToggleQuietMode?: () => void;
   readonly onSelectWorld?: (worldId: WorldIdentifier) => void;
+  readonly onInspectCorpusDoor?: () => void;
   readonly onReturnToGate: () => void;
 }) {
   const [focusedPillar, setFocusedPillar] = useState<string>(COVENANT_PILLARS[0]?.numeral ?? "I");
@@ -50,9 +53,9 @@ export function CovenantAboutSection({
             >
               ARCHITECTURE OF THE LIGHT
             </h2>
-            <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[#dfd6c3]/90">
-              A-L-L-A-H.COM is designed as a luminous sanctuary where remembrance, rigorous
-              knowledge, and masterful creation converge into a single harmonious civilization.
+            <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[#e6decb]">
+              A neutral, monocentric gateway uniting honest witness, comparative study across
+              revealed scriptures, and principled craft without cult or coercion.
             </p>
           </div>
         </ScrollChapterReveal>
@@ -109,7 +112,10 @@ export function CovenantAboutSection({
           </div>
         </ScrollChapterReveal>
 
-        {/* Sanctuary of Remembrance, 9 Luminous Attributes, Tasbih Counter & Breath Guide */}
+        {/* Four Revealed Scriptural Witnesses (Taurat · Zabur · Injil · Al-Qur'an) */}
+        <FourScripturesSanctum quietMode={quietMode} onInspectCorpusDoor={onInspectCorpusDoor} />
+
+        {/* Contemplative Stillness Sanctuary, 9 Universal Attributes, Reflection Ring & Breath Guide */}
         <RemembranceSanctuary quietMode={quietMode} onNavigateToWorld={onSelectWorld} />
 
         {/* Return to Gate Ornament & Experience Controls */}

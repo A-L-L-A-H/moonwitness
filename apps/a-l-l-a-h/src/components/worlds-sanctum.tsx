@@ -1173,7 +1173,7 @@ export function WorldsSanctum({
                       </div>
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#cfc5b0]">
                         <span className="text-[#f5dfa6]">
-                          DESKTOP OVERSEER · GIT WATCH · C:/Z: STEWARD · SESSION TRACE
+                          DESKTOP WORKBENCH · LOCAL SQLITE ENGINE · SPATIAL STAGE
                         </span>
                         <span>SSOT: @MOONWITNESS/CANON</span>
                       </div>

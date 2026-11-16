@@ -1,5 +1,7 @@
 import type {
   DhgsAssuranceStep,
+  EcosystemEdgeNode,
+  EcosystemWorkspaceNode,
   MasterDnaMeta,
   OxDxZoneEntry,
   QuarantinedAmbiguityEntry,
@@ -257,7 +259,7 @@ export const QUARANTINED_AMBIGUITY_LEDGER: readonly QuarantinedAmbiguityEntry[] 
     title: "MVN §21A.7 & 25 Bidang Amanah Recovery Gap",
     classification: "PENDING_OWNER_REVIEW",
     detail:
-      "bjo163/moonwitnessxv reported 0/25 Amanah entries until recovered from Z:\\.raw_archives\\chatgpt_mohrezzafahlevi\\conversations-001[33]; requires owner promotion review.",
+      "bjo163/moonwitnessxv reported 0/25 Amanah entries until recovered from the Consolidated Narrative Archive (conv-001[33]); requires owner promotion review.",
     rule: "Expose raw origin and keep pedagogical Avatar framing distinct from infallibility.",
   },
   {
@@ -276,10 +278,10 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
     repoCount: 12,
     roleInEmpire: "Constitutional Core, Master Docs, Kernel OS, Desktop Sanctuary & Harness",
     localClones: [
-      "Z:\\repo\\dx (BRIDGE-ALLAH/MOONWITNESS)",
-      "Z:\\repo\\A-L-L-A-H\\rocksoul-dx",
-      "Z:\\repo\\A-L-L-A-H\\memory",
-      "Z:\\repo\\isrockfeel\\moonwitness (active dev workspace)",
+      "BRIDGE-ALLAH/MOONWITNESS (dx runtime)",
+      "A-L-L-A-H/rocksoul-dx (desktop kernel)",
+      "A-L-L-A-H/memory (constitutional memory)",
+      "isrockfeel/moonwitness (active monorepo)",
     ],
     flagshipRepos: [
       "A-L-L-A-H/master-docs",
@@ -297,10 +299,10 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
     roleInEmpire:
       "Primary R&D Foundry — II/XII/XV Codices, Empire of the Light, SRGBL Corpus, OX-DX, M-Time, AQEL & DHGS",
     localClones: [
-      "Z:\\project\\rocksoul-dx (bjo163/A-L-L-A-H.COM)",
-      "Z:\\project\\moonwitness-corpus",
-      "Z:\\project\\moonradio (bjo163/moonwitnessxv)",
-      "Z:\\project\\moonwitness-xi (bjo163/moonwitness-xiv)",
+      "bjo163/A-L-L-A-H.COM (Imperium Lumen DNA)",
+      "bjo163/moonwitness-corpus (P18 / SRGBL v8)",
+      "bjo163/moonwitnessxv (Vision Narrative XV)",
+      "bjo163/moonwitness-xiv (99-Chapter Structure)",
     ],
     flagshipRepos: [
       "bjo163/A-L-L-A-H.COM",
@@ -322,7 +324,7 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
     repoCount: 27,
     roleInEmpire:
       "Gen2 Enterprise Architecture Freeze — 196-Entry Blueprint, ADRs 021–027 & Multi-Service Cores",
-    localClones: ["Synchronized into bjo163/moonwitness-corpus & Z:\\project\\moonwitness-corpus"],
+    localClones: ["Synchronized into bjo163/moonwitness-corpus"],
     flagshipRepos: [
       "ArsyBelovedLabs/moonwitness-blueprint",
       "ArsyBelovedLabs/moonwitness-platform-foundation",
@@ -338,8 +340,8 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
     roleInEmpire:
       "Rust & OS Consolidation Wave — MWX, EMPIRE-OF-LIGHT Temps Binary, ARSY & MoonFrame Targets",
     localClones: [
-      "Z:\\repo\\dx (BRIDGE-ALLAH/MOONWITNESS)",
-      "Mapped across Z:\\project\\moonframe",
+      "BRIDGE-ALLAH/MOONWITNESS (NARATION.md)",
+      "Synchronized with @moonwitness/moonframe UI skins",
     ],
     flagshipRepos: [
       "BRIDGE-ALLAH/MWX",
@@ -388,11 +390,91 @@ export const CROSS_REPO_TOPOLOGY_ATLAS: readonly RepoOrgCluster[] = [
     repoCount: 1,
     roleInEmpire: "Canonical Private V9.5 Monorepo Anchor (MOONWITNESS OS V9.5)",
     localClones: [
-      "Mirrors bjo163/moonwitness (Z:\\repo\\moonwitness); distinct from A-L-L-A-H/moonwitness (Z:\\repo\\isrockfeel\\moonwitness)",
+      "Mirrors bjo163/moonwitness (MOONWITNESS OS V9.5); distinct from A-L-L-A-H/moonwitness@dev",
     ],
     flagshipRepos: ["moonwitness-id/moonwitness"],
   },
 ] as const;
+
+export const ECOSYSTEM_RUNTIME_CATALOG = {
+  monorepoSlug: "A-L-L-A-H/moonwitness",
+  liveEdges: [
+    {
+      id: "sanctuary",
+      hostname: "a-l-l-a-h.com",
+      url: "https://a-l-l-a-h.com",
+      workerName: "allah-sanctuary",
+      layer: "Cloudflare Workers · vinext",
+      role: "Primary Sanctuary Gateway, Four Scriptures Covenant & 4-Door Canon Codex",
+    },
+    {
+      id: "codex-edge",
+      hostname: "codex.a-l-l-a-h.com",
+      url: "https://codex.a-l-l-a-h.com",
+      workerName: "sovereign-codex-edge",
+      layer: "Cloudflare Workers · D1 Edge",
+      role: "Autonomous 9-Node Edge Pulse, Roadmap Progress & Public Comments Codex",
+    },
+    {
+      id: "community",
+      hostname: "community.moonwitness.biz.id",
+      url: "https://community.moonwitness.biz.id",
+      workerName: "rocksoul-community",
+      layer: "Cloudflare Workers · SPA Edge",
+      role: "Source-Aware Community Participation Portal for MoonWitness × Rocksoul",
+    },
+  ] as readonly EcosystemEdgeNode[],
+  workspaceNodes: [
+    {
+      workspacePath: "apps/a-l-l-a-h",
+      name: "@moonwitness/a-l-l-a-h",
+      stack: "Next 15.5 · vinext · WebGL2 GLSL · Cloudflare Worker",
+      dnaWorld: "01 Imperium Lumen",
+      responsibility:
+        "Monocentric Sanctuary Frontier, Four Scriptural Witnesses, Contemplation & 4-Door Canon Codex.",
+    },
+    {
+      workspacePath: "apps/web",
+      name: "@moonwitness/web",
+      stack: "Next 15.5 · @moonwitness/ui · Playwright Verified",
+      dnaWorld: "02 Lunar Chronicles / 05 Riot Anarchy",
+      responsibility:
+        "MoonWitness Universe Console (/dock, /mission-control, /intelligence, /skin-lab, Operations).",
+    },
+    {
+      workspacePath: "apps/api",
+      name: "@moonwitness/api",
+      stack: "Fastify · @moonwitness/orm libSQL · Ollama AI",
+      dnaWorld: "Core API Gateway",
+      responsibility:
+        "Authenticated REST gateway, persistent SQLite timeline/command-center state & Rust/Go proxy.",
+    },
+    {
+      workspacePath: "apps/rocksoul",
+      name: "rocksoul-dx",
+      stack: "Tauri 2 · React 19 · Three.js / R3F · SQLite",
+      dnaWorld: "03 Rocksoul (Noise × Silence)",
+      responsibility:
+        "Windows desktop spatial workbench integrating The Awakening threshold, SQLite & allowlisted Git ops.",
+    },
+    {
+      workspacePath: "apps/memory",
+      name: "How U Remind Me",
+      stack: "FastAPI · SQLite FTS5 · FastEmbed · LanceDB · Rclone S3",
+      dnaWorld: "Personal Archive Vault",
+      responsibility:
+        "Local-first encrypted conversation vault & semantic recall feeding /intelligence memory bridge.",
+    },
+    {
+      workspacePath: "cp/arsy & services/*",
+      name: "ARSY + Rust Bare-Metal Services",
+      stack: "Go Stdlib (:8787) · 4 Rust Axum Services",
+      dnaWorld: "09 Simpul Nusantara / Control Plane",
+      responsibility:
+        "Go WireGuard/DNS host reconciler paired with Rust RADIUS, SNMP, SigV4 Storage & Syslog engines.",
+    },
+  ] as readonly EcosystemWorkspaceNode[],
+} as const;
 
 export const MASTER_DNA_WORLDS_META: readonly MasterDnaMeta[] = [
   {

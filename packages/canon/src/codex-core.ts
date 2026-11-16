@@ -91,9 +91,9 @@ export const CODEX_SEARCH_INDEX: readonly CodexSearchEntry[] = [
   {
     id: "cx-p18-key-witness",
     doorId: "epistemic-corpus",
-    category: "P18 Key Witness v0 · 9-Layer Spine",
-    title: "P18 Key Witness v0, 20 Controlled Keys & Four-Corpus Policy",
-    subtitle: "AL-QURAN muhaimin vs TAURAT/ZABUR/INJIL · WHCMT 2×4 vs BASS-HUNTER UNKNOWN",
+    category: "Four Scriptures & P18 Key Witness v0",
+    title: "Four Scriptures (Taurat · Zabur · Injīl · Al-Qur’ān) & P18 Witness Spine",
+    subtitle: "Neutral non-ranking four-corpus inquiry · WHCMT 2×4 matrix vs BASS-HUNTER UNKNOWN",
     repoSource: "bjo163/moonwitness-corpus · bjo163/propetic",
   },
   {
@@ -126,7 +126,7 @@ export const CODEX_SEARCH_INDEX: readonly CodexSearchEntry[] = [
     category: "DX Storyboard · Owner Manifesto",
     title: "SIN CAN BE BETTER HUMAN & 4-Line Owner Manifesto",
     subtitle: "GOGOGO → SHUUU → BAAAN → DODODO + NOISE × SILENCE 4-Line Copy",
-    repoSource: "BRIDGE-ALLAH/MOONWITNESS (Z:\\repo\\dx\\NARATION.md) · A-L-L-A-H/master-docs",
+    repoSource: "BRIDGE-ALLAH/MOONWITNESS · A-L-L-A-H/master-docs",
   },
   {
     id: "cx-manusia-pulpen",
@@ -158,7 +158,16 @@ export const CODEX_SEARCH_INDEX: readonly CodexSearchEntry[] = [
     category: "Pedagogical Atlas · 25 Bidang Amanah",
     title: "25 Bidang Amanah (01 Adam → 25 Muhammad ﷺ)",
     subtitle: "Prophetic stewardship anchors incl. 19 Ilyas (ṬĀGHŪT rejected)",
-    repoSource: "Z:\\.raw_archives\\chatgpt_mohrezzafahlevi\\conversations-001[33]",
+    repoSource: "Consolidated Narrative Archive (conv-001[33])",
+  },
+  {
+    id: "cx-ecosystem-live",
+    doorId: "sovereign-runtimes",
+    category: "Live Cloudflare Edge & Monorepo Stack",
+    title: "Unified MoonWitness Ecosystem (Edges · 5 Apps · Rust/Go Services)",
+    subtitle:
+      "a-l-l-a-h.com · codex.a-l-l-a-h.com · community.moonwitness.biz.id · @moonwitness/ui",
+    repoSource: "A-L-L-A-H/moonwitness",
   },
   {
     id: "cx-wings-10",

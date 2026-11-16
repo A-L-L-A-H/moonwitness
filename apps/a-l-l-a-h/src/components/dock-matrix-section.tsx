@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ECOSYSTEM_RUNTIME_CATALOG } from "@/data/empire-canon-codex";
 import {
   DOCK_TELEMETRY_NODES,
   WORLD_DOMAINS,
@@ -20,18 +21,13 @@ import {
   SacredCornerBrackets,
 } from "./sacred-illustrations";
 
-const WEB_APP_BASE_URL = (process.env.NEXT_PUBLIC_WEB_URL ?? "http://localhost:3000").replace(
-  /\/+$/,
-  "",
-);
+const CONFIGURED_WEB_URL = process.env.NEXT_PUBLIC_WEB_URL?.replace(/\/+$/, "") ?? null;
 
-const WEB_PORTAL_LINKS: readonly { readonly href: string; readonly label: string }[] = [
+const LOCAL_WEB_ROUTES: readonly { readonly href: string; readonly label: string }[] = [
   { href: "/dock", label: "Chronicle Dock" },
   { href: "/mission-control", label: "Command Center" },
   { href: "/intelligence", label: "RIOT Intelligence" },
   { href: "/skin-lab", label: "7-DNA Skin Lab" },
-  { href: "/id-lab", label: "ID Lab" },
-  { href: "/control", label: "Control Plane" },
 ];
 
 type DockFilterState = "ALL" | DockNodeTelemetry["state"];
@@ -291,23 +287,25 @@ export function DockMatrixSection({
                     </button>
                   </div>
 
-                  {/* Live Multi-Node Observatory, Git Workspace & Cross-Portal Links */}
+                  {/* Live Multi-Node Observatory, Cloudflare Edges & Portal Bridges */}
                   <div className="mt-5 border-t border-[#d6b46c]/20 pt-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
-                      <span className="text-[#d6b46c]">ECOSYSTEM API BRIDGE (/api/v1)</span>
+                      <span className="text-[#dfc07b]">ECOSYSTEM TOPOLOGY BRIDGE</span>
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`border px-2 py-0.5 ${
                             telemetry.status === "online"
                               ? "border-[#e6c987]/55 bg-[#d6b46c]/15 text-[#fff6df]"
-                              : "border-[#d6b46c]/25 bg-[#080a12] text-[#bfb59e]"
+                              : "border-[#d6b46c]/25 bg-[#080a12] text-[#d8ceba]"
                           }`}
                         >
                           {telemetry.status === "checking"
-                            ? "CHECKING LIVE API…"
+                            ? "PROBING ECOSYSTEM…"
                             : telemetry.status === "online"
-                              ? `ONLINE · DB:${(telemetry.databaseStatus ?? "OK").toUpperCase()} · ${telemetry.timelineTotal ?? 0} EVENTS · ${telemetry.erasCount ?? 0} ERAS`
-                              : "CANON SPEC MODE · LIVE API (:3002) OFFLINE"}
+                              ? `API ONLINE · DB:${(telemetry.databaseStatus ?? "OK").toUpperCase()} · ${telemetry.timelineTotal ?? 0} EVENTS · ${telemetry.erasCount ?? 0} ERAS`
+                              : telemetry.runtimeMode === "cloudflare-edge"
+                                ? "CLOUDFLARE EDGE · ORIGIN API STANDBY"
+                                : "CANON SPEC MODE · LOCAL API STANDBY"}
                         </span>
                         <button
                           type="button"
@@ -320,6 +318,45 @@ export function DockMatrixSection({
                       </div>
                     </div>
 
+                    {/* Real Live Public Cloudflare Edge Portals */}
+                    <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 font-mono text-[10px]">
+                      {ECOSYSTEM_RUNTIME_CATALOG.liveEdges
+                        .filter((edge) => edge.id !== "sanctuary")
+                        .map((edge) => {
+                          const liveProbe = telemetry.edges.find((e) => e.id === edge.id);
+                          const isUp = liveProbe?.status === "online";
+                          return (
+                            <a
+                              key={edge.id}
+                              href={edge.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center justify-between border border-[#d6b46c]/30 bg-[#090d18] px-3 py-2 text-[#fff6df] hover:border-[#fff4d2] hover:bg-[#12182b] transition-colors"
+                            >
+                              <div className="min-w-0 pr-2">
+                                <div className="font-bold truncate">{edge.hostname} ↗</div>
+                                <div className="text-[9.5px] text-[#cfc5b0] truncate">
+                                  {edge.workerName}
+                                </div>
+                              </div>
+                              <span
+                                className={`shrink-0 border px-1.5 py-0.5 text-[9.5px] ${
+                                  isUp
+                                    ? "border-[#e6c987]/55 bg-[#d6b46c]/20 text-[#fff8e6]"
+                                    : "border-[#d6b46c]/25 bg-[#080a12] text-[#cfc5b0]"
+                                }`}
+                              >
+                                {liveProbe
+                                  ? isUp
+                                    ? `LIVE · ${liveProbe.latencyMs ?? 0}ms`
+                                    : liveProbe.status.toUpperCase()
+                                  : "EDGE"}
+                              </span>
+                            </a>
+                          );
+                        })}
+                    </div>
+
                     {telemetry.services.length > 0 && (
                       <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4 font-mono text-[10px]">
                         {telemetry.services.map((svc) => (
@@ -330,16 +367,18 @@ export function DockMatrixSection({
                                 ? "border-[#e6c987]/45 bg-[#d6b46c]/10 text-[#fff6df]"
                                 : svc.status === "degraded"
                                   ? "border-[#e6c987]/35 bg-[#1a1408] text-[#f5dfa6]"
-                                  : "border-[#d6b46c]/15 bg-[#060911] text-[#9c927d]"
+                                  : "border-[#d6b46c]/20 bg-[#060911] text-[#cfc5b0]"
                             }`}
                           >
                             <div className="font-bold tracking-[0.04em]">
                               {svc.name.toUpperCase()}
                             </div>
-                            <div className="mt-0.5 text-[9.5px]">
+                            <div className="mt-0.5 text-[10px]">
                               {svc.status === "online"
                                 ? `ONLINE · ${svc.latencyMs ?? 0}ms`
-                                : svc.status.toUpperCase()}
+                                : telemetry.runtimeMode === "cloudflare-edge"
+                                  ? "LOCAL STACK"
+                                  : svc.status.toUpperCase()}
                             </div>
                           </div>
                         ))}
@@ -365,19 +404,22 @@ export function DockMatrixSection({
                       </div>
                     )}
 
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {WEB_PORTAL_LINKS.map((link) => (
-                        <a
-                          key={link.href}
-                          href={`${WEB_APP_BASE_URL}${link.href}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex min-h-[44px] items-center border border-[#d6b46c]/25 bg-[#080b14] px-3 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase transition-colors hover:border-[#f8eac6] hover:text-[#fff6df]"
-                        >
-                          {link.label} ↗
-                        </a>
-                      ))}
-                    </div>
+                    {(CONFIGURED_WEB_URL ||
+                      telemetry.services.find((s) => s.id === "web")?.status === "online") && (
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {LOCAL_WEB_ROUTES.map((link) => (
+                          <a
+                            key={link.href}
+                            href={`${CONFIGURED_WEB_URL ?? "http://localhost:3000"}${link.href}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex min-h-[44px] items-center border border-[#d6b46c]/25 bg-[#080b14] px-3 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase transition-colors hover:border-[#f8eac6] hover:text-[#fff6df]"
+                          >
+                            {link.label} ↗
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </SpatialTiltCard>

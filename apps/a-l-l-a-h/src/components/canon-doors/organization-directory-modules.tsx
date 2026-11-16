@@ -124,8 +124,8 @@ export function Amanah25AtlasPanel() {
             25 BIDANG AMANAH PEDAGOGICAL ATLAS (01 ADAM → 25 MUHAMMAD ﷺ)
           </span>
           <div className="mt-0.5 font-mono text-[10px] text-[#cfc5b0]">
-            Origin: conversations-001[33] · Teaching anchor only (Avatar = pedagogical metaphor,
-            never infallibility claim)
+            Origin: Narrative Stewardship Archive (conv-001[33]) · Pedagogical anchor only (Avatar =
+            teaching metaphor, never infallibility claim)
           </div>
         </div>
         <input

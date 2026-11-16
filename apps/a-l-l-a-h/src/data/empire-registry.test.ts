@@ -10,9 +10,11 @@ import {
   CODEX_SEARCH_INDEX,
   CROSS_REPO_TOPOLOGY_ATLAS,
   DX_MANGA_FOUR_PANELS,
+  ECOSYSTEM_RUNTIME_CATALOG,
   EIGHT_STORY_ERAS,
   EPISTEMIC_FEDERATION_DOMAINS,
   FIFTEEN_STORY_EPISODES,
+  FOUR_CORPUS_POLICY,
   FOUR_ENTRY_DOORS,
   GOD_PROMISE_THREE_TRACKS,
   ORIGINAL_CREW_ARCHETYPES,
@@ -219,5 +221,21 @@ describe("Remembrance Sanctuary Registry", () => {
       expect(phrase.translation.length).toBeGreaterThan(0);
       expect(phrase.targetCount).toBe(33);
     }
+  });
+
+  it("exposes all four revealed scriptures neutrally alongside live ecosystem topology", () => {
+    expect(FOUR_CORPUS_POLICY.corpora.map((c) => c.name)).toEqual([
+      "TAURAT",
+      "ZABUR",
+      "INJIL",
+      "AL-QURAN",
+    ]);
+    expect(FOUR_CORPUS_POLICY.neutralityPrinciple.toLowerCase()).toContain("zero ranking");
+    expect(ECOSYSTEM_RUNTIME_CATALOG.liveEdges.some((e) => e.hostname === "a-l-l-a-h.com")).toBe(
+      true,
+    );
+    expect(
+      ECOSYSTEM_RUNTIME_CATALOG.liveEdges.some((e) => e.hostname === "codex.a-l-l-a-h.com"),
+    ).toBe(true);
   });
 });

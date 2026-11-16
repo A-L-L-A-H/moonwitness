@@ -58,13 +58,13 @@ export function CanonCodexSanctum({
             >
               THE CANON CODEX
             </h2>
-            <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
-              Four MoonFrame Entry Doors unifying 368+ verified remote repositories across 7 GitHub
-              owners (bjo163, ArsyBelovedLabs, BRIDGE-ALLAH, zenix-id, A-L-L-A-H, The-Batteries,
-              moonwitness-id) and local Z:\ archives under one monocentric covenant.
+            <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#e6decb] leading-relaxed">
+              Four architectural gallery doors organizing MoonWitness chronicles, neutral
+              comparative study across Taurat, Zabur, Injīl &amp; Al-Qur’ān, unassigned human
+              stewardship ethics, and the unified multi-runtime ecosystem.
             </p>
             <div className="mt-3 font-mono text-[11px] tracking-[0.16em] text-[#f5dfa6]">
-              {SUPREME_IDENTITY.creativeFormula}
+              {SUPREME_IDENTITY.tawhidPrinciple}
             </div>
           </div>
         </ScrollChapterReveal>

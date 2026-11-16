@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | A-L-L-A-H.COM",
   },
   description:
-    "In the Name of Allah. A-L-L-A-H.COM — Empire of the Light. A world to witness. A world to learn. A world to build.",
+    "In the Name of Allah. A-L-L-A-H.COM (Accountable Life, Learning & Action Hub) — Empire of the Light. A neutral sanctuary uniting witness chronicles, comparative study across Taurat, Zabur, Injīl & Al-Qur'ān, and sovereign engineering.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

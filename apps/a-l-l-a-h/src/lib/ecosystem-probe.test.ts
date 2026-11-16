@@ -102,4 +102,66 @@ describe("ecosystem-probe", () => {
     expect(git.dirtyCount).toBe(0);
     expect(git.branch).toBe("main");
   });
+
+  it("reports runtimeMode and probes public edge endpoints cleanly", async () => {
+    const fetchFn: FetchLike = async (url) => {
+      if (url.startsWith("https://codex.a-l-l-a-h.com")) {
+        return new Response("ok", { status: 200 });
+      }
+      if (url.startsWith("https://community.moonwitness.biz.id")) {
+        return new Response("ok", { status: 200 });
+      }
+      throw new Error("connection refused");
+    };
+
+    const snapshot = await probeEcosystemHealth({
+      fetchFn,
+      gitRunner: async () => null,
+      runtimeMode: "cloudflare-edge",
+    });
+
+    expect(snapshot.runtimeMode).toBe("cloudflare-edge");
+    expect(snapshot.edges.map((e) => [e.id, e.status, e.httpStatus])).toEqual([
+      ["codex-edge", "online", 200],
+      ["community", "online", 200],
+    ]);
+  });
+
+  it("auto-detects cloudflare-edge via WebSocketPair and skips loopback probes", async () => {
+    const requestedUrls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    const globalObj = globalThis as { WebSocketPair?: unknown };
+    const originalWebSocketPair = globalObj.WebSocketPair;
+
+    globalObj.WebSocketPair = function MockWebSocketPair() {};
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      requestedUrls.push(url);
+      return new Response("ok", { status: 200 });
+    }) as typeof fetch;
+
+    try {
+      const snapshot = await probeEcosystemHealth();
+      expect(snapshot.runtimeMode).toBe("cloudflare-edge");
+      expect(snapshot.git.available).toBe(false);
+      expect(requestedUrls.some((url) => url.includes("127.0.0.1"))).toBe(false);
+      expect(requestedUrls).toEqual([
+        "https://codex.a-l-l-a-h.com/",
+        "https://community.moonwitness.biz.id/",
+      ]);
+      expect(
+        snapshot.services.every((svc) => svc.status === "offline" && svc.httpStatus === null),
+      ).toBe(true);
+      expect(
+        snapshot.edges.every((edge) => edge.status === "online" && edge.httpStatus === 200),
+      ).toBe(true);
+    } finally {
+      globalThis.fetch = originalFetch;
+      if (originalWebSocketPair === undefined) {
+        delete globalObj.WebSocketPair;
+      } else {
+        globalObj.WebSocketPair = originalWebSocketPair;
+      }
+    }
+  });
 });

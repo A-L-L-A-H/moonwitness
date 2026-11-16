@@ -1,14 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { EcosystemGitStatus, EcosystemServiceStatus } from "./ecosystem-probe";
+import type {
+  EcosystemEdgeStatus,
+  EcosystemGitStatus,
+  EcosystemRuntimeMode,
+  EcosystemServiceStatus,
+} from "./ecosystem-probe";
 
 export interface EcosystemTelemetryState {
   readonly status: "checking" | "online" | "offline";
+  readonly runtimeMode: EcosystemRuntimeMode | null;
   readonly databaseStatus: string | null;
   readonly timelineTotal: number | null;
   readonly erasCount: number | null;
   readonly services: readonly EcosystemServiceStatus[];
+  readonly edges: readonly EcosystemEdgeStatus[];
   readonly git: EcosystemGitStatus | null;
   readonly generatedAt: string | null;
   readonly refreshing: boolean;
@@ -17,10 +24,12 @@ export interface EcosystemTelemetryState {
 
 interface EcosystemHealthPayload {
   readonly status?: "online" | "offline";
+  readonly runtimeMode?: EcosystemRuntimeMode;
   readonly databaseStatus?: string | null;
   readonly timelineTotal?: number | null;
   readonly erasCount?: number | null;
   readonly services?: readonly EcosystemServiceStatus[];
+  readonly edges?: readonly EcosystemEdgeStatus[];
   readonly git?: EcosystemGitStatus;
   readonly generatedAt?: string;
 }
@@ -29,10 +38,12 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
   const [refreshTick, setRefreshTick] = useState<number>(0);
   const [state, setState] = useState<Omit<EcosystemTelemetryState, "refresh">>({
     status: "checking",
+    runtimeMode: null,
     databaseStatus: null,
     timelineTotal: null,
     erasCount: null,
     services: [],
+    edges: [],
     git: null,
     generatedAt: null,
     refreshing: false,
@@ -57,10 +68,12 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
           const payload = (await res.json()) as EcosystemHealthPayload;
           setState({
             status: payload.status === "online" ? "online" : "offline",
+            runtimeMode: payload.runtimeMode ?? null,
             databaseStatus: payload.databaseStatus ?? null,
             timelineTotal: typeof payload.timelineTotal === "number" ? payload.timelineTotal : null,
             erasCount: typeof payload.erasCount === "number" ? payload.erasCount : null,
             services: Array.isArray(payload.services) ? payload.services : [],
+            edges: Array.isArray(payload.edges) ? payload.edges : [],
             git: payload.git ?? null,
             generatedAt: payload.generatedAt ?? null,
             refreshing: false,
@@ -82,10 +95,12 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
         if (!healthRes.ok) {
           setState({
             status: "offline",
+            runtimeMode: null,
             databaseStatus: null,
             timelineTotal: null,
             erasCount: null,
             services: [],
+            edges: [],
             git: null,
             generatedAt: new Date().toISOString(),
             refreshing: false,
@@ -113,10 +128,12 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
 
         setState({
           status: "online",
+          runtimeMode: "local-node",
           databaseStatus: dbState,
           timelineTotal,
           erasCount,
           services: [],
+          edges: [],
           git: null,
           generatedAt: new Date().toISOString(),
           refreshing: false,
@@ -125,10 +142,12 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
         if (!controller.signal.aborted) {
           setState({
             status: "offline",
+            runtimeMode: null,
             databaseStatus: null,
             timelineTotal: null,
             erasCount: null,
             services: [],
+            edges: [],
             git: null,
             generatedAt: null,
             refreshing: false,

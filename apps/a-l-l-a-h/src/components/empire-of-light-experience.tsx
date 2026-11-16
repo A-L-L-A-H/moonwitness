@@ -179,6 +179,18 @@ export function EmpireOfLightExperience() {
     }
   }, [quietMode, navigateToSection]);
 
+  const jumpToFourScriptures = useCallback(() => {
+    setMobileMenuOpen(false);
+    setActiveNavTab("about");
+    const scripturesEl = document.getElementById("four-scriptures");
+    if (scripturesEl) {
+      const reduced = quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      scripturesEl.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+    } else {
+      navigateToSection("about");
+    }
+  }, [quietMode, navigateToSection]);
+
   const handleCapabilityDetected = useCallback((tier: RenderingCapabilityTier) => {
     setRenderingTier(tier);
   }, []);
@@ -478,6 +490,10 @@ export function EmpireOfLightExperience() {
           <p className="mt-3 sm:mt-4 font-serif text-sm sm:text-base md:text-[19px] tracking-[0.04em] text-[#f5efe2]/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
             A world to witness. A world to learn. A world to build.
           </p>
+          <p className="mt-1.5 max-w-2xl font-sans text-xs sm:text-[13px] tracking-[0.06em] text-[#d8ceba]/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.95)]">
+            Accountable Life, Learning &amp; Action Hub — honoring Taurat, Zabur, Injīl &amp;
+            Al-Qur’ān alongside principled open engineering.
+          </p>
 
           {/* Interactive Gate Threshold with Magnetic Portal */}
           <div className="mt-5 sm:mt-8 flex flex-col items-center">
@@ -572,10 +588,10 @@ export function EmpireOfLightExperience() {
 
               <button
                 type="button"
-                onClick={jumpToRemembranceSanctuary}
+                onClick={jumpToFourScriptures}
                 className="min-h-[44px] border border-[#dfc07b]/35 bg-[#080a12]/75 px-5 py-2.5 font-monument text-[11px] tracking-[0.2em] text-[#f5dfa6] uppercase hover:border-[#fff4d2] hover:bg-[#dfc07b]/15 hover:text-white transition-all cursor-pointer"
               >
-                SANCTUARY &amp; DHIKR
+                FOUR SCRIPTURES · COVENANT
               </button>
             </div>
 
@@ -628,6 +644,7 @@ export function EmpireOfLightExperience() {
           onReplayEntrance={handleReplayEntrance}
           onToggleQuietMode={() => setQuietMode((prev) => !prev)}
           onSelectWorld={(worldId) => selectAndInspectWorld(worldId)}
+          onInspectCorpusDoor={() => selectAndInspectDoor("epistemic-corpus")}
           onReturnToGate={() => navigateToSection("the-gate")}
         />
       </main>
