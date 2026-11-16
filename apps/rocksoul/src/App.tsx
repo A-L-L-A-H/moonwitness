@@ -215,9 +215,18 @@ export default function App() {
       />
     );
 
+  const sectorScene =
+    page === "monitor" || page === "noise"
+      ? "signal-room"
+      : page === "git"
+        ? "archive"
+        : page === "war-room"
+          ? "studio"
+          : "riot-deck";
+
   return (
-    <div className="app-shell riot-room-shell" data-reduced-motion={reducedMotion}>
-      <IllustratedStage scene="riot-deck" destination="riot-deck" reducedMotion={reducedMotion} subtle />
+    <div className="app-shell riot-room-shell" data-reduced-motion={reducedMotion} data-sector={page}>
+      <IllustratedStage scene={sectorScene} destination={sectorScene} reducedMotion={reducedMotion} subtle />
       <RiotRail page={page} onNavigate={navigateDestination} onSwitchboard={() => setCommandOpen(true)} />
       <div className="app-main">
         <Topbar

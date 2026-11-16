@@ -13,6 +13,7 @@ import "./design-system/primitives.css";
 import "./design-system/layout.css";
 import "./features/world.css";
 import "./features/world/living-world.css";
+import "./features/cinematic-shell.css";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

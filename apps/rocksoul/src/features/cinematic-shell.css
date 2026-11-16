@@ -1,0 +1,507 @@
+/* === CINEMATIC GPU STAGE + UNIFIED CITADEL HUD ARCHITECTURE === */
+
+.world-gpu-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: auto;
+}
+
+.world-canvas.is-gpu {
+  background: #050508;
+}
+
+.world-canvas.is-gpu .world-artwork-stage {
+  z-index: 0;
+}
+
+.world-canvas.is-gpu.is-subtle {
+  opacity: 1;
+}
+
+.world-gpu-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 54% 44%, transparent 0%, rgba(5, 5, 9, 0.34) 64%, rgba(5, 5, 9, 0.76) 100%),
+    linear-gradient(180deg, rgba(5, 5, 9, 0.52) 0%, transparent 24%, transparent 72%, rgba(5, 5, 9, 0.84) 100%);
+}
+
+.world-canvas.is-subtle .world-gpu-veil {
+  background:
+    radial-gradient(ellipse at 56% 38%, rgba(8, 8, 14, 0.22) 0%, rgba(5, 5, 9, 0.62) 74%, rgba(5, 5, 9, 0.84) 100%),
+    linear-gradient(180deg, rgba(5, 5, 9, 0.58) 0%, rgba(5, 5, 9, 0.26) 38%, rgba(5, 5, 9, 0.44) 72%, rgba(5, 5, 9, 0.88) 100%);
+}
+
+/* === AWAKENING & THRESHOLD HD REFINEMENTS === */
+
+.universe-brand {
+  min-width: 230px;
+}
+
+.universe-brand-copy {
+  display: block !important;
+  font-size: 18px !important;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+.universe-brand-copy b {
+  margin-left: 3px;
+  color: #e53e38;
+}
+
+.universe-brand-copy small {
+  display: block;
+  margin-top: 4px !important;
+  color: #cfc5b4 !important;
+  font: 8.5px/1 "IBM Plex Mono", monospace !important;
+  letter-spacing: 0.16em !important;
+}
+
+.awakening-copy,
+.universe-copy {
+  position: relative;
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 3px solid #e53e38 !important;
+  background:
+    linear-gradient(135deg, rgba(10, 11, 16, 0.82) 0%, rgba(8, 9, 14, 0.56) 72%, rgba(8, 9, 14, 0.18) 100%) !important;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+.universe-copy {
+  width: min(495px, 43vw) !important;
+}
+
+.universe-manifesto {
+  gap: 4px !important;
+  font-size: clamp(12.5px, 1.02vw, 14.5px) !important;
+  line-height: 1.22 !important;
+}
+
+.universe-manifesto .manifesto-climax {
+  max-width: none !important;
+  margin-top: 2px !important;
+  color: #ff6459 !important;
+  font-size: clamp(12.5px, 1.02vw, 14.5px) !important;
+  font-style: normal !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-shadow: 0 0 16px rgba(229, 62, 56, 0.45);
+}
+
+/* Make Threshold destination cards true HD widescreen portals instead of 58px slits */
+.universe-destination {
+  border: 1px solid rgba(243, 235, 217, 0.22) !important;
+  background: linear-gradient(180deg, rgba(10, 11, 16, 0.78), rgba(7, 8, 12, 0.9)) !important;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.universe-destination-thumb {
+  height: clamp(94px, 11.5vh, 124px) !important;
+  border-bottom: 1px solid rgba(229, 62, 56, 0.32) !important;
+}
+
+.universe-destination-thumb img {
+  object-position: center 36% !important;
+  filter: brightness(0.96) contrast(1.08) saturate(1.08) !important;
+}
+
+.universe-destination-thumb::after {
+  background:
+    linear-gradient(180deg, rgba(7, 8, 12, 0.12) 0%, transparent 45%, rgba(7, 8, 12, 0.86) 100%) !important;
+}
+
+.universe-destination em {
+  color: #ff8577 !important;
+  font-size: 9px !important;
+}
+
+.universe-spray-sub {
+  color: #ff796b !important;
+  font-size: 10px !important;
+}
+
+/* === RIOT WORK CHAMBERS: UNIFIED LIVING CITADEL HUD (NO SAAS BOXINESS) === */
+
+.riot-room-shell {
+  position: relative;
+  background: #050508 !important;
+  isolation: isolate;
+  padding: 12px 16px 12px 12px;
+  gap: 14px;
+}
+
+.riot-room-shell > .app-main,
+.riot-room-shell > .riot-rail {
+  position: relative;
+  z-index: 2;
+}
+
+/* Floating Tactical Waypoint Spine instead of flat grey SaaS sidebar */
+.riot-room-shell .riot-rail {
+  width: 88px;
+  flex: 0 0 88px;
+  height: calc(100vh - 24px);
+  background: linear-gradient(180deg, rgba(9, 10, 15, 0.84) 0%, rgba(6, 7, 11, 0.72) 100%);
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 2px solid #e53e38;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.riot-room-shell .rail-mark {
+  height: 64px;
+  border-bottom: 1px solid rgba(243, 235, 217, 0.12);
+  background: radial-gradient(circle at 50% 50%, rgba(229, 62, 56, 0.2), transparent 72%);
+}
+
+.riot-room-shell .rail-emblem-img {
+  width: 28px;
+  height: 28px;
+  color: #f4eee4;
+}
+
+.riot-room-shell .rail-item {
+  height: 62px;
+  border-bottom: 1px solid rgba(243, 235, 217, 0.06);
+  color: #b8b0a2;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  transition: background-color 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.riot-room-shell .rail-item:hover {
+  color: #f4eee4;
+  background: rgba(229, 62, 56, 0.12);
+}
+
+.riot-room-shell .rail-item.active {
+  background: linear-gradient(90deg, rgba(229, 62, 56, 0.36) 0%, rgba(229, 62, 56, 0.08) 100%);
+  color: #f4eee4;
+  border-left: 3px solid #d7ff36;
+  box-shadow: inset 0 0 22px rgba(229, 62, 56, 0.25);
+}
+
+.riot-room-shell .rail-item.active svg {
+  color: #d7ff36;
+  filter: drop-shadow(0 0 8px rgba(215, 255, 54, 0.55));
+}
+
+.riot-room-shell .rail-sticker {
+  display: none;
+}
+
+.riot-room-shell .rail-bottom {
+  padding: 8px;
+  gap: 6px;
+}
+
+.riot-room-shell .switchboard {
+  background: rgba(12, 13, 19, 0.78);
+  border: 1px solid rgba(229, 62, 56, 0.42);
+  color: #f4eee4;
+}
+
+/* Unified Floating Top HUD Bridge (collapsing 3-bar SaaS stack) */
+.riot-room-shell .topbar {
+  height: 56px;
+  flex: 0 0 56px;
+  padding: 0 18px;
+  gap: 16px;
+  background: linear-gradient(90deg, rgba(9, 10, 15, 0.84) 0%, rgba(9, 10, 15, 0.66) 100%);
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 3px solid #e53e38;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+
+.riot-room-shell .topbar-brand {
+  min-width: 210px;
+}
+
+.riot-room-shell .brand-crown-img {
+  width: 34px;
+  height: 24px;
+}
+
+.riot-room-shell .topbar-brand > span:nth-child(2) {
+  font-size: 21px;
+  letter-spacing: -0.03em;
+}
+
+.riot-room-shell .topbar-brand small {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+}
+
+.riot-room-shell .context-chip,
+.riot-room-shell .shortcut {
+  background: rgba(6, 7, 11, 0.68);
+  border: 1px solid rgba(243, 235, 217, 0.18);
+  padding: 6px 10px;
+}
+
+/* Merge RoomContextBar + ScreenHeading into a sleek 28px HUD telemetry sub-strip */
+.riot-room-shell .room-context-bar {
+  min-height: 28px;
+  height: 28px;
+  padding: 0 14px;
+  margin-top: 6px;
+  background: rgba(7, 8, 12, 0.56);
+  border: 1px solid rgba(243, 235, 217, 0.1);
+  border-bottom: 0;
+}
+
+.riot-room-shell .screen-heading {
+  height: 24px;
+  flex: 0 0 24px;
+  padding: 3px 14px 0;
+  background: rgba(7, 8, 12, 0.42);
+  border: 1px solid rgba(243, 235, 217, 0.08);
+  border-top: 0;
+  color: #b8b0a2;
+}
+
+.riot-room-shell .page-content {
+  padding: 12px 4px 18px 2px;
+}
+
+.riot-room-shell .app-footer {
+  height: 28px;
+  flex: 0 0 28px;
+  padding: 0 14px;
+  background: rgba(7, 8, 12, 0.68);
+  border: 1px solid rgba(243, 235, 217, 0.12);
+}
+
+/* === CHAMFERED OBSIDIAN HUD SLATES (ZERO PER-PANEL BLUR LAG) === */
+
+.riot-room-shell .riot-panel,
+.riot-room-shell .monitor-service-card,
+.riot-room-shell .monitor-stat-card,
+.riot-room-shell .monitor-repo-card,
+.riot-room-shell .project-card,
+.riot-room-shell .milestone-board,
+.riot-room-shell .repo-panel,
+.riot-room-shell .deck-overseer-strip,
+.riot-room-shell .monitor-canon-strip {
+  position: relative;
+  background:
+    linear-gradient(155deg, rgba(16, 17, 25, 0.76) 0%, rgba(8, 9, 14, 0.66) 100%);
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 2px solid rgba(229, 62, 56, 0.72);
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.52),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+}
+
+/* Replace solid pastel/cream/salmon SaaS header bars with laser-etched dark HUD headers */
+.riot-room-shell .panel-heading,
+.riot-room-shell .panel-heading.cream,
+.riot-room-shell .panel-heading.pink,
+.riot-room-shell .panel-heading.purple-head {
+  height: 34px;
+  padding: 0 12px;
+  color: #f4eee4;
+  background:
+    linear-gradient(90deg, rgba(229, 62, 56, 0.28) 0%, rgba(229, 62, 56, 0.06) 55%, rgba(10, 11, 16, 0.3) 100%);
+  border-bottom: 1px solid rgba(243, 235, 217, 0.14);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+}
+
+.riot-room-shell .panel-heading.purple-head {
+  background:
+    linear-gradient(90deg, rgba(116, 168, 220, 0.28) 0%, rgba(101, 85, 255, 0.08) 55%, transparent 100%);
+}
+
+.riot-room-shell .panel-heading button {
+  color: #d7ff36;
+  font: 9.5px "IBM Plex Mono", monospace;
+  letter-spacing: 0.08em;
+}
+
+/* === DECK CHAMBER REFINEMENTS === */
+
+.riot-room-shell .deck-overseer-strip {
+  padding: 7px 12px;
+  margin-bottom: 10px;
+  border-left-color: #d7ff36;
+}
+
+.riot-room-shell .deck-hero {
+  grid-template-columns: 1.05fr 1fr;
+  gap: 16px;
+  min-height: 188px;
+  padding: 14px 16px;
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 3px solid #e53e38;
+  background:
+    linear-gradient(120deg, rgba(9, 10, 15, 0.82) 0%, rgba(9, 10, 15, 0.46) 62%, rgba(9, 10, 15, 0.72) 100%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.52);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
+}
+
+.riot-room-shell .hero-copy h1 {
+  font-size: clamp(38px, 3.8vw, 58px);
+  line-height: 0.86;
+}
+
+.riot-room-shell .hero-art {
+  min-height: 164px;
+  border: 1px solid rgba(229, 62, 56, 0.42);
+  background: #07080c;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+
+.riot-room-shell .hero-art-backdrop {
+  object-position: center 34%;
+  filter: brightness(0.92) contrast(1.08) saturate(1.06);
+}
+
+.riot-room-shell .hero-art-scrim {
+  background:
+    linear-gradient(180deg, rgba(7, 8, 12, 0.18) 0%, rgba(7, 8, 12, 0.1) 50%, rgba(7, 8, 12, 0.84) 100%);
+}
+
+.riot-room-shell .hero-waveform {
+  top: auto !important;
+  bottom: 10px !important;
+  left: 118px !important;
+  right: 12px !important;
+  width: auto !important;
+  height: 26px !important;
+  transform: none !important;
+  opacity: 0.92;
+}
+
+.riot-room-shell .deck-grid {
+  grid-template-rows: 195px 175px;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.riot-room-shell .create-chaos {
+  right: 28px !important;
+  bottom: 48px !important;
+  width: 224px !important;
+  height: 52px !important;
+  transform: none !important;
+  background: linear-gradient(90deg, rgba(229, 62, 56, 0.92) 0%, rgba(164, 32, 28, 0.92) 100%) !important;
+  border: 1px solid #ff8b80 !important;
+  color: #f4eee4 !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.65), 0 0 22px rgba(229, 62, 56, 0.32) !important;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)) !important;
+}
+
+.riot-room-shell .create-chaos > b {
+  font-size: 18px !important;
+  line-height: 0.92 !important;
+}
+
+.riot-room-shell .create-chaos small {
+  display: none !important;
+}
+
+/* === PIT, GIT & WORKSPACE CHAMBERS === */
+
+.riot-room-shell .workspace-title {
+  padding: 12px 16px;
+  border: 1px solid rgba(243, 235, 217, 0.15);
+  border-left: 3px solid #e53e38;
+  background: linear-gradient(90deg, rgba(9, 10, 15, 0.82) 0%, rgba(9, 10, 15, 0.45) 100%);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+
+.riot-room-shell .workspace-art-plate {
+  width: 220px;
+  height: 76px;
+  border: 1px solid rgba(229, 62, 56, 0.45);
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 0 100%);
+}
+
+.riot-room-shell .workspace-art-plate img {
+  object-position: center 36%;
+  filter: brightness(0.95) contrast(1.08);
+}
+
+.riot-room-shell .large-issue-list {
+  min-height: 220px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(229, 62, 56, 0.08) 0%, transparent 65%),
+    linear-gradient(160deg, rgba(12, 13, 19, 0.72) 0%, rgba(7, 8, 12, 0.58) 100%);
+  border: 1px solid rgba(243, 235, 217, 0.16);
+  border-left: 2px solid #e53e38;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+
+.riot-room-shell .empty-state.large-empty {
+  min-height: 210px;
+  background:
+    linear-gradient(90deg, rgba(243, 235, 217, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(243, 235, 217, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* === OVERSEER (MONITOR) DENSITY & CLIPPING FIX === */
+
+.riot-room-shell .monitor-page {
+  gap: 10px;
+  padding-bottom: 24px;
+}
+
+.riot-room-shell .monitor-summary-grid {
+  gap: 10px;
+}
+
+.riot-room-shell .monitor-stat-card {
+  padding: 10px 14px;
+}
+
+.riot-room-shell .monitor-stat-value {
+  font-size: 26px;
+}
+
+.riot-room-shell .monitor-grid {
+  gap: 10px;
+}
+
+.riot-room-shell .monitor-panel-body {
+  padding: 10px 12px;
+}
+
+.riot-room-shell .monitor-services-grid {
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.riot-room-shell .monitor-canon-strip {
+  padding: 10px 14px;
+}
+
+.riot-room-shell .command-panel,
+.riot-room-shell .issue-dialog,
+.riot-room-shell .settings-dialog,
+.riot-room-shell .git-confirm-dialog {
+  background: rgba(9, 10, 15, 0.92);
+  border: 1px solid rgba(243, 235, 217, 0.22);
+  border-left: 3px solid #e53e38;
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.78);
+}

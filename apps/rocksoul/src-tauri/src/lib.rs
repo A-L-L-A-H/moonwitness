@@ -4,8 +4,28 @@ mod models;
 
 use crate::commands::repositories;
 
+/// Chromium flags that keep WebView2 on the hardware GPU path (D3D11 via ANGLE)
+/// so the WebGL2 cinematic renderer is rasterized and composited on the GPU.
+#[cfg(windows)]
+const WEBVIEW2_GPU_ARGUMENTS: &str =
+    "--ignore-gpu-blocklist --enable-gpu-rasterization --enable-zero-copy --use-angle=d3d11";
+
+#[cfg(windows)]
+fn enable_webview_gpu_acceleration() {
+    if std::env::var_os("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS").is_none() {
+        std::env::set_var(
+            "WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS",
+            WEBVIEW2_GPU_ARGUMENTS,
+        );
+    }
+}
+
+#[cfg(not(windows))]
+fn enable_webview_gpu_acceleration() {}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    enable_webview_gpu_acceleration();
     tauri::Builder::default()
         .manage(commands::s3_gateway::S3GatewayState::default())
         .setup(|app| {

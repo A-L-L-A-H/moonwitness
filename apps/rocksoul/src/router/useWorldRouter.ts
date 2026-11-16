@@ -21,7 +21,8 @@ function isPageRoute(path: string): path is PageRoute {
 export function useWorldRouter() {
   const location = useLocation();
   const navigate = useNavigate();
-  const path = location.pathname.replace(/^\/+|\/+$/g, "");
+  const rawPath = location.pathname.replace(/^\/+|\/+$/g, "");
+  const path = rawPath === "issues" ? "pit" : rawPath;
   const isValidRoute = path.length === 0 || path === "awakening" || path === "threshold" || isWorldDestination(path) || isPageRoute(path);
   const destination: WorldRoute = path.length === 0 || path === "awakening"
     ? "awakening"
