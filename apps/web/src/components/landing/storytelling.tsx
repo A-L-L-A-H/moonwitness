@@ -153,7 +153,6 @@ export function Storytelling() {
                           src={artSrc(story.art)}
                           alt=""
                           fill
-                          loading={i === 0 ? "eager" : undefined}
                           sizes={
                             i === 0
                               ? "(min-width: 1280px) 1200px, 100vw"
