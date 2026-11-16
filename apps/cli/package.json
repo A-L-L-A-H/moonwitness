@@ -1,0 +1,32 @@
+{
+  "name": "@moonwitness/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "moonwitness": "./dist/cli.js"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf .turbo dist node_modules"
+  },
+  "dependencies": {
+    "@moonwitness/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@moonwitness/eslint-config": "workspace:*",
+    "@moonwitness/typescript-config": "workspace:*",
+    "@types/node": "^24.10.0",
+    "eslint": "^10.14.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
+  }
+}
