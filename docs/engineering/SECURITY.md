@@ -48,6 +48,11 @@ affected versions, and impact. Expect an acknowledgement before any public discl
   `STORAGE_SECRET_KEY`; the browser must not receive or persist these values. The Storage service
   requires both credentials and rejects unsigned requests unless its local-only anonymous mode is
   explicitly enabled for development.
+- RIOT Intelligence only ever calls the operator-configured `RIOT_AI_BASE_URL`. The client cannot
+  choose a host, port, or scheme; endpoints that resolve to loopback (unless explicitly allowed),
+  private, link-local, or cloud metadata ranges are rejected at startup. No cloud fallback exists.
+- Rate limiting keys on the socket peer by default. Set `TRUSTED_PROXY_COUNT` to the real reverse
+  proxy depth so forwarded-for headers cannot be used to mint unlimited buckets.
 
 ## Dependency policy
 

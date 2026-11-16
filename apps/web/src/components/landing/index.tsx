@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Marquee } from "@moonwitness/ui";
+import { Button } from "@moonwitness/ui";
 import { MotionPauseContext } from "@/lib/motion/motion-pause";
 import { Star4 } from "@moonwitness/ui/icons";
 import { SiteNav } from "../site-nav";
@@ -72,14 +73,16 @@ export function Landing() {
 
         <LandingFooter />
 
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           aria-pressed={paused}
           onClick={() => setPaused((p) => !p)}
-          className="btn-zine btn-paper fixed bottom-4 left-4 z-40 min-h-11 px-4 py-2 font-mono text-xs motion-reduce:hidden"
+          className="fixed bottom-4 left-4 z-40 min-h-11 px-4 py-2 font-mono text-xs motion-reduce:hidden"
         >
           PAUSE MOTION
-        </button>
+        </Button>
       </div>
     </MotionPauseContext.Provider>
   );

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { witnesses } from "@/lib/data";
 import { artSrc } from "@/lib/art";
 import { ArrowRight, SkullCrossbonesFunky } from "@moonwitness/ui/icons";
-import { CrewConstellation, Halftone, Staple, TactileTape } from "@moonwitness/ui";
+import { CrewConstellation, Halftone, Staple, TactileTape, Button } from "@moonwitness/ui";
 
 export function Crew() {
   return (
@@ -51,11 +51,10 @@ export function Crew() {
           demo
           stickerText="DEMO CHARACTERS. SAME STORY SKY."
           cta={
-            <Link
-              href="/shadow"
-              className="btn-zine btn-blue px-6 py-3.5 text-base shadow-[4px_4px_0_#000]"
-            >
-              EXPLORE THE CREW <ArrowRight className="h-4 w-4" />
+            <Link href="/shadow">
+              <Button className="px-6 py-3.5 text-base">
+                EXPLORE THE CREW <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           }
         />

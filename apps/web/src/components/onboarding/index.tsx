@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Grain, Tape, ZineCardRough, ZineInput } from "@moonwitness/ui";
+import { Grain, Tape, ZineCardRough, Input } from "@moonwitness/ui";
+import { Label } from "@moonwitness/ui";
+import { Button } from "@moonwitness/ui";
 import { ArrowRight, Crown, Star4 } from "@moonwitness/ui/icons";
 import { useCreateSuperuser, useSetupStatus } from "@/lib/api/onboarding";
 
@@ -24,20 +26,12 @@ function StepRail({ current }: { current: Step }) {
         return (
           <li key={step.id} className="flex items-center gap-2">
             <span
-              className={`flex h-6 w-6 items-center justify-center border text-[10px] font-bold ${
-                state === "done"
-                  ? "border-[var(--green)] bg-[var(--green)]/15 text-[var(--green)]"
-                  : state === "active"
-                    ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--pink)]"
-                    : "border-[var(--line)] text-zinc-600"
-              }`}
+              className={`flex h-6 w-6 items-center justify-center border text-[10px] font-bold ${state === "done" ? "border-[var(--green)] bg-[var(--green)]/15 text-[var(--green)]" : state === "active" ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--pink)]" : "border-[var(--line)] text-zinc-600"}`}
             >
               {i + 1}
             </span>
             <span
-              className={`text-[10px] tracking-[0.2em] ${
-                state === "todo" ? "text-zinc-600" : "text-zinc-300"
-              }`}
+              className={`text-[10px] tracking-[0.2em] ${state === "todo" ? "text-zinc-600" : "text-zinc-300"}`}
             >
               {step.label.toUpperCase()}
             </span>
@@ -64,9 +58,9 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300">
+      <Label htmlFor={id} className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300">
         {label}
-      </label>
+      </Label>
       {children}
       {error ? (
         <p id={`${id}-error`} role="alert" className="mt-1.5 text-xs text-[var(--red)]">
@@ -112,8 +106,8 @@ export function Onboarding() {
             apps/api sudah benar.
           </p>
           <p className="mt-3 text-xs text-zinc-500">
-            Di VPS: <code>sudo ./install.sh --with-app --with-caddy --domain &lt;host&gt;</code>,
-            lalu <code>systemctl status arsy.service</code>.
+            Di VPS: <code>{`sudo ./install.sh --with-app --with-caddy --domain <host>`}</code>, lalu{" "}
+            <code>systemctl status arsy.service</code>.
           </p>
         </ZineCardRough>
       </div>
@@ -186,7 +180,8 @@ export function Onboarding() {
         <Link href="/" className="flex items-center gap-2">
           <Crown className="h-5 w-8 text-[var(--yellow)]" />
           <span className="font-brush text-xl text-white sm:text-2xl">
-            MOON<span className="text-[var(--pink)]">WITNESS</span>
+            {" "}
+            MOON<span className="text-[var(--pink)]">WITNESS</span>{" "}
           </span>
         </Link>
         <span className="font-hand text-lg text-zinc-400">First light setup</span>
@@ -196,11 +191,13 @@ export function Onboarding() {
         <div className="mb-6">
           <p className="text-[10px] tracking-[0.3em] text-zinc-500">CONTROL PLANE / ONBOARDING</p>
           <h1 className="mt-1 font-brush text-4xl text-white sm:text-5xl">
-            WELCOME TO <span className="text-[var(--pink)]">THE SHADOW</span>
+            {" "}
+            WELCOME TO <span className="text-[var(--pink)]">THE SHADOW</span>{" "}
           </h1>
           <p className="mt-2 max-w-xl text-sm text-zinc-400">
+            {" "}
             Instance ini belum punya akun. Buat superuser pertama — hanya bisa dilakukan sekali,
-            langsung dari host ini.
+            langsung dari host ini.{" "}
           </p>
         </div>
 
@@ -218,27 +215,24 @@ export function Onboarding() {
                 label="NAMA INSTANCE"
                 hint="Tampil di header dashboard. Bisa diubah nanti."
               >
-                <ZineInput
+                <Input
                   id="instance"
                   value={instanceName}
                   onChange={(e) => setInstanceName(e.target.value)}
                   placeholder="Moonwitness"
-                  className="rounded-md px-4 py-3 text-sm"
+                  className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
               </Field>
               <div className="border border-[var(--line)] bg-black/30 p-3 text-[11px] text-zinc-500">
                 Versi arsy <span className="text-zinc-300">{status.data?.version ?? "—"}</span> ·
                 Instance ID{" "}
-                <span className="font-mono text-zinc-400">{status.data?.instance.id}</span>
+                <span className="font-mono text-zinc-400">{status.data?.instance?.id ?? "—"}</span>
               </div>
               <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={() => setStep("account")}
-                  className="btn-zine px-5 py-3 text-sm"
-                >
-                  LANJUT <ArrowRight className="h-4 w-4" />
-                </button>
+                <Button onClick={() => setStep("account")} className="btn-zine px-5 py-3 text-sm">
+                  {" "}
+                  LANJUT <ArrowRight className="h-4 w-4" />{" "}
+                </Button>
               </div>
             </div>
           )}
@@ -253,18 +247,18 @@ export function Onboarding() {
               }}
             >
               <Field id="name" label="NAMA" error={errors.name}>
-                <ZineInput
+                <Input
                   id="name"
                   value={name}
                   autoComplete="name"
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Rezza"
                   aria-invalid={!!errors.name}
-                  className="rounded-md px-4 py-3 text-sm"
+                  className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
               </Field>
               <Field id="email" label="EMAIL" error={errors.email}>
-                <ZineInput
+                <Input
                   id="email"
                   type="email"
                   value={email}
@@ -272,11 +266,11 @@ export function Onboarding() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   aria-invalid={!!errors.email}
-                  className="rounded-md px-4 py-3 text-sm"
+                  className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
               </Field>
               <Field id="password" label="PASSWORD" hint={passwordHint} error={errors.password}>
-                <ZineInput
+                <Input
                   id="password"
                   type="password"
                   value={password}
@@ -284,11 +278,11 @@ export function Onboarding() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••"
                   aria-invalid={!!errors.password}
-                  className="rounded-md px-4 py-3 text-sm"
+                  className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
               </Field>
               <Field id="confirm" label="ULANGI PASSWORD" error={errors.confirm}>
-                <ZineInput
+                <Input
                   id="confirm"
                   type="password"
                   value={confirm}
@@ -296,20 +290,23 @@ export function Onboarding() {
                   onChange={(e) => setConfirm(e.target.value)}
                   placeholder="••••••••••"
                   aria-invalid={!!errors.confirm}
-                  className="rounded-md px-4 py-3 text-sm"
+                  className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
               </Field>
               <div className="flex items-center justify-between">
-                <button
+                <Button
                   type="button"
                   onClick={() => setStep("instance")}
+                  variant="secondary"
                   className="btn-zine btn-paper px-4 py-3 text-sm"
                 >
-                  KEMBALI
-                </button>
-                <button type="submit" className="btn-zine px-5 py-3 text-sm">
-                  REVIEW <ArrowRight className="h-4 w-4" />
-                </button>
+                  {" "}
+                  KEMBALI{" "}
+                </Button>
+                <Button type="submit" className="btn-zine px-5 py-3 text-sm">
+                  {" "}
+                  REVIEW <ArrowRight className="h-4 w-4" />{" "}
+                </Button>
               </div>
             </form>
           )}
@@ -317,7 +314,8 @@ export function Onboarding() {
           {step === "review" && (
             <div className="space-y-5">
               <h2 className="font-brush text-2xl text-white">
-                SIAP <span className="text-[var(--green)]">DIBUKA</span>
+                {" "}
+                SIAP <span className="text-[var(--green)]">DIBUKA</span>{" "}
               </h2>
               <dl className="divide-y divide-[var(--line)] border border-[var(--line)]">
                 <div className="flex items-center justify-between px-4 py-3">
@@ -338,36 +336,43 @@ export function Onboarding() {
                   role="alert"
                   className="border border-[var(--red)]/40 bg-[var(--red)]/10 px-3 py-2 text-xs text-[var(--red)]"
                 >
-                  {errors.form}
+                  {" "}
+                  {errors.form}{" "}
                 </p>
               )}
               <p className="text-[11px] text-zinc-500">
-                Setelah dibuat, endpoint setup ditutup permanen. Simpan kredensial di tempat aman.
+                {" "}
+                Setelah dibuat, endpoint setup ditutup permanen. Simpan kredensial di tempat
+                aman.{" "}
               </p>
               <div className="flex items-center justify-between">
-                <button
+                <Button
                   type="button"
                   onClick={() => setStep("account")}
+                  variant="secondary"
                   className="btn-zine btn-paper px-4 py-3 text-sm"
                   disabled={create.isPending}
                 >
-                  KEMBALI
-                </button>
-                <button
+                  {" "}
+                  KEMBALI{" "}
+                </Button>
+                <Button
                   type="button"
                   onClick={submit}
                   disabled={create.isPending}
                   className="btn-zine px-5 py-3 text-sm"
                 >
-                  {create.isPending ? "MEMBUAT…" : "BUAT SUPERUSER"}
-                </button>
+                  {" "}
+                  {create.isPending ? "MEMBUAT…" : "BUAT SUPERUSER"}{" "}
+                </Button>
               </div>
             </div>
           )}
         </ZineCardRough>
 
         <p className="mt-5 text-center text-[11px] text-zinc-600">
-          Setup hanya tersedia dari host ini (loopback / SSH tunnel).
+          {" "}
+          Setup hanya tersedia dari host ini (loopback / SSH tunnel).{" "}
         </p>
       </main>
     </div>

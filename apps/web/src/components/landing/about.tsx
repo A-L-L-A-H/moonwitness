@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
-import { Grain } from "@moonwitness/ui";
+import { Grain, Button } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { useScrollReveal } from "@/lib/motion/use-scroll-reveal";
 
@@ -63,11 +63,15 @@ export function About() {
           </p>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/shadow" className="btn-zine btn-paper px-8 py-4 text-xl">
-            BECOME A MOONWITNESS <ArrowRight className="h-5 w-5" />
+          <Link href="/shadow">
+            <Button size="lg" className="px-8 py-4 text-xl">
+              BECOME A MOONWITNESS <ArrowRight className="h-5 w-5" />
+            </Button>
           </Link>
-          <Link href="/mission-control" className="btn-zine btn-blue px-8 py-4 text-xl">
-            MISSION CONTROL
+          <Link href="/mission-control">
+            <Button variant="outline" size="lg" className="px-8 py-4 text-xl">
+              MISSION CONTROL
+            </Button>
           </Link>
         </div>
         <div

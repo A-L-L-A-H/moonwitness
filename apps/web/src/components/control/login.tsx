@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Tape, ZineCardRough, ZineInput } from "@moonwitness/ui";
+import { Tape, ZineCardRough, Input } from "@moonwitness/ui";
+import { Label } from "@moonwitness/ui";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
 import { useLogin } from "@/lib/api/onboarding";
 
@@ -47,37 +48,37 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
 
           <form onSubmit={submit} className="mt-7 space-y-5" noValidate>
             <div>
-              <label
+              <Label
                 htmlFor="control-email"
                 className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300"
               >
                 EMAIL
-              </label>
-              <ZineInput
+              </Label>
+              <Input
                 id="control-email"
                 type="email"
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="rounded-md px-4 py-3 text-sm"
+                className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
               />
             </div>
             <div>
-              <label
+              <Label
                 htmlFor="control-password"
                 className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300"
               >
                 PASSWORD
-              </label>
-              <ZineInput
+              </Label>
+              <Input
                 id="control-password"
                 type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••"
-                className="rounded-md px-4 py-3 text-sm"
+                className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
               />
             </div>
 

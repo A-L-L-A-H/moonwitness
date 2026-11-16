@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { artSrc } from "@/lib/art";
 import { ArrowRight, Crown, SafetyPin, SprayCan } from "@moonwitness/ui/icons";
-import { DistressedSticker, Staple, TactileTape } from "@moonwitness/ui";
+import { DistressedSticker, Staple, TactileTape, Button } from "@moonwitness/ui";
 
 export function Signals() {
   return (
@@ -57,11 +57,10 @@ export function Signals() {
               A story from the Moonwitness storyworld. Strange sounds. A deeper current. What are we
               really hearing?
             </p>
-            <Link
-              href="/dock"
-              className="btn-zine btn-blue mt-4 min-h-11 px-5 py-2.5 text-sm shadow-[3px_3px_0_#000]"
-            >
-              READ SIGNAL STORY <ArrowRight className="h-4 w-4" />
+            <Link href="/dock" className="mt-4 inline-block">
+              <Button className="min-h-11 px-5 py-2.5 text-sm">
+                READ SIGNAL STORY <ArrowRight className="h-4 w-4" />
+              </Button>
             </Link>
           </div>
         </article>
@@ -96,11 +95,10 @@ export function Signals() {
               Fictional story fragments from the Moonwitness storyworld.
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--line)] pt-3">
-              <Link
-                href="/dock"
-                className="btn-zine btn-blue min-h-11 px-5 py-2.5 text-sm shadow-[3px_3px_0_#000]"
-              >
-                EXPLORE STORIES <ArrowRight className="h-4 w-4" />
+              <Link href="/dock">
+                <Button className="min-h-11 px-5 py-2.5 text-sm">
+                  EXPLORE STORIES <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
               <span className="font-mono text-[10px] text-zinc-500">TAG: #ROOFTOP</span>
             </div>
@@ -136,11 +134,10 @@ export function Signals() {
               Fictional signals, invented connections, and scenes from the Moonwitness storyworld.
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--line)] pt-3">
-              <Link
-                href="/dock"
-                className="btn-zine btn-yellow min-h-11 px-5 py-2.5 text-sm shadow-[3px_3px_0_#000]"
-              >
-                ACCESS ARCHIVE <ArrowRight className="h-4 w-4" />
+              <Link href="/dock">
+                <Button className="min-h-11 px-5 py-2.5 text-sm">
+                  ACCESS ARCHIVE <ArrowRight className="h-4 w-4" />
+                </Button>
               </Link>
               <span className="font-mono text-[10px] text-[var(--red)] font-bold">
                 STORYWORLD ARCHIVE

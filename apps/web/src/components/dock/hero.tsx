@@ -28,6 +28,9 @@ export function DockHero({ visibleCount, total }: { visibleCount: number; total:
             A public chronology of projects, stories, signals, and moments across the Empire.
             Different people. Same sky. Many stories.
           </p>
+          <p className="mt-2 text-xs font-semibold tracking-wide text-[var(--yellow)]">
+            STORY-WORLD DEMO DATA — NOT VERIFIED REAL-WORLD REPORTING
+          </p>
         </div>
         <div className="text-right">
           <div className="font-brush text-5xl text-[var(--yellow)]">

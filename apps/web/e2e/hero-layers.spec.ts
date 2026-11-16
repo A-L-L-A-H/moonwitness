@@ -110,11 +110,13 @@ for (const width of [320, 390, 430, 768, 1024, 1440]) {
     for (const [role, source] of Object.entries(sources)) {
       const image = root.locator(`[data-hero-layer='${role}']`);
       await expect(image).toHaveAttribute("src", new RegExp(source));
-      expect(
-        await image.evaluate(
-          (el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth > 0,
-        ),
-      ).toBe(true);
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalWidth > 0,
+          ),
+        )
+        .toBe(true);
     }
     await expect(root.locator("[data-hero-headline]")).toHaveCSS("opacity", "1");
     await expect(root.locator("[data-hero-character-reveal]")).toHaveCSS("transform", "none");

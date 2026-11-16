@@ -16,6 +16,7 @@ next-env.d.ts
 # testing
 coverage/
 test-results/
+apps/web/pacts/
 
 # local database artifacts (libSQL/SQLite write these next to the app)
 *.db
@@ -75,3 +76,17 @@ services/*/target/
 
 # Qoder tool worktrees
 .qoder/
+
+# Local raw ChatGPT archives & runtime memory vault data (stored safely in gitignored apps/memory/data/inbox)
+.raw_archives/
+apps/memory/data/
+apps/memory/**/__pycache__/
+apps/memory/.env
+venv/
+.venv/
+
+# ROCKSOUL desktop build/screenshot scratch outputs
+apps/rocksoul/src-tauri/target/
+apps/rocksoul/shots/
+apps/rocksoul/test-results/
+apps/rocksoul/.taste-skill/

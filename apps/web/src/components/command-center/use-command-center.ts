@@ -24,6 +24,15 @@ import {
   projects,
   workspaceItems,
 } from "@/lib/data";
+import {
+  CommandCenterApiError,
+  type CommandCenterStats,
+  createCommandCenterWorkflow,
+  dismissCommandCenterAlert,
+  fetchCommandCenterState,
+  fetchCommandCenterStats,
+  toggleCommandCenterWorkflow,
+} from "@/lib/api/command-center";
 import type { ItemDrawerDetail } from "./item-drawer";
 
 export interface CommandCenterState {
@@ -52,6 +61,7 @@ export interface CommandCenterState {
   onQueue: (m: Module) => void;
   onDismissAlert: (id: string) => void;
   onToggleWorkflow: (id: string) => void;
+  stats: CommandCenterStats | null;
   previousFocus: HTMLElement | null;
   setPreviousFocus: (el: HTMLElement | null) => void;
 }
@@ -62,6 +72,7 @@ export function useCommandCenter(): CommandCenterState {
   const [openModule, setOpenModule] = useState<Module | null>(null);
   const [workflows, setWorkflows] = useState<Workflow[]>(initialWorkflows);
   const [alerts, setAlerts] = useState<MissionAlert[]>(initialAlerts);
+  const [stats, setStats] = useState<CommandCenterStats | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [detail, setDetail] = useState<ItemDrawerDetail | null>(null);
@@ -71,6 +82,29 @@ export function useCommandCenter(): CommandCenterState {
     const m = modules.find((mod) => mod.id === params.get("module"));
     if (m) setOpenModule(m);
   }, [params]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    Promise.all([
+      fetchCommandCenterState(controller.signal),
+      fetchCommandCenterStats(controller.signal),
+    ])
+      .then(([snapshot, statsSnapshot]) => {
+        setWorkflows(snapshot.workflows);
+        setAlerts(snapshot.alerts);
+        setStats(statsSnapshot);
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        if (error instanceof CommandCenterApiError && error.status === 401) {
+          setToast("Read-only preview: sign in via /shadow to save workflows and alerts.");
+          return;
+        }
+        const message = error instanceof Error ? error.message : "Backend unavailable";
+        setToast(`Offline command state fallback (${message}).`);
+      });
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -166,29 +200,65 @@ export function useCommandCenter(): CommandCenterState {
     });
   }
 
+  function formatMutationError(error: unknown, fallback: string): string {
+    if (error instanceof CommandCenterApiError && error.status === 401) {
+      return "Sign in via /shadow to persist Command Center changes.";
+    }
+    return error instanceof Error ? error.message : fallback;
+  }
+
   function onQueue(m: Module) {
-    const wf: Workflow = {
-      id: `wf-${Date.now()}`,
+    setOpenModule(null);
+    void createCommandCenterWorkflow({
       name: `${m.name} Run`,
       detail: "Queued from module console…",
-      status: "Running",
-    };
-    setWorkflows((ws) => [wf, ...ws]);
-    setToast(`${m.name}: new run queued and started.`);
-    setOpenModule(null);
+      status: "Queued",
+    })
+      .then((wf) => {
+        setWorkflows((ws) => [wf, ...ws]);
+        setStats((s) => (s ? { ...s, workflows: s.workflows + 1, queued: s.queued + 1 } : s));
+        setToast(`${m.name}: new run queued and saved.`);
+      })
+      .catch((error: unknown) => {
+        setToast(formatMutationError(error, `Could not queue ${m.name}.`));
+      });
   }
 
   function onDismissAlert(id: string) {
-    setAlerts((list) => list.filter((a) => a.id !== id));
-    setToast("Alert dismissed.");
+    void dismissCommandCenterAlert(id)
+      .then(() => {
+        setAlerts((list) => list.filter((a) => a.id !== id));
+        setStats((s) => (s ? { ...s, alerts: Math.max(0, s.alerts - 1) } : s));
+        setToast("Alert dismissed.");
+      })
+      .catch((error: unknown) => {
+        setToast(formatMutationError(error, "Could not dismiss alert."));
+      });
   }
 
   function onToggleWorkflow(id: string) {
-    setWorkflows((ws) =>
-      ws.map((w) =>
-        w.id === id ? { ...w, status: w.status === "Running" ? "Paused" : "Running" } : w,
-      ),
-    );
+    void toggleCommandCenterWorkflow(id)
+      .then((updated) => {
+        setWorkflows((ws) => ws.map((w) => (w.id === id ? updated : w)));
+        setStats((s) => {
+          if (!s) return s;
+          const previous = workflows.find((w) => w.id === id);
+          if (!previous) return s;
+          const statusKey = (status: Workflow["status"]) =>
+            status.charAt(0).toLowerCase() + status.slice(1);
+          const before = statusKey(previous.status) as keyof CommandCenterStats;
+          const after = statusKey(updated.status) as keyof CommandCenterStats;
+          return {
+            ...s,
+            [before]: Math.max(0, (s[before] as number) - 1),
+            [after]: (s[after] as number) + 1,
+          };
+        });
+        setToast(`${updated.name}: ${updated.status}.`);
+      })
+      .catch((error: unknown) => {
+        setToast(formatMutationError(error, "Could not update workflow status."));
+      });
   }
 
   return {
@@ -210,6 +280,7 @@ export function useCommandCenter(): CommandCenterState {
     onQueue,
     onDismissAlert,
     onToggleWorkflow,
+    stats,
     previousFocus,
     setPreviousFocus,
   };

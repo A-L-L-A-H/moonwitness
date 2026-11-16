@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Button } from "@moonwitness/ui";
 import type { NavLink } from "./links";
 
 export interface MobileMenuProps {
@@ -28,8 +29,8 @@ export function MobileMenu({ links, active, onSelect, onClose }: MobileMenuProps
           {link.label}
         </a>
       ))}
-      <Link href="/shadow" onClick={onClose} className="btn-zine mt-2 px-5 py-2.5 text-base">
-        JOIN THE CREW →
+      <Link href="/shadow" onClick={onClose} className="mt-2 inline-block">
+        <Button className="px-5 py-2.5 text-base">JOIN THE CREW →</Button>
       </Link>
     </nav>
   );

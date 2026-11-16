@@ -29,6 +29,34 @@ interface Bucket {
   resetAt: number;
 }
 
+/**
+ * Resolves the rate-limit identity for a request.
+ *
+ * Node only reports the socket peer, so a deployment behind `n` reverse
+ * proxies must opt in with `TRUSTED_PROXY_COUNT=n`. Anything above that is
+ * caller-controlled and ignored, which stops `X-Forwarded-For` spoofing from
+ * minting unlimited buckets.
+ */
+export function resolveRateLimitKey(
+  peer: string,
+  forwardedFor: string | string[] | undefined,
+  trustedProxyCount: number,
+): string {
+  if (!Number.isInteger(trustedProxyCount) || trustedProxyCount <= 0) return peer;
+  const header = Array.isArray(forwardedFor)
+    ? forwardedFor.join(",")
+    : typeof forwardedFor === "string"
+      ? forwardedFor
+      : "";
+  const hops = header
+    .split(",")
+    .map((hop) => hop.trim())
+    .filter((hop) => hop.length > 0);
+  if (hops.length < trustedProxyCount) return peer;
+  const client = hops[hops.length - trustedProxyCount];
+  return client && client.length > 0 ? client : peer;
+}
+
 export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
   const { windowMs, max } = options;
   const now = options.now ?? (() => Date.now());

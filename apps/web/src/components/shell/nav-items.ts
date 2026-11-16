@@ -27,6 +27,13 @@ export function navHref(item: NavItem): string {
 const ACTIVE_BY_PATH: Record<string, string> = {
   "/dock": "archive",
   "/mission-control": "dashboard",
+  "/intelligence": "intelligence",
+  "/control": "control",
+  "/syslog": "syslog",
+  "/snmp": "snmp",
+  "/radius": "radius",
+  "/storage": "storage",
+  "/vpn": "vpn",
   "/shadow": "settings",
   "/id-lab": "id-lab",
 };
@@ -34,6 +41,51 @@ const ACTIVE_BY_PATH: Record<string, string> = {
 export function activeByPath(pathname: string): string {
   return ACTIVE_BY_PATH[pathname] ?? "";
 }
+
+export const operationsNavItems: NavItem[] = [
+  {
+    id: "control",
+    label: "Control Plane",
+    icon: "M4 6 L20 6 M4 12 L20 12 M4 18 L20 18 M8 4 L8 8 M16 10 L16 14 M11 16 L11 20",
+    target: { kind: "route", href: "/control" },
+  },
+  {
+    id: "vpn",
+    label: "VPN",
+    icon: "M12 3 L20 7 L20 17 L12 21 L4 17 L4 7 Z M8 10 L16 10 M8 14 L16 14",
+    target: { kind: "route", href: "/vpn" },
+  },
+  {
+    id: "syslog",
+    label: "Syslog",
+    icon: "M4 5 L20 5 L20 19 L4 19 Z M8 9 L16 9 M8 13 L16 13 M8 17 L12 17",
+    target: { kind: "route", href: "/syslog" },
+  },
+  {
+    id: "snmp",
+    label: "SNMP",
+    icon: "M4 5 L20 5 L20 19 L4 19 Z M8 9 L16 9 M8 13 L16 13",
+    target: { kind: "route", href: "/snmp" },
+  },
+  {
+    id: "storage",
+    label: "Storage",
+    icon: "M4 7 L12 3 L20 7 L12 11 Z M4 12 L12 16 L20 12 M4 17 L12 21 L20 17",
+    target: { kind: "route", href: "/storage" },
+  },
+  {
+    id: "radius",
+    label: "RADIUS",
+    icon: "M12 3 L20 7 L20 17 L12 21 L4 17 L4 7 Z M8 10 L16 10 M8 14 L16 14",
+    target: { kind: "route", href: "/radius" },
+  },
+  {
+    id: "dashboard",
+    label: "Empire Studio",
+    icon: "M4 11 L12 4 L20 11 M6 10 L6 20 L18 20 L18 10",
+    target: { kind: "route", href: "/mission-control" },
+  },
+];
 
 export const navItems: NavItem[] = [
   {
@@ -85,6 +137,12 @@ export const navItems: NavItem[] = [
     target: { kind: "section", href: "/mission-control", anchor: "cc-log" },
   },
   {
+    id: "intelligence",
+    label: "RIOT Intelligence",
+    icon: "M12 3 L14 9 L21 12 L14 15 L12 21 L10 15 L3 12 L10 9 Z M12 9 L12 15",
+    target: { kind: "route", href: "/intelligence" },
+  },
+  {
     id: "id-lab",
     label: "ID Lab",
     icon: "M12 11 A4 4 0 1 0 12 3 A4 4 0 1 0 12 11 M4 21 Q4 15 12 15 Q20 15 20 21 M17 4 L18 2 L19 4 L21 5 L19 6 L18 8 L17 6 L15 5 Z",
@@ -98,7 +156,7 @@ export const navItems: NavItem[] = [
   },
   {
     id: "settings",
-    label: "Settings",
+    label: "Shadow Sign-In",
     icon: "M12 8 A4 4 0 1 0 12 16 A4 4 0 1 0 12 8 M12 2 L12 5 M12 19 L12 22 M2 12 L5 12 M19 12 L22 12 M5 5 L7 7 M17 17 L19 19 M19 5 L17 7 M7 17 L5 19",
     target: { kind: "route", href: "/shadow" },
   },

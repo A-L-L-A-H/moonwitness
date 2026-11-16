@@ -1,5 +1,5 @@
 import type { PipelineCard, PipelineColumn } from "@moonwitness/types";
-import { KanbanColumn } from "@moonwitness/ui";
+import { KanbanColumn, Grid } from "@moonwitness/ui";
 import { SectionHeading } from "./section-heading";
 
 export interface PipelineProps {
@@ -16,11 +16,11 @@ export function Pipeline({ columns, onOpenCard }: PipelineProps) {
         accent="PIPELINE"
         note="click a card, no dragging"
       />
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <Grid cols={{ md: 2, xl: 4 }} gap={4}>
         {columns.map((column) => (
           <KanbanColumn key={column.stage} column={column} onOpenItem={onOpenCard} />
         ))}
-      </div>
+      </Grid>
     </section>
   );
 }

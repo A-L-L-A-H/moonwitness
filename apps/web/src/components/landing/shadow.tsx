@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowRight, SkullCrossbonesFunky, SprayCan } from "@moonwitness/ui/icons";
-import { DistressedSticker, Grain, Staple } from "@moonwitness/ui";
+import { DistressedSticker, Grain, Staple, Button } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { useTimelineEvents } from "@/lib/api/timeline";
 
@@ -145,12 +145,13 @@ export function Shadow() {
                 <p role="alert" className="font-mono text-sm text-zinc-400">
                   Archive preview unavailable.
                 </p>
-                <button
+                <Button
+                  variant="destructive"
                   onClick={() => void refetch()}
-                  className="btn-zine mt-4 min-h-11 min-w-11 px-4 py-3"
+                  className="mt-4 min-h-11 min-w-11 px-4 py-3"
                 >
                   Retry archive preview
-                </button>
+                </Button>
               </div>
             ) : event ? (
               <Link
@@ -183,12 +184,10 @@ export function Shadow() {
         </div>
 
         <div className="mt-12 flex flex-wrap items-center gap-5">
-          <Link
-            href="/shadow"
-            className="btn-zine px-8 py-4 text-xl shadow-[5px_5px_0_rgba(255,59,59,0.5)]"
-            style={{ "--btn-bg": "#1a0a0a", "--btn-fg": "#ff3b3b" } as React.CSSProperties}
-          >
-            ENTER THE SHADOW <ArrowRight className="h-5 w-5" />
+          <Link href="/shadow">
+            <Button variant="destructive" size="lg" className="px-8 py-4 text-xl">
+              ENTER THE SHADOW <ArrowRight className="h-5 w-5" />
+            </Button>
           </Link>
           <DistressedSticker variant="barcode" code="SHD-LEVEL-4" className="rotate-[-2deg]" />
         </div>

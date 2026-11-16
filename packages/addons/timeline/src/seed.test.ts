@@ -58,7 +58,14 @@ describe("seedTimeline", () => {
 
   it("keeps stable ids and related-event links intact", async () => {
     await seedTimeline();
+    const eventIds = new Set(events.map((event) => event.id));
+    const eraIds = new Set(eras.map((era) => era.id));
+
+    expect(eventIds.size).toBe(events.length);
+    expect(eraIds.size).toBe(eras.length);
     for (const event of events) {
+      expect(eraIds.has(event.era)).toBe(true);
+      expect(event.related.every((relatedId) => eventIds.has(relatedId))).toBe(true);
       const row = await getDb().get<{ id: string }>(
         `SELECT id FROM ${timelineEventModel.table} WHERE id = ?`,
         [event.id],

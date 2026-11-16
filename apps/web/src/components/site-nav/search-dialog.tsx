@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ZineInput } from "@moonwitness/ui";
+import { Button, Input } from "@moonwitness/ui";
 
 export interface SearchDialogProps {
   query: string;
@@ -13,7 +13,6 @@ export interface SearchDialogProps {
 export function SearchDialog({ query, onQueryChange, onSubmit, onClose }: SearchDialogProps) {
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Escape closes the dialog; Tab cycles within the dialog's focusable elements.
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
@@ -64,21 +63,27 @@ export function SearchDialog({ query, onQueryChange, onSubmit, onClose }: Search
           <label htmlFor="nav-search" className="font-brush text-lg text-[var(--yellow)]">
             SEARCH THE SIGNALS
           </label>
-          <button type="button" onClick={onClose} className="btn-zine min-h-11 px-3 text-sm">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="btn-zine min-h-11 px-3 text-sm"
+          >
             Close search
-          </button>
+          </Button>
         </div>
         <div className="mt-3 flex gap-2">
-          <ZineInput
+          <Input
             id="nav-search"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="stories, signals, people, places…"
-            className="rounded-md px-4 py-3 text-sm"
+            className="rounded-md bg-[var(--background)] border-[var(--line)] px-4 py-3 text-sm focus:border-[var(--pink)] focus:ring-[var(--pink)]"
           />
-          <button type="submit" className="btn-zine px-5 py-2 text-sm">
+          <Button type="submit" className="btn-zine px-5 py-2 text-sm">
             GO
-          </button>
+          </Button>
         </div>
         <p className="mt-3 text-xs text-zinc-500">Searches the Dock timeline chronicle.</p>
       </form>

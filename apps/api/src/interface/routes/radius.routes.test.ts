@@ -1,12 +1,24 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
-import { radiusRoutes } from "./radius.routes";
 
-vi.mock("../../middleware/auth", () => ({
-  requireAuth: () => async () => {},
-  requireRole: () => async () => {},
-}));
+async function loadRoutes(allowWrite: boolean) {
+  vi.doMock("../../middleware/auth", () => ({
+    requireAuth: () => async () => {},
+    requireRole: () =>
+      allowWrite
+        ? async () => {}
+        : async (
+            _request: unknown,
+            reply: { code: (status: number) => { send: (body: unknown) => unknown } },
+          ) => {
+            reply.code(403).send({ error: "Forbidden: insufficient permissions" });
+          },
+  }));
+  vi.resetModules();
+  const module = await import("./radius.routes");
+  return module.radiusRoutes;
+}
 
 describe("RADIUS proxy authorization", () => {
   let app: FastifyInstance | null = null;
@@ -15,9 +27,11 @@ describe("RADIUS proxy authorization", () => {
     await app?.close();
     app = null;
     vi.unstubAllGlobals();
+    vi.doUnmock("../../middleware/auth");
   });
 
   it("forwards reads to the upstream service", async () => {
+    const routes = await loadRoutes(true);
     const fetch = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ users: [] }), {
         status: 200,
@@ -27,7 +41,7 @@ describe("RADIUS proxy authorization", () => {
     vi.stubGlobal("fetch", fetch);
     app = Fastify({ logger: false });
     await app.register(FastifyCors);
-    await app.register(radiusRoutes);
+    await app.register(routes);
     await app.ready();
 
     const read = await app.inject({ method: "GET", url: "/radius/users" });
@@ -36,11 +50,12 @@ describe("RADIUS proxy authorization", () => {
   });
 
   it("blocks writes when RADIUS_PROXY_ADMIN is not enabled", async () => {
+    const routes = await loadRoutes(true);
     const fetch = vi.fn();
     vi.stubGlobal("fetch", fetch);
     app = Fastify({ logger: false });
     await app.register(FastifyCors);
-    await app.register(radiusRoutes);
+    await app.register(routes);
     await app.ready();
 
     const write = await app.inject({ method: "POST", url: "/radius/users", payload: {} });
@@ -49,13 +64,14 @@ describe("RADIUS proxy authorization", () => {
   });
 
   it("allows CORS preflight for PUT and DELETE on radius routes", async () => {
+    const routes = await loadRoutes(true);
     app = Fastify({ logger: false });
     await app.register(FastifyCors, {
       origin: true,
       methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
       credentials: true,
     });
-    await app.register(radiusRoutes);
+    await app.register(routes);
     await app.ready();
 
     // CORS preflight for PUT
@@ -83,5 +99,44 @@ describe("RADIUS proxy authorization", () => {
     });
     expect([200, 204]).toContain(deletePreflight.statusCode);
     expect(deletePreflight.headers["access-control-allow-methods"]).toContain("DELETE");
+  });
+
+  it("rejects user creation when the role gate denies the caller", async () => {
+    const routes = await loadRoutes(false);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    process.env.RADIUS_PROXY_ADMIN = "1";
+    app = Fastify({ logger: false });
+    await app.register(FastifyCors);
+    await app.register(routes);
+    await app.ready();
+
+    const response = await app.inject({
+      method: "POST",
+      url: "/radius/users",
+      payload: { username: "mallory", password: "mallory-password-2026" },
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
+    delete process.env.RADIUS_PROXY_ADMIN;
+  });
+
+  it("rejects user deletion when the role gate denies the caller", async () => {
+    const routes = await loadRoutes(false);
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    app = Fastify({ logger: false });
+    await app.register(FastifyCors);
+    await app.register(routes);
+    await app.ready();
+
+    const response = await app.inject({
+      method: "DELETE",
+      url: "/radius/users/alice",
+    });
+
+    expect(response.statusCode).toBe(403);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

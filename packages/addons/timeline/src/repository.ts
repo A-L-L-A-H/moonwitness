@@ -7,6 +7,8 @@ export interface TimelineFilters {
   kind?: string;
   from?: string;
   to?: string;
+  q?: string;
+  sort?: "newest" | "oldest";
   limit?: number;
   offset?: number;
 }
@@ -97,6 +99,18 @@ export class TimelineRepository implements ITimelineRepository {
       clauses.push("date <= ?");
       params.push(filters.to);
     }
+    if (filters.q?.trim()) {
+      const escapedQuery = filters.q
+        .trim()
+        .toLowerCase()
+        .replaceAll("\\", "\\\\")
+        .replaceAll("%", "\\%")
+        .replaceAll("_", "\\_");
+      clauses.push(
+        "lower(title || ' ' || excerpt || ' ' || body || ' ' || location || ' ' || tags) LIKE ? ESCAPE '\\'",
+      );
+      params.push(`%${escapedQuery}%`);
+    }
 
     const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
     const table = this.events.table;
@@ -108,9 +122,10 @@ export class TimelineRepository implements ITimelineRepository {
 
     const limit = Math.min(Math.max(filters.limit ?? DEFAULT_LIST_LIMIT, 1), MAX_LIST_LIMIT);
     const offset = Math.max(filters.offset ?? 0, 0);
+    const orderBy = filters.sort === "newest" ? "date DESC, id DESC" : "date ASC, id ASC";
 
     const rows = await db.all<Record<string, unknown>>(
-      `SELECT * FROM ${table} ${where} ORDER BY date ASC, id ASC LIMIT ? OFFSET ?`,
+      `SELECT * FROM ${table} ${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
       [...params, limit, offset],
     );
 

@@ -2,7 +2,6 @@
 
 @source "../../../../packages/ui/src";
 
-@import "@moonwitness/ui/theme.css";
 @import "@moonwitness/ui/base.css";
 @import "../styles/motion.css";
 

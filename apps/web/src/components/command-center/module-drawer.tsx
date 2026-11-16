@@ -1,7 +1,7 @@
 "use client";
 
 import type { Module, Project } from "@moonwitness/types";
-import { ModuleGlyph } from "@moonwitness/ui";
+import { ModuleGlyph, Card, Button } from "@moonwitness/ui";
 import { ArrowRight } from "@moonwitness/ui/icons";
 import { useFocusTrap } from "./use-focus-trap";
 
@@ -24,7 +24,7 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
       aria-label={`${module.name} console`}
     >
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="zine-card-rough absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-6">
+      <Card className="absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-6">
         <div className="flex items-start justify-between">
           <span
             className="flex h-14 w-14 items-center justify-center rounded-md"
@@ -35,14 +35,16 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
           >
             <ModuleGlyph icon={module.icon} className="h-7 w-7" />
           </span>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             onClick={onClose}
             aria-label="Close module console"
-            className="min-h-11 min-w-11 p-2 text-zinc-400 hover:text-[var(--pink)]"
+            className="min-h-11 min-w-11 p-2"
           >
             ✕
-          </button>
+          </Button>
         </div>
         <h2 className="font-brush mt-4 text-3xl text-white">{module.name.toUpperCase()}</h2>
         <p className="mt-2 text-sm leading-relaxed text-zinc-400">{module.description}</p>
@@ -74,17 +76,17 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
             </div>
           ))}
         </div>
-        <button
+        <Button
           type="button"
           onClick={() => onQueue(module)}
-          className="btn-zine mt-6 w-full px-6 py-3.5 text-lg"
+          className="mt-6 w-full px-6 py-3.5 text-lg"
         >
           QUEUE NEW RUN <ArrowRight className="h-5 w-5" />
-        </button>
+        </Button>
         <p className="mt-3 text-center text-[10px] text-zinc-600">
           Starts a workflow in the Automation Center immediately.
         </p>
-      </div>
+      </Card>
     </div>
   );
 }

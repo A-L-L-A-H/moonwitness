@@ -127,38 +127,40 @@ export async function seedTimeline(): Promise<void> {
   const db = getDb();
   const now = new Date().toISOString();
 
-  for (const era of eras) {
-    await db.run(
-      `INSERT OR IGNORE INTO ${timelineEraModel.table}
+  await db.transaction(async (transaction) => {
+    for (const era of eras) {
+      await transaction.run(
+        `INSERT OR IGNORE INTO ${timelineEraModel.table}
        (id, name, years, tagline, color, create_date, write_date, source)
        VALUES (?, ?, ?, ?, ?, ?, ?, 'seed')`,
-      [era.id, era.name, era.years, era.tagline, era.color, now, now],
-    );
-  }
+        [era.id, era.name, era.years, era.tagline, era.color, now, now],
+      );
+    }
 
-  for (const event of events) {
-    await db.run(
-      `INSERT OR IGNORE INTO ${timelineEventModel.table}
+    for (const event of events) {
+      await transaction.run(
+        `INSERT OR IGNORE INTO ${timelineEventModel.table}
        (id, kind, date, era, title, excerpt, body, location, tags, sources, notes, image, imagePosition, related, create_date, write_date, source)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'seed')`,
-      [
-        event.id,
-        event.kind,
-        event.date,
-        event.era,
-        event.title,
-        event.excerpt,
-        event.body,
-        event.location,
-        JSON.stringify(event.tags),
-        event.sources,
-        event.notes,
-        event.image,
-        event.imagePosition ?? null,
-        JSON.stringify(event.related),
-        now,
-        now,
-      ],
-    );
-  }
+        [
+          event.id,
+          event.kind,
+          event.date,
+          event.era,
+          event.title,
+          event.excerpt,
+          event.body,
+          event.location,
+          JSON.stringify(event.tags),
+          event.sources,
+          event.notes,
+          event.image,
+          event.imagePosition ?? null,
+          JSON.stringify(event.related),
+          now,
+          now,
+        ],
+      );
+    }
+  });
 }

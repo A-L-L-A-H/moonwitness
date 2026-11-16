@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Sticker, Tape, ZineBadge, ZineCard, ZineCardRough } from "@moonwitness/ui";
+import { Sticker, Tape, Card, Badge, Progress, ZineCardRough } from "@moonwitness/ui";
 import { Crown, Star4 } from "@moonwitness/ui/icons";
-import { EmpireShell } from "@/components/shell";
+import { OperationsShell } from "@/components/shell";
 import {
   useControlAudit,
   useControlResources,
@@ -59,17 +59,15 @@ function Gauge({
 }) {
   const clamped = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
   return (
-    <ZineCard className="relative overflow-hidden p-4">
+    <Card className="relative overflow-hidden p-4">
       <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: tone }} />
       <div className="font-brush text-3xl leading-none" style={{ color: tone }}>
         {clamped.toFixed(0)}%
       </div>
       <div className="mt-2 text-[10px] tracking-widest text-zinc-500">{label}</div>
-      <div className="mt-2 h-1.5 w-full border border-[var(--line)] bg-black/40">
-        <div className="h-full" style={{ width: `${clamped}%`, background: tone }} />
-      </div>
+      <Progress value={clamped} className="mt-2 h-1.5" />
       <div className="mt-1.5 text-[11px] text-zinc-400">{detail}</div>
-    </ZineCard>
+    </Card>
   );
 }
 
@@ -135,7 +133,7 @@ function ResourcePanel({ kind }: { kind: Kind }) {
   );
 
   return (
-    <ZineCard className="overflow-hidden p-0">
+    <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
         <h2 className="font-brush text-lg text-white">
           {kind.toUpperCase()}{" "}
@@ -143,9 +141,9 @@ function ResourcePanel({ kind }: { kind: Kind }) {
             {kind === "systemd" || kind === "docker" ? "UNITS" : "RESOURCES"}
           </span>
         </h2>
-        <ZineBadge color="#2ea8ff" dark>
+        <Badge variant="default" className="bg-[var(--blue)] text-black">
           {isLoading ? "SYNCING" : error || kindError ? "UNAVAILABLE" : `${rows.length} SEEN`}
-        </ZineBadge>
+        </Badge>
       </div>
       {error || kindError ? (
         <p className="px-4 py-6 text-sm text-[var(--yellow)]">
@@ -171,7 +169,7 @@ function ResourcePanel({ kind }: { kind: Kind }) {
           </table>
         </div>
       )}
-    </ZineCard>
+    </Card>
   );
 }
 
@@ -183,7 +181,7 @@ function HostCard({
   metrics: HostMetrics;
 }) {
   return (
-    <ZineCardRough className="relative overflow-hidden p-5">
+    <ZineCardRough className="relative overflow-hidden p-5 skin-riot">
       <Star4 className="absolute right-4 top-4 h-6 w-6 text-[var(--pink)] opacity-70" />
       <p className="text-[10px] tracking-[0.25em] text-zinc-500">HOST AGENT</p>
       <h2 className="mt-1 font-brush text-2xl text-white">{host.hostname || "unknown-host"}</h2>
@@ -239,7 +237,7 @@ function AuditPanel() {
   const { data, isLoading } = useControlAudit(20);
   const entries = data ?? [];
   return (
-    <ZineCard className="overflow-hidden p-0">
+    <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
         <h2 className="font-brush text-lg text-white">
           AUDIT <span className="text-[var(--pink)]">TRAIL</span>
@@ -278,7 +276,7 @@ function AuditPanel() {
           ))}
         </ul>
       )}
-    </ZineCard>
+    </Card>
   );
 }
 
@@ -352,7 +350,7 @@ function ControlDashboard() {
   }
 
   return (
-    <EmpireShell
+    <OperationsShell
       breadcrumb="Control Plane"
       search={{ value: query, onChange: setQuery, placeholder: "Filter host state…" }}
     >
@@ -468,6 +466,6 @@ function ControlDashboard() {
           )
         )}
       </div>
-    </EmpireShell>
+    </OperationsShell>
   );
 }

@@ -62,6 +62,12 @@ export interface SampleQuery {
   limit?: number;
 }
 
+export type SafeSnmpDevice = Omit<SnmpDevice, "community">;
+
+export function sanitizeSnmpDevices(devices: SnmpDevice[]): SafeSnmpDevice[] {
+  return devices.map(({ community: _community, ...device }) => device);
+}
+
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, credentials: "include" });
   if (!res.ok) {

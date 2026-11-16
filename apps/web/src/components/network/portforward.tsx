@@ -1,10 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ZineBadge, ZineCard, ZineInput } from "@moonwitness/ui";
+import { Input, Card, Badge } from "@moonwitness/ui";
 import { useCreatePortForward, useDeletePortForward, usePortForwards } from "@/lib/api/portforward";
 
 export function PortForwardPanel() {
+  return <PortForwardPanelInner />;
+}
+
+function PortForwardPanelInner() {
   const { data, isLoading } = usePortForwards();
   const create = useCreatePortForward();
   const remove = useDeletePortForward();
@@ -48,7 +52,7 @@ export function PortForwardPanel() {
   }
 
   return (
-    <ZineCard className="overflow-hidden p-0">
+    <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
         <div>
           <h2 className="font-brush text-lg text-white">
@@ -58,14 +62,14 @@ export function PortForwardPanel() {
             Teruskan port publik host ke layanan di balik VPN (DNAT via nftables).
           </p>
         </div>
-        <ZineBadge color="#2ea8ff" dark>
+        <Badge variant="default" className="bg-[var(--blue)] text-black">
           {isLoading ? "SYNCING" : `${forwards.length} ATURAN`}
-        </ZineBadge>
+        </Badge>
       </div>
 
       <form onSubmit={submit} className="border-b border-[var(--line)] bg-[var(--panel-2)] p-4">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-[100px_80px_1fr_1fr_auto]">
-          <ZineInput
+          <Input
             value={port}
             onChange={(e) => setPort(e.target.value)}
             placeholder="Port: 8080"
@@ -89,21 +93,25 @@ export function PortForwardPanel() {
               </button>
             ))}
           </div>
-          <ZineInput
+          <Input
             value={to}
             onChange={(e) => setTo(e.target.value)}
             placeholder="Tujuan: 10.66.0.2:80"
             className="rounded-md px-3 py-2 text-xs"
             aria-label="Tujuan IP dan port"
           />
-          <ZineInput
+          <Input
             value={from}
             onChange={(e) => setFrom(e.target.value)}
             placeholder="Sumber (opsional CIDR)"
             className="rounded-md px-3 py-2 text-xs"
             aria-label="Sumber CIDR opsional"
           />
-          <button type="submit" disabled={create.isPending} className="btn-zine px-4 py-2 text-xs">
+          <button
+            type="submit"
+            disabled={create.isPending}
+            className="btn-zine border border-[var(--line)] px-4 py-2 text-xs"
+          >
             {create.isPending ? "MEMASANG…" : "TERUSKAN"}
           </button>
         </div>
@@ -157,7 +165,7 @@ export function PortForwardPanel() {
                       type="button"
                       onClick={() => deleteRule(f.key)}
                       disabled={remove.isPending}
-                      className="btn-zine px-2.5 py-1.5 text-[10px]"
+                      className="btn-zine border border-[var(--line)] px-2.5 py-1.5 text-[10px]"
                     >
                       HAPUS
                     </button>
@@ -168,6 +176,6 @@ export function PortForwardPanel() {
           </table>
         </div>
       )}
-    </ZineCard>
+    </Card>
   );
 }

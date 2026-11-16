@@ -1,8 +1,8 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import type { EraId } from "@moonwitness/types";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { EraId, TimelineEvent } from "@moonwitness/types";
 import { EmpireShell } from "../shell";
 import { Star4 } from "@moonwitness/ui/icons";
 import { EraBand } from "@moonwitness/ui";
@@ -10,102 +10,157 @@ import { DockHero } from "./hero";
 import { FilterBar, type SortKey } from "./filter-bar";
 import { EventList } from "./event-list";
 import { EventDetailPanel } from "./event-detail-panel";
-import { useTimelineEvents, useTimelineEras } from "@/lib/api/timeline";
+import {
+  useTimelineEras,
+  useTimelineEvent,
+  useTimelineEvents,
+  useTimelineRelatedEvents,
+  useTimelineStats,
+} from "@/lib/api/timeline";
+
+const PAGE_SIZE = 12;
+const EMPTY_EVENTS: TimelineEvent[] = [];
+type DockSearchKey = "q" | "era" | "sort" | "page" | "event";
+
+function readPage(rawPage: string | null): number {
+  const page = Number(rawPage);
+  return Number.isSafeInteger(page) && page > 0 ? page : 1;
+}
 
 export function Dock() {
   const params = useSearchParams();
-  const [query, setQuery] = useState(params.get("q") ?? "");
-  const [era, setEra] = useState<EraId | "all">((params.get("era") ?? "all") as EraId | "all");
-  const [sort, setSort] = useState<SortKey>("newest");
+  const router = useRouter();
+  const paramsString = params.toString();
+  const queryFromUrl = params.get("q") ?? "";
+  const rawEra = params.get("era");
+  const era = (rawEra ?? "all") as EraId | "all";
+  const sort: SortKey = params.get("sort") === "oldest" ? "oldest" : "newest";
+  const page = readPage(params.get("page"));
+  const eventId = params.get("event") || null;
+  const [queryInput, setQueryInput] = useState(queryFromUrl);
+  const [drawerOpen, setDrawerOpen] = useState(Boolean(eventId));
+  const [isDesktopXl, setIsDesktopXl] = useState(false);
   const [view, setView] = useState<"grid" | "list">("grid");
-  const [selectedId, setSelectedId] = useState<string | null>(() => {
-    const id = params.get("event");
-    return id; // will be validated after data loads
-  });
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [origin, setOrigin] = useState("");
 
-  const {
-    data: eventsData,
-    isLoading: eventsLoading,
-    isError: eventsError,
-    refetch: refetchEvents,
-  } = useTimelineEvents({
-    era: era === "all" ? undefined : era,
-    limit: 100,
+  const updateSearchParams = useCallback(
+    (
+      updates: Partial<Record<DockSearchKey, string | null>>,
+      history: "push" | "replace" = "replace",
+    ) => {
+      const nextParams = new URLSearchParams(paramsString);
+      for (const [key, value] of Object.entries(updates)) {
+        if (value) nextParams.set(key, value);
+        else nextParams.delete(key);
+      }
+      const query = nextParams.toString();
+      const url = query ? `/dock?${query}` : "/dock";
+      if (history === "push") router.push(url, { scroll: false });
+      else router.replace(url, { scroll: false });
+    },
+    [paramsString, router],
+  );
+
+  const eventsQuery = useTimelineEvents({
+    era: rawEra ?? undefined,
+    q: queryFromUrl || undefined,
+    sort,
+    limit: PAGE_SIZE,
+    offset: (page - 1) * PAGE_SIZE,
   });
-  const {
-    data: erasData,
-    isLoading: erasLoading,
-    isError: erasError,
-    refetch: refetchEras,
-  } = useTimelineEras();
+  const erasQuery = useTimelineEras();
+  const statsQuery = useTimelineStats();
+  const timelineEvents = eventsQuery.data?.data ?? EMPTY_EVENTS;
+  const eras = erasQuery.data?.data ?? [];
+  const selectedFromList = timelineEvents[0] ?? null;
+  const selectedInList = eventId
+    ? (timelineEvents.find((event) => event.id === eventId) ?? null)
+    : null;
+  const selectedDetailQuery = useTimelineEvent(eventId);
+  const selected = eventId ? (selectedDetailQuery.data?.data ?? selectedInList) : selectedFromList;
+  const relatedQuery = useTimelineRelatedEvents(selected?.related ?? []);
+  const relatedEvents = relatedQuery.data ?? EMPTY_EVENTS;
+  const selectedEra = selected
+    ? (eras.find((availableEra) => availableEra.id === selected.era) ?? null)
+    : null;
+  const total = eventsQuery.data?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const selectedListId = eventId ?? selectedFromList?.id ?? null;
+
+  useEffect(() => {
+    setQueryInput(queryFromUrl);
+  }, [queryFromUrl]);
+
+  useEffect(() => {
+    setDrawerOpen(Boolean(eventId));
+  }, [eventId]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const syncViewport = () => setIsDesktopXl(mediaQuery.matches);
+    syncViewport();
+    mediaQuery.addEventListener("change", syncViewport);
+    return () => mediaQuery.removeEventListener("change", syncViewport);
+  }, []);
 
   useEffect(() => setOrigin(window.location.origin), []);
 
-  const timelineEvents = eventsData?.data ?? [];
-  const eras = erasData?.data ?? [];
+  useEffect(() => {
+    const query = queryInput.trim();
+    if (query === queryFromUrl) return;
+    const timeout = window.setTimeout(
+      () => updateSearchParams({ q: query || null, page: null }),
+      300,
+    );
+    return () => window.clearTimeout(timeout);
+  }, [queryFromUrl, queryInput, updateSearchParams]);
 
   useEffect(() => {
-    const id = params.get("event");
-    if (id && timelineEvents.some((e) => e.id === id)) {
-      setSelectedId(id);
-      setDrawerOpen(true);
-    } else if (timelineEvents.length > 0) {
-      const first = timelineEvents[0];
-      if (first) setSelectedId(first.id);
+    if (eventsQuery.isSuccess && page > totalPages) {
+      updateSearchParams({ page: totalPages > 1 ? String(totalPages) : null });
     }
-  }, [timelineEvents, params]);
+  }, [eventsQuery.isSuccess, page, totalPages, updateSearchParams]);
 
-  const q = query.trim().toLowerCase();
-  const visible = useMemo(() => {
-    let list = timelineEvents.filter((e) => era === "all" || e.era === era);
-    if (q)
-      list = list.filter((e) =>
-        `${e.title} ${e.excerpt} ${e.body} ${e.tags.join(" ")} ${e.location}`
-          .toLowerCase()
-          .includes(q),
-      );
-    return [...list].sort((a, b) =>
-      sort === "newest" ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date),
-    );
-  }, [era, q, sort, timelineEvents]);
+  const shareUrl = useMemo(() => {
+    if (!selected) return "";
+    const shareParams = new URLSearchParams(paramsString);
+    shareParams.set("event", selected.id);
+    return `${origin}/dock?${shareParams.toString()}`;
+  }, [origin, paramsString, selected]);
 
-  const selected = timelineEvents.find((e) => e.id === selectedId) ?? null;
-  const selectedEra = selected ? eras.find((e) => e.id === selected.era) : undefined;
-  const relatedEvents = selected
-    ? timelineEvents.filter((e) => selected.related.includes(e.id))
-    : [];
-
-  function select(id: string) {
-    setSelectedId(id);
+  function selectEvent(id: string) {
+    updateSearchParams({ event: id }, "push");
     setDrawerOpen(true);
   }
 
   function resetFilters() {
-    setQuery("");
-    setEra("all");
+    setQueryInput("");
+    updateSearchParams({ q: null, era: null, sort: null, page: null, event: null });
+    setDrawerOpen(false);
   }
 
-  if (eventsError || erasError) {
+  const retryAll = () => {
+    void eventsQuery.refetch();
+    void erasQuery.refetch();
+    void statsQuery.refetch();
+  };
+
+  if (eventsQuery.isError || erasQuery.isError || statsQuery.isError) {
     return (
       <EmpireShell
         breadcrumb="Dock / Lighthouse"
-        search={{ value: query, onChange: setQuery, placeholder: "Search timeline events…" }}
+        search={{
+          value: queryInput,
+          onChange: setQueryInput,
+          placeholder: "Search timeline events…",
+        }}
       >
         <div className="flex h-[60vh] flex-col items-center justify-center gap-4 text-center">
           <p className="font-brush text-xl text-[var(--pink)]">THE ARCHIVE SIGNAL WAS LOST…</p>
           <p className="text-sm text-zinc-400">
             We couldn&apos;t load the timeline. Check your connection and try again.
           </p>
-          <button
-            type="button"
-            onClick={() => {
-              void refetchEvents();
-              void refetchEras();
-            }}
-            className="btn-zine btn-blue px-5 py-2 text-sm"
-          >
+          <button type="button" onClick={retryAll} className="btn-zine btn-blue px-5 py-2 text-sm">
             Retry
           </button>
         </div>
@@ -113,71 +168,147 @@ export function Dock() {
     );
   }
 
-  if (eventsLoading || erasLoading) {
+  if (eventsQuery.isLoading || erasQuery.isLoading || statsQuery.isLoading) {
     return (
       <EmpireShell
         breadcrumb="Dock / Lighthouse"
-        search={{ value: query, onChange: setQuery, placeholder: "Search timeline events…" }}
+        search={{
+          value: queryInput,
+          onChange: setQueryInput,
+          placeholder: "Search timeline events…",
+        }}
       >
-        <div className="flex h-[60vh] items-center justify-center font-brush text-xl text-[var(--pink)]">
+        <div
+          className="flex h-[60vh] items-center justify-center font-brush text-xl text-[var(--pink)]"
+          role="status"
+          aria-live="polite"
+        >
           LOADING THE DOCK…
         </div>
       </EmpireShell>
     );
   }
 
+  const stats = statsQuery.data?.data;
+  const pageStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const pageEnd = Math.min(page * PAGE_SIZE, total);
+
   return (
     <EmpireShell
       breadcrumb="Dock / Lighthouse"
-      search={{ value: query, onChange: setQuery, placeholder: "Search timeline events…" }}
+      search={{
+        value: queryInput,
+        onChange: setQueryInput,
+        placeholder: "Search timeline events…",
+      }}
     >
-      <DockHero visibleCount={visible.length} total={eventsData?.total ?? timelineEvents.length} />
+      <DockHero visibleCount={timelineEvents.length} total={total} />
 
       <div className="space-y-5 px-4 py-6 sm:px-8">
+        <section
+          aria-label="Timeline archive statistics"
+          className="grid grid-cols-3 gap-3 text-center"
+        >
+          <div className="zine-card-rough p-3">
+            <p className="font-brush text-2xl text-[var(--yellow)]">{stats?.total ?? "—"}</p>
+            <p className="text-[10px] tracking-widest text-zinc-400">ARCHIVE EVENTS</p>
+          </div>
+          <div className="zine-card-rough p-3">
+            <p className="font-brush text-2xl text-[var(--blue)]">{eras.length}</p>
+            <p className="text-[10px] tracking-widest text-zinc-400">ERAS</p>
+          </div>
+          <div className="zine-card-rough p-3">
+            <p className="font-brush text-2xl text-[var(--pink)]">
+              {Object.keys(stats?.byKind ?? {}).length}
+            </p>
+            <p className="text-[10px] tracking-widest text-zinc-400">EVENT TYPES</p>
+          </div>
+        </section>
+
         <FilterBar
           eras={eras}
           era={era}
-          onEraChange={setEra}
+          onEraChange={(nextEra) =>
+            updateSearchParams({
+              era: nextEra === "all" ? null : nextEra,
+              page: null,
+            })
+          }
           sort={sort}
-          onSortChange={setSort}
+          onSortChange={(nextSort) =>
+            updateSearchParams({
+              sort: nextSort === "newest" ? null : nextSort,
+              page: null,
+            })
+          }
           view={view}
           onViewChange={setView}
         />
 
-        <EraBand eras={eras} active={era} onSelect={(e) => setEra(e as EraId | "all")} />
+        <EraBand
+          eras={eras}
+          active={era}
+          onSelect={(nextEra) =>
+            updateSearchParams({
+              era: nextEra === "all" ? null : nextEra,
+              page: null,
+            })
+          }
+        />
 
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <EventList
-            events={visible}
-            total={eventsData?.total ?? timelineEvents.length}
-            view={view}
-            selectedId={selectedId}
-            query={query}
-            onOpen={select}
-            onReset={resetFilters}
-          />
+          <div>
+            <EventList
+              events={timelineEvents}
+              total={total}
+              pageStart={pageStart}
+              pageEnd={pageEnd}
+              page={page}
+              totalPages={totalPages}
+              view={view}
+              selectedId={selectedListId}
+              query={queryFromUrl}
+              onOpen={selectEvent}
+              onReset={resetFilters}
+              onPageChange={(nextPage) =>
+                updateSearchParams({
+                  page: nextPage > 1 ? String(nextPage) : null,
+                  event: null,
+                })
+              }
+            />
+            {eventId && !selected && selectedDetailQuery.isError && (
+              <p className="mt-4 text-sm text-[var(--yellow)]" role="alert">
+                The selected event could not be loaded from the archive.
+              </p>
+            )}
+          </div>
 
-          {selected && selectedEra && (
+          {selected && selectedEra ? (
             <EventDetailPanel
               variant="aside"
               event={selected}
               era={selectedEra}
               relatedEvents={relatedEvents}
-              shareUrl={`${origin}/dock?event=${selected.id}`}
-              onRelated={select}
+              shareUrl={shareUrl}
+              onRelated={selectEvent}
             />
-          )}
+          ) : eventId && selectedDetailQuery.isLoading ? (
+            <p className="p-5 text-sm text-zinc-400" role="status">
+              Loading event details…
+            </p>
+          ) : null}
         </div>
       </div>
 
-      {drawerOpen && selected && selectedEra && (
+      {!isDesktopXl && drawerOpen && selected && selectedEra && (
         <EventDetailPanel
           variant="drawer"
           event={selected}
           era={selectedEra}
           relatedEvents={relatedEvents}
-          shareUrl={`${origin}/dock?event=${selected.id}`}
-          onRelated={select}
+          shareUrl={shareUrl}
+          onRelated={selectEvent}
           onClose={() => setDrawerOpen(false)}
         />
       )}

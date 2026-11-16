@@ -40,6 +40,9 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
     error.status = res.status;
     throw error;
   }
+  if (body === null || typeof body !== "object") {
+    throw new Error("The control plane returned an unreadable response.");
+  }
   return body as T;
 }
 

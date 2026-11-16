@@ -1,6 +1,7 @@
 "use client";
 
 import { feedItems } from "@/lib/data";
+import { Card } from "@moonwitness/ui";
 
 interface NotificationsProps {
   open: boolean;
@@ -32,11 +33,7 @@ export function Notifications({ open, onToggle }: NotificationsProps) {
         </span>
       </button>
       {open && (
-        <div
-          className="zine-card absolute right-0 top-12 w-80 p-3"
-          role="dialog"
-          aria-label="Notifications"
-        >
+        <Card className="absolute right-0 top-12 w-80 p-3" role="dialog" aria-label="Notifications">
           <div className="mb-2 flex items-center justify-between px-1">
             <span className="font-brush text-sm text-[var(--yellow)]">COMMAND FEED</span>
             <span className="text-[10px] text-zinc-500">3 unread</span>
@@ -56,7 +53,7 @@ export function Notifications({ open, onToggle }: NotificationsProps) {
               </div>
             </div>
           ))}
-        </div>
+        </Card>
       )}
     </>
   );

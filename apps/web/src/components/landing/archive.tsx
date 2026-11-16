@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { artSrc } from "@/lib/art";
 import { ArrowRight, CassetteTape, Smiley } from "@moonwitness/ui/icons";
 import { DistressedSticker, Staple, kindColors } from "@moonwitness/ui";
+import { Button } from "@moonwitness/ui";
 import { useTimelineEvents } from "@/lib/api/timeline";
 
 function ArchiveStrip() {
@@ -88,7 +89,7 @@ function ArchiveStrip() {
             <Link
               key={ev.id}
               href={`/dock?event=${encodeURIComponent(ev.id)}`}
-              className="archive-preview zine-card photocopy-grit group relative w-64 shrink-0 snap-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:rotate-1"
+              className="archive-preview photocopy-grit group relative w-64 shrink-0 snap-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:rotate-1"
             >
               <Staple className="top-1 left-2 -rotate-12" />
               <div className="relative h-32 overflow-hidden bg-black/60">
@@ -125,11 +126,10 @@ function ArchiveStrip() {
           ))}
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--line)] pt-4">
-        <Link
-          href="/dock"
-          className="archive-browse btn-zine btn-blue min-h-11 px-4 py-3 text-sm shadow-[3px_3px_0_#000]"
-        >
-          BROWSE FULL ARCHIVE <ArrowRight className="h-4 w-4" />
+        <Link href="/dock">
+          <Button className="min-h-11 px-4 py-3 text-sm">
+            BROWSE FULL ARCHIVE <ArrowRight className="h-4 w-4" />
+          </Button>
         </Link>
         <div className="flex shrink-0 gap-2">
           <button
@@ -137,7 +137,7 @@ function ArchiveStrip() {
             disabled={unavailable || edges.left}
             onClick={() => scroll(-1)}
             aria-label="Scroll archive left"
-            className="archive-control zine-card flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-zinc-300"
+            className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-zinc-300"
           >
             ←
           </button>
@@ -146,7 +146,7 @@ function ArchiveStrip() {
             disabled={unavailable || edges.right}
             onClick={() => scroll(1)}
             aria-label="Scroll archive right"
-            className="archive-control zine-card flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-zinc-300"
+            className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-zinc-300"
           >
             →
           </button>

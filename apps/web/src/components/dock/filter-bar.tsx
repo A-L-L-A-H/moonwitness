@@ -1,6 +1,7 @@
 "use client";
 
 import type { Era, EraId } from "@moonwitness/types";
+import { Card, cn } from "@moonwitness/ui";
 
 export type SortKey = "newest" | "oldest";
 
@@ -24,22 +25,35 @@ export function FilterBar({
   onViewChange,
 }: FilterBarProps) {
   return (
-    <div className="zine-card-rough flex flex-wrap items-center gap-3 p-3">
+    <Card className="flex flex-wrap items-center gap-3 p-3">
       <span className="font-brush text-sm text-white">FILTER BY ERA</span>
+
       <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by era">
         <button
+          type="button"
           onClick={() => onEraChange("all")}
           aria-pressed={era === "all"}
-          className={`rounded-full border px-3 py-1 text-[11px] transition-colors max-lg:min-h-11 ${era === "all" ? "border-[var(--pink)] bg-[var(--pink)] font-bold text-white" : "border-[var(--line)] text-zinc-300 hover:border-zinc-500"}`}
+          className={cn(
+            "rounded-full border px-3 py-1 text-[11px] transition-colors max-lg:min-h-11",
+            era === "all"
+              ? "border-[var(--pink)] bg-[var(--pink)] font-bold text-white"
+              : "border-[var(--line)] text-zinc-300 hover:border-zinc-500",
+          )}
         >
           All Eras
         </button>
         {eras.map((e) => (
           <button
             key={e.id}
+            type="button"
             onClick={() => onEraChange(era === e.id ? "all" : e.id)}
             aria-pressed={era === e.id}
-            className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] transition-colors max-lg:min-h-11 ${era === e.id ? "font-bold text-white" : "border-[var(--line)] text-zinc-300 hover:border-zinc-500"}`}
+            className={cn(
+              "flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] transition-colors max-lg:min-h-11",
+              era === e.id
+                ? "font-bold text-white"
+                : "border-[var(--line)] text-zinc-300 hover:border-zinc-500",
+            )}
             style={era === e.id ? { borderColor: e.color, background: `${e.color}33` } : undefined}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: e.color }} />
@@ -47,6 +61,7 @@ export function FilterBar({
           </button>
         ))}
       </div>
+
       <div className="ml-auto flex items-center gap-2">
         <label className="sr-only" htmlFor="dock-sort">
           Sort events
@@ -60,16 +75,21 @@ export function FilterBar({
           <option value="newest">Sort: Newest First</option>
           <option value="oldest">Sort: Oldest First</option>
         </select>
+
         <div
           className="flex rounded-md border border-[var(--line)]"
           role="group"
           aria-label="View mode"
         >
           <button
+            type="button"
             onClick={() => onViewChange("grid")}
             aria-pressed={view === "grid"}
             aria-label="Grid view"
-            className={`inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11 ${view === "grid" ? "bg-[var(--pink)] text-white" : "text-zinc-400 hover:text-white"}`}
+            className={cn(
+              "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
+              view === "grid" ? "bg-[var(--pink)] text-white" : "text-zinc-400 hover:text-white",
+            )}
           >
             <svg
               viewBox="0 0 24 24"
@@ -82,10 +102,14 @@ export function FilterBar({
             </svg>
           </button>
           <button
+            type="button"
             onClick={() => onViewChange("list")}
             aria-pressed={view === "list"}
             aria-label="List view"
-            className={`inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11 ${view === "list" ? "bg-[var(--pink)] text-white" : "text-zinc-400 hover:text-white"}`}
+            className={cn(
+              "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
+              view === "list" ? "bg-[var(--pink)] text-white" : "text-zinc-400 hover:text-white",
+            )}
           >
             <svg
               viewBox="0 0 24 24"
@@ -100,6 +124,6 @@ export function FilterBar({
           </button>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

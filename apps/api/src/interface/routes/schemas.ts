@@ -5,6 +5,8 @@ export const listTimelineQuerySchema = {
     kind: { type: "string" },
     from: { type: "string" },
     to: { type: "string" },
+    q: { type: "string", maxLength: 200 },
+    sort: { type: "string", enum: ["newest", "oldest"] },
     limit: { type: "integer", minimum: 1, maximum: 100, default: 100 },
     offset: { type: "integer", minimum: 0, default: 0 },
   },

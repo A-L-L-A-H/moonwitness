@@ -1,5 +1,5 @@
 import type { FeedItem, MissionAlert, Workflow } from "@moonwitness/types";
-import { ZineCardRough } from "@moonwitness/ui";
+import { Card, Button } from "@moonwitness/ui";
 import { Bolt, Crown } from "@moonwitness/ui/icons";
 import { SectionHeading } from "./section-heading";
 
@@ -15,6 +15,9 @@ const STATUS_TEXT: Record<Workflow["status"], string> = {
   Running: "text-[var(--green)]",
   Queued: "text-[var(--blue)]",
   Paused: "text-[var(--yellow)]",
+  Succeeded: "text-[var(--green)]",
+  Failed: "text-[var(--red)]",
+  Cancelled: "text-[var(--yellow)]",
 };
 
 export function MissionLog({
@@ -29,7 +32,7 @@ export function MissionLog({
     <section aria-labelledby="cc-log" className="scroll-mt-24">
       <SectionHeading id="cc-log" title="MISSION" accent="LOG" note={`${running} running`} />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ZineCardRough className="min-w-0 p-4">
+        <Card className="min-w-0 p-4">
           <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
             ACTIVE WORKFLOWS <Crown className="h-4 w-6 text-[var(--yellow)]" />
           </h3>
@@ -40,32 +43,44 @@ export function MissionLog({
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-xs font-bold text-zinc-200">{w.name}</p>
                   <p className="truncate text-[10px] text-zinc-500">
-                    {w.status === "Paused" ? "Paused by operator" : w.detail}
+                    {w.status === "Paused"
+                      ? "Paused by operator"
+                      : w.status === "Succeeded"
+                        ? "Completed successfully"
+                        : w.status === "Failed"
+                          ? "Failed; review the mission log"
+                          : w.status === "Cancelled"
+                            ? "Cancelled by operator"
+                            : w.detail}
                   </p>
                 </div>
                 <span className={`flex items-center gap-1.5 text-[10px] ${STATUS_TEXT[w.status]}`}>
                   <span
-                    className={`h-1.5 w-1.5 rounded-full bg-current ${w.status === "Running" ? "pulse-dot" : ""}`}
+                    className={`h-1.5 w-1.5 rounded-full bg-current ${w.status === "Running" || w.status === "Queued" ? "pulse-dot" : ""}`}
                   />
                   {w.status}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onToggleWorkflow(w.id)}
-                  aria-label={w.status === "Running" ? `Pause ${w.name}` : `Resume ${w.name}`}
-                  className="min-h-11 rounded border border-[var(--line)] px-3 text-[10px] text-zinc-300 hover:border-[var(--pink)] hover:text-[var(--pink)]"
-                >
-                  {w.status === "Running" ? "Pause" : "Run"}
-                </button>
+                {(w.status === "Queued" || w.status === "Running" || w.status === "Paused") && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onToggleWorkflow(w.id)}
+                    aria-label={w.status === "Paused" ? `Resume ${w.name}` : `Pause ${w.name}`}
+                    className="min-h-11 rounded px-3 text-[10px]"
+                  >
+                    {w.status === "Paused" ? "Run" : "Pause"}
+                  </Button>
+                )}
               </div>
             ))}
             {workflows.length === 0 && (
               <p className="py-4 text-sm text-zinc-500">No workflows match.</p>
             )}
           </div>
-        </ZineCardRough>
+        </Card>
 
-        <ZineCardRough className="min-w-0 p-4">
+        <Card className="min-w-0 p-4">
           <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
             COMMAND FEED <Crown className="h-4 w-6 text-[var(--yellow)]" />
           </h3>
@@ -84,9 +99,9 @@ export function MissionLog({
               <p className="py-4 text-sm text-zinc-500">No feed items match.</p>
             )}
           </div>
-        </ZineCardRough>
+        </Card>
 
-        <ZineCardRough className="min-w-0 p-4">
+        <Card className="min-w-0 p-4">
           <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
             MISSION ALERTS <Crown className="h-4 w-6 text-[var(--yellow)]" />
           </h3>
@@ -103,21 +118,23 @@ export function MissionLog({
                 </span>
                 <p className="min-w-0 flex-1 text-xs text-zinc-300">{a.text}</p>
                 <span className="text-[10px] text-zinc-600">{a.ago}</span>
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  size="sm"
                   onClick={() => onDismissAlert(a.id)}
                   aria-label={`Dismiss alert: ${a.text}`}
-                  className="min-h-11 min-w-11 text-zinc-500 hover:text-[var(--pink)]"
+                  className="min-h-11 min-w-11 text-zinc-500"
                 >
                   ✕
-                </button>
+                </Button>
               </div>
             ))}
             {alerts.length === 0 && (
               <p className="py-2 text-xs text-zinc-500">All clear. The sky is quiet.</p>
             )}
           </div>
-        </ZineCardRough>
+        </Card>
       </div>
     </section>
   );

@@ -42,9 +42,14 @@ describe("timeline contracts", () => {
 
   it("validates list query bounds and rejects unknown fields", () => {
     expect(TimelineListQuerySchema.parse({ limit: 100, offset: 0 }).limit).toBe(100);
+    expect(TimelineListQuerySchema.parse({ q: "signal", sort: "newest" })).toMatchObject({
+      q: "signal",
+      sort: "newest",
+    });
     expect(() => TimelineListQuerySchema.parse({ limit: 101 })).toThrow();
     expect(() => TimelineListQuerySchema.parse({ limit: 0 })).toThrow();
     expect(() => TimelineListQuerySchema.parse({ offset: -1 })).toThrow();
+    expect(() => TimelineListQuerySchema.parse({ sort: "random" })).toThrow();
     expect(() => TimelineListQuerySchema.parse({ bogus: "x" })).toThrow();
   });
 

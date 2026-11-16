@@ -2,7 +2,7 @@
 
 import { Star4 } from "@moonwitness/ui/icons";
 import { EmpireShell } from "@/components/shell";
-import { mapCities, modules, projects, quickActions, universeStats } from "@/lib/data";
+import { mapCities, modules, projects, quickActions } from "@/lib/data";
 import { Collections } from "./collections";
 import { CommandHero } from "./hero";
 import { CrewOrbit } from "./crew";
@@ -40,7 +40,7 @@ export function CommandCenter() {
       <div className="px-4 py-6 sm:px-8">
         {/* Row 1: Universe Status | Quick Actions | Ideas In Motion */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-          <UniverseStatus stats={universeStats} />
+          <UniverseStatus stats={cc.stats} />
           <QuickActions actions={quickActions} onAction={cc.onAction} />
           <IdeasInMotion />
         </div>

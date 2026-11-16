@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Tape, ZineBadge, ZineCard, ZineCardRough, ZineInput } from "@moonwitness/ui";
 import { Crown } from "@moonwitness/ui/icons";
-import { EmpireShell } from "@/components/shell";
+import { OperationsShell } from "@/components/shell";
 import { ControlGate } from "@/components/control/gate";
 import { PortForwardPanel } from "./portforward";
 import {
@@ -300,7 +300,7 @@ function NetworkDashboard() {
   const data = status.data;
 
   return (
-    <EmpireShell
+    <OperationsShell
       breadcrumb="Network"
       search={{ value: query, onChange: setQuery, placeholder: "Filter peer…" }}
     >
@@ -577,6 +577,6 @@ function NetworkDashboard() {
           </>
         )}
       </div>
-    </EmpireShell>
+    </OperationsShell>
   );
 }

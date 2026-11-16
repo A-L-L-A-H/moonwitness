@@ -6,7 +6,7 @@ import FastifyCors from "@fastify/cors";
 import FastifySwagger from "@fastify/swagger";
 import FastifySwaggerUi from "@fastify/swagger-ui";
 import { env, parseCorsOrigins } from "../../shared/env";
-import { createRateLimiter } from "../rate-limit";
+import { createRateLimiter, resolveRateLimitKey } from "../rate-limit";
 import { registerHealthRoutes } from "../../interface/routes/health.routes";
 import { authRoutes } from "../../interface/routes/auth.routes";
 import { controlRoutes } from "../../interface/routes/control.routes";
@@ -14,6 +14,10 @@ import { radiusRoutes } from "../../interface/routes/radius.routes";
 import { storageRoutes } from "../../interface/routes/storage.routes";
 import { syslogRoutes } from "../../interface/routes/syslog.routes";
 import { snmpPollerRoutes } from "../../interface/routes/snmp-poller.routes";
+import { riotAiRoutes } from "../../interface/routes/riot-ai.routes";
+import { commandCenterRoutes } from "../../interface/routes/command-center.routes";
+import { memoryRoutes } from "../../interface/routes/memory.routes";
+import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
 import { applyMigrations } from "@moonwitness/orm";
 import { authMigrations } from "../../db/migrations";
 import { seedBootstrapAdmin } from "../../services/user";
@@ -72,7 +76,13 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
       windowMs: Number(env.RATE_LIMIT_WINDOW_MS),
     });
     fastify.addHook("onRequest", async (request, reply) => {
-      const result = limiter.check(request.ip);
+      const result = limiter.check(
+        resolveRateLimitKey(
+          request.ip,
+          request.headers["x-forwarded-for"],
+          env.TRUSTED_PROXY_COUNT,
+        ),
+      );
       reply.header("x-ratelimit-limit", maxRequests);
       reply.header("x-ratelimit-remaining", result.remaining);
       if (!result.allowed) {
@@ -119,8 +129,8 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     });
   }
 
-  // Ensure auth schema exists before serving routes.
-  await applyMigrations([...authMigrations]);
+  // Ensure auth and command center schemas exist before serving routes.
+  await applyMigrations([...authMigrations, ...commandCenterMigrations]);
   await seedBootstrapAdmin();
 
   if (options.prefix) {
@@ -135,6 +145,9 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
         await instance.register(storageRoutes);
         await instance.register(syslogRoutes);
         await instance.register(snmpPollerRoutes);
+        await instance.register(riotAiRoutes);
+        await instance.register(commandCenterRoutes);
+        await instance.register(memoryRoutes);
       },
       { prefix: options.prefix },
     );
