@@ -1,5 +1,3 @@
-import { getCloudflareWorkerEnv, type WebWorkerEnv } from "@/lib/cloudflare-runtime";
-
 export const dynamic = "force-dynamic";
 
 const STRIPPED_REQUEST_HEADERS = new Set([
@@ -34,11 +32,8 @@ function isNodeRuntime(): boolean {
   return typeof process !== "undefined" && Boolean(process.versions?.node);
 }
 
-function resolveFallbackBaseUrl(cfEnv: WebWorkerEnv | null): string {
-  const edgeDefault =
-    typeof caches !== "undefined" ? "https://api.moonwitness.biz.id" : "http://localhost:3002";
-  const configuredUrl =
-    cfEnv?.API_INTERNAL_URL?.trim() || process.env.API_INTERNAL_URL?.trim() || edgeDefault;
+function resolveUpstreamBaseUrl(): string {
+  const configuredUrl = process.env.API_INTERNAL_URL?.trim() || "http://127.0.0.1:3002";
   return configuredUrl.replace(/\/+$/, "");
 }
 
@@ -103,17 +98,11 @@ function buildCleanResponseHeaders(upstreamHeaders: Headers): Headers {
 }
 
 async function dispatchUpstreamRequest(
-  cfEnv: WebWorkerEnv | null,
   pathname: string,
   search: string,
   requestInit: RequestInit,
 ): Promise<Response> {
-  if (cfEnv?.API_SERVICE && typeof cfEnv.API_SERVICE.fetch === "function") {
-    return cfEnv.API_SERVICE.fetch(
-      new Request(`https://api.internal${pathname}${search}`, requestInit),
-    );
-  }
-  const baseUrl = resolveFallbackBaseUrl(cfEnv);
+  const baseUrl = resolveUpstreamBaseUrl();
   return fetch(`${baseUrl}${pathname}${search}`, requestInit);
 }
 
@@ -137,14 +126,10 @@ async function toProxyResponse(method: string, upstreamResponse: Response): Prom
 
 async function proxyApiRequest(request: Request): Promise<Response> {
   const incomingUrl = new URL(request.url);
-  const [cfEnv, requestInit] = await Promise.all([
-    getCloudflareWorkerEnv(),
-    buildUpstreamRequestInit(request),
-  ]);
+  const requestInit = await buildUpstreamRequestInit(request);
 
   try {
     const upstreamResponse = await dispatchUpstreamRequest(
-      cfEnv,
       incomingUrl.pathname,
       incomingUrl.search,
       requestInit,
@@ -183,12 +168,12 @@ export async function DELETE(request: Request): Promise<Response> {
   return proxyApiRequest(request);
 }
 
-/** Proxies OPTIONS /api/v1/* requests to the upstream Moonwitness API service. */
-export async function OPTIONS(request: Request): Promise<Response> {
+/** Proxies HEAD /api/v1/* requests to the upstream Moonwitness API service. */
+export async function HEAD(request: Request): Promise<Response> {
   return proxyApiRequest(request);
 }
 
-/** Proxies HEAD /api/v1/* requests to the upstream Moonwitness API service. */
-export async function HEAD(request: Request): Promise<Response> {
+/** Proxies OPTIONS /api/v1/* requests to the upstream Moonwitness API service. */
+export async function OPTIONS(request: Request): Promise<Response> {
   return proxyApiRequest(request);
 }

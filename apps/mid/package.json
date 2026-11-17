@@ -9,13 +9,11 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "dev": "wrangler dev",
     "build": "tsup",
-    "deploy": "wrangler deploy",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "clean": "rm -rf .turbo .wrangler dist node_modules"
+    "clean": "rm -rf .turbo dist node_modules"
   },
   "peerDependencies": {
     "fastify": ">=5.0.0"
