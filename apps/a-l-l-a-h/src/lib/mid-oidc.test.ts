@@ -195,7 +195,95 @@ describe("allah-sanctuary mid-oidc", () => {
     }
   });
 
-  it("completes PKCE flow with ES256 JWKS verification, populates verified claims, and revokes cleanly", async () => {
+  it("exchanges authorization code via BFF, stores only non-secret display metadata in sessionStorage, and logs out via BFF", async () => {
+    const win = installMockWindow("https://a-l-l-a-h.com/codex");
+    const { authUrl, state } = await beginLogin(win, "/codex");
+
+    expect(authUrl.origin).toBe(DEFAULT_ISSUER);
+    expect(authUrl.searchParams.get("client_id")).toBe(ALLAH_SANCTUARY_CLIENT_ID);
+    expect(authUrl.searchParams.get("redirect_uri")).toBe("https://a-l-l-a-h.com/auth/callback");
+
+    const requestedUrls: string[] = [];
+    const fetchMock: typeof fetch = async (input, init) => {
+      const target = typeof input === "string" ? input : input.toString();
+      requestedUrls.push(target);
+      if (target === "/api/v1/auth/bff/exchange") {
+        expect(init?.method).toBe("POST");
+        expect(init?.credentials).toBe("include");
+        return new Response(
+          JSON.stringify({
+            authenticated: true,
+            user: {
+              id: 9,
+              username: "witness",
+              displayName: "Sanctuary Steward",
+              role: "admin",
+            },
+          }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      if (target === "/api/v1/auth/bff/logout") {
+        expect(init?.method).toBe("POST");
+        expect(init?.credentials).toBe("include");
+        return new Response(JSON.stringify({ ok: true }), { status: 200 });
+      }
+      return new Response(null, { status: 404 });
+    };
+
+    const result = await completeSanctuaryMidCallback(
+      new URLSearchParams({ code: "code_bff_1", state }),
+      fetchMock,
+    );
+
+    expect(requestedUrls).toEqual(["/api/v1/auth/bff/exchange"]);
+    expect(result.nextPath).toBe("/codex");
+    expect(result.session).toMatchObject({
+      sub: "9",
+      username: "witness",
+      displayName: "Sanctuary Steward",
+      role: "admin",
+    });
+    expect(result.session).not.toHaveProperty("accessToken");
+    expect(result.session).not.toHaveProperty("refreshToken");
+
+    const rawStoredSession = win.store.get("allah_sanctuary_mid_session_v1") ?? "";
+    expect(rawStoredSession).not.toContain("accessToken");
+    expect(rawStoredSession).not.toContain("refreshToken");
+    expect(rawStoredSession).not.toContain("access_token");
+    expect(rawStoredSession).not.toContain("refresh_token");
+    expect(getStoredSanctuaryMidSession()?.sub).toBe("9");
+    expect(win.getDispatched()).toContain(SANCTUARY_MID_AUTH_EVENT);
+
+    await clearSanctuaryMidSession(fetchMock);
+    expect(requestedUrls).toEqual(["/api/v1/auth/bff/exchange", "/api/v1/auth/bff/logout"]);
+    expect(getStoredSanctuaryMidSession()).toBeNull();
+  });
+
+  it("fails closed when BFF exchange returns an error without calling MID token endpoint directly", async () => {
+    const win = installMockWindow("https://a-l-l-a-h.com/codex");
+    const { state } = await beginLogin(win, "/codex");
+    const requestedUrls: string[] = [];
+
+    await expect(
+      completeSanctuaryMidCallback(
+        new URLSearchParams({ code: "code_bad", state }),
+        async (input) => {
+          const target = typeof input === "string" ? input : input.toString();
+          requestedUrls.push(target);
+          return new Response(JSON.stringify({ error: "invalid_grant" }), {
+            status: 401,
+            headers: { "content-type": "application/json" },
+          });
+        },
+      ),
+    ).rejects.toThrow(/invalid_grant/i);
+
+    expect(requestedUrls).toEqual(["/api/v1/auth/bff/exchange"]);
+    expect(getStoredSanctuaryMidSession()).toBeNull();
+  });
+
+  it("completes PKCE flow with ES256 JWKS verification fallback, omits tokens from sessionStorage, and revokes cleanly", async () => {
     const win = installMockWindow("https://a-l-l-a-h.com/codex");
     const signer = await createEs256TestSigner("mid-sanctuary-k1");
     const { authUrl, state, nonce } = await beginLogin(win, "/codex");
@@ -217,24 +305,29 @@ describe("allah-sanctuary mid-oidc", () => {
 
     expect(result.nextPath).toBe("/codex");
     expect(result.session).toMatchObject({
-      accessToken: "acc_sanctuary",
-      refreshToken: "rt_sanctuary",
       sub: "9",
       username: "witness",
       displayName: "Sanctuary Steward",
       role: "admin",
     });
+    expect(result.session).not.toHaveProperty("accessToken");
+    expect(result.session).not.toHaveProperty("refreshToken");
+    const rawStoredSession = win.store.get("allah_sanctuary_mid_session_v1") ?? "";
+    expect(rawStoredSession).not.toContain("acc_sanctuary");
+    expect(rawStoredSession).not.toContain("rt_sanctuary");
+    expect(rawStoredSession).not.toContain("accessToken");
+    expect(rawStoredSession).not.toContain("refreshToken");
     expect(getStoredSanctuaryMidSession()?.sub).toBe("9");
     expect(win.getDispatched()).toContain(SANCTUARY_MID_AUTH_EVENT);
 
-    let revokeCalled = false;
+    let bffLogoutCalled = false;
     await clearSanctuaryMidSession(async (input) => {
       const target = typeof input === "string" ? input : input.toString();
-      if (target.endsWith("/oauth/revoke")) revokeCalled = true;
+      if (target.endsWith("/api/v1/auth/bff/logout")) bffLogoutCalled = true;
       return new Response(JSON.stringify({ ok: true }), { status: 200 });
     });
 
-    expect(revokeCalled).toBe(true);
+    expect(bffLogoutCalled).toBe(true);
     expect(getStoredSanctuaryMidSession()).toBeNull();
   });
 

@@ -1,18 +1,17 @@
 const STORAGE_PKCE_KEY = "mw_mid_pkce";
-const STORAGE_TOKEN_KEY = "mw_mid_access_token";
-
-export interface MidTokenPayload {
-  access_token: string;
-  id_token: string;
-  refresh_token?: string;
-  expires_in: number;
-}
 
 function getMidIssuer(): string {
   return (process.env.NEXT_PUBLIC_MID_ISSUER_URL ?? "https://id.moonwitness.biz.id").replace(
     /\/+$/g,
     "",
   );
+}
+
+function sanitizeNextPath(rawPath: string | undefined): string {
+  if (typeof rawPath === "string" && rawPath.startsWith("/") && !rawPath.startsWith("//")) {
+    return rawPath;
+  }
+  return "/mission-control";
 }
 
 function randomUrlSafeString(byteLen: number): string {
@@ -41,7 +40,7 @@ export async function startMidLogin(nextPath = "/mission-control"): Promise<void
   const state = randomUrlSafeString(18);
   const nonce = randomUrlSafeString(18);
   const challenge = await computeS256Challenge(verifier);
-  const safeNext = nextPath.startsWith("/") ? nextPath : "/mission-control";
+  const safeNext = sanitizeNextPath(nextPath);
 
   window.sessionStorage.setItem(
     STORAGE_PKCE_KEY,
@@ -61,7 +60,7 @@ export async function startMidLogin(nextPath = "/mission-control"): Promise<void
   window.location.assign(authUrl.toString());
 }
 
-/** Complete OAuth 2.1 authorization_code exchange on `/auth/callback`. */
+/** Complete OAuth 2.1 authorization_code exchange via the server-side BFF on `/auth/callback`. */
 export async function completeMidCallback(searchParams: URLSearchParams): Promise<string> {
   const oauthError = searchParams.get("error");
   if (oauthError) {
@@ -88,43 +87,49 @@ export async function completeMidCallback(searchParams: URLSearchParams): Promis
     throw new Error("State mismatch detected during SSO callback.");
   }
 
-  const response = await fetch(`${getMidIssuer()}/oauth/token`, {
+  const response = await fetch("/api/v1/auth/bff/exchange", {
     method: "POST",
-    headers: { "content-type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "authorization_code",
-      client_id: "moonwitness-web",
+    credentials: "include",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
       code,
-      redirect_uri: resolveCallbackUrl(),
       code_verifier: stored.verifier,
+      redirect_uri: resolveCallbackUrl(),
+      client_id: "moonwitness-web",
     }),
   });
-  const payload = (await response.json().catch(() => null)) as
-    (MidTokenPayload & { error_description?: string; error?: string }) | null;
-  if (!response.ok || !payload?.access_token) {
-    throw new Error(payload?.error_description || payload?.error || "Token exchange failed.");
+  const payload = (await response.json().catch(() => null)) as {
+    authenticated?: boolean;
+    user?: unknown;
+    error?: string;
+    error_description?: string;
+    message?: string;
+  } | null;
+  if (!response.ok || !payload?.authenticated || !payload?.user) {
+    throw new Error(
+      payload?.error_description ||
+        payload?.message ||
+        payload?.error ||
+        "Authentication exchange failed.",
+    );
   }
 
-  window.sessionStorage.setItem(STORAGE_TOKEN_KEY, payload.access_token);
-  return stored.nextPath && stored.nextPath.startsWith("/") ? stored.nextPath : "/mission-control";
+  return sanitizeNextPath(stored.nextPath);
 }
 
-/** Retrieve active MoonWitness ID Bearer token from sessionStorage if available. */
-export function getStoredMidAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.sessionStorage.getItem(STORAGE_TOKEN_KEY);
-  } catch {
-    return null;
-  }
+/**
+ * @deprecated OAuth tokens are stored server-side behind HttpOnly session cookies.
+ * Always returns null.
+ */
+export function getStoredMidAccessToken(): null {
+  return null;
 }
 
-/** Remove stored MoonWitness ID PKCE state and access token on logout. */
+/** Remove stored ephemeral MoonWitness ID PKCE state on logout. */
 export function clearStoredMidSession(): void {
   if (typeof window === "undefined") return;
   try {
     window.sessionStorage.removeItem(STORAGE_PKCE_KEY);
-    window.sessionStorage.removeItem(STORAGE_TOKEN_KEY);
   } catch {
     // Ignore storage unavailability during teardown.
   }

@@ -41,6 +41,7 @@ const envSchema = {
   MEMORY_API_TIMEOUT_MS: z.coerce.number().int().positive().max(120_000).default(10_000),
   /** Canonical MoonWitness centralized Identity issuer, JWKS override, and audience allowlist. */
   MID_ISSUER_URL: z.string().max(2048).optional(),
+  MID_INTERNAL_URL: z.string().max(2048).optional(),
   MID_JWKS_URL: z.string().max(2048).optional(),
   MID_ALLOWED_AUDIENCES: z.string().max(2048).optional(),
   /** AES-256-GCM key encryption secret for MID signing-key storage (min 16 chars). */

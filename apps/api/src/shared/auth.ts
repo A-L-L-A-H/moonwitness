@@ -173,6 +173,20 @@ export function getSessionCookieOptions(maxAgeMs: number): Record<string, unknow
 }
 
 /**
+ * Readable CSRF double-submit cookie options paired with BFF sessions.
+ */
+export function getCsrfCookieOptions(maxAgeMs: number): Record<string, unknown> {
+  const isProduction = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: false,
+    secure: isProduction,
+    sameSite: "lax",
+    maxAge: Math.floor(maxAgeMs / 1000),
+    path: "/",
+  };
+}
+
+/**
  * Session expiry from env (default 7 days).
  */
 export function getSessionMaxAgeMs(): number {
@@ -184,3 +198,8 @@ export function getSessionMaxAgeMs(): number {
  * Cookie name for session.
  */
 export const SESSION_COOKIE_NAME = "mw_session";
+
+/**
+ * Cookie name for readable CSRF protection token.
+ */
+export const CSRF_COOKIE_NAME = "mw_csrf";
