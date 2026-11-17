@@ -93,6 +93,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
       expect(rawCompose).toContain("web:");
       expect(rawCompose).toContain("allah:");
       expect(rawCompose).toContain("api:");
+      expect(rawCompose).toContain("postgres:");
       expect(rawCompose).toContain("radius:");
       expect(rawCompose).toContain("snmp-poller:");
       expect(rawCompose).toContain("syslog:");
@@ -102,7 +103,16 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     const { services, networks, volumes } = parsedConfig;
 
     // 1. Service Set validation
-    const expectedServices = ["caddy", "web", "allah", "api", "radius", "snmp-poller", "syslog"];
+    const expectedServices = [
+      "caddy",
+      "web",
+      "allah",
+      "api",
+      "postgres",
+      "radius",
+      "snmp-poller",
+      "syslog",
+    ];
     for (const service of expectedServices) {
       expect(services).toHaveProperty(service);
     }
@@ -114,6 +124,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     const web = services.web;
     const allah = services.allah;
     const api = services.api;
+    const postgres = services.postgres;
     const radius = services.radius;
     const snmp = services["snmp-poller"];
     const syslog = services.syslog;
@@ -123,12 +134,23 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(web).toBeDefined();
     expect(allah).toBeDefined();
     expect(api).toBeDefined();
+    expect(postgres).toBeDefined();
     expect(radius).toBeDefined();
     expect(snmp).toBeDefined();
     expect(syslog).toBeDefined();
     expect(netInternal).toBeDefined();
 
-    if (!caddy || !web || !allah || !api || !radius || !snmp || !syslog || !netInternal) {
+    if (
+      !caddy ||
+      !web ||
+      !allah ||
+      !api ||
+      !postgres ||
+      !radius ||
+      !snmp ||
+      !syslog ||
+      !netInternal
+    ) {
       throw new Error("Missing expected services or networks in configuration");
     }
 
@@ -143,6 +165,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(web.ports).toBeUndefined();
     expect(allah.ports).toBeUndefined();
     expect(api.ports).toBeUndefined();
+    expect(postgres.ports).toBeUndefined();
     expect(snmp.ports).toBeUndefined();
 
     // RADIUS publishes only UDP auth/acct ports
@@ -164,7 +187,9 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(networks).toHaveProperty("moonwitness-internal");
     expect(netInternal.internal).toBe(true);
 
-    // Private Rust backends isolated only on moonwitness-internal
+    // Private backends & database isolated only on moonwitness-internal
+    expect(postgres.networks).toHaveProperty("moonwitness-internal");
+    expect(postgres.networks).not.toHaveProperty("moonwitness-public");
     expect(radius.networks).toHaveProperty("moonwitness-internal");
     expect(radius.networks).not.toHaveProperty("moonwitness-public");
     expect(snmp.networks).toHaveProperty("moonwitness-internal");
@@ -188,6 +213,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
 
     // 5. Stateful Persistence Volumes
     expect(volumes).toHaveProperty("moonwitness-data");
+    expect(volumes).toHaveProperty("postgres-data");
     expect(volumes).toHaveProperty("radius-data");
     expect(volumes).toHaveProperty("snmp-data");
     expect(volumes).toHaveProperty("syslog-data");
