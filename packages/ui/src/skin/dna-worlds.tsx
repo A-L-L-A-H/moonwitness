@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 import type { SkinName } from "./compositions";
-import { IMPERIUM_LUMEN_TOKENS } from "./imperium-tokens";
+import { IMPERIUM_LUMEN_TOKENS, MASTER_DNA_PALETTES } from "./imperium-tokens";
 
 export type MasterDnaId =
   | "01-imperium-lumen"
@@ -66,29 +66,15 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
       "Graphic editorial frames, bold ink borders, electric yellow & magenta offset accents, clear reading planes",
     motionGrammar: "Crisp transform/opacity entrance · tactile hover lift · static reduced-motion parity",
     mappedSkinPreset: "default",
-    palette: {
-      canvas: IMPERIUM_LUMEN_TOKENS.semantic.canvas,
-      surface: IMPERIUM_LUMEN_TOKENS.semantic.surface,
-      surfaceElevated: IMPERIUM_LUMEN_TOKENS.semantic.surfaceElevated,
-      text: IMPERIUM_LUMEN_TOKENS.semantic.text,
-      mutedText: IMPERIUM_LUMEN_TOKENS.semantic.textMuted,
-      border: IMPERIUM_LUMEN_TOKENS.semantic.border,
-      accent: IMPERIUM_LUMEN_TOKENS.semantic.accent,
-      accentSecondary: IMPERIUM_LUMEN_TOKENS.semantic.accentSecondary,
-      accentForeground: IMPERIUM_LUMEN_TOKENS.semantic.accentForeground,
-      focus: IMPERIUM_LUMEN_TOKENS.semantic.focus,
-      success: IMPERIUM_LUMEN_TOKENS.semantic.success,
-      warning: IMPERIUM_LUMEN_TOKENS.semantic.warning,
-      danger: IMPERIUM_LUMEN_TOKENS.semantic.danger,
-    },
+    palette: MASTER_DNA_PALETTES["01-imperium-lumen"],
     cardClass:
-      "rounded-none border-2 border-[#f4ecd8] bg-[#10121a] text-[#fff8e8] shadow-[4px_4px_0_#ed149b]",
+      "rounded-none border-2 border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)] shadow-[4px_4px_0_var(--dna-accent-secondary)]",
     buttonClass:
-      "rounded-none border-2 border-[#08090d] bg-[#f6d438] text-[#08090d] font-bold tracking-[0.08em] uppercase shadow-[4px_4px_0_#ed149b]",
+      "rounded-none border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-bold tracking-[0.08em] uppercase shadow-[4px_4px_0_var(--dna-accent-secondary)]",
     badgeClass:
-      "rounded-none border border-[#f6d438] bg-[#171a26] text-[#f6d438] font-mono tracking-wider",
+      "rounded-none border border-[var(--dna-border)] bg-[var(--dna-surface-elevated)] text-[var(--dna-accent)] font-mono tracking-wider",
     inputClass:
-      "rounded-none border border-[#f6d438]/60 bg-[#08090d] text-[#fff8e8] placeholder:text-[#d8d0c0]/75",
+      "rounded-none border border-[var(--dna-border)]/60 bg-[var(--dna-canvas)] text-[var(--dna-text)] placeholder:text-[var(--dna-muted)]/75",
   },
   "02-lunar-chronicles": {
     id: "02-lunar-chronicles",
@@ -99,24 +85,14 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     shapeLanguage: "Observatory radii, ruled archival ledgers, polar orbital rings",
     motionGrammar: "Steady astronomical drift · tabular clarity",
     mappedSkinPreset: "transmission",
-    palette: {
-      canvas: "#0b0d14",
-      surface: "#121722",
-      surfaceElevated: "#1a2233",
-      text: "#edf2f9",
-      mutedText: "#bac7dc",
-      border: "#4e6d96",
-      accent: "#5ab8ff",
-      accentForeground: "#060a11",
-      focus: "#bae0ff",
-    },
-    cardClass: "rounded-lg border border-[#4e6d96] bg-[#121722] text-[#edf2f9]",
+    palette: MASTER_DNA_PALETTES["02-lunar-chronicles"],
+    cardClass: "rounded-lg border border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)]",
     buttonClass:
-      "rounded-md border border-[#8cd0ff] bg-[#5ab8ff] text-[#060a11] font-semibold tracking-wide",
+      "rounded-md border border-[var(--dna-focus)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-semibold tracking-wide",
     badgeClass:
-      "rounded-full border border-[#5ab8ff]/60 bg-[#1a2233] text-[#bae0ff] font-mono",
+      "rounded-full border border-[var(--dna-accent)]/60 bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)] font-mono",
     inputClass:
-      "rounded-md border border-[#4e6d96] bg-[#0b0d14] text-[#edf2f9] placeholder:text-[#bac7dc]/75",
+      "rounded-md border border-[var(--dna-border)] bg-[var(--dna-canvas)] text-[var(--dna-text)] placeholder:text-[var(--dna-muted)]/75",
   },
   "03-rocksoul": {
     id: "03-rocksoul",
@@ -127,24 +103,14 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     shapeLanguage: "Widescreen letterbox slabs, guitar-fret hairlines, warm tungsten highlight",
     motionGrammar: "Acoustic resonance fade · zero noisy bounce",
     mappedSkinPreset: "editorial",
-    palette: {
-      canvas: "#100f14",
-      surface: "#1a1821",
-      surfaceElevated: "#24212d",
-      text: "#f3efe6",
-      mutedText: "#cac3b4",
-      border: "#78664e",
-      accent: "#f5b027",
-      accentForeground: "#100f14",
-      focus: "#ffe08a",
-    },
-    cardClass: "rounded-sm border border-[#78664e] bg-[#1a1821] text-[#f3efe6]",
+    palette: MASTER_DNA_PALETTES["03-rocksoul"],
+    cardClass: "rounded-sm border border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)]",
     buttonClass:
-      "rounded-sm border border-[#ffd066] bg-[#f5b027] text-[#100f14] font-bold uppercase tracking-wider",
+      "rounded-sm border border-[var(--dna-focus)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-bold uppercase tracking-wider",
     badgeClass:
-      "rounded-sm border border-[#f5b027]/60 bg-[#24212d] text-[#ffe08a] font-mono",
+      "rounded-sm border border-[var(--dna-accent)]/60 bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)] font-mono",
     inputClass:
-      "rounded-sm border border-[#78664e] bg-[#100f14] text-[#f3efe6] placeholder:text-[#cac3b4]/75",
+      "rounded-sm border border-[var(--dna-border)] bg-[var(--dna-canvas)] text-[var(--dna-text)] placeholder:text-[var(--dna-muted)]/75",
   },
   "04-nexus-paradox": {
     id: "04-nexus-paradox",
@@ -155,24 +121,14 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     shapeLanguage: "Notched diagnostic corners, monochrome vector reticules, split HUD dividers",
     motionGrammar: "Crisp telemetry snap · deterministic state transitions",
     mappedSkinPreset: "technical",
-    palette: {
-      canvas: "#060a10",
-      surface: "#0b121d",
-      surfaceElevated: "#111c2d",
-      text: "#e4f6fa",
-      mutedText: "#a4d2df",
-      border: "#267c96",
-      accent: "#00e5ff",
-      accentForeground: "#041016",
-      focus: "#8cf4ff",
-    },
-    cardClass: "rounded-none border border-[#267c96] bg-[#0b121d] text-[#e4f6fa]",
+    palette: MASTER_DNA_PALETTES["04-nexus-paradox"],
+    cardClass: "rounded-none border border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)]",
     buttonClass:
-      "rounded-none border border-[#8cf4ff] bg-[#00e5ff] text-[#041016] font-mono font-bold uppercase tracking-widest",
+      "rounded-none border border-[var(--dna-focus)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-mono font-bold uppercase tracking-widest",
     badgeClass:
-      "rounded-none border border-[#00e5ff]/65 bg-[#111c2d] text-[#8cf4ff] font-mono",
+      "rounded-none border border-[var(--dna-accent)]/65 bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)] font-mono",
     inputClass:
-      "rounded-none border border-[#267c96] bg-[#060a10] text-[#e4f6fa] font-mono placeholder:text-[#a4d2df]/75",
+      "rounded-none border border-[var(--dna-border)] bg-[var(--dna-canvas)] text-[var(--dna-text)] font-mono placeholder:text-[var(--dna-muted)]/75",
   },
   "05-riot-anarchy": {
     id: "05-riot-anarchy",
@@ -183,25 +139,15 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     shapeLanguage: "Hard ink strokes, hard offset shadows, torn-sticker highlights, high contrast",
     motionGrammar: "Snap cut · print punch · reduced-motion static ink",
     mappedSkinPreset: "riot",
-    palette: {
-      canvas: "#0b0b10",
-      surface: "#14141c",
-      surfaceElevated: "#1e1e2b",
-      text: "#f4eede",
-      mutedText: "#cbc4b4",
-      border: "#ff5c96",
-      accent: "#ff5c96",
-      accentForeground: "#0b0b10",
-      focus: "#ffd21f",
-    },
+    palette: MASTER_DNA_PALETTES["05-riot-anarchy"],
     cardClass:
-      "rounded-md border-2 border-[#ff5c96] bg-[#14141c] text-[#f4eede] shadow-[4px_4px_0_#000000]",
+      "rounded-md border-2 border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)] shadow-[4px_4px_0_var(--dna-canvas)]",
     buttonClass:
-      "rounded-md border-2 border-[#0b0b10] bg-[#ff5c96] text-[#0b0b10] font-bold uppercase tracking-wider shadow-[3px_3px_0_#ffd21f]",
+      "rounded-md border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-bold uppercase tracking-wider shadow-[3px_3px_0_var(--dna-focus)]",
     badgeClass:
-      "rounded-sm border border-[#ffd21f] bg-[#1e1e2b] text-[#ffd21f] font-mono font-bold",
+      "rounded-sm border border-[var(--dna-focus)] bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)] font-mono font-bold",
     inputClass:
-      "rounded-md border-2 border-[#ff5c96] bg-[#0b0b10] text-[#f4eede] placeholder:text-[#cbc4b4]/75",
+      "rounded-md border-2 border-[var(--dna-border)] bg-[var(--dna-canvas)] text-[var(--dna-text)] placeholder:text-[var(--dna-muted)]/75",
   },
   "06-mycelium": {
     id: "06-mycelium",
@@ -212,24 +158,14 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     shapeLanguage: "Organic pill nodes, bioluminescent hairline filaments, soft membrane layers",
     motionGrammar: "Gentle breathing pulse (pauses on reduced motion)",
     mappedSkinPreset: "archive",
-    palette: {
-      canvas: "#080d0a",
-      surface: "#101a14",
-      surfaceElevated: "#17251d",
-      text: "#e6f4eb",
-      mutedText: "#a8ceb6",
-      border: "#328455",
-      accent: "#3ddc84",
-      accentForeground: "#06140c",
-      focus: "#a7f3c9",
-    },
-    cardClass: "rounded-2xl border border-[#328455] bg-[#101a14] text-[#e6f4eb]",
+    palette: MASTER_DNA_PALETTES["06-mycelium"],
+    cardClass: "rounded-2xl border border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)]",
     buttonClass:
-      "rounded-full border border-[#a7f3c9] bg-[#3ddc84] text-[#06140c] font-semibold tracking-wide",
+      "rounded-full border border-[var(--dna-focus)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-semibold tracking-wide",
     badgeClass:
-      "rounded-full border border-[#3ddc84]/60 bg-[#17251d] text-[#a7f3c9] font-mono",
+      "rounded-full border border-[var(--dna-accent)]/60 bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)] font-mono",
     inputClass:
-      "rounded-xl border border-[#328455] bg-[#080d0a] text-[#e6f4eb] placeholder:text-[#a8ceb6]/75",
+      "rounded-xl border border-[var(--dna-border)] bg-[var(--dna-canvas)] text-[var(--dna-text)] placeholder:text-[var(--dna-muted)]/75",
   },
   "09-simpul-nusantara": {
     id: "09-simpul-nusantara",
@@ -240,24 +176,14 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     shapeLanguage: "Route-line connectors, archipelago station cards, warm copper signal markers",
     motionGrammar: "Waypoint hops · clean signal transitions",
     mappedSkinPreset: "technical",
-    palette: {
-      canvas: "#0b1220",
-      surface: "#121c31",
-      surfaceElevated: "#192742",
-      text: "#f8f1e4",
-      mutedText: "#c9bead",
-      border: "#b96d24",
-      accent: "#f59e0b",
-      accentForeground: "#0b1220",
-      focus: "#fde68a",
-    },
-    cardClass: "rounded-xl border border-[#b96d24] bg-[#121c31] text-[#f8f1e4]",
+    palette: MASTER_DNA_PALETTES["09-simpul-nusantara"],
+    cardClass: "rounded-xl border border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)]",
     buttonClass:
-      "rounded-lg border border-[#fde68a] bg-[#f59e0b] text-[#0b1220] font-semibold tracking-wide",
+      "rounded-lg border border-[var(--dna-focus)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] font-semibold tracking-wide",
     badgeClass:
-      "rounded-md border border-[#f59e0b]/60 bg-[#192742] text-[#fde68a] font-mono",
+      "rounded-md border border-[var(--dna-accent)]/60 bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)] font-mono",
     inputClass:
-      "rounded-lg border border-[#b96d24] bg-[#0b1220] text-[#f8f1e4] placeholder:text-[#c9bead]/75",
+      "rounded-lg border border-[var(--dna-border)] bg-[var(--dna-canvas)] text-[var(--dna-text)] placeholder:text-[var(--dna-muted)]/75",
   },
 };
 
@@ -284,9 +210,9 @@ export function dnaWorldCssVariables(world: MasterDnaWorldSpec): CSSProperties {
     "--dna-accent-secondary": world.palette.accentSecondary ?? world.palette.accent,
     "--dna-accent-fg": world.palette.accentForeground,
     "--dna-focus": world.palette.focus,
-    "--dna-success": world.palette.success ?? "#3ddc84",
+    "--dna-success": world.palette.success ?? IMPERIUM_LUMEN_TOKENS.semantic.success,
     "--dna-warning": world.palette.warning ?? world.palette.accent,
-    "--dna-danger": world.palette.danger ?? "#ff3b3b",
+    "--dna-danger": world.palette.danger ?? IMPERIUM_LUMEN_TOKENS.semantic.danger,
   } as CSSProperties;
 }
 

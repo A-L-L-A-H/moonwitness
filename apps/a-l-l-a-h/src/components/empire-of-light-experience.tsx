@@ -224,7 +224,7 @@ export function EmpireOfLightExperience() {
   }, [quietMode, navigateToSection]);
 
   return (
-    <div className="home-page relative min-h-screen bg-[#08090d] text-[#fff8e8] selection:bg-[#f6d438] selection:text-[#08090d]">
+    <div className="home-page relative min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] selection:bg-[var(--dna-accent)] selection:text-[var(--dna-canvas)]">
       <SiteNavigation
         navLabel="Primary Empire Navigation"
         mobileMenuOpen={mobileMenuOpen}
@@ -237,12 +237,12 @@ export function EmpireOfLightExperience() {
             }}
             className="home-header-brand group flex min-h-[44px] items-center gap-2.5 sm:gap-3"
           >
-            <CrownEmblemIcon className="h-8 w-8 shrink-0 text-[#f6d438]" />
+            <CrownEmblemIcon className="h-8 w-8 shrink-0 text-[var(--dna-accent)]" />
             <div className="flex flex-col leading-tight">
-              <span className="home-brand-wordmark text-base sm:text-lg font-bold tracking-[0.06em] text-[#fff8e8]">
+              <span className="home-brand-wordmark text-base sm:text-lg font-bold tracking-[0.06em] text-[var(--dna-text)]">
                 A-L-L-A-H.COM
               </span>
-              <span className="home-brand-tagline text-[11px] font-bold tracking-[0.12em] text-[#f6d438] uppercase">
+              <span className="home-brand-tagline text-[11px] font-bold tracking-[0.12em] text-[var(--dna-accent)] uppercase">
                 EMPIRE OF THE LIGHT
               </span>
             </div>
@@ -265,7 +265,7 @@ export function EmpireOfLightExperience() {
               onClick={() => setSearchModalOpen(true)}
               aria-label="Search the Empire of the Light"
               title="Search (Ctrl+K)"
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[#fff8e8] hover:text-[#f6d438] transition-colors cursor-pointer"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--dna-text)] hover:text-[var(--dna-accent)] transition-colors cursor-pointer"
             >
               <SearchLensIcon className="h-5 w-5" />
             </button>
@@ -277,7 +277,9 @@ export function EmpireOfLightExperience() {
               aria-label="Toggle Sanctuary Radiance Mode"
               title="Toggle Sanctuary Radiance"
               className={`flex min-h-[44px] min-w-[44px] items-center justify-center transition-colors cursor-pointer ${
-                sanctuaryRadianceActive ? "text-[#f6d438]" : "text-[#fff8e8] hover:text-[#f6d438]"
+                sanctuaryRadianceActive
+                  ? "text-[var(--dna-accent)]"
+                  : "text-[var(--dna-text)] hover:text-[var(--dna-accent)]"
               }`}
             >
               <CrescentStarIcon className="h-5 w-5" />
@@ -321,7 +323,7 @@ export function EmpireOfLightExperience() {
             id="mobile-sanctuary-nav"
             role="region"
             aria-label="Mobile Navigation"
-            className="mx-4 mb-3 border-2 border-[#f6d438] bg-[#08090d] p-4 shadow-[4px_4px_0_#ed149b] lg:hidden"
+            className="mx-4 mb-3 border-2 border-[var(--dna-accent)] bg-[var(--dna-canvas)] p-4 shadow-[4px_4px_0_var(--dna-accent-secondary)] lg:hidden"
           >
             <div className="grid grid-cols-2 gap-2">
               {NAVIGATION_TABS.map((navTab) => {
@@ -338,7 +340,7 @@ export function EmpireOfLightExperience() {
                 );
               })}
             </div>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#f6d438]/25 pt-3">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--dna-accent)]/25 pt-3">
               <SecondaryAction
                 aria-pressed={quietMode}
                 onClick={() => setQuietMode((prev) => !prev)}
@@ -408,17 +410,17 @@ export function EmpireOfLightExperience() {
           }
           asideContent={
             <div className="mw-editorial-aside-panel text-right">
-              <div className="flex items-center justify-end gap-2 text-[#f6d438]">
+              <div className="flex items-center justify-end gap-2 text-[var(--dna-accent)]">
                 <CrownEmblemIcon className="h-6 w-6" />
                 <span>{locale === "id" ? "MISI BERSAMA" : "SHARED COMPASS"}</span>
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-[#fff8e8]">
+              <p className="mt-2 text-sm leading-relaxed text-[var(--dna-text)]">
                 DREAM · EXPLORE · LEARN · CREATE · CONNECT
               </p>
               <button
                 type="button"
                 onClick={() => navigateToSection("the-worlds")}
-                className="mt-3 inline-flex min-h-[44px] items-center gap-2 border border-[#f6d438] bg-[#171a26] px-3 py-1.5 text-xs text-[#f6d438] hover:bg-[#f6d438] hover:text-[#08090d] transition-colors cursor-pointer"
+                className="mt-3 inline-flex min-h-[44px] items-center gap-2 border border-[var(--dna-accent)] bg-[var(--dna-surface-elevated)] px-3 py-1.5 text-xs text-[var(--dna-accent)] hover:bg-[var(--dna-accent)] hover:text-[var(--dna-canvas)] transition-colors cursor-pointer"
               >
                 <span>{locale === "id" ? "MENUJU DUNIA" : "TO THE WORLDS"}</span>
                 <span aria-hidden="true">&rarr;</span>
@@ -431,7 +433,7 @@ export function EmpireOfLightExperience() {
                 <h2>{locale === "id" ? "JELAJAHI SEMBILAN DUNIA" : "EXPLORE THE NINE WORLDS"}</h2>
               }
               trailing={
-                <span className="text-[#ed149b] text-xl" aria-hidden="true">
+                <span className="text-[var(--dna-accent-secondary)] text-xl" aria-hidden="true">
                   ✦
                 </span>
               }

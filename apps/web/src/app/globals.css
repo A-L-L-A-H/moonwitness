@@ -38,7 +38,7 @@
   height: 18px;
   border-radius: 50%;
   background: var(--yellow);
-  border: 2px solid #0b0b10;
+  border: 2px solid var(--ink);
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
 }
 .zine-range::-moz-range-thumb {
@@ -46,7 +46,7 @@
   height: 18px;
   border-radius: 50%;
   background: var(--yellow);
-  border: 2px solid #0b0b10;
+  border: 2px solid var(--ink);
   box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
 }
 .zine-range:focus-visible {

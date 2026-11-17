@@ -97,8 +97,8 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
     <div className="space-y-6">
       {/* Date + Meridian + Profile Controls */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-        <div className="lg:col-span-5 border border-[#d6b46c]/25 bg-[#090d17] p-4 space-y-3">
-          <div className="font-mono text-[10.5px] text-[#dfc07b] uppercase">
+        <div className="lg:col-span-5 border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-4 space-y-3">
+          <div className="font-mono text-[10.5px] text-[var(--dna-accent)] uppercase">
             {locale === "id"
               ? "LAPIS 1 · WAKTU FISIK UTC & MERIDIAN"
               : "LAYER 1 · PHYSICAL UTC TIME & MERIDIAN"}
@@ -108,7 +108,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
             value={dateIso}
             onChange={(e) => setDateIso(e.target.value)}
             aria-label="UTC ISO Timestamp"
-            className="w-full border border-[#d6b46c]/35 bg-[#05070e] px-3 py-2 font-mono text-xs text-[#fff6df] focus:outline-none"
+            className="w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] px-3 py-2 font-mono text-xs text-[var(--dna-text)] focus:outline-none"
           />
           <div className="flex flex-wrap gap-1.5">
             {HISTORICAL_DATE_PRESETS.map((preset) => (
@@ -117,7 +117,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                 tone="secondary"
                 aria-pressed={dateIso === preset.iso}
                 onClick={() => setDateIso(preset.iso)}
-                className="px-3 py-1 text-[10px] text-[#e6decb]"
+                className="px-3 py-1 text-[10px] text-[var(--dna-muted)]"
               >
                 {preset.label}
               </DnaButton>
@@ -125,7 +125,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
           </div>
 
           <div className="pt-2">
-            <div className="font-mono text-[10px] text-[#cfc5b0] uppercase mb-1.5">
+            <div className="font-mono text-[10px] text-[var(--dna-muted)] uppercase mb-1.5">
               OBSERVER SITE
             </div>
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
@@ -135,7 +135,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                   tone="secondary"
                   aria-pressed={s.id === activeSite.id}
                   onClick={() => setSiteId(s.id)}
-                  className="px-3 py-1.5 justify-start text-left text-[10px] text-[#f5efe2]"
+                  className="px-3 py-1.5 justify-start text-left text-[10px] text-[var(--dna-text)]"
                 >
                   {s.label}
                 </DnaButton>
@@ -145,43 +145,47 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
         </div>
 
         {/* Computed Geometry Layer */}
-        <div className="lg:col-span-7 border border-[#d6b46c]/25 bg-[#090d17] p-4 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/15 pb-2.5">
-            <span className="font-mono text-[10.5px] text-[#dfc07b] uppercase">
+        <div className="lg:col-span-7 border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-4 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/15 pb-2.5">
+            <span className="font-mono text-[10.5px] text-[var(--dna-accent)] uppercase">
               {locale === "id"
                 ? "LAPIS 2 · GEOMETRI BULAN-MATAHARI"
                 : "LAYER 2 · SOLAR-LUNAR GEOMETRY ESTIMATE"}
             </span>
-            <span className="font-mono text-[10px] text-[#cfc5b0]">JD {geometry.julianDayUtc}</span>
+            <span className="font-mono text-[10px] text-[var(--dna-muted)]">
+              JD {geometry.julianDayUtc}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono">
-            <div className="border border-[#d6b46c]/20 bg-[#0c101d] p-3">
-              <div className="text-[9.5px] text-[#bfb59e]">MOON AGE</div>
-              <div className="mt-1 text-base text-[#fff8e6]">{geometry.moonAgeDays} d</div>
+            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
+              <div className="text-[9.5px] text-[var(--dna-muted)]">MOON AGE</div>
+              <div className="mt-1 text-base text-[var(--dna-text)]">{geometry.moonAgeDays} d</div>
             </div>
-            <div className="border border-[#d6b46c]/20 bg-[#0c101d] p-3">
-              <div className="text-[9.5px] text-[#bfb59e]">ILLUMINATION</div>
-              <div className="mt-1 text-base text-[#fff8e6]">{geometry.illuminatedPercent}%</div>
+            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
+              <div className="text-[9.5px] text-[var(--dna-muted)]">ILLUMINATION</div>
+              <div className="mt-1 text-base text-[var(--dna-text)]">
+                {geometry.illuminatedPercent}%
+              </div>
             </div>
-            <div className="border border-[#d6b46c]/20 bg-[#0c101d] p-3">
-              <div className="text-[9.5px] text-[#bfb59e]">ELONGATION</div>
-              <div className="mt-1 text-base text-[#f5dfa6]">
+            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
+              <div className="text-[9.5px] text-[var(--dna-muted)]">ELONGATION</div>
+              <div className="mt-1 text-base text-[var(--dna-accent)]">
                 {geometry.elongationGeocentricDeg}°
               </div>
             </div>
-            <div className="border border-[#d6b46c]/20 bg-[#0c101d] p-3">
-              <div className="text-[9.5px] text-[#bfb59e]">SUNSET ALTITUDE</div>
-              <div className="mt-1 text-base text-[#f5dfa6]">
+            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
+              <div className="text-[9.5px] text-[var(--dna-muted)]">SUNSET ALTITUDE</div>
+              <div className="mt-1 text-base text-[var(--dna-accent)]">
                 {geometry.estimatedSunsetAltitudeDeg}°
               </div>
             </div>
           </div>
 
           {/* Criterion Evaluation & Semantic Basis Separation */}
-          <div className="border-t border-[#d6b46c]/15 pt-3 space-y-3">
+          <div className="border-t border-[var(--dna-accent)]/15 pt-3 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-[10.5px] text-[#dfc07b] uppercase">
+              <span className="font-mono text-[10.5px] text-[var(--dna-accent)] uppercase">
                 LAYER 3 · CRITERION &amp; SEMANTIC GUARD ({criterion.profileId})
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -191,7 +195,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                     tone="secondary"
                     aria-pressed={profileId === id}
                     onClick={() => setProfileId(id)}
-                    className="px-3 py-1 text-[10px] text-[#f5efe2]"
+                    className="px-3 py-1 text-[10px] text-[var(--dna-text)]"
                   >
                     {id}
                   </DnaButton>
@@ -206,7 +210,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                         : "GEOCENTRIC_CENTER_TO_CENTER",
                     )
                   }
-                  className="px-3 py-1 text-[10px] text-[#d8ceba]"
+                  className="px-3 py-1 text-[10px] text-[var(--dna-muted)]"
                 >
                   BASIS:{" "}
                   {elongationBasis === "GEOCENTRIC_CENTER_TO_CENTER"
@@ -220,37 +224,38 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
               {criterion.clauses.map((c) => (
                 <div
                   key={c.id}
-                  className="border border-[#d6b46c]/20 bg-[#0c101d] p-3 font-mono text-[10.5px]"
+                  className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3 font-mono text-[10.5px]"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[#dfc07b]">{c.id}</span>
+                    <span className="text-[var(--dna-accent)]">{c.id}</span>
                     <span
                       className={
                         c.passed === true
-                          ? "text-[#fff4d2]"
+                          ? "text-[var(--dna-text)]"
                           : c.passed === false
-                            ? "text-[#d6b46c]"
-                            : "text-[#f59e0b]"
+                            ? "text-[var(--dna-accent)]"
+                            : "text-[var(--dna-warning)]"
                       }
                     >
                       {c.passed === true ? "PASS" : c.passed === false ? "FAIL" : "UNKNOWN"}
                     </span>
                   </div>
-                  <div className="mt-1 text-xs text-[#dfd6c3]">{c.reason}</div>
+                  <div className="mt-1 text-xs text-[var(--dna-muted)]">{c.reason}</div>
                 </div>
               ))}
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 border border-[#d6b46c]/30 bg-[#0b101d] px-3.5 py-2.5 font-mono text-[11px]">
+            <div className="flex flex-wrap items-center justify-between gap-2 border border-[var(--dna-accent)]/30 bg-[var(--dna-surface)] px-3.5 py-2.5 font-mono text-[11px]">
               <span>
-                VERDICT: <strong className="text-[#fff8e6]">{criterion.verdict}</strong> · ACTION:{" "}
-                <strong className="text-[#f5dfa6]">{criterion.computedAction}</strong>
+                VERDICT: <strong className="text-[var(--dna-text)]">{criterion.verdict}</strong> ·
+                ACTION:{" "}
+                <strong className="text-[var(--dna-accent)]">{criterion.computedAction}</strong>
               </span>
               <div className="flex items-center gap-2">
                 <DnaButton
                   tone="secondary"
                   onClick={() => void copyScenarioDeepLink()}
-                  className="px-3 py-1 text-[10px] text-[#f5dfa6]"
+                  className="px-3 py-1 text-[10px] text-[var(--dna-accent)]"
                 >
                   {copiedScenario
                     ? locale === "id"
@@ -260,26 +265,26 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                       ? "SALIN TAUTAN"
                       : "SHARE SCENARIO"}
                 </DnaButton>
-                <span className="text-[10px] text-[#cfc5b0]">
+                <span className="text-[10px] text-[var(--dna-muted)]">
                   {locale === "id"
                     ? "OBSERVASI & OTORITAS TETAP TERPISAH"
                     : "OBSERVATION & AUTHORITY REMAIN SEPARATE"}
                 </span>
               </div>
             </div>
-            <p className="text-[11px] font-sans text-[#bfb59e]">{geometry.methodNote}</p>
+            <p className="text-[11px] font-sans text-[var(--dna-muted)]">{geometry.methodNote}</p>
           </div>
         </div>
       </div>
 
       {!compact && (
-        <section className="relative border border-[#d6b46c]/30 bg-[#070a13] p-6 sm:p-8 space-y-4">
+        <section className="relative border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-6 sm:p-8 space-y-4">
           <SacredCornerBrackets />
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-            <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[#fff6df] uppercase">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+            <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[var(--dna-text)] uppercase">
               KEMENAG RI 1446–1447 H VERIFIED HISTORICAL FALSIFICATION CORPUS
             </h2>
-            <span className="font-mono text-[10px] text-[#dfc07b]">
+            <span className="font-mono text-[10px] text-[var(--dna-accent)]">
               SOURCE: ANTIKYTHERA-TIME v0.11 / MTIME-HIJRI
             </span>
           </div>
@@ -287,20 +292,20 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
             {MTIME_HISTORICAL_BENCHMARKS.map((item) => (
               <div
                 key={item.id}
-                className="border border-[#d6b46c]/25 bg-[#0a0f1c] p-4 space-y-1.5"
+                className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] p-4 space-y-1.5"
               >
                 <div className="flex items-center justify-between font-mono text-[10.5px]">
-                  <span className="text-[#f5dfa6] font-bold">
+                  <span className="text-[var(--dna-accent)] font-bold">
                     {item.id} · {item.officialMonthStart}
                   </span>
-                  <DnaBadge className="font-mono text-[10px] text-[#fff4d2]">
+                  <DnaBadge className="font-mono text-[10px] text-[var(--dna-text)]">
                     {item.criterionStatus}
                   </DnaBadge>
                 </div>
-                <div className="font-mono text-[10px] text-[#dfc07b]">
+                <div className="font-mono text-[10px] text-[var(--dna-accent)]">
                   {item.sourceAuthority} · {item.observationStatus}
                 </div>
-                <p className="font-serif text-xs text-[#e6decb]">{item.sourceNote}</p>
+                <p className="font-serif text-xs text-[var(--dna-muted)]">{item.sourceNote}</p>
                 <div className="pt-1">
                   <DnaButton
                     tone="secondary"
@@ -314,7 +319,7 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }
                     }}
-                    className="px-3 py-1 text-[10px] text-[#f5dfa6] uppercase"
+                    className="px-3 py-1 text-[10px] text-[var(--dna-accent)] uppercase"
                   >
                     {locale === "id" ? "MUAT KE EVALUATOR" : "LOAD INTO EVALUATOR"}
                   </DnaButton>
@@ -332,17 +337,17 @@ export function MTimeObservatory() {
   const { locale } = useSanctuaryLocale();
 
   return (
-    <div className="min-h-screen bg-[#040509] text-[#f5efe2] bg-girih-filigree">
+    <div className="min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] bg-girih-filigree">
       <SiteSubpageHeader activeRoute="mtime" />
       <main id="main" className="mx-auto max-w-7xl px-4 py-12 sm:px-8 space-y-8">
         <div className="text-center space-y-3">
-          <div className="font-mono text-[11px] tracking-[0.26em] text-[#dfc07b] uppercase">
+          <div className="font-mono text-[11px] tracking-[0.26em] text-[var(--dna-accent)] uppercase">
             ANTIKYTHERA M-TIME · MĪQĀT TEMPORAL PROTOCOL
           </div>
           <h1 className="font-monument text-3xl sm:text-5xl tracking-[0.16em] text-gold-gradient uppercase">
             {locale === "id" ? "OBSERVATORIUM WAKTU M-TIME" : "EXPLAINABLE M-TIME OBSERVATORY"}
           </h1>
-          <p className="mx-auto max-w-3xl font-serif text-base text-[#e6decb] leading-relaxed">
+          <p className="mx-auto max-w-3xl font-serif text-base text-[var(--dna-muted)] leading-relaxed">
             {locale === "id"
               ? "Memisahkan waktu fisik UTC, estimasi geometri bulan-matahari, kriteria imkanur rukyat (MABIMS / Diyanet), hasil rukyat lapangan, dan keputusan otoritas tanpa mencampuradukkan peran."
               : "Strictly separating physical UTC time, solar-lunar geometry, calendar visibility criteria (MABIMS_ID_2026 / DIYANET_1978), field observation, and official decree."}
@@ -350,7 +355,7 @@ export function MTimeObservatory() {
           <div>
             <Link
               href="/codex?door=sovereign-runtimes"
-              className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[#f5dfa6] uppercase"
+              className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
             >
               DOOR IV SOVEREIGN RUNTIMES &rsaquo;
             </Link>

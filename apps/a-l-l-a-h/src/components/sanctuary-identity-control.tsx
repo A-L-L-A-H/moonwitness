@@ -26,7 +26,7 @@ export function SanctuaryIdentityControl({ compact = false }: { readonly compact
     return (
       <div className="inline-flex items-center gap-1.5">
         <span
-          className="inline-flex items-center border border-[#d6b46c]/45 bg-[#d6b46c]/12 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f5dfa6] uppercase"
+          className="inline-flex items-center border border-[var(--dna-accent)]/45 bg-[var(--dna-accent)]/12 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] uppercase"
           title={`${session.displayName} (${session.role})`}
         >
           @{session.username}
@@ -38,7 +38,7 @@ export function SanctuaryIdentityControl({ compact = false }: { readonly compact
             void clearSanctuaryMidSession().finally(() => setBusy(false));
           }}
           disabled={busy}
-          className="btn-luxe-secondary px-2.5 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[#d8ceba] hover:text-[#fff6df] uppercase cursor-pointer"
+          className="btn-luxe-secondary px-2.5 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[var(--dna-muted)] hover:text-[var(--dna-text)] uppercase cursor-pointer"
         >
           {locale === "id" ? "KELUAR" : "SIGN OUT"}
         </button>
@@ -58,7 +58,7 @@ export function SanctuaryIdentityControl({ compact = false }: { readonly compact
             : "/";
         void startSanctuaryMidLogin(currentPath).catch(() => setBusy(false));
       }}
-      className={`btn-luxe-secondary inline-flex items-center font-mono tracking-[0.16em] text-[#f5dfa6] uppercase cursor-pointer ${
+      className={`btn-luxe-secondary inline-flex items-center font-mono tracking-[0.16em] text-[var(--dna-accent)] uppercase cursor-pointer ${
         compact ? "px-3 py-2 text-[11px]" : "px-3 py-1.5 text-[10px]"
       }`}
     >
