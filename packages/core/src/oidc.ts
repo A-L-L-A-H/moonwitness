@@ -35,6 +35,7 @@ export interface MidVerifiedClaims {
   readonly aud: string | string[];
   readonly exp: number;
   readonly iat: number;
+  readonly nbf?: number;
   readonly token_use: string;
   readonly scope?: string;
   readonly preferred_username?: string;
@@ -274,12 +275,22 @@ export function decodeJwtParts<
     return null;
   }
   try {
-    const header = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[0]))) as THeader;
-    const claims = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[1]))) as TClaims;
+    const header = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[0]))) as unknown;
+    const claims = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[1]))) as unknown;
+    if (
+      !header ||
+      typeof header !== "object" ||
+      Array.isArray(header) ||
+      !claims ||
+      typeof claims !== "object" ||
+      Array.isArray(claims)
+    ) {
+      return null;
+    }
     const signatureBytes = decodeBase64Url(segments[2]);
     return {
-      header,
-      claims,
+      header: header as THeader,
+      claims: claims as TClaims,
       signingInput: `${segments[0]}.${segments[1]}`,
       signatureBytes,
     };
@@ -303,21 +314,52 @@ export function createJwksKeyResolver(options?: {
   const ttlMs = options?.ttlMs ?? 300_000;
   const fetchFn = options?.fetchFn ?? globalThis.fetch;
 
-  let cached: { fetchedAt: number; keys: readonly PublicEs256Jwk[] } | null = null;
+  let cached: {
+    fetchedAt: number;
+    keys: readonly PublicEs256Jwk[];
+    missRefreshed: boolean;
+  } | null = null;
+
+  const fetchJwks = async (now: number): Promise<readonly PublicEs256Jwk[] | null> => {
+    const response = await fetchFn(jwksUrl);
+    if (!response.ok) return null;
+    const body = (await response.json().catch(() => null)) as {
+      keys?: PublicEs256Jwk[];
+    } | null;
+    if (!Array.isArray(body?.keys)) return null;
+    cached = { fetchedAt: now, keys: body.keys, missRefreshed: false };
+    return cached.keys;
+  };
 
   return {
     async resolveByKid(kid: string): Promise<PublicEs256Jwk | null> {
       const now = Date.now();
-      if (!cached || now - cached.fetchedAt > ttlMs) {
-        const response = await fetchFn(jwksUrl);
-        if (!response.ok) return null;
-        const body = (await response.json().catch(() => null)) as {
-          keys?: PublicEs256Jwk[];
-        } | null;
-        if (!body?.keys) return null;
-        cached = { fetchedAt: now, keys: body.keys };
+      const snapshot = cached;
+      if (!snapshot || now - snapshot.fetchedAt > ttlMs) {
+        const keys = await fetchJwks(now);
+        if (!keys) return null;
+        return keys.find((entry) => entry.kid === kid) ?? null;
       }
-      return cached.keys.find((entry) => entry.kid === kid) ?? null;
+
+      const existing = snapshot.keys.find((entry) => entry.kid === kid);
+      if (existing) {
+        return existing;
+      }
+
+      // Refresh once on cache miss so signing key rotation succeeds within TTL without flooding.
+      if (snapshot.missRefreshed) {
+        return null;
+      }
+      const refreshedKeys = await fetchJwks(now);
+      if (!refreshedKeys) {
+        cached = { ...snapshot, missRefreshed: true };
+        return null;
+      }
+      const rotatedMatch = refreshedKeys.find((entry) => entry.kid === kid) ?? null;
+      if (!rotatedMatch) {
+        cached = { fetchedAt: now, keys: refreshedKeys, missRefreshed: true };
+      }
+      return rotatedMatch;
     },
     resetCache(): void {
       cached = null;
@@ -354,26 +396,46 @@ export async function verifyEs256Jwt(params: {
   }
 
   const nowSec = params.nowEpochSec ?? Math.floor(Date.now() / 1000);
-  if (typeof claims.exp !== "number" || claims.exp <= nowSec) return null;
+  if (typeof claims.exp !== "number" || !Number.isFinite(claims.exp) || claims.exp <= nowSec) {
+    return null;
+  }
+  if (
+    claims.nbf !== undefined &&
+    (typeof claims.nbf !== "number" || !Number.isFinite(claims.nbf) || claims.nbf > nowSec)
+  ) {
+    return null;
+  }
   if (typeof claims.sub !== "string" || !claims.sub) return null;
 
   const jwk = await params.resolveJwkByKid(decoded.header.kid);
-  if (!jwk || jwk.kty !== "EC" || jwk.crv !== "P-256") return null;
+  if (
+    !jwk ||
+    jwk.kty !== "EC" ||
+    jwk.crv !== "P-256" ||
+    (jwk.use && jwk.use !== "sig") ||
+    (jwk.alg && jwk.alg !== "ES256")
+  ) {
+    return null;
+  }
 
-  const publicKey = await globalThis.crypto.subtle.importKey(
-    "jwk",
-    jwk,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["verify"],
-  );
-  const valid = await globalThis.crypto.subtle.verify(
-    { name: "ECDSA", hash: "SHA-256" },
-    publicKey,
-    toArrayBuffer(decoded.signatureBytes),
-    toArrayBuffer(TEXT_ENCODER.encode(decoded.signingInput)),
-  );
-  if (!valid) return null;
+  try {
+    const publicKey = await globalThis.crypto.subtle.importKey(
+      "jwk",
+      jwk,
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["verify"],
+    );
+    const valid = await globalThis.crypto.subtle.verify(
+      { name: "ECDSA", hash: "SHA-256" },
+      publicKey,
+      toArrayBuffer(decoded.signatureBytes),
+      toArrayBuffer(TEXT_ENCODER.encode(decoded.signingInput)),
+    );
+    if (!valid) return null;
+  } catch {
+    return null;
+  }
 
   return claims as MidVerifiedClaims;
 }

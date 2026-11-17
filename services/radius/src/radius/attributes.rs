@@ -15,7 +15,7 @@ pub const TUNNEL_MEDIUM_TYPE_IEEE_802: u32 = 6;
 
 pub const ACCT_STATUS_TYPE: u8 = 40;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Attribute {
     pub type_code: u8,
     pub value: Vec<u8>,
@@ -83,7 +83,59 @@ pub fn vlan_attributes(vlan: u16) -> Vec<Attribute> {
     let group_id = vlan.to_string();
     vec![
         Attribute::new(TUNNEL_TYPE, &TUNNEL_TYPE_VLAN.to_be_bytes()),
-        Attribute::new(TUNNEL_MEDIUM_TYPE, &TUNNEL_MEDIUM_TYPE_IEEE_802.to_be_bytes()),
+        Attribute::new(
+            TUNNEL_MEDIUM_TYPE,
+            &TUNNEL_MEDIUM_TYPE_IEEE_802.to_be_bytes(),
+        ),
         Attribute::new(TUNNEL_PRIVATE_GROUP_ID, group_id.as_bytes()),
     ]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn roundtrip_and_typed_helpers() {
+        let mut attrs = vec![
+            Attribute::new(USER_NAME, b"alice"),
+            Attribute::new(SESSION_TIMEOUT, &3600u32.to_be_bytes()),
+        ];
+        attrs.extend(vlan_attributes(100));
+
+        let mut encoded = Vec::new();
+        for attr in &attrs {
+            encoded.extend_from_slice(&attr.to_bytes());
+        }
+        let decoded = Attribute::parse(&encoded);
+        assert_eq!(decoded, attrs);
+        assert_eq!(attr_string(&decoded, USER_NAME).as_deref(), Some("alice"));
+        assert_eq!(attr_u32(&decoded, SESSION_TIMEOUT), Some(3600));
+        assert_eq!(attr_u32(&decoded, TUNNEL_TYPE), Some(TUNNEL_TYPE_VLAN));
+        assert_eq!(
+            attr_u32(&decoded, TUNNEL_MEDIUM_TYPE),
+            Some(TUNNEL_MEDIUM_TYPE_IEEE_802)
+        );
+        assert_eq!(
+            attr_string(&decoded, TUNNEL_PRIVATE_GROUP_ID).as_deref(),
+            Some("100")
+        );
+    }
+
+    #[test]
+    fn parse_stops_safely_on_zero_length_or_truncated_attribute() {
+        // Zero-length attribute must terminate without looping.
+        let zero_len = [USER_NAME, 0, b'a', b'b'];
+        assert!(Attribute::parse(&zero_len).is_empty());
+
+        // Length 1 (< 2 header bytes) must terminate.
+        let tiny_len = [USER_NAME, 1, b'a'];
+        assert!(Attribute::parse(&tiny_len).is_empty());
+
+        // Valid first attribute followed by truncated second attribute keeps first only.
+        let mut bytes = Attribute::new(USER_NAME, b"bob").to_bytes();
+        bytes.extend_from_slice(&[ACCT_STATUS_TYPE, 6, 0, 0]);
+        let parsed = Attribute::parse(&bytes);
+        assert_eq!(parsed, vec![Attribute::new(USER_NAME, b"bob")]);
+    }
 }

@@ -155,25 +155,21 @@ async fn list_logs(
     let limit = q.limit.unwrap_or(100).clamp(1, 1000);
 
     let logs = match q.username {
-        Some(username) => {
-            sqlx::query_as::<_, RadiusLog>(
-                "SELECT id, username, nas_ip, nas_port, event, result, framed_ip, vlan_id, created_at \
+        Some(username) => sqlx::query_as::<_, RadiusLog>(
+            "SELECT id, username, nas_ip, nas_port, event, result, framed_ip, vlan_id, created_at \
                  FROM radius_logs WHERE username = ? ORDER BY created_at DESC LIMIT ?",
-            )
-            .bind(username)
-            .bind(limit)
-            .fetch_all(&state.pool)
-            .await?
-        }
-        None => {
-            sqlx::query_as::<_, RadiusLog>(
-                "SELECT id, username, nas_ip, nas_port, event, result, framed_ip, vlan_id, created_at \
+        )
+        .bind(username)
+        .bind(limit)
+        .fetch_all(&state.pool)
+        .await?,
+        None => sqlx::query_as::<_, RadiusLog>(
+            "SELECT id, username, nas_ip, nas_port, event, result, framed_ip, vlan_id, created_at \
                  FROM radius_logs ORDER BY created_at DESC LIMIT ?",
-            )
-            .bind(limit)
-            .fetch_all(&state.pool)
-            .await?
-        }
+        )
+        .bind(limit)
+        .fetch_all(&state.pool)
+        .await?,
     };
 
     Ok(Json(logs))
@@ -191,11 +187,12 @@ async fn stats(State(state): State<AppState>) -> Result<Json<Stats>, AppError> {
             .fetch_one(&state.pool)
             .await?;
     let cutoff = chrono::Utc::now().timestamp() - 86_400;
-    let recent_rejects: i64 =
-        sqlx::query_scalar("SELECT COUNT(*) FROM radius_logs WHERE result LIKE 'reject%' AND created_at >= ?")
-            .bind(cutoff)
-            .fetch_one(&state.pool)
-            .await?;
+    let recent_rejects: i64 = sqlx::query_scalar(
+        "SELECT COUNT(*) FROM radius_logs WHERE result LIKE 'reject%' AND created_at >= ?",
+    )
+    .bind(cutoff)
+    .fetch_one(&state.pool)
+    .await?;
 
     Ok(Json(Stats {
         total_users,
