@@ -119,4 +119,203 @@ describe("@moonwitness/core oidc", () => {
     expect(rejected).toBeNull();
     expect(fetchCount).toBe(1);
   });
+
+  it("enforces string and array expectedAudience strictly and fails closed on empty/malformed aud", async () => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const pair = await globalThis.crypto.subtle.generateKey(
+      { name: "ECDSA", namedCurve: "P-256" },
+      true,
+      ["sign", "verify"],
+    );
+    const rawPublic = (await globalThis.crypto.subtle.exportKey(
+      "jwk",
+      pair.publicKey,
+    )) as PublicEs256Jwk;
+    const sharedJwk: PublicEs256Jwk = {
+      kty: "EC",
+      crv: "P-256",
+      x: rawPublic.x,
+      y: rawPublic.y,
+      kid: "aud-k1",
+      use: "sig",
+      alg: "ES256",
+    };
+    const signWithShared = async (payload: Record<string, unknown>) => {
+      const headerB64 = encodeBase64Url(
+        TEXT_ENCODER.encode(JSON.stringify({ alg: "ES256", typ: "JWT", kid: sharedJwk.kid })),
+      );
+      const payloadB64 = encodeBase64Url(TEXT_ENCODER.encode(JSON.stringify(payload)));
+      const signingInput = `${headerB64}.${payloadB64}`;
+      const sigBuffer = await globalThis.crypto.subtle.sign(
+        { name: "ECDSA", hash: "SHA-256" },
+        pair.privateKey,
+        TEXT_ENCODER.encode(signingInput),
+      );
+      return `${signingInput}.${encodeBase64Url(new Uint8Array(sigBuffer))}`;
+    };
+
+    const baseClaims = {
+      iss: "https://id.moonwitness.biz.id",
+      sub: "42",
+      exp: nowSec + 300,
+      iat: nowSec,
+      token_use: "access",
+    };
+
+    const stringAud = await signWithShared({ ...baseClaims, aud: "moonwitness-web" });
+    const arrayAud = await signWithShared({
+      ...baseClaims,
+      aud: ["moonwitness-web", "moonwitness-api"],
+    });
+    const missingAud = await signWithShared(baseClaims);
+    const emptyArrayAud = await signWithShared({ ...baseClaims, aud: [] });
+    const malformedArrayAud = await signWithShared({
+      ...baseClaims,
+      aud: ["moonwitness-web", 123],
+    });
+
+    const resolveKey = async (kid: string) => (kid === sharedJwk.kid ? sharedJwk : null);
+
+    expect(
+      await verifyEs256Jwt({
+        token: stringAud,
+        expectedTokenUse: "access",
+        expectedAudience: ["moonwitness-cli", "moonwitness-web"],
+        resolveJwkByKid: resolveKey,
+        nowEpochSec: nowSec,
+      }),
+    ).not.toBeNull();
+
+    expect(
+      await verifyEs256Jwt({
+        token: arrayAud,
+        expectedTokenUse: "access",
+        expectedAudience: "moonwitness-api",
+        resolveJwkByKid: resolveKey,
+        nowEpochSec: nowSec,
+      }),
+    ).not.toBeNull();
+
+    expect(
+      await verifyEs256Jwt({
+        token: arrayAud,
+        expectedTokenUse: "access",
+        expectedAudience: ["igate-console", "moonwitness-api"],
+        resolveJwkByKid: resolveKey,
+        nowEpochSec: nowSec,
+      }),
+    ).not.toBeNull();
+
+    expect(
+      await verifyEs256Jwt({
+        token: stringAud,
+        expectedTokenUse: "access",
+        expectedAudience: "igate-console",
+        resolveJwkByKid: resolveKey,
+        nowEpochSec: nowSec,
+      }),
+    ).toBeNull();
+
+    expect(
+      await verifyEs256Jwt({
+        token: stringAud,
+        expectedTokenUse: "access",
+        expectedAudience: [],
+        resolveJwkByKid: resolveKey,
+        nowEpochSec: nowSec,
+      }),
+    ).toBeNull();
+
+    expect(
+      await verifyEs256Jwt({
+        token: stringAud,
+        expectedTokenUse: "access",
+        expectedAudience: "",
+        resolveJwkByKid: resolveKey,
+        nowEpochSec: nowSec,
+      }),
+    ).toBeNull();
+
+    for (const badToken of [missingAud, emptyArrayAud, malformedArrayAud]) {
+      expect(
+        await verifyEs256Jwt({
+          token: badToken,
+          expectedTokenUse: "access",
+          expectedAudience: ["moonwitness-web"],
+          resolveJwkByKid: resolveKey,
+          nowEpochSec: nowSec,
+        }),
+      ).toBeNull();
+    }
+  });
+
+  it("refreshes cached JWKS on unseen kid during key rotation without hammering unknown kids", async () => {
+    const nowSec = Math.floor(Date.now() / 1000);
+    const k1 = await createSignedTestJwt({
+      kid: "rot-k1",
+      payload: {
+        iss: "https://id.moonwitness.biz.id",
+        sub: "7",
+        aud: "igate-console",
+        exp: nowSec + 300,
+        iat: nowSec,
+        token_use: "access",
+      },
+    });
+    const k2 = await createSignedTestJwt({
+      kid: "rot-k2",
+      payload: {
+        iss: "https://id.moonwitness.biz.id",
+        sub: "7",
+        aud: "igate-console",
+        exp: nowSec + 300,
+        iat: nowSec,
+        token_use: "access",
+      },
+    });
+
+    let activeKeys = [k1.publicJwk];
+    let fetchCount = 0;
+    const resolver = createJwksKeyResolver({
+      issuerUrl: "https://id.moonwitness.biz.id",
+      ttlMs: 300_000,
+      fetchFn: async () => {
+        fetchCount += 1;
+        return new Response(JSON.stringify({ keys: activeKeys }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      },
+    });
+
+    expect(
+      await verifyEs256Jwt({
+        token: k1.jwt,
+        expectedTokenUse: "access",
+        expectedAudience: "igate-console",
+        resolveJwkByKid: resolver.resolveByKid,
+        nowEpochSec: nowSec,
+      }),
+    ).not.toBeNull();
+    expect(fetchCount).toBe(1);
+
+    // Rotate issuer keys within TTL.
+    activeKeys = [k1.publicJwk, k2.publicJwk];
+    expect(
+      await verifyEs256Jwt({
+        token: k2.jwt,
+        expectedTokenUse: "access",
+        expectedAudience: "igate-console",
+        resolveJwkByKid: resolver.resolveByKid,
+        nowEpochSec: nowSec,
+      }),
+    ).not.toBeNull();
+    expect(fetchCount).toBe(2);
+
+    // Unknown kid refreshes once then stays cached as a miss within TTL.
+    expect(await resolver.resolveByKid("unknown-kid")).toBeNull();
+    expect(fetchCount).toBe(3);
+    expect(await resolver.resolveByKid("unknown-kid")).toBeNull();
+    expect(fetchCount).toBe(3);
+  });
 });

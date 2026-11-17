@@ -1,4 +1,9 @@
 import {
+  buildAccessTokenAudience,
+  resolveIntrospectionExpectedAudience,
+  resolveRequestedClientTarget,
+} from "./audience";
+import {
   constantTimeEqualString,
   sha256Hex,
   signEs256Jwt,
@@ -128,7 +133,8 @@ function buildDiscoveryDocument(issuer: string): Record<string, unknown> {
 function buildTokenClaims(params: {
   issuer: string;
   user: PublicUser;
-  audience: string;
+  audience: string | string[];
+  azp?: string;
   ttlSec: number;
   tokenUse: "access" | "id";
   scope: string;
@@ -149,6 +155,9 @@ function buildTokenClaims(params: {
     email: params.user.email,
     role: params.user.role,
   };
+  if (params.azp) {
+    claims.azp = params.azp;
+  }
   if (params.tokenUse === "id" && params.nonce) {
     claims.nonce = params.nonce;
   }
@@ -161,6 +170,7 @@ async function issueClientTokens(params: {
   clientId: string;
   scope: string;
   nonce?: string | null;
+  resource?: string | null;
   refreshTokenOverride?: string;
 }): Promise<Record<string, unknown>> {
   const issuer = resolveIssuer(params.env);
@@ -172,14 +182,17 @@ async function issueClientTokens(params: {
     params.env.DB,
     params.env.MID_KEY_ENCRYPTION_SECRET,
   );
+  const accessAudience = buildAccessTokenAudience(params.clientId, params.resource);
   const accessClaims = buildTokenClaims({
     issuer,
     user: params.user,
-    audience: params.clientId,
+    audience: accessAudience,
+    ...(Array.isArray(accessAudience) ? { azp: params.clientId } : {}),
     ttlSec: accessTtl,
     tokenUse: "access",
     scope: params.scope,
   });
+  // ID tokens stay isolated to the relying-party client_id even on cross-resource grants.
   const idClaims = buildTokenClaims({
     issuer,
     user: params.user,
@@ -221,6 +234,7 @@ async function issueClientTokens(params: {
       userId: params.user.id,
       scope: params.scope,
       ttlSec: refreshTtl,
+      resource: params.resource ?? null,
     });
     payload.refresh_token = issued.plainToken;
   }
@@ -240,10 +254,11 @@ async function authenticateClientCredentials(
     try {
       const decoded = atob(authHeader.slice(6).trim());
       const separator = decoded.indexOf(":");
-      if (separator > 0) {
-        clientId = decodeURIComponent(decoded.slice(0, separator));
-        clientSecret = decodeURIComponent(decoded.slice(separator + 1));
+      if (separator <= 0) {
+        return { client: null, secret: null };
       }
+      clientId = decodeURIComponent(decoded.slice(0, separator));
+      clientSecret = decodeURIComponent(decoded.slice(separator + 1));
     } catch {
       return { client: null, secret: null };
     }
@@ -309,6 +324,16 @@ async function handleAuthorizeGet(
       302,
     );
   }
+  const targetResolution = resolveRequestedClientTarget(client.clientId, {
+    resources: requestUrl.searchParams.getAll("resource"),
+    audiences: requestUrl.searchParams.getAll("audience"),
+  });
+  if (!targetResolution.ok) {
+    return Response.redirect(
+      appendQueryParams(redirectUri, { error: "invalid_target", state }),
+      302,
+    );
+  }
 
   if (sessionUser && client.firstParty && promptParam !== "login" && promptParam !== "consent") {
     const code = await storeAuthorizationCode(env.DB, {
@@ -319,12 +344,13 @@ async function handleAuthorizeGet(
       codeChallenge,
       codeChallengeMethod,
       nonce: nonce || null,
+      resource: targetResolution.resource,
     });
     await recordAuditEvent(env.DB, {
       eventType: "oauth.code.sso_issued",
       actorUserId: sessionUser.id,
       clientId: client.clientId,
-      detail: { scope },
+      detail: { scope, resource: targetResolution.resource },
       ipAddress: clientIpFromRequest(request),
     });
     return Response.redirect(appendQueryParams(redirectUri, { code, state }), 302);
@@ -340,6 +366,7 @@ async function handleAuthorizeGet(
       nonce,
       codeChallenge,
       codeChallengeMethod,
+      resource: targetResolution.resource,
     }),
   );
 }
@@ -372,6 +399,17 @@ async function handleAuthorizePost(
   ) {
     return oauthError("invalid_request", "Malformed authorization submission", 400);
   }
+  const targetResolution = resolveRequestedClientTarget(client.clientId, {
+    resources: body.resource !== undefined ? [body.resource] : [],
+    audiences: body.audience !== undefined ? [body.audience] : [],
+  });
+  if (!targetResolution.ok) {
+    return oauthError(
+      "invalid_target",
+      "Requested resource or audience is not authorized for this client",
+      400,
+    );
+  }
   if (decision === "deny") {
     return Response.redirect(
       appendQueryParams(redirectUri, { error: "access_denied", state }),
@@ -402,6 +440,7 @@ async function handleAuthorizePost(
           nonce,
           codeChallenge,
           codeChallengeMethod,
+          resource: targetResolution.resource,
           error: "Invalid username/email or password.",
         }),
         401,
@@ -427,12 +466,13 @@ async function handleAuthorizePost(
     codeChallenge,
     codeChallengeMethod,
     nonce: nonce || null,
+    resource: targetResolution.resource,
   });
   await recordAuditEvent(env.DB, {
     eventType: "oauth.code.issued",
     actorUserId: activeUser.id,
     clientId: client.clientId,
-    detail: { scope },
+    detail: { scope, resource: targetResolution.resource },
     ipAddress: clientIpFromRequest(request),
   });
   return new Response(null, {
@@ -447,12 +487,24 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
   const { client } = await authenticateClientCredentials(request, form, env);
   if (!client) return oauthError("invalid_client", "Client authentication failed", 401);
 
+  const targetResolution = resolveRequestedClientTarget(client.clientId, {
+    resources: form.getAll("resource"),
+    audiences: form.getAll("audience"),
+  });
+
   if (grantType === "authorization_code") {
     const code = form.get("code") ?? "";
     const redirectUri = form.get("redirect_uri") ?? "";
     const verifier = form.get("code_verifier") ?? "";
     if (!code || !redirectUri || !verifier) {
       return oauthError("invalid_request", "Missing code, redirect_uri, or code_verifier");
+    }
+    if (!targetResolution.ok) {
+      return oauthError(
+        "invalid_target",
+        "Requested resource or audience is not authorized for this client",
+        400,
+      );
     }
     const authCode = await consumeAuthorizationCode(env.DB, code);
     if (
@@ -462,6 +514,18 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
     ) {
       return oauthError("invalid_grant", "Authorization code is invalid, expired, or already used");
     }
+    if (
+      authCode.resource &&
+      targetResolution.resource &&
+      targetResolution.resource !== authCode.resource &&
+      targetResolution.resource !== client.clientId
+    ) {
+      return oauthError(
+        "invalid_target",
+        "Requested resource does not match authorization grant",
+        400,
+      );
+    }
     const pkceValid = await verifyPkceS256(verifier, authCode.codeChallenge);
     if (!pkceValid) {
       return oauthError("invalid_grant", "PKCE verification failed");
@@ -469,18 +533,24 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
     const user = await findPublicUserById(env.DB, authCode.userId);
     if (!user) return oauthError("invalid_grant", "User account no longer active");
 
+    const effectiveResource = targetResolution.resource ?? authCode.resource;
     const tokenResponse = await issueClientTokens({
       env,
       user,
       clientId: client.clientId,
       scope: authCode.scope,
       nonce: authCode.nonce,
+      resource: effectiveResource,
     });
     await recordAuditEvent(env.DB, {
       eventType: "oauth.token.issued",
       actorUserId: user.id,
       clientId: client.clientId,
-      detail: { grantType: "authorization_code", scope: authCode.scope },
+      detail: {
+        grantType: "authorization_code",
+        scope: authCode.scope,
+        resource: effectiveResource,
+      },
       ipAddress: clientIpFromRequest(request),
     });
     return jsonResponse(tokenResponse, 200);
@@ -489,8 +559,24 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
   if (grantType === "refresh_token") {
     const presentedToken = form.get("refresh_token") ?? "";
     if (!presentedToken) return oauthError("invalid_request", "Missing refresh_token");
+    if (!targetResolution.ok) {
+      return oauthError(
+        "invalid_target",
+        "Requested resource or audience is not authorized for this client",
+        400,
+      );
+    }
     const refreshTtl = readTtl(env.REFRESH_TOKEN_TTL_SEC, 604_800);
-    const rotated = await rotateRefreshToken(env.DB, presentedToken, client.clientId, refreshTtl);
+    const rotated = await rotateRefreshToken(
+      env.DB,
+      presentedToken,
+      client.clientId,
+      refreshTtl,
+      targetResolution.resource,
+    );
+    if (rotated.status === "invalid_target") {
+      return oauthError("invalid_target", "Requested resource exceeds refresh token grant", 400);
+    }
     if (rotated.status === "reused") {
       await recordAuditEvent(env.DB, {
         eventType: "oauth.refresh.reuse_detected",
@@ -517,6 +603,7 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
       user,
       clientId: client.clientId,
       scope: rotated.scope,
+      resource: rotated.resource ?? null,
       refreshTokenOverride: rotated.nextRefreshToken,
     });
     return jsonResponse(tokenResponse, 200);
@@ -606,7 +693,9 @@ export function createMidHandler() {
       }
       const token = authHeader.slice(7).trim();
       const { publicJwks } = await getOrProvisionSigningKeys(env.DB, env.MID_KEY_ENCRYPTION_SECRET);
-      const claims = await verifyEs256Jwt(token, publicJwks, issuer);
+      const claims = await verifyEs256Jwt(token, publicJwks, issuer, {
+        expectedTokenUse: "access",
+      });
       if (!claims || claims.token_use !== "access") {
         return withCors(oauthError("invalid_token", "Invalid or expired access token", 401), cors);
       }
@@ -636,12 +725,28 @@ export function createMidHandler() {
           cors,
         );
       }
+      const expectedAudience = resolveIntrospectionExpectedAudience(client.clientId, form, env);
+      if (!expectedAudience) {
+        return withCors(jsonResponse({ active: false }), cors);
+      }
       const { publicJwks } = await getOrProvisionSigningKeys(env.DB, env.MID_KEY_ENCRYPTION_SECRET);
-      const claims = token ? await verifyEs256Jwt(token, publicJwks, issuer) : null;
+      const claims = token
+        ? await verifyEs256Jwt(token, publicJwks, issuer, {
+            expectedTokenUse: "access",
+            expectedAudience,
+          })
+        : null;
+      if (!claims) {
+        return withCors(jsonResponse({ active: false }), cors);
+      }
+      const resolvedClientId =
+        claims.azp ?? (Array.isArray(claims.aud) ? (claims.aud[0] ?? client.clientId) : claims.aud);
       return withCors(
-        jsonResponse(
-          claims ? { active: true, ...claims, client_id: claims.aud } : { active: false },
-        ),
+        jsonResponse({
+          active: true,
+          ...claims,
+          client_id: resolvedClientId,
+        }),
         cors,
       );
     }

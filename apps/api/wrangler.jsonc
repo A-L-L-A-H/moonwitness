@@ -35,5 +35,6 @@
     "SYSLOG_URL": "https://syslog-edge.moonwitness.biz.id",
     "SNMP_POLLER_URL": "https://snmp-edge.moonwitness.biz.id",
     "MID_ISSUER_URL": "https://id.moonwitness.biz.id",
+    "MID_ALLOWED_AUDIENCES": "moonwitness-web,moonwitness-cli,rocksoul-dx,allah-sanctuary,moonwitness-api",
   },
 }

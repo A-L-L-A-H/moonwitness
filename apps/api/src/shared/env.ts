@@ -39,9 +39,10 @@ const envSchema = {
   /** Optional local apps/memory FastAPI bridge URL (e.g. http://127.0.0.1:8000). */
   MEMORY_API_URL: z.string().max(2048).optional(),
   MEMORY_API_TIMEOUT_MS: z.coerce.number().int().positive().max(120_000).default(10_000),
-  /** Canonical MoonWitness centralized Identity issuer & optional JWKS override. */
+  /** Canonical MoonWitness centralized Identity issuer, JWKS override, and audience allowlist. */
   MID_ISSUER_URL: z.string().max(2048).optional(),
   MID_JWKS_URL: z.string().max(2048).optional(),
+  MID_ALLOWED_AUDIENCES: z.string().max(2048).optional(),
 };
 
 export const env = parseEnv(envSchema);

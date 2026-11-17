@@ -56,9 +56,40 @@ describe("@moonwitness/mid crypto & http primitives", () => {
       jwt,
       [generated.publicJwk],
       "https://id.moonwitness.biz.id",
+      { expectedTokenUse: "access", expectedAudience: "moonwitness-web" },
     );
     expect(verified?.sub).toBe("1");
     expect(await verifyEs256Jwt(jwt, [generated.publicJwk], "https://other.example")).toBeNull();
+    expect(
+      await verifyEs256Jwt(jwt, [generated.publicJwk], "https://id.moonwitness.biz.id", {
+        expectedTokenUse: "id",
+      }),
+    ).toBeNull();
+    expect(
+      await verifyEs256Jwt(jwt, [generated.publicJwk], "https://id.moonwitness.biz.id", {
+        expectedTokenUse: "access",
+        expectedAudience: "igate-console",
+      }),
+    ).toBeNull();
+    expect(
+      await verifyEs256Jwt(jwt, [generated.publicJwk], "https://id.moonwitness.biz.id", {
+        expectedTokenUse: "access",
+        expectedAudience: [],
+      }),
+    ).toBeNull();
+
+    const multiAudJwt = await signEs256Jwt(
+      { ...claims, aud: ["moonwitness-web", "moonwitness-api"], azp: "moonwitness-web" },
+      generated.kid,
+      generated.encryptedPrivateJwk,
+      masterSecret,
+    );
+    expect(
+      await verifyEs256Jwt(multiAudJwt, [generated.publicJwk], "https://id.moonwitness.biz.id", {
+        expectedTokenUse: "access",
+        expectedAudience: ["moonwitness-api"],
+      }),
+    ).not.toBeNull();
   });
 
   it("verifies PKCE S256 challenges, cookie domains, and CSRF origin checks", async () => {
