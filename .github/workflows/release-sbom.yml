@@ -79,7 +79,7 @@ jobs:
           retention-days: 90
 
       - name: Attest Build Provenance (GitHub Artifact Attestations)
-        uses: actions/attest-build-provenance@1c608d11d69870c2092266b3f9a6f3abbfee7002 # v2.2.0
+        uses: actions/attest-build-provenance@520d128f165991a6c774bcb264f323e3d70747f4 # v2.2.0
         continue-on-error: true
         with:
           subject-path: |
