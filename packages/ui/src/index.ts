@@ -230,6 +230,64 @@ export { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
 export { Slider } from "./components/ui/slider";
 export { Toggle, toggleVariants, type ToggleProps } from "./components/ui/toggle";
 export { ToggleGroup, ToggleGroupItem } from "./components/ui/toggle-group";
+export { Checkbox, type CheckboxProps, type CheckedState } from "./components/ui/checkbox";
+export { Skeleton, type SkeletonProps } from "./components/ui/skeleton";
+export {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  alertVariants,
+  type AlertProps,
+} from "./components/ui/alert";
+export {
+  Table,
+  TableHeader,
+  TableBody,
+  TableFooter,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "./components/ui/table";
+export {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogOverlay,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "./components/ui/alert-dialog";
+export {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+  BreadcrumbEllipsis,
+} from "./components/ui/breadcrumb";
+export {
+  ToastProvider,
+  ToastViewport,
+  Toast,
+  ToastTitle,
+  ToastDescription,
+  ToastClose,
+  ToastAction,
+  Toaster,
+  toast,
+  dismissToast,
+  useToast,
+  toastVariants,
+  type ToastProps,
+  type ToastRecord,
+  type ToastVariant,
+} from "./components/ui/toast";
 
 export { cva, type VariantProps } from "./lib/utils";
 
