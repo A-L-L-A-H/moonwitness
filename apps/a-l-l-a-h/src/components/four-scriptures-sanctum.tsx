@@ -38,28 +38,28 @@ export function FourScripturesSanctum({
   return (
     <div
       id="four-scriptures"
-      className="scroll-mt-20 mt-16 border border-[#d6b46c]/35 bg-[#060911]/95 p-6 sm:p-10 shadow-[0_24px_70px_rgba(0,0,0,0.82)] relative"
+      className="scroll-mt-20 mt-16 border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)]/95 p-6 sm:p-10 shadow-[0_24px_70px_rgba(0,0,0,0.82)] relative"
     >
       <SacredCornerBrackets />
 
       <ScrollChapterReveal quietMode={quietMode}>
-        <div className="flex flex-col items-center text-center border-b border-[#d6b46c]/20 pb-8">
-          <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.26em] text-[#d6b46c] uppercase">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d6b46c]" />
+        <div className="flex flex-col items-center text-center border-b border-[var(--dna-accent)]/20 pb-8">
+          <div className="flex items-center gap-3 font-mono text-[11px] tracking-[0.26em] text-[var(--dna-accent)] uppercase">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--dna-accent)]" />
             <span>FOUR REVEALED WITNESSES · NEUTRAL MONOCENTRIC ARCHIVE</span>
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[#d6b46c]" />
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--dna-accent)]" />
           </div>
           <h3 className="font-monument mt-3 text-2xl sm:text-3xl tracking-[0.16em] text-gold-gradient uppercase">
             TAURAT · ZABUR · INJĪL · AL-QUR’ĀN
           </h3>
-          <p className="mt-3 max-w-3xl font-serif text-base text-[#e6decb] leading-relaxed">
+          <p className="mt-3 max-w-3xl font-serif text-base text-[var(--dna-muted)] leading-relaxed">
             {locale === "id"
               ? "Keempat kitab suci bersumber dari Pencipta Yang Esa (ALLAH). Kajian perbandingan meneliti saksi teks tanpa merasa paling unggul, menghormati nurani tanpa paksaan (QS 2:256), dan menjaga kesetaraan antarumat."
               : FOUR_CORPUS_POLICY.neutralityPrinciple}
           </p>
-          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 border border-[#d6b46c]/30 bg-[#0a0d16] px-4 py-1.5 font-mono text-[10.5px] tracking-[0.14em] text-[#f5dfa6]">
+          <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-4 py-1.5 font-mono text-[10.5px] tracking-[0.14em] text-[var(--dna-accent)]">
             <span>{FOUR_CORPUS_POLICY.invariant}</span>
-            <span className="text-[#d6b46c]" aria-hidden="true">
+            <span className="text-[var(--dna-accent)]" aria-hidden="true">
               ·
             </span>
             <span>ZERO RELIGION RANKING · NO COMPULSION IN FAITH</span>
@@ -88,12 +88,12 @@ export function FourScripturesSanctum({
                 }
                 className={`relative flex h-full w-full min-h-[168px] flex-col justify-between border px-5 pt-7 pb-5 text-left transition-all cursor-pointer ${
                   isSelected
-                    ? "border-[#fff4d2] bg-gradient-to-b from-[#d6b46c]/20 via-[#0e1320] to-[#070910] shadow-[0_0_28px_rgba(223,192,123,0.2)]"
-                    : "border-[#d6b46c]/25 bg-[#090c16]/90 hover:border-[#d6b46c]/60 hover:bg-[#0d111e]"
+                    ? "border-[var(--dna-text)] bg-gradient-to-b from-[var(--dna-accent)]/20 via-[var(--dna-surface)] to-[var(--dna-canvas)] shadow-[0_0_28px_rgba(223,192,123,0.2)]"
+                    : "border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/90 hover:border-[var(--dna-accent)]/60 hover:bg-[var(--dna-surface)]"
                 }`}
               >
                 <div>
-                  <div className="relative mb-3 h-24 w-full overflow-hidden border border-[#d6b46c]/20 bg-[#05060a]">
+                  <div className="relative mb-3 h-24 w-full overflow-hidden border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)]">
                     <Image
                       src={`/art/story-plate-0${idx + 1}.webp`}
                       alt=""
@@ -102,20 +102,20 @@ export function FourScripturesSanctum({
                       className="object-cover"
                     />
                   </div>
-                  <div className="flex items-center justify-between font-mono text-[10.5px] text-[#dfc07b]">
+                  <div className="flex items-center justify-between font-mono text-[10.5px] text-[var(--dna-accent)]">
                     <span>
                       0{idx + 1} · {corpus.code}
                     </span>
-                    <span className="text-[#cfc5b0]">{corpus.classicalLanguage}</span>
+                    <span className="text-[var(--dna-muted)]">{corpus.classicalLanguage}</span>
                   </div>
-                  <h4 className="font-monument mt-2.5 text-lg tracking-[0.14em] text-[#fff8e6]">
+                  <h4 className="font-monument mt-2.5 text-lg tracking-[0.14em] text-[var(--dna-text)]">
                     {corpus.name}
                   </h4>
-                  <div className="mt-1 font-mono text-[11px] text-[#f5dfa6]">
+                  <div className="mt-1 font-mono text-[11px] text-[var(--dna-accent)]">
                     {corpus.prophetAnchor}
                   </div>
                 </div>
-                <p className="mt-3 border-t border-[#d6b46c]/15 pt-2.5 font-serif text-xs leading-relaxed text-[#e0d7c4]">
+                <p className="mt-3 border-t border-[var(--dna-accent)]/15 pt-2.5 font-serif text-xs leading-relaxed text-[var(--dna-muted)]">
                   {corpus.ethicalCore}
                 </p>
               </DnaPortalArch>
@@ -125,41 +125,41 @@ export function FourScripturesSanctum({
       </div>
 
       {/* Selected Scripture Deep Inspection Bay */}
-      <div className="mt-6 border border-[#dfc07b]/35 bg-[#080b14] p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-3">
+      <div className="mt-6 border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--dna-accent)]/20 pb-3">
           <div className="flex items-center gap-2.5">
-            <DiamondStarOrnament className="h-4 w-4 text-[#f5dfa6]" />
-            <span className="font-monument text-base sm:text-lg tracking-[0.14em] text-[#fff6df]">
+            <DiamondStarOrnament className="h-4 w-4 text-[var(--dna-accent)]" />
+            <span className="font-monument text-base sm:text-lg tracking-[0.14em] text-[var(--dna-text)]">
               {selectedCorpus.name} · {selectedCorpus.prophetAnchor}
             </span>
           </div>
-          <span className="border border-[#d6b46c]/30 bg-[#0d111e] px-3 py-1 font-mono text-[10.5px] text-[#f5dfa6]">
+          <span className="border border-[var(--dna-accent)]/30 bg-[var(--dna-surface)] px-3 py-1 font-mono text-[10.5px] text-[var(--dna-accent)]">
             {selectedCorpus.epistemicRole}
           </span>
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
           <div className="lg:col-span-7 space-y-2">
-            <div className="font-mono text-[10.5px] tracking-[0.16em] text-[#dfc07b] uppercase">
+            <div className="font-mono text-[10.5px] tracking-[0.16em] text-[var(--dna-accent)] uppercase">
               ETHICAL WITNESS FOCUS ({selectedCorpus.classicalLanguage})
             </div>
-            <p className="font-serif text-base leading-relaxed text-[#ece4d3]">
+            <p className="font-serif text-base leading-relaxed text-[var(--dna-text)]">
               {selectedCorpus.neutralSummary}
             </p>
           </div>
-          <div className="lg:col-span-5 flex flex-col justify-between gap-3 border border-[#d6b46c]/20 bg-[#0a0e18] p-4">
+          <div className="lg:col-span-5 flex flex-col justify-between gap-3 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-4">
             <div>
-              <div className="font-mono text-[10.5px] tracking-[0.14em] text-[#dfc07b] uppercase">
+              <div className="font-mono text-[10.5px] tracking-[0.14em] text-[var(--dna-accent)] uppercase">
                 EPISTEMIC DISCIPLINE
               </div>
-              <p className="mt-1.5 text-xs leading-relaxed text-[#dfd6c3]">
+              <p className="mt-1.5 text-xs leading-relaxed text-[var(--dna-muted)]">
                 {selectedCorpus.invariant}
               </p>
             </div>
             <div className="flex flex-col gap-2">
               <Link
                 href="/scriptures"
-                className="btn-luxe-secondary inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[#f5dfa6] uppercase hover:text-white"
+                className="btn-luxe-secondary inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-white"
               >
                 {locale === "id"
                   ? "BUKA STUDIO 4 KITAB & PENCARI AYAT ›"
@@ -169,7 +169,7 @@ export function FourScripturesSanctum({
                 <DnaButton
                   type="button"
                   onClick={onInspectCorpusDoor}
-                  className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[#fff4d2] uppercase hover:text-white cursor-pointer"
+                  className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-text)] uppercase hover:text-white cursor-pointer"
                 >
                   INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
                 </DnaButton>
@@ -180,13 +180,15 @@ export function FourScripturesSanctum({
       </div>
 
       {/* Shared Moral Roots · Four-Scripture Ethical Concordance */}
-      <div className="mt-6 border border-[#d6b46c]/30 bg-[#080c15]/90 p-5 sm:p-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-          <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] text-[#dfc07b] uppercase">
-            <DiamondStarOrnament className="h-3.5 w-3.5 text-[#f5dfa6]" />
+      <div className="mt-6 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/90 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+          <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.2em] text-[var(--dna-accent)] uppercase">
+            <DiamondStarOrnament className="h-3.5 w-3.5 text-[var(--dna-accent)]" />
             <span>SHARED MORAL ROOTS · FOUR-CORPUS CONCORDANCE</span>
           </div>
-          <span className="font-mono text-[10.5px] text-[#cfc5b0]">{selectedTheme.arabicRoot}</span>
+          <span className="font-mono text-[10.5px] text-[var(--dna-muted)]">
+            {selectedTheme.arabicRoot}
+          </span>
         </div>
 
         <div
@@ -208,7 +210,9 @@ export function FourScripturesSanctum({
                   }, quietMode)
                 }
                 className={`btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] tracking-[0.1em] uppercase cursor-pointer ${
-                  active ? "text-[#fff8e6]" : "text-[#d8ceba] hover:text-[#fff6df]"
+                  active
+                    ? "text-[var(--dna-text)]"
+                    : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                 }`}
               >
                 {theme.title}
@@ -226,20 +230,21 @@ export function FourScripturesSanctum({
           ].map((witness) => (
             <div
               key={witness.code}
-              className="border border-[#d6b46c]/20 bg-[#0b101d]/90 p-3.5 shadow-[inset_0_1px_0_rgba(255,244,210,0.08)]"
+              className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)]/90 p-3.5 shadow-[inset_0_1px_0_rgba(255,244,210,0.08)]"
             >
-              <div className="font-monument text-xs tracking-[0.16em] text-[#f5dfa6]">
+              <div className="font-monument text-xs tracking-[0.16em] text-[var(--dna-accent)]">
                 {witness.code}
               </div>
-              <p className="mt-1.5 font-serif text-xs leading-relaxed text-[#e6decb]">
+              <p className="mt-1.5 font-serif text-xs leading-relaxed text-[var(--dna-muted)]">
                 {witness.body}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="mt-3 border-t border-[#d6b46c]/15 pt-3 font-mono text-[11px] text-[#e0d7c4]">
-          <span className="text-[#dfc07b]">LIVED STEWARDSHIP:</span> {selectedTheme.livedPractice}
+        <div className="mt-3 border-t border-[var(--dna-accent)]/15 pt-3 font-mono text-[11px] text-[var(--dna-muted)]">
+          <span className="text-[var(--dna-accent)]">LIVED STEWARDSHIP:</span>{" "}
+          {selectedTheme.livedPractice}
         </div>
       </div>
     </div>

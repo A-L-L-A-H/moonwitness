@@ -42,12 +42,12 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
 
       {/* SRGBL v8 Interactive 5-Stage Witness Pipeline */}
       {activeWing === "srgbl-pipeline" && (
-        <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+        <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[var(--dna-accent)] uppercase">
               SRGBL v8 CANONICAL 5-STAGE WITNESS PIPELINE &amp; SYMBOLIC RGBL
             </span>
-            <span className="font-mono text-[11px] text-[#d6b46c]">
+            <span className="font-mono text-[11px] text-[var(--dna-accent)]">
               SOURCE: bjo163/moonwitness-corpus · P18 KEY WITNESS
             </span>
           </div>
@@ -62,15 +62,17 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
                   onClick={() => setActiveStageLetter(stage.letter)}
                   className={`min-h-[44px] border p-3.5 text-left ${transitionClass} cursor-pointer ${
                     selected
-                      ? "border-[#e6c987] bg-[#d6b46c]/20"
-                      : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/50"
+                      ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20"
+                      : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/50"
                   }`}
                 >
-                  <div className="font-mono text-[11px] text-[#d6b46c]">{stage.stage}</div>
-                  <div className="font-monument mt-1 text-xs sm:text-sm text-[#fff6df]">
+                  <div className="font-mono text-[11px] text-[var(--dna-accent)]">
+                    {stage.stage}
+                  </div>
+                  <div className="font-monument mt-1 text-xs sm:text-sm text-[var(--dna-text)]">
                     {stage.title}
                   </div>
-                  <div className="mt-1 font-mono text-[10px] text-[#f5dfa6]">
+                  <div className="mt-1 font-mono text-[10px] text-[var(--dna-accent)]">
                     {stage.symbolicLayer}
                   </div>
                 </button>
@@ -78,27 +80,27 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
             })}
           </div>
 
-          <div className="mt-4 border border-[#d6b46c]/20 bg-[#0a0d16] p-4 sm:p-5">
+          <div className="mt-4 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-4 sm:p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-monument text-base sm:text-lg text-[#fff6df]">
+              <span className="font-monument text-base sm:text-lg text-[var(--dna-text)]">
                 {activeStage.stage} — {activeStage.title}
               </span>
-              <span className="border border-[#d6b46c]/35 bg-[#d6b46c]/10 px-2.5 py-0.5 font-mono text-[11px] text-[#f8eac6]">
+              <span className="border border-[var(--dna-accent)]/35 bg-[var(--dna-accent)]/10 px-2.5 py-0.5 font-mono text-[11px] text-[var(--dna-accent)]">
                 {activeStage.symbolicLayer}
               </span>
             </div>
-            <p className="mt-2 font-serif text-sm text-[#dfd5c0]">
+            <p className="mt-2 font-serif text-sm text-[var(--dna-muted)]">
               AUDIT QUESTION: {activeStage.auditQuestion}
             </p>
           </div>
 
           {/* Swing Swing Key 7 Rotations */}
-          <div className="mt-6 border-t border-[#d6b46c]/20 pt-4">
+          <div className="mt-6 border-t border-[var(--dna-accent)]/20 pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-[11px] tracking-[0.18em] text-[#d6b46c] uppercase">
+              <span className="font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                 SWING SWING KEY · 7 RESEARCH OPERATORS (MAX 3 HOPS · CANDIDATE ROTATIONS ONLY)
               </span>
-              <span className="font-mono text-[11px] text-[#f5dfa6]">
+              <span className="font-mono text-[11px] text-[var(--dna-accent)]">
                 ACTIVE ROTATION {activeRotationIdx + 1} / 7
               </span>
             </div>
@@ -112,8 +114,8 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
                     onClick={() => setActiveRotationIdx(idx)}
                     className={`min-h-[44px] border px-3 py-2 text-left font-mono text-[11px] transition-colors cursor-pointer ${
                       isSelected
-                        ? "border-[#fff2c6] bg-[#d6b46c]/20 text-[#fff6df]"
-                        : "border-[#d6b46c]/20 bg-[#0b0e18] text-[#bfb59e] hover:border-[#d6b46c]/45"
+                        ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
+                        : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] text-[var(--dna-muted)] hover:border-[var(--dna-accent)]/45"
                     }`}
                   >
                     {rotationLabel}
@@ -127,12 +129,12 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
 
       {/* 6 ROCKSOUL Domains + Correlation Layer */}
       {activeWing === "rocksoul-domains" && (
-        <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+        <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[var(--dna-accent)] uppercase">
               6-DOMAIN + RELATIONSHIP ROCKSOUL EPISTEMIC FEDERATION
             </span>
-            <span className="font-mono text-[11px] text-[#d6b46c]">
+            <span className="font-mono text-[11px] text-[var(--dna-accent)]">
               OFFSIDE → ONSIDE SEMANTIC VERIFICATION (QS 37:30)
             </span>
           </div>
@@ -141,22 +143,24 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
             {EPISTEMIC_FEDERATION_DOMAINS.map((domain) => (
               <div
                 key={domain.code}
-                className="border border-[#d6b46c]/20 bg-[#0a0d16] p-4 flex flex-col justify-between"
+                className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-4 flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+                  <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                     <span>{domain.code}</span>
                     <span>{domain.repoSlug}</span>
                   </div>
-                  <h4 className="font-monument mt-1 text-sm sm:text-base text-[#fff6df]">
+                  <h4 className="font-monument mt-1 text-sm sm:text-base text-[var(--dna-text)]">
                     {domain.name}
                   </h4>
-                  <div className="mt-0.5 text-xs text-[#f5dfa6]">{domain.domainFocus}</div>
-                  <p className="mt-2 font-mono text-[11px] text-[#bfb59e]">
+                  <div className="mt-0.5 text-xs text-[var(--dna-accent)]">
+                    {domain.domainFocus}
+                  </div>
+                  <p className="mt-2 font-mono text-[11px] text-[var(--dna-muted)]">
                     {domain.pipelineOrFamilies}
                   </p>
                 </div>
-                <div className="mt-3 border-t border-[#d6b46c]/15 pt-2 text-[11px] text-[#dfd5c0]">
+                <div className="mt-3 border-t border-[var(--dna-accent)]/15 pt-2 text-[11px] text-[var(--dna-muted)]">
                   INVARIANT: {domain.coreInvariant}
                 </div>
               </div>
@@ -164,24 +168,29 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
           </div>
 
           {/* Shared Case 001: Jerusalem 70 CE */}
-          <div className="mt-6 border border-[#e6c987]/35 bg-[#0b0f1b] p-5">
+          <div className="mt-6 border border-[var(--dna-accent)]/35 bg-[var(--dna-surface)] p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-monument text-sm sm:text-base tracking-[0.14em] text-[#fff6df]">
+              <span className="font-monument text-sm sm:text-base tracking-[0.14em] text-[var(--dna-text)]">
                 {JERUSALEM_70CE_CASE_001.caseId} · {JERUSALEM_70CE_CASE_001.title}
               </span>
-              <span className="border border-[#d6b46c]/40 bg-[#d6b46c]/15 px-2.5 py-0.5 font-mono text-[10px] text-[#fff4d2]">
+              <span className="border border-[var(--dna-accent)]/40 bg-[var(--dna-accent)]/15 px-2.5 py-0.5 font-mono text-[10px] text-[var(--dna-text)]">
                 CROSS-DOMAIN BENCHMARK
               </span>
             </div>
             <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
               {JERUSALEM_70CE_CASE_001.strands.map((strand) => (
-                <div key={strand.domain} className="border border-[#d6b46c]/20 bg-[#080a12] p-3">
-                  <div className="font-mono text-[10px] text-[#d6b46c]">{strand.domain}</div>
-                  <p className="mt-1 text-xs text-[#e6decb]">{strand.evidence}</p>
+                <div
+                  key={strand.domain}
+                  className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3"
+                >
+                  <div className="font-mono text-[10px] text-[var(--dna-accent)]">
+                    {strand.domain}
+                  </div>
+                  <p className="mt-1 text-xs text-[var(--dna-muted)]">{strand.evidence}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-3 font-mono text-xs text-[#f5dfa6]">
+            <div className="mt-3 font-mono text-xs text-[var(--dna-accent)]">
               VERDICT // {JERUSALEM_70CE_CASE_001.verdict}
             </div>
           </div>

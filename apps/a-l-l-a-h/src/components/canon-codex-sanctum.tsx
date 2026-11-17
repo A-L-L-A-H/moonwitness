@@ -44,16 +44,16 @@ export function CanonCodexSanctum({
     <section
       id="the-codex"
       aria-labelledby="codex-heading"
-      className="scroll-mt-16 relative bg-gradient-to-b from-[#040509]/95 via-[#080b13]/90 to-[#05060a]/95 py-24 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative bg-gradient-to-b from-[var(--dna-canvas)]/95 via-[var(--dna-canvas)]/90 to-[var(--dna-canvas)]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
       <div className="wrap mx-auto max-w-7xl">
         {/* Section Header */}
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
-            <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
-              <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d6b46c]" />
+            <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[var(--dna-accent)] uppercase">
+              <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--dna-accent)]" />
               <span>A-L-L-A-H · {SUPREME_IDENTITY.fullExpansion}</span>
-              <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d6b46c]" />
+              <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--dna-accent)]" />
             </div>
             <h2
               id="codex-heading"
@@ -61,12 +61,12 @@ export function CanonCodexSanctum({
             >
               {locale === "id" ? "KODEKS KANON" : "THE CANON CODEX"}
             </h2>
-            <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[#e6decb] leading-relaxed">
+            <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[var(--dna-muted)] leading-relaxed">
               {locale === "id"
                 ? "Empat pintu galeri arsitektur yang mengorganisasi kronik MoonWitness, kajian netral lintas Taurat, Zabur, Injīl & Al-Qur’ān, etika amanah manusia tanpa kultus, dan ekosistem multi-runtime."
                 : "Four architectural gallery doors organizing MoonWitness chronicles, neutral comparative study across Taurat, Zabur, Injīl & Al-Qur’ān, unassigned human stewardship ethics, and the unified multi-runtime ecosystem."}
             </p>
-            <div className="mt-3 font-mono text-[11px] tracking-[0.16em] text-[#f5dfa6]">
+            <div className="mt-3 font-mono text-[11px] tracking-[0.16em] text-[var(--dna-accent)]">
               {SUPREME_IDENTITY.tawhidPrinciple}
             </div>
           </div>
@@ -90,36 +90,36 @@ export function CanonCodexSanctum({
                   onClick={() => onSelectDoor(door.id)}
                   className={`portal-arch-card relative flex h-full w-full min-h-[44px] flex-col justify-between border px-5 pt-7 pb-5 text-left transition-all duration-300 cursor-pointer ${
                     isSelected
-                      ? "border-[#fff4d2] bg-gradient-to-b from-[#d6b46c]/22 via-[#0e1320]/90 to-[#060810] shadow-[0_0_32px_rgba(223,192,123,0.22)]"
-                      : "border-[#d6b46c]/25 bg-[#090c16]/85 hover:border-[#d6b46c]/60 hover:bg-[#d6b46c]/10"
+                      ? "border-[var(--dna-text)] bg-gradient-to-b from-[var(--dna-accent)]/22 via-[var(--dna-surface)]/90 to-[var(--dna-canvas)] shadow-[0_0_32px_rgba(223,192,123,0.22)]"
+                      : "border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/85 hover:border-[var(--dna-accent)]/60 hover:bg-[var(--dna-accent)]/10"
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between font-mono text-[11px] text-[#d6b46c]">
+                    <div className="flex items-center justify-between font-mono text-[11px] text-[var(--dna-accent)]">
                       <div className="flex items-center gap-2.5">
                         <DoorPortalGlyph doorId={door.id} active={isSelected} />
                         <span>{door.numeral}</span>
                       </div>
                       {isSelected && (
-                        <span className="inline-flex items-center gap-1 text-[10px] tracking-[0.16em] text-[#fff4d2] uppercase">
+                        <span className="inline-flex items-center gap-1 text-[10px] tracking-[0.16em] text-[var(--dna-text)] uppercase">
                           <DiamondStarOrnament className="h-3 w-3" /> OPEN
                         </span>
                       )}
                     </div>
-                    <h3 className="font-monument mt-3.5 text-sm tracking-[0.14em] text-[#fff6df] uppercase">
+                    <h3 className="font-monument mt-3.5 text-sm tracking-[0.14em] text-[var(--dna-text)] uppercase">
                       {door.title}
                     </h3>
-                    <p className="mt-1.5 font-sans text-xs text-[#cfc5b0] leading-relaxed">
+                    <p className="mt-1.5 font-sans text-xs text-[var(--dna-muted)] leading-relaxed">
                       {door.subtitle}
                     </p>
                   </div>
-                  <div className="mt-4 border-t border-[#d6b46c]/15 pt-2.5 font-mono text-[10px] text-[#9f9580]">
+                  <div className="mt-4 border-t border-[var(--dna-accent)]/15 pt-2.5 font-mono text-[10px] text-[var(--dna-muted)]">
                     {door.sourceSpec}
                   </div>
                   {isSelected && (
                     <span
                       aria-hidden="true"
-                      className="pointer-events-none absolute -bottom-4 left-1/2 h-4 w-px -translate-x-1/2 bg-gradient-to-b from-[#fff4d2] to-transparent"
+                      className="pointer-events-none absolute -bottom-4 left-1/2 h-4 w-px -translate-x-1/2 bg-gradient-to-b from-[var(--dna-text)] to-transparent"
                     />
                   )}
                 </button>
@@ -131,14 +131,16 @@ export function CanonCodexSanctum({
         {/* Active Door Banner & Mounted Chamber */}
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="octa-bevel-shell relative mt-8 p-6 sm:p-9">
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--dna-accent)]/20 pb-4">
               <div>
-                <div className="font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">
+                <div className="font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                   {activeDoor.numeral} // {activeDoor.title}
                 </div>
-                <p className="mt-1 font-serif text-base text-[#e6decb]">{activeDoor.summary}</p>
+                <p className="mt-1 font-serif text-base text-[var(--dna-muted)]">
+                  {activeDoor.summary}
+                </p>
               </div>
-              <span className="border border-[#d6b46c]/35 bg-[#d6b46c]/10 px-3 py-1 font-mono text-[11px] text-[#f8eac6]">
+              <span className="border border-[var(--dna-accent)]/35 bg-[var(--dna-accent)]/10 px-3 py-1 font-mono text-[11px] text-[var(--dna-accent)]">
                 SOURCE: {activeDoor.sourceSpec}
               </span>
             </div>

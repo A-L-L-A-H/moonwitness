@@ -24,15 +24,15 @@ export function SiteSubpageHeader({
   ] as const;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#d6b46c]/25 bg-[#040509]/92 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/92 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
         <Link href="/" className="flex min-h-[44px] items-center gap-3 focus:outline-none">
           <OctagramMandalaIcon className="h-8 w-8 shrink-0" />
           <div className="flex flex-col">
-            <span className="font-monument text-sm tracking-[0.16em] text-[#fff6df]">
+            <span className="font-monument text-sm tracking-[0.16em] text-[var(--dna-text)]">
               A-L-L-A-H.COM
             </span>
-            <span className="font-mono text-[9.5px] tracking-[0.2em] text-[#dfc07b] uppercase">
+            <span className="font-mono text-[9.5px] tracking-[0.2em] text-[var(--dna-accent)] uppercase">
               EMPIRE OF THE LIGHT
             </span>
           </div>
@@ -47,7 +47,9 @@ export function SiteSubpageHeader({
                 href={item.href}
                 data-active={isCurrent ? "true" : "false"}
                 className={`btn-luxe-secondary inline-flex items-center px-3.5 py-1.5 font-mono text-[10px] tracking-[0.16em] uppercase ${
-                  isCurrent ? "text-[#fff8e6]" : "text-[#d8ceba] hover:text-[#fff6df]"
+                  isCurrent
+                    ? "text-[var(--dna-text)]"
+                    : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                 }`}
               >
                 {item.label}
@@ -58,7 +60,7 @@ export function SiteSubpageHeader({
             type="button"
             onClick={toggleLocale}
             aria-label={locale === "en" ? "Switch to Indonesian" : "Ganti ke Bahasa Inggris"}
-            className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-[#f5dfa6] uppercase cursor-pointer"
+            className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-[var(--dna-accent)] uppercase cursor-pointer"
           >
             {locale.toUpperCase()}
           </button>

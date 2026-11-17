@@ -559,9 +559,11 @@ export function WorldsSanctum({
           <WorldChamberWatermarkSvg worldId={activeWorld.id} />
 
           {/* Meridian & Status Header Strip */}
-          <div className="mb-8 grid grid-cols-1 gap-2 border-b border-[#f6d438]/25 pb-4 text-xs font-mono tracking-[0.08em] text-[#f6d438] uppercase md:grid-cols-3 md:items-center">
+          <div className="mb-8 grid grid-cols-1 gap-2 border-b border-[var(--dna-accent)]/25 pb-4 text-xs font-mono tracking-[0.08em] text-[var(--dna-accent)] uppercase md:grid-cols-3 md:items-center">
             <span>CHAMBER // {activeWorld.citadelSector}</span>
-            <span className="text-[#fff8e8] md:text-center">{activeWorld.primaryDirective}</span>
+            <span className="text-[var(--dna-text)] md:text-center">
+              {activeWorld.primaryDirective}
+            </span>
             <span className="md:text-right">
               {activeWorld.canonicalAlias ?? activeWorld.harmonicFrequency}
             </span>
@@ -569,13 +571,13 @@ export function WorldsSanctum({
 
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
             {/* Left Column: Architectural Overview & Artifacts */}
-            <div className="lg:col-span-5 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#d6b46c]/20 pb-8 lg:pb-0 lg:pr-8">
+            <div className="lg:col-span-5 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[var(--dna-accent)]/20 pb-8 lg:pb-0 lg:pr-8">
               <div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-mono tracking-[0.2em] text-[#d6b46c] uppercase">
+                  <span className="text-xs font-mono tracking-[0.2em] text-[var(--dna-accent)] uppercase">
                     {activeWorld.citadelSector}
                   </span>
-                  <span className="rounded-full border border-[#d6b46c]/40 bg-[#d6b46c]/10 px-3 py-0.5 text-[11px] font-mono tracking-[0.15em] text-[#f8eac6]">
+                  <span className="rounded-full border border-[var(--dna-accent)]/40 bg-[var(--dna-accent)]/10 px-3 py-0.5 text-[11px] font-mono tracking-[0.15em] text-[var(--dna-accent)]">
                     {activeWorld.statusLabel}
                   </span>
                 </div>
@@ -584,20 +586,20 @@ export function WorldsSanctum({
                   <WorldEmblemById worldId={activeWorld.id} className="h-14 w-14 shrink-0" />
                   <div>
                     <div className="flex flex-wrap items-baseline gap-3">
-                      <h3 className="font-monument text-2xl sm:text-3xl tracking-[0.16em] text-[#fff6df]">
+                      <h3 className="font-monument text-2xl sm:text-3xl tracking-[0.16em] text-[var(--dna-text)]">
                         {activeWorld.name}
                       </h3>
-                      <span dir="rtl" lang="ar" className="text-xl text-[#d6b46c]/95">
+                      <span dir="rtl" lang="ar" className="text-xl text-[var(--dna-accent)]/95">
                         {activeWorld.arabicEpithet}
                       </span>
                     </div>
-                    <p className="text-xs font-mono tracking-[0.14em] text-[#bfb59e] uppercase mt-1">
+                    <p className="text-xs font-mono tracking-[0.14em] text-[var(--dna-muted)] uppercase mt-1">
                       {activeWorld.transliteration} · {activeWorld.harmonicFrequency}
                     </p>
                   </div>
                 </div>
 
-                <p className="mt-5 font-serif text-base leading-relaxed text-[#eae2d1]">
+                <p className="mt-5 font-serif text-base leading-relaxed text-[var(--dna-text)]">
                   {activeWorld.architecturalDescription}
                 </p>
 
@@ -605,12 +607,12 @@ export function WorldsSanctum({
                   {activeWorld.pillars.map((pillarLabel) => (
                     <span
                       key={pillarLabel}
-                      className="border border-[#d6b46c]/30 bg-[#111524] px-3 py-1 font-mono text-[11px] tracking-[0.16em] text-[#f3dfb2] uppercase"
+                      className="border border-[var(--dna-accent)]/30 bg-[var(--dna-surface)] px-3 py-1 font-mono text-[11px] tracking-[0.16em] text-[var(--dna-accent)] uppercase"
                     >
                       {pillarLabel}
                     </span>
                   ))}
-                  <span className="border border-[#d6b46c]/30 bg-[#d6b46c]/10 px-3 py-1 text-xs font-mono text-[#f8eac6]">
+                  <span className="border border-[var(--dna-accent)]/30 bg-[var(--dna-accent)]/10 px-3 py-1 text-xs font-mono text-[var(--dna-accent)]">
                     {activeWorld.summaryLabel}
                   </span>
                 </div>
@@ -618,7 +620,7 @@ export function WorldsSanctum({
 
               {/* Artifacts / Dispatches Selector */}
               <div className="mt-8">
-                <p className="font-mono text-xs tracking-[0.22em] text-[#d6b46c] uppercase mb-3">
+                <p className="font-mono text-xs tracking-[0.22em] text-[var(--dna-accent)] uppercase mb-3">
                   SANCTUARY CODICES & DISPATCHES
                 </p>
                 <div className="space-y-2.5">
@@ -635,18 +637,18 @@ export function WorldsSanctum({
                         }
                         className={`w-full min-h-[44px] text-left p-3.5 border transition-colors cursor-pointer ${
                           isCurrentArtifact
-                            ? "border-[#e6c987] bg-[#d6b46c]/14"
-                            : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/45"
+                            ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/14"
+                            : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/45"
                         }`}
                       >
-                        <div className="flex items-center justify-between text-[11px] font-mono text-[#d6b46c]">
+                        <div className="flex items-center justify-between text-[11px] font-mono text-[var(--dna-accent)]">
                           <span>{artifactRecord.code}</span>
                           <span>{artifactRecord.timestampLabel}</span>
                         </div>
-                        <div className="font-monument mt-1 text-sm font-medium tracking-[0.06em] text-[#fff6df]">
+                        <div className="font-monument mt-1 text-sm font-medium tracking-[0.06em] text-[var(--dna-text)]">
                           {artifactRecord.title}
                         </div>
-                        <div className="mt-0.5 font-sans text-xs text-[#cfc5b0]">
+                        <div className="mt-0.5 font-sans text-xs text-[var(--dna-muted)]">
                           {artifactRecord.classification}
                         </div>
                       </button>
@@ -659,30 +661,32 @@ export function WorldsSanctum({
             {/* Right Column: World-Specific Interactive Instrument */}
             <div className="lg:col-span-7 flex flex-col justify-between">
               {/* Highlighted Artifact Reader Banner */}
-              <div className="border border-[#d6b46c]/30 bg-gradient-to-r from-[#121626] via-[#15192b] to-[#101320] p-5">
-                <div className="flex items-center justify-between text-xs font-mono text-[#e6c987]">
+              <div className="border border-[var(--dna-accent)]/30 bg-gradient-to-r from-[var(--dna-surface)] via-[var(--dna-surface-elevated)] to-[var(--dna-surface)] p-5">
+                <div className="flex items-center justify-between text-xs font-mono text-[var(--dna-accent)]">
                   <span>SELECTED RECORD // {selectedArtifact.code}</span>
                   <span>{selectedArtifact.classification}</span>
                 </div>
-                <h4 className="font-monument mt-2 text-lg sm:text-xl tracking-[0.08em] text-[#fff8e6]">
+                <h4 className="font-monument mt-2 text-lg sm:text-xl tracking-[0.08em] text-[var(--dna-text)]">
                   {selectedArtifact.title}
                 </h4>
-                <p className="mt-2 font-serif text-sm sm:text-base leading-relaxed text-[#e6decb]">
+                <p className="mt-2 font-serif text-sm sm:text-base leading-relaxed text-[var(--dna-muted)]">
                   {selectedArtifact.summary}
                 </p>
               </div>
 
               {/* Interactive Console per World */}
-              <div className="mt-6 flex-1 border border-[#d6b46c]/25 bg-[#06080f] p-6">
+              <div className="mt-6 flex-1 border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-6">
                 {activeWorld.id === "moonwitness" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-                      <span className="font-monument text-sm tracking-[0.18em] text-[#f5e3b8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+                      <span className="font-monument text-sm tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                         MOONWITNESS MERIDIAN OBSERVATORY
                       </span>
-                      <span className="font-mono text-xs text-[#d6b46c]">ORBITAL SYNC: 100%</span>
+                      <span className="font-mono text-xs text-[var(--dna-accent)]">
+                        ORBITAL SYNC: 100%
+                      </span>
                     </div>
-                    <p className="mt-3 font-sans text-xs text-[#cfc5b0]">
+                    <p className="mt-3 font-sans text-xs text-[var(--dna-muted)]">
                       Select an observatory meridian to inspect witness corridors linking human
                       testimony across regions under the same sky:
                     </p>
@@ -705,17 +709,17 @@ export function WorldsSanctum({
                             onClick={() => setActiveMeridianIdx(idx)}
                             className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
                               selected
-                                ? "border-[#e6c987] bg-[#d6b46c]/14"
-                                : "border-[#d6b46c]/25 bg-[#0c0f1a] hover:border-[#d6b46c]/55"
+                                ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/14"
+                                : "border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] hover:border-[var(--dna-accent)]/55"
                             }`}
                           >
-                            <div className="text-[11px] font-mono text-[#d6b46c]">
+                            <div className="text-[11px] font-mono text-[var(--dna-accent)]">
                               {meridian.code}
                             </div>
-                            <div className="font-monument mt-1 text-sm text-[#fff6df]">
+                            <div className="font-monument mt-1 text-sm text-[var(--dna-text)]">
                               {meridian.fullLabel}
                             </div>
-                            <div className="mt-1 font-sans text-xs text-[#cfc5b0]">
+                            <div className="mt-1 font-sans text-xs text-[var(--dna-muted)]">
                               {meridian.stats}
                             </div>
                           </button>
@@ -723,12 +727,12 @@ export function WorldsSanctum({
                       })}
                     </div>
 
-                    <div className="mt-4 border border-[#d6b46c]/20 bg-[#0b0e18] p-3.5">
-                      <div className="flex flex-wrap items-center justify-between font-mono text-[10px] text-[#dfc07b]">
+                    <div className="mt-4 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3.5">
+                      <div className="flex flex-wrap items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                         <span>{activeMeridian.fullLabel}</span>
                         <span>{activeMeridian.bearing}</span>
                       </div>
-                      <p className="mt-1.5 font-serif text-sm text-[#e6decb]">
+                      <p className="mt-1.5 font-serif text-sm text-[var(--dna-muted)]">
                         {activeMeridian.note}
                       </p>
                     </div>
@@ -737,8 +741,8 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "arsy" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-                      <span className="font-monument text-sm tracking-[0.18em] text-[#f5e3b8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+                      <span className="font-monument text-sm tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                         ARSY HARMONIC CARRIER SYNTHESIZER
                       </span>
                       <button
@@ -746,15 +750,15 @@ export function WorldsSanctum({
                         onClick={toggleArsyCarrier}
                         className={`min-h-[44px] px-4 py-1.5 text-xs font-mono tracking-[0.18em] uppercase border transition-all cursor-pointer ${
                           carrierPlaying
-                            ? "border-[#fff2c6] bg-[#d6b46c] text-[#05060a] font-semibold"
-                            : "border-[#d6b46c] bg-[#d6b46c]/15 text-[#f8eac6] hover:bg-[#d6b46c]/30"
+                            ? "border-[var(--dna-accent)] bg-[var(--dna-accent)] text-[var(--dna-canvas)] font-semibold"
+                            : "border-[var(--dna-accent)] bg-[var(--dna-accent)]/15 text-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/30"
                         }`}
                       >
                         {carrierPlaying ? "■ MUTE HARMONIC STREAM" : "▶ ENGAGE CARRIER TONE"}
                       </button>
                     </div>
 
-                    <div className="mt-4 border border-[#d6b46c]/20 bg-[#05070e] p-2">
+                    <div className="mt-4 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2">
                       <canvas
                         ref={arsyWaveCanvasRef}
                         width={560}
@@ -764,7 +768,7 @@ export function WorldsSanctum({
                       />
                     </div>
 
-                    <p className="mt-3 font-sans text-xs text-[#cfc5b0]">
+                    <p className="mt-3 font-sans text-xs text-[var(--dna-muted)]">
                       Select an acoustic carrier frequency to tune the Sovereign Relay Array:
                     </p>
                     <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -777,14 +781,14 @@ export function WorldsSanctum({
                             onClick={() => setActiveFrequencyHz(freqOption.hz)}
                             className={`min-h-[44px] p-3.5 text-left border transition-colors cursor-pointer ${
                               isSelectedFreq
-                                ? "border-[#e6c987] bg-[#d6b46c]/20"
-                                : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/45"
+                                ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20"
+                                : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/45"
                             }`}
                           >
-                            <div className="font-mono text-sm font-semibold text-[#fff6df]">
+                            <div className="font-mono text-sm font-semibold text-[var(--dna-text)]">
                               {freqOption.label}
                             </div>
-                            <div className="mt-1 text-xs font-mono text-[#d6b46c]">
+                            <div className="mt-1 text-xs font-mono text-[var(--dna-accent)]">
                               Harmonic Interval: {freqOption.ratio}
                             </div>
                           </button>
@@ -796,8 +800,8 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "human-pen" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f6d438]/20 pb-3">
-                      <span className="font-monument text-sm tracking-[0.14em] text-[#fff8e8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+                      <span className="font-monument text-sm tracking-[0.14em] text-[var(--dna-text)] uppercase">
                         HUMAN-PEN · QALAM SCRIPTORIUM
                       </span>
                       <DnaBadge>{inscriptions.length} FOLIOS SEALED</DnaBadge>
@@ -808,7 +812,7 @@ export function WorldsSanctum({
                         <div>
                           <label
                             htmlFor="qalam-author-input"
-                            className="block text-[11px] font-mono tracking-[0.15em] text-[#d6b46c] uppercase"
+                            className="block text-[11px] font-mono tracking-[0.15em] text-[var(--dna-accent)] uppercase"
                           >
                             Scribe Designation
                           </label>
@@ -818,13 +822,13 @@ export function WorldsSanctum({
                             value={draftAuthor}
                             onChange={(e) => setDraftAuthor(e.target.value)}
                             placeholder="e.g. Traveler of the Gate"
-                            className="font-sans mt-1 min-h-[44px] w-full border border-[#d6b46c]/35 bg-[#0c0f1a] px-3 py-2 text-sm text-[#fff6df] placeholder-[#9f9580] focus:border-[#f8eac6] focus:outline-none"
+                            className="font-sans mt-1 min-h-[44px] w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-surface)] px-3 py-2 text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:border-[var(--dna-accent)] focus:outline-none"
                           />
                         </div>
                         <div>
                           <label
                             htmlFor="qalam-seal-select"
-                            className="block text-[11px] font-mono tracking-[0.15em] text-[#d6b46c] uppercase"
+                            className="block text-[11px] font-mono tracking-[0.15em] text-[var(--dna-accent)] uppercase"
                           >
                             Sacred Seal
                           </label>
@@ -832,7 +836,7 @@ export function WorldsSanctum({
                             id="qalam-seal-select"
                             value={draftSeal}
                             onChange={(e) => setDraftSeal(e.target.value)}
-                            className="font-sans mt-1 min-h-[44px] w-full border border-[#d6b46c]/35 bg-[#0c0f1a] px-3 py-2 text-sm text-[#fff6df] focus:border-[#f8eac6] focus:outline-none"
+                            className="font-sans mt-1 min-h-[44px] w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-surface)] px-3 py-2 text-sm text-[var(--dna-text)] focus:border-[var(--dna-accent)] focus:outline-none"
                           >
                             {SACRED_SEALS.map((sealOption) => (
                               <option key={sealOption} value={sealOption}>
@@ -845,7 +849,7 @@ export function WorldsSanctum({
                       <div>
                         <label
                           htmlFor="qalam-reflection-input"
-                          className="block text-[11px] font-mono tracking-[0.15em] text-[#d6b46c] uppercase"
+                          className="block text-[11px] font-mono tracking-[0.15em] text-[var(--dna-accent)] uppercase"
                         >
                           Luminous Inscription
                         </label>
@@ -858,18 +862,18 @@ export function WorldsSanctum({
                             if (qalamHint) setQalamHint("");
                           }}
                           placeholder="Inscribe a word of wisdom, gratitude, or architectural vision..."
-                          className="font-serif mt-1 w-full border border-[#d6b46c]/35 bg-[#0c0f1a] px-3 py-2 text-sm text-[#fff6df] placeholder-[#9f9580] focus:border-[#f8eac6] focus:outline-none"
+                          className="font-serif mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-surface)] px-3 py-2 text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:border-[var(--dna-accent)] focus:outline-none"
                         />
                       </div>
                       {qalamHint && (
-                        <p role="alert" className="font-mono text-xs text-[#ffcf99]">
+                        <p role="alert" className="font-mono text-xs text-[var(--dna-warning)]">
                           {qalamHint}
                         </p>
                       )}
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <button
                           type="submit"
-                          className="font-monument min-h-[44px] border border-[#e6c987] bg-[#d6b46c]/20 px-5 py-2 text-xs tracking-[0.2em] text-[#fff6df] uppercase hover:bg-[#d6b46c]/35 transition-colors cursor-pointer"
+                          className="font-monument min-h-[44px] border border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 px-5 py-2 text-xs tracking-[0.2em] text-[var(--dna-text)] uppercase hover:bg-[var(--dna-accent)]/35 transition-colors cursor-pointer"
                         >
                           SEAL INSCRIPTION IN FOLIO
                         </button>
@@ -884,7 +888,7 @@ export function WorldsSanctum({
                                 // Ignore storage error
                               }
                             }}
-                            className="min-h-[44px] border border-[#d6b46c]/25 px-3 py-1 font-mono text-[10px] text-[#bfb59e] uppercase hover:border-[#dfc07b] hover:text-[#fff6df] cursor-pointer"
+                            className="min-h-[44px] border border-[var(--dna-accent)]/25 px-3 py-1 font-mono text-[10px] text-[var(--dna-muted)] uppercase hover:border-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
                           >
                             RESTORE DEFAULTS
                           </button>
@@ -896,15 +900,15 @@ export function WorldsSanctum({
                       {inscriptions.map((entry) => (
                         <div
                           key={entry.id}
-                          className="border border-[#d6b46c]/20 bg-[#0b0e18] p-3.5 text-xs"
+                          className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3.5 text-xs"
                         >
-                          <div className="flex items-center justify-between text-[11px] font-mono text-[#d6b46c]">
+                          <div className="flex items-center justify-between text-[11px] font-mono text-[var(--dna-accent)]">
                             <span>
                               {entry.id} · {entry.authorTitle}
                             </span>
                             <span>{entry.sealName}</span>
                           </div>
-                          <p className="mt-1.5 font-serif text-sm sm:text-base leading-relaxed text-[#f4efe4]">
+                          <p className="mt-1.5 font-serif text-sm sm:text-base leading-relaxed text-[var(--dna-text)]">
                             “{entry.bodyText}”
                           </p>
                         </div>
@@ -915,11 +919,11 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "sidra" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-                      <span className="font-monument text-sm tracking-[0.18em] text-[#f5e3b8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+                      <span className="font-monument text-sm tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                         SIDRA POLYHEDRAL KNOWLEDGE CONSTELLATION
                       </span>
-                      <span className="font-mono text-xs text-[#d6b46c]">
+                      <span className="font-mono text-xs text-[var(--dna-accent)]">
                         {selectedAxiom.geometricRatio}
                       </span>
                     </div>
@@ -928,7 +932,7 @@ export function WorldsSanctum({
                         <div
                           role="group"
                           aria-label="Sidra Knowledge Graph"
-                          className="relative h-60 sm:h-64 w-full overflow-hidden border border-[#d6b46c]/30 bg-[#060912] shadow-[inset_0_0_28px_rgba(0,0,0,0.88)]"
+                          className="relative h-60 sm:h-64 w-full overflow-hidden border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] shadow-[inset_0_0_28px_rgba(0,0,0,0.88)]"
                         >
                           <Image
                             src="/art/sidra-lote-constellation.webp"
@@ -965,7 +969,7 @@ export function WorldsSanctum({
                                     y1={axiomNode.coordinateY}
                                     x2={targetNode.coordinateX}
                                     y2={targetNode.coordinateY}
-                                    stroke={isHighlighted ? "#fff4d2" : "#dfc07b"}
+                                    stroke={isHighlighted ? "var(--dna-text)" : "var(--dna-accent)"}
                                     strokeWidth={isHighlighted ? "0.7" : "0.35"}
                                     strokeOpacity={isHighlighted ? "0.75" : "0.24"}
                                   />
@@ -993,8 +997,8 @@ export function WorldsSanctum({
                                 <span
                                   className={`flex h-4 w-4 items-center justify-center rounded-full border transition-all duration-300 ${
                                     isCurrent
-                                      ? "scale-125 border-[#fff8e6] bg-[#fff4d2] shadow-[0_0_16px_rgba(255,244,210,0.95)]"
-                                      : "border-[#060912] bg-[#d6b46c] shadow-[0_0_8px_rgba(223,192,123,0.55)] group-hover:scale-110 group-hover:bg-[#fff4d2]"
+                                      ? "scale-125 border-[var(--dna-text)] bg-[var(--dna-text)] shadow-[0_0_16px_rgba(255,244,210,0.95)]"
+                                      : "border-[var(--dna-canvas)] bg-[var(--dna-accent)] shadow-[0_0_8px_rgba(223,192,123,0.55)] group-hover:scale-110 group-hover:bg-[var(--dna-text)]"
                                   }`}
                                 />
                                 <span
@@ -1004,8 +1008,8 @@ export function WorldsSanctum({
                                       : "top-[calc(50%+12px)]"
                                   } ${
                                     isCurrent
-                                      ? "border-[#fff4d2]/75 bg-[#060912]/90 text-[#fff8e6]"
-                                      : "border-[#d6b46c]/30 bg-[#060912]/80 text-[#f5e3b8] group-hover:border-[#f5dfa6]/60"
+                                      ? "border-[var(--dna-text)]/75 bg-[var(--dna-canvas)]/90 text-[var(--dna-text)]"
+                                      : "border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/80 text-[var(--dna-accent)] group-hover:border-[var(--dna-accent)]/60"
                                   }`}
                                 >
                                   {axiomNode.id === "qalam-codex"
@@ -1018,13 +1022,13 @@ export function WorldsSanctum({
                         </div>
                       </div>
                       <div className="sm:col-span-6 space-y-2.5">
-                        <div className="text-xs font-mono text-[#d6b46c] uppercase">
+                        <div className="text-xs font-mono text-[var(--dna-accent)] uppercase">
                           {selectedAxiom.discipline}
                         </div>
-                        <h5 className="font-monument text-lg text-[#fff6df]">
+                        <h5 className="font-monument text-lg text-[var(--dna-text)]">
                           {selectedAxiom.title}
                         </h5>
-                        <p className="font-serif text-sm leading-relaxed text-[#e6decb]">
+                        <p className="font-serif text-sm leading-relaxed text-[var(--dna-muted)]">
                           {selectedAxiom.exposition}
                         </p>
                         <div className="pt-2 flex flex-wrap gap-1.5">
@@ -1035,8 +1039,8 @@ export function WorldsSanctum({
                               onClick={() => setSelectedAxiomId(axiomItem.id)}
                               className={`min-h-[44px] px-3 py-1.5 text-[11px] font-mono border cursor-pointer transition-colors ${
                                 axiomItem.id === selectedAxiom.id
-                                  ? "border-[#f5e3b8] bg-[#d6b46c]/25 text-[#fff6df]"
-                                  : "border-[#d6b46c]/25 text-[#bfb59e] hover:border-[#d6b46c]/55"
+                                  ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/25 text-[var(--dna-text)]"
+                                  : "border-[var(--dna-accent)]/25 text-[var(--dna-muted)] hover:border-[var(--dna-accent)]/55"
                               }`}
                             >
                               {axiomItem.title}
@@ -1050,11 +1054,11 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "rocksoul-dx" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-                      <span className="font-monument text-sm tracking-[0.18em] text-[#f5e3b8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+                      <span className="font-monument text-sm tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                         ROCKSOUL DX · ASTROLABE DREAMFORGE ENGINE
                       </span>
-                      <span className="font-mono text-xs text-[#d6b46c]">
+                      <span className="font-mono text-xs text-[var(--dna-accent)]">
                         {symmetryPoints}-FOLD GIRIH SYMMETRY
                       </span>
                     </div>
@@ -1065,7 +1069,7 @@ export function WorldsSanctum({
                           width={440}
                           height={320}
                           aria-label="Rocksoul DX Generative Mandala Studio Canvas"
-                          className="h-52 w-full max-w-[280px] border border-[#d6b46c]/25 bg-[#05070e]"
+                          className="h-52 w-full max-w-[280px] border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]"
                         />
                       </div>
                       <div className="sm:col-span-6 space-y-4">
@@ -1082,8 +1086,8 @@ export function WorldsSanctum({
                               className={`min-h-[44px] border px-3 py-1.5 font-mono text-[10px] uppercase cursor-pointer transition-colors ${
                                 symmetryPoints === preset.points &&
                                 orbitalRadiusRatio === preset.radius
-                                  ? "border-[#fff4d2] bg-[#d6b46c]/25 text-[#fff8e6]"
-                                  : "border-[#d6b46c]/25 text-[#cfc5b0] hover:border-[#d6b46c]/60"
+                                  ? "border-[var(--dna-text)] bg-[var(--dna-accent)]/25 text-[var(--dna-text)]"
+                                  : "border-[var(--dna-accent)]/25 text-[var(--dna-muted)] hover:border-[var(--dna-accent)]/60"
                               }`}
                             >
                               {preset.label}
@@ -1091,7 +1095,7 @@ export function WorldsSanctum({
                           ))}
                         </div>
                         <div>
-                          <div className="flex justify-between text-xs font-mono text-[#e6c987]">
+                          <div className="flex justify-between text-xs font-mono text-[var(--dna-accent)]">
                             <label htmlFor="symmetry-slider">Symmetry Fold</label>
                             <span>{symmetryPoints} Points</span>
                           </div>
@@ -1103,11 +1107,11 @@ export function WorldsSanctum({
                             step={2}
                             value={symmetryPoints}
                             onChange={(e) => setSymmetryPoints(Number(e.target.value))}
-                            className="mt-1 w-full accent-[#d6b46c]"
+                            className="mt-1 w-full accent-[var(--dna-accent)]"
                           />
                         </div>
                         <div>
-                          <div className="flex justify-between text-xs font-mono text-[#e6c987]">
+                          <div className="flex justify-between text-xs font-mono text-[var(--dna-accent)]">
                             <label htmlFor="radius-slider">Harmonic Aperture</label>
                             <span>{orbitalRadiusRatio}%</span>
                           </div>
@@ -1118,11 +1122,11 @@ export function WorldsSanctum({
                             max={80}
                             value={orbitalRadiusRatio}
                             onChange={(e) => setOrbitalRadiusRatio(Number(e.target.value))}
-                            className="mt-1 w-full accent-[#d6b46c]"
+                            className="mt-1 w-full accent-[var(--dna-accent)]"
                           />
                         </div>
                         <div>
-                          <div className="flex justify-between text-xs font-mono text-[#e6c987]">
+                          <div className="flex justify-between text-xs font-mono text-[var(--dna-accent)]">
                             <label htmlFor="velocity-slider">Sidereal Velocity</label>
                             <span>{rotationSpeed} rad/s</span>
                           </div>
@@ -1133,13 +1137,13 @@ export function WorldsSanctum({
                             max={80}
                             value={rotationSpeed}
                             onChange={(e) => setRotationSpeed(Number(e.target.value))}
-                            className="mt-1 w-full accent-[#d6b46c]"
+                            className="mt-1 w-full accent-[var(--dna-accent)]"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#cfc5b0]">
-                      <span className="text-[#f5dfa6]">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--dna-accent)]/15 pt-3 font-mono text-[10px] text-[var(--dna-muted)]">
+                      <span className="text-[var(--dna-accent)]">
                         DESKTOP WORKBENCH · LOCAL SQLITE ENGINE · SPATIAL STAGE
                       </span>
                       <span>SSOT: @MOONWITNESS/CANON</span>
@@ -1149,13 +1153,13 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "crayon" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2ea8ff]/30 pb-3">
-                      <span className="font-monument text-sm tracking-[0.14em] text-[#fff8e8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--brand-blue)]/30 pb-3">
+                      <span className="font-monument text-sm tracking-[0.14em] text-[var(--dna-text)] uppercase">
                         CRAYON · SRGBL v8 HERMENEUTIC SPECTRUM
                       </span>
                       <DnaBadge>CANON EXPLORER · bjo163/ALLAH-CRAYON-RGBL-ENGINE</DnaBadge>
                     </div>
-                    <p className="mt-3 font-sans text-sm text-[#d8d0c0]">
+                    <p className="mt-3 font-sans text-sm text-[var(--dna-muted)]">
                       Select a lens stage to inspect how CRAYON illuminates primary text from sense
                       to living action:
                     </p>
@@ -1167,22 +1171,22 @@ export function WorldsSanctum({
                           onClick={() => setSelectedSrgblIdx(idx)}
                           className={`min-h-[44px] border px-3 py-1.5 font-mono text-xs uppercase cursor-pointer ${
                             selectedSrgblIdx === idx
-                              ? "border-[#2ea8ff] bg-[#2ea8ff]/20 text-[#fff8e8]"
-                              : "border-[#d6b46c]/25 text-[#d8d0c0] hover:border-[#2ea8ff]/60"
+                              ? "border-[var(--brand-blue)] bg-[var(--brand-blue)]/20 text-[var(--dna-text)]"
+                              : "border-[var(--dna-accent)]/25 text-[var(--dna-muted)] hover:border-[var(--brand-blue)]/60"
                           }`}
                         >
                           {stage.stage}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-4 border border-[#2ea8ff]/35 bg-[#0b0e18] p-4 space-y-2">
-                      <div className="font-mono text-xs text-[#2ea8ff] uppercase">
+                    <div className="mt-4 border border-[var(--brand-blue)]/35 bg-[var(--dna-canvas)] p-4 space-y-2">
+                      <div className="font-mono text-xs text-[var(--brand-blue)] uppercase">
                         {selectedSrgblStage.symbolicLayer}
                       </div>
-                      <h5 className="font-monument text-lg text-[#fff8e8]">
+                      <h5 className="font-monument text-lg text-[var(--dna-text)]">
                         {selectedSrgblStage.title}
                       </h5>
-                      <p className="font-serif text-base text-[#f4ecd8]">
+                      <p className="font-serif text-base text-[var(--dna-text)]">
                         {selectedSrgblStage.auditQuestion}
                       </p>
                     </div>
@@ -1191,8 +1195,8 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "sin-can" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ed149b]/35 pb-3">
-                      <span className="font-monument text-sm tracking-[0.14em] text-[#fff8e8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent-secondary)]/35 pb-3">
+                      <span className="font-monument text-sm tracking-[0.14em] text-[var(--dna-text)] uppercase">
                         SIN CAN · BETTER HUMAN REFLECTION ARC
                       </span>
                       <DnaBadge>CANON EXPLORER · 4 STORY PANELS</DnaBadge>
@@ -1201,16 +1205,18 @@ export function WorldsSanctum({
                       {DX_MANGA_FOUR_PANELS.map((panel) => (
                         <div
                           key={panel.panelNumber}
-                          className="border border-[#ed149b]/35 bg-[#0b0e18] p-3.5"
+                          className="border border-[var(--dna-accent-secondary)]/35 bg-[var(--dna-canvas)] p-3.5"
                         >
-                          <div className="flex items-center justify-between font-mono text-xs text-[#f6d438]">
+                          <div className="flex items-center justify-between font-mono text-xs text-[var(--dna-accent)]">
                             <span>{panel.panelNumber}</span>
                             <span>{panel.romajiSfx}</span>
                           </div>
-                          <div className="font-monument mt-1 text-sm text-[#fff8e8]">
+                          <div className="font-monument mt-1 text-sm text-[var(--dna-text)]">
                             {panel.title}
                           </div>
-                          <p className="mt-1.5 font-sans text-sm text-[#d8d0c0]">{panel.meaning}</p>
+                          <p className="mt-1.5 font-sans text-sm text-[var(--dna-muted)]">
+                            {panel.meaning}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -1218,7 +1224,7 @@ export function WorldsSanctum({
                       {SYAFAAT_BASE_STATES.map((stateItem) => (
                         <span
                           key={stateItem.state}
-                          className="border border-[#ed149b]/35 bg-[#171a26] px-2.5 py-1 font-mono text-xs text-[#fff8e8]"
+                          className="border border-[var(--dna-accent-secondary)]/35 bg-[var(--dna-surface-elevated)] px-2.5 py-1 font-mono text-xs text-[var(--dna-text)]"
                         >
                           {stateItem.state}
                         </span>
@@ -1229,13 +1235,13 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "mythos" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f6d438]/30 pb-3">
-                      <span className="font-monument text-sm tracking-[0.14em] text-[#fff8e8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/30 pb-3">
+                      <span className="font-monument text-sm tracking-[0.14em] text-[var(--dna-text)] uppercase">
                         MYTHOS · MFTL & SHARED CASE 001
                       </span>
                       <DnaBadge>CANON EXPLORER · DOM-02 / DOM-03</DnaBadge>
                     </div>
-                    <p className="mt-3 font-sans text-sm text-[#d8d0c0]">
+                    <p className="mt-3 font-sans text-sm text-[var(--dna-muted)]">
                       {JERUSALEM_70CE_CASE_001.title} — cross-domain verification across four
                       primary strands:
                     </p>
@@ -1243,18 +1249,18 @@ export function WorldsSanctum({
                       {JERUSALEM_70CE_CASE_001.strands.map((strand) => (
                         <div
                           key={strand.domain}
-                          className="border border-[#f6d438]/30 bg-[#0b0e18] p-3.5"
+                          className="border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-3.5"
                         >
-                          <div className="font-mono text-xs text-[#f6d438] uppercase">
+                          <div className="font-mono text-xs text-[var(--dna-accent)] uppercase">
                             {strand.domain}
                           </div>
-                          <p className="mt-1.5 font-sans text-sm text-[#fff8e8]">
+                          <p className="mt-1.5 font-sans text-sm text-[var(--dna-text)]">
                             {strand.evidence}
                           </p>
                         </div>
                       ))}
                     </div>
-                    <p className="mt-3 font-mono text-xs text-[#3ddc84]">
+                    <p className="mt-3 font-mono text-xs text-[var(--dna-success)]">
                       VERDICT: {JERUSALEM_70CE_CASE_001.verdict}
                     </p>
                   </div>
@@ -1262,13 +1268,13 @@ export function WorldsSanctum({
 
                 {activeWorld.id === "angel-with-shotgun" && (
                   <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#2ea8ff]/30 pb-3">
-                      <span className="font-monument text-sm tracking-[0.14em] text-[#fff8e8] uppercase">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--brand-blue)]/30 pb-3">
+                      <span className="font-monument text-sm tracking-[0.14em] text-[var(--dna-text)] uppercase">
                         ANGEL WITH SHOTGUN · AWS NORMATIVE ENGINE
                       </span>
                       <DnaBadge>CANON EXPLORER · DOM-05 LAW</DnaBadge>
                     </div>
-                    <p className="mt-3 font-sans text-sm text-[#f6d438]">
+                    <p className="mt-3 font-sans text-sm text-[var(--dna-accent)]">
                       CORE INVARIANT: LEGAL TEXT ≠ APPLICABLE LAW WITHOUT FULL SCOPE VALIDATION
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
@@ -1279,19 +1285,19 @@ export function WorldsSanctum({
                           onClick={() => setSelectedAwsStageIdx(idx)}
                           className={`min-h-[44px] border px-3 py-1.5 font-mono text-xs uppercase cursor-pointer ${
                             selectedAwsStageIdx === idx
-                              ? "border-[#f6d438] bg-[#f6d438] text-[#08090d] font-bold"
-                              : "border-[#2ea8ff]/35 text-[#fff8e8] hover:border-[#f6d438]"
+                              ? "border-[var(--dna-accent)] bg-[var(--dna-accent)] text-[var(--dna-canvas)] font-bold"
+                              : "border-[var(--brand-blue)]/35 text-[var(--dna-text)] hover:border-[var(--dna-accent)]"
                           }`}
                         >
                           0{idx + 1} · {gate}
                         </button>
                       ))}
                     </div>
-                    <div className="mt-4 border border-[#2ea8ff]/35 bg-[#0b0e18] p-4">
-                      <div className="font-mono text-xs text-[#2ea8ff] uppercase">
+                    <div className="mt-4 border border-[var(--brand-blue)]/35 bg-[var(--dna-canvas)] p-4">
+                      <div className="font-mono text-xs text-[var(--brand-blue)] uppercase">
                         ACTIVE GATE // 0{selectedAwsStageIdx + 1} · {AWS_GATES[selectedAwsStageIdx]}
                       </div>
-                      <p className="mt-2 font-sans text-base text-[#fff8e8]">
+                      <p className="mt-2 font-sans text-base text-[var(--dna-text)]">
                         Every normative judgment traverses all six gates in sequence (Source, Rule,
                         Jurisdiction, Applicability, Argument, and Review) before any obligation
                         applies.

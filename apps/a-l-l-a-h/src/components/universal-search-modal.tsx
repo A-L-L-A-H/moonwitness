@@ -106,9 +106,9 @@ export function UniversalSearchModal({
         className="octa-bevel-shell w-full max-w-2xl p-6 sm:p-7"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between gap-2 border-b border-[#d6b46c]/25 pb-3">
+        <div className="flex items-center justify-between gap-2 border-b border-[var(--dna-accent)]/25 pb-3">
           <div className="flex items-center gap-3 flex-1">
-            <SearchLensIcon className="h-5 w-5 shrink-0 text-[#d6b46c]" />
+            <SearchLensIcon className="h-5 w-5 shrink-0 text-[var(--dna-accent)]" />
             <input
               type="search"
               autoFocus
@@ -116,27 +116,27 @@ export function UniversalSearchModal({
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search Worlds, Taurat/Zabur/Injīl/Al-Qur’ān, Attributes, SRGBL v8..."
               aria-label="Search query"
-              className="font-sans w-full bg-transparent text-sm sm:text-base text-[#fff6df] placeholder-[#a79d86] focus:outline-none"
+              className="font-sans w-full bg-transparent text-sm sm:text-base text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none"
             />
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close Search"
-            className="btn-luxe-secondary min-w-[54px] px-3.5 py-1 text-[11px] font-mono text-[#d6b46c] hover:text-[#fff6df] cursor-pointer"
+            className="btn-luxe-secondary min-w-[54px] px-3.5 py-1 text-[11px] font-mono text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
           >
             ESC
           </button>
         </div>
 
-        <div className="mt-2.5 flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#9f9580] uppercase">
+        <div className="mt-2.5 flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[var(--dna-muted)] uppercase">
           <span>CTRL/⌘ + K TOGGLE · ESC CLOSE</span>
           <span>5 WORLD REALMS · 4 SCRIPTURES · CODEX DOORS</span>
         </div>
 
         <div className="mt-5 max-h-[65vh] overflow-y-auto space-y-5 pr-1">
           <div>
-            <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+            <div className="text-[11px] font-mono tracking-[0.22em] text-[var(--dna-accent)] uppercase">
               WORLDS ({matchingWorlds.length})
             </div>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -148,14 +148,16 @@ export function UniversalSearchModal({
                     onNavigateToWorld(worldEntry.id);
                     onClose();
                   }}
-                  className="min-h-[44px] flex items-center gap-3 border border-[#d6b46c]/20 bg-[#0b0e18] p-3 text-left hover:border-[#e6c987] hover:bg-[#d6b46c]/12 transition-colors cursor-pointer"
+                  className="min-h-[44px] flex items-center gap-3 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/12 transition-colors cursor-pointer"
                 >
                   <WorldEmblemById worldId={worldEntry.id} className="h-8 w-8 shrink-0" />
                   <div>
-                    <div className="font-monument text-sm tracking-[0.14em] text-[#fff6df]">
+                    <div className="font-monument text-sm tracking-[0.14em] text-[var(--dna-text)]">
                       {worldEntry.name}
                     </div>
-                    <div className="font-sans text-[11px] text-[#cfc5b0]">{worldEntry.tagline}</div>
+                    <div className="font-sans text-[11px] text-[var(--dna-muted)]">
+                      {worldEntry.tagline}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -164,7 +166,7 @@ export function UniversalSearchModal({
 
           {onJumpToRemembrance && (
             <div>
-              <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+              <div className="text-[11px] font-mono tracking-[0.22em] text-[var(--dna-accent)] uppercase">
                 FOUR REVEALED SCRIPTURES ({matchingScriptures.length})
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -176,16 +178,16 @@ export function UniversalSearchModal({
                       onNavigateToDoor("epistemic-corpus");
                       onClose();
                     }}
-                    className="min-h-[44px] border border-[#d6b46c]/20 bg-[#0b0e18] p-3 text-left hover:border-[#e6c987] transition-colors cursor-pointer"
+                    className="min-h-[44px] border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] transition-colors cursor-pointer"
                   >
-                    <div className="flex items-center justify-between font-mono text-[10px] text-[#dfc07b]">
+                    <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                       <span>{corpus.code}</span>
                       <span>{corpus.prophetAnchor}</span>
                     </div>
-                    <div className="font-monument mt-0.5 text-xs tracking-[0.1em] text-[#fff6df]">
+                    <div className="font-monument mt-0.5 text-xs tracking-[0.1em] text-[var(--dna-text)]">
                       {corpus.name}
                     </div>
-                    <div className="font-sans text-[11px] text-[#cfc5b0] truncate">
+                    <div className="font-sans text-[11px] text-[var(--dna-muted)] truncate">
                       {corpus.ethicalCore}
                     </div>
                   </button>
@@ -196,7 +198,7 @@ export function UniversalSearchModal({
 
           {onJumpToRemembrance && (
             <div>
-              <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+              <div className="text-[11px] font-mono tracking-[0.22em] text-[var(--dna-accent)] uppercase">
                 CONTEMPLATIVE ATTRIBUTES ({matchingNames.length})
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -208,20 +210,20 @@ export function UniversalSearchModal({
                       onJumpToRemembrance();
                       onClose();
                     }}
-                    className="min-h-[44px] border border-[#d6b46c]/20 bg-[#0b0e18] p-3 text-left hover:border-[#e6c987] hover:bg-[#d6b46c]/12 transition-colors cursor-pointer"
+                    className="min-h-[44px] border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/12 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span dir="rtl" lang="ar" className="text-base text-[#fff4d2]">
+                      <span dir="rtl" lang="ar" className="text-base text-[var(--dna-text)]">
                         {entry.arabic}
                       </span>
-                      <span className="font-mono text-[10px] text-[#dfc07b]">
+                      <span className="font-mono text-[10px] text-[var(--dna-accent)]">
                         {entry.worldLabel.split("·")[0]?.trim()}
                       </span>
                     </div>
-                    <div className="font-monument mt-1 text-xs tracking-[0.1em] text-[#fff6df]">
+                    <div className="font-monument mt-1 text-xs tracking-[0.1em] text-[var(--dna-text)]">
                       {entry.transliteration}
                     </div>
-                    <div className="font-sans text-[11px] text-[#cfc5b0] truncate">
+                    <div className="font-sans text-[11px] text-[var(--dna-muted)] truncate">
                       {entry.meaning}
                     </div>
                   </button>
@@ -231,7 +233,7 @@ export function UniversalSearchModal({
           )}
 
           <div>
-            <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+            <div className="text-[11px] font-mono tracking-[0.22em] text-[var(--dna-accent)] uppercase">
               CANON CODEX DOORS ({matchingCodex.length})
             </div>
             <div className="mt-2 space-y-2">
@@ -243,23 +245,25 @@ export function UniversalSearchModal({
                     onNavigateToDoor(codexItem.doorId);
                     onClose();
                   }}
-                  className="min-h-[44px] w-full border border-[#d6b46c]/20 bg-[#0b0e18] p-3 text-left hover:border-[#e6c987] transition-colors cursor-pointer"
+                  className="min-h-[44px] w-full border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center justify-between text-[11px] font-mono text-[#d6b46c]">
+                  <div className="flex items-center justify-between text-[11px] font-mono text-[var(--dna-accent)]">
                     <span>{codexItem.category}</span>
                     <span>{codexItem.repoSource}</span>
                   </div>
-                  <div className="font-monument mt-0.5 text-xs sm:text-sm text-[#fff6df]">
+                  <div className="font-monument mt-0.5 text-xs sm:text-sm text-[var(--dna-text)]">
                     {codexItem.title}
                   </div>
-                  <p className="font-serif mt-0.5 text-xs text-[#cfc5b0]">{codexItem.subtitle}</p>
+                  <p className="font-serif mt-0.5 text-xs text-[var(--dna-muted)]">
+                    {codexItem.subtitle}
+                  </p>
                 </button>
               ))}
             </div>
           </div>
 
           <div>
-            <div className="text-[11px] font-mono tracking-[0.22em] text-[#d6b46c] uppercase">
+            <div className="text-[11px] font-mono tracking-[0.22em] text-[var(--dna-accent)] uppercase">
               SIDRA KNOWLEDGE AXIOMS ({matchingAxioms.length})
             </div>
             <div className="mt-2 space-y-2">
@@ -271,16 +275,16 @@ export function UniversalSearchModal({
                     onNavigateToWorld("sidra");
                     onClose();
                   }}
-                  className="min-h-[44px] w-full border border-[#d6b46c]/15 bg-[#0b0e18] p-3 text-left hover:border-[#d6b46c]/45 transition-colors cursor-pointer"
+                  className="min-h-[44px] w-full border border-[var(--dna-accent)]/15 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)]/45 transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center justify-between text-xs font-mono text-[#d6b46c]">
+                  <div className="flex items-center justify-between text-xs font-mono text-[var(--dna-accent)]">
                     <span>{axiomRecord.discipline}</span>
                     <span>{axiomRecord.geometricRatio}</span>
                   </div>
-                  <div className="font-monument mt-0.5 text-xs sm:text-sm text-[#fff6df]">
+                  <div className="font-monument mt-0.5 text-xs sm:text-sm text-[var(--dna-text)]">
                     {axiomRecord.title}
                   </div>
-                  <p className="font-serif mt-0.5 text-xs text-[#cfc5b0] line-clamp-2">
+                  <p className="font-serif mt-0.5 text-xs text-[var(--dna-muted)] line-clamp-2">
                     {axiomRecord.exposition}
                   </p>
                 </button>

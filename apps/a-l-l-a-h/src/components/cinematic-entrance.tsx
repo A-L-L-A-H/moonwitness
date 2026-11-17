@@ -121,14 +121,14 @@ export function CinematicEntrance({
       role="dialog"
       aria-modal="true"
       aria-label="Empire of the Light Entrance Sequence"
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[#040509] px-6 text-center transition-all duration-700 ease-out ${
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-[var(--dna-canvas)] px-6 text-center transition-all duration-700 ease-out ${
         stage === 3 ? "opacity-0 scale-[1.03] pointer-events-none" : "opacity-100 scale-100"
       }`}
     >
       {/* Vertical Meridian Emergence Beam */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-transparent via-[#fff4d2] to-transparent transition-all duration-1000 ${
+        className={`pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 w-[2px] bg-gradient-to-b from-transparent via-[var(--dna-text)] to-transparent transition-all duration-1000 ${
           stage >= 1 ? "opacity-80 scale-y-100" : "opacity-0 scale-y-0"
         }`}
       />
@@ -146,7 +146,7 @@ export function CinematicEntrance({
         <div className="relative flex items-center justify-center">
           <div
             aria-hidden="true"
-            className="absolute h-36 w-36 rounded-full bg-[#dfc07b]/15 blur-2xl"
+            className="absolute h-36 w-36 rounded-full bg-[var(--dna-accent)]/15 blur-2xl"
           />
           <AstrolabeSealMedallion
             className="relative h-24 w-24 sm:h-28 sm:w-28 drop-shadow-[0_0_24px_rgba(255,244,210,0.45)]"
@@ -164,16 +164,16 @@ export function CinematicEntrance({
         <div
           dir="rtl"
           lang="ar"
-          className="mb-2 text-lg sm:text-2xl text-[#f5dfa6]/95 tracking-wide drop-shadow-[0_0_16px_rgba(223,192,123,0.45)]"
+          className="mb-2 text-lg sm:text-2xl text-[var(--dna-accent)]/95 tracking-wide drop-shadow-[0_0_16px_rgba(223,192,123,0.45)]"
         >
           بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
         </div>
         <div className="flex items-center justify-center gap-3 sm:gap-5">
-          <span className="h-px w-10 sm:w-16 bg-gradient-to-r from-transparent to-[#dfc07b]/80" />
-          <p className="font-monument text-[11px] sm:text-xs tracking-[0.32em] text-[#e8dfd0] uppercase">
+          <span className="h-px w-10 sm:w-16 bg-gradient-to-r from-transparent to-[var(--dna-accent)]/80" />
+          <p className="font-monument text-[11px] sm:text-xs tracking-[0.32em] text-[var(--dna-text)] uppercase">
             IN THE NAME OF ALLAH
           </p>
-          <span className="h-px w-10 sm:w-16 bg-gradient-to-l from-transparent to-[#dfc07b]/80" />
+          <span className="h-px w-10 sm:w-16 bg-gradient-to-l from-transparent to-[var(--dna-accent)]/80" />
         </div>
 
         <h2 className="font-monument mt-4 text-3xl sm:text-5xl md:text-6xl tracking-[0.16em] text-gold-monument">
@@ -181,11 +181,11 @@ export function CinematicEntrance({
         </h2>
 
         <div className="mt-3 flex items-center gap-3">
-          <DiamondStarOrnament className="h-3.5 w-3.5 text-[#dfc07b]" />
-          <p className="font-monument text-xs sm:text-sm tracking-[0.42em] text-[#dfd5c0] uppercase pl-[0.42em]">
+          <DiamondStarOrnament className="h-3.5 w-3.5 text-[var(--dna-accent)]" />
+          <p className="font-monument text-xs sm:text-sm tracking-[0.42em] text-[var(--dna-muted)] uppercase pl-[0.42em]">
             EMPIRE OF THE LIGHT
           </p>
-          <DiamondStarOrnament className="h-3.5 w-3.5 text-[#dfc07b]" />
+          <DiamondStarOrnament className="h-3.5 w-3.5 text-[var(--dna-accent)]" />
         </div>
       </div>
 
@@ -194,10 +194,10 @@ export function CinematicEntrance({
         type="button"
         onClick={dismissEntrance}
         aria-label="Skip cinematic entrance sequence"
-        className="relative z-20 mt-12 inline-flex min-h-[44px] min-w-[44px] items-center gap-2.5 border border-[#dfc07b]/45 bg-[#080a12]/85 px-6 py-2.5 font-serif text-xs tracking-[0.22em] text-[#f5efe2] uppercase transition-colors hover:border-[#fff4d2] hover:bg-[#dfc07b]/15 hover:text-white cursor-pointer"
+        className="relative z-20 mt-12 inline-flex min-h-[44px] min-w-[44px] items-center gap-2.5 border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)]/85 px-6 py-2.5 font-serif text-xs tracking-[0.22em] text-[var(--dna-text)] uppercase transition-colors hover:border-[var(--dna-text)] hover:bg-[var(--dna-accent)]/15 hover:text-white cursor-pointer"
       >
         <span>SKIP ENTRANCE</span>
-        <span className="border-l border-[#dfc07b]/35 pl-2.5 font-mono text-[10px] text-[#dfc07b]">
+        <span className="border-l border-[var(--dna-accent)]/35 pl-2.5 font-mono text-[10px] text-[var(--dna-accent)]">
           ESC
         </span>
       </button>

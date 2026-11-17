@@ -120,12 +120,12 @@ export function CodexWorkbench() {
   return (
     <DnaChamber cornerBrackets className="mt-8 p-6 sm:p-8 space-y-6">
       <SacredCornerBrackets />
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/25 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--dna-accent)]/25 pb-4">
         <div>
-          <div className="font-mono text-[10px] tracking-[0.22em] text-[#dfc07b] uppercase">
+          <div className="font-mono text-[10px] tracking-[0.22em] text-[var(--dna-accent)] uppercase">
             @MOONWITNESS/CANON · DETERMINISTIC CLIENT ENGINE WORKBENCH
           </div>
-          <h3 className="mt-1 font-monument text-base sm:text-lg tracking-[0.14em] text-[#fff6df] uppercase">
+          <h3 className="mt-1 font-monument text-base sm:text-lg tracking-[0.14em] text-[var(--dna-text)] uppercase">
             {locale === "id"
               ? "LABORATORIUM EKSEKUSI WSI · SRGBL v8 · OX-DX 49 · AQEL"
               : "LIVE EXECUTION BENCH: WSI · SRGBL v8 · OX-DX 49 · AQEL"}
@@ -142,8 +142,8 @@ export function CodexWorkbench() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-3 py-1.5 font-mono text-[10px] tracking-[0.12em] uppercase cursor-pointer ${
                   selected
-                    ? "border border-[#f5dfa6] bg-[#d6b46c]/20 text-[#fff8e6]"
-                    : "btn-luxe-secondary text-[#cfc5b0]"
+                    ? "border border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
+                    : "btn-luxe-secondary text-[var(--dna-muted)]"
                 }`}
               >
                 {tab.code} · {tab.label}
@@ -157,13 +157,13 @@ export function CodexWorkbench() {
       {activeTab === "wsi" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block font-mono text-[10px] text-[#dfc07b]">
+            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               CLAIM STATEMENT
               <textarea
                 rows={2}
                 value={wsiStatement}
                 onChange={(e) => setWsiStatement(e.target.value)}
-                className="mt-1 w-full border border-[#d6b46c]/35 bg-[#05070e] p-2.5 font-serif text-xs text-[#fff6df] focus:outline-none"
+                className="mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] p-2.5 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
               />
             </label>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -175,18 +175,21 @@ export function CodexWorkbench() {
                 { label: "4. SCOPE", val: wsiScope, set: setWsiScope },
                 { label: "5. GENRE", val: wsiGenre, set: setWsiGenre },
               ].map((field) => (
-                <label key={field.label} className="block font-mono text-[10px] text-[#cfc5b0]">
+                <label
+                  key={field.label}
+                  className="block font-mono text-[10px] text-[var(--dna-muted)]"
+                >
                   {field.label}
                   <input
                     type="text"
                     value={field.val}
                     onChange={(e) => field.set(e.target.value)}
-                    className="mt-1 w-full border border-[#d6b46c]/30 bg-[#05070e] px-2.5 py-1.5 font-mono text-[11px] text-[#fff6df] focus:outline-none"
+                    className="mt-1 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--dna-text)] focus:outline-none"
                   />
                 </label>
               ))}
             </div>
-            <label className="block font-mono text-[10px] text-[#dfc07b]">
+            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               BOUNDED SWING DEPTH (MAX 3 HOPS): {wsiDepth}
               <input
                 type="range"
@@ -194,25 +197,27 @@ export function CodexWorkbench() {
                 max={3}
                 value={wsiDepth}
                 onChange={(e) => setWsiDepth(Number(e.target.value))}
-                className="mt-1 block w-full accent-[#d6b46c]"
+                className="mt-1 block w-full accent-[var(--dna-accent)]"
               />
             </label>
           </div>
 
-          <div className="border border-[#d6b46c]/25 bg-[#070b15] p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2.5">
-              <span className="font-mono text-[10.5px] text-[#dfc07b]">P18 AUDIT VERDICT</span>
+          <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5">
+              <span className="font-mono text-[10.5px] text-[var(--dna-accent)]">
+                P18 AUDIT VERDICT
+              </span>
               <span
                 className={`border px-2.5 py-0.5 font-mono text-[11px] font-bold ${
                   wsiResult.frameStatus === "ONSIDE"
-                    ? "border-[#7ee7b8]/50 bg-[#7ee7b8]/10 text-[#9cf4cb]"
-                    : "border-[#f5a97f]/60 bg-[#f5a97f]/15 text-[#ffd1b8]"
+                    ? "border-[var(--dna-success)]/50 bg-[var(--dna-success)]/10 text-[var(--dna-success)]"
+                    : "border-[var(--dna-danger)]/60 bg-[var(--dna-danger)]/15 text-[var(--dna-danger)]"
                 }`}
               >
                 {wsiResult.frameStatus}
               </span>
             </div>
-            <div className="font-mono text-[10.5px] text-[#dfd6c3]">
+            <div className="font-mono text-[10.5px] text-[var(--dna-muted)]">
               MISSING DIMENSIONS:{" "}
               {wsiResult.missingDimensions.length === 0
                 ? "NONE (ALL 5 MANDATORY SLOTS POPULATED)"
@@ -220,18 +225,23 @@ export function CodexWorkbench() {
             </div>
             <div className="space-y-2">
               {wsiResult.rotations.map((rot) => (
-                <div key={rot.hop} className="border border-[#d6b46c]/20 bg-[#0b101d] p-3">
-                  <div className="flex items-center justify-between font-mono text-[10px] text-[#f5dfa6]">
+                <div
+                  key={rot.hop}
+                  className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3"
+                >
+                  <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                     <span>
                       HOP {rot.hop} · {rot.operator}
                     </span>
-                    <span className="text-[#dfc07b]">{rot.status}</span>
+                    <span className="text-[var(--dna-accent)]">{rot.status}</span>
                   </div>
-                  <p className="mt-1 font-serif text-xs text-[#e6decb]">{rot.prompt}</p>
+                  <p className="mt-1 font-serif text-xs text-[var(--dna-muted)]">{rot.prompt}</p>
                 </div>
               ))}
             </div>
-            <div className="font-mono text-[10px] text-[#cfc5b0]">{wsiResult.invariant}</div>
+            <div className="font-mono text-[10px] text-[var(--dna-muted)]">
+              {wsiResult.invariant}
+            </div>
           </div>
         </div>
       )}
@@ -240,13 +250,13 @@ export function CodexWorkbench() {
       {activeTab === "srgbl" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block font-mono text-[10px] text-[#dfc07b]">
+            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               INQUIRY QUESTION
               <input
                 type="text"
                 value={srgblQuestion}
                 onChange={(e) => setSrgblQuestion(e.target.value)}
-                className="mt-1 w-full border border-[#d6b46c]/30 bg-[#05070e] px-3 py-1.5 font-serif text-xs text-[#fff6df] focus:outline-none"
+                className="mt-1 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-1.5 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
               />
             </label>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -256,13 +266,16 @@ export function CodexWorkbench() {
                 { label: "B3 BEING & AGENTS", val: b3Text, set: setB3Text },
                 { label: "L4 LIGHT & ACTION", val: l4Text, set: setL4Text },
               ].map((stage) => (
-                <label key={stage.label} className="block font-mono text-[10px] text-[#cfc5b0]">
+                <label
+                  key={stage.label}
+                  className="block font-mono text-[10px] text-[var(--dna-muted)]"
+                >
                   {stage.label}
                   <textarea
                     rows={2}
                     value={stage.val}
                     onChange={(e) => stage.set(e.target.value)}
-                    className="mt-1 w-full border border-[#d6b46c]/30 bg-[#05070e] p-2 font-serif text-xs text-[#fff6df] focus:outline-none"
+                    className="mt-1 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-2 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
                   />
                 </label>
               ))}
@@ -273,27 +286,27 @@ export function CodexWorkbench() {
                 onClick={() =>
                   setSrgblRows([{ weight: 0, confidence: 0, intensity: 0, direction: 1 }])
                 }
-                className="px-3 py-1 font-mono text-[10px] text-[#ffd1b8]"
+                className="px-3 py-1 font-mono text-[10px] text-[var(--dna-danger)]"
               >
                 TEST ZERO-DENOMINATOR GUARD (0/0 &rarr; UNKNOWN)
               </DnaButton>
               <DnaButton
                 tone="secondary"
                 onClick={() => setSrgblRows(INITIAL_SRGBL_ROWS)}
-                className="px-3 py-1 font-mono text-[10px] text-[#e6decb]"
+                className="px-3 py-1 font-mono text-[10px] text-[var(--dna-muted)]"
               >
                 RESET BALANCED WEIGHTS
               </DnaButton>
             </div>
           </div>
 
-          <div className="border border-[#d6b46c]/25 bg-[#070b15] p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2.5">
-              <span className="font-mono text-[10.5px] text-[#dfc07b]">
+          <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5">
+              <span className="font-mono text-[10.5px] text-[var(--dna-accent)]">
                 CUMULATIVE COMPLETENESS: {srgblResult.completeness.filledLevels}/4 (
                 {Math.round(srgblResult.completeness.ratio * 100)}%)
               </span>
-              <span className="border border-[#d6b46c]/40 bg-[#d6b46c]/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#fff8e6]">
+              <span className="border border-[var(--dna-accent)]/40 bg-[var(--dna-accent)]/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[var(--dna-text)]">
                 SCORE: {srgblResult.weightedScore}
               </span>
             </div>
@@ -304,9 +317,12 @@ export function CodexWorkbench() {
                 { key: "B3 BEING", items: srgblResult.stages.B3_Being },
                 { key: "L4 LIGHT", items: srgblResult.stages.L4_Light },
               ].map((block) => (
-                <div key={block.key} className="border border-[#d6b46c]/20 bg-[#0b101d] p-3">
-                  <div className="font-mono text-[10px] text-[#f5dfa6]">{block.key}</div>
-                  <ul className="mt-1 space-y-1 font-serif text-xs text-[#e6decb]">
+                <div
+                  key={block.key}
+                  className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3"
+                >
+                  <div className="font-mono text-[10px] text-[var(--dna-accent)]">{block.key}</div>
+                  <ul className="mt-1 space-y-1 font-serif text-xs text-[var(--dna-muted)]">
                     {block.items.map((line, idx) => (
                       <li key={idx}>• {line}</li>
                     ))}
@@ -314,7 +330,7 @@ export function CodexWorkbench() {
                 </div>
               ))}
             </div>
-            <div className="font-mono text-[10px] text-[#cfc5b0]">
+            <div className="font-mono text-[10px] text-[var(--dna-muted)]">
               {srgblResult.neutralityInvariant}
             </div>
           </div>
@@ -325,41 +341,41 @@ export function CodexWorkbench() {
       {activeTab === "oxdx" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block font-mono text-[10px] text-[#dfc07b]">
+            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               QUERY OX-DX 49 ONTOLOGICAL LEVELS ({oxdxHits.length} MATCHED)
               <input
                 type="search"
                 value={oxdxQuery}
                 onChange={(e) => setOxdxQuery(e.target.value)}
                 placeholder="Origin, Covenant, Sovereign, Physics, AI..."
-                className="mt-1 w-full border border-[#d6b46c]/35 bg-[#05070e] px-3 py-2 font-mono text-xs text-[#fff6df] focus:outline-none"
+                className="mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] px-3 py-2 font-mono text-xs text-[var(--dna-text)] focus:outline-none"
               />
             </label>
-            <div className="max-h-56 overflow-y-auto border border-[#d6b46c]/25 bg-[#070b15] p-3 space-y-1.5">
+            <div className="max-h-56 overflow-y-auto border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-3 space-y-1.5">
               {oxdxHits.slice(0, 14).map((hit, idx) => (
                 <div
                   key={`${hit.zoneIndex}-${hit.level}-${idx}`}
-                  className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/10 pb-1.5 font-mono text-[10.5px]"
+                  className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/10 pb-1.5 font-mono text-[10.5px]"
                 >
-                  <span className="text-[#f5dfa6]">
+                  <span className="text-[var(--dna-accent)]">
                     Z0{hit.zoneIndex} · {hit.zoneName}
                   </span>
-                  <span className="text-[#e6decb]">{hit.level}</span>
+                  <span className="text-[var(--dna-muted)]">{hit.level}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="border border-[#d6b46c]/25 bg-[#070b15] p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2.5">
-              <span className="font-mono text-[10.5px] text-[#dfc07b]">
+          <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5">
+              <span className="font-mono text-[10.5px] text-[var(--dna-accent)]">
                 DHGS 13-STEP VERIFICATION LOOP ({dhgsResult.completedCount}/{dhgsResult.totalSteps})
               </span>
               <span
                 className={`border px-2 py-0.5 font-mono text-[10px] font-bold ${
                   dhgsResult.status === "VERIFIED_LOOP"
-                    ? "border-[#7ee7b8]/50 bg-[#7ee7b8]/10 text-[#9cf4cb]"
-                    : "border-[#d6b46c]/40 bg-[#d6b46c]/10 text-[#f5dfa6]"
+                    ? "border-[var(--dna-success)]/50 bg-[var(--dna-success)]/10 text-[var(--dna-success)]"
+                    : "border-[var(--dna-accent)]/40 bg-[var(--dna-accent)]/10 text-[var(--dna-accent)]"
                 }`}
               >
                 {dhgsResult.status}
@@ -376,8 +392,8 @@ export function CodexWorkbench() {
                     onClick={() => toggleDhgsStep(step.code)}
                     className={`px-2 py-1 font-mono text-[9.5px] cursor-pointer ${
                       checked
-                        ? "border border-[#7ee7b8]/60 bg-[#7ee7b8]/15 text-[#9cf4cb]"
-                        : "border border-[#d6b46c]/25 bg-[#0b101d] text-[#cfc5b0]"
+                        ? "border border-[var(--dna-success)]/60 bg-[var(--dna-success)]/15 text-[var(--dna-success)]"
+                        : "border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] text-[var(--dna-muted)]"
                     }`}
                   >
                     {String(step.stepNumber).padStart(2, "0")}·{step.code}
@@ -385,7 +401,7 @@ export function CodexWorkbench() {
                 );
               })}
             </div>
-            <div className="font-mono text-[10.5px] text-[#dfd6c3]">
+            <div className="font-mono text-[10.5px] text-[var(--dna-muted)]">
               NEXT REQUIRED STEP: {dhgsResult.nextRequiredStep ?? "COMPLETE · LOOP VERIFIED"}
             </div>
           </div>
@@ -396,7 +412,7 @@ export function CodexWorkbench() {
       {activeTab === "aqel" && (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-3">
-            <label className="block font-mono text-[10px] text-[#dfc07b]">
+            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               AQEL v0.1 SOURCE BUFFER (DETERMINISTIC ARABIC-FIRST GRAMMAR)
               <textarea
                 dir="rtl"
@@ -404,16 +420,16 @@ export function CodexWorkbench() {
                 rows={7}
                 value={aqelSource}
                 onChange={(e) => setAqelSource(e.target.value)}
-                className="mt-1 w-full border border-[#d6b46c]/35 bg-[#05070e] p-3 font-serif text-base leading-relaxed text-[#fff8e6] focus:outline-none"
+                className="mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] p-3 font-serif text-base leading-relaxed text-[var(--dna-text)] focus:outline-none"
               />
             </label>
           </div>
-          <div className="border border-[#d6b46c]/25 bg-[#070b15] p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2.5 font-mono text-[10.5px]">
-              <span className="text-[#dfc07b]">
+          <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5 font-mono text-[10.5px]">
+              <span className="text-[var(--dna-accent)]">
                 TOKENS: {aqelResult.tokens.length} · AST STATEMENTS: {aqelResult.statements.length}
               </span>
-              <span className="text-[#9cf4cb]">
+              <span className="text-[var(--dna-success)]">
                 DIAGNOSTICS: {aqelResult.diagnostics.length} ERRORS
               </span>
             </div>
@@ -421,12 +437,12 @@ export function CodexWorkbench() {
               {aqelResult.statements.map((st, idx) => (
                 <div
                   key={`${st.line}-${idx}`}
-                  className="flex flex-wrap items-center justify-between gap-2 border border-[#d6b46c]/20 bg-[#0b101d] px-3 py-1.5 font-mono text-[11px]"
+                  className="flex flex-wrap items-center justify-between gap-2 border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] px-3 py-1.5 font-mono text-[11px]"
                 >
-                  <span className="text-[#f5dfa6]">
+                  <span className="text-[var(--dna-accent)]">
                     L{st.line} · KEYWORD [{st.keyword}]
                   </span>
-                  <span dir="rtl" lang="ar" className="text-[#fff8e6]">
+                  <span dir="rtl" lang="ar" className="text-[var(--dna-text)]">
                     {st.target}
                   </span>
                 </div>
@@ -436,7 +452,7 @@ export function CodexWorkbench() {
               {aqelResult.tokens.slice(0, 18).map((tok, i) => (
                 <span
                   key={i}
-                  className="border border-[#d6b46c]/20 bg-[#0a0f1d] px-2 py-0.5 font-mono text-[9.5px] text-[#cfc5b0]"
+                  className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] px-2 py-0.5 font-mono text-[9.5px] text-[var(--dna-muted)]"
                 >
                   {tok.kind}: {tok.value}
                 </span>

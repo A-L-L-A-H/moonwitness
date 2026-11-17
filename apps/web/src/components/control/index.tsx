@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Sticker, Tape, Card, Badge, Progress, ZineCardRough } from "@moonwitness/ui";
+import { Sticker, Tape, Card, Badge, Gauge, ZineCardRough } from "@moonwitness/ui";
 import { Crown, Star4 } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
@@ -46,7 +46,10 @@ function formatUptime(sec: number): string {
   return `${minutes}m`;
 }
 
-function Gauge({
+type HostMetricTone = "pink" | "blue" | "yellow" | "green";
+
+/** Host metric tile: product composition around the shared HUD Gauge primitive. */
+function HostMetricCard({
   label,
   pct,
   detail,
@@ -55,17 +58,12 @@ function Gauge({
   label: string;
   pct: number;
   detail: string;
-  tone: string;
+  tone: HostMetricTone;
 }) {
   const clamped = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
   return (
     <Card className="relative overflow-hidden p-4">
-      <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: tone }} />
-      <div className="font-brush text-3xl leading-none" style={{ color: tone }}>
-        {clamped.toFixed(0)}%
-      </div>
-      <div className="mt-2 text-[10px] tracking-widest text-zinc-500">{label}</div>
-      <Progress value={clamped} className="mt-2 h-1.5" />
+      <Gauge label={label} value={`${clamped.toFixed(0)}%`} percent={clamped} tone={tone} />
       <div className="mt-1.5 text-[11px] text-zinc-400">{detail}</div>
     </Card>
   );
@@ -404,13 +402,13 @@ function ControlDashboard() {
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                 <HostCard host={status.data.host} metrics={status.data.metrics} />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  <Gauge
+                  <HostMetricCard
                     label="CPU"
                     pct={status.data.metrics.cpu_pct}
                     detail={`load ${status.data.metrics.load1.toFixed(2)} / ${status.data.metrics.load5.toFixed(2)} / ${status.data.metrics.load15.toFixed(2)}`}
-                    tone="var(--pink)"
+                    tone="pink"
                   />
-                  <Gauge
+                  <HostMetricCard
                     label="MEMORY"
                     pct={status.data.metrics.mem_pct}
                     detail={
@@ -418,9 +416,9 @@ function ControlDashboard() {
                         ? `${formatBytes(status.data.metrics.mem_used)} / ${formatBytes(status.data.metrics.mem_total)}`
                         : `${formatBytes(status.data.metrics.mem_used)} · total tidak tersedia`
                     }
-                    tone="var(--blue)"
+                    tone="blue"
                   />
-                  <Gauge
+                  <HostMetricCard
                     label="DISK"
                     pct={status.data.metrics.disk_pct}
                     detail={
@@ -428,9 +426,9 @@ function ControlDashboard() {
                         ? `${formatBytes(status.data.metrics.disk_used)} / ${formatBytes(status.data.metrics.disk_total)}`
                         : `${status.data.metrics.disk_path} · total tidak tersedia`
                     }
-                    tone="var(--yellow)"
+                    tone="yellow"
                   />
-                  <Gauge
+                  <HostMetricCard
                     label="SWAP"
                     pct={
                       status.data.metrics.swap_total > 0
@@ -442,7 +440,7 @@ function ControlDashboard() {
                         ? `${formatBytes(status.data.metrics.swap_used)} / ${formatBytes(status.data.metrics.swap_total)}`
                         : "no swap"
                     }
-                    tone="var(--green)"
+                    tone="green"
                   />
                 </div>
               </div>

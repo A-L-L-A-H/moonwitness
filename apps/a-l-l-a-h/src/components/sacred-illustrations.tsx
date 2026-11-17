@@ -27,7 +27,7 @@ export function StoryPlateGeometrySvg({
   return (
     <div
       aria-hidden="true"
-      className="relative aspect-[16/9] w-full overflow-hidden border border-[#d6b46c]/30 bg-[#040509] shadow-[inset_0_0_22px_rgba(0,0,0,0.85)]"
+      className="relative aspect-[16/9] w-full overflow-hidden border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] shadow-[inset_0_0_22px_rgba(0,0,0,0.85)]"
     >
       <Image
         src={plateSrc}
@@ -66,16 +66,16 @@ export function Monocentric100CenterSvg({
   const ringTier = Math.min(2, Math.max(0, Math.floor(selectedClusterIndex / 3)));
   const activeInsetClass =
     ringTier === 0
-      ? "inset-12 border-[#fff4d2]/75"
+      ? "inset-12 border-[var(--dna-text)]/75"
       : ringTier === 1
-        ? "inset-8 border-[#fff4d2]/75"
-        : "inset-3.5 border-[#fff4d2]/75";
+        ? "inset-8 border-[var(--dna-text)]/75"
+        : "inset-3.5 border-[var(--dna-text)]/75";
 
   return (
     <div
       role="img"
       aria-label="100CENTER orbital artwork showing 99 ethical reflections orbiting 1 Tawhid center"
-      className="relative h-48 w-48 shrink-0 overflow-hidden rounded-full border border-[#d6b46c]/45 bg-[#05070e] shadow-[0_0_38px_rgba(223,192,123,0.16)]"
+      className="relative h-48 w-48 shrink-0 overflow-hidden rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)] shadow-[0_0_38px_rgba(223,192,123,0.16)]"
     >
       <Image
         src="/art/tawhid-100center-orb.webp"
@@ -94,7 +94,7 @@ export function Monocentric100CenterSvg({
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-2.5 left-1/2 -translate-x-1/2 rounded-full border border-[#d6b46c]/40 bg-[#05070e]/90 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.2em] text-[#fff4d2] uppercase whitespace-nowrap"
+        className="pointer-events-none absolute bottom-2.5 left-1/2 -translate-x-1/2 rounded-full border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)]/90 px-2.5 py-0.5 font-mono text-[9px] tracking-[0.2em] text-[var(--dna-text)] uppercase whitespace-nowrap"
       >
         RING 0{ringTier + 1} · {selectedClusterIndex + 1}/9
       </div>
@@ -123,7 +123,7 @@ export function MeridianConstellationMapSvg({
     <div
       role="group"
       aria-label="Moonwitness Celestial Meridian Observatory Corridors"
-      className="relative h-44 sm:h-48 w-full overflow-hidden border border-[#d6b46c]/30 bg-[#060912] shadow-[inset_0_0_28px_rgba(0,0,0,0.9)]"
+      className="relative h-44 sm:h-48 w-full overflow-hidden border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] shadow-[inset_0_0_28px_rgba(0,0,0,0.9)]"
     >
       <Image
         src="/art/meridian-sky-chart.webp"
@@ -134,7 +134,7 @@ export function MeridianConstellationMapSvg({
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#060912]/50 via-[#060912]/15 to-[#060912]/82"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--dna-canvas)]/50 via-[var(--dna-canvas)]/15 to-[var(--dna-canvas)]/82"
       />
       <svg
         viewBox="0 0 360 132"
@@ -151,7 +151,7 @@ export function MeridianConstellationMapSvg({
               key={`${src.code}-${dst.code}`}
               d={`M${src.x} ${src.y} Q180 24 ${dst.x} ${dst.y}`}
               fill="none"
-              stroke={activeSeg ? "#fff4d2" : "#dfc07b"}
+              stroke={activeSeg ? "var(--dna-text)" : "var(--dna-accent)"}
               strokeOpacity={activeSeg ? 0.8 : 0.28}
               strokeWidth={activeSeg ? 1.3 : 0.75}
               strokeDasharray={activeSeg ? undefined : "3 3"}
@@ -179,12 +179,12 @@ export function MeridianConstellationMapSvg({
             <span
               className={`relative flex h-3.5 w-3.5 items-center justify-center rounded-full border transition-all duration-300 ${
                 selected
-                  ? "scale-125 border-[#fff8e6] bg-[#fff4d2] shadow-[0_0_16px_rgba(255,244,210,0.95)]"
-                  : "border-[#060912] bg-[#dfc07b] shadow-[0_0_8px_rgba(223,192,123,0.6)] group-hover:scale-110 group-hover:bg-[#fff4d2]"
+                  ? "scale-125 border-[var(--dna-text)] bg-[var(--dna-text)] shadow-[0_0_16px_rgba(255,244,210,0.95)]"
+                  : "border-[var(--dna-canvas)] bg-[var(--dna-accent)] shadow-[0_0_8px_rgba(223,192,123,0.6)] group-hover:scale-110 group-hover:bg-[var(--dna-text)]"
               }`}
             >
               {selected && (
-                <span className="absolute -inset-2 rounded-full border border-[#fff4d2]/60 animate-ping" />
+                <span className="absolute -inset-2 rounded-full border border-[var(--dna-text)]/60 animate-ping" />
               )}
             </span>
             <span
@@ -192,8 +192,8 @@ export function MeridianConstellationMapSvg({
                 placePillAbove ? "bottom-[calc(50%+12px)]" : "top-[calc(50%+12px)]"
               } ${
                 selected
-                  ? "border-[#fff4d2]/70 bg-[#060912]/90 text-[#fff8e6]"
-                  : "border-[#d6b46c]/30 bg-[#060912]/78 text-[#e2d8c3] group-hover:border-[#f5dfa6]/60"
+                  ? "border-[var(--dna-text)]/70 bg-[var(--dna-canvas)]/90 text-[var(--dna-text)]"
+                  : "border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/78 text-[var(--dna-muted)] group-hover:border-[var(--dna-accent)]/60"
               }`}
             >
               {node.city}
@@ -217,19 +217,19 @@ export function GatewayWaveformSvg({ variant = 0 }: { readonly variant?: number 
         y1="11"
         x2="120"
         y2="11"
-        stroke="#dfc07b"
+        stroke="var(--dna-accent)"
         strokeOpacity="0.18"
         strokeWidth="0.6"
       />
       <path
         d={`M0 11 Q15 ${4 + (phase % 5)} 30 11 T60 11 T90 11 T120 11`}
-        stroke="#f5dfa6"
+        stroke="var(--dna-accent)"
         strokeWidth="1.15"
         strokeOpacity="0.75"
       />
       <path
         d={`M0 11 Q15 ${17 - (phase % 4)} 30 11 T60 11 T90 11 T120 11`}
-        stroke="#dfc07b"
+        stroke="var(--dna-accent)"
         strokeWidth="0.7"
         strokeOpacity="0.4"
       />
@@ -305,7 +305,7 @@ export function AstrolabeOrreryMap({
       )}
 
       {/* Hand-crafted Brass & Obsidian Astrolabe Art Dial */}
-      <div className="relative h-full w-full overflow-hidden rounded-full border border-[#d6b46c]/45 bg-[#040509] shadow-[0_0_64px_rgba(223,192,123,0.14),inset_0_0_40px_rgba(0,0,0,0.92)]">
+      <div className="relative h-full w-full overflow-hidden rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)] shadow-[0_0_64px_rgba(223,192,123,0.14),inset_0_0_40px_rgba(0,0,0,0.92)]">
         <Image
           src="/art/astrolabe-orrery-plate.webp"
           alt=""
@@ -336,20 +336,20 @@ export function AstrolabeOrreryMap({
               clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
             }}
           />
-          <div className="absolute top-[7%] left-1/2 h-[33%] w-px -translate-x-1/2 bg-gradient-to-b from-[#fff8e6] via-[#f5dfa6]/70 to-transparent" />
+          <div className="absolute top-[7%] left-1/2 h-[33%] w-px -translate-x-1/2 bg-gradient-to-b from-[var(--dna-text)] via-[var(--dna-accent)]/70 to-transparent" />
         </div>
       </div>
 
       {/* Cardinal Bearing Annotations */}
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 rounded-sm border border-[#d6b46c]/30 bg-[#05070e]/90 px-2 py-0.5 font-mono text-[8.5px] tracking-[0.16em] text-[#dfc07b]"
+        className="pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 rounded-sm border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/90 px-2 py-0.5 font-mono text-[8.5px] tracking-[0.16em] text-[var(--dna-accent)]"
       >
         000° ZENITH
       </span>
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-sm border border-[#d6b46c]/25 bg-[#05070e]/90 px-2 py-0.5 font-mono text-[8.5px] tracking-[0.16em] text-[#a79d86]"
+        className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 rounded-sm border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/90 px-2 py-0.5 font-mono text-[8.5px] tracking-[0.16em] text-[var(--dna-muted)]"
       >
         180° SOUTH
       </span>
@@ -357,12 +357,12 @@ export function AstrolabeOrreryMap({
       {/* Center Monocentric Unity Hub */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute top-1/2 left-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-[#fff4d2]/55 bg-[#060811]/88 text-center shadow-[0_0_28px_rgba(223,192,123,0.22)] backdrop-blur-sm"
+        className="pointer-events-none absolute top-1/2 left-1/2 flex h-24 w-24 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-[var(--dna-text)]/55 bg-[var(--dna-canvas)]/88 text-center shadow-[0_0_28px_rgba(223,192,123,0.22)] backdrop-blur-sm"
       >
-        <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-[#fff8e6]">
+        <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-[var(--dna-text)]">
           AL-NŪR
         </span>
-        <span className="mt-0.5 font-mono text-[7.5px] tracking-[0.14em] text-[#dfc07b] uppercase">
+        <span className="mt-0.5 font-mono text-[7.5px] tracking-[0.14em] text-[var(--dna-accent)] uppercase">
           ONE SOURCE
         </span>
       </div>
@@ -394,12 +394,12 @@ export function AstrolabeOrreryMap({
             <span
               className={`relative flex h-5 w-5 items-center justify-center rounded-full border transition-all duration-300 ${
                 isSelected
-                  ? "scale-125 border-[#fff8e6] bg-[#262012] shadow-[0_0_18px_rgba(255,244,210,0.8)]"
-                  : "border-[#dfc07b]/85 bg-[#090c16] group-hover:scale-110 group-hover:border-[#fff4d2]"
+                  ? "scale-125 border-[var(--dna-text)] bg-[var(--dna-surface)] shadow-[0_0_18px_rgba(255,244,210,0.8)]"
+                  : "border-[var(--dna-accent)]/85 bg-[var(--dna-canvas)] group-hover:scale-110 group-hover:border-[var(--dna-text)]"
               }`}
             >
               <span
-                className={`h-2 w-2 rounded-full ${isSelected ? "bg-[#fff8e6]" : "bg-[#dfc07b]"}`}
+                className={`h-2 w-2 rounded-full ${isSelected ? "bg-[var(--dna-text)]" : "bg-[var(--dna-accent)]"}`}
               />
             </span>
             <span
@@ -407,8 +407,8 @@ export function AstrolabeOrreryMap({
                 placePillAbove ? "bottom-[calc(50%+14px)]" : "top-[calc(50%+14px)]"
               } ${
                 isSelected
-                  ? "border-[#fff4d2]/75 bg-[#060912]/92 text-[#fff8e6]"
-                  : "border-[#d6b46c]/30 bg-[#060912]/82 text-[#dfd6c3] group-hover:border-[#f5dfa6]/60"
+                  ? "border-[var(--dna-text)]/75 bg-[var(--dna-canvas)]/92 text-[var(--dna-text)]"
+                  : "border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/82 text-[var(--dna-muted)] group-hover:border-[var(--dna-accent)]/60"
               }`}
             >
               {spec.shortName}
@@ -430,7 +430,7 @@ export function DoorPortalGlyph({
   readonly doorId: EntryDoorId;
   readonly active?: boolean;
 }) {
-  const stroke = active ? "#fff6dc" : "#dfc07b";
+  const stroke = active ? "var(--dna-text)" : "var(--dna-accent)";
   if (doorId === "story-universe") {
     return (
       <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
@@ -518,7 +518,7 @@ export function AstrolabeSealMedallion({
   return (
     <div
       aria-hidden="true"
-      className={`relative overflow-hidden rounded-full border border-[#f5dfa6]/45 bg-[#05070e] shadow-[0_0_26px_rgba(223,192,123,0.26)] ${className}`}
+      className={`relative overflow-hidden rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)] shadow-[0_0_26px_rgba(223,192,123,0.26)] ${className}`}
     >
       <Image
         src="/art/astrolabe-orrery-plate.webp"

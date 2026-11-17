@@ -2,7 +2,11 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { dnaWorldCssVariables, MASTER_DNA_IDS, MASTER_DNA_WORLDS } from "../skin/dna-worlds";
-import { IMPERIUM_LUMEN_TOKENS, imperiumLumenCssVariables } from "../skin/imperium-tokens";
+import {
+  IMPERIUM_LUMEN_TOKENS,
+  imperiumLumenCssVariables,
+  MASTER_DNA_PALETTES,
+} from "../skin/imperium-tokens";
 
 /**
  * UI architecture gate. Enforces that `packages/ui` is the single authority for
@@ -36,31 +40,20 @@ const IGNORED_DIRS = new Set([
  */
 const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
   rocksoul: 478,
-  web: 2,
 };
 
 /** Apps whose CSS must not contain any palette literal (TSX is ratcheted separately). */
-const STRICT_TOKEN_APPS: readonly string[] = ["a-l-l-a-h"];
+const STRICT_TOKEN_APPS: readonly string[] = ["a-l-l-a-h", "web"];
 
-/**
- * Legacy Tailwind arbitrary-color literals in TSX (the pre-Imperium "sacred gold" palette in
- * canon/codex/scriptures/sanctum components). RATCHET CEILINGS: may only decrease.
- */
-const LEGACY_TSX_HEX_CEILINGS: Readonly<Record<string, number>> = {
-  "a-l-l-a-h": 1619,
-};
+/** 6-digit only in TSX: 3-digit matches collide with editorial labels such as "#014". */
+const TSX_HEX_LITERAL = /#[0-9a-fA-F]{6}\b/g;
 
 /**
  * Component names re-declared locally although @moonwitness/ui owns them. Each entry is a
  * tracked duplication; the test fails if an entry is resolved without being removed here,
  * and fails on any new duplicate.
  */
-const KNOWN_COMPONENT_DUPLICATES: readonly string[] = [
-  "rocksoul::SkipLink",
-  "web::SectionHeading",
-  "web::Gauge",
-];
-
+const KNOWN_COMPONENT_DUPLICATES: readonly string[] = [];
 function walk(dir: string, extensions: readonly string[]): string[] {
   if (!existsSync(dir)) return [];
   const found: string[] = [];
@@ -187,12 +180,17 @@ describe("UI architecture: single token source parity", () => {
     }
   });
 
-  it("registers exactly the seven master DNA identities with distinct shape languages", () => {
+  it("registers exactly the seven master DNA identities with distinct shape languages and token-sourced palettes", () => {
     expect(MASTER_DNA_IDS).toHaveLength(7);
     const shapes = new Set(MASTER_DNA_IDS.map((id) => MASTER_DNA_WORLDS[id].shapeLanguage));
     const motions = new Set(MASTER_DNA_IDS.map((id) => MASTER_DNA_WORLDS[id].motionGrammar));
     expect(shapes.size).toBe(7);
     expect(motions.size).toBe(7);
+    for (const id of MASTER_DNA_IDS) {
+      expect(MASTER_DNA_WORLDS[id].palette).toEqual(MASTER_DNA_PALETTES[id]);
+    }
+    const dnaWorldsSource = readFileSync(join(UI_ROOT, "src/skin/dna-worlds.tsx"), "utf8");
+    expect(dnaWorldsSource.match(TSX_HEX_LITERAL)).toBeNull();
   });
 });
 
@@ -232,13 +230,14 @@ describe("UI architecture: consumer applications", () => {
     });
   }
 
-  for (const [app, ceiling] of Object.entries(LEGACY_TSX_HEX_CEILINGS)) {
-    it(`${app}: legacy TSX palette literals stay at or below the ratchet ceiling (${ceiling})`, () => {
-      let total = 0;
+  for (const app of ["a-l-l-a-h"] as const) {
+    it(`${app}: contains no hard-coded palette literals in TSX`, () => {
+      const offenders: string[] = [];
       for (const file of appSources(app, [".tsx"])) {
-        total += stripJsComments(readFileSync(file, "utf8")).match(HEX_LITERAL)?.length ?? 0;
+        const hits = stripJsComments(readFileSync(file, "utf8")).match(TSX_HEX_LITERAL);
+        if (hits) offenders.push(`${relative(REPO_ROOT, file)} (${hits.length})`);
       }
-      expect(total).toBeLessThanOrEqual(ceiling);
+      expect(offenders).toEqual([]);
     });
   }
 
