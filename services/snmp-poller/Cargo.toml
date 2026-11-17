@@ -23,6 +23,9 @@ anyhow = "1"
 thiserror = "1"
 # Simple synchronous SNMP client; wrapped in spawn_blocking for async polling.
 snmp = "0.2"
+aes-gcm = "0.10"
+base64 = "0.22"
+getrandom = "0.3"
 
 [dev-dependencies]
 tempfile = "3"
