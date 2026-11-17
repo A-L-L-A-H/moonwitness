@@ -71,11 +71,12 @@ describe("Empire of the Light Registry", () => {
     const worldIds = new Set(WORLD_DOMAINS.map((world) => world.id));
     for (const node of DOCK_TELEMETRY_NODES) {
       expect(worldIds.has(node.worldId)).toBe(true);
+      expect(node.integrityPercent).toBeNull();
+      expect(node.latencyMs).toBeNull();
       if (node.state === "CANON_EXPLORER") {
-        expect(node.integrityPercent).toBeNull();
-        expect(node.latencyMs).toBeNull();
+        expect(node.runtimeTargetId).toBeNull();
       } else {
-        expect(node.integrityPercent).toBeGreaterThanOrEqual(99.9);
+        expect(node.runtimeTargetId).not.toBeNull();
       }
     }
   });

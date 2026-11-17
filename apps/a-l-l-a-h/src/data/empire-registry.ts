@@ -38,6 +38,8 @@ export interface DockNodeTelemetry {
   readonly protocol: string;
   readonly latencyMs: number | null;
   readonly integrityPercent: number | null;
+  readonly runtimeTargetId:
+    "web" | "api" | "arsy" | "memory" | "codex-edge" | "community" | "radio" | "igate" | null;
   readonly orbitalBearing: string;
   readonly state: "SYNCHRONIZED" | "LUMINOUS" | "BROADCASTING" | "CANON_EXPLORER";
 }
@@ -70,6 +72,47 @@ export const NAVIGATION_TABS: readonly {
   { id: "the-dock", label: "THE DOCK" },
   { id: "about", label: "ABOUT" },
 ] as const;
+
+export const WORLD_ART: Readonly<
+  Record<WorldIdentifier, { readonly src: string; readonly subject: string }>
+> = {
+  moonwitness: {
+    src: "/art/world-moonwitness.webp",
+    subject: "An illustrated archive hall beneath a moonlit sky",
+  },
+  arsy: {
+    src: "/art/world-arsy.webp",
+    subject: "A radio relay dish overlooking a twilight skyline",
+  },
+  "human-pen": {
+    src: "/art/world-qalam.webp",
+    subject: "An illuminated writing pen over editorial panels",
+  },
+  sidra: {
+    src: "/art/world-sidra.webp",
+    subject: "A luminous tree of connected knowledge",
+  },
+  "rocksoul-dx": {
+    src: "/art/world-rocksoul.webp",
+    subject: "A playful creative studio controller over vibrant color",
+  },
+  crayon: {
+    src: "/art/world-crayon.webp",
+    subject: "A bright spectrum of illustrated editorial crayons",
+  },
+  "sin-can": {
+    src: "/art/world-sincan.webp",
+    subject: "A luminous scarlet archway leading into honest self-reflection",
+  },
+  mythos: {
+    src: "/art/world-mythos.webp",
+    subject: "Historic stone colonnades preserving ancient human memory",
+  },
+  "angel-with-shotgun": {
+    src: "/art/world-angel.webp",
+    subject: "A winged guardian silhouette under dramatic golden-violet sky light",
+  },
+};
 
 export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
   {
@@ -475,8 +518,9 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "moonwitness",
     designation: "Spire of Testimony Vault",
     protocol: "MW-CHRONICLE/TLS1.3",
-    latencyMs: 4,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
+    runtimeTargetId: "web",
     orbitalBearing: "284° W · +19° Decl",
     state: "SYNCHRONIZED",
   },
@@ -485,8 +529,9 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "arsy",
     designation: "Zenith Radio Relay Array",
     protocol: "ARSY-RADIO/QUIC",
-    latencyMs: 2,
-    integrityPercent: 99.99,
+    latencyMs: null,
+    integrityPercent: null,
+    runtimeTargetId: "arsy",
     orbitalBearing: "000° Z · +90° Apex",
     state: "BROADCASTING",
   },
@@ -495,8 +540,9 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "human-pen",
     designation: "Human-Pen & Qalam Scriptorium",
     protocol: "QALAM-FOLIO/ED25519",
-    latencyMs: 3,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
+    runtimeTargetId: "codex-edge",
     orbitalBearing: "180° S · +45° Gate",
     state: "LUMINOUS",
   },
@@ -505,8 +551,9 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "sidra",
     designation: "Lote-Tree Knowledge Graph",
     protocol: "SIDRA-DAG/SPARQL",
-    latencyMs: 5,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
+    runtimeTargetId: "api",
     orbitalBearing: "076° E · +33° Dome",
     state: "SYNCHRONIZED",
   },
@@ -515,8 +562,9 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "rocksoul-dx",
     designation: "Rocksoul DX Spatial Studio",
     protocol: "ROCKSOUL-DX/CANVAS",
-    latencyMs: 1,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
+    runtimeTargetId: "community",
     orbitalBearing: "142° SE · +12° Plaza",
     state: "LUMINOUS",
   },
@@ -527,6 +575,7 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     protocol: "CRAYON-SRGBL/SPEC",
     latencyMs: null,
     integrityPercent: null,
+    runtimeTargetId: null,
     orbitalBearing: "045° NE · +28° Prism",
     state: "CANON_EXPLORER",
   },
@@ -537,6 +586,7 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     protocol: "DX-SYAFAAT/SPEC",
     latencyMs: null,
     integrityPercent: null,
+    runtimeTargetId: null,
     orbitalBearing: "210° SW · +16° Hall",
     state: "CANON_EXPLORER",
   },
@@ -547,6 +597,7 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     protocol: "MFTL-CASE001/SPEC",
     latencyMs: null,
     integrityPercent: null,
+    runtimeTargetId: null,
     orbitalBearing: "315° NW · +40° Vault",
     state: "CANON_EXPLORER",
   },
@@ -557,6 +608,7 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     protocol: "AWS-LAW-6GATE/SPEC",
     latencyMs: null,
     integrityPercent: null,
+    runtimeTargetId: null,
     orbitalBearing: "110° E · +55° Bench",
     state: "CANON_EXPLORER",
   },

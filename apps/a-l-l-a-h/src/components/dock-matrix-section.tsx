@@ -82,6 +82,19 @@ export function DockMatrixSection({
     DOCK_TELEMETRY_NODES.findIndex((node) => node.nodeCode === activeNode.nodeCode),
   );
 
+  const activeLiveProbe = useMemo(() => {
+    if (!activeNode.runtimeTargetId) return null;
+    const svc = telemetry.services.find((s) => s.id === activeNode.runtimeTargetId);
+    if (svc) return svc;
+    return telemetry.edges.find((e) => e.id === activeNode.runtimeTargetId) ?? null;
+  }, [activeNode.runtimeTargetId, telemetry.services, telemetry.edges]);
+
+  const hasVerifiedProbeMeasurement =
+    activeLiveProbe !== null &&
+    typeof activeLiveProbe.latencyMs === "number" &&
+    Boolean(activeLiveProbe.measuredAt ?? telemetry.generatedAt) &&
+    activeLiveProbe.source === "live-http-probe";
+
   const handleSelectFilter = (optionId: DockFilterState) => {
     triggerSacredViewTransition(() => {
       setFilterState(optionId);
@@ -271,11 +284,15 @@ export function DockMatrixSection({
                       <dd className="mt-1 text-[var(--dna-text)]">{activeNode.orbitalBearing}</dd>
                     </div>
                     <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3">
-                      <dt className="text-[10px] text-[var(--dna-muted)]">SPEC TARGET</dt>
+                      <dt className="text-[10px] text-[var(--dna-muted)]">TELEMETRY STATUS</dt>
                       <dd className="mt-1 text-[var(--dna-accent)]">
-                        {activeNode.integrityPercent !== null && activeNode.latencyMs !== null
-                          ? `${activeNode.integrityPercent}% · ${activeNode.latencyMs}ms`
-                          : "CANON EXPLORER"}
+                        {activeNode.state === "CANON_EXPLORER"
+                          ? "CANON EXPLORER · STATIC SPEC"
+                          : hasVerifiedProbeMeasurement
+                            ? `${activeLiveProbe.status.toUpperCase()} · ${activeLiveProbe.latencyMs}ms · ${activeLiveProbe.source.toUpperCase()} · ${(activeLiveProbe.measuredAt ?? telemetry.generatedAt ?? "").slice(11, 19)}Z`
+                            : telemetry.status === "checking"
+                              ? "PROBING RUNTIME…"
+                              : "UNMEASURED · PROBE STANDBY"}
                       </dd>
                     </div>
                   </dl>
@@ -288,9 +305,9 @@ export function DockMatrixSection({
                     <button
                       type="button"
                       onClick={() => onLaunchWorld(activeNode.worldId)}
-                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs tracking-[0.2em] text-[var(--dna-text)] uppercase hover:text-white cursor-pointer"
+                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs font-bold tracking-[0.18em] text-[var(--dna-canvas)] uppercase cursor-pointer"
                     >
-                      <DiamondStarOrnament className="h-2.5 w-2.5 text-[var(--dna-accent)] transition-transform duration-500 group-hover:rotate-45" />
+                      <DiamondStarOrnament className="h-2.5 w-2.5 text-[var(--dna-canvas)] transition-transform duration-500 group-hover:rotate-45" />
                       <span>ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;</span>
                     </button>
                   </div>
@@ -355,8 +372,10 @@ export function DockMatrixSection({
                                 }`}
                               >
                                 {liveProbe
-                                  ? isUp
-                                    ? `LIVE · ${liveProbe.latencyMs ?? 0}ms`
+                                  ? isUp &&
+                                    typeof liveProbe.latencyMs === "number" &&
+                                    liveProbe.source === "live-http-probe"
+                                    ? `LIVE · ${liveProbe.latencyMs}ms`
                                     : liveProbe.status.toUpperCase()
                                   : "EDGE"}
                               </span>
@@ -382,8 +401,10 @@ export function DockMatrixSection({
                               {svc.name.toUpperCase()}
                             </div>
                             <div className="mt-0.5 text-[10px]">
-                              {svc.status === "online"
-                                ? `ONLINE · ${svc.latencyMs ?? 0}ms`
+                              {svc.status === "online" &&
+                              typeof svc.latencyMs === "number" &&
+                              svc.source === "live-http-probe"
+                                ? `ONLINE · ${svc.latencyMs}ms`
                                 : telemetry.runtimeMode === "cloudflare-edge"
                                   ? "LOCAL STACK"
                                   : svc.status.toUpperCase()}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   DnaBadge,
   DnaChamber,
+  IllustrationFrame,
   MotionReveal,
   SectionHeading,
   StorySection,
@@ -18,6 +19,7 @@ import {
 } from "@/data/empire-canon-codex";
 import {
   SIDRA_KNOWLEDGE_AXIOMS,
+  WORLD_ART,
   WORLD_DOMAINS,
   type WorldDomainEntry,
   type WorldIdentifier,
@@ -582,7 +584,23 @@ export function WorldsSanctum({
                   </span>
                 </div>
 
-                <div className="mt-4 flex items-center gap-4">
+                <div className="mt-4">
+                  <IllustrationFrame
+                    aspectRatio="worldTile"
+                    scrim
+                    className="border-2 border-[var(--brand-paper)] shadow-[4px_4px_0_var(--brand-pink)]"
+                  >
+                    <Image
+                      src={WORLD_ART[activeWorld.id].src}
+                      alt={WORLD_ART[activeWorld.id].subject}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 40vw"
+                      className="object-cover"
+                    />
+                  </IllustrationFrame>
+                </div>
+
+                <div className="mt-5 flex items-center gap-4">
                   <WorldEmblemById worldId={activeWorld.id} className="h-14 w-14 shrink-0" />
                   <div>
                     <div className="flex flex-wrap items-baseline gap-3">

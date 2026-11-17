@@ -8,6 +8,8 @@ import {
 export type ServiceHealthState = "online" | "degraded" | "offline";
 export type EcosystemRuntimeMode = "local-node" | "cloudflare-edge";
 
+export type TelemetrySourceKind = "live-http-probe" | "unmeasured";
+
 export interface EcosystemServiceStatus {
   readonly id: "web" | "api" | "arsy" | "memory";
   readonly name: string;
@@ -15,6 +17,8 @@ export interface EcosystemServiceStatus {
   readonly status: ServiceHealthState;
   readonly httpStatus: number | null;
   readonly latencyMs: number | null;
+  readonly measuredAt: string | null;
+  readonly source: TelemetrySourceKind;
 }
 
 export interface EcosystemEdgeStatus {
@@ -24,6 +28,8 @@ export interface EcosystemEdgeStatus {
   readonly status: ServiceHealthState;
   readonly httpStatus: number | null;
   readonly latencyMs: number | null;
+  readonly measuredAt: string | null;
+  readonly source: TelemetrySourceKind;
 }
 
 export interface EcosystemGitStatus {
@@ -262,6 +268,8 @@ async function probeTarget<TId extends string>(
   readonly status: ServiceHealthState;
   readonly httpStatus: number | null;
   readonly latencyMs: number | null;
+  readonly measuredAt: string | null;
+  readonly source: TelemetrySourceKind;
 }> {
   // Cloudflare Workers edge isolates cannot connect to origin 127.0.0.1 services (egress returns 403).
   if (skipLoopbackOnEdge && isLoopbackUrl(target.probeUrl)) {
@@ -272,6 +280,8 @@ async function probeTarget<TId extends string>(
       status: "offline",
       httpStatus: null,
       latencyMs: null,
+      measuredAt: null,
+      source: "unmeasured",
     };
   }
   const startedAt = Date.now();
@@ -288,6 +298,8 @@ async function probeTarget<TId extends string>(
       status: response.ok ? "online" : "degraded",
       httpStatus: response.status,
       latencyMs,
+      measuredAt: new Date().toISOString(),
+      source: "live-http-probe",
     };
   } catch {
     return {
@@ -297,6 +309,8 @@ async function probeTarget<TId extends string>(
       status: "offline",
       httpStatus: null,
       latencyMs: null,
+      measuredAt: null,
+      source: "unmeasured",
     };
   }
 }
