@@ -11,22 +11,23 @@ import {
   triggerSacredViewTransition,
 } from "./motion-primitives";
 import { RemembranceSanctuary } from "./remembrance-sanctuary";
-import { DiamondStarOrnament, OctagramMandalaIcon } from "@moonwitness/ui/imperium";
+import {
+  DiamondStarOrnament,
+  DnaButton,
+  DnaPortalArch,
+  OctagramMandalaIcon,
+} from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { AstrolabeSealMedallion } from "./sacred-illustrations";
 
 export function CovenantAboutSection({
   quietMode = false,
-  capabilityStatusLabel = "LIVING LIGHT · WEBGL2",
-  onReplayEntrance,
   onToggleQuietMode,
   onSelectWorld,
   onInspectCorpusDoor,
   onReturnToGate,
 }: {
   readonly quietMode?: boolean;
-  readonly capabilityStatusLabel?: string;
-  readonly onReplayEntrance?: () => void;
   readonly onToggleQuietMode?: () => void;
   readonly onSelectWorld?: (worldId: WorldIdentifier) => void;
   readonly onInspectCorpusDoor?: () => void;
@@ -39,16 +40,16 @@ export function CovenantAboutSection({
     <section
       id="about"
       aria-labelledby="about-heading"
-      className="scroll-mt-16 relative border-t border-[#d6b46c]/25 bg-gradient-to-b from-[#05060b]/95 via-[#090c16]/90 to-[#030407] pt-24 pb-16 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative bg-gradient-to-b from-[var(--dna-canvas)]/95 via-[var(--dna-canvas)]/90 to-[var(--dna-canvas)] pt-24 pb-16 px-4 sm:px-8 lg:px-16"
     >
-      <div className="mx-auto max-w-6xl">
+      <div className="wrap mx-auto max-w-7xl">
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
             <AstrolabeSealMedallion className="h-20 w-20" spin={!quietMode} />
-            <div className="mt-4 flex items-center gap-4 font-monument text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
-              <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d6b46c]" />
+            <div className="mt-4 flex items-center gap-4 font-monument text-xs tracking-[0.35em] text-[var(--dna-accent)] uppercase">
+              <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--dna-accent)]" />
               <span>IN THE NAME OF ALLAH</span>
-              <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d6b46c]" />
+              <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--dna-accent)]" />
             </div>
             <h2
               id="about-heading"
@@ -56,10 +57,10 @@ export function CovenantAboutSection({
             >
               {locale === "id" ? "ARSITEKTUR CAHAYA" : "ARCHITECTURE OF THE LIGHT"}
             </h2>
-            <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[#e6decb]">
+            <p className="mt-4 max-w-2xl font-serif text-base sm:text-lg leading-relaxed text-[var(--dna-muted)]">
               {locale === "id"
                 ? "Gerbang monosentris netral yang menyatukan kesaksian jujur, kajian komparatif lintas kitab wahyu, dan karya beramanah tanpa kultus maupun paksaan."
-                : "A neutral, monocentric gateway uniting honest witness, comparative study across revealed scriptures, and principled craft without cult or coercion."}
+                : "A neutral, monocentric gateway uniting documented witness, comparative study across revealed scriptures, and principled craft without cult or coercion."}
             </p>
           </div>
         </ScrollChapterReveal>
@@ -77,7 +78,7 @@ export function CovenantAboutSection({
                   maxTiltDeg={3.5}
                   className={isCenterArch ? "md:-translate-y-4" : ""}
                 >
-                  <button
+                  <DnaPortalArch
                     type="button"
                     aria-pressed={isFocused}
                     onClick={() =>
@@ -85,31 +86,31 @@ export function CovenantAboutSection({
                         setFocusedPillar(pillarEntry.numeral);
                       }, quietMode)
                     }
-                    className={`portal-arch-card relative flex h-full w-full flex-col items-center border px-8 pt-10 pb-8 text-center shadow-[0_16px_48px_rgba(0,0,0,0.75)] transition-colors cursor-pointer ${
+                    className={`relative flex h-full w-full flex-col items-center border px-8 pt-10 pb-8 text-center shadow-[0_16px_48px_rgba(0,0,0,0.75)] transition-colors cursor-pointer ${
                       isFocused
-                        ? "border-[#fff4d2] bg-gradient-to-b from-[#d6b46c]/16 via-[#0c101b] to-[#070910]"
-                        : "border-[#d6b46c]/30 bg-[#080a12]/90 hover:border-[#d6b46c]/60"
+                        ? "border-[var(--dna-text)] bg-gradient-to-b from-[var(--dna-accent)]/16 via-[var(--dna-surface)] to-[var(--dna-canvas)]"
+                        : "border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/90 hover:border-[var(--dna-accent)]/60"
                     }`}
                   >
                     <div
                       className={`font-monument mx-auto flex h-11 w-11 items-center justify-center rounded-full border text-sm tracking-[0.1em] transition-colors ${
                         isFocused
-                          ? "border-[#fff4d2] bg-[#d6b46c]/25 text-[#fff8e6]"
-                          : "border-[#d6b46c]/50 bg-[#d6b46c]/10 text-[#f8eac6]"
+                          ? "border-[var(--dna-text)] bg-[var(--dna-accent)]/25 text-[var(--dna-text)]"
+                          : "border-[var(--dna-accent)]/50 bg-[var(--dna-accent)]/10 text-[var(--dna-accent)]"
                       }`}
                     >
                       {pillarEntry.numeral}
                     </div>
-                    <h3 className="font-monument mt-5 text-lg tracking-[0.2em] text-[#fff6df]">
+                    <h3 className="font-monument mt-5 text-lg tracking-[0.2em] text-[var(--dna-text)]">
                       {pillarEntry.heading}
                     </h3>
-                    <p className="mt-1 font-mono text-[11px] tracking-[0.16em] text-[#d6b46c] uppercase">
+                    <p className="mt-1 font-mono text-[11px] tracking-[0.16em] text-[var(--dna-accent)] uppercase">
                       {pillarEntry.subtitle}
                     </p>
-                    <p className="mt-4 font-serif text-base leading-relaxed text-[#dfd6c2]">
+                    <p className="mt-4 font-serif text-base leading-relaxed text-[var(--dna-muted)]">
                       {pillarEntry.statement}
                     </p>
-                  </button>
+                  </DnaPortalArch>
                 </SpatialTiltCard>
               );
             })}
@@ -125,66 +126,55 @@ export function CovenantAboutSection({
         {/* Return to Gate Ornament & Experience Controls */}
         <div className="mt-16 flex flex-col items-center">
           <MagneticPortal disabled={quietMode} maxOffsetPx={6}>
-            <button
+            <DnaButton
               type="button"
               onClick={onReturnToGate}
-              className="btn-chamfer font-monument group inline-flex items-center gap-3 px-9 py-3 text-xs sm:text-sm tracking-[0.25em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
+              tone="primary"
+              className="btn-chamfer font-monument group inline-flex items-center gap-3 px-9 py-3 text-xs sm:text-sm tracking-[0.25em] text-[var(--dna-text)] uppercase hover:text-white cursor-pointer"
             >
-              <DiamondStarOrnament className="h-3 w-3 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
+              <DiamondStarOrnament className="h-3 w-3 text-[var(--dna-accent)] transition-transform duration-500 group-hover:rotate-45" />
               <span>ASCEND TO THE GATE &uarr;</span>
-            </button>
+            </DnaButton>
           </MagneticPortal>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            {onReplayEntrance && (
-              <button
-                type="button"
-                onClick={onReplayEntrance}
-                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[#e6decb] uppercase hover:text-white cursor-pointer"
-              >
-                REPLAY ENTRANCE
-              </button>
-            )}
             {onToggleQuietMode && (
-              <button
+              <DnaButton
                 type="button"
                 aria-pressed={quietMode}
                 onClick={onToggleQuietMode}
-                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase hover:text-white cursor-pointer"
+                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase hover:text-white cursor-pointer"
               >
                 {quietMode ? "ENABLE LIVING LIGHT SHADERS" : "QUIET CONTEMPLATIVE MODE"}
-              </button>
+              </DnaButton>
             )}
           </div>
 
-          <div className="mt-10 flex w-full max-w-xl items-center justify-center gap-3 text-[#d6b46c]/70">
-            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#d6b46c]/50 to-[#d6b46c]" />
-            <DiamondStarOrnament className="h-4 w-4 text-[#f8eac6]" />
-            <span className="h-px flex-1 bg-gradient-to-l from-transparent via-[#d6b46c]/50 to-[#d6b46c]" />
+          <div className="mt-10 flex w-full max-w-xl items-center justify-center gap-3 text-[var(--dna-accent)]/70">
+            <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--dna-accent)]/50 to-[var(--dna-accent)]" />
+            <DiamondStarOrnament className="h-4 w-4 text-[var(--dna-accent)]" />
+            <span className="h-px flex-1 bg-gradient-to-l from-transparent via-[var(--dna-accent)]/50 to-[var(--dna-accent)]" />
           </div>
 
-          <footer className="mt-8 flex w-full flex-col items-center justify-between gap-4 border-t border-[#d6b46c]/15 pt-6 text-[11px] tracking-[0.22em] text-[#cfc5b0]/80 uppercase sm:flex-row">
+          <footer className="mt-8 flex w-full flex-col items-center justify-between gap-4 border-t border-[var(--dna-accent)]/15 pt-6 text-[11px] tracking-[0.22em] text-[var(--dna-muted)]/80 uppercase sm:flex-row">
             <div className="flex items-center gap-3">
               <OctagramMandalaIcon className="h-6 w-6" />
               <span>A-L-L-A-H.COM &middot; EMPIRE OF THE LIGHT</span>
             </div>
             <nav
               aria-label="Sanctuary Dedicated Portals"
-              className="flex items-center gap-4 font-mono text-[10px] tracking-[0.16em] text-[#dfc07b]"
+              className="flex items-center gap-4 font-mono text-[10px] tracking-[0.16em] text-[var(--dna-accent)]"
             >
-              <Link href="/scriptures" className="hover:text-[#fff8e6]">
+              <Link href="/scriptures" className="hover:text-[var(--dna-text)]">
                 /SCRIPTURES
               </Link>
-              <Link href="/codex" className="hover:text-[#fff8e6]">
+              <Link href="/codex" className="hover:text-[var(--dna-text)]">
                 /CODEX
               </Link>
-              <Link href="/mtime" className="hover:text-[#fff8e6]">
+              <Link href="/mtime" className="hover:text-[var(--dna-text)]">
                 /MTIME
               </Link>
             </nav>
-            <div className="font-mono text-[10px] tracking-[0.18em] text-[#dfc07b]">
-              {capabilityStatusLabel}
-            </div>
           </footer>
         </div>
       </div>

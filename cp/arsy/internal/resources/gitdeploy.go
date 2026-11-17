@@ -19,6 +19,9 @@ func (g *GitDeploy) Kind() string { return "gitdeploy" }
 func (g *GitDeploy) ObsKey(r Resource) string { return r.Name }
 
 func (g *GitDeploy) Validate(r Resource) error {
+	if r.PostCmd != "" {
+		return fmt.Errorf("%w: gitdeploy post_cmd tidak didukung di v1; gunakan workflow deployment terpisah", ErrBadResource)
+	}
 	if r.Name == "" {
 		return fmt.Errorf("%w: gitdeploy butuh name", ErrBadResource)
 	}
@@ -207,14 +210,5 @@ func (g *GitDeploy) Apply(ctx context.Context, r Resource) error {
 		}
 	}
 
-	// Run post command if specified
-	if r.PostCmd != "" {
-		if _, err := g.Runner.Run(ctx, host.Command{
-			Name: "sh",
-			Args: []string{"-c", r.PostCmd},
-		}); err != nil {
-			return fmt.Errorf("post_cmd gagal: %w", err)
-		}
-	}
 	return nil
 }

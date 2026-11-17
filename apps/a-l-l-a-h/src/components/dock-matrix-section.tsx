@@ -41,6 +41,7 @@ const DOCK_FILTER_OPTIONS: readonly { readonly id: DockFilterState; readonly lab
   { id: "SYNCHRONIZED", label: "SYNCHRONIZED" },
   { id: "LUMINOUS", label: "LUMINOUS" },
   { id: "BROADCASTING", label: "BROADCASTING" },
+  { id: "CANON_EXPLORER", label: "CANON EXPLORER" },
 ] as const;
 
 export function DockMatrixSection({
@@ -104,15 +105,15 @@ export function DockMatrixSection({
     <section
       id="the-dock"
       aria-labelledby="dock-heading"
-      className="scroll-mt-16 relative overflow-x-clip border-t border-[#d6b46c]/25 bg-[#040509]/95 py-24 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative overflow-x-clip bg-[var(--dna-canvas)]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="wrap mx-auto max-w-7xl">
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
-            <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
-              <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#d6b46c]" />
+            <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[var(--dna-accent)] uppercase">
+              <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--dna-accent)]" />
               <span>CELESTIAL HORIZON BRIDGE</span>
-              <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#d6b46c]" />
+              <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--dna-accent)]" />
             </div>
             <h2
               id="dock-heading"
@@ -120,7 +121,7 @@ export function DockMatrixSection({
             >
               {locale === "id" ? "DERMAGA · MATRIKS BERDAULAT" : "THE DOCK · SOVEREIGN MATRIX"}
             </h2>
-            <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[#dfd6c3]/90 leading-relaxed">
+            <p className="mt-3 max-w-2xl font-serif text-base sm:text-lg text-[var(--dna-muted)]/90 leading-relaxed">
               {locale === "id"
                 ? "Astrolabe heliosentris interaktif yang memetakan lima gerbang ekosistem di sekitar satu inti cahaya monosentris. Pilih titik orbit untuk membaca telemetri."
                 : "Interactive heliocentric astrolabe plotting the five Empire gateways around one monocentric light core. Select any orbital node to lock sextant telemetry and launch."}
@@ -141,7 +142,9 @@ export function DockMatrixSection({
                     aria-pressed={isActive}
                     onClick={() => handleSelectFilter(option.id)}
                     className={`px-4.5 py-1.5 text-[11px] tracking-[0.18em] uppercase ${
-                      isActive ? "text-[#fff6df]" : "text-[#c8beaa] hover:text-[#fff6df]"
+                      isActive
+                        ? "text-[var(--dna-text)]"
+                        : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                     }`}
                   >
                     {option.label}
@@ -156,9 +159,9 @@ export function DockMatrixSection({
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="mt-12 grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
             {/* Left: Astronomical Orbital Orrery Stage */}
-            <div className="lg:col-span-6 relative border border-[#d6b46c]/30 bg-gradient-to-b from-[#070a14] via-[#05070e] to-[#080b14] p-6 sm:p-8 shadow-[0_24px_65px_rgba(0,0,0,0.85)]">
+            <div className="lg:col-span-6 relative border border-[var(--dna-accent)]/30 bg-gradient-to-b from-[var(--dna-canvas)] via-[var(--dna-canvas)] to-[var(--dna-canvas)] p-6 sm:p-8 shadow-[0_24px_65px_rgba(0,0,0,0.85)]">
               <SacredCornerBrackets />
-              <div className="mb-3 flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-[#dfc07b] uppercase">
+              <div className="mb-3 flex items-center justify-between font-mono text-[10px] tracking-[0.2em] text-[var(--dna-accent)] uppercase">
                 <span>ASTROLABE ORRERY // SEXTANT LOCK</span>
                 <span>
                   {visibleNodes.length} OF {DOCK_TELEMETRY_NODES.length} ACTIVE
@@ -194,15 +197,15 @@ export function DockMatrixSection({
                       onClick={() => handleSelectNode(node.nodeCode)}
                       className="btn-luxe-secondary min-h-[54px] px-3 py-2 text-left cursor-pointer"
                     >
-                      <div className="flex items-center justify-between font-mono text-[9.5px] text-[#dfc07b]">
+                      <div className="flex items-center justify-between font-mono text-[9.5px] text-[var(--dna-accent)]">
                         <span>{node.nodeCode}</span>
                         <span
-                          className={`h-1.5 w-1.5 rounded-full bg-[#f7dfa0] ${
+                          className={`h-1.5 w-1.5 rounded-full bg-[var(--dna-accent)] ${
                             quietMode ? "" : "animate-pulse"
                           }`}
                         />
                       </div>
-                      <div className="font-monument mt-1 truncate text-[11px] tracking-[0.08em] text-[#fff6df]">
+                      <div className="font-monument mt-1 truncate text-[11px] tracking-[0.08em] text-[var(--dna-text)]">
                         {worldMeta?.name ?? node.designation}
                       </div>
                     </button>
@@ -213,11 +216,11 @@ export function DockMatrixSection({
               {/* Active Gateway Beveled Telemetry Aperture */}
               <SpatialTiltCard disabled={quietMode} maxTiltDeg={2.8}>
                 <div className="octa-bevel-shell relative p-6 sm:p-8">
-                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-4 font-mono text-[11px] text-[#d6b46c]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-4 font-mono text-[11px] text-[var(--dna-accent)]">
                     <span>TELEMETRY LOCK // {activeNode.nodeCode}</span>
-                    <span className="inline-flex items-center gap-1.5 text-[#f7dfa0]">
+                    <span className="inline-flex items-center gap-1.5 text-[var(--dna-accent)]">
                       <span
-                        className={`h-1.5 w-1.5 rounded-full bg-[#f7dfa0] ${
+                        className={`h-1.5 w-1.5 rounded-full bg-[var(--dna-accent)] ${
                           quietMode ? "" : "animate-pulse"
                         }`}
                       />
@@ -226,30 +229,30 @@ export function DockMatrixSection({
                   </div>
 
                   <div className="mt-5 flex items-center gap-4">
-                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#dfc07b]/40 bg-[#080b15]">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)]">
                       <WorldEmblemById worldId={activeNode.worldId} className="h-11 w-11" />
                     </div>
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-baseline gap-2.5">
-                        <h3 className="font-monument text-2xl sm:text-3xl tracking-[0.14em] text-[#fff8e6]">
+                        <h3 className="font-monument text-2xl sm:text-3xl tracking-[0.14em] text-[var(--dna-text)]">
                           {matchedWorld?.name ?? activeNode.designation}
                         </h3>
                         {matchedWorld && (
-                          <span dir="rtl" lang="ar" className="text-lg text-[#dfc07b]">
+                          <span dir="rtl" lang="ar" className="text-lg text-[var(--dna-accent)]">
                             {matchedWorld.arabicEpithet}
                           </span>
                         )}
                       </div>
-                      <p className="mt-0.5 font-serif text-sm text-[#e0d7c4]">
+                      <p className="mt-0.5 font-serif text-sm text-[var(--dna-muted)]">
                         {activeNode.designation}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-5 border-y border-[#d6b46c]/15 py-3">
-                    <div className="mb-1.5 flex justify-between font-mono text-[10px] tracking-[0.16em] text-[#9c927d] uppercase">
+                  <div className="mt-5 border-y border-[var(--dna-accent)]/15 py-3">
+                    <div className="mb-1.5 flex justify-between font-mono text-[10px] tracking-[0.16em] text-[var(--dna-muted)] uppercase">
                       <span>HARMONIC CARRIER WAVE</span>
-                      <span className="text-[#f5dfa6]">
+                      <span className="text-[var(--dna-accent)]">
                         {matchedWorld?.harmonicFrequency ?? "COVENANT SYNC"}
                       </span>
                     </div>
@@ -257,47 +260,51 @@ export function DockMatrixSection({
                   </div>
 
                   <dl className="mt-5 grid grid-cols-1 gap-3 font-mono text-xs sm:grid-cols-3">
-                    <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
-                      <dt className="text-[10px] text-[#8e8572]">PROTOCOL</dt>
-                      <dd className="mt-1 text-[#fff4d2] break-words">{activeNode.protocol}</dd>
+                    <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3">
+                      <dt className="text-[10px] text-[var(--dna-muted)]">PROTOCOL</dt>
+                      <dd className="mt-1 text-[var(--dna-text)] break-words">
+                        {activeNode.protocol}
+                      </dd>
                     </div>
-                    <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
-                      <dt className="text-[10px] text-[#8e8572]">ORBITAL BEARING</dt>
-                      <dd className="mt-1 text-[#fff4d2]">{activeNode.orbitalBearing}</dd>
+                    <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3">
+                      <dt className="text-[10px] text-[var(--dna-muted)]">ORBITAL BEARING</dt>
+                      <dd className="mt-1 text-[var(--dna-text)]">{activeNode.orbitalBearing}</dd>
                     </div>
-                    <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
-                      <dt className="text-[10px] text-[#8e8572]">SPEC TARGET</dt>
-                      <dd className="mt-1 text-[#f5e3b8]">
-                        {activeNode.integrityPercent}% · {activeNode.latencyMs}ms
+                    <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3">
+                      <dt className="text-[10px] text-[var(--dna-muted)]">SPEC TARGET</dt>
+                      <dd className="mt-1 text-[var(--dna-accent)]">
+                        {activeNode.integrityPercent !== null && activeNode.latencyMs !== null
+                          ? `${activeNode.integrityPercent}% · ${activeNode.latencyMs}ms`
+                          : "CANON EXPLORER"}
                       </dd>
                     </div>
                   </dl>
 
                   <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-                    <p className="font-serif text-xs text-[#c8beaa] max-w-xs">
+                    <p className="font-serif text-xs text-[var(--dna-muted)] max-w-xs">
                       {matchedWorld?.primaryDirective ??
                         "Enter calibrated sanctum chamber directly via Sovereign Matrix."}
                     </p>
                     <button
                       type="button"
                       onClick={() => onLaunchWorld(activeNode.worldId)}
-                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs tracking-[0.2em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
+                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs tracking-[0.2em] text-[var(--dna-text)] uppercase hover:text-white cursor-pointer"
                     >
-                      <DiamondStarOrnament className="h-2.5 w-2.5 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
+                      <DiamondStarOrnament className="h-2.5 w-2.5 text-[var(--dna-accent)] transition-transform duration-500 group-hover:rotate-45" />
                       <span>ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;</span>
                     </button>
                   </div>
 
                   {/* Live Multi-Node Observatory, Cloudflare Edges & Portal Bridges */}
-                  <div className="mt-5 border-t border-[#d6b46c]/20 pt-4 space-y-3">
+                  <div className="mt-5 border-t border-[var(--dna-accent)]/20 pt-4 space-y-3">
                     <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10px]">
-                      <span className="text-[#dfc07b]">ECOSYSTEM TOPOLOGY BRIDGE</span>
+                      <span className="text-[var(--dna-accent)]">ECOSYSTEM TOPOLOGY BRIDGE</span>
                       <div className="flex flex-wrap items-center gap-2">
                         <span
                           className={`border px-2 py-0.5 ${
                             telemetry.status === "online"
-                              ? "border-[#e6c987]/55 bg-[#d6b46c]/15 text-[#fff6df]"
-                              : "border-[#d6b46c]/25 bg-[#080a12] text-[#d8ceba]"
+                              ? "border-[var(--dna-accent)]/55 bg-[var(--dna-accent)]/15 text-[var(--dna-text)]"
+                              : "border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] text-[var(--dna-muted)]"
                           }`}
                         >
                           {telemetry.status === "checking"
@@ -312,7 +319,7 @@ export function DockMatrixSection({
                           type="button"
                           onClick={telemetry.refresh}
                           disabled={telemetry.refreshing}
-                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[#f5dfa6] hover:text-white disabled:opacity-50 cursor-pointer"
+                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] hover:text-white disabled:opacity-50 cursor-pointer"
                         >
                           {telemetry.refreshing ? "PROBING…" : "REFRESH"}
                         </button>
@@ -332,19 +339,19 @@ export function DockMatrixSection({
                               href={edge.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex items-center justify-between border border-[#d6b46c]/30 bg-[#090d18] px-3 py-2 text-[#fff6df] hover:border-[#fff4d2] hover:bg-[#12182b] transition-colors"
+                              className="flex items-center justify-between border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-2 text-[var(--dna-text)] hover:border-[var(--dna-text)] hover:bg-[var(--dna-surface-elevated)] transition-colors"
                             >
                               <div className="min-w-0 pr-2">
                                 <div className="font-bold truncate">{edge.hostname} ↗</div>
-                                <div className="text-[9.5px] text-[#cfc5b0] truncate">
+                                <div className="text-[9.5px] text-[var(--dna-muted)] truncate">
                                   {edge.workerName}
                                 </div>
                               </div>
                               <span
                                 className={`shrink-0 border px-1.5 py-0.5 text-[9.5px] ${
                                   isUp
-                                    ? "border-[#e6c987]/55 bg-[#d6b46c]/20 text-[#fff8e6]"
-                                    : "border-[#d6b46c]/25 bg-[#080a12] text-[#cfc5b0]"
+                                    ? "border-[var(--dna-accent)]/55 bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
+                                    : "border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] text-[var(--dna-muted)]"
                                 }`}
                               >
                                 {liveProbe
@@ -365,10 +372,10 @@ export function DockMatrixSection({
                             key={svc.id}
                             className={`border px-2.5 py-1.5 ${
                               svc.status === "online"
-                                ? "border-[#e6c987]/45 bg-[#d6b46c]/10 text-[#fff6df]"
+                                ? "border-[var(--dna-accent)]/45 bg-[var(--dna-accent)]/10 text-[var(--dna-text)]"
                                 : svc.status === "degraded"
-                                  ? "border-[#e6c987]/35 bg-[#1a1408] text-[#f5dfa6]"
-                                  : "border-[#d6b46c]/20 bg-[#060911] text-[#cfc5b0]"
+                                  ? "border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] text-[var(--dna-accent)]"
+                                  : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] text-[var(--dna-muted)]"
                             }`}
                           >
                             <div className="font-bold tracking-[0.04em]">
@@ -387,14 +394,14 @@ export function DockMatrixSection({
                     )}
 
                     {telemetry.git?.available && (
-                      <div className="flex flex-wrap items-center justify-between gap-2 border border-[#d6b46c]/20 bg-[#060911] px-3 py-2 font-mono text-[10px] text-[#e0d7c4]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] px-3 py-2 font-mono text-[10px] text-[var(--dna-muted)]">
                         <span>
                           GIT WORKSPACE:{" "}
-                          <strong className="text-[#fff6df]">
+                          <strong className="text-[var(--dna-text)]">
                             {telemetry.git.branch ?? "HEAD"} ({telemetry.git.headShort ?? "—"})
                           </strong>
                         </span>
-                        <span className="text-[#f5dfa6]">
+                        <span className="text-[var(--dna-accent)]">
                           {telemetry.git.dirtyCount > 0
                             ? `${telemetry.git.dirtyCount} CHANGED FILES`
                             : "CLEAN TREE"}
@@ -406,10 +413,10 @@ export function DockMatrixSection({
                     )}
 
                     {telemetry.codexGovernance?.source === "cloudflare-d1" && (
-                      <div className="border border-[#d6b46c]/25 bg-[#060911] px-3 py-2.5 space-y-1.5 font-mono text-[10px]">
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-[#dfc07b]">
+                      <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] px-3 py-2.5 space-y-1.5 font-mono text-[10px]">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[var(--dna-accent)]">
                           <span>CLOUDFLARE D1 · SOVEREIGN-CODEX-DB LIVE</span>
-                          <span className="text-[#fff6df]">
+                          <span className="text-[var(--dna-text)]">
                             {telemetry.codexGovernance.milestonesCount} MILESTONES ·{" "}
                             {telemetry.codexGovernance.tasksCount} TASKS ·{" "}
                             {telemetry.codexGovernance.docsCount} DOCS ·{" "}
@@ -417,11 +424,11 @@ export function DockMatrixSection({
                           </span>
                         </div>
                         {telemetry.codexGovernance.latestReleases.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 text-[9.5px] text-[#e0d7c4]">
+                          <div className="flex flex-wrap gap-1.5 text-[9.5px] text-[var(--dna-muted)]">
                             {telemetry.codexGovernance.latestReleases.slice(0, 2).map((rel) => (
                               <DnaBadge
                                 key={rel.tag}
-                                className="font-mono text-[9.5px] text-[#f5dfa6]"
+                                className="font-mono text-[9.5px] text-[var(--dna-accent)]"
                               >
                                 {rel.tag} ({rel.channel})
                               </DnaBadge>
@@ -434,19 +441,19 @@ export function DockMatrixSection({
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Link
                         href="/scriptures"
-                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#f5dfa6] uppercase"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-accent)] uppercase"
                       >
                         4-SCRIPTURE STUDIO &rsaquo;
                       </Link>
                       <Link
                         href="/mtime"
-                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#f5dfa6] uppercase"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-accent)] uppercase"
                       >
                         M-TIME OBSERVATORY &rsaquo;
                       </Link>
                       <Link
                         href="/codex"
-                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase"
+                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase"
                       >
                         CODEX DOORS &rsaquo;
                       </Link>
@@ -467,7 +474,7 @@ export function DockMatrixSection({
                               href={`${resolvedWebBase}${link.href}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[#e6decb] uppercase hover:text-[#fff6df]"
+                              className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase hover:text-[var(--dna-text)]"
                             >
                               {link.label} ↗
                             </a>

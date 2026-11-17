@@ -250,5 +250,11 @@ describe("ROCKSOUL browser-preview workflow", () => {
     await expect(call("open_ecosystem_url", { url: "https://example.com" })).rejects.toMatchObject({
       message: expect.stringContaining("3000, 3002, 3003, 8000, or 8787"),
     });
+
+    await expect(
+      call("await_mid_loopback_callback", { authorizeUrl: "https://id.moonwitness.biz.id/authorize" }),
+    ).rejects.toMatchObject({
+      message: "Loopback sign-in requires the native desktop app.",
+    });
   });
 });

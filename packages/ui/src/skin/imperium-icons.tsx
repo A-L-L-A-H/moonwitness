@@ -126,3 +126,27 @@ export function DiamondStarOrnament(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+/**
+ * Hand-drawn style three-peak crown emblem used in the Empire of the Light lockup.
+ */
+export function CrownEmblemIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 48 40" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M5 32 L3 10 L15 21 L24 6 L33 21 L45 10 L43 32 Z"
+        stroke="currentColor"
+        strokeWidth="3.2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        fill="rgba(246, 212, 56, 0.16)"
+      />
+      <path
+        d="M8 36 H40"
+        stroke="currentColor"
+        strokeWidth="3.2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}

@@ -24,7 +24,7 @@ export function CodexPageClient() {
   };
 
   return (
-    <div className="min-h-screen bg-[#040509] text-[#f5efe2] bg-girih-filigree">
+    <div className="min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] bg-girih-filigree">
       <SiteSubpageHeader activeRoute="codex" />
       <main id="main">
         <CanonCodexSanctum activeDoorId={activeDoorId} onSelectDoor={handleSelectDoor} />

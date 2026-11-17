@@ -1,8 +1,8 @@
 ---
 title: "Seven DNA Component Mapping"
-version: "1.2.0"
+version: "1.3.0"
 status: "approved"
-last_verified: "2026-11-04"
+last_verified: "2026-11-17"
 owner: "product-design"
 ---
 
@@ -10,47 +10,49 @@ owner: "product-design"
 
 ## Purpose
 
-Define how the same semantic task can be expressed through seven distinct visual languages while preserving one functional contract. This is a design specification, not evidence that these variants have been implemented.
+Define how the same semantic task can be expressed through seven distinct visual languages while preserving one functional contract.
 
 ## Representative component matrix
 
 | Component / task | IMPERIUM LUMEN | LUNAR CHRONICLES | ROCKSOUL | NEXUS PARADOX | RIOT ANARCHY | MYCELIUM | SIMPUL NUSANTARA |
 |---|---|---|---|---|---|---|---|
-| Primary action | Architectural seal | Observatory command | Chapter-entry CTA | Instrument command | Stamped graphic command | Organic node action | Check service coverage |
-| Content card | Monumental bay | Celestial object / archive record | Film still / album sleeve | Floating module | Poster cutout | Membrane / cell | Service plan or coverage result |
-| Navigation | Gates and spaces | Orbit / constellation | Chapters / tracks | Spatial selector | Poster strip / issue index | Branching network | Coverage, plans, account |
-| Dialog | Threshold chamber | Observation chamber | Film intertitle | Cockpit overlay | Comic spread | Membrane chamber | Coverage result sheet |
-| Tabs | Architectural wings | Coordinate layers | Story arcs | System modes | Graphic issue markers | Ecosystem branches | Plan comparison, when available |
+| Primary action | Electric yellow offset banner (`PrimaryAction` / `DnaButton`) | Observatory command | Chapter-entry CTA | Instrument command | Stamped graphic command | Organic node action | Check service coverage |
+| Content card | Graphic editorial illustrated card (`WorldTile` / `EditorialFeature`) | Celestial object / archive record | Film still / album sleeve | Floating module | Poster cutout | Membrane / cell | Service plan or coverage result |
+| Navigation | Illustrated universe bar + Nine Worlds shelf (`SiteNavigation` / `WorldExplorer`) | Orbit / constellation | Chapters / tracks | Spatial selector | Poster strip / issue index | Branching network | Coverage, plans, account |
+| Dialog | Ink & brass threshold chamber | Observation chamber | Film intertitle | Cockpit overlay | Comic spread | Membrane chamber | Coverage result sheet |
+| Tabs | Illustrated realm selector wings | Coordinate layers | Story arcs | System modes | Graphic issue markers | Ecosystem branches | Plan comparison, when available |
 | Progress | Journey stage | Quest constellation | Chapter sequence | Actual telemetry | Editorial sequence | Growth path | Real service-order state only |
 | Data table | Inscribed information plane | Observation ledger | Event chronology | Telemetry grid | Printed data sheet | Text-first network alternative | Coverage and plan details |
-| Loading | Light reveal | Chart / orbit focus | Film dissolve | Actual calibration / scan | Print reveal | Connection / growth | Text-led service lookup |
-| Empty state | Open chamber | Undiscovered region | Quiet film frame | Idle instrument | Graphic starting point | Dormant ecosystem | No result, with a retry path |
+| Loading | Light reveal (`MotionReveal`) | Chart / orbit focus | Film dissolve | Actual calibration / scan | Print reveal | Connection / growth | Text-led service lookup |
+| Empty state | Open sanctuary frame | Undiscovered region | Quiet film frame | Idle instrument | Graphic starting point | Dormant ecosystem | No result, with a retry path |
 
 ## Implementation status
 
-This document is a design specification, so each row states whether the code exists.
+This document records actual code status in `packages/ui`:
 
 | Matrix row | Implementing API in `@moonwitness/ui` | Status |
 |---|---|---|
-| Entry / hero composition | `PageHero` (`mediaLayout="side"` or `"backdrop"`, `as`) | implemented |
-| Original world artwork | `WorldArtwork` (scalable 1600 × 900 vector scenes for all seven DNA IDs) | implemented |
-| Route-specific DNA | `SkinScope` (token scope only; shares the app motion provider) | implemented |
+| Entry / hero composition | `IllustratedHero` (`@moonwitness/ui/imperium`) and `PageHero` | implemented |
+| World explorer & tiles | `WorldExplorer`, `WorldTile`, `WorldAtlas` (`@moonwitness/ui/imperium`) | implemented |
+| Site navigation bar | `SiteNavigation`, `EcosystemNavbar`, `SkipLink` | implemented |
+| Editorial & story presentation | `StorySection`, `EditorialFeature`, `SectionHeading`, `IllustrationFrame`, `ResponsiveImage` | implemented |
+| Motion reveal primitive | `MotionReveal` (`@moonwitness/ui/imperium`) | implemented |
+| Imperium Lumen tokens & icons | `IMPERIUM_LUMEN_TOKENS`, `CrownEmblemIcon`, `OctagramMandalaIcon`, `CrescentStarIcon`, `SearchLensIcon`, `DiamondStarOrnament` | implemented |
+| Original vector scenes | `WorldArtwork` (scalable 1600 × 900 vector scenes for all seven DNA IDs) | implemented |
+| Route-specific DNA | `SkinRoot`, `SkinScope` (`[data-dna]` isolated token scope) | implemented |
 | Kicker / world label | `Kicker` | implemented |
-| Section heading | `SectionHeading` (`title`, `description`, `trailing`) | implemented |
-| Route measure and header | `RouteShell` (`as="main"` carries the skip target; `LANDMARK_PURITY` lint keeps `id="main-content"` owned by the design system) | implemented |
-| Primary and secondary action | `Button`, `LinkButton`, `Link` with variants | implemented |
-| Icon glyph | `Icon` (`@moonwitness/ui` glyph registry; `ICON_PURITY` lint blocks third-party icon libraries outside the design system) | implemented |
-| Navigation | `EcosystemNavbar` plus `SkipLink` | implemented |
-| Content card | `Card` family | implemented |
+| Primary and secondary action | `PrimaryAction`, `SecondaryAction`, `DnaButton`, `Button`, `LinkButton`, `Link` | implemented |
+| Icon glyph | `Icon` + `@moonwitness/ui/imperium-icons` | implemented |
+| Content card | `Card` family, `DnaChamber`, `DnaPortalArch` | implemented |
 | Destination card | `DestinationCard`, `DestinationGrid` (static mode when a route is not open) | implemented |
 | Dialog or overlay | `Dialog` on native `<dialog>` | implemented |
 | Data table | `Table` family | implemented |
 | Form validation | `Form`, `FormField`, `Input`, `Textarea`, `Select` | implemented |
-| Status message | `StatusMessage` (info, success, warning, danger) | implemented |
+| Status message | `StatusMessage`, `DnaBadge` | implemented |
 | Loading, empty, error, offline, permission | `StatePanel` plus `error.tsx` / `loading.tsx` / `not-found.tsx` per app | implemented |
-| Tabs | none | specification |
+| Tabs | none (app-level interactive wings compose buttons/tablist) | specification |
 | Progress | none | specification |
-| World recipes per block | `[data-moonframe-skin='...']` variants in `skins.css` | implemented |
+| World recipes per block | `[data-dna='...']` in `imperium.css` / `dna-base.css` and `[data-moonframe-skin='...']` | implemented |
 | Seven-world parity showcase | `SkinLaboratory` at headquarter `/skin-lab` | implemented |
 
 The showcase carries all nine required comparisons: hero, primary and secondary action,

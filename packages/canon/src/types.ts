@@ -1,4 +1,13 @@
-export type WorldIdentifier = "moonwitness" | "arsy" | "qalam" | "sidra" | "rocksoul-dx";
+export type WorldIdentifier =
+  | "moonwitness"
+  | "arsy"
+  | "human-pen"
+  | "sidra"
+  | "rocksoul-dx"
+  | "crayon"
+  | "sin-can"
+  | "mythos"
+  | "angel-with-shotgun";
 
 export type EntryDoorId =
   "story-universe" | "epistemic-corpus" | "empire-organization" | "sovereign-runtimes";

@@ -83,23 +83,23 @@ async function authenticateBearerRequest(
   request: Request,
   env: IgateEnv,
   deps: IgateRuntimeDependencies,
+  getResolveJwkByKid: (
+    issuerUrl: string,
+    jwksUrl?: string,
+  ) => (kid: string) => Promise<PublicEs256Jwk | null>,
 ) {
   const auth = request.headers.get("authorization") ?? "";
   if (!auth.startsWith("Bearer ")) return null;
   const token = auth.slice(7).trim();
   const issuerUrl = normalizeIssuerUrl(env.MID_ISSUER_URL ?? DEFAULT_MID_ISSUER_URL);
-  const resolveJwkByKid =
-    deps.resolveJwkByKid ??
-    createJwksKeyResolver({
-      issuerUrl,
-      jwksUrl: env.MID_JWKS_URL,
-      fetchFn: deps.probeFetch,
-    }).resolveByKid;
+  const expectedAudience = env.IGATE_CLIENT_ID?.trim() || "igate-console";
+  const resolveJwkByKid = deps.resolveJwkByKid ?? getResolveJwkByKid(issuerUrl, env.MID_JWKS_URL);
 
   return verifyEs256Jwt({
     token,
     issuerUrl,
     expectedTokenUse: "access",
+    expectedAudience,
     resolveJwkByKid,
     nowEpochSec: deps.nowEpochSec?.(),
   });
@@ -107,6 +107,21 @@ async function authenticateBearerRequest(
 
 /** Create the Cloudflare Worker fetch handler for `@moonwitness/igate`. */
 export function createIgateHandler(deps: IgateRuntimeDependencies = {}) {
+  const jwksResolvers = new Map<string, ReturnType<typeof createJwksKeyResolver>>();
+  const getResolveJwkByKid = (issuerUrl: string, jwksUrl?: string) => {
+    const cacheKey = `${issuerUrl}|${jwksUrl?.trim() ?? ""}`;
+    let resolver = jwksResolvers.get(cacheKey);
+    if (!resolver) {
+      resolver = createJwksKeyResolver({
+        issuerUrl,
+        jwksUrl,
+        fetchFn: deps.probeFetch ?? ((input, init) => globalThis.fetch(input, init)),
+      });
+      jwksResolvers.set(cacheKey, resolver);
+    }
+    return resolver.resolveByKid;
+  };
+
   return async (request: Request, env: IgateEnv): Promise<Response> => {
     const url = new URL(request.url);
     const requestId = request.headers.get("x-request-id") ?? crypto.randomUUID();
@@ -198,7 +213,7 @@ export function createIgateHandler(deps: IgateRuntimeDependencies = {}) {
     }
 
     if (url.pathname === "/api/status" && request.method === "GET") {
-      const actor = await authenticateBearerRequest(request, env, deps);
+      const actor = await authenticateBearerRequest(request, env, deps, getResolveJwkByKid);
       if (!actor) {
         return finalize(jsonResponse({ error: "unauthorized" }, 401));
       }
@@ -228,7 +243,7 @@ export function createIgateHandler(deps: IgateRuntimeDependencies = {}) {
     }
 
     if (url.pathname === "/api/probe" && request.method === "POST") {
-      const actor = await authenticateBearerRequest(request, env, deps);
+      const actor = await authenticateBearerRequest(request, env, deps, getResolveJwkByKid);
       if (!actor) {
         return finalize(jsonResponse({ error: "unauthorized" }, 401));
       }

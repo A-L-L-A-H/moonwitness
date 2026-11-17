@@ -4,6 +4,8 @@
  */
 
 import {
+  CSRF_COOKIE_NAME,
+  getCsrfCookieOptions as sharedCsrfCookieOptions,
   getSessionCookieOptions as sharedCookieOptions,
   getSessionMaxAgeMs,
   SESSION_COOKIE_NAME,
@@ -16,6 +18,16 @@ export interface SessionData {
   createdAt: Date;
   expiresAt: Date;
   revoked: boolean;
+}
+
+export interface BffOAuthTokenRecord {
+  sessionId: string;
+  clientId: string;
+  accessToken: string;
+  refreshToken: string | null;
+  idToken: string | null;
+  expiresAt: Date;
+  createdAt: Date;
 }
 
 export interface SessionWithUser {
@@ -95,14 +107,85 @@ export async function revokeAllUserSessions(userId: number): Promise<void> {
 
 export async function cleanupExpiredSessions(): Promise<number> {
   const db = getDb();
-  const result = await db.run(`DELETE FROM sessions WHERE expires_at < ? OR revoked = 1`, [
-    new Date().toISOString(),
-  ]);
+  const nowIso = new Date().toISOString();
+  await db.run(
+    `DELETE FROM bff_oauth_tokens
+     WHERE session_id IN (SELECT id FROM sessions WHERE expires_at < ? OR revoked = 1)`,
+    [nowIso],
+  );
+  const result = await db.run(`DELETE FROM sessions WHERE expires_at < ? OR revoked = 1`, [nowIso]);
   return result.rowsAffected;
+}
+
+export async function storeBffOAuthTokens(input: {
+  sessionId: string;
+  clientId: string;
+  accessToken: string;
+  refreshToken?: string;
+  idToken?: string;
+  expiresInSec: number;
+}): Promise<void> {
+  const db = getDb();
+  const now = new Date();
+  const expiresAt = new Date(now.getTime() + Math.max(1, input.expiresInSec) * 1000);
+  await db.run(
+    `INSERT INTO bff_oauth_tokens
+     (session_id, client_id, access_token, refresh_token, id_token, expires_at, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(session_id) DO UPDATE SET
+       client_id = excluded.client_id,
+       access_token = excluded.access_token,
+       refresh_token = excluded.refresh_token,
+       id_token = excluded.id_token,
+       expires_at = excluded.expires_at`,
+    [
+      input.sessionId,
+      input.clientId,
+      input.accessToken,
+      input.refreshToken ?? null,
+      input.idToken ?? null,
+      expiresAt.toISOString(),
+      now.toISOString(),
+    ],
+  );
+}
+
+export async function getBffOAuthTokens(sessionId: string): Promise<BffOAuthTokenRecord | null> {
+  const db = getDb();
+  const row = await db.get<Record<string, unknown>>(
+    `SELECT session_id, client_id, access_token, refresh_token, id_token, expires_at, created_at
+     FROM bff_oauth_tokens WHERE session_id = ?`,
+    [sessionId],
+  );
+  if (!row) return null;
+  return {
+    sessionId: String(row.session_id),
+    clientId: String(row.client_id),
+    accessToken: String(row.access_token),
+    refreshToken: typeof row.refresh_token === "string" ? row.refresh_token : null,
+    idToken: typeof row.id_token === "string" ? row.id_token : null,
+    expiresAt: new Date(String(row.expires_at)),
+    createdAt: new Date(String(row.created_at)),
+  };
+}
+
+export async function consumeBffOAuthTokens(
+  sessionId: string,
+): Promise<BffOAuthTokenRecord | null> {
+  const record = await getBffOAuthTokens(sessionId);
+  if (record) {
+    const db = getDb();
+    await db.run(`DELETE FROM bff_oauth_tokens WHERE session_id = ?`, [sessionId]);
+  }
+  return record;
 }
 
 export function getSessionCookieOptions() {
   return sharedCookieOptions(getSessionMaxAgeMs());
 }
 
-export { SESSION_COOKIE_NAME };
+export function getCsrfCookieOptions() {
+  return sharedCsrfCookieOptions(getSessionMaxAgeMs());
+}
+
+export { CSRF_COOKIE_NAME, SESSION_COOKIE_NAME };

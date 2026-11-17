@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { MotionReveal } from "@moonwitness/ui/imperium";
+
+export { MotionReveal };
 
 interface DocumentWithViewTransition {
   startViewTransition?: (updateCallback: () => void) => {
@@ -236,8 +239,7 @@ export function SpatialTiltCard({
 }
 
 /**
- * Scroll-triggered sacred chapter reveal using IntersectionObserver.
- * Keeps DOM immediately readable if IntersectionObserver or motion is disabled.
+ * Static / reduced-motion aware chapter wrapper backed by centralized MotionReveal.
  */
 export function ScrollChapterReveal({
   children,
@@ -248,57 +250,9 @@ export function ScrollChapterReveal({
   readonly className?: string;
   readonly quietMode?: boolean;
 }) {
-  const chapterRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const element = chapterRef.current;
-    if (!element) {
-      return;
-    }
-
-    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (quietMode || reducedMotionQuery.matches || typeof IntersectionObserver === "undefined") {
-      element.style.opacity = "1";
-      element.style.transform = "translate3d(0, 0, 0)";
-      return;
-    }
-
-    // Already above or within viewport: keep visible immediately
-    const rect = element.getBoundingClientRect();
-    if (rect.top < window.innerHeight * 0.96) {
-      element.style.opacity = "1";
-      element.style.transform = "translate3d(0, 0, 0)";
-      return;
-    }
-
-    element.style.opacity = "0";
-    element.style.transform = "translate3d(0, 18px, 0)";
-    element.style.transition =
-      "opacity 760ms cubic-bezier(0.22, 1, 0.36, 1), transform 760ms cubic-bezier(0.22, 1, 0.36, 1)";
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            element.style.opacity = "1";
-            element.style.transform = "translate3d(0, 0, 0)";
-            observer.disconnect();
-            break;
-          }
-        }
-      },
-      { threshold: 0.08, rootMargin: "0px 0px -40px 0px" },
-    );
-
-    observer.observe(element);
-    return () => {
-      observer.disconnect();
-    };
-  }, [quietMode]);
-
   return (
-    <div ref={chapterRef} className={className}>
+    <MotionReveal disabled={quietMode} className={className}>
       {children}
-    </div>
+    </MotionReveal>
   );
 }

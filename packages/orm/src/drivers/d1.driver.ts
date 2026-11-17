@@ -6,6 +6,7 @@ export interface D1PreparedStatementLike {
   bind(...values: unknown[]): D1PreparedStatementLike;
   all<T = Record<string, unknown>>(): Promise<{ results?: T[] }>;
   run(): Promise<{ meta?: { last_row_id?: number; changes?: number } }>;
+  first?<T = Record<string, unknown>>(colName?: string): Promise<T | null>;
 }
 
 /** Structural subset of Cloudflare Workers `D1Database`. */
@@ -203,4 +204,55 @@ export class D1Driver implements LibSqlExecutor {
     // D1 auto-commits per prepared statement/batch; ORM models already guard updates with `WHERE id = ? AND version = ?`.
     return fn(this);
   }
+}
+
+/** Adapt an ORM `LibSqlExecutor` (e.g. local SQLite/libSQL driver) to structural `D1DatabaseLike`. */
+export function createD1DatabaseFromOrm(executor: LibSqlExecutor): D1DatabaseLike {
+  class PreparedStatement implements D1PreparedStatementLike {
+    private params: unknown[] = [];
+    constructor(private readonly query: string) {}
+
+    bind(...values: unknown[]): D1PreparedStatementLike {
+      this.params = values;
+      return this;
+    }
+
+    async all<T = Record<string, unknown>>(): Promise<{ results?: T[] }> {
+      const results = await executor.all<T>(this.query, this.params);
+      return { results };
+    }
+
+    async run(): Promise<{ meta?: { last_row_id?: number; changes?: number } }> {
+      const res = await executor.run(this.query, this.params);
+      return {
+        meta: {
+          last_row_id: res.lastInsertRowid !== undefined ? Number(res.lastInsertRowid) : 0,
+          changes: res.rowsAffected,
+        },
+      };
+    }
+
+    async first<T = Record<string, unknown>>(colName?: string): Promise<T | null> {
+      const res = await executor.all<Record<string, unknown>>(this.query, this.params);
+      const row = res[0];
+      if (!row) return null;
+      if (colName) {
+        return (row[colName] as T) ?? null;
+      }
+      return row as T;
+    }
+  }
+
+  return {
+    prepare(query: string): D1PreparedStatementLike {
+      return new PreparedStatement(query);
+    },
+    async batch(statements: D1PreparedStatementLike[]): Promise<unknown[]> {
+      const results: unknown[] = [];
+      for (const statement of statements) {
+        results.push(await statement.run());
+      }
+      return results;
+    },
+  };
 }

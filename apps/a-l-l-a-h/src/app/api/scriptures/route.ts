@@ -7,7 +7,7 @@ import {
   type CompactScriptureTuple,
   type ScriptureCorpusFilter,
 } from "@moonwitness/canon";
-import { getCloudflareWorkerEnv, loadPublicJsonAsset } from "@/lib/cloudflare-runtime";
+import { loadPublicJsonAsset } from "@/lib/cloudflare-runtime";
 
 interface WitnessCrosswalkPayload {
   readonly invariant: string;
@@ -80,24 +80,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const limitRaw = Number(searchParams.get("limit") ?? "12");
   const limit = Number.isFinite(limitRaw) ? Math.max(1, Math.min(36, Math.round(limitRaw))) : 12;
 
-  const cfEnv = await getCloudflareWorkerEnv();
-  const cacheKey = `scriptures:v2:${corpusFilter}:${limit}:${query.toLowerCase()}`;
-  if (cfEnv?.CACHE_KV && typeof cfEnv.CACHE_KV.get === "function") {
-    try {
-      const cached = await cfEnv.CACHE_KV.get<Record<string, unknown>>(cacheKey, "json");
-      if (cached) {
-        return NextResponse.json(cached, {
-          headers: {
-            "cache-control": "public, max-age=300, stale-while-revalidate=3600",
-            "x-sanctuary-cache": "kv-hit",
-          },
-        });
-      }
-    } catch {
-      // Cache read failure falls through cleanly to authoritative computation
-    }
-  }
-
   const [quran, taurat, zabur, injil, crosswalk] = await Promise.all([
     getCachedArrayAsset<CompactQuranTuple>(
       "/data/quran-uthmani.json",
@@ -158,14 +140,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     unifiedHits,
     crosswalk,
   };
-
-  if (cfEnv?.CACHE_KV && typeof cfEnv.CACHE_KV.put === "function" && totalVerses > 0) {
-    try {
-      await cfEnv.CACHE_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 600 });
-    } catch {
-      // Cache write errors must never block response
-    }
-  }
 
   return NextResponse.json(payload, {
     headers: {

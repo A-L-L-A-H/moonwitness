@@ -161,3 +161,10 @@ pub struct MonitorSnapshot {
     pub repositories: Vec<RepoMonitorEntry>,
     pub plans: Vec<PlanTrackerEntry>,
 }
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+pub struct MidLoopbackCallback {
+    pub code: String,
+    pub state: String,
+    pub redirect_uri: String,
+}

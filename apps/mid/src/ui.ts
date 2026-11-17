@@ -87,9 +87,10 @@ export function renderAuthorizePage(params: {
   nonce: string;
   codeChallenge: string;
   codeChallengeMethod: string;
+  resource?: string | null;
   error?: string;
 }): string {
-  const hiddenInputs = [
+  const hiddenPairs: Array<[string, string]> = [
     ["client_id", params.client.clientId],
     ["redirect_uri", params.redirectUri],
     ["scope", params.scope],
@@ -98,11 +99,12 @@ export function renderAuthorizePage(params: {
     ["code_challenge", params.codeChallenge],
     ["code_challenge_method", params.codeChallengeMethod],
     ["response_type", "code"],
-  ]
-    .map(
-      ([name, val]) =>
-        `<input type="hidden" name="${name ?? ""}" value="${escapeHtml(val ?? "")}">`,
-    )
+  ];
+  if (params.resource) {
+    hiddenPairs.push(["resource", params.resource]);
+  }
+  const hiddenInputs = hiddenPairs
+    .map(([name, val]) => `<input type="hidden" name="${name}" value="${escapeHtml(val)}">`)
     .join("");
 
   const banner = params.error

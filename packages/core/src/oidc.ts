@@ -33,8 +33,10 @@ export interface MidVerifiedClaims {
   readonly iss: string;
   readonly sub: string;
   readonly aud: string | string[];
+  readonly azp?: string;
   readonly exp: number;
   readonly iat: number;
+  readonly nbf?: number;
   readonly token_use: string;
   readonly scope?: string;
   readonly preferred_username?: string;
@@ -116,6 +118,7 @@ export async function createPkceAuthorizationRequest(params: {
   readonly redirectUri: string;
   readonly scope?: string;
   readonly prompt?: "login" | "consent";
+  readonly resource?: string;
 }): Promise<PkceAuthorizationRequest> {
   const issuer = normalizeIssuerUrl(params.issuerUrl);
   const verifier = randomUrlSafeString(48);
@@ -134,6 +137,9 @@ export async function createPkceAuthorizationRequest(params: {
   authUrl.searchParams.set("code_challenge_method", "S256");
   if (params.prompt) {
     authUrl.searchParams.set("prompt", params.prompt);
+  }
+  if (params.resource?.trim()) {
+    authUrl.searchParams.set("resource", params.resource.trim());
   }
 
   return {
@@ -173,6 +179,7 @@ export async function exchangeAuthorizationCode(params: {
   readonly code: string;
   readonly redirectUri: string;
   readonly codeVerifier: string;
+  readonly resource?: string;
   readonly fetchFn?: typeof fetch;
 }): Promise<MidTokenResponse> {
   const issuer = normalizeIssuerUrl(params.issuerUrl);
@@ -184,6 +191,7 @@ export async function exchangeAuthorizationCode(params: {
       code: params.code,
       redirect_uri: params.redirectUri,
       code_verifier: params.codeVerifier,
+      ...(params.resource?.trim() ? { resource: params.resource.trim() } : {}),
     },
     params.fetchFn,
   );
@@ -195,6 +203,7 @@ export async function refreshAccessTokens(params: {
   readonly clientId: string;
   readonly refreshToken: string;
   readonly scope?: string;
+  readonly resource?: string;
   readonly fetchFn?: typeof fetch;
 }): Promise<MidTokenResponse> {
   const issuer = normalizeIssuerUrl(params.issuerUrl);
@@ -202,10 +211,9 @@ export async function refreshAccessTokens(params: {
     grant_type: "refresh_token",
     client_id: params.clientId,
     refresh_token: params.refreshToken,
+    ...(params.scope ? { scope: params.scope } : {}),
+    ...(params.resource?.trim() ? { resource: params.resource.trim() } : {}),
   };
-  if (params.scope) {
-    form.scope = params.scope;
-  }
   return postTokenEndpoint(`${issuer}/oauth/token`, form, params.fetchFn);
 }
 
@@ -276,12 +284,22 @@ export function decodeJwtParts<
     return null;
   }
   try {
-    const header = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[0]))) as THeader;
-    const claims = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[1]))) as TClaims;
+    const header = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[0]))) as unknown;
+    const claims = JSON.parse(TEXT_DECODER.decode(decodeBase64Url(segments[1]))) as unknown;
+    if (
+      !header ||
+      typeof header !== "object" ||
+      Array.isArray(header) ||
+      !claims ||
+      typeof claims !== "object" ||
+      Array.isArray(claims)
+    ) {
+      return null;
+    }
     const signatureBytes = decodeBase64Url(segments[2]);
     return {
-      header,
-      claims,
+      header: header as THeader,
+      claims: claims as TClaims,
       signingInput: `${segments[0]}.${segments[1]}`,
       signatureBytes,
     };
@@ -305,21 +323,52 @@ export function createJwksKeyResolver(options?: {
   const ttlMs = options?.ttlMs ?? 300_000;
   const fetchFn = options?.fetchFn ?? globalThis.fetch;
 
-  let cached: { fetchedAt: number; keys: readonly PublicEs256Jwk[] } | null = null;
+  let cached: {
+    fetchedAt: number;
+    keys: readonly PublicEs256Jwk[];
+    missRefreshed: boolean;
+  } | null = null;
+
+  const fetchJwks = async (now: number): Promise<readonly PublicEs256Jwk[] | null> => {
+    const response = await fetchFn(jwksUrl);
+    if (!response.ok) return null;
+    const body = (await response.json().catch(() => null)) as {
+      keys?: PublicEs256Jwk[];
+    } | null;
+    if (!Array.isArray(body?.keys)) return null;
+    cached = { fetchedAt: now, keys: body.keys, missRefreshed: false };
+    return cached.keys;
+  };
 
   return {
     async resolveByKid(kid: string): Promise<PublicEs256Jwk | null> {
       const now = Date.now();
-      if (!cached || now - cached.fetchedAt > ttlMs) {
-        const response = await fetchFn(jwksUrl);
-        if (!response.ok) return null;
-        const body = (await response.json().catch(() => null)) as {
-          keys?: PublicEs256Jwk[];
-        } | null;
-        if (!body?.keys) return null;
-        cached = { fetchedAt: now, keys: body.keys };
+      const snapshot = cached;
+      if (!snapshot || now - snapshot.fetchedAt > ttlMs) {
+        const keys = await fetchJwks(now);
+        if (!keys) return null;
+        return keys.find((entry) => entry.kid === kid) ?? null;
       }
-      return cached.keys.find((entry) => entry.kid === kid) ?? null;
+
+      const existing = snapshot.keys.find((entry) => entry.kid === kid);
+      if (existing) {
+        return existing;
+      }
+
+      // Refresh once on cache miss so signing key rotation succeeds within TTL without flooding.
+      if (snapshot.missRefreshed) {
+        return null;
+      }
+      const refreshedKeys = await fetchJwks(now);
+      if (!refreshedKeys) {
+        cached = { ...snapshot, missRefreshed: true };
+        return null;
+      }
+      const rotatedMatch = refreshedKeys.find((entry) => entry.kid === kid) ?? null;
+      if (!rotatedMatch) {
+        cached = { fetchedAt: now, keys: refreshedKeys, missRefreshed: true };
+      }
+      return rotatedMatch;
     },
     resetCache(): void {
       cached = null;
@@ -327,12 +376,35 @@ export function createJwksKeyResolver(options?: {
   };
 }
 
+function normalizeExpectedAudiences(
+  expectedAudience: string | readonly string[],
+): readonly string[] {
+  const raw = typeof expectedAudience === "string" ? [expectedAudience] : expectedAudience;
+  return raw.map((entry) => (typeof entry === "string" ? entry.trim() : "")).filter(Boolean);
+}
+
+function extractJwtAudiences(rawAud: unknown): readonly string[] | null {
+  if (typeof rawAud === "string") {
+    return rawAud.trim().length > 0 ? [rawAud] : null;
+  }
+  if (Array.isArray(rawAud)) {
+    if (
+      rawAud.length === 0 ||
+      rawAud.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+    ) {
+      return null;
+    }
+    return rawAud as string[];
+  }
+  return null;
+}
+
 /** Verify an ES256 JWT issued by MoonWitness ID against a resolved P-256 public JWK. */
 export async function verifyEs256Jwt(params: {
   readonly token: string;
   readonly issuerUrl?: string;
   readonly expectedTokenUse?: "access" | "id";
-  readonly expectedAudience?: string;
+  readonly expectedAudience?: string | readonly string[];
   readonly expectedNonce?: string;
   readonly resolveJwkByKid: (kid: string) => Promise<PublicEs256Jwk | null>;
   readonly nowEpochSec?: number;
@@ -350,32 +422,58 @@ export async function verifyEs256Jwt(params: {
   if (params.expectedTokenUse && claims.token_use !== params.expectedTokenUse) return null;
   if (params.expectedNonce && claims.nonce !== params.expectedNonce) return null;
 
-  if (params.expectedAudience) {
-    const audList = Array.isArray(claims.aud) ? claims.aud : claims.aud ? [claims.aud] : [];
-    if (!audList.includes(params.expectedAudience)) return null;
+  if (params.expectedAudience !== undefined) {
+    const allowedAudiences = normalizeExpectedAudiences(params.expectedAudience);
+    if (allowedAudiences.length === 0) return null;
+
+    const tokenAudiences = extractJwtAudiences(claims.aud as unknown);
+    if (!tokenAudiences) return null;
+
+    const allowedSet = new Set(allowedAudiences);
+    if (!tokenAudiences.some((aud) => allowedSet.has(aud))) return null;
   }
 
   const nowSec = params.nowEpochSec ?? Math.floor(Date.now() / 1000);
-  if (typeof claims.exp !== "number" || claims.exp <= nowSec) return null;
-  if (typeof claims.sub !== "string" || !claims.sub) return null;
+  if (typeof claims.exp !== "number" || !Number.isFinite(claims.exp) || claims.exp <= nowSec) {
+    return null;
+  }
+  if (
+    claims.nbf !== undefined &&
+    (typeof claims.nbf !== "number" || !Number.isFinite(claims.nbf) || claims.nbf > nowSec)
+  ) {
+    return null;
+  }
+  if (typeof claims.sub !== "string" || !claims.sub.trim()) return null;
 
   const jwk = await params.resolveJwkByKid(decoded.header.kid);
-  if (!jwk || jwk.kty !== "EC" || jwk.crv !== "P-256") return null;
+  if (
+    !jwk ||
+    jwk.kty !== "EC" ||
+    jwk.crv !== "P-256" ||
+    (jwk.use && jwk.use !== "sig") ||
+    (jwk.alg && jwk.alg !== "ES256")
+  ) {
+    return null;
+  }
 
-  const publicKey = await globalThis.crypto.subtle.importKey(
-    "jwk",
-    jwk,
-    { name: "ECDSA", namedCurve: "P-256" },
-    false,
-    ["verify"],
-  );
-  const valid = await globalThis.crypto.subtle.verify(
-    { name: "ECDSA", hash: "SHA-256" },
-    publicKey,
-    toArrayBuffer(decoded.signatureBytes),
-    toArrayBuffer(TEXT_ENCODER.encode(decoded.signingInput)),
-  );
-  if (!valid) return null;
+  try {
+    const publicKey = await globalThis.crypto.subtle.importKey(
+      "jwk",
+      jwk,
+      { name: "ECDSA", namedCurve: "P-256" },
+      false,
+      ["verify"],
+    );
+    const valid = await globalThis.crypto.subtle.verify(
+      { name: "ECDSA", hash: "SHA-256" },
+      publicKey,
+      toArrayBuffer(decoded.signatureBytes),
+      toArrayBuffer(TEXT_ENCODER.encode(decoded.signingInput)),
+    );
+    if (!valid) return null;
+  } catch {
+    return null;
+  }
 
   return claims as MidVerifiedClaims;
 }

@@ -1,24 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type * as CloudflareRuntimeModule from "@/lib/cloudflare-runtime";
 import { DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT } from "../src/app/api/v1/[...path]/route";
-
-const mockGetCloudflareWorkerEnv =
-  vi.fn<() => Promise<CloudflareRuntimeModule.WebWorkerEnv | null>>();
-
-vi.mock("@/lib/cloudflare-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof CloudflareRuntimeModule>();
-  return {
-    ...actual,
-    getCloudflareWorkerEnv: () => mockGetCloudflareWorkerEnv(),
-  };
-});
 
 describe("/api/v1/[...path] reverse proxy route handler", () => {
   const originalApiInternalUrl = process.env.API_INTERNAL_URL;
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    mockGetCloudflareWorkerEnv.mockReset();
     if (originalApiInternalUrl === undefined) {
       delete process.env.API_INTERNAL_URL;
     } else {
@@ -26,22 +13,15 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
     }
   });
 
-  it("resolves Cloudflare runtime bindings to null safely outside Workers runtime", async () => {
-    const actualRuntime = await vi.importActual<typeof CloudflareRuntimeModule>(
-      "@/lib/cloudflare-runtime",
-    );
-    const resolvedEnv = await actualRuntime.getCloudflareWorkerEnv();
-    expect(resolvedEnv).toBeNull();
-  });
+  it("dispatches via HTTP fetch to API_INTERNAL_URL, forwards path/query/body/auth headers, strips host/cf-*/hop-by-hop, and preserves multi-value set-cookie", async () => {
+    process.env.API_INTERNAL_URL = "http://127.0.0.1:3002";
 
-  it("dispatches via API_SERVICE binding, forwards path/query/body/auth headers, strips host/cf-*/hop-by-hop, and preserves multi-value set-cookie", async () => {
-    let capturedUpstreamRequest: Request | null = null;
-    let capturedBodyText = "";
+    let capturedUrl = "";
+    let capturedInit: RequestInit | undefined;
 
-    const serviceFetchMock = vi.fn(async (upstreamInput: Request | string) => {
-      capturedUpstreamRequest =
-        upstreamInput instanceof Request ? upstreamInput : new Request(upstreamInput);
-      capturedBodyText = await capturedUpstreamRequest.text();
+    const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      capturedUrl = String(url);
+      capturedInit = init;
 
       const upstreamHeaders = new Headers({
         "content-type": "application/json",
@@ -58,10 +38,7 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
       });
     });
 
-    mockGetCloudflareWorkerEnv.mockResolvedValue({
-      API_SERVICE: { fetch: serviceFetchMock },
-      API_INTERNAL_URL: "https://api.moonwitness.biz.id",
-    });
+    vi.stubGlobal("fetch", fetchMock);
 
     const jsonPayload = JSON.stringify({ email: "operator@moonwitness.biz.id", password: "pw" });
     const incomingRequest = new Request(
@@ -92,15 +69,13 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
 
     const proxyResponse = await POST(incomingRequest);
 
-    expect(serviceFetchMock).toHaveBeenCalledTimes(1);
-    expect(capturedUpstreamRequest).not.toBeNull();
-    expect(capturedUpstreamRequest!.url).toBe(
-      "https://api.internal/api/v1/auth/login?next=%2Fmission-control&tab=ops",
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(capturedUrl).toBe(
+      "http://127.0.0.1:3002/api/v1/auth/login?next=%2Fmission-control&tab=ops",
     );
-    expect(capturedUpstreamRequest!.method).toBe("POST");
-    expect(capturedBodyText).toBe(jsonPayload);
+    expect(capturedInit?.method).toBe("POST");
 
-    const forwardedHeaders = capturedUpstreamRequest!.headers;
+    const forwardedHeaders = new Headers(capturedInit?.headers);
     expect(forwardedHeaders.get("authorization")).toBe("Bearer jwt-token-1");
     expect(forwardedHeaders.get("cookie")).toBe("mw_locale=en");
     expect(forwardedHeaders.get("content-type")).toBe("application/json");
@@ -129,8 +104,7 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
     await expect(proxyResponse.json()).resolves.toEqual({ authenticated: true });
   });
 
-  it("falls back to process.env.API_INTERNAL_URL over HTTP when API_SERVICE is absent and returns 502 on network failure", async () => {
-    mockGetCloudflareWorkerEnv.mockResolvedValue(null);
+  it("falls back to process.env.API_INTERNAL_URL over HTTP and returns 502 on network failure", async () => {
     process.env.API_INTERNAL_URL = "http://127.0.0.1:4321/";
 
     const fetchMock = vi
@@ -180,24 +154,28 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
   });
 
   it("handles PUT, PATCH, DELETE, OPTIONS, and HEAD methods including empty 204 responses", async () => {
-    const serviceFetchMock = vi.fn(async (upstreamInput: Request | string) => {
-      const upstreamRequest =
-        upstreamInput instanceof Request ? upstreamInput : new Request(upstreamInput);
-      if (upstreamRequest.method === "DELETE") {
+    process.env.API_INTERNAL_URL = "http://127.0.0.1:3002";
+
+    const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const method = init?.method ?? "GET";
+      if (method === "DELETE") {
         return new Response(null, { status: 204 });
       }
-      if (upstreamRequest.method === "HEAD") {
+      if (method === "HEAD") {
         return new Response(null, { status: 200, headers: { "x-head-ok": "1" } });
       }
-      return new Response(
-        JSON.stringify({ method: upstreamRequest.method, body: await upstreamRequest.text() }),
-        { status: 200, headers: { "content-type": "application/json" } },
-      );
+      const body = init?.body
+        ? typeof init.body === "string"
+          ? init.body
+          : new TextDecoder().decode(init.body as ArrayBuffer)
+        : "";
+      return new Response(JSON.stringify({ method, body }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
     });
 
-    mockGetCloudflareWorkerEnv.mockResolvedValue({
-      API_SERVICE: { fetch: serviceFetchMock },
-    });
+    vi.stubGlobal("fetch", fetchMock);
 
     const putResponse = await PUT(
       new Request("https://moonwitness.biz.id/api/v1/radius/users/u1", {

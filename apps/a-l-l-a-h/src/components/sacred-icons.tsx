@@ -1,13 +1,20 @@
 import type { SVGProps } from "react";
 import {
   CrescentStarIcon,
+  CrownEmblemIcon,
   DiamondStarOrnament,
   OctagramMandalaIcon,
   SearchLensIcon,
 } from "@moonwitness/ui/imperium";
 import type { WorldIdentifier } from "@/data/empire-registry";
 
-export { CrescentStarIcon, DiamondStarOrnament, OctagramMandalaIcon, SearchLensIcon };
+export {
+  CrescentStarIcon,
+  CrownEmblemIcon,
+  DiamondStarOrnament,
+  OctagramMandalaIcon,
+  SearchLensIcon,
+};
 
 export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -21,14 +28,14 @@ export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
           y2="108"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#fff7df" />
-          <stop offset="50%" stopColor="#dfc07c" />
-          <stop offset="100%" stopColor="#9e7632" />
+          <stop offset="0%" stopColor="var(--dna-text)" />
+          <stop offset="50%" stopColor="var(--dna-accent)" />
+          <stop offset="100%" stopColor="var(--dna-accent)" />
         </linearGradient>
         <radialGradient id="astrolabe-glow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#fff2c6" stopOpacity="0.45" />
-          <stop offset="65%" stopColor="#d9b56c" stopOpacity="0.12" />
-          <stop offset="100%" stopColor="#d9b56c" stopOpacity="0" />
+          <stop offset="0%" stopColor="var(--dna-accent)" stopOpacity="0.45" />
+          <stop offset="65%" stopColor="var(--dna-accent)" stopOpacity="0.12" />
+          <stop offset="100%" stopColor="var(--dna-accent)" stopOpacity="0" />
         </radialGradient>
       </defs>
       <circle cx="60" cy="60" r="56" fill="url(#astrolabe-glow)" />
@@ -91,7 +98,7 @@ export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
         strokeWidth="1.1"
         fill="rgba(255, 243, 204, 0.18)"
       />
-      <circle cx="60" cy="60" r="3.5" fill="#fff9e8" />
+      <circle cx="60" cy="60" r="3.5" fill="var(--dna-text)" />
     </svg>
   );
 }
@@ -101,9 +108,9 @@ export function MoonwitnessCrestIcon(props: SVGProps<SVGSVGElement>) {
     <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
       <defs>
         <linearGradient id="mw-gold" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#fff6dc" />
-          <stop offset="55%" stopColor="#dec07d" />
-          <stop offset="100%" stopColor="#9c732b" />
+          <stop offset="0%" stopColor="var(--dna-text)" />
+          <stop offset="55%" stopColor="var(--dna-accent)" />
+          <stop offset="100%" stopColor="var(--dna-accent)" />
         </linearGradient>
       </defs>
       {/* Ornate Crescent Moon */}
@@ -127,12 +134,12 @@ export function MoonwitnessCrestIcon(props: SVGProps<SVGSVGElement>) {
       <path
         d="M43 17 L44.9 22.4 L50.6 22.5 L46.1 25.9 L47.7 31.4 L43 28.1 L38.3 31.4 L39.9 25.9 L35.4 22.5 L41.1 22.4 Z"
         fill="url(#mw-gold)"
-        stroke="#fff6dc"
+        stroke="var(--dna-text)"
         strokeWidth="0.6"
       />
       {/* Tiny accent sparkles */}
-      <circle cx="49" cy="13" r="1.1" fill="#fff6dc" />
-      <circle cx="29" cy="21" r="0.9" fill="#dec07d" />
+      <circle cx="49" cy="13" r="1.1" fill="var(--dna-text)" />
+      <circle cx="29" cy="21" r="0.9" fill="var(--dna-accent)" />
     </svg>
   );
 }
@@ -149,9 +156,9 @@ export function ArsyTowerIcon(props: SVGProps<SVGSVGElement>) {
           y2="58"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#fff7df" />
-          <stop offset="55%" stopColor="#dfc07b" />
-          <stop offset="100%" stopColor="#997029" />
+          <stop offset="0%" stopColor="var(--dna-text)" />
+          <stop offset="55%" stopColor="var(--dna-accent)" />
+          <stop offset="100%" stopColor="var(--dna-accent)" />
         </linearGradient>
       </defs>
       {/* Concentric Radio Waves Left & Right */}
@@ -182,7 +189,14 @@ export function ArsyTowerIcon(props: SVGProps<SVGSVGElement>) {
         strokeOpacity="0.75"
       />
       {/* Broadcast Lattice Tower */}
-      <circle cx="32" cy="18" r="2.8" fill="#fff7df" stroke="url(#arsy-gold)" strokeWidth="1.2" />
+      <circle
+        cx="32"
+        cy="18"
+        r="2.8"
+        fill="var(--dna-text)"
+        stroke="url(#arsy-gold)"
+        strokeWidth="1.2"
+      />
       <path
         d="M32 21 L21 56 M32 21 L43 56"
         stroke="url(#arsy-gold)"
@@ -218,9 +232,9 @@ export function QalamNibIcon(props: SVGProps<SVGSVGElement>) {
           y2="10"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#fff8e3" />
-          <stop offset="50%" stopColor="#e2c37e" />
-          <stop offset="100%" stopColor="#9c722a" />
+          <stop offset="0%" stopColor="var(--dna-text)" />
+          <stop offset="50%" stopColor="var(--dna-accent)" />
+          <stop offset="100%" stopColor="var(--dna-accent)" />
         </linearGradient>
       </defs>
       {/* Illuminated Calligraphy Nib */}
@@ -233,15 +247,27 @@ export function QalamNibIcon(props: SVGProps<SVGSVGElement>) {
         strokeLinejoin="round"
       />
       {/* Slit and breather hole */}
-      <path d="M14 50 L28.5 35.5" stroke="#fff8e3" strokeWidth="1.4" strokeLinecap="round" />
-      <circle cx="30.5" cy="33.5" r="2.2" fill="#0d0d12" stroke="#fff8e3" strokeWidth="1.2" />
+      <path
+        d="M14 50 L28.5 35.5"
+        stroke="var(--dna-text)"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+      <circle
+        cx="30.5"
+        cy="33.5"
+        r="2.2"
+        fill="var(--dna-canvas)"
+        stroke="var(--dna-text)"
+        strokeWidth="1.2"
+      />
       {/* Collar detail */}
       <path d="M37 16.5 L47.5 27" stroke="url(#qalam-gold)" strokeWidth="1.4" />
       <path d="M40.5 13 L51 23.5" stroke="url(#qalam-gold)" strokeWidth="1" strokeOpacity="0.75" />
       {/* Luminous ink trail */}
       <path
         d="M10 54 Q22 55 34 53"
-        stroke="#fff6d9"
+        stroke="var(--dna-text)"
         strokeWidth="1.3"
         strokeLinecap="round"
         strokeOpacity="0.8"
@@ -262,9 +288,9 @@ export function SidraPolyhedronIcon(props: SVGProps<SVGSVGElement>) {
           y2="56"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#fff7df" />
-          <stop offset="55%" stopColor="#dfc07b" />
-          <stop offset="100%" stopColor="#997029" />
+          <stop offset="0%" stopColor="var(--dna-text)" />
+          <stop offset="55%" stopColor="var(--dna-accent)" />
+          <stop offset="100%" stopColor="var(--dna-accent)" />
         </linearGradient>
       </defs>
       {/* Outer Icosahedral Hexagon */}
@@ -296,7 +322,7 @@ export function SidraPolyhedronIcon(props: SVGProps<SVGSVGElement>) {
         strokeWidth="0.95"
         strokeOpacity="0.7"
       />
-      <circle cx="32" cy="32" r="2.5" fill="#fff7df" />
+      <circle cx="32" cy="32" r="2.5" fill="var(--dna-text)" />
     </svg>
   );
 }
@@ -313,9 +339,9 @@ export function RocksoulCubeIcon(props: SVGProps<SVGSVGElement>) {
           y2="56"
           gradientUnits="userSpaceOnUse"
         >
-          <stop offset="0%" stopColor="#fff7df" />
-          <stop offset="55%" stopColor="#dfc07b" />
-          <stop offset="100%" stopColor="#997029" />
+          <stop offset="0%" stopColor="var(--dna-text)" />
+          <stop offset="55%" stopColor="var(--dna-accent)" />
+          <stop offset="100%" stopColor="var(--dna-accent)" />
         </linearGradient>
       </defs>
       {/* Top Face */}
@@ -353,7 +379,87 @@ export function RocksoulCubeIcon(props: SVGProps<SVGSVGElement>) {
         strokeDasharray="2 2"
         strokeOpacity="0.65"
       />
-      <circle cx="32" cy="32" r="2.4" fill="#fff8e6" />
+      <circle cx="32" cy="32" r="2.4" fill="var(--dna-text)" />
+    </svg>
+  );
+}
+
+export function CrayonPrismIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <polygon
+        points="32,8 54,50 10,50"
+        fill="rgba(46, 168, 255, 0.14)"
+        stroke="var(--brand-blue)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M22 36 H42 M18 43 H46"
+        stroke="var(--dna-accent)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="32" cy="24" r="3" fill="var(--dna-accent-secondary)" />
+    </svg>
+  );
+}
+
+export function SinCanMirrorIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M14 50 V24 C14 14 32 8 32 8 C32 8 50 14 50 24 V50 Z"
+        fill="rgba(237, 20, 155, 0.14)"
+        stroke="var(--dna-accent-secondary)"
+        strokeWidth="2"
+      />
+      <path d="M32 14 V46" stroke="var(--dna-accent)" strokeWidth="1.8" strokeDasharray="3 3" />
+      <circle cx="32" cy="29" r="5" fill="var(--dna-text)" />
+    </svg>
+  );
+}
+
+export function MythosArchIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M10 52 H54 M16 24 V52 M32 24 V52 M48 24 V52"
+        stroke="var(--dna-accent)"
+        strokeWidth="2.2"
+      />
+      <polygon
+        points="8,24 32,10 56,24"
+        fill="rgba(246, 212, 56, 0.18)"
+        stroke="var(--dna-accent)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function AwsScalesIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M32 10 V52 M20 52 H44 M14 20 H50"
+        stroke="var(--dna-text)"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 20 L8 36 H20 Z"
+        fill="rgba(46, 168, 255, 0.25)"
+        stroke="var(--brand-blue)"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M50 20 L44 36 H56 Z"
+        fill="rgba(246, 212, 56, 0.25)"
+        stroke="var(--dna-accent)"
+        strokeWidth="1.6"
+      />
     </svg>
   );
 }
@@ -370,11 +476,19 @@ export function WorldEmblemById({
       return <MoonwitnessCrestIcon className={className} />;
     case "arsy":
       return <ArsyTowerIcon className={className} />;
-    case "qalam":
+    case "human-pen":
       return <QalamNibIcon className={className} />;
     case "sidra":
       return <SidraPolyhedronIcon className={className} />;
     case "rocksoul-dx":
       return <RocksoulCubeIcon className={className} />;
+    case "crayon":
+      return <CrayonPrismIcon className={className} />;
+    case "sin-can":
+      return <SinCanMirrorIcon className={className} />;
+    case "mythos":
+      return <MythosArchIcon className={className} />;
+    case "angel-with-shotgun":
+      return <AwsScalesIcon className={className} />;
   }
 }

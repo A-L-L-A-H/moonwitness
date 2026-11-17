@@ -24,12 +24,12 @@ export function God99DirectoryExplorer() {
   );
 
   return (
-    <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6 space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-        <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+    <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 sm:p-6 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+        <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[var(--dna-accent)] uppercase">
           G.O.D. 99 STEWARDSHIP DIRECTORY (9 DEPTS × 11 = 99 SLOTS)
         </span>
-        <span className="border border-[#d6b46c]/40 bg-[#d6b46c]/15 px-2.5 py-0.5 font-mono text-[10px] text-[#f5dfa6]">
+        <span className="border border-[var(--dna-accent)]/40 bg-[var(--dna-accent)]/15 px-2.5 py-0.5 font-mono text-[10px] text-[var(--dna-accent)]">
           ALL SLOTS: UNASSIGNED · POWERS: NONE · ETHICAL_ANALOGY_NOT_IDENTITY
         </span>
       </div>
@@ -42,8 +42,8 @@ export function God99DirectoryExplorer() {
             onClick={() => setSelectedDept("ALL")}
             className={`min-h-[44px] border px-2.5 py-1 font-mono text-[10px] cursor-pointer ${
               selectedDept === "ALL"
-                ? "border-[#fff2c6] bg-[#d6b46c]/20 text-[#fff6df]"
-                : "border-[#d6b46c]/20 bg-[#0b0e18] text-[#bfb59e]"
+                ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
+                : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] text-[var(--dna-muted)]"
             }`}
           >
             ALL (99)
@@ -58,8 +58,8 @@ export function God99DirectoryExplorer() {
                 onClick={() => setSelectedDept(dept.code)}
                 className={`min-h-[44px] border px-2.5 py-1 font-mono text-[10px] cursor-pointer ${
                   active
-                    ? "border-[#fff2c6] bg-[#d6b46c]/20 text-[#fff6df]"
-                    : "border-[#d6b46c]/20 bg-[#0b0e18] text-[#bfb59e] hover:border-[#d6b46c]/45"
+                    ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
+                    : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] text-[var(--dna-muted)] hover:border-[var(--dna-accent)]/45"
                 }`}
               >
                 {dept.code} {dept.name}
@@ -73,24 +73,27 @@ export function God99DirectoryExplorer() {
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search GOD-001, codename, Al-Haqq..."
           aria-label="Search G.O.D. 99 directory"
-          className="min-h-[44px] w-full sm:w-64 border border-[#d6b46c]/30 bg-[#090c15] px-3 py-1.5 font-mono text-xs text-[#fff6df] placeholder-[#8e8572] focus:border-[#f5dfa6] focus:outline-none"
+          className="min-h-[44px] w-full sm:w-64 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-1.5 font-mono text-xs text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:border-[var(--dna-accent)] focus:outline-none"
         />
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:grid-cols-4 max-h-[380px] overflow-y-auto pr-1">
         {visibleSlots.map((slot) => (
-          <div key={slot.slotId} className="border border-[#d6b46c]/20 bg-[#0a0d16] p-3">
-            <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+          <div
+            key={slot.slotId}
+            className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3"
+          >
+            <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
               <span>{slot.slotId}</span>
               <span>
                 {slot.departmentCode} · {slot.pillar}
               </span>
             </div>
-            <div className="font-monument mt-1 text-xs text-[#fff6df]">{slot.codename}</div>
-            <div className="mt-0.5 font-serif text-xs text-[#f5dfa6]">
+            <div className="font-monument mt-1 text-xs text-[var(--dna-text)]">{slot.codename}</div>
+            <div className="mt-0.5 font-serif text-xs text-[var(--dna-accent)]">
               {slot.attributeReflection}
             </div>
-            <div className="mt-1.5 font-mono text-[9.5px] text-[#9e9580]">
+            <div className="mt-1.5 font-mono text-[9.5px] text-[var(--dna-muted)]">
               {slot.status} · {slot.powers}
             </div>
           </div>
@@ -117,13 +120,13 @@ export function Amanah25AtlasPanel() {
   );
 
   return (
-    <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6 space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
+    <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 sm:p-6 space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
         <div>
-          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+          <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[var(--dna-accent)] uppercase">
             25 BIDANG AMANAH PEDAGOGICAL ATLAS (01 ADAM → 25 MUHAMMAD ﷺ)
           </span>
-          <div className="mt-0.5 font-mono text-[10px] text-[#cfc5b0]">
+          <div className="mt-0.5 font-mono text-[10px] text-[var(--dna-muted)]">
             Origin: Narrative Stewardship Archive (conv-001[33]) · Pedagogical anchor only (Avatar =
             teaching metaphor, never infallibility claim)
           </div>
@@ -134,7 +137,7 @@ export function Amanah25AtlasPanel() {
           onChange={(e) => setFilterText(e.target.value)}
           placeholder="Search prophet, amanah, surah..."
           aria-label="Filter 25 Bidang Amanah"
-          className="min-h-[44px] w-full sm:w-64 border border-[#d6b46c]/30 bg-[#090c15] px-3 py-1.5 font-mono text-xs text-[#fff6df] placeholder-[#8e8572] focus:border-[#f5dfa6] focus:outline-none"
+          className="min-h-[44px] w-full sm:w-64 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-1.5 font-mono text-xs text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:border-[var(--dna-accent)] focus:outline-none"
         />
       </div>
 
@@ -144,17 +147,19 @@ export function Amanah25AtlasPanel() {
             key={entry.number}
             className={`border p-3 ${
               entry.rejectedFlag
-                ? "border-[#e6c987]/50 bg-[#140e12]"
-                : "border-[#d6b46c]/20 bg-[#0a0d16]"
+                ? "border-[var(--dna-accent)]/50 bg-[var(--dna-canvas)]"
+                : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)]"
             }`}
           >
-            <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+            <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
               <span>#{String(entry.number).padStart(2, "0")}</span>
               <span>{entry.quranRef}</span>
             </div>
-            <div className="font-monument mt-1 text-xs text-[#fff6df]">{entry.prophet}</div>
-            <div className="mt-0.5 font-mono text-[11px] text-[#f5dfa6]">{entry.amanahKey}</div>
-            <p className="mt-1 text-[11px] text-[#bfb59e]">{entry.domainFocus}</p>
+            <div className="font-monument mt-1 text-xs text-[var(--dna-text)]">{entry.prophet}</div>
+            <div className="mt-0.5 font-mono text-[11px] text-[var(--dna-accent)]">
+              {entry.amanahKey}
+            </div>
+            <p className="mt-1 text-[11px] text-[var(--dna-muted)]">{entry.domainFocus}</p>
           </div>
         ))}
       </div>

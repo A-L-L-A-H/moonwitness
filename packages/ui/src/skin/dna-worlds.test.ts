@@ -33,6 +33,9 @@ describe("7 Master DNA Worlds Registry", () => {
       expect(vars["--dna-canvas"]).toBe(world.palette.canvas);
       expect(vars["--dna-text"]).toBe(world.palette.text);
       expect(vars["--dna-accent"]).toBe(world.palette.accent);
+      expect(vars["--dna-accent-secondary"]).toBe(
+        world.palette.accentSecondary ?? world.palette.accent,
+      );
       expect(vars["--dna-focus"]).toBe(world.palette.focus);
     }
   });

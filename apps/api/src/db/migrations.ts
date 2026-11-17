@@ -30,6 +30,23 @@ export const authMigrations = [
       CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
     `,
   },
+  {
+    id: "002_create_bff_oauth_tokens",
+    up: `
+      CREATE TABLE IF NOT EXISTS bff_oauth_tokens (
+        session_id TEXT PRIMARY KEY,
+        client_id TEXT NOT NULL,
+        access_token TEXT NOT NULL,
+        refresh_token TEXT,
+        id_token TEXT,
+        expires_at TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_bff_oauth_tokens_expires_at ON bff_oauth_tokens(expires_at);
+    `,
+  },
 ] as const;
 
 export type AuthMigration = (typeof authMigrations)[number];

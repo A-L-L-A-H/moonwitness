@@ -193,12 +193,12 @@ export function ScripturesStudio() {
         }));
 
   return (
-    <div className="min-h-screen bg-[#040509] text-[#f5efe2] bg-girih-filigree">
+    <div className="min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] bg-girih-filigree">
       <SiteSubpageHeader activeRoute="scriptures" />
 
       <main id="main" className="mx-auto max-w-7xl px-4 py-12 sm:px-8 space-y-10">
         <div className="text-center space-y-3">
-          <div className="font-mono text-[11px] tracking-[0.26em] text-[#dfc07b] uppercase">
+          <div className="font-mono text-[11px] tracking-[0.26em] text-[var(--dna-accent)] uppercase">
             {locale === "id"
               ? "PUSAT KAJIAN EMPAT KITAB · NETRAL & TERBUKA"
               : "FOUR-SCRIPTURE PARALLEL STUDIO · NEUTRAL & SOURCE-GROUNDED"}
@@ -206,12 +206,12 @@ export function ScripturesStudio() {
           <h1 className="font-monument text-3xl sm:text-5xl tracking-[0.16em] text-gold-gradient uppercase">
             TAURAT · ZABUR · INJĪL · AL-QUR’ĀN
           </h1>
-          <p className="mx-auto max-w-3xl font-serif text-base text-[#e6decb] leading-relaxed">
+          <p className="mx-auto max-w-3xl font-serif text-base text-[var(--dna-muted)] leading-relaxed">
             {locale === "id"
               ? "Meneliti empat korpus teks klasik penuh—Taurat Ibrani (WLC), Zabur (Mazmur WLC), Injīl Yunani Koine (SBLGNT), dan Al-Qur’ān Arab Utsmani (6.236 ayat)—secara jujur, netral, tanpa peringkat agama, dan tanpa paksaan."
               : FOUR_CORPUS_POLICY.neutralityPrinciple}
           </p>
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 border border-[#d6b46c]/30 bg-[#0a0d16] px-4 py-1.5 font-mono text-[10.5px] text-[#f5dfa6]">
+          <div className="inline-flex flex-wrap items-center justify-center gap-2 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)]">
             <span>{FOUR_CORPUS_POLICY.invariant}</span>
             <span>·</span>
             <span>
@@ -225,15 +225,15 @@ export function ScripturesStudio() {
         </div>
 
         {/* Classical Manuscript Witness Panel */}
-        <section className="relative border border-[#d6b46c]/30 bg-[#070a13]/95 p-6 sm:p-8">
+        <section className="relative border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/95 p-6 sm:p-8">
           <SacredCornerBrackets />
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-            <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[#fff6df] uppercase">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+            <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[var(--dna-text)] uppercase">
               {locale === "id"
                 ? "SAMPEL NASKAH KLASIK PRIMER (IBRANI · YUNANI · ARAB)"
                 : "PRIMARY CLASSICAL WITNESS EXCERPTS (HEBREW · GREEK · ARABIC)"}
             </h2>
-            <span className="font-mono text-[10px] text-[#dfc07b]">
+            <span className="font-mono text-[10px] text-[var(--dna-accent)]">
               OSHB WLC 4.20 · SBLGNT v1.2 · DIVINE-TEXT
             </span>
           </div>
@@ -242,25 +242,29 @@ export function ScripturesStudio() {
             {(payload?.crosswalk?.passages ?? []).map((item) => (
               <article
                 key={item.corpusCode}
-                className="border border-[#d6b46c]/25 bg-[#0a0e19] p-5 space-y-2.5"
+                className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-2.5"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10.5px]">
-                  <span className="text-[#f5dfa6] font-bold">
+                  <span className="text-[var(--dna-accent)] font-bold">
                     {item.corpusCode} · {item.corpusName}
                   </span>
-                  <span className="text-[#cfc5b0]">{item.language}</span>
+                  <span className="text-[var(--dna-muted)]">{item.language}</span>
                 </div>
-                <div className="font-mono text-[10px] text-[#d6b46c]">{item.reference}</div>
+                <div className="font-mono text-[10px] text-[var(--dna-accent)]">
+                  {item.reference}
+                </div>
                 <p
                   dir={item.dir}
                   lang={
                     item.language === "Arabic" ? "ar" : item.language === "Hebrew" ? "he" : "el"
                   }
-                  className="border-y border-[#d6b46c]/15 py-3 font-serif text-base sm:text-lg leading-loose text-[#fff8e6]"
+                  className="border-y border-[var(--dna-accent)]/15 py-3 font-serif text-base sm:text-lg leading-loose text-[var(--dna-text)]"
                 >
                   {item.originalText}
                 </p>
-                <p className="font-serif text-xs text-[#dfd6c3] leading-relaxed">{item.summary}</p>
+                <p className="font-serif text-xs text-[var(--dna-muted)] leading-relaxed">
+                  {item.summary}
+                </p>
               </article>
             ))}
           </div>
@@ -268,14 +272,14 @@ export function ScripturesStudio() {
 
         {/* Live 18,384-Verse 4-Corpus Witness Search Console */}
         <DnaChamber cornerBrackets className="p-6 sm:p-8 space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--dna-accent)]/20 pb-4">
             <div>
-              <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[#fff6df] uppercase">
+              <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[var(--dna-text)] uppercase">
                 {locale === "id"
                   ? "MESIN PENCARI EMPAT KITAB (18.384 AYAT ASLI)"
                   : "FOUR-CORPUS WITNESS ENGINE (18,384 ORIGINAL VERSES)"}
               </h2>
-              <p className="mt-1 font-serif text-xs text-[#cfc5b0]">
+              <p className="mt-1 font-serif text-xs text-[var(--dna-muted)]">
                 {locale === "id"
                   ? "Cari langsung lintas Taurat (Gen/Exod/Lev/Num/Deut 5.853), Zabur (Ps 2.527), Injīl (Matt-John 3.768), dan Al-Qur’ān (6.236 ayat)."
                   : "Search directly across Taurat (WLC 5,853), Zabur (Psalms 2,527), Injīl (SBLGNT 3,768), and Al-Qur’ān (Uthmani 6,236) by ref or root script."}
@@ -285,7 +289,7 @@ export function ScripturesStudio() {
               <DnaButton
                 tone="secondary"
                 onClick={() => void copyShareUrl()}
-                className="px-3.5 py-1.5 font-mono text-[10.5px] text-[#e6decb]"
+                className="px-3.5 py-1.5 font-mono text-[10.5px] text-[var(--dna-muted)]"
               >
                 {copiedLink === "search"
                   ? locale === "id"
@@ -297,7 +301,7 @@ export function ScripturesStudio() {
               </DnaButton>
               <Link
                 href="/codex?door=epistemic-corpus"
-                className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[#f5dfa6] uppercase"
+                className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
               >
                 DOOR II EPISTEMIC SPINE &rsaquo;
               </Link>
@@ -317,8 +321,8 @@ export function ScripturesStudio() {
                   onClick={() => setCorpusFilter(tab.id)}
                   className={`px-3.5 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors cursor-pointer ${
                     active
-                      ? "border border-[#f5dfa6] bg-[#d6b46c]/20 text-[#fff8e6]"
-                      : "btn-luxe-secondary text-[#cfc5b0]"
+                      ? "border border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
+                      : "btn-luxe-secondary text-[var(--dna-muted)]"
                   }`}
                 >
                   {locale === "id" ? tab.labelId : tab.labelEn}
@@ -329,15 +333,15 @@ export function ScripturesStudio() {
           </div>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <div className="flex flex-1 items-center gap-3 border border-[#d6b46c]/40 bg-[#05070e] px-4 py-2.5">
-              <SearchLensIcon className="h-4 w-4 text-[#dfc07b]" />
+            <div className="flex flex-1 items-center gap-3 border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)] px-4 py-2.5">
+              <SearchLensIcon className="h-4 w-4 text-[var(--dna-accent)]" />
               <input
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 aria-label="Search across Taurat, Zabur, Injil, and Quran corpora"
                 placeholder="Gen 1:1, Ps 23:1, John 1:1, 2:256, الله, θεος..."
-                className="w-full bg-transparent font-mono text-sm text-[#fff6df] placeholder-[#9f9580] focus:outline-none"
+                className="w-full bg-transparent font-mono text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none"
               />
             </div>
           </div>
@@ -352,7 +356,7 @@ export function ScripturesStudio() {
                   setCorpusFilter(preset.corpus);
                   setQuery(preset.q);
                 }}
-                className="px-3.5 py-1.5 text-[10px] text-[#e6decb]"
+                className="px-3.5 py-1.5 text-[10px] text-[var(--dna-muted)]"
               >
                 {locale === "id" ? preset.labelId : preset.labelEn}
               </DnaButton>
@@ -361,18 +365,18 @@ export function ScripturesStudio() {
 
           <div className="space-y-2.5">
             {loading && !payload ? (
-              <div className="border border-[#d6b46c]/20 bg-[#080b14] p-4 font-mono text-xs text-[#cfc5b0]">
+              <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-4 font-mono text-xs text-[var(--dna-muted)]">
                 PROBING FOUR-CORPUS INDEX (18,384 VERSES)…
               </div>
             ) : displayedHits.length > 0 ? (
               displayedHits.map((hit) => (
                 <div
                   key={`${hit.corpusCode}-${hit.reference}`}
-                  className="border border-[#d6b46c]/25 bg-[#090d18]/90 p-4 space-y-2"
+                  className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/90 p-4 space-y-2"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10.5px] text-[#dfc07b]">
+                  <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10.5px] text-[var(--dna-accent)]">
                     <div className="flex flex-wrap items-center gap-2">
-                      <DnaBadge className="font-mono text-[10px] text-[#f5dfa6]">
+                      <DnaBadge className="font-mono text-[10px] text-[var(--dna-accent)]">
                         {hit.corpusCode}
                       </DnaBadge>
                       <span>
@@ -380,7 +384,7 @@ export function ScripturesStudio() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <DnaBadge className="font-mono text-[10px] text-[#fff4d2]">
+                      <DnaBadge className="font-mono text-[10px] text-[var(--dna-text)]">
                         {hit.reference}
                       </DnaBadge>
                       <button
@@ -388,7 +392,7 @@ export function ScripturesStudio() {
                         onClick={() =>
                           void copyShareUrl(hit.reference.replace(/^QS\s+/i, ""), hit.corpusCode)
                         }
-                        className="border border-[#d6b46c]/25 bg-[#0a0f1d] px-2 py-0.5 text-[10px] text-[#dfc07b] hover:text-[#fff8e6] cursor-pointer"
+                        className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] px-2 py-0.5 text-[10px] text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
                       >
                         {copiedLink === hit.reference.replace(/^QS\s+/i, "") ? "COPIED" : "SHARE"}
                       </button>
@@ -401,8 +405,8 @@ export function ScripturesStudio() {
                     }
                     className={
                       hit.dir === "rtl"
-                        ? "text-xl sm:text-2xl leading-loose text-[#fff8e6]"
-                        : "font-serif text-lg sm:text-xl leading-relaxed text-[#fff8e6]"
+                        ? "text-xl sm:text-2xl leading-loose text-[var(--dna-text)]"
+                        : "font-serif text-lg sm:text-xl leading-relaxed text-[var(--dna-text)]"
                     }
                   >
                     {hit.text}
@@ -410,7 +414,7 @@ export function ScripturesStudio() {
                 </div>
               ))
             ) : (
-              <div className="border border-[#d6b46c]/20 bg-[#080b14] p-4 font-mono text-xs text-[#cfc5b0]">
+              <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-4 font-mono text-xs text-[var(--dna-muted)]">
                 NO MATCHING WITNESS RECORD FOR &ldquo;{query}&rdquo;.
               </div>
             )}
@@ -418,14 +422,16 @@ export function ScripturesStudio() {
         </DnaChamber>
 
         {/* Shared Moral Roots Concordance Matrix */}
-        <section className="relative border border-[#d6b46c]/30 bg-[#070a13] p-6 sm:p-8 space-y-5">
+        <section className="relative border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-6 sm:p-8 space-y-5">
           <SacredCornerBrackets />
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">
-              <DiamondStarOrnament className="h-3.5 w-3.5 text-[#f5dfa6]" />
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+            <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase">
+              <DiamondStarOrnament className="h-3.5 w-3.5 text-[var(--dna-accent)]" />
               <span>SHARED MORAL ROOTS // FOUR-CORPUS CONCORDANCE</span>
             </div>
-            <span className="font-mono text-[10.5px] text-[#cfc5b0]">{activeTheme.arabicRoot}</span>
+            <span className="font-mono text-[10.5px] text-[var(--dna-muted)]">
+              {activeTheme.arabicRoot}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
@@ -435,7 +441,7 @@ export function ScripturesStudio() {
                 type="button"
                 aria-pressed={theme.id === activeTheme.id}
                 onClick={() => setActiveThemeId(theme.id)}
-                className="btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] text-[#f5efe2] uppercase cursor-pointer"
+                className="btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] text-[var(--dna-text)] uppercase cursor-pointer"
               >
                 {theme.title}
               </button>
@@ -449,18 +455,22 @@ export function ScripturesStudio() {
               { code: "INJĪL", body: activeTheme.injilWitness },
               { code: "AL-QUR’ĀN", body: activeTheme.quranWitness },
             ].map((item) => (
-              <div key={item.code} className="border border-[#d6b46c]/25 bg-[#0b101d] p-4">
-                <div className="font-monument text-xs tracking-[0.16em] text-[#f5dfa6]">
+              <div
+                key={item.code}
+                className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] p-4"
+              >
+                <div className="font-monument text-xs tracking-[0.16em] text-[var(--dna-accent)]">
                   {item.code}
                 </div>
-                <p className="mt-2 font-serif text-xs leading-relaxed text-[#e6decb]">
+                <p className="mt-2 font-serif text-xs leading-relaxed text-[var(--dna-muted)]">
                   {item.body}
                 </p>
               </div>
             ))}
           </div>
-          <div className="border-t border-[#d6b46c]/15 pt-3 font-mono text-[11px] text-[#dfd6c3]">
-            <span className="text-[#dfc07b]">STEWARDSHIP ACTION:</span> {activeTheme.livedPractice}
+          <div className="border-t border-[var(--dna-accent)]/15 pt-3 font-mono text-[11px] text-[var(--dna-muted)]">
+            <span className="text-[var(--dna-accent)]">STEWARDSHIP ACTION:</span>{" "}
+            {activeTheme.livedPractice}
           </div>
         </section>
       </main>

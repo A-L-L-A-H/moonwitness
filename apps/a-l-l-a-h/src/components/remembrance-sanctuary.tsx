@@ -433,25 +433,29 @@ export function RemembranceSanctuary({
   return (
     <div
       id="remembrance-sanctuary"
-      className="mt-16 border border-[#d6b46c]/35 bg-[#060911]/95 p-6 sm:p-10 shadow-[0_24px_70px_rgba(0,0,0,0.82)] relative"
+      className="mt-16 border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)]/95 p-6 sm:p-10 shadow-[0_24px_70px_rgba(0,0,0,0.82)] relative"
     >
       <SacredCornerBrackets />
 
       {/* Section Banner */}
       <ScrollChapterReveal quietMode={quietMode}>
-        <div className="flex flex-col items-center text-center border-b border-[#d6b46c]/20 pb-8">
-          <div dir="rtl" lang="ar" className="text-2xl sm:text-3xl text-[#f5dfa6] tracking-wide">
+        <div className="flex flex-col items-center text-center border-b border-[var(--dna-accent)]/20 pb-8">
+          <div
+            dir="rtl"
+            lang="ar"
+            className="text-2xl sm:text-3xl text-[var(--dna-accent)] tracking-wide"
+          >
             بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ
           </div>
-          <div className="mt-3 flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] text-[#dfc07b] uppercase">
-            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[#d6b46c]" />
+          <div className="mt-3 flex items-center gap-3 text-[11px] font-mono tracking-[0.26em] text-[var(--dna-accent)] uppercase">
+            <span className="h-px w-8 bg-gradient-to-r from-transparent to-[var(--dna-accent)]" />
             <span>MĪZĀN AL-QALB · CONTEMPLATIVE STILLNESS</span>
-            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[#d6b46c]" />
+            <span className="h-px w-8 bg-gradient-to-l from-transparent to-[var(--dna-accent)]" />
           </div>
           <h3 className="font-monument mt-3 text-2xl sm:text-3xl tracking-[0.16em] text-gold-gradient uppercase">
             CONTEMPLATION, GRATITUDE &amp; STILLNESS
           </h3>
-          <p className="mt-2.5 max-w-2xl font-serif text-base text-[#e6decb] leading-relaxed">
+          <p className="mt-2.5 max-w-2xl font-serif text-base text-[var(--dna-muted)] leading-relaxed">
             A quiet, non-sectarian chamber honoring One Creator—reflecting on universal virtues of
             Light, Mercy, Wisdom, Gratitude, and Peace while centering conscience before every act
             of building.
@@ -464,10 +468,10 @@ export function RemembranceSanctuary({
         <div className="lg:col-span-7 flex flex-col justify-between">
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-mono text-[11px] tracking-[0.2em] text-[#dfc07b] uppercase">
+              <span className="font-mono text-[11px] tracking-[0.2em] text-[var(--dna-accent)] uppercase">
                 UNIVERSAL ATTRIBUTES · LUMINOUS CONTEMPLATIONS (9 OF 99)
               </span>
-              <span className="font-mono text-[10.5px] text-[#cfc5b0]">
+              <span className="font-mono text-[10.5px] text-[var(--dna-muted)]">
                 MONOCENTRIC UNITY · ZERO HUMAN IDOLS
               </span>
             </div>
@@ -480,7 +484,7 @@ export function RemembranceSanctuary({
                 className="relative mx-auto h-[412px] w-[412px] select-none"
               >
                 {/* Hand-crafted Obsidian & Gold-Leaf Nonagram Rosette Dial */}
-                <div className="pointer-events-none absolute inset-4 overflow-hidden rounded-full border border-[#d6b46c]/40 bg-[#05070e] shadow-[0_0_54px_rgba(223,192,123,0.14),inset_0_0_36px_rgba(0,0,0,0.92)]">
+                <div className="pointer-events-none absolute inset-4 overflow-hidden rounded-full border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)] shadow-[0_0_54px_rgba(223,192,123,0.14),inset_0_0_36px_rgba(0,0,0,0.92)]">
                   <Image
                     src="/art/nonagram-sanctuary-dial.webp"
                     alt=""
@@ -503,19 +507,19 @@ export function RemembranceSanctuary({
                       : "transform 600ms cubic-bezier(0.22, 1, 0.36, 1)",
                   }}
                 >
-                  <div className="absolute top-[11%] left-1/2 h-[22%] w-px -translate-x-1/2 bg-gradient-to-b from-[#fff8e6] via-[#f5dfa6]/70 to-transparent" />
-                  <div className="absolute top-[10%] left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-t border-l border-[#fff8e6] bg-[#f5dfa6]/40" />
+                  <div className="absolute top-[11%] left-1/2 h-[22%] w-px -translate-x-1/2 bg-gradient-to-b from-[var(--dna-text)] via-[var(--dna-accent)]/70 to-transparent" />
+                  <div className="absolute top-[10%] left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 border-t border-l border-[var(--dna-text)] bg-[var(--dna-accent)]/40" />
                 </div>
 
                 {/* Central Al-Asma Focal Medallion */}
-                <div className="pointer-events-none absolute top-1/2 left-1/2 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-[#f5dfa6]/45 bg-[#060811]/90 text-center px-2 shadow-[0_0_30px_rgba(223,192,123,0.18)] backdrop-blur-sm">
-                  <span className="font-mono text-[9px] tracking-[0.22em] text-[#dfc07b]">
+                <div className="pointer-events-none absolute top-1/2 left-1/2 flex h-32 w-32 -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)]/90 text-center px-2 shadow-[0_0_30px_rgba(223,192,123,0.18)] backdrop-blur-sm">
+                  <span className="font-mono text-[9px] tracking-[0.22em] text-[var(--dna-accent)]">
                     0{selectedNameIndex + 1} / 09
                   </span>
-                  <div dir="rtl" lang="ar" className="mt-1 text-2xl text-[#fff8e6]">
+                  <div dir="rtl" lang="ar" className="mt-1 text-2xl text-[var(--dna-text)]">
                     {selectedName.arabic}
                   </div>
-                  <div className="font-monument mt-0.5 text-[11px] tracking-[0.12em] text-[#f5dfa6]">
+                  <div className="font-monument mt-0.5 text-[11px] tracking-[0.12em] text-[var(--dna-accent)]">
                     {selectedName.transliteration}
                   </div>
                 </div>
@@ -540,14 +544,18 @@ export function RemembranceSanctuary({
                       style={{ left: `${x}px`, top: `${y}px` }}
                       className={`absolute flex h-[50px] w-[88px] flex-col items-center justify-center rounded-sm border px-1.5 transition-all duration-300 cursor-pointer ${
                         isSelected
-                          ? "z-10 border-[#fff4d2] bg-[#1b160c]/95 shadow-[0_0_24px_rgba(245,223,166,0.34)] scale-105"
-                          : "border-[#d6b46c]/30 bg-[#080b14]/92 hover:border-[#f5dfa6]/70 hover:bg-[#0f1322]"
+                          ? "z-10 border-[var(--dna-text)] bg-[var(--dna-surface)]/95 shadow-[0_0_24px_rgba(245,223,166,0.34)] scale-105"
+                          : "border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/92 hover:border-[var(--dna-accent)]/70 hover:bg-[var(--dna-surface)]"
                       }`}
                     >
-                      <span dir="rtl" lang="ar" className="text-sm leading-none text-[#fff4d2]">
+                      <span
+                        dir="rtl"
+                        lang="ar"
+                        className="text-sm leading-none text-[var(--dna-text)]"
+                      >
                         {entry.arabic}
                       </span>
-                      <span className="font-monument mt-1 text-[9.5px] leading-none tracking-[0.06em] whitespace-nowrap text-[#f5efe2]">
+                      <span className="font-monument mt-1 text-[9.5px] leading-none tracking-[0.06em] whitespace-nowrap text-[var(--dna-text)]">
                         {entry.transliteration}
                       </span>
                     </button>
@@ -577,14 +585,14 @@ export function RemembranceSanctuary({
                     }
                     className={`min-h-[68px] border px-2 py-2.5 text-center transition-all cursor-pointer ${
                       isSelected
-                        ? "border-[#fff4d2] bg-[#d6b46c]/18 shadow-[0_0_24px_rgba(223,192,123,0.18)]"
-                        : "border-[#d6b46c]/22 bg-[#0a0d16] hover:border-[#d6b46c]/55"
+                        ? "border-[var(--dna-text)] bg-[var(--dna-accent)]/18 shadow-[0_0_24px_rgba(223,192,123,0.18)]"
+                        : "border-[var(--dna-accent)]/22 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/55"
                     }`}
                   >
-                    <div dir="rtl" lang="ar" className="text-lg text-[#fff4d2]">
+                    <div dir="rtl" lang="ar" className="text-lg text-[var(--dna-text)]">
                       {entry.arabic}
                     </div>
-                    <div className="font-monument mt-0.5 text-[10px] tracking-[0.06em] whitespace-nowrap text-[#f5efe2]">
+                    <div className="font-monument mt-0.5 text-[10px] tracking-[0.06em] whitespace-nowrap text-[var(--dna-text)]">
                       {entry.transliteration}
                     </div>
                   </button>
@@ -594,34 +602,35 @@ export function RemembranceSanctuary({
           </div>
 
           <SpatialTiltCard disabled={quietMode} maxTiltDeg={2.5} className="mt-5">
-            <div className="relative border border-[#dfc07b]/40 bg-gradient-to-br from-[#0e1320] via-[#090c15] to-[#06080f] p-6">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d6b46c]/20 pb-3">
+            <div className="relative border border-[var(--dna-accent)]/40 bg-gradient-to-br from-[var(--dna-surface)] via-[var(--dna-canvas)] to-[var(--dna-canvas)] p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--dna-accent)]/20 pb-3">
                 <div className="flex items-baseline gap-3">
-                  <span dir="rtl" lang="ar" className="text-2xl text-[#fff4d2]">
+                  <span dir="rtl" lang="ar" className="text-2xl text-[var(--dna-text)]">
                     {selectedName.arabic}
                   </span>
-                  <span className="font-monument text-lg tracking-[0.14em] text-[#fff8e6]">
+                  <span className="font-monument text-lg tracking-[0.14em] text-[var(--dna-text)]">
                     {selectedName.transliteration}
                   </span>
                 </div>
-                <span className="border border-[#d6b46c]/35 bg-[#d6b46c]/12 px-2.5 py-0.5 font-mono text-[10px] text-[#f8eac6]">
+                <span className="border border-[var(--dna-accent)]/35 bg-[var(--dna-accent)]/12 px-2.5 py-0.5 font-mono text-[10px] text-[var(--dna-accent)]">
                   {selectedName.meaning}
                 </span>
               </div>
 
-              <p className="mt-4 font-serif text-base leading-relaxed text-[#ece4d3]">
+              <p className="mt-4 font-serif text-base leading-relaxed text-[var(--dna-text)]">
                 {selectedName.contemplation}
               </p>
 
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#d6b46c]/15 pt-3">
-                <span className="text-xs text-[#dfc07b]">
-                  Practice: <span className="text-[#f5efe2]">{selectedName.practicePrompt}</span>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--dna-accent)]/15 pt-3">
+                <span className="text-xs text-[var(--dna-accent)]">
+                  Practice:{" "}
+                  <span className="text-[var(--dna-text)]">{selectedName.practicePrompt}</span>
                 </span>
                 {onNavigateToWorld && (
                   <button
                     type="button"
                     onClick={() => onNavigateToWorld(selectedName.linkedWorldId)}
-                    className="btn-luxe-secondary px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f8eac6] uppercase hover:text-white cursor-pointer"
+                    className="btn-luxe-secondary px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-white cursor-pointer"
                   >
                     {selectedName.worldLabel} &rsaquo;
                   </button>
@@ -634,8 +643,8 @@ export function RemembranceSanctuary({
         {/* Right: Orbital Tasbih Counter & Sakinah Breath Guide */}
         <div className="octa-bevel-shell lg:col-span-5 p-6 sm:p-7 flex flex-col justify-between">
           <div>
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-              <span className="font-mono text-[11px] tracking-[0.18em] text-[#dfc07b] uppercase">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+              <span className="font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                 ORBITAL TASBĪḤ · SAKĪNAH
               </span>
               <div className="flex items-center gap-2">
@@ -644,7 +653,9 @@ export function RemembranceSanctuary({
                   aria-pressed={chimeEnabled}
                   onClick={() => setChimeEnabled((prev) => !prev)}
                   className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer ${
-                    chimeEnabled ? "text-[#fff8e6]" : "text-[#bfb59e] hover:text-[#fff6df]"
+                    chimeEnabled
+                      ? "text-[var(--dna-text)]"
+                      : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                   }`}
                 >
                   {chimeEnabled ? "CHIME: 528HZ" : "CHIME: MUTE"}
@@ -654,7 +665,9 @@ export function RemembranceSanctuary({
                   aria-pressed={breathActive}
                   onClick={() => setBreathActive((prev) => !prev)}
                   className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.14em] uppercase cursor-pointer ${
-                    breathActive ? "text-[#fff8e6]" : "text-[#bfb59e] hover:text-[#fff6df]"
+                    breathActive
+                      ? "text-[var(--dna-text)]"
+                      : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                   }`}
                 >
                   {breathActive ? "BREATH: ON" : "BREATH: GUIDE"}
@@ -673,7 +686,9 @@ export function RemembranceSanctuary({
                     aria-pressed={active}
                     onClick={() => handleSelectPhrase(phrase.id)}
                     className={`btn-luxe-secondary px-3.5 py-1.5 font-mono text-[10px] tracking-[0.1em] uppercase cursor-pointer ${
-                      active ? "text-[#fff6df]" : "text-[#bfb59e] hover:text-[#fff6df]"
+                      active
+                        ? "text-[var(--dna-text)]"
+                        : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                     }`}
                   >
                     {phrase.transliteration}
@@ -688,7 +703,7 @@ export function RemembranceSanctuary({
                 {breathActive && !quietMode && (
                   <div
                     aria-hidden="true"
-                    className="animate-sakinah-breathe absolute h-44 w-44 rounded-full bg-[#dfc07b]/15 blur-xl"
+                    className="animate-sakinah-breathe absolute h-44 w-44 rounded-full bg-[var(--dna-accent)]/15 blur-xl"
                   />
                 )}
                 <button
@@ -707,7 +722,7 @@ export function RemembranceSanctuary({
                       cy="90"
                       r="74"
                       fill="rgba(4,5,9,0.85)"
-                      stroke="#d6b46c"
+                      stroke="var(--dna-accent)"
                       strokeOpacity="0.22"
                       strokeWidth="1"
                     />
@@ -716,7 +731,7 @@ export function RemembranceSanctuary({
                       cy="90"
                       r="64"
                       fill="none"
-                      stroke="#d6b46c"
+                      stroke="var(--dna-accent)"
                       strokeOpacity="0.14"
                       strokeWidth="1.5"
                     />
@@ -725,7 +740,7 @@ export function RemembranceSanctuary({
                       cy="90"
                       r="64"
                       fill="none"
-                      stroke="#fff4d2"
+                      stroke="var(--dna-text)"
                       strokeOpacity="0.68"
                       strokeWidth="1.5"
                       strokeDasharray="402.12"
@@ -745,33 +760,35 @@ export function RemembranceSanctuary({
                           cx={cx}
                           cy={cy}
                           r={lit ? (isMilestone ? 4 : 3.2) : isMilestone ? 2.2 : 1.7}
-                          fill={lit ? "#fff4d2" : "#dfc07b"}
+                          fill={lit ? "var(--dna-text)" : "var(--dna-accent)"}
                           fillOpacity={lit ? 0.98 : isMilestone ? 0.55 : 0.28}
                         />
                       );
                     })}
                   </svg>
                   <AstrolabeSealMedallion className="pointer-events-none absolute h-24 w-24 opacity-25 transition-opacity group-hover:opacity-40" />
-                  <div dir="rtl" lang="ar" className="relative z-10 text-xl text-[#fff4d2]">
+                  <div dir="rtl" lang="ar" className="relative z-10 text-xl text-[var(--dna-text)]">
                     {activePhrase.arabic}
                   </div>
-                  <div className="relative z-10 mt-1 font-mono text-2xl font-semibold text-[#fff8e6]">
+                  <div className="relative z-10 mt-1 font-mono text-2xl font-semibold text-[var(--dna-text)]">
                     {beadCount}
-                    <span className="text-xs text-[#cfc5b0]"> / 33</span>
+                    <span className="text-xs text-[var(--dna-muted)]"> / 33</span>
                   </div>
-                  <div className="relative z-10 mt-1 inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.18em] text-[#dfc07b] uppercase">
+                  <div className="relative z-10 mt-1 inline-flex items-center gap-1 font-mono text-[10px] tracking-[0.18em] text-[var(--dna-accent)] uppercase">
                     <DiamondStarOrnament className="h-2.5 w-2.5" /> PAUSE &amp; REFLECT
                   </div>
                 </button>
               </div>
 
-              <p className="mt-3 font-serif text-sm text-[#e6decb]">{activePhrase.translation}</p>
-              <p className="mt-1 text-xs text-[#cfc5b0]">{activePhrase.heartFocus}</p>
+              <p className="mt-3 font-serif text-sm text-[var(--dna-muted)]">
+                {activePhrase.translation}
+              </p>
+              <p className="mt-1 text-xs text-[var(--dna-muted)]">{activePhrase.heartFocus}</p>
               {breathActive && (
                 <div
                   role="status"
                   aria-live="polite"
-                  className="mt-2 border border-[#fff4d2]/40 bg-[#0b0f1b] px-3 py-1 font-mono text-[10px] tracking-[0.14em] text-[#f5dfa6] uppercase"
+                  className="mt-2 border border-[var(--dna-text)]/40 bg-[var(--dna-surface)] px-3 py-1 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] uppercase"
                 >
                   {breathLabels[breathPhaseIndex]}
                 </div>
@@ -780,7 +797,7 @@ export function RemembranceSanctuary({
                 <div
                   role="status"
                   aria-live="polite"
-                  className="mt-2 border border-[#fff4d2]/55 bg-[#d6b46c]/20 px-3 py-1 font-mono text-[11px] text-[#fff8e6]"
+                  className="mt-2 border border-[var(--dna-text)]/55 bg-[var(--dna-accent)]/20 px-3 py-1 font-mono text-[11px] text-[var(--dna-text)]"
                 >
                   33-Bead Contemplation Cycle Sealed ({cyclesCompleted} total)
                 </div>
@@ -789,8 +806,8 @@ export function RemembranceSanctuary({
           </div>
 
           {/* Quiet On-Device Private Muhasabah Checklist */}
-          <div className="mt-5 border-t border-[#d6b46c]/20 pt-4">
-            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[#dfc07b] uppercase">
+          <div className="mt-5 border-t border-[var(--dna-accent)]/20 pt-4">
+            <div className="flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[var(--dna-accent)] uppercase">
               <span>
                 {locale === "id"
                   ? "MUḤĀSABAH PRIVAT · KHUSUS PERANGKAT INI"
@@ -810,15 +827,17 @@ export function RemembranceSanctuary({
                     aria-pressed={checked}
                     onClick={() => toggleMuhasabahPledge(item.id)}
                     className={`btn-luxe-secondary flex items-center gap-2 px-3 py-1.5 text-left text-[11px] leading-snug cursor-pointer ${
-                      checked ? "text-[#fff8e6]" : "text-[#cfc5b0] hover:text-[#fff6df]"
+                      checked
+                        ? "text-[var(--dna-text)]"
+                        : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
                     }`}
                   >
                     <span
                       aria-hidden="true"
                       className={`inline-block h-2 w-2 shrink-0 rotate-45 border ${
                         checked
-                          ? "border-[#fff4d2] bg-[#fff4d2]"
-                          : "border-[#dfc07b]/60 bg-transparent"
+                          ? "border-[var(--dna-text)] bg-[var(--dna-text)]"
+                          : "border-[var(--dna-accent)]/60 bg-transparent"
                       }`}
                     />
                     <span>{locale === "id" ? item.labelId : item.labelEn}</span>
@@ -826,24 +845,25 @@ export function RemembranceSanctuary({
                 );
               })}
             </div>
-            <p className="mt-2.5 font-mono text-[9.5px] leading-relaxed text-[#bfb59e]">
+            <p className="mt-2.5 font-mono text-[9.5px] leading-relaxed text-[var(--dna-muted)]">
               {locale === "id"
                 ? "AMAL NYATA (0% POTONGAN): Salurkan zakat/sedekah langsung kepada tetangga, anak yatim, atau pihak yang berhak di sekitar Anda."
                 : "DIRECT SERVICE (0% PLATFORM FEE): Channel kindness, fair wages & zakat directly to neighbors, orphans, and those around you."}
             </p>
 
             {/* On-Device Reflection Journal (IndexedDB + LocalStorage, 0% Server Transmission) */}
-            <div className="mt-3.5 border-t border-[#d6b46c]/15 pt-3 space-y-2">
-              <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9.5px] text-[#dfc07b]">
-                <span>
+            <div className="mt-3.5 border-t border-[var(--dna-accent)]/15 pt-3 space-y-2">
+              <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9.5px] text-[var(--dna-accent)]">
+                <label htmlFor="muhasabah-journal-input" className="cursor-pointer">
                   {locale === "id"
                     ? "JURNAL MUḤĀSABAH PRIVAT (LOKAL SAJA)"
                     : "ON-DEVICE REFLECTION JOURNAL (LOCAL ONLY)"}
-                </span>
-                <span className="text-[#9f9580]">{journalEngine}</span>
+                </label>
+                <span className="text-[var(--dna-muted)]">{journalEngine}</span>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
+                  id="muhasabah-journal-input"
                   type="text"
                   value={journalDraft}
                   onChange={(e) => setJournalDraft(e.target.value)}
@@ -858,13 +878,12 @@ export function RemembranceSanctuary({
                       ? "Tulis refleksi jujur untuk diri sendiri..."
                       : "Write a private self-reflection note..."
                   }
-                  aria-label="Private on-device Muhasabah reflection journal"
-                  className="flex-1 border border-[#d6b46c]/30 bg-[#05070e] px-3 py-1.5 font-serif text-xs text-[#fff8e6] placeholder-[#8f8572] focus:outline-none"
+                  className="flex-1 min-h-[44px] border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-2 font-serif text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)]"
                 />
                 <button
                   type="button"
                   onClick={() => void saveJournalNote()}
-                  className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] text-[#f5dfa6] uppercase cursor-pointer"
+                  className="btn-luxe-secondary min-h-[44px] px-4 py-2 font-mono text-[10px] text-[var(--dna-accent)] uppercase cursor-pointer"
                 >
                   {locale === "id" ? "SIMPAN LOKAL" : "SEAL LOCALLY"}
                 </button>
@@ -874,13 +893,13 @@ export function RemembranceSanctuary({
                   {journalEntries.slice(0, 3).map((note) => (
                     <li
                       key={note.id}
-                      className="flex items-start justify-between gap-2 border border-[#d6b46c]/20 bg-[#080c17] px-3 py-1.5 font-serif text-xs text-[#e6decb]"
+                      className="flex items-start justify-between gap-2 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] px-3 py-1.5 font-serif text-xs text-[var(--dna-muted)]"
                     >
                       <span>{note.text}</span>
                       <button
                         type="button"
                         onClick={() => void removeJournalNote(note.id)}
-                        className="shrink-0 font-mono text-[9px] text-[#bfb59e] hover:text-white cursor-pointer"
+                        className="shrink-0 font-mono text-[9px] text-[var(--dna-muted)] hover:text-white cursor-pointer"
                       >
                         DELETE
                       </button>
@@ -893,7 +912,7 @@ export function RemembranceSanctuary({
 
           <div
             aria-live="polite"
-            className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/15 pt-3 font-mono text-[10px] text-[#bfb59e]"
+            className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--dna-accent)]/15 pt-3 font-mono text-[10px] text-[var(--dna-muted)]"
           >
             <span>CYCLES: {cyclesCompleted}</span>
             <span>TOTAL: {totalWitnessed}</span>
@@ -901,7 +920,7 @@ export function RemembranceSanctuary({
               <button
                 type="button"
                 onClick={exportPrivateMuhasabahJson}
-                className="btn-luxe-secondary px-3 py-1 text-[#f5dfa6] hover:text-white cursor-pointer"
+                className="btn-luxe-secondary px-3 py-1 text-[var(--dna-accent)] hover:text-white cursor-pointer"
               >
                 EXPORT JSON
               </button>
@@ -911,7 +930,7 @@ export function RemembranceSanctuary({
                   setBeadCount(0);
                   setJustCompletedCycle(false);
                 }}
-                className="btn-luxe-secondary px-3 py-1 hover:text-[#fff6df] cursor-pointer"
+                className="btn-luxe-secondary px-3 py-1 hover:text-[var(--dna-text)] cursor-pointer"
               >
                 RESET RING
               </button>

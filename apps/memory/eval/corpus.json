@@ -1,0 +1,283 @@
+{
+  "version": "1.0.0",
+  "description": "Synthetic, privacy-safe evaluation corpus for MoonWitness Memory retrieval and citation grounding (MW-0026).",
+  "provenance": "100% synthetic archive messages authored specifically for offline evaluation; contains zero private user archives or personal transcripts.",
+  "messages": [
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-001",
+      "conversation_id": "conv-storage-adr",
+      "title": "ADR-01 Archive Ingestion and Checkpointing",
+      "role": "assistant",
+      "content": "Uploaded chat export archives are streamed to disk without altering the original bytes. SHA-256 checksums deduplicate identical uploads, while SQLite WAL checkpoints record the last completed conversation index so retries do not reprocess finished threads.",
+      "created_at": "2026-09-02T09:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-002",
+      "conversation_id": "conv-storage-adr",
+      "title": "ADR-02 Local Loopback Binding and Drive Backup",
+      "role": "user",
+      "content": "Keep the dashboard and FastAPI ports bound strictly to loopback 127.0.0.1 so local archives are never exposed to the LAN. Google Drive backup uses Rclone's experimental S3 gateway and remains completely optional.",
+      "created_at": "2026-09-02T09:15:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-003",
+      "conversation_id": "conv-worker-queue",
+      "title": "Worker Queue Locking and Crash Recovery",
+      "role": "assistant",
+      "content": "Background workers acquire queued jobs atomically with SQLite BEGIN IMMEDIATE transactions. Any job left in processing status longer than ten minutes is treated as stale and reclaimed automatically for retry.",
+      "created_at": "2026-09-05T11:30:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-004",
+      "conversation_id": "conv-worker-queue",
+      "title": "Bounded Transcript Chunking and Deterministic Knowledge IDs",
+      "role": "assistant",
+      "content": "Conversation transcripts are segmented into bounded 14000-character chunks before extraction. Each extracted knowledge item derives a deterministic SHA-256 record ID from conversation ID, kind, casefolded title, and source message IDs to prevent duplicate rows on job retry.",
+      "created_at": "2026-09-05T11:45:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-005",
+      "conversation_id": "conv-auth-v1",
+      "title": "Authentication Specification v1 (Legacy)",
+      "role": "user",
+      "content": "Auth v1 relies on a static shared header X-Bridge-Secret rotated manually every 30 days alongside local browser session cookies. This v1 scheme has no JWKS verification or audience claims.",
+      "created_at": "2026-09-10T09:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-02",
+      "message_id": "msg-006",
+      "conversation_id": "conv-auth-v2",
+      "title": "Authentication Specification v2 (OIDC Replacement)",
+      "role": "assistant",
+      "content": "Auth v2 replaces the legacy v1 static X-Bridge-Secret header with MoonWitness ID OIDC Bearer JWTs. Tokens are validated against cached JWKS keys with a 300-second TTL and enforced audience allowlisting.",
+      "created_at": "2026-10-18T14:30:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-007",
+      "conversation_id": "conv-export-v1",
+      "title": "Corpus Export v1 Monolithic Snapshot",
+      "role": "user",
+      "content": "Export v1 assembled the entire extracted knowledge list in RAM as one monolithic JSON array before writing corpus-snapshot.json to disk.",
+      "created_at": "2026-09-15T10:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-02",
+      "message_id": "msg-008",
+      "conversation_id": "conv-export-v2",
+      "title": "Corpus Export v2 Keyset Streaming NDJSON",
+      "role": "assistant",
+      "content": "Export v2 supersedes the v1 monolithic RAM snapshot by iterating records with keyset pagination and streaming lines to a temporary file atomically renamed to moonwitness-knowledge.ndjson.",
+      "created_at": "2026-10-22T11:15:00Z"
+    },
+    {
+      "archive_id": "arch-synth-02",
+      "message_id": "msg-009",
+      "conversation_id": "conv-vault-ui",
+      "title": "Dashboard Vault Table Terminology",
+      "role": "user",
+      "content": "In the frontend dashboard, the Vault panel renders the archive ledger table showing file size, SHA-256 verification digest, ingestion status, and Google Drive backup badge for each uploaded archive.",
+      "created_at": "2026-10-23T08:20:00Z"
+    },
+    {
+      "archive_id": "arch-synth-03",
+      "message_id": "msg-010",
+      "conversation_id": "conv-vault-secrets",
+      "title": "Encrypted Vault Keystore Terminology",
+      "role": "assistant",
+      "content": "Unlike the dashboard UI table, the backend security module refers to Vault as the encrypted local keystore holding S3 access secrets, Rclone OAuth refresh tokens, and bridge signing material.",
+      "created_at": "2026-10-23T16:40:00Z"
+    },
+    {
+      "archive_id": "arch-synth-02",
+      "message_id": "msg-011",
+      "conversation_id": "conv-bridge-term",
+      "title": "Host Supervisor Bridge Routing Note",
+      "role": "user",
+      "content": "Here the word Bridge denotes the internal reverse-proxy forwarder connecting host desktop controls to /api/memory endpoints over loopback without exposing external sockets.",
+      "created_at": "2026-10-24T12:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-012",
+      "conversation_id": "conv-sync-policy-a",
+      "title": "Sprint Draft: Unauthenticated Local Webhook Sync",
+      "role": "user",
+      "content": "Early sprint note proposing that webhook sync run automatically after ingestion even when MOONWITNESS_SYNC_TOKEN is blank by falling back to an unauthenticated local HTTP POST.",
+      "created_at": "2026-10-05T13:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-03",
+      "message_id": "msg-013",
+      "conversation_id": "conv-sync-policy-b",
+      "title": "Security Audit: Fail-Closed Sync Token Requirement",
+      "role": "assistant",
+      "content": "Security audit policy mandates that sync_to_moonwitness fail closed with a RuntimeError whenever MOONWITNESS_SYNC_URL is configured without MOONWITNESS_SYNC_TOKEN; unauthenticated webhook delivery is forbidden.",
+      "created_at": "2026-10-25T15:10:00Z"
+    },
+    {
+      "archive_id": "arch-synth-01",
+      "message_id": "msg-014",
+      "conversation_id": "conv-retention-a",
+      "title": "Draft Proposal: Purging Failed Inbox Files",
+      "role": "user",
+      "content": "Scratch note suggesting that failed archive files in data/inbox be deleted automatically after 24 hours to reclaim disk space.",
+      "created_at": "2026-10-06T10:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-03",
+      "message_id": "msg-015",
+      "conversation_id": "conv-retention-b",
+      "title": "Preservation Covenant: Never Delete Original Archives",
+      "role": "assistant",
+      "content": "Authoritative preservation rule: failed extraction or Google Drive backup jobs never delete original uploaded archive files in data/inbox; originals remain untouched for manual inspection or retry.",
+      "created_at": "2026-10-26T09:45:00Z"
+    },
+    {
+      "archive_id": "arch-synth-03",
+      "message_id": "msg-016",
+      "conversation_id": "conv-dream-journal",
+      "title": "[DREAM LOG] Brass Astrolabe Harbor",
+      "role": "user",
+      "content": "[DREAM LOG] Last night I dreamed the SQLite ledger became a brass astrolabe anchored above a foggy lunar harbor, tapping missing checksums in Morse code across silver tides.",
+      "created_at": "2026-10-27T06:15:00Z"
+    },
+    {
+      "archive_id": "arch-synth-03",
+      "message_id": "msg-017",
+      "conversation_id": "conv-fiction-draft",
+      "title": "[FICTION DRAFT] The Obsidian Relay Chapter 4",
+      "role": "assistant",
+      "content": "[FICTION DRAFT] In Chapter 4 of The Obsidian Relay, Archivist Kaelen boards an orbital tape library circling Titan that replays synthetic telemetry logs from the year 2199.",
+      "created_at": "2026-10-28T20:00:00Z"
+    },
+    {
+      "archive_id": "arch-synth-03",
+      "message_id": "msg-018",
+      "conversation_id": "conv-fiction-lore",
+      "title": "[FICTIONAL SCENARIO] Owl BGP Spec Parody",
+      "role": "user",
+      "content": "[FICTIONAL SCENARIO] Parody protocol memo where clockwork owls negotiate BGP network routes by arranging tail feathers instead of autonomous system numbers.",
+      "created_at": "2026-10-29T18:10:00Z"
+    }
+  ],
+  "queries": [
+    {
+      "id": "q-fact-01",
+      "category": "factual",
+      "query": "How are uploaded chat archives deduplicated and checkpointed during ingestion?",
+      "expected_message_ids": ["msg-001"],
+      "expected_archive_ids": ["arch-synth-01"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-fact-02",
+      "category": "factual",
+      "query": "Which network interface does the local dashboard bind to and is Google Drive backup mandatory?",
+      "expected_message_ids": ["msg-002"],
+      "expected_archive_ids": ["arch-synth-01"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-fact-03",
+      "category": "factual",
+      "query": "How does the background worker acquire jobs atomically and reclaim stale processing tasks?",
+      "expected_message_ids": ["msg-003"],
+      "expected_archive_ids": ["arch-synth-01"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-fact-04",
+      "category": "factual",
+      "query": "How are deterministic knowledge IDs computed across bounded 14000-character transcript chunks?",
+      "expected_message_ids": ["msg-004"],
+      "expected_archive_ids": ["arch-synth-01"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-temp-01",
+      "category": "temporal",
+      "query": "What OIDC authentication mechanism in v2 replaced the legacy v1 static X-Bridge-Secret header?",
+      "expected_message_ids": ["msg-006"],
+      "expected_archive_ids": ["arch-synth-02"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-temp-02",
+      "category": "temporal",
+      "query": "How does export v2 replace the v1 monolithic RAM snapshot with streaming NDJSON?",
+      "expected_message_ids": ["msg-008"],
+      "expected_archive_ids": ["arch-synth-02"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-temp-03",
+      "category": "temporal",
+      "query": "Is the static shared X-Bridge-Secret header still the active authentication design?",
+      "expected_message_ids": ["msg-006"],
+      "expected_archive_ids": ["arch-synth-02"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-ambig-01",
+      "category": "ambiguous",
+      "query": "What does the Vault panel in the frontend dashboard display for each uploaded archive?",
+      "expected_message_ids": ["msg-009"],
+      "expected_archive_ids": ["arch-synth-02"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-ambig-02",
+      "category": "ambiguous",
+      "query": "What credentials are stored in the encrypted Vault keystore in the backend security module?",
+      "expected_message_ids": ["msg-010"],
+      "expected_archive_ids": ["arch-synth-03"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-contra-01",
+      "category": "contradictory",
+      "query": "What conflicting policies exist for webhook sync when MOONWITNESS_SYNC_TOKEN is blank?",
+      "expected_message_ids": ["msg-012", "msg-013"],
+      "expected_archive_ids": ["arch-synth-01", "arch-synth-03"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-contra-02",
+      "category": "contradictory",
+      "query": "What conflicting notes exist about deleting versus preserving failed original archive files in data/inbox?",
+      "expected_message_ids": ["msg-014", "msg-015"],
+      "expected_archive_ids": ["arch-synth-01", "arch-synth-03"],
+      "expect_abstention": false
+    },
+    {
+      "id": "q-abst-01",
+      "category": "unanswerable",
+      "query": "Which PostgreSQL Citus sharding partition key was selected for distributed archive storage?",
+      "expected_message_ids": [],
+      "expected_archive_ids": [],
+      "expect_abstention": true
+    },
+    {
+      "id": "q-abst-02",
+      "category": "abstention",
+      "query": "What Kubernetes Helm chart values configure GPU autoscaling across inference pods?",
+      "expected_message_ids": [],
+      "expected_archive_ids": [],
+      "expect_abstention": true
+    },
+    {
+      "id": "q-abst-03",
+      "category": "unanswerable",
+      "query": "What Redis Sentinel quorum size was chosen for distributed session caching?",
+      "expected_message_ids": [],
+      "expected_archive_ids": [],
+      "expect_abstention": true
+    }
+  ]
+}

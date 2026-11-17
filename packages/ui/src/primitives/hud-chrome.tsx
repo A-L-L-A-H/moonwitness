@@ -219,17 +219,19 @@ const TONE_TEXT: Record<string, string> = {
   pink: "text-[var(--pink)]",
   blue: "text-[var(--blue)]",
   yellow: "text-[var(--yellow)]",
+  green: "text-[var(--green)]",
 };
 const TONE_BAR: Record<string, string> = {
   pink: "bg-[var(--pink)]",
   blue: "bg-[var(--blue)]",
   yellow: "bg-[var(--yellow)]",
+  green: "bg-[var(--green)]",
 };
 
 export interface GaugeProps {
   label: string;
   value: string;
-  tone?: "pink" | "blue" | "yellow";
+  tone?: "pink" | "blue" | "yellow" | "green";
   percent?: number;
   className?: string;
 }

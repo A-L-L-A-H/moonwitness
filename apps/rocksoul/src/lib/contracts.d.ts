@@ -162,6 +162,12 @@ export interface MonitorSnapshot {
   plans: PlanTrackerEntry[];
 }
 
+export interface MidLoopbackCallback {
+  code: string;
+  state: string;
+  redirect_uri: string;
+}
+
 export interface CreateIssueArgs {
   title: string;
   description?: string | undefined;
@@ -213,6 +219,7 @@ export interface GitExecuteArgs {
 }
 
 export interface NativeCommands {
+  await_mid_loopback_callback: { args: { authorizeUrl: string }; result: MidLoopbackCallback };
   get_dashboard: { args: Record<string, never>; result: Dashboard };
   list_events: { args: Record<string, never>; result: ActivityEvent[] };
   get_monitor_snapshot: { args: Record<string, never>; result: MonitorSnapshot };

@@ -119,8 +119,28 @@ export async function hashPassword(plainPassword: string, iterations = 100_000):
   return `${PBKDF2_PREFIX}${iterations}$${bytesToHex(salt)}$${bytesToHex(new Uint8Array(derived))}`;
 }
 
-/** Verify password against stored `$pbkdf2-sha256$<iters>$<saltHex>$<hashHex>` digest. */
+/** Verify password against stored digest (supporting both bcrypt `$2a$/$2b$` and WebCrypto PBKDF2 `$pbkdf2-sha256$`). */
 export async function verifyPassword(plainPassword: string, storedHash: string): Promise<boolean> {
+  if (
+    storedHash.startsWith("$2a$") ||
+    storedHash.startsWith("$2b$") ||
+    storedHash.startsWith("$2y$")
+  ) {
+    try {
+      const moduleName = "bc" + "rypt";
+      const mod = (await import(moduleName)) as {
+        compare?: (p: string, h: string) => Promise<boolean>;
+        default?: { compare?: (p: string, h: string) => Promise<boolean> };
+      };
+      const bcrypt = mod.default ?? mod;
+      if (typeof bcrypt.compare === "function") {
+        return await bcrypt.compare(plainPassword, storedHash);
+      }
+    } catch {
+      return false;
+    }
+  }
+
   if (!storedHash.startsWith(PBKDF2_PREFIX)) return false;
   const segments = storedHash.slice(PBKDF2_PREFIX.length).split("$");
   if (segments.length !== 3) return false;
@@ -158,7 +178,7 @@ export async function verifyPkceS256(verifier: string, challenge: string): Promi
   return constantTimeEqualString(computed, challenge);
 }
 
-async function deriveAesWrapKey(masterSecret: string): Promise<CryptoKey> {
+async function deriveAesWrapKey(masterSecret: string) {
   const keyMaterial = await sha256Bytes(masterSecret);
   return crypto.subtle.importKey("raw", toArrayBuffer(keyMaterial), { name: "AES-GCM" }, false, [
     "encrypt",
@@ -208,10 +228,16 @@ export async function generateEs256SigningKey(masterSecret: string): Promise<{
   const keyPair = (await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, [
     "sign",
     "verify",
-  ])) as CryptoKeyPair;
+  ])) as { publicKey: unknown; privateKey: unknown };
 
-  const exportedPublic = (await crypto.subtle.exportKey("jwk", keyPair.publicKey)) as JsonWebKey;
-  const exportedPrivate = (await crypto.subtle.exportKey("jwk", keyPair.privateKey)) as JsonWebKey;
+  const exportedPublic = (await crypto.subtle.exportKey(
+    "jwk",
+    keyPair.publicKey as never,
+  )) as Record<string, string | undefined>;
+  const exportedPrivate = (await crypto.subtle.exportKey(
+    "jwk",
+    keyPair.privateKey as never,
+  )) as Record<string, unknown>;
   const kid = `mid-${generateOpaqueToken(8)}`;
 
   const publicJwk: PublicEs256Jwk = {
@@ -239,10 +265,10 @@ export async function signEs256Jwt(
 ): Promise<string> {
   const privateJwk = JSON.parse(
     await decryptSecretJson(encryptedPrivateJwk, masterSecret),
-  ) as JsonWebKey;
+  ) as Record<string, unknown>;
   const privateKey = await crypto.subtle.importKey(
     "jwk",
-    privateJwk,
+    privateJwk as never,
     { name: "ECDSA", namedCurve: "P-256" },
     false,
     ["sign"],
@@ -258,11 +284,38 @@ export async function signEs256Jwt(
   return `${signingInput}.${encodeBase64Url(new Uint8Array(signature))}`;
 }
 
-/** Verify an ES256 JWT against a list of active public JWKs and check `iss` + `exp`. */
+function normalizeExpectedAudiences(
+  expectedAudience: string | readonly string[],
+): readonly string[] {
+  const raw = typeof expectedAudience === "string" ? [expectedAudience] : expectedAudience;
+  return raw.map((entry) => (typeof entry === "string" ? entry.trim() : "")).filter(Boolean);
+}
+
+function extractJwtAudiences(rawAud: unknown): readonly string[] | null {
+  if (typeof rawAud === "string") {
+    return rawAud.trim().length > 0 ? [rawAud] : null;
+  }
+  if (Array.isArray(rawAud)) {
+    if (
+      rawAud.length === 0 ||
+      rawAud.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+    ) {
+      return null;
+    }
+    return rawAud as string[];
+  }
+  return null;
+}
+
+/** Verify an ES256 JWT against active public JWKs, checking `iss`, `exp`, `token_use`, and `aud`. */
 export async function verifyEs256Jwt(
   token: string,
   publicJwks: PublicEs256Jwk[],
   expectedIssuer: string,
+  options?: {
+    expectedTokenUse?: "access" | "id";
+    expectedAudience?: string | readonly string[];
+  },
 ): Promise<MidTokenClaims | null> {
   const segments = token.split(".");
   if (segments.length !== 3 || !segments[0] || !segments[1] || !segments[2]) return null;
@@ -277,6 +330,36 @@ export async function verifyEs256Jwt(
   }
 
   if (header.alg !== "ES256" || !header.kid) return null;
+  const normalizedIssuer = expectedIssuer.replace(/\/+$/g, "");
+  if (claims.iss !== normalizedIssuer) return null;
+
+  if (options?.expectedTokenUse && claims.token_use !== options.expectedTokenUse) {
+    return null;
+  }
+
+  if (options?.expectedAudience !== undefined) {
+    const allowedAudiences = normalizeExpectedAudiences(options.expectedAudience);
+    if (allowedAudiences.length === 0) return null;
+
+    const tokenAudiences = extractJwtAudiences(claims.aud as unknown);
+    if (!tokenAudiences) return null;
+
+    const allowedSet = new Set(allowedAudiences);
+    if (!tokenAudiences.some((aud) => allowedSet.has(aud))) return null;
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (typeof claims.exp !== "number" || !Number.isFinite(claims.exp) || claims.exp <= nowSec) {
+    return null;
+  }
+  if (
+    claims.nbf !== undefined &&
+    (typeof claims.nbf !== "number" || !Number.isFinite(claims.nbf) || claims.nbf > nowSec)
+  ) {
+    return null;
+  }
+  if (typeof claims.sub !== "string" || !claims.sub.trim()) return null;
+
   const matchingJwk = publicJwks.find((candidate) => candidate.kid === header.kid);
   if (!matchingJwk) return null;
 
@@ -294,7 +377,5 @@ export async function verifyEs256Jwt(
     toArrayBuffer(TEXT_ENCODER.encode(`${segments[0]}.${segments[1]}`)),
   );
   if (!signatureValid) return null;
-  if (claims.iss !== expectedIssuer) return null;
-  if (typeof claims.exp !== "number" || claims.exp <= Math.floor(Date.now() / 1000)) return null;
   return claims;
 }

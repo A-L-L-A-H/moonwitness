@@ -14,8 +14,14 @@ export { initDb, initD1Db, closeDb, getDb } from "./driver.js";
 export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
 export type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
-export { D1Driver, splitSqlStatements } from "./drivers/d1.driver.js";
+export { D1Driver, splitSqlStatements, createD1DatabaseFromOrm } from "./drivers/d1.driver.js";
 export type { D1DatabaseLike, D1PreparedStatementLike } from "./drivers/d1.driver.js";
 export { applyMigrations, listAppliedMigrations } from "./migrations.js";
 export type { Migration } from "./migrations.js";
-export { backupDatabase, restoreDatabase } from "./backup.js";
+export {
+  backupDatabase,
+  restoreDatabase,
+  verifyIntegrity,
+  encryptBackupFile,
+  decryptBackupFile,
+} from "./backup.js";

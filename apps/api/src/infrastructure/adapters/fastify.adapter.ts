@@ -16,9 +16,12 @@ import { riotAiRoutes } from "../../interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "../../interface/routes/command-center.routes";
 import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
-import { applyMigrations } from "@moonwitness/orm";
+import { ensureProbesSchema, probesMigrations } from "../../interface/routes/probes.persistence";
+import { probesRoutes } from "../../interface/routes/probes.routes";
+import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import { authMigrations } from "../../db/migrations";
 import { seedBootstrapAdmin } from "../../services/user";
+import { midFastifyPlugin } from "@moonwitness/mid";
 
 export interface BootstrapOptions {
   prefix?: string;
@@ -132,9 +135,25 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     });
   }
 
-  // Ensure auth and command center schemas exist before serving routes.
-  await applyMigrations([...authMigrations, ...commandCenterMigrations]);
+  // Ensure auth, command center, and probes schemas exist before serving routes.
+  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...probesMigrations]);
   await seedBootstrapAdmin();
+  await ensureProbesSchema();
+
+  // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
+  const midKeyEncryptionSecret =
+    process.env.MID_KEY_ENCRYPTION_SECRET?.trim() || env.MID_KEY_ENCRYPTION_SECRET;
+  if (midKeyEncryptionSecret) {
+    await fastify.register(midFastifyPlugin, {
+      db: createD1DatabaseFromOrm(getDb()),
+      keyEncryptionSecret: midKeyEncryptionSecret,
+      issuerUrl:
+        process.env.MID_ISSUER_URL?.trim() || env.MID_ISSUER_URL || "https://id.moonwitness.biz.id",
+      cookieDomain: process.env.MID_COOKIE_DOMAIN?.trim() || env.MID_COOKIE_DOMAIN,
+      corsOrigins: process.env.CORS_ORIGINS ?? env.CORS_ORIGINS,
+    });
+    fastify.decorate("midMounted", true);
+  }
 
   if (options.prefix) {
     await fastify.register(
@@ -151,6 +170,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
         await instance.register(riotAiRoutes);
         await instance.register(commandCenterRoutes);
         await instance.register(memoryRoutes);
+        await instance.register(probesRoutes);
       },
       { prefix: options.prefix },
     );

@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -20,6 +21,11 @@ class Settings(BaseSettings):
     moonwitness_sync_url: str = ""
     moonwitness_sync_token: str = ""
     moonwitness_batch_size: int = 50
+    mid_issuer_url: str = "https://id.moonwitness.biz.id"
+    mid_jwks_cache_ttl_seconds: int = 300
+    mid_audience: str = "moonwitness-memory"
+    mid_allowed_audiences: str = ""
+    memory_require_auth: bool = False
     cors_origins: str = (
         "http://localhost:3005,http://127.0.0.1:3005,"
         "http://localhost:3000,http://127.0.0.1:3000,"
@@ -29,6 +35,13 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def mid_audience_allowlist(self) -> tuple[str, ...]:
+        raw = self.mid_allowed_audiences.strip() or self.mid_audience.strip()
+        if not raw:
+            return ()
+        return tuple(entry.strip() for entry in raw.split(",") if entry.strip())
 
     @property
     def db_path(self) -> Path:

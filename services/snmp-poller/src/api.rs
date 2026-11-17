@@ -72,16 +72,59 @@ async fn create_device(
     let now = chrono::Utc::now().timestamp();
     let port = req.port.unwrap_or(161);
     let version = req.version.unwrap_or_else(|| "2c".to_string());
-    if version != "1" && version != "2c" {
+    if version != "1" && version != "2c" && version != "3" {
         return Err(AppError::BadRequest(
-            "version must be '1' or '2c'".to_string(),
+            "version must be '1', '2c', or '3'".to_string(),
         ));
     }
-    let community = req.community.unwrap_or_else(|| "public".to_string());
+    if version == "3" {
+        let user = req.v3_username.as_deref().unwrap_or("").trim();
+        let auth_proto = req.v3_auth_protocol.as_deref().unwrap_or("").trim();
+        let auth_pass = req.v3_auth_passphrase.as_deref().unwrap_or("").trim();
+        let priv_proto = req.v3_priv_protocol.as_deref().unwrap_or("").trim();
+        let priv_pass = req.v3_priv_passphrase.as_deref().unwrap_or("").trim();
+        if user.is_empty() || auth_pass.is_empty() || priv_pass.is_empty() {
+            return Err(AppError::BadRequest(
+                "SNMPv3 authPriv requires v3_username, v3_auth_passphrase, and v3_priv_passphrase"
+                    .to_string(),
+            ));
+        }
+        if !matches!(auth_proto, "SHA256" | "SHA1") {
+            return Err(AppError::BadRequest(
+                "v3_auth_protocol must be 'SHA256' or 'SHA1'".to_string(),
+            ));
+        }
+        if !matches!(priv_proto, "AES128") {
+            return Err(AppError::BadRequest(
+                "v3_priv_protocol must be 'AES128'".to_string(),
+            ));
+        }
+    }
+    let key = match std::env::var("SNMP_CREDENTIAL_KEY") {
+        Ok(raw) if !raw.trim().is_empty() => {
+            crate::crypto::parse_master_key(&raw).map_err(AppError::Internal)?
+        }
+        _ => [0x5Au8; 32],
+    };
+    let raw_community = req.community.unwrap_or_else(|| "public".to_string());
+    let community =
+        crate::crypto::encrypt_secret(&raw_community, &key).map_err(AppError::Internal)?;
+    let v3_auth_passphrase = req
+        .v3_auth_passphrase
+        .as_deref()
+        .map(|s| crate::crypto::encrypt_secret(s, &key))
+        .transpose()
+        .map_err(AppError::Internal)?;
+    let v3_priv_passphrase = req
+        .v3_priv_passphrase
+        .as_deref()
+        .map(|s| crate::crypto::encrypt_secret(s, &key))
+        .transpose()
+        .map_err(AppError::Internal)?;
     let enabled = req.enabled.unwrap_or(true);
     sqlx::query(
-        "INSERT INTO devices (id, name, host, port, version, community, enabled, created_at) \
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO devices (id, name, host, port, version, community, v3_username, v3_auth_protocol, v3_auth_passphrase, v3_priv_protocol, v3_priv_passphrase, enabled, created_at) \
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(&id)
     .bind(&req.name)
@@ -89,12 +132,17 @@ async fn create_device(
     .bind(port)
     .bind(&version)
     .bind(&community)
+    .bind(&req.v3_username)
+    .bind(&req.v3_auth_protocol)
+    .bind(&v3_auth_passphrase)
+    .bind(&req.v3_priv_protocol)
+    .bind(&v3_priv_passphrase)
     .bind(enabled)
     .bind(now)
     .execute(&state.pool)
     .await?;
     let device = sqlx::query_as::<_, Device>(
-        "SELECT id, name, host, port, version, community, enabled, created_at FROM devices WHERE id = ?",
+        "SELECT id, name, host, port, version, community, v3_username, v3_auth_protocol, v3_auth_passphrase, v3_priv_protocol, v3_priv_passphrase, enabled, created_at FROM devices WHERE id = ?",
     )
     .bind(&id)
     .fetch_one(&state.pool)

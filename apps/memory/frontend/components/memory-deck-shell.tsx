@@ -14,6 +14,7 @@ type Props = {
   lastUpdated: string | null;
   theme: Theme;
   onToggleTheme: () => void;
+  authControl?: ReactNode;
   loadControl: ReactNode;
   apiDocsHref: string;
   transport: ReactNode;
@@ -36,6 +37,7 @@ export function MemoryDeckShell({
   lastUpdated,
   theme,
   onToggleTheme,
+  authControl,
   loadControl,
   apiDocsHref,
   transport,
@@ -72,6 +74,7 @@ export function MemoryDeckShell({
         </div>
 
         <div className="deck-fascia__actions">
+          {authControl}
           {loadControl}
           <button
             className="deck-icon-button"

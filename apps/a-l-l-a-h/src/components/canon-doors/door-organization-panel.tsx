@@ -45,38 +45,43 @@ export function DoorOrganizationPanel() {
       {activeWing === "constitution" && (
         <div className="space-y-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-5 border border-[#d6b46c]/30 bg-[#070910] p-5 sm:p-6">
-              <div className="font-mono text-[11px] tracking-[0.2em] text-[#d6b46c] uppercase">
+            <div className="lg:col-span-5 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-5 sm:p-6">
+              <div className="font-mono text-[11px] tracking-[0.2em] text-[var(--dna-accent)] uppercase">
                 SUPREME IDENTITY &amp; LOW-PROFILE TAWHID
               </div>
-              <h4 className="font-monument mt-2 text-lg sm:text-xl tracking-[0.1em] text-[#fff6df]">
+              <h4 className="font-monument mt-2 text-lg sm:text-xl tracking-[0.1em] text-[var(--dna-text)]">
                 A-L-L-A-H: {SUPREME_IDENTITY.fullExpansion}
               </h4>
-              <p className="mt-2 font-mono text-xs text-[#f5dfa6]">
+              <p className="mt-2 font-mono text-xs text-[var(--dna-accent)]">
                 {SUPREME_IDENTITY.tawhidPrinciple}
               </p>
-              <p className="mt-2 font-serif text-sm italic text-[#dfd5c0]">
+              <p className="mt-2 font-serif text-sm italic text-[var(--dna-muted)]">
                 “{SUPREME_IDENTITY.tawhidMotto}”
               </p>
-              <div className="mt-4 border-t border-[#d6b46c]/20 pt-3 font-mono text-[11px] text-[#cfc5b0]">
+              <div className="mt-4 border-t border-[var(--dna-accent)]/20 pt-3 font-mono text-[11px] text-[var(--dna-muted)]">
                 {SUPREME_IDENTITY.monocentricFormula}
               </div>
             </div>
 
-            <div className="lg:col-span-7 border border-[#d6b46c]/30 bg-[#070910] p-5 sm:p-6">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-2">
-                <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+            <div className="lg:col-span-7 border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-5 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2">
+                <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[var(--dna-accent)] uppercase">
                   4-LINE STEWARDSHIP MANIFESTO (VISUAL CONSTITUTION)
                 </span>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                 {OWNER_FOUR_LINE_MANIFESTO.map((item) => (
-                  <div key={item.index} className="border border-[#d6b46c]/20 bg-[#0a0d16] p-3.5">
-                    <div className="font-mono text-[10px] text-[#d6b46c]">LINE {item.index}</div>
-                    <div className="font-monument mt-1 text-xs sm:text-sm tracking-[0.06em] text-[#fff6df]">
+                  <div
+                    key={item.index}
+                    className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3.5"
+                  >
+                    <div className="font-mono text-[10px] text-[var(--dna-accent)]">
+                      LINE {item.index}
+                    </div>
+                    <div className="font-monument mt-1 text-xs sm:text-sm tracking-[0.06em] text-[var(--dna-text)]">
                       {item.line}
                     </div>
-                    <p className="mt-1 text-xs text-[#cfc5b0]">{item.interpretation}</p>
+                    <p className="mt-1 text-xs text-[var(--dna-muted)]">{item.interpretation}</p>
                   </div>
                 ))}
               </div>
@@ -85,49 +90,57 @@ export function DoorOrganizationPanel() {
 
           {/* WINGS 10 Operational Array & THE PRIME CODE PC01-PC09 */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            <div className="lg:col-span-7 border border-[#d6b46c]/25 bg-[#070910] p-5">
-              <div className="font-monument text-xs sm:text-sm tracking-[0.16em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
+            <div className="lg:col-span-7 border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5">
+              <div className="font-monument text-xs sm:text-sm tracking-[0.16em] text-[var(--dna-accent)] uppercase border-b border-[var(--dna-accent)]/20 pb-2">
                 WINGS 10 OPERATIONAL ARRAY (W01 SKYLINK – W10 HAVEN · PROPOSED_NOT_ASSIGNED)
               </div>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {WINGS_TEN_ARRAY.map((wing) => (
-                  <div key={wing.code} className="border border-[#d6b46c]/20 bg-[#0a0d16] p-3">
-                    <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+                  <div
+                    key={wing.code}
+                    className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3"
+                  >
+                    <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                       <span>{wing.code}</span>
                       <span>{wing.domainRole}</span>
                     </div>
-                    <div className="font-monument mt-0.5 text-xs sm:text-sm text-[#fff6df]">
+                    <div className="font-monument mt-0.5 text-xs sm:text-sm text-[var(--dna-text)]">
                       {wing.callsign}
                     </div>
-                    <p className="mt-0.5 text-[11px] text-[#cfc5b0]">{wing.architecturalDuty}</p>
+                    <p className="mt-0.5 text-[11px] text-[var(--dna-muted)]">
+                      {wing.architecturalDuty}
+                    </p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="lg:col-span-5 border border-[#d6b46c]/25 bg-[#070910] p-5">
-              <div className="font-monument text-xs sm:text-sm tracking-[0.16em] text-[#f5e3b8] uppercase border-b border-[#d6b46c]/20 pb-2">
+            <div className="lg:col-span-5 border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5">
+              <div className="font-monument text-xs sm:text-sm tracking-[0.16em] text-[var(--dna-accent)] uppercase border-b border-[var(--dna-accent)]/20 pb-2">
                 THE PRIME CODE (PC01–PC09) &amp; 14 SYSTEM CONCEPTS
               </div>
               <div className="mt-3 space-y-2 max-h-[380px] overflow-y-auto pr-1">
                 {PRIME_CODE_AXIOMS.map((axiom) => (
-                  <div key={axiom.code} className="border border-[#d6b46c]/15 bg-[#0a0d16] p-2.5">
-                    <div className="font-mono text-[10px] text-[#d6b46c]">
+                  <div
+                    key={axiom.code}
+                    className="border border-[var(--dna-accent)]/15 bg-[var(--dna-canvas)] p-2.5"
+                  >
+                    <div className="font-mono text-[10px] text-[var(--dna-accent)]">
                       {axiom.code} · {axiom.title}
                     </div>
-                    <p className="mt-0.5 text-xs text-[#dfd5c0]">{axiom.statement}</p>
+                    <p className="mt-0.5 text-xs text-[var(--dna-muted)]">{axiom.statement}</p>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 border-t border-[#d6b46c]/20 pt-3">
-                <div className="font-mono text-[10px] tracking-[0.16em] text-[#d6b46c] uppercase">
+              <div className="mt-4 border-t border-[var(--dna-accent)]/20 pt-3">
+                <div className="font-mono text-[10px] tracking-[0.16em] text-[var(--dna-accent)] uppercase">
                   14 CANONICAL SYSTEM CONCEPTS (MWX-SYS-001..014)
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {SYSTEM_CONCEPTS_14.map((concept) => (
                     <span
                       key={concept}
-                      className="border border-[#d6b46c]/15 bg-[#090c15] px-2 py-0.5 font-mono text-[10px] text-[#cfc5b0]"
+                      className="border border-[var(--dna-accent)]/15 bg-[var(--dna-canvas)] px-2 py-0.5 font-mono text-[10px] text-[var(--dna-muted)]"
                     >
                       {concept}
                     </span>
@@ -141,12 +154,12 @@ export function DoorOrganizationPanel() {
 
       {/* 100CENTER (99 G.O.D. Stewardship Nodes + 1 Tawhid Center) & Syafaat 6 States */}
       {activeWing === "center100" && (
-        <div className="border border-[#d6b46c]/25 bg-[#070910] p-5 sm:p-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d6b46c]/20 pb-3">
-            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[#f5e3b8] uppercase">
+        <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
+            <span className="font-monument text-sm sm:text-base tracking-[0.16em] text-[var(--dna-accent)] uppercase">
               100CENTER STEWARDSHIP TOPOLOGY &amp; SYAFAAT 6-STATE ENGINE
             </span>
-            <span className="font-mono text-[11px] text-[#d6b46c]">
+            <span className="font-mono text-[11px] text-[var(--dna-accent)]">
               99 HUMAN ETHICAL REFLECTIONS + 1 TAWHID CENTER (NO DEIFICATION OF HUMANS)
             </span>
           </div>
@@ -161,8 +174,8 @@ export function DoorOrganizationPanel() {
                   onClick={() => setActiveSyafaatState(stateObj.state)}
                   className={`min-h-[44px] border px-3 py-1.5 font-mono text-[11px] tracking-[0.14em] cursor-pointer transition-colors ${
                     isSelected
-                      ? "border-[#fff2c6] bg-[#d6b46c]/25 text-[#fff6df]"
-                      : "border-[#d6b46c]/20 bg-[#0b0e18] text-[#cfc5b0] hover:border-[#d6b46c]/50"
+                      ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/25 text-[var(--dna-text)]"
+                      : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] text-[var(--dna-muted)] hover:border-[var(--dna-accent)]/50"
                   }`}
                 >
                   {stateObj.state}
@@ -170,7 +183,7 @@ export function DoorOrganizationPanel() {
               );
             })}
           </div>
-          <p className="mt-2 font-mono text-xs text-[#f5dfa6]">
+          <p className="mt-2 font-mono text-xs text-[var(--dna-accent)]">
             ACTIVE REFLECTION STATE [{activeSyafaatState}]:{" "}
             {SYAFAAT_BASE_STATES.find((s) => s.state === activeSyafaatState)?.description}
           </p>
@@ -189,18 +202,18 @@ export function DoorOrganizationPanel() {
                     onClick={() => setSelectedClusterIdx(idx)}
                     className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
                       selected
-                        ? "border-[#e6c987] bg-[#d6b46c]/15"
-                        : "border-[#d6b46c]/20 bg-[#0b0e18] hover:border-[#d6b46c]/50"
+                        ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/15"
+                        : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/50"
                     }`}
                   >
-                    <div className="flex items-center justify-between font-mono text-[10px] text-[#d6b46c]">
+                    <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                       <span>{cluster.clusterCode}</span>
                       <span>{cluster.rangeLabel}</span>
                     </div>
-                    <div className="font-monument mt-1 text-xs text-[#fff6df] uppercase">
+                    <div className="font-monument mt-1 text-xs text-[var(--dna-text)] uppercase">
                       {cluster.title}
                     </div>
-                    <div className="mt-1 font-sans text-xs text-[#cfc5b0]">
+                    <div className="mt-1 font-sans text-xs text-[var(--dna-muted)]">
                       {cluster.humanEthicalFocus}
                     </div>
                   </button>
@@ -209,15 +222,15 @@ export function DoorOrganizationPanel() {
             </div>
           </div>
 
-          <div className="mt-3 border border-[#d6b46c]/20 bg-[#0a0d16] p-3.5 flex flex-wrap items-center justify-between gap-2">
-            <span className="font-mono text-xs text-[#fff6df]">
+          <div className="mt-3 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3.5 flex flex-wrap items-center justify-between gap-2">
+            <span className="font-mono text-xs text-[var(--dna-text)]">
               SELECTED CLUSTER // {selectedCluster.title} [{activeSyafaatState}]
             </span>
             <div className="flex flex-wrap gap-1.5">
               {selectedCluster.representativeReflections.map((refl) => (
                 <span
                   key={refl}
-                  className="border border-[#d6b46c]/25 bg-[#101423] px-2.5 py-0.5 font-mono text-[10px] text-[#f5dfa6]"
+                  className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] px-2.5 py-0.5 font-mono text-[10px] text-[var(--dna-accent)]"
                 >
                   {refl}
                 </span>

@@ -22,6 +22,7 @@ export interface MidEnv {
   SESSION_TTL_SEC?: string;
   COOKIE_DOMAIN?: string;
   CORS_ORIGINS?: string;
+  MID_ALLOWED_AUDIENCES?: string;
 }
 
 /** Canonical MoonWitness user role levels. */
@@ -77,9 +78,11 @@ export interface PublicEs256Jwk {
 export interface MidTokenClaims {
   iss: string;
   sub: string;
-  aud: string;
+  aud: string | string[];
+  azp?: string;
   exp: number;
   iat: number;
+  nbf?: number;
   jti: string;
   token_use: "access" | "id";
   scope?: string;

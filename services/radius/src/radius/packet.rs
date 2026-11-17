@@ -17,7 +17,7 @@ pub const CODE_ACCESS_REJECT: u8 = 3;
 pub const CODE_ACCOUNTING_REQUEST: u8 = 4;
 pub const CODE_ACCOUNTING_RESPONSE: u8 = 5;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RadiusPacket {
     pub code: u8,
     pub identifier: u8,
@@ -88,11 +88,49 @@ impl RadiusPacket {
         if data.len() < 20 {
             return false;
         }
-        let mut input = data.to_vec();
+        let length = u16::from_be_bytes([data[2], data[3]]) as usize;
+        if length < 20 || length > data.len() {
+            return false;
+        }
+        let mut input = data[..length].to_vec();
         input[4..20].copy_from_slice(&[0u8; 16]);
         input.extend_from_slice(secret.as_bytes());
         md5_digest(&input) == self.authenticator
     }
+}
+
+#[cfg(test)]
+pub(crate) fn compute_response_authenticator(
+    raw_response: &[u8],
+    req_auth: &[u8; 16],
+    secret: &str,
+) -> [u8; 16] {
+    let mut input = raw_response.to_vec();
+    input[4..20].copy_from_slice(req_auth);
+    input.extend_from_slice(secret.as_bytes());
+    md5_digest(&input)
+}
+
+#[cfg(test)]
+pub(crate) fn sign_accounting_request(
+    identifier: u8,
+    attributes: Vec<crate::radius::attributes::Attribute>,
+    secret: &str,
+) -> Vec<u8> {
+    let unsigned = RadiusPacket {
+        code: CODE_ACCOUNTING_REQUEST,
+        identifier,
+        authenticator: [0u8; 16],
+        attributes,
+    }
+    .encode(None, secret);
+    let mut input = unsigned.clone();
+    input[4..20].copy_from_slice(&[0u8; 16]);
+    input.extend_from_slice(secret.as_bytes());
+    let auth = md5_digest(&input);
+    let mut signed = unsigned;
+    signed[4..20].copy_from_slice(&auth);
+    signed
 }
 
 fn md5_digest(input: &[u8]) -> [u8; 16] {
@@ -106,7 +144,10 @@ fn md5_digest(input: &[u8]) -> [u8; 16] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::radius::attributes::Attribute;
+    use crate::radius::attributes::{
+        self, attr_string, attr_u32, vlan_attributes, Attribute, FRAMED_IP_ADDRESS,
+        SESSION_TIMEOUT, TUNNEL_PRIVATE_GROUP_ID, USER_NAME,
+    };
 
     #[test]
     fn decode_rejects_short_packet() {
@@ -124,6 +165,46 @@ mod tests {
     }
 
     #[test]
+    fn decode_rejects_length_below_header_size() {
+        let mut data = vec![CODE_ACCESS_REQUEST, 1, 0, 19];
+        data.extend_from_slice(&[0u8; 16]);
+        assert!(RadiusPacket::decode(&data).is_none());
+    }
+
+    #[test]
+    fn encode_decode_roundtrip_preserves_packet_fields() {
+        let mut attrs = vec![
+            Attribute::new(USER_NAME, b"pppoe-user"),
+            Attribute::new(FRAMED_IP_ADDRESS, &[192, 168, 10, 42]),
+            Attribute::new(SESSION_TIMEOUT, &1800u32.to_be_bytes()),
+        ];
+        attrs.extend(vlan_attributes(210));
+
+        let original = RadiusPacket {
+            code: CODE_ACCESS_REQUEST,
+            identifier: 77,
+            authenticator: [0x5Au8; 16],
+            attributes: attrs,
+        };
+        let encoded = original.encode(None, "unused");
+        let decoded = RadiusPacket::decode(&encoded).unwrap();
+        assert_eq!(decoded, original);
+        assert_eq!(
+            attr_string(&decoded.attributes, USER_NAME).as_deref(),
+            Some("pppoe-user")
+        );
+        assert_eq!(attr_u32(&decoded.attributes, SESSION_TIMEOUT), Some(1800));
+        assert_eq!(
+            attr_string(&decoded.attributes, TUNNEL_PRIVATE_GROUP_ID).as_deref(),
+            Some("210")
+        );
+        assert_eq!(
+            attributes::attr_bytes(&decoded.attributes, FRAMED_IP_ADDRESS),
+            Some([192, 168, 10, 42].as_slice())
+        );
+    }
+
+    #[test]
     fn access_accept_authenticator_matches_rfc_2865() {
         let secret = "s3cr3t";
         let req_auth = [0xABu8; 16];
@@ -134,40 +215,49 @@ mod tests {
             attributes: vec![Attribute::new(8, &[10, 0, 0, 1])],
         };
         let encoded = packet.encode(Some(&req_auth), secret);
-
-        // Recompute: MD5(Code|ID|Len|ReqAuth|Attrs|Secret)
-        let mut input = encoded.clone();
-        input[4..20].copy_from_slice(&req_auth);
-        input.extend_from_slice(secret.as_bytes());
-        let expected = md5_digest(&input);
-
+        let expected = compute_response_authenticator(&encoded, &req_auth, secret);
         assert_eq!(&encoded[4..20], &expected);
     }
 
     #[test]
     fn accounting_authenticator_verifies() {
         let secret = "s3cr3t";
-        let attrs = vec![Attribute::new(1, b"user"), Attribute::new(40, &1u32.to_be_bytes())];
-        let zero_auth = [0u8; 16];
-        let packet = RadiusPacket {
-            code: CODE_ACCOUNTING_REQUEST,
-            identifier: 9,
-            authenticator: zero_auth,
-            attributes: attrs,
-        };
-        let unsigned = packet.encode(None, secret);
-
-        // Compute the real authenticator over the packet with a zeroed field.
-        let mut input = unsigned.clone();
-        input[4..20].copy_from_slice(&[0u8; 16]);
-        input.extend_from_slice(secret.as_bytes());
-        let auth = md5_digest(&input);
-
-        let mut signed = unsigned.clone();
-        signed[4..20].copy_from_slice(&auth);
+        let attrs = vec![
+            Attribute::new(1, b"user"),
+            Attribute::new(40, &1u32.to_be_bytes()),
+        ];
+        let signed = sign_accounting_request(9, attrs, secret);
 
         let decoded = RadiusPacket::decode(&signed).unwrap();
         assert!(decoded.verify_accounting_request(&signed, secret));
         assert!(!decoded.verify_accounting_request(&signed, "wrong-secret"));
+    }
+
+    #[test]
+    fn accounting_authenticator_rejects_tampered_payload_and_bad_length() {
+        let secret = "s3cr3t";
+        let attrs = vec![
+            Attribute::new(USER_NAME, b"user"),
+            Attribute::new(attributes::ACCT_STATUS_TYPE, &1u32.to_be_bytes()),
+        ];
+        let signed = sign_accounting_request(11, attrs, secret);
+        let decoded = RadiusPacket::decode(&signed).unwrap();
+
+        let mut tampered = signed.clone();
+        let last = tampered.len() - 1;
+        tampered[last] ^= 0x01;
+        assert!(!decoded.verify_accounting_request(&tampered, secret));
+
+        assert!(!decoded.verify_accounting_request(&signed[..10], secret));
+
+        let mut bad_len = signed.clone();
+        bad_len[2] = 0;
+        bad_len[3] = 250;
+        assert!(!decoded.verify_accounting_request(&bad_len, secret));
+
+        // Trailing UDP padding past packet Length is ignored per RFC 2866 §3.
+        let mut padded = signed;
+        padded.extend_from_slice(&[0u8; 8]);
+        assert!(decoded.verify_accounting_request(&padded, secret));
     }
 }

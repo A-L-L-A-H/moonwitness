@@ -1,11 +1,21 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import {
+  CrescentStarIcon,
+  CrownEmblemIcon,
+  IllustratedHero,
+  PrimaryAction,
+  SearchLensIcon,
+  SecondaryAction,
+  SiteNavigation,
+  WorldExplorer,
+  WorldTile,
+} from "@moonwitness/ui/imperium";
+import gateCrowdMoonArt from "../../public/art/gate-crowd-moon.webp";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
-import type { RenderingCapabilityTier } from "@/data/design-tokens";
 import {
   NAVIGATION_TABS,
   WORLD_DOMAINS,
@@ -13,37 +23,75 @@ import {
   type WorldIdentifier,
 } from "@/data/empire-registry";
 import { CanonCodexSanctum } from "./canon-codex-sanctum";
-import { CelestialCanvas } from "./celestial-canvas";
-import { CelestialHudCapsule } from "./celestial-hud-capsule";
-import { CinematicEntrance } from "./cinematic-entrance";
 import { CovenantAboutSection } from "./covenant-about-section";
 import { DockMatrixSection } from "./dock-matrix-section";
-import { MagneticPortal, triggerSacredViewTransition } from "./motion-primitives";
-import {
-  CrescentStarIcon,
-  DiamondStarOrnament,
-  OctagramMandalaIcon,
-  SearchLensIcon,
-  WorldEmblemById,
-} from "./sacred-icons";
+import { triggerSacredViewTransition } from "./motion-primitives";
 import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
 import { UniversalSearchModal } from "./universal-search-modal";
 import { WorldsSanctum } from "./worlds-sanctum";
 
+const WORLD_ART: Readonly<
+  Record<WorldIdentifier, { readonly src: string; readonly subject: string }>
+> = {
+  moonwitness: {
+    src: "/art/world-moonwitness.webp",
+    subject: "An illustrated archive hall beneath a moonlit sky",
+  },
+  arsy: {
+    src: "/art/world-arsy.webp",
+    subject: "A radio relay dish overlooking a twilight skyline",
+  },
+  "human-pen": {
+    src: "/art/world-qalam.webp",
+    subject: "An illuminated writing pen over editorial panels",
+  },
+  sidra: {
+    src: "/art/world-sidra.webp",
+    subject: "A luminous tree of connected knowledge",
+  },
+  "rocksoul-dx": {
+    src: "/art/world-rocksoul.webp",
+    subject: "A playful creative studio controller over vibrant color",
+  },
+  crayon: {
+    src: "/art/story-plate-01.webp",
+    subject: "A bright spectrum of illustrated editorial lenses",
+  },
+  "sin-can": {
+    src: "/art/story-plate-02.webp",
+    subject: "An open archway leading into honest self-reflection",
+  },
+  mythos: {
+    src: "/art/story-plate-04.webp",
+    subject: "Historic stone arches preserving ancient human memory",
+  },
+  "angel-with-shotgun": {
+    src: "/art/celestial-gate-bg.webp",
+    subject: "Balanced architectural scales under dramatic sky light",
+  },
+};
+
+const WORLD_TAGLINES_ID: Readonly<Record<WorldIdentifier, string>> = {
+  moonwitness: "Kisah · Pengetahuan · Arsip",
+  arsy: "Radio · Teknologi · Infrastruktur",
+  "human-pen": "Pikir · Tulis · Cipta · Bagikan",
+  sidra: "Terhubung · Jelajahi · Pelajari",
+  "rocksoul-dx": "Bermain · Cipta · Bermimpi",
+  crayon: "Biar Hidup Lebih Berwarna!",
+  "sin-can": "Refleksi · Tanya · Pahami",
+  mythos: "Jelajahi · Temukan · Ingat",
+  "angel-with-shotgun": "Hukum · Keadilan · Masyarakat",
+};
+
 export function EmpireOfLightExperience() {
   const { locale, toggleLocale } = useSanctuaryLocale();
   const [activeNavTab, setActiveNavTab] = useState<NavigationSectionId>("the-gate");
-  const [activeWorldId, setActiveWorldId] = useState<WorldIdentifier>("qalam");
+  const [activeWorldId, setActiveWorldId] = useState<WorldIdentifier>("human-pen");
   const [activeDoorId, setActiveDoorId] = useState<EntryDoorId>("story-universe");
   const [sanctuaryRadianceActive, setSanctuaryRadianceActive] = useState<boolean>(false);
   const [quietMode, setQuietMode] = useState<boolean>(false);
-  const [renderingTier, setRenderingTier] = useState<RenderingCapabilityTier>("canvas-2d");
   const [searchModalOpen, setSearchModalOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const [replayCounter, setReplayCounter] = useState<number>(0);
-  const [entranceActive, setEntranceActive] = useState<boolean>(false);
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
-  const [pageScrollFraction, setPageScrollFraction] = useState<number>(0);
 
   // Keyboard shortcut Ctrl+K / Cmd+K to open search from anywhere
   useEffect(() => {
@@ -57,7 +105,7 @@ export function EmpireOfLightExperience() {
     return () => window.removeEventListener("keydown", handleGlobalKey);
   }, []);
 
-  // Passive scroll progress for hero parallax + sticky header glass + accurate scroll-spy
+  // Keep the fixed navigation in sync with the section currently in view
   useEffect(() => {
     let rafId = 0;
     const sectionIds: readonly NavigationSectionId[] = [
@@ -70,14 +118,6 @@ export function EmpireOfLightExperience() {
 
     const updateScroll = () => {
       rafId = 0;
-      const vh = Math.max(window.innerHeight, 1);
-      const progress = Math.max(0, Math.min(1, window.scrollY / vh));
-      const maxDocScroll = Math.max(document.documentElement.scrollHeight - window.innerHeight, 1);
-      setScrollProgress(progress);
-      setPageScrollFraction(Math.max(0, Math.min(1, window.scrollY / maxDocScroll)));
-      document.documentElement.style.setProperty("--scroll-progress", progress.toFixed(3));
-
-      // Determine active section by viewport top threshold (~160px below fixed header)
       const nearBottom =
         window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 40;
       if (nearBottom) {
@@ -183,146 +223,52 @@ export function EmpireOfLightExperience() {
     }
   }, [quietMode, navigateToSection]);
 
-  const jumpToFourScriptures = useCallback(() => {
-    setMobileMenuOpen(false);
-    setActiveNavTab("about");
-    const scripturesEl = document.getElementById("four-scriptures");
-    if (scripturesEl) {
-      const reduced = quietMode || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      scripturesEl.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-    } else {
-      navigateToSection("about");
-    }
-  }, [quietMode, navigateToSection]);
-
-  const handleCapabilityDetected = useCallback((tier: RenderingCapabilityTier) => {
-    setRenderingTier(tier);
-  }, []);
-
-  const handleReplayEntrance = useCallback(() => {
-    setMobileMenuOpen(false);
-    setQuietMode(false);
-    setReplayCounter((prev) => prev + 1);
-  }, []);
-
-  const parallaxTranslateY = quietMode ? 0 : Math.round(scrollProgress * 42);
-  const parallaxScale = quietMode
-    ? 1
-    : (sanctuaryRadianceActive ? 1.018 : 1.0) + scrollProgress * 0.03;
-
-  const capabilityStatusLabel =
-    renderingTier === "webgl2-full"
-      ? "LIVING LIGHT · WEBGL2 GLSL"
-      : renderingTier === "canvas-2d"
-        ? "LIVING LIGHT · CANVAS 2D"
-        : "QUIET CONTEMPLATIVE MODE";
-
-  const headerFrosted = scrollProgress > 0.06 || mobileMenuOpen;
-
   return (
-    <div className="relative min-h-screen bg-[#040509] text-[#f5efe2] selection:bg-[#d6b46c] selection:text-[#040509]">
-      {/* Non-Blocking Staged Cinematic Opening Sequence */}
-      <CinematicEntrance
-        quietMode={quietMode}
-        replayCounter={replayCounter}
-        onVisibilityChange={setEntranceActive}
-      />
-
-      {/* Global Meridian Scroll Progress Hairline */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 top-0 z-50 h-[2px] bg-[#dfc07b]/10"
-      >
-        <div
-          className="h-full bg-gradient-to-r from-[#9c732b] via-[#fff4d2] to-[#dfc07b] transition-[width] duration-150"
-          style={{ width: `${(pageScrollFraction * 100).toFixed(1)}%` }}
-        />
-      </div>
-
-      {/* 1. FIXED SANCTUARY HEADER (Transparent over the Gate, Obsidian Glass on Scroll) */}
-      <header
-        aria-hidden={entranceActive ? true : undefined}
-        className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
-          headerFrosted
-            ? "border-b border-[#d6b46c]/20 bg-[#040509]/85 backdrop-blur-md shadow-[0_12px_40px_rgba(0,0,0,0.75)]"
-            : "bg-gradient-to-b from-[#040509]/70 via-[#040509]/25 to-transparent"
-        }`}
-      >
-        <div className="mx-auto flex w-full max-w-[1600px] items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-3.5 xl:px-10">
-          {/* Brand Emblem & Title */}
+    <div className="home-page relative min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] selection:bg-[var(--dna-accent)] selection:text-[var(--dna-canvas)]">
+      <SiteNavigation
+        navLabel="Primary Empire Navigation"
+        mobileMenuOpen={mobileMenuOpen}
+        brand={
           <a
             href="#the-gate"
             onClick={(event) => {
               event.preventDefault();
               navigateToSection("the-gate");
             }}
-            className="group flex min-h-[44px] shrink-0 items-center gap-2.5 sm:gap-3 focus:outline-none"
+            className="home-header-brand group flex min-h-[44px] items-center gap-2.5 sm:gap-3"
           >
-            <OctagramMandalaIcon className="h-9 w-9 sm:h-10 sm:w-10 shrink-0 transition-transform duration-700 group-hover:rotate-45" />
-            <div className="flex items-center gap-2.5 sm:gap-3 whitespace-nowrap">
-              <span className="font-monument text-sm md:text-xs lg:text-base xl:text-lg tracking-[0.14em] text-[#f7efe0] font-normal">
+            <CrownEmblemIcon className="h-8 w-8 shrink-0 text-[var(--dna-accent)]" />
+            <div className="flex flex-col leading-tight">
+              <span className="home-brand-wordmark text-base sm:text-lg font-bold tracking-[0.06em] text-[var(--dna-text)]">
                 A-L-L-A-H.COM
               </span>
-              <span
-                className="hidden h-4 w-px bg-[#d6b46c]/45 2xl:inline-block"
-                aria-hidden="true"
-              />
-              <span className="hidden font-monument text-[11px] tracking-[0.2em] text-[#dfd5c0]/85 uppercase 2xl:inline-block">
+              <span className="home-brand-tagline text-[11px] font-bold tracking-[0.12em] text-[var(--dna-accent)] uppercase">
                 EMPIRE OF THE LIGHT
               </span>
             </div>
           </a>
-
-          {/* Center Navigation Tabs (Desktop & Tablet Large) */}
-          <nav
-            aria-label="Primary Empire Navigation"
-            className="hidden md:flex min-w-0 items-center gap-3.5 lg:gap-5 xl:gap-7"
-          >
-            {NAVIGATION_TABS.map((navTab) => {
-              const isTabActive = activeNavTab === navTab.id;
-              return (
-                <a
-                  key={navTab.id}
-                  href={`#${navTab.id}`}
-                  onClick={(event) => {
-                    event.preventDefault();
-                    navigateToSection(navTab.id);
-                  }}
-                  aria-current={isTabActive ? "page" : undefined}
-                  className={`relative flex min-h-[44px] items-center whitespace-nowrap py-2 font-monument text-[10px] lg:text-[11.5px] xl:text-[12.5px] tracking-[0.12em] xl:tracking-[0.16em] uppercase transition-colors ${
-                    isTabActive
-                      ? "text-[#fff8e8] drop-shadow-[0_0_10px_rgba(248,234,198,0.65)]"
-                      : "text-[#d8ceba]/80 hover:text-[#fff6df]"
-                  }`}
-                >
-                  {navTab.label}
-                  {isTabActive && (
-                    <span
-                      aria-hidden="true"
-                      className="absolute inset-x-[-10px] bottom-0.5 flex items-center justify-center"
-                    >
-                      <span className="h-[1.5px] w-full bg-gradient-to-r from-transparent via-[#f5dfa6] to-transparent shadow-[0_0_12px_#f5dfa6]" />
-                      <span className="absolute h-2 w-2 rotate-45 bg-[#fff8e6] shadow-[0_0_10px_#fff8e6]" />
-                    </span>
-                  )}
-                </a>
-              );
-            })}
-          </nav>
-
-          {/* Right Utility Controls */}
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+        }
+        items={NAVIGATION_TABS.map((navTab) => ({
+          id: navTab.id,
+          label: navTab.label,
+          href: `#${navTab.id}`,
+          active: activeNavTab === navTab.id,
+          onSelect: (event) => {
+            event.preventDefault();
+            navigateToSection(navTab.id);
+          },
+        }))}
+        actions={
+          <>
             <button
               type="button"
               onClick={() => setSearchModalOpen(true)}
               aria-label="Search the Empire of the Light"
               title="Search (Ctrl+K)"
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[#e8dec8]/85 hover:text-[#fff8e6] transition-colors cursor-pointer"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--dna-text)] hover:text-[var(--dna-accent)] transition-colors cursor-pointer"
             >
               <SearchLensIcon className="h-5 w-5" />
             </button>
-
-            <span className="h-4 w-px bg-[#d6b46c]/40" aria-hidden="true" />
 
             <button
               type="button"
@@ -330,335 +276,214 @@ export function EmpireOfLightExperience() {
               onClick={() => setSanctuaryRadianceActive((prev) => !prev)}
               aria-label="Toggle Sanctuary Radiance Mode"
               title="Toggle Sanctuary Radiance"
-              className={`flex min-h-[44px] min-w-[44px] items-center justify-center transition-all cursor-pointer ${
+              className={`flex min-h-[44px] min-w-[44px] items-center justify-center transition-colors cursor-pointer ${
                 sanctuaryRadianceActive
-                  ? "text-[#fff6d6] drop-shadow-[0_0_12px_rgba(255,242,198,0.9)] scale-110"
-                  : "text-[#e8dec8]/85 hover:text-[#fff8e6]"
+                  ? "text-[var(--dna-accent)]"
+                  : "text-[var(--dna-text)] hover:text-[var(--dna-accent)]"
               }`}
             >
               <CrescentStarIcon className="h-5 w-5" />
             </button>
 
-            <button
-              type="button"
+            <SecondaryAction
               onClick={toggleLocale}
               aria-label={locale === "en" ? "Switch to Indonesian" : "Switch to English"}
               title={locale === "en" ? "Ganti ke Bahasa Indonesia" : "Switch to English"}
-              className="btn-luxe-secondary hidden sm:inline-flex items-center px-3 text-[10px] font-mono tracking-[0.18em] text-[#f5dfa6] uppercase cursor-pointer"
+              className="hidden sm:inline-flex font-mono text-xs"
             >
               {locale.toUpperCase()}
-            </button>
+            </SecondaryAction>
 
             <div className="hidden lg:inline-flex">
               <SanctuaryIdentityControl />
             </div>
 
-            <button
-              type="button"
+            <SecondaryAction
               aria-pressed={quietMode}
               onClick={() => setQuietMode((prev) => !prev)}
               aria-label="Toggle Quiet Contemplative Motion Mode"
-              title={
-                quietMode
-                  ? "Restore Living Light Shaders & Motion"
-                  : "Enable Quiet Contemplative Mode (Low Motion)"
-              }
-              className={`btn-luxe-secondary hidden lg:inline-flex items-center px-3.5 text-[10px] font-mono tracking-[0.18em] uppercase cursor-pointer ${
-                quietMode ? "text-[#fff4d2]" : "text-[#dfd5c0]/85 hover:text-[#fff6df]"
-              }`}
+              className="hidden lg:inline-flex font-mono text-xs"
             >
               {quietMode ? "QUIET" : "LIGHT"}
-            </button>
+            </SecondaryAction>
 
-            {/* Mobile Menu Toggle (< md) */}
-            <button
-              type="button"
+            <SecondaryAction
               aria-expanded={mobileMenuOpen}
               aria-controls="mobile-sanctuary-nav"
               aria-label="Toggle Empire Navigation Menu"
               onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="btn-luxe-secondary flex min-w-[44px] items-center justify-center text-[#f5efe2] md:hidden cursor-pointer"
+              className="flex min-w-[44px] px-3 lg:hidden"
             >
-              <span className="font-mono text-xs tracking-widest">
-                {mobileMenuOpen ? "✕" : "☰"}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Sanctuary Drawer Navigation */}
-        {mobileMenuOpen && (
+              <span className="font-mono text-sm">{mobileMenuOpen ? "✕" : "☰"}</span>
+            </SecondaryAction>
+          </>
+        }
+        mobileDrawer={
           <div
             id="mobile-sanctuary-nav"
             role="region"
             aria-label="Mobile Navigation"
-            className="mx-4 mb-3 border border-[#d6b46c]/45 bg-[#060810]/95 p-4 shadow-[0_20px_50px_rgba(0,0,0,0.9)] backdrop-blur-md md:hidden"
+            className="mx-4 mb-3 border-2 border-[var(--dna-accent)] bg-[var(--dna-canvas)] p-4 shadow-[4px_4px_0_var(--dna-accent-secondary)] lg:hidden"
           >
             <div className="grid grid-cols-2 gap-2">
               {NAVIGATION_TABS.map((navTab) => {
                 const isTabActive = activeNavTab === navTab.id;
                 return (
-                  <button
+                  <SecondaryAction
                     key={navTab.id}
-                    type="button"
                     data-active={isTabActive ? "true" : "false"}
                     onClick={() => navigateToSection(navTab.id)}
-                    className={`btn-luxe-secondary px-3 py-2 font-monument text-xs tracking-[0.18em] uppercase cursor-pointer ${
-                      isTabActive ? "text-[#fff6df]" : "text-[#d8ceba]"
-                    }`}
+                    className="w-full justify-center"
                   >
                     {navTab.label}
-                  </button>
+                  </SecondaryAction>
                 );
               })}
             </div>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[#d6b46c]/20 pt-3">
-              <button
-                type="button"
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--dna-accent)]/25 pt-3">
+              <SecondaryAction
                 aria-pressed={quietMode}
                 onClick={() => setQuietMode((prev) => !prev)}
-                className="btn-luxe-secondary flex-1 px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#dfc07b] uppercase cursor-pointer"
+                className="flex-1"
               >
-                {quietMode ? "RESTORE LIVING LIGHT" : "QUIET MODE"}
-              </button>
-              <button
-                type="button"
-                onClick={toggleLocale}
-                className="btn-luxe-secondary px-3.5 py-2 font-mono text-[11px] tracking-[0.16em] text-[#f5dfa6] uppercase cursor-pointer"
-              >
-                {locale.toUpperCase()}
-              </button>
-              <button
-                type="button"
-                onClick={handleReplayEntrance}
-                className="btn-luxe-secondary flex-1 px-3 py-2 font-mono text-[11px] tracking-[0.16em] text-[#f5efe2] uppercase cursor-pointer"
-              >
-                REPLAY ENTRANCE
-              </button>
+                {quietMode ? "RESTORE MOTION" : "QUIET MODE"}
+              </SecondaryAction>
+              <SecondaryAction onClick={toggleLocale}>{locale.toUpperCase()}</SecondaryAction>
               <SanctuaryIdentityControl compact />
             </div>
           </div>
-        )}
-      </header>
+        }
+      />
 
-      {/* =====================================================================
-          HERO VIEWPORT — THE GATE OF LIGHT (Sacred Minimalism × Living Light)
-         ===================================================================== */}
-      <section
-        id="the-gate"
-        aria-label="A-L-L-A-H.COM — Empire of the Light Gate"
-        aria-hidden={entranceActive ? true : undefined}
-        className="relative flex min-h-screen w-full flex-col justify-between overflow-hidden pt-20 sm:pt-24"
-      >
-        {/* Background Master Celestial Vista with Scroll-Depth Parallax */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 bg-[#040509]">
-          <div
-            className="relative h-full w-full transition-transform duration-700 ease-out"
-            style={{
-              transform: `translate3d(0, ${parallaxTranslateY}px, 0) scale(${parallaxScale.toFixed(4)})`,
-            }}
-          >
+      <main id="main" className="bg-girih-filigree">
+        <IllustratedHero
+          id="the-gate"
+          labelledBy="gate-heading"
+          data-enter
+          backdrop={
             <Image
-              src="/art/celestial-gate-bg.webp"
-              alt=""
+              src={gateCrowdMoonArt}
+              alt="Original illustration of back-facing travelers facing a luminous moonlit city across nine worlds"
               fill
               priority
-              sizes="100vw"
-              className={`object-cover object-center transition-[filter] duration-1000 ${
-                sanctuaryRadianceActive ? "brightness-110 contrast-105" : "brightness-100"
+              sizes="(orientation: portrait) min(170vh, 1900px), max(100vw, 170vh)"
+              data-source="illustration"
+              data-subject="Back-facing travelers overlooking a bright moonlit universe"
+              className={`home-gate-art-image object-cover ${
+                sanctuaryRadianceActive ? "is-radiant" : ""
               }`}
             />
-          </div>
-          {/* Legibility & Horizon Vignette Veils */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
-          <div className="absolute inset-x-0 bottom-0 h-[48%] sm:h-[38%] bg-gradient-to-t from-[#040509] via-[#040509]/76 to-transparent" />
-        </div>
-
-        {/* Multi-Layer WebGL2 GLSL Shader + 2D Orbital Starfield & Ripple Canvas */}
-        <CelestialCanvas
-          sanctuaryRadianceActive={sanctuaryRadianceActive}
-          quietMode={quietMode}
-          scrollProgress={scrollProgress}
-          onCapabilityDetected={handleCapabilityDetected}
-        />
-
-        {/* 2. CENTRAL HERO MONUMENT & SACRED PORTAL */}
-        <div className="relative z-20 mx-auto flex w-full max-w-5xl flex-col items-center px-4 text-center mt-[2vh] sm:mt-[4vh]">
-          {/* — IN THE NAME OF ALLAH — */}
-          <div className="flex items-center justify-center gap-3 sm:gap-5">
-            <span
-              aria-hidden="true"
-              className="h-px w-10 sm:w-20 bg-gradient-to-r from-transparent to-[#d6b46c]/80"
-            />
-            <p className="font-monument text-[10px] sm:text-xs md:text-[13px] tracking-[0.28em] text-[#e8dfd0]/90 uppercase">
-              IN THE NAME OF ALLAH
-            </p>
-            <span
-              aria-hidden="true"
-              className="h-px w-10 sm:w-20 bg-gradient-to-l from-transparent to-[#d6b46c]/80"
-            />
-          </div>
-
-          {/* A-L-L-A-H.COM */}
-          <h1 className="font-monument mt-2 sm:mt-3 text-4xl sm:text-6xl md:text-7xl lg:text-[5.4rem] font-normal leading-none tracking-[0.12em] text-gold-monument select-none">
-            A-L-L-A-H.COM
-          </h1>
-
-          {/* E M P I R E   O F   T H E   L I G H T */}
-          <p className="font-monument mt-2.5 sm:mt-3.5 text-xs sm:text-lg md:text-2xl tracking-[0.46em] text-[#eee5d3]/95 uppercase pl-[0.46em]">
-            EMPIRE OF THE LIGHT
-          </p>
-
-          {/* A world to witness. A world to learn. A world to build. */}
-          <p className="mt-3 sm:mt-4 font-serif text-sm sm:text-base md:text-[19px] tracking-[0.04em] text-[#f5efe2]/95 drop-shadow-[0_2px_10px_rgba(0,0,0,0.95)]">
-            {locale === "id"
-              ? "Dunia untuk bersaksi. Dunia untuk belajar. Dunia untuk membangun."
-              : "A world to witness. A world to learn. A world to build."}
-          </p>
-          <p className="mt-1.5 max-w-2xl font-sans text-xs sm:text-[13px] tracking-[0.06em] text-[#d8ceba]/90 drop-shadow-[0_1px_8px_rgba(0,0,0,0.95)]">
-            {locale === "id"
-              ? "Accountable Life, Learning & Action Hub — memuliakan Taurat, Zabur, Injīl & Al-Qur’ān bersama rekayasa terbuka yang jujur."
-              : "Accountable Life, Learning & Action Hub — honoring Taurat, Zabur, Injīl & Al-Qur’ān alongside principled open engineering."}
-          </p>
-
-          {/* Interactive Gate Threshold with Magnetic Portal */}
-          <div className="mt-5 sm:mt-8 flex flex-col items-center">
-            <MagneticPortal disabled={quietMode} maxOffsetPx={7}>
+          }
+          kicker={
+            locale === "id"
+              ? "HUB KEHIDUPAN · PEMBELAJARAN · AKSI"
+              : "ACCOUNTABLE LIFE · LEARNING · ACTION HUB"
+          }
+          title={
+            <h1 id="gate-heading" className="home-gate-heading">
+              <span className="sr-only">
+                {locale === "id"
+                  ? "A-L-L-A-H.COM — Empire of the Light. Jelajahi sembilan dunia pembelajaran."
+                  : "A-L-L-A-H.COM — Empire of the Light. Explore the nine learning worlds."}
+              </span>
+              <span className="home-gate-heading-visible" aria-hidden="true">
+                A-L-L-A-H.COM
+              </span>
+            </h1>
+          }
+          subtitle={locale === "id" ? "KERAJAAN CAHAYA" : "EMPIRE OF THE LIGHT"}
+          callouts={
+            locale === "id"
+              ? ["CAHAYA MILIK SEMUA", "TEMUKAN TERANG DALAM GELAP", "PENGINGAT JALAN PULANG"]
+              : ["SUNSHINE BELONG", "FIND LIGHT IN DARKNESS", "HOW U REMIND ME"]
+          }
+          description={
+            locale === "id"
+              ? "Satu semesta berilustrasi dengan kemungkinan tanpa batas. Setiap orang punya ruang untuk belajar, mencipta, dan bertumbuh di sini."
+              : "One universe. Infinite possibilities. Everyone has a welcoming world to explore, learn, and build here."
+          }
+          actions={
+            <PrimaryAction onClick={() => navigateToSection("the-worlds")}>
+              <span>{locale === "id" ? "JELAJAHI SEMBILAN DUNIA" : "EXPLORE THE NINE WORLDS"}</span>
+              <span aria-hidden="true">&rarr;</span>
+            </PrimaryAction>
+          }
+          asideContent={
+            <div className="mw-editorial-aside-panel text-right">
+              <div className="flex items-center justify-end gap-2 text-[var(--dna-accent)]">
+                <CrownEmblemIcon className="h-6 w-6" />
+                <span>{locale === "id" ? "MISI BERSAMA" : "SHARED COMPASS"}</span>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--dna-text)]">
+                DREAM · EXPLORE · LEARN · CREATE · CONNECT
+              </p>
               <button
                 type="button"
                 onClick={() => navigateToSection("the-worlds")}
-                aria-label="Enter the Golden Gate of Light"
-                className="group relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full focus:outline-none cursor-pointer"
+                className="mt-3 inline-flex min-h-[44px] items-center gap-2 border border-[var(--dna-accent)] bg-[var(--dna-surface-elevated)] px-3 py-1.5 text-xs text-[var(--dna-accent)] hover:bg-[var(--dna-accent)] hover:text-[var(--dna-canvas)] transition-colors cursor-pointer"
               >
-                <span className="absolute inset-0 rounded-full border border-[#f5dfa6]/25 transition-transform duration-700 group-hover:scale-125 group-hover:border-[#fff6dc]/80" />
-                <DiamondStarOrnament className="h-4 w-4 text-[#f5dfa6]/70 transition-all duration-500 group-hover:scale-125 group-hover:text-[#fff8e6]" />
-                <span className="sr-only">Enter the Golden Gate</span>
+                <span>{locale === "id" ? "MENUJU DUNIA" : "TO THE WORLDS"}</span>
+                <span aria-hidden="true">&rarr;</span>
               </button>
-            </MagneticPortal>
-          </div>
-        </div>
-
-        {/* 3. FOREGROUND REFLECTIVE WATER DOCK — 5 WORLDS + CTA + FOOTER */}
-        <div className="relative z-20 mt-auto w-full pt-6 pb-4 sm:pb-6">
-          <div className="mx-auto max-w-[1480px] px-4 sm:px-8 lg:px-12">
-            {/* Five Worlds Reflective Row */}
-            <div
-              role="region"
-              aria-label="The Five Worlds Dock"
-              className="grid grid-cols-2 gap-2.5 sm:gap-y-5 lg:grid-cols-5 lg:gap-0"
+            </div>
+          }
+          shelf={
+            <WorldExplorer
+              heading={
+                <h2>{locale === "id" ? "JELAJAHI SEMBILAN DUNIA" : "EXPLORE THE NINE WORLDS"}</h2>
+              }
+              trailing={
+                <span className="text-[var(--dna-accent-secondary)] text-xl" aria-hidden="true">
+                  ✦
+                </span>
+              }
             >
-              {WORLD_DOMAINS.map((worldItem, worldIdx) => {
-                const isWorldSelected = activeWorldId === worldItem.id;
+              {WORLD_DOMAINS.map((worldItem, index) => {
+                const art = WORLD_ART[worldItem.id];
                 return (
-                  <div
+                  <WorldTile
                     key={worldItem.id}
-                    className={`relative flex flex-col items-center px-2 py-2 sm:px-4 sm:py-0 text-center rounded-sm bg-[#040509]/58 border border-[#d6b46c]/18 backdrop-blur-[2px] sm:rounded-none sm:bg-transparent sm:border-0 sm:backdrop-blur-none ${
-                      worldIdx === WORLD_DOMAINS.length - 1 ? "col-span-2 lg:col-span-1" : ""
-                    }`}
-                  >
-                    {worldIdx > 0 && (
-                      <span
-                        aria-hidden="true"
-                        className="hidden lg:block absolute left-0 top-1 bottom-1 w-px bg-gradient-to-b from-transparent via-[#e8cd8c]/45 to-transparent"
+                    indexLabel={`0${index + 1}`}
+                    title={worldItem.name}
+                    tagline={locale === "id" ? WORLD_TAGLINES_ID[worldItem.id] : worldItem.tagline}
+                    ctaLabel={locale === "id" ? "JELAJAHI" : "EXPLORE"}
+                    active={activeWorldId === worldItem.id}
+                    onClick={() => selectAndInspectWorld(worldItem.id)}
+                    media={
+                      <Image
+                        src={art.src}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 90vw, (max-width: 1279px) 30vw, 11vw"
+                        data-source="illustration"
+                        data-subject={art.subject}
+                        className="object-cover"
                       />
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => selectAndInspectWorld(worldItem.id)}
-                      className="group flex min-h-[44px] flex-col items-center py-1 text-center focus:outline-none cursor-pointer"
-                    >
-                      <div className="relative flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center transition-transform duration-300 group-hover:-translate-y-1">
-                        <span
-                          aria-hidden="true"
-                          className={`absolute inset-0 rounded-full bg-[#f5dfa6]/18 blur-md transition-opacity duration-300 ${
-                            isWorldSelected ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                          }`}
-                        />
-                        <WorldEmblemById
-                          worldId={worldItem.id}
-                          className="relative h-9 w-9 sm:h-12 sm:w-12 drop-shadow-[0_0_12px_rgba(245,223,166,0.45)]"
-                        />
-                      </div>
-
-                      <span className="font-monument mt-1.5 sm:mt-2 text-xs sm:text-sm md:text-[15px] tracking-[0.16em] text-[#f8f1e1] group-hover:text-[#fff9e8] transition-colors">
-                        {worldItem.name}
-                      </span>
-
-                      <span className="mt-0.5 sm:mt-1 font-serif text-[11px] sm:text-xs tracking-[0.03em] text-[#e6decb]/90 group-hover:text-[#fff8e6] transition-colors drop-shadow-[0_1px_6px_rgba(0,0,0,0.95)]">
-                        {worldItem.tagline}
-                      </span>
-                    </button>
-                  </div>
+                    }
+                  />
                 );
               })}
-            </div>
+            </WorldExplorer>
+          }
+        />
 
-            {/* Center Chamfered Button with Magnetic Interaction */}
-            <div className="mt-5 sm:mt-8 flex flex-wrap items-center justify-center gap-3.5">
-              <MagneticPortal disabled={quietMode} maxOffsetPx={6}>
-                <button
-                  type="button"
-                  onClick={() => navigateToSection("the-worlds")}
-                  className="btn-chamfer font-monument group inline-flex items-center gap-3 px-8 sm:px-11 py-3 text-xs sm:text-sm tracking-[0.22em] text-[#fff6df] uppercase hover:text-white cursor-pointer"
-                >
-                  <DiamondStarOrnament className="h-3 w-3 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-45" />
-                  <span>EXPLORE THE WORLDS</span>
-                  <span
-                    aria-hidden="true"
-                    className="text-[#f5dfa6] transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    &rsaquo;
-                  </span>
-                </button>
-              </MagneticPortal>
-
-              <button
-                type="button"
-                onClick={jumpToFourScriptures}
-                className="btn-luxe-secondary group inline-flex items-center gap-2.5 px-6 py-2.5 font-monument text-[11px] tracking-[0.2em] text-[#f5dfa6] uppercase hover:text-white cursor-pointer"
-              >
-                <DiamondStarOrnament className="h-2.5 w-2.5 text-[#dfc07b] transition-transform duration-500 group-hover:rotate-90" />
-                <span>
-                  {locale === "id" ? "EMPAT KITAB · KOVENAN" : "FOUR SCRIPTURES · COVENANT"}
-                </span>
-              </button>
-
-              <Link
-                href="/scriptures"
-                className="btn-luxe-secondary inline-flex items-center gap-2 px-5 py-2.5 font-mono text-[10.5px] tracking-[0.16em] text-[#e6decb] uppercase hover:text-white"
-              >
-                <span>{locale === "id" ? "STUDIO 4 KITAB" : "SCRIPTURE ENGINE"}</span>
-                <span aria-hidden="true">&rsaquo;</span>
-              </Link>
-            </div>
-
-            {/* Bottom Ornament Line with Center 4-Point Diamond Star */}
-            <div
-              aria-hidden="true"
-              className="mt-4 mx-auto flex w-full max-w-md items-center justify-center gap-2.5"
-            >
-              <span className="h-px flex-1 bg-gradient-to-r from-transparent via-[#d6b46c]/55 to-[#e6c987]/80" />
-              <DiamondStarOrnament className="h-3.5 w-3.5 text-[#f5dfa6]" />
-              <span className="h-px flex-1 bg-gradient-to-l from-transparent via-[#d6b46c]/55 to-[#e6c987]/80" />
-            </div>
-
-            {/* Bottom Corner Signatures + Subtle Engine Capability Indicator */}
-            <div className="mt-2 flex flex-col items-center justify-between gap-2 text-[10px] sm:text-[11px] font-monument tracking-[0.2em] text-[#d8ceba]/80 uppercase sm:flex-row">
-              <div>A-L-L-A-H.COM &middot; EMPIRE OF THE LIGHT</div>
-              <div className="font-mono text-[10px] tracking-[0.18em] text-[#dfc07b]/80">
-                {capabilityStatusLabel}
-              </div>
-              <div>DREAM &middot; EXPLORE &middot; CREATE</div>
-            </div>
+        <section
+          data-moment="letters-assemble"
+          aria-labelledby="home-moment-heading"
+          className="home-moment relative flex min-h-screen items-center px-4 py-24 sm:px-8 lg:px-16"
+        >
+          <div className="wrap mx-auto w-full max-w-7xl">
+            <h2 id="home-moment-heading" className="mo-la__type">
+              9 WORLDS 1 LIGHT
+            </h2>
+            <p className="mo-la__sub">
+              {locale === "id"
+                ? "Moonwitness · Arsy · Human-Pen · Sidra · RockSoul DX · Crayon · Sin Can · Mythos · Angel With Shotgun."
+                : "Moonwitness · Arsy · Human-Pen · Sidra · RockSoul DX · Crayon · Sin Can · Mythos · Angel With Shotgun."}
+            </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* =====================================================================
-          INTERACTIVE SANCTUM SECTIONS BELOW THE FOLD
-         ===================================================================== */}
-      <main id="main" className="bg-girih-filigree">
         <WorldsSanctum
           activeWorldId={activeWorldId}
           quietMode={quietMode}
@@ -678,8 +503,6 @@ export function EmpireOfLightExperience() {
 
         <CovenantAboutSection
           quietMode={quietMode}
-          capabilityStatusLabel={capabilityStatusLabel}
-          onReplayEntrance={handleReplayEntrance}
           onToggleQuietMode={() => setQuietMode((prev) => !prev)}
           onSelectWorld={(worldId) => selectAndInspectWorld(worldId)}
           onInspectCorpusDoor={() => selectAndInspectDoor("epistemic-corpus")}
@@ -687,17 +510,6 @@ export function EmpireOfLightExperience() {
         />
       </main>
 
-      {/* Floating Celestial Telemetry Observatory HUD Capsule */}
-      <CelestialHudCapsule
-        activeNavTab={activeNavTab}
-        activeWorldId={activeWorldId}
-        pageScrollFraction={pageScrollFraction}
-        onNavigateSection={navigateToSection}
-        onJumpToRemembrance={jumpToRemembranceSanctuary}
-        onOpenSearch={() => setSearchModalOpen(true)}
-      />
-
-      {/* Universal Empire Search & Command Palette */}
       <UniversalSearchModal
         isOpen={searchModalOpen}
         onClose={() => setSearchModalOpen(false)}

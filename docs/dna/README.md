@@ -1,8 +1,8 @@
 ---
 title: "MoonFrame Seven Master DNA"
-version: "1.1.0"
+version: "1.2.0"
 status: "approved"
-last_verified: "2026-11-15"
+last_verified: "2026-11-17"
 owner: "product-design"
 ---
 
@@ -31,7 +31,7 @@ A documented direction must never be reported as a shipped feature.
 
 | ID | Master DNA | World metaphor | Primary ecosystem identity |
 |---|---|---|---|
-| 01 | IMPERIUM LUMEN | A monumental empire of light and impossible architecture | A-L-L-A-H.COM / Empire of the Light |
+| 01 | IMPERIUM LUMEN | An illustrated universe of electric yellow, magenta, deep blue, ink black, warm paper, and accessible editorial rooms (`v2.0.0`, superseding the v1.1.0 ivory-and-gold-only rule) | A-L-L-A-H.COM / Empire of the Light |
 | 02 | LUNAR CHRONICLES | A living lunar observatory, celestial chronicle, and universe archive | MoonWitness Universe |
 | 03 | ROCKSOUL | A silent cinematic storyteller and alternative-music journey | ROCKSOUL signature narrative |
 | 04 | NEXUS PARADOX | An interface from another reality; diegetic spatial technology | Future-game / experimental products |
@@ -61,7 +61,7 @@ A documented direction must never be reported as a shipped feature.
 5. Decorative effects must never obscure labels, controls, data, focus, or state.
 6. The visual canon of each parent identity must be preserved. A child skin cannot silently rewrite the product's narrative or history.
 7. Real-world astronomy and other factual data must remain distinguishable from fictional, symbolic, or narrative content.
-8. Never depict ALLAH or claim that a graphic, architecture, light effect, or interface is a representation of ALLAH, and never use sacred names or Qur'anic text as decorative textures, wallpapers, or filler glyphs. IMPERIUM LUMEN uses abstract artistic language only.
+8. Never depict ALLAH or claim that a graphic, architecture, light effect, or interface is a representation of ALLAH, and never use sacred names or Qur'anic text as decorative textures, wallpapers, or filler glyphs. Original, art-directed illustrations with faceless silhouettes, landscapes, architecture, and symbolic artifacts are allowed under `01-imperium-lumen` v2.0.0.
 9. Use original or properly licensed assets. Do not reproduce proprietary game interfaces, manga characters, album artwork, or poster compositions.
 10. Implementation status requires source and verification evidence, not mockups or documentation alone.
 

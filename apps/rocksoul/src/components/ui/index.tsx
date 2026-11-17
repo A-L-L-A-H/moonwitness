@@ -252,11 +252,6 @@ export function Badge({ variant = "default", priority, status, className = "", c
   return <span className={classNames} {...props}>{children}</span>;
 }
 
-// === SKIP LINK ===
-export function SkipLink({ href = "#main-content", children = "Skip to main content" }: { href?: string; children?: string }) {
-  return <a href={href} className="rs-skip-link">{children}</a>;
-}
-
 // === MOTION CONTROL ===
 export interface MotionControlProps {
   reducedMotion: boolean;

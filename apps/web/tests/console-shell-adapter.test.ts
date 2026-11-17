@@ -193,6 +193,7 @@ describe("ConsoleShellAdapter", () => {
   it("preserves identity, saved avatar, popover exclusivity, and existing logout request", async () => {
     applyToStore({}, "Pilot Crew", "saved-pilot-face", DEFAULT_AVATAR_OPTIONS);
     await render();
+    expect(fetchRequest).toHaveBeenCalledWith("/api/v1/auth/me", { credentials: "include" });
     expect(button("Profile menu").textContent).toContain("Pilot Crew");
     expect(button("Profile menu").textContent).toContain("creator");
     expect(button("Profile menu").querySelector("img")?.getAttribute("src")).toBe(
