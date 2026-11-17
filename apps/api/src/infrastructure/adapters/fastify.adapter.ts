@@ -16,6 +16,8 @@ import { riotAiRoutes } from "../../interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "../../interface/routes/command-center.routes";
 import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
+import { ensureProbesSchema, probesMigrations } from "../../interface/routes/probes.persistence";
+import { probesRoutes } from "../../interface/routes/probes.routes";
 import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import { authMigrations } from "../../db/migrations";
 import { seedBootstrapAdmin } from "../../services/user";
@@ -133,9 +135,10 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     });
   }
 
-  // Ensure auth and command center schemas exist before serving routes.
-  await applyMigrations([...authMigrations, ...commandCenterMigrations]);
+  // Ensure auth, command center, and probes schemas exist before serving routes.
+  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...probesMigrations]);
   await seedBootstrapAdmin();
+  await ensureProbesSchema();
 
   // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
   if (env.MID_KEY_ENCRYPTION_SECRET) {
@@ -163,6 +166,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
         await instance.register(riotAiRoutes);
         await instance.register(commandCenterRoutes);
         await instance.register(memoryRoutes);
+        await instance.register(probesRoutes);
       },
       { prefix: options.prefix },
     );

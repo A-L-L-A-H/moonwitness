@@ -16,6 +16,7 @@ import { QuickActions } from "./quick-actions";
 import { Studios } from "./studios";
 import { UniverseMap } from "./map";
 import { UniverseStatus } from "./status";
+import { NocProbesPanel } from "./noc-probes";
 import { Workspace } from "./workspace";
 import { StewardshipPanel } from "./StewardshipPanel";
 import { useCommandCenter } from "./use-command-center";
@@ -84,6 +85,8 @@ export function CommandCenter() {
             onToggleWorkflow={cc.onToggleWorkflow}
           />
         </div>
+
+        <NocProbesPanel />
 
         <StewardshipPanel />
       </div>
