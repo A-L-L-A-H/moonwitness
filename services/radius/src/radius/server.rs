@@ -116,17 +116,25 @@ async fn handle_datagram(
     pool: &Pool,
     role: Role,
 ) -> Option<Vec<u8>> {
+    let Some(nas) = config.resolve_nas(peer.ip()) else {
+        tracing::warn!(%peer, "rejected RADIUS packet from unknown NAS peer");
+        return None;
+    };
     let packet = RadiusPacket::decode(data)?;
     match (role, packet.code) {
         (Role::Auth, CODE_ACCESS_REQUEST) => {
-            Some(handle_access_request(packet, peer, config, pool).await)
+            Some(handle_access_request(packet, peer, nas, pool).await)
         }
         (Role::Accounting, CODE_ACCOUNTING_REQUEST) => {
-            if !packet.verify_accounting_request(data, &config.radius_secret) {
-                tracing::warn!(%peer, "accounting request with bad authenticator, dropping");
+            let matched_secret = nas
+                .secrets()
+                .into_iter()
+                .find(|s| packet.verify_accounting_request(data, s));
+            let Some(secret) = matched_secret else {
+                tracing::warn!(%peer, nas_id = %nas.id, "accounting request with bad authenticator, dropping");
                 return None;
-            }
-            Some(handle_accounting(packet, peer, config, pool).await)
+            };
+            Some(handle_accounting(packet, peer, secret, pool).await)
         }
         (_, other) => {
             tracing::warn!(code = other, %peer, "unexpected RADIUS code");
@@ -138,15 +146,15 @@ async fn handle_datagram(
 async fn handle_access_request(
     request: RadiusPacket,
     peer: SocketAddr,
-    config: &Config,
+    nas: &crate::config::NasClient,
     pool: &Pool,
 ) -> Vec<u8> {
     let username =
         attributes::attr_string(&request.attributes, attributes::USER_NAME).unwrap_or_default();
     let nas_ip = peer.ip().to_string();
 
-    match authenticate(&request, &username, config, pool).await {
-        Some(user) => {
+    match authenticate(&request, &username, nas, pool).await {
+        Some((user, matched_secret)) => {
             let mut attrs = Vec::new();
             if let Some(ip) = &user.framed_ip {
                 if let Ok(addr) = ip.parse::<std::net::Ipv4Addr>() {
@@ -172,7 +180,7 @@ async fn handle_access_request(
                 authenticator: [0u8; 16],
                 attributes: attrs,
             }
-            .encode(Some(&request.authenticator), &config.radius_secret)
+            .encode(Some(&request.authenticator), &matched_secret)
         }
         None => {
             let reason = if username.is_empty() {
@@ -188,7 +196,7 @@ async fn handle_access_request(
                 authenticator: [0u8; 16],
                 attributes: attrs,
             }
-            .encode(Some(&request.authenticator), &config.radius_secret)
+            .encode(Some(&request.authenticator), &nas.secret)
         }
     }
 }
@@ -196,9 +204,9 @@ async fn handle_access_request(
 async fn authenticate(
     request: &RadiusPacket,
     username: &str,
-    config: &Config,
+    nas: &crate::config::NasClient,
     pool: &Pool,
-) -> Option<User> {
+) -> Option<(User, String)> {
     if username.is_empty() {
         return None;
     }
@@ -217,21 +225,27 @@ async fn authenticate(
     }
 
     let encrypted = attributes::attr_bytes(&request.attributes, attributes::USER_PASSWORD)?;
-    let supplied =
-        auth::decrypt_user_password(encrypted, &config.radius_secret, &request.authenticator)?;
+    for secret in nas.secrets() {
+        if let Some(supplied) =
+            auth::decrypt_user_password(encrypted, secret, &request.authenticator)
+        {
+            let hash = user.password.clone();
+            let ok = tokio::task::spawn_blocking(move || auth::verify_password(&hash, &supplied))
+                .await
+                .unwrap_or(false);
+            if ok {
+                return Some((user, secret.to_string()));
+            }
+        }
+    }
 
-    let hash = user.password.clone();
-    let ok = tokio::task::spawn_blocking(move || auth::verify_password(&hash, &supplied))
-        .await
-        .unwrap_or(false);
-
-    ok.then_some(user)
+    None
 }
 
 async fn handle_accounting(
     request: RadiusPacket,
     peer: SocketAddr,
-    config: &Config,
+    secret: &str,
     pool: &Pool,
 ) -> Vec<u8> {
     let username =
@@ -254,7 +268,7 @@ async fn handle_accounting(
         authenticator: [0u8; 16],
         attributes: Vec::new(),
     }
-    .encode(Some(&request.authenticator), &config.radius_secret)
+    .encode(Some(&request.authenticator), secret)
 }
 
 async fn record_log(
@@ -341,6 +355,12 @@ mod tests {
             radius_auth_port: 0,
             radius_acct_port: 0,
             radius_secret: "unit-test-radius-secret".to_string(),
+            nas_clients: vec![crate::config::NasClient {
+                id: "test-nas".to_string(),
+                cidr: "0.0.0.0/0".parse().unwrap(),
+                secret: "unit-test-radius-secret".to_string(),
+                previous_secret: None,
+            }],
             database_url: "sqlite::memory:".to_string(),
         }
     }
@@ -425,7 +445,7 @@ mod tests {
         let pool = test_pool().await;
 
         let mut empty_secret = test_config();
-        empty_secret.radius_secret = "   ".to_string();
+        empty_secret.nas_clients.clear();
         assert!(RadiusServer::new(Arc::new(empty_secret), pool.clone())
             .try_spawn()
             .await
