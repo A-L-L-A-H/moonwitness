@@ -42,6 +42,7 @@ pub fn run() {
             commands::s3_gateway::s3_gateway_status,
             commands::s3_gateway::start_s3_gateway,
             commands::s3_gateway::stop_s3_gateway,
+            commands::system::await_mid_loopback_callback,
             commands::system::get_dashboard,
             commands::system::list_events,
             commands::monitor::get_monitor_snapshot,

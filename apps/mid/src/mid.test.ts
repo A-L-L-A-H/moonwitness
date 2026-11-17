@@ -380,5 +380,63 @@ describe("@moonwitness/mid OIDC & SSO Worker", () => {
       env,
     );
     expect(rejectedLoopbackPath.status).toBe(400);
+
+    // 8. First-party ROCKSOUL - DX client accepts dynamic loopback and web dev callback, rejects unregistered URIs
+    const rocksoulVerifier = "rocksoul_dx_pkce_verifier_with_high_entropy_0123456789";
+    const rocksoulChallenge = await sha256Base64Url(rocksoulVerifier);
+    const rocksoulLoopbackUri = "http://127.0.0.1:53124/callback";
+    const rocksoulAuthorize = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=rocksoul-dx&redirect_uri=${encodeURIComponent(rocksoulLoopbackUri)}&response_type=code&scope=openid%20profile%20email%20offline_access&state=st_rs_1&nonce=nc_rs_1&code_challenge=${rocksoulChallenge}&code_challenge_method=S256`,
+        { headers: { cookie: adminCookie } },
+      ),
+      env,
+    );
+    expect(rocksoulAuthorize.status).toBe(302);
+    const rocksoulRedirect = new URL(rocksoulAuthorize.headers.get("location") ?? "");
+    expect(rocksoulRedirect.origin).toBe("http://127.0.0.1:53124");
+    expect(rocksoulRedirect.pathname).toBe("/callback");
+    expect(rocksoulRedirect.searchParams.get("state")).toBe("st_rs_1");
+    const rocksoulCode = rocksoulRedirect.searchParams.get("code") ?? "";
+    expect(rocksoulCode.startsWith("mwc_")).toBe(true);
+
+    const rocksoulTokenRes = await handler(
+      new Request("https://id.moonwitness.biz.id/oauth/token", {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: "rocksoul-dx",
+          code: rocksoulCode,
+          redirect_uri: rocksoulLoopbackUri,
+          code_verifier: rocksoulVerifier,
+        }),
+      }),
+      env,
+    );
+    expect(rocksoulTokenRes.status).toBe(200);
+    const rocksoulTokens = (await rocksoulTokenRes.json()) as {
+      access_token: string;
+      id_token: string;
+      refresh_token?: string;
+    };
+    expect(rocksoulTokens.refresh_token).toBeTruthy();
+
+    const rocksoulWebDev = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=rocksoul-dx&redirect_uri=${encodeURIComponent("http://localhost:1420/auth/callback")}&response_type=code&scope=openid%20profile&state=st_rs_web&nonce=nc_rs_web&code_challenge=${rocksoulChallenge}&code_challenge_method=S256`,
+      ),
+      env,
+    );
+    expect(rocksoulWebDev.status).toBe(200);
+    expect(await rocksoulWebDev.text()).toContain("ROCKSOUL - DX");
+
+    const rocksoulRejectedUri = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=rocksoul-dx&redirect_uri=${encodeURIComponent("https://evil.example/auth/callback")}&response_type=code&scope=openid&state=st_bad&nonce=nc_bad&code_challenge=${rocksoulChallenge}&code_challenge_method=S256`,
+      ),
+      env,
+    );
+    expect(rocksoulRejectedUri.status).toBe(400);
   });
 });

@@ -458,6 +458,9 @@ importers:
       '@moonwitness/canon':
         specifier: workspace:*
         version: link:../../packages/canon
+      '@moonwitness/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@moonwitness/ui':
         specifier: workspace:*
         version: link:../../packages/ui

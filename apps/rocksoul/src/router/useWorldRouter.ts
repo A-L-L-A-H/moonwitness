@@ -23,7 +23,14 @@ export function useWorldRouter() {
   const navigate = useNavigate();
   const rawPath = location.pathname.replace(/^\/+|\/+$/g, "");
   const path = rawPath === "issues" ? "pit" : rawPath;
-  const isValidRoute = path.length === 0 || path === "awakening" || path === "threshold" || isWorldDestination(path) || isPageRoute(path);
+  const isAuthCallback = path === "auth/callback";
+  const isValidRoute =
+    path.length === 0 ||
+    path === "awakening" ||
+    path === "threshold" ||
+    isAuthCallback ||
+    isWorldDestination(path) ||
+    isPageRoute(path);
   const destination: WorldRoute = path.length === 0 || path === "awakening"
     ? "awakening"
     : path === "threshold" || isWorldDestination(path) || isPageRoute(path)

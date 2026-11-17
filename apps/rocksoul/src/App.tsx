@@ -1,10 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Command, Search, X } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { CreateIssueDialog, EditIssueDialog, RiotRail, SettingsDialog, Topbar } from "./components";
 import { IllustratedStage } from "./components/ui/IllustratedStage";
 import { KatanaAgentSubtitle } from "./components/ui/KatanaSkyHud";
 import { Deck, Git, Monitor, Noise, Pit, WarRoom } from "./features";
 import { isDesktop } from "./lib";
+import {
+  ROCKSOUL_MID_AUTH_EVENT,
+  completeBrowserOidcCallback,
+  getStoredRocksoulOidcSession,
+  resolveValidRocksoulOidcSession,
+  signInWithMoonWitnessId,
+  signOutRocksoulOidc,
+  type RocksoulOidcSession,
+} from "./lib/mid-oidc";
 import { useAppStore } from "./store";
 import { Awakening, PreviewRoom, RoomReturnButton, Threshold } from "./features/World";
 import useMotionPreference from "./features/useMotionPreference";
@@ -27,6 +37,21 @@ export default function App() {
   const [commandQuery, setCommandQuery] = useState("");
   const [editingIssue, setEditingIssue] = useState<Issue | null>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [oidcSession, setOidcSession] = useState<RocksoulOidcSession | null>(() =>
+    getStoredRocksoulOidcSession(),
+  );
+  const [oidcBusy, setOidcBusy] = useState(false);
+  const [oidcError, setOidcError] = useState("");
+  const location = useLocation();
+  const browserPathname =
+    typeof window !== "undefined" ? window.location.pathname.replace(/\/+$/, "") : "";
+  const routerPathname = location.pathname.replace(/\/+$/, "");
+  const isOidcCallbackRoute =
+    browserPathname === "/auth/callback" || routerPathname === "/auth/callback";
+  const oidcCallbackSearch =
+    browserPathname === "/auth/callback" && typeof window !== "undefined"
+      ? window.location.search
+      : location.search;
   const { reducedMotion, systemReducedMotion, toggleMotion } = useMotionPreference();
   const { destination, navigateDestination: navigateWorld, returnToThreshold } = useWorldRouter();
   const projectFilter = useAppStore((state) => state.projectFilter);
@@ -86,6 +111,16 @@ export default function App() {
     }, 15_000);
     return () => window.clearInterval(interval);
   }, [autoMonitor, destination, refreshMonitor]);
+
+  useEffect(() => {
+    if (isOidcCallbackRoute) return;
+    const sync = () => setOidcSession(getStoredRocksoulOidcSession());
+    window.addEventListener(ROCKSOUL_MID_AUTH_EVENT, sync);
+    void resolveValidRocksoulOidcSession().then((valid) => {
+      setOidcSession(valid);
+    });
+    return () => window.removeEventListener(ROCKSOUL_MID_AUTH_EVENT, sync);
+  }, [isOidcCallbackRoute]);
 
   useEffect(() => {
     if (pageRoutes.includes(destination as any)) {
@@ -168,6 +203,30 @@ export default function App() {
     await Promise.all([refresh(), refreshMonitor()]);
   };
 
+  const handleOidcSignIn = async () => {
+    setOidcBusy(true);
+    setOidcError("");
+    try {
+      const session = await signInWithMoonWitnessId({ returnHash: `#/${page}` });
+      if (session) setOidcSession(session);
+    } catch (authError) {
+      setOidcError(authError instanceof Error ? authError.message : String(authError));
+    } finally {
+      setOidcBusy(false);
+    }
+  };
+
+  const handleOidcSignOut = async () => {
+    setOidcBusy(true);
+    setOidcError("");
+    try {
+      await signOutRocksoulOidc();
+      setOidcSession(null);
+    } finally {
+      setOidcBusy(false);
+    }
+  };
+
   const primaryDisk = monitor?.disks?.[0];
   const onlineServices = monitor?.services?.filter((svc) => svc.status === "online").length ?? 0;
   const topbarMonitorSummary = monitor
@@ -177,6 +236,29 @@ export default function App() {
   const filtered = Object.entries(pageTitles).filter(([key, title]) =>
     (title + " " + key).toLowerCase().includes(commandQuery.toLowerCase()),
   );
+
+  if (isOidcCallbackRoute) {
+    return (
+      <OidcCallbackScreen
+        search={oidcCallbackSearch}
+        onComplete={(session, returnHash) => {
+          setOidcSession(session);
+          setOidcError("");
+          if (typeof window !== "undefined" && window.location.pathname.replace(/\/+$/, "") === "/auth/callback") {
+            window.history.replaceState(null, "", `/${returnHash}`);
+          }
+          const routeTarget = returnHash.replace(/^#\/?/, "") || "deck";
+          navigateDestination(routeTarget);
+        }}
+        onReturnWorkbench={() => {
+          if (typeof window !== "undefined" && window.location.pathname.replace(/\/+$/, "") === "/auth/callback") {
+            window.history.replaceState(null, "", "/#/deck");
+          }
+          navigateDestination("deck");
+        }}
+      />
+    );
+  }
 
   if (destination === "awakening")
     return (
@@ -241,6 +323,22 @@ export default function App() {
             void refreshAll();
           }}
           monitorSummary={topbarMonitorSummary}
+          identity={
+            oidcSession
+              ? {
+                  username: oidcSession.user.preferred_username,
+                  displayName: oidcSession.user.name,
+                  role: oidcSession.user.role,
+                }
+              : null
+          }
+          identityBusy={oidcBusy}
+          onSignIn={() => {
+            void handleOidcSignIn();
+          }}
+          onSignOut={() => {
+            void handleOidcSignOut();
+          }}
         />
         <div className="katana-hud-bar">
           <RiotRail page={page} onNavigate={navigateDestination} onSwitchboard={() => setCommandOpen(true)} />
@@ -259,7 +357,7 @@ export default function App() {
             {isDesktop() ? "NATIVE DESKTOP / PRIVATE" : "BROWSER PREVIEW / LOCAL DATA"}
           </span>
         </div>
-        {error && <div className="global-error">{error}</div>}
+        {(error || oidcError) && <div className="global-error">{error || oidcError}</div>}
         {page === "deck" && (
           <Deck
             issues={issues}
@@ -399,5 +497,60 @@ export default function App() {
         </div>
       )}
     </div>
+  );
+}
+
+interface OidcCallbackScreenProps {
+  search: string;
+  onComplete: (session: RocksoulOidcSession, returnHash: string) => void;
+  onReturnWorkbench: () => void;
+}
+
+function OidcCallbackScreen({ search, onComplete, onReturnWorkbench }: OidcCallbackScreenProps) {
+  const [callbackError, setCallbackError] = useState("");
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+
+  useEffect(() => {
+    let active = true;
+    completeBrowserOidcCallback(new URLSearchParams(search))
+      .then(({ session, returnHash }) => {
+        if (active) onCompleteRef.current(session, returnHash);
+      })
+      .catch((authError: unknown) => {
+        if (active) {
+          setCallbackError(authError instanceof Error ? authError.message : String(authError));
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [search]);
+
+  return (
+    <main className="app-shell riot-room-shell" style={{ display: "grid", placeItems: "center", padding: "24px" }}>
+      <section className="issue-dialog" aria-live="polite">
+        <header className="dialog-head">
+          <div>
+            <span className="eyebrow">MOONWITNESS ID // PKCE CALLBACK</span>
+            <h2>{callbackError ? "SIGN-IN FAILED" : "VERIFYING IDENTITY"}</h2>
+          </div>
+        </header>
+        {callbackError ? (
+          <>
+            <p className="global-error" role="alert" style={{ margin: "0 0 18px" }}>
+              {callbackError}
+            </p>
+            <button type="button" className="riot-button" onClick={onReturnWorkbench}>
+              RETURN TO WORKBENCH
+            </button>
+          </>
+        ) : (
+          <p style={{ font: "11px var(--mono)", color: "#cfc7b8", margin: 0 }}>
+            Exchanging PKCE authorization code with MoonWitness ID…
+          </p>
+        )}
+      </section>
+    </main>
   );
 }

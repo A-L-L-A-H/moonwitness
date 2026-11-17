@@ -376,3 +376,30 @@
     grid-template-columns: 1fr;
   }
 }
+
+.identity-signin-btn {
+  border-color: rgba(215, 255, 54, 0.45);
+  color: var(--lime);
+  white-space: nowrap;
+}
+
+.identity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(215, 255, 54, 0.45);
+  background: #191a12;
+  padding: 2px 4px 2px 9px;
+  white-space: nowrap;
+}
+
+.identity-handle {
+  font: 10px var(--mono);
+  color: var(--lime);
+  letter-spacing: 0.04em;
+}
+
+.identity-signout-btn {
+  width: 26px;
+  height: 26px;
+}

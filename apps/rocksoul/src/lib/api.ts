@@ -468,5 +468,9 @@ export async function call<Command extends NativeCommand>(
     } as unknown as CommandResult<Command>;
   }
 
+  if (command === "await_mid_loopback_callback") {
+    throw new Error("Loopback sign-in requires the native desktop app.");
+  }
+
   throw new Error(`Unsupported native command: ${command}`);
 }

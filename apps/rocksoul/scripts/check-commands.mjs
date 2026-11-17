@@ -27,6 +27,7 @@ const rustModels = [
   { rustName: "RepoMonitorEntry", contractName: "RepoMonitorEntry" },
   { rustName: "PlanTrackerEntry", contractName: "PlanTrackerEntry" },
   { rustName: "MonitorSnapshot", contractName: "MonitorSnapshot" },
+  { rustName: "MidLoopbackCallback", contractName: "MidLoopbackCallback" },
 ];
 const [contracts, registration, models, ...sources] = await Promise.all([
   readFile("src/lib/contracts.d.ts", "utf8"),
@@ -60,6 +61,7 @@ for (const command of implementedCommands) {
 
 const nativeCommandSources = [registration, ...sources];
 const commandArgs = {
+  await_mid_loopback_callback: ["authorize_url"],
   get_dashboard: [],
   list_events: [],
   get_monitor_snapshot: [],
