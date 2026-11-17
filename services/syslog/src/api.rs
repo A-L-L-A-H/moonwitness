@@ -1,5 +1,9 @@
+use std::sync::Arc;
+
 use axum::{
     extract::{Path, Query, State},
+    http::{header, StatusCode},
+    response::IntoResponse,
     routing::get,
     Json, Router,
 };
@@ -8,17 +12,26 @@ use serde_json::json;
 
 use crate::db::Pool;
 use crate::error::AppError;
+use crate::metrics::{MetricsSnapshot, SyslogMetrics};
 use crate::models::{SeverityCount, Stats, SyslogMessage};
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: Pool,
+    pub metrics: Arc<SyslogMetrics>,
 }
 
+#[allow(dead_code)]
 pub fn router(pool: Pool) -> Router {
-    let state = AppState { pool };
+    router_with_metrics(pool, Arc::new(SyslogMetrics::new()))
+}
+
+pub fn router_with_metrics(pool: Pool, metrics: Arc<SyslogMetrics>) -> Router {
+    let state = AppState { pool, metrics };
     Router::new()
         .route("/health", get(health))
+        .route("/metrics", get(prometheus_metrics))
+        .route("/api/metrics", get(json_metrics))
         .route("/api/messages", get(list_messages))
         .route("/api/messages/:id", get(get_message))
         .route("/api/stats", get(stats))
@@ -27,6 +40,21 @@ pub fn router(pool: Pool) -> Router {
 
 async fn health() -> Json<serde_json::Value> {
     Json(json!({ "status": "ok", "service": "syslog" }))
+}
+
+async fn json_metrics(State(state): State<AppState>) -> Json<MetricsSnapshot> {
+    Json(state.metrics.snapshot())
+}
+
+async fn prometheus_metrics(State(state): State<AppState>) -> impl IntoResponse {
+    (
+        StatusCode::OK,
+        [(
+            header::CONTENT_TYPE,
+            "text/plain; version=0.0.4; charset=utf-8",
+        )],
+        state.metrics.to_prometheus(),
+    )
 }
 
 #[derive(Deserialize)]
@@ -140,5 +168,6 @@ async fn stats(State(state): State<AppState>) -> Result<Json<Stats>, AppError> {
         total_messages,
         by_severity,
         recent_sources,
+        metrics: state.metrics.snapshot(),
     }))
 }
