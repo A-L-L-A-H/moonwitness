@@ -77,6 +77,12 @@ impl Config {
     {
         let defaults = Self::default();
         let host = lookup("HOST")?.unwrap_or(defaults.host);
+        let allow_public_bind = lookup("ALLOW_PUBLIC_BIND")?
+            .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false);
+        if !allow_public_bind && !is_private_or_loopback(&host) {
+            anyhow::bail!("HOST {host:?} is non-private; set ALLOW_PUBLIC_BIND=1 to override");
+        }
         let http_port = parse_var(&mut lookup, "HTTP_PORT", defaults.http_port)?;
         let syslog_udp_port = parse_var(&mut lookup, "SYSLOG_UDP_PORT", defaults.syslog_udp_port)?;
         let syslog_tcp_port = parse_var(&mut lookup, "SYSLOG_TCP_PORT", defaults.syslog_tcp_port)?;
@@ -183,6 +189,17 @@ fn require_positive<T: PartialOrd + From<u8>>(key: &str, value: T) -> anyhow::Re
         anyhow::bail!("{key} must be greater than 0");
     }
     Ok(())
+}
+
+fn is_private_or_loopback(host: &str) -> bool {
+    if host.eq_ignore_ascii_case("localhost") {
+        return true;
+    }
+    match host.parse::<std::net::IpAddr>() {
+        Ok(std::net::IpAddr::V4(ip)) => ip.is_loopback() || ip.is_private() || ip.is_link_local(),
+        Ok(std::net::IpAddr::V6(ip)) => ip.is_loopback(),
+        Err(_) => false,
+    }
 }
 
 #[cfg(test)]
