@@ -24,15 +24,31 @@ jobs:
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         id: release
         with:
+          token: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
           target-branch: main
 
-      - name: Keep the release pull request for manual review
+      - name: Enable auto-merge on the release pull request
         if: steps.release.outputs.pr != '' || steps.release.outputs.prs != ''
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_JSON: ${{ steps.release.outputs.pr }}
+          PRS_JSON: ${{ steps.release.outputs.prs }}
         run: |
-          echo "A Release Please pull request was created or updated."
-          echo "Keep it open for manual review and merge after required checks pass."
+          pr_number=$(node -e '
+            const pr = process.env.PR_JSON ? JSON.parse(process.env.PR_JSON) : null;
+            const prs = process.env.PRS_JSON ? JSON.parse(process.env.PRS_JSON) : [];
+            const num = pr?.number ?? prs?.[0]?.number ?? "";
+            process.stdout.write(String(num));
+          ')
+          if [ -n "$pr_number" ]; then
+            echo "Enabling auto-merge on Release Please PR #$pr_number"
+            gh pr merge "$pr_number" --auto --merge --repo "$REPO" || true
+          else
+            echo "No release PR number returned in action outputs."
+          fi
 
       - name: Report release outcome
         if: always()
