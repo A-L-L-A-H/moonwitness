@@ -48,12 +48,15 @@ describe("ecosystem-probe", () => {
     expect(snapshot.timelineTotal).toBe(12);
     expect(snapshot.erasCount).toBe(3);
 
-    expect(snapshot.services.map((s) => [s.id, s.status, s.httpStatus])).toEqual([
-      ["web", "online", 200],
-      ["api", "online", 200],
-      ["arsy", "degraded", 401],
-      ["memory", "offline", null],
+    expect(snapshot.services.map((s) => [s.id, s.status, s.httpStatus, s.source])).toEqual([
+      ["web", "online", 200, "live-http-probe"],
+      ["api", "online", 200, "live-http-probe"],
+      ["arsy", "degraded", 401, "live-http-probe"],
+      ["memory", "offline", null, "unmeasured"],
     ]);
+    expect(typeof snapshot.services[0]?.measuredAt).toBe("string");
+    expect(snapshot.services[3]?.latencyMs).toBeNull();
+    expect(snapshot.services[3]?.measuredAt).toBeNull();
 
     expect(snapshot.git).toEqual({
       available: true,

@@ -1,9 +1,9 @@
 name: Playwright E2E Tests
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: [dev, main]
   push:
-    branches: [main]
+    branches: [dev, main]
   workflow_dispatch:
 
 concurrency:
@@ -79,3 +79,46 @@ jobs:
           name: playwright-report
           path: apps/web/playwright-report
           retention-days: 7
+
+  allah-e2e-tests:
+    name: A-L-L-A-H.COM E2E & Visual Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm (corepack)
+        run: |
+          corepack enable
+          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium for A-L-L-A-H
+        working-directory: ./apps/a-l-l-a-h
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build A-L-L-A-H
+        run: pnpm --filter @moonwitness/a-l-l-a-h build
+
+      - name: Run A-L-L-A-H Playwright E2E
+        working-directory: ./apps/a-l-l-a-h
+        run: pnpm exec playwright test
+
+      - name: Upload A-L-L-A-H screenshots & Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allah-playwright-evidence
+          path: apps/a-l-l-a-h/test-results
+          retention-days: 14

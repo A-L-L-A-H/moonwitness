@@ -296,12 +296,12 @@ export function SiteNavigation({
         className,
       )}
     >
-      <div className="wrap mw-site-nav-inner mx-auto flex w-full max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8 lg:px-16">
+      <div className="wrap mw-site-nav-inner mx-auto flex w-full max-w-7xl items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
         <div className="shrink-0">{brand}</div>
 
         <nav
           aria-label={navLabel}
-          className="mw-site-nav-links hidden min-w-0 items-center gap-2 lg:flex xl:gap-4"
+          className="mw-site-nav-links hidden min-w-0 items-center gap-1 lg:flex xl:gap-3"
         >
           {items.map((item) => (
             <a
@@ -310,7 +310,7 @@ export function SiteNavigation({
               onClick={item.onSelect}
               aria-current={item.active ? "page" : undefined}
               className={cn(
-                "mw-site-nav-link relative inline-flex min-h-[44px] items-center whitespace-nowrap px-3 py-1.5 text-sm font-bold tracking-[0.06em] uppercase transition-colors",
+                "mw-site-nav-link relative inline-flex min-h-[44px] items-center whitespace-nowrap px-2 py-1.5 text-xs font-bold tracking-[0.05em] uppercase transition-colors xl:px-3 xl:text-sm xl:tracking-[0.06em]",
                 item.active && "is-active",
               )}
             >
