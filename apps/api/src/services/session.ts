@@ -11,7 +11,7 @@ import {
   SESSION_COOKIE_NAME,
 } from "../shared/auth";
 import { getDb, createActorContext } from "@moonwitness/orm";
-import { recordAuditLog, tryRecordAuditLog } from "../infrastructure/audit/audit-log";
+import { tryRecordAuditLog } from "../infrastructure/audit/audit-log";
 import {
   identitySessionModel,
   oauthTokenModel,
@@ -87,7 +87,7 @@ export async function createSession(userId: number): Promise<string> {
         expires_at: expiresAt.toISOString(),
         ip_address: null,
         user_agent: null,
-      } as any,
+      },
       actor,
     );
     await authEventModel.repository.create(
@@ -101,7 +101,7 @@ export async function createSession(userId: number): Promise<string> {
         user_agent: null,
         correlation_id: actor.requestId ?? null,
         occurred_at: now.toISOString(),
-      } as any,
+      },
       actor,
     );
   } catch {
@@ -159,11 +159,11 @@ export async function revokeSession(sessionId: string): Promise<void> {
   try {
     const rows = await identitySessionModel.repository.find({
       session_token: sessionId,
-    } as any);
+    });
     for (const row of rows) {
       await identitySessionModel.repository.update(
         row.id,
-        { revoked: true } as any,
+        { revoked: true },
         actor,
       );
     }
@@ -179,11 +179,11 @@ export async function revokeAllUserSessions(userId: number): Promise<void> {
   try {
     const rows = await identitySessionModel.repository.find({
       user_ref: String(userId),
-    } as any);
+    });
     for (const row of rows) {
       await identitySessionModel.repository.update(
         row.id,
-        { revoked: true } as any,
+        { revoked: true },
         actor,
       );
     }
@@ -241,7 +241,7 @@ export async function storeBffOAuthTokens(input: {
   try {
     const existing = await oauthTokenModel.repository.find({
       session_ref: input.sessionId,
-    } as any);
+    });
     const payload = {
       session_ref: input.sessionId,
       client_id: input.clientId,
@@ -249,7 +249,7 @@ export async function storeBffOAuthTokens(input: {
       refresh_token: input.refreshToken ?? null,
       id_token: input.idToken ?? null,
       expires_at: expiresAt.toISOString(),
-    } as any;
+    };
     if (existing[0]) {
       await oauthTokenModel.repository.update(existing[0].id, payload, actor);
     } else {

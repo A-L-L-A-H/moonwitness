@@ -100,7 +100,7 @@ export async function ensureProbesSchema(): Promise<void> {
     try {
       const existing = await probeNodeModel.repository.find({
         node_key: node.id,
-      } as any);
+      });
       const payload = {
         node_key: node.id,
         name: node.name,
@@ -108,7 +108,7 @@ export async function ensureProbesSchema(): Promise<void> {
         category: node.category,
         enabled: true,
         metadata_json: null,
-      } as any;
+      };
       if (!existing[0]) {
         await probeNodeModel.repository.create(payload, actor);
       }
@@ -242,7 +242,7 @@ export async function recordProbeEvent(params: {
         actor_sub: record.actorSub,
         checked_at: record.checkedAt,
         error_message: null,
-      } as any,
+      },
       actor,
     );
     await tryRecordAuditLog({

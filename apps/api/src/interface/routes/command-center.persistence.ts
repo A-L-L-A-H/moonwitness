@@ -1,11 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { applyMigrations, createActorContext, getDb, type Migration } from "@moonwitness/orm";
-import {
-  workflowModel,
-  alertModel,
-  controlCommandModel,
-} from "../../infrastructure/persistence/domain/command-control";
+import { workflowModel, alertModel } from "../../infrastructure/persistence/domain/command-control";
 import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 
 export const workflowStatusSchema = z.enum([
@@ -299,7 +295,7 @@ export async function createCommandCenterWorkflow(
         workflow_status: parsed.status,
         sort_order: nextSort,
         metadata_json: null,
-      } as any,
+      },
       actor,
     );
     await tryRecordAuditLog({
@@ -366,7 +362,7 @@ export async function transitionCommandCenterWorkflow(
     const existing = await workflowModel.repository.find({
       actor_id: actorId,
       workflow_key: workflowId,
-    } as any);
+    });
     const payload = {
       workflow_key: workflowId,
       actor_id: actorId,
@@ -375,7 +371,7 @@ export async function transitionCommandCenterWorkflow(
       workflow_status: nextStatus,
       sort_order: 0,
       metadata_json: null,
-    } as any;
+    };
     if (existing[0]) {
       await workflowModel.repository.update(existing[0].id, payload, actor);
     } else {
@@ -466,11 +462,11 @@ export async function dismissCommandCenterAlert(
     const existing = await alertModel.repository.find({
       actor_id: actorId,
       alert_key: alertId,
-    } as any);
+    });
     if (existing[0]) {
       await alertModel.repository.update(
         existing[0].id,
-        { dismissed: true, dismissed_at: now } as any,
+        { dismissed: true, dismissed_at: now },
         actor,
       );
     }

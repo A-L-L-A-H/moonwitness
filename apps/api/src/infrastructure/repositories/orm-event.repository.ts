@@ -1,4 +1,4 @@
-import { createActorContext, type Migration } from "@moonwitness/orm";
+import { createActorContext, type Migration, type ModelRecord } from "@moonwitness/orm";
 import type { Era, TimelineEvent } from "@moonwitness/types";
 import type {
   ITimelineRepository,
@@ -7,24 +7,26 @@ import type {
 } from "../../domain/usecases/timeline/timeline.repository";
 import { opsEventModel, opsEventMigrations } from "../persistence/domain/ops-events";
 
-function toTimelineEvent(row: any): TimelineEvent {
-  const tags = row.tags_json ? JSON.parse(row.tags_json) : [];
-  const related = row.related_json ? JSON.parse(row.related_json) : [];
+function toTimelineEvent(row: ModelRecord<typeof opsEventModel.schema>): TimelineEvent {
+  const tags: unknown =
+    typeof row.tags_json === "string" && row.tags_json ? JSON.parse(row.tags_json) : [];
+  const related: unknown =
+    typeof row.related_json === "string" && row.related_json ? JSON.parse(row.related_json) : [];
   return {
     id: String(row.event_key ?? row.id),
-    kind: (row.kind ?? "PROJECT") as any,
+    kind: (row.kind ?? "PROJECT") as TimelineEvent["kind"],
     date: String(row.date ?? ""),
-    era: (row.era ?? "origins") as any,
+    era: (row.era ?? "origins") as TimelineEvent["era"],
     title: String(row.title ?? ""),
     excerpt: String(row.excerpt ?? ""),
     body: String(row.body ?? ""),
     location: String(row.location ?? ""),
-    tags: Array.isArray(tags) ? tags : [],
+    tags: Array.isArray(tags) ? tags.map(String) : [],
     sources: Number(row.sources_count ?? 0),
     notes: Number(row.notes_count ?? 0),
-    image: (row.image_key ?? "hero-witness") as any,
+    image: (row.image_key ?? "hero-witness") as TimelineEvent["image"],
     ...(row.image_position ? { imagePosition: String(row.image_position) } : {}),
-    related: Array.isArray(related) ? related : [],
+    related: Array.isArray(related) ? related.map(String) : [],
   };
 }
 
@@ -32,7 +34,8 @@ export class OrmEventRepository implements ITimelineRepository {
   async upsertEvent(event: TimelineEvent): Promise<void> {
     const actor = createActorContext(null, "api");
     const existing = await opsEventModel.repository.find({ event_key: event.id });
-    const payload = {
+    const eventWithPosition = event as TimelineEvent & { imagePosition?: string };
+    const payload: Record<string, unknown> = {
       event_key: event.id,
       kind: event.kind,
       era: event.era ?? null,
@@ -45,10 +48,10 @@ export class OrmEventRepository implements ITimelineRepository {
       sources_count: Number(event.sources ?? 0),
       notes_count: Number(event.notes ?? 0),
       image_key: event.image ?? null,
-      image_position: (event as any).imagePosition ?? null,
+      image_position: eventWithPosition.imagePosition ?? null,
       related_json: JSON.stringify(event.related ?? []),
       payload_json: JSON.stringify(event),
-    } as any;
+    };
     if (existing[0]) {
       await opsEventModel.repository.update(existing[0].id, payload, actor);
     } else {
@@ -61,13 +64,7 @@ export class OrmEventRepository implements ITimelineRepository {
     if (filters.era) where.era = filters.era;
     if (filters.kind) where.kind = filters.kind;
     // basic fetch; apply complex filters in-memory for parity with prior repo
-    const rows = await opsEventModel.repository.find(
-      where as any,
-      {
-        orderBy: "date",
-        direction: filters.sort === "newest" ? "DESC" : "ASC",
-      } as any,
-    );
+    const rows = await opsEventModel.repository.find(where);
     let events = rows.map(toTimelineEvent);
     if (filters.from) events = events.filter((e) => e.date >= filters.from!);
     if (filters.to) events = events.filter((e) => e.date <= filters.to!);
@@ -95,7 +92,7 @@ export class OrmEventRepository implements ITimelineRepository {
   }
 
   async getEvent(id: string): Promise<TimelineEvent | null> {
-    const rows = await opsEventModel.repository.find({ event_key: id } as any);
+    const rows = await opsEventModel.repository.find({ event_key: id });
     return rows[0] ? toTimelineEvent(rows[0]) : null;
   }
 
@@ -116,12 +113,12 @@ export class OrmEventRepository implements ITimelineRepository {
     try {
       const { timelineEraModel } = await import("../persistence/timeline-model");
       const rows = await timelineEraModel.repository.find();
-      return rows.map((r: any) => ({
-        id: r.id as any,
-        name: String(r.name ?? r.id),
-        years: String(r.years ?? ""),
-        tagline: String(r.tagline ?? ""),
-        color: String(r.color ?? "#888"),
+      return rows.map((row) => ({
+        id: row.id as Era["id"],
+        name: String(row.name ?? row.id),
+        years: String(row.years ?? ""),
+        tagline: String(row.tagline ?? ""),
+        color: String(row.color ?? "#888"),
       }));
     } catch {
       return [];

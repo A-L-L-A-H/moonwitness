@@ -1,30 +1,4 @@
-import { getDb, closeDb } from "@moonwitness/orm";
-import { createActorContext } from "@moonwitness/orm";
-
-/** Run all built-in seeders in deterministic order. */
-export async function runSeeders(): Promise<string[]> {
-  const ran: string[] = [];
-
-  // 1. Bootstrap admin (already existed via services/user.ts seedBootstrapAdmin)
-  // No-op here; bootstrap is triggered at app start.
-
-  // 2. Identity baseline: ensure admin profile exists
-  await identitySeeder(ran);
-
-  // 3. Storage baseline buckets (if env provides default bucket name)
-  await storageSeeder(ran);
-
-  // 4. Syslog baseline: ensure empty table exists (no-op, just schema)
-  await syslogSeeder(ran);
-
-  // 5. SNMP baseline devices (empty, schema only)
-  await snmpSeeder(ran);
-
-  // 6. RADIUS baseline clients (empty, schema only)
-  await radiusSeeder(ran);
-
-  return ran;
-}
+import { getDb } from "@moonwitness/orm";
 
 /** Best-effort identity baseline seeder. */
 async function identitySeeder(ran: string[]): Promise<void> {
@@ -87,4 +61,29 @@ async function radiusSeeder(ran: string[]): Promise<void> {
   } catch {
     // best-effort
   }
+}
+
+/** Run all built-in seeders in deterministic order. */
+export async function runSeeders(): Promise<string[]> {
+  const ran: string[] = [];
+
+  // 1. Bootstrap admin (already existed via services/user.ts seedBootstrapAdmin)
+  // No-op here; bootstrap is triggered at app start.
+
+  // 2. Identity baseline: ensure admin profile exists
+  await identitySeeder(ran);
+
+  // 3. Storage baseline buckets (if env provides default bucket name)
+  await storageSeeder(ran);
+
+  // 4. Syslog baseline: ensure empty table exists (no-op, just schema)
+  await syslogSeeder(ran);
+
+  // 5. SNMP baseline devices (empty, schema only)
+  await snmpSeeder(ran);
+
+  // 6. RADIUS baseline clients (empty, schema only)
+  await radiusSeeder(ran);
+
+  return ran;
 }

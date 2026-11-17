@@ -5,7 +5,7 @@
 
 import { hashPassword, verifyPassword } from "../shared/auth";
 import { getDb, createActorContext } from "@moonwitness/orm";
-import { recordAuditLog, tryRecordAuditLog } from "../infrastructure/audit/audit-log";
+import { tryRecordAuditLog } from "../infrastructure/audit/audit-log";
 import { userProfileModel } from "../infrastructure/persistence/domain/identity";
 import { authEventModel } from "../infrastructure/persistence/domain/identity";
 
@@ -112,17 +112,17 @@ export async function createUser(input: CreateUserInput): Promise<UserPublic> {
   try {
     const existing = await userProfileModel.repository.find({
       legacy_user_id: Number(user.id),
-    } as any);
+    });
     const profilePayload = {
       legacy_user_id: Number(user.id),
       username: String(user.username),
       email: String(user.email),
       password_hash: String(user.password_hash),
-      role: String(user.role) as any,
+      role: String(user.role) as User["role"],
       display_name: String(user.display_name),
       is_active: true,
       last_login_at: null,
-    } as any;
+    };
     if (existing[0]) {
       await userProfileModel.repository.update(existing[0].id, profilePayload, actor);
     } else {
@@ -139,7 +139,7 @@ export async function createUser(input: CreateUserInput): Promise<UserPublic> {
         user_agent: null,
         correlation_id: actor.requestId ?? null,
         occurred_at: new Date().toISOString(),
-      } as any,
+      },
       actor,
     );
   } catch {

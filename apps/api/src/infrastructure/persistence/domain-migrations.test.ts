@@ -100,11 +100,11 @@ describe("domain migrations (P0)", () => {
         image_position: null,
         related_json: null,
         payload_json: null,
-      } as any,
+      },
       actor,
     );
-    const found = await opsEventModel.repository.find({ event_key: "evt-smoke-1" } as any);
+    const found = await opsEventModel.repository.find({ event_key: "evt-smoke-1" });
     expect(found).toHaveLength(1);
-    expect((found[0] as any).title).toBe("Smoke event");
+    expect(found[0]?.title).toBe("Smoke event");
   });
 });
