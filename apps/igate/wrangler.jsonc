@@ -1,0 +1,32 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "rocksoul-igate-worker",
+  "account_id": "5e743e388c349ee7a340be8ba91665fa",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-16",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "traces": {
+      "enabled": true,
+    },
+  },
+  "routes": [
+    {
+      "pattern": "igate.moonwitness.biz.id/*",
+      "zone_name": "moonwitness.biz.id",
+    },
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "igate-worker-db",
+      "database_id": "1267ccd2-77ad-4353-8991-5dfe0c157cd0",
+    },
+  ],
+  "vars": {
+    "MID_ISSUER_URL": "https://id.moonwitness.biz.id",
+    "IGATE_CLIENT_ID": "igate-console",
+    "CORS_ORIGINS": "https://igate.moonwitness.biz.id,https://moonwitness.biz.id,https://a-l-l-a-h.com",
+  },
+}

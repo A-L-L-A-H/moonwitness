@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@moonwitness/canon", "@moonwitness/ui", "@moonwitness/types"],
+  transpilePackages: [
+    "@moonwitness/canon",
+    "@moonwitness/core",
+    "@moonwitness/ui",
+    "@moonwitness/types",
+  ],
   reactStrictMode: true,
   poweredByHeader: false,
   async headers() {
@@ -25,10 +30,10 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self' data:",
-              "connect-src 'self' https://moonwitness.biz.id https://api.moonwitness.biz.id https://codex.a-l-l-a-h.com https://community.moonwitness.biz.id https://moonwitness-radio.bjo163.workers.dev https://igate.moonwitness.biz.id https://cloudflareinsights.com",
+              "connect-src 'self' https://id.moonwitness.biz.id https://moonwitness.biz.id https://api.moonwitness.biz.id https://codex.a-l-l-a-h.com https://community.moonwitness.biz.id https://moonwitness-radio.bjo163.workers.dev https://igate.moonwitness.biz.id https://cloudflareinsights.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://id.moonwitness.biz.id",
             ].join("; "),
           },
         ],

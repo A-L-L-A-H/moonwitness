@@ -1,0 +1,74 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  SANCTUARY_MID_AUTH_EVENT,
+  clearSanctuaryMidSession,
+  getStoredSanctuaryMidSession,
+  startSanctuaryMidLogin,
+  type SanctuaryMidSession,
+} from "@/lib/mid-oidc";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+
+export function SanctuaryIdentityControl({ compact = false }: { readonly compact?: boolean }) {
+  const { locale } = useSanctuaryLocale();
+  const [session, setSession] = useState<SanctuaryMidSession | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setSession(getStoredSanctuaryMidSession());
+    sync();
+    window.addEventListener(SANCTUARY_MID_AUTH_EVENT, sync);
+    return () => window.removeEventListener(SANCTUARY_MID_AUTH_EVENT, sync);
+  }, []);
+
+  if (session) {
+    return (
+      <div className="inline-flex items-center gap-1.5">
+        <span
+          className="inline-flex items-center border border-[#d6b46c]/45 bg-[#d6b46c]/12 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[#f5dfa6] uppercase"
+          title={`${session.displayName} (${session.role})`}
+        >
+          @{session.username}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setBusy(true);
+            void clearSanctuaryMidSession().finally(() => setBusy(false));
+          }}
+          disabled={busy}
+          className="btn-luxe-secondary px-2.5 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[#d8ceba] hover:text-[#fff6df] uppercase cursor-pointer"
+        >
+          {locale === "id" ? "KELUAR" : "SIGN OUT"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={busy}
+      onClick={() => {
+        setBusy(true);
+        const currentPath =
+          typeof window !== "undefined"
+            ? `${window.location.pathname}${window.location.search}`
+            : "/";
+        void startSanctuaryMidLogin(currentPath).catch(() => setBusy(false));
+      }}
+      className={`btn-luxe-secondary inline-flex items-center font-mono tracking-[0.16em] text-[#f5dfa6] uppercase cursor-pointer ${
+        compact ? "px-3 py-2 text-[11px]" : "px-3 py-1.5 text-[10px]"
+      }`}
+    >
+      {busy
+        ? locale === "id"
+          ? "MENGHUBUNGKAN…"
+          : "CONNECTING…"
+        : locale === "id"
+          ? "MASUK · ID"
+          : "SIGN IN · ID"}
+    </button>
+  );
+}
