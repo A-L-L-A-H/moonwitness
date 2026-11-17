@@ -185,7 +185,7 @@ describe("auth routes", () => {
     const logout = await app.inject({
       method: "POST",
       url: `${API_PREFIX}/auth/logout`,
-      headers: { cookie: activeCookie },
+      headers: { cookie: activeCookie, origin: "http://localhost:3000" },
     });
     expect(logout.statusCode).toBe(200);
 

@@ -58,7 +58,7 @@ export const DEFAULT_PROBE_NODES = [
 
 export const probesMigrations: Migration[] = [
   {
-    id: "001_create_igate_probes_tables",
+    id: "probes_001_create_igate_probes_tables",
     up: `
       CREATE TABLE IF NOT EXISTS igate_nodes (
         id TEXT PRIMARY KEY,

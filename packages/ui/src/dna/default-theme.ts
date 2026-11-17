@@ -34,22 +34,44 @@ const createColorToken = (hex: string, alpha?: number): ColorToken => ({
   alpha,
 });
 
-// Color scales - generated from base colors
+// Color scales - generated from base colors using HSL lightness variation
+const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return { r, g, b };
+};
+
+const rgbToHex = (r: number, g: number, b: number): string => {
+  const clamp = (v: number) => Math.max(0, Math.min(255, Math.round(v)));
+  return '#' + [clamp(r), clamp(g), clamp(b)].map((v) => v.toString(16).padStart(2, '0')).join('');
+};
+
+// Mix base color with white (lighten) or black (darken) by a factor 0-1
+const mixColor = (hex: string, target: string, factor: number): string => {
+  const a = hexToRgb(hex);
+  const t = hexToRgb(target);
+  return rgbToHex(
+    a.r + (t.r - a.r) * factor,
+    a.g + (t.g - a.g) * factor,
+    a.b + (t.b - a.b) * factor,
+  );
+};
+
 const createScale = (baseHex: string): ColorScale => {
-  // This is a simplified scale generation - in production you'd use a proper color scale generator
   const base = createColorToken(baseHex);
   return {
-    50: createColorToken(baseHex),
-    100: createColorToken(baseHex),
-    200: createColorToken(baseHex),
-    300: createColorToken(baseHex),
-    400: createColorToken(baseHex),
+    50: createColorToken(mixColor(baseHex, '#ffffff', 0.95)),
+    100: createColorToken(mixColor(baseHex, '#ffffff', 0.9)),
+    200: createColorToken(mixColor(baseHex, '#ffffff', 0.75)),
+    300: createColorToken(mixColor(baseHex, '#ffffff', 0.6)),
+    400: createColorToken(mixColor(baseHex, '#ffffff', 0.3)),
     500: base,
-    600: createColorToken(baseHex),
-    700: createColorToken(baseHex),
-    800: createColorToken(baseHex),
-    900: createColorToken(baseHex),
-    950: createColorToken(baseHex),
+    600: createColorToken(mixColor(baseHex, '#000000', 0.15)),
+    700: createColorToken(mixColor(baseHex, '#000000', 0.3)),
+    800: createColorToken(mixColor(baseHex, '#000000', 0.45)),
+    900: createColorToken(mixColor(baseHex, '#000000', 0.6)),
+    950: createColorToken(mixColor(baseHex, '#000000', 0.75)),
   };
 };
 

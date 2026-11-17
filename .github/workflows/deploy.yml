@@ -71,13 +71,16 @@ jobs:
         if: steps.creds.outputs.configured == 'true'
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_PORT: ${{ vars.VPS_PORT || '22' }}
           VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
         run: |
           install -d -m 700 ~/.ssh
           umask 077
           printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
+          printf 'Host %s\n  Port %s\n' "$VPS_HOST" "$VPS_PORT" > ~/.ssh/config
+          chmod 600 ~/.ssh/config
+          ssh-keyscan -p "$VPS_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null || true
           chmod 600 ~/.ssh/known_hosts
 
       - name: Pre-flight check
