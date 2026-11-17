@@ -1,74 +1,42 @@
 # Deployment
 
-## Status: contract defined, target not configured
+> [!NOTE]
+> **Status:** Single-VPS Compose topology and SSH deployment workflow are **configured** on `dev` (`docker-compose.yml`, `Caddyfile`, `.github/workflows/deploy.yml`, `docs/architecture/DEPLOYMENT-RUNBOOK.md`), with compose/Caddy structural constraints **tested** in Vitest (`vps-topology.test.ts`). Execution against a live VPS requires populating the `production` GitHub Environment secrets (`unverified in repo`).
 
-`.github/workflows/deploy.yml` implements the production deploy contract. It has never run
-successfully, because this repository has no hosting target and no deployment credentials. The
-workflow fails loudly and tells you exactly what is missing instead of reporting a green deploy
-that deployed nothing.
+## Architecture & Service Topology
 
-## What the workflow does
+MoonWitness deploys as a single-VPS Docker Compose stack fronted exclusively by **Caddy** on ports `80`/`443`:
 
-1. Resolves the release tag (from the `release: published` event, or the manual `tag` input).
-2. Verifies `DEPLOY_HOOK_URL` (secret) and `HEALTHCHECK_URL` (variable) exist; fails with a list of
-   what is missing otherwise.
-3. Checks out the release tag — never a branch head.
-4. `POST`s `{"ref": "<tag>", "sha": "<sha>"}` to `DEPLOY_HOOK_URL` and fails on any non-2xx.
-5. Polls `HEALTHCHECK_URL` up to ten times, 15 seconds apart, and fails unless it returns `200`.
-6. Smoke-tests `PRODUCTION_URL` (variable) and requires `200`.
+- `caddy` (`moonwitness-public`) → TLS termination & reverse proxy (`moonwitness.biz.id` → `web:3000`, `a-l-l-a-h.com` → `allah:3003`, `api.moonwitness.biz.id` / `id.moonwitness.biz.id` → `api:3002`)
+- `web` (Next.js App Router) → `apps/web` (internal `:3000`)
+- `allah` (Next.js App Router) → `apps/a-l-l-a-h` (internal `:3003`)
+- `api` (Fastify Core API + MID OIDC + IGate) → `apps/api` (internal `:3002`, SQLite `moonwitness-data`)
+- `radius`, `snmp-poller`, `syslog` (Rust services on `moonwitness-internal`, no public ports)
+- `arsy` (`cp/arsy`) → native loopback-only host agent (`127.0.0.1:8787`)
 
-The job is bound to the `production` GitHub Environment, so required reviewers can gate it.
+See [VPS-TOPOLOGY-OPERATIONS.md](../architecture/VPS-TOPOLOGY-OPERATIONS.md) and [DEPLOYMENT-RUNBOOK.md](../architecture/DEPLOYMENT-RUNBOOK.md) for full service, volume, and backup details.
 
-## Web → API deployment topology
+## GitHub Actions Deploy Flow (`.github/workflows/deploy.yml`)
 
-The Next.js app proxies API calls through a rewrite so browsers talk to one origin. The rewrite
-target is controlled by `API_INTERNAL_URL` on the web process (defaults to `http://localhost:3002`
-for local dev):
+Runs exclusively on **GitHub-hosted `ubuntu-latest`** runners under the protected `production` environment:
 
-- `apps/web/next.config.ts` maps `/api/v1/:path*` → `{API_INTERNAL_URL}/api/v1/:path*`.
-- Set `API_INTERNAL_URL` to the Fastify API's reachable origin in each environment:
-  - local dev: unset (uses `http://localhost:3002`).
-  - staging/production: set it to the API service URL the web process can reach over the
-    platform's private network (e.g. `http://api:3002` on a container network, or the internal
-    load-balanced origin).
+1. Resolves release tag from `release: published` or manual `workflow_dispatch` input.
+2. Verifies required `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` (secrets) and `VPS_DEPLOY_PATH`, `PRODUCTION_URL` (vars).
+3. Connects over SSH with `webfactory/ssh-agent`, runs remote Docker & `docker compose config --quiet` pre-flight checks.
+4. Checks out the release tag at `VPS_DEPLOY_PATH`, pulls/rebuilds services, and runs `docker compose up -d --build --remove-orphans` (never removing persistent volumes).
+5. Polls `$PRODUCTION_URL/api/health` (up to 20 × 10s = 200s) and smoke-tests root + API health HTTP 200.
+6. Rolls back to the previous release tag automatically on failure.
 
-The API side controls its own bound host/port via `HOST`/`PORT` (defaults `127.0.0.1:3002`) and
-exposes health/readiness under the API prefix (`/api/v1/healthz`, `/api/v1/readyz`).
+## Required `production` Environment Configuration
 
-## Required configuration
-
-| Name              | Kind     | Purpose                                                 |
-| ----------------- | -------- | ------------------------------------------------------- |
-| `DEPLOY_HOOK_URL` | secret   | Hosting platform deploy hook (Vercel/Coolify/other)     |
-| `HEALTHCHECK_URL` | variable | Endpoint that must return `200` when the app is serving |
-| `PRODUCTION_URL`  | variable | Public root URL used by the smoke test                  |
-
-Plus a platform manifest committed to the repo (`vercel.json`, Dockerfile, or the platform's
-equivalent) so the build is reproducible outside a developer machine.
-
-## Enabling it
-
-1. Add the three values above in Settings → Secrets and variables → Actions.
-2. Create the `production` Environment and add the owner as a required reviewer.
-3. Run the workflow manually with a tag that exists (for example `v0.1.0`) and watch it pass.
-4. Only then rely on `release: published` to trigger it automatically.
-
-Until step 3 has actually succeeded, treat deployment as unverified.
+| Name              | Kind     | Purpose                                                         |
+| ----------------- | -------- | --------------------------------------------------------------- |
+| `VPS_HOST`        | secret   | Target VPS hostname or IP                                       |
+| `VPS_USER`        | secret   | Non-root deploy SSH user with Docker permission                 |
+| `VPS_SSH_KEY`     | secret   | Ed25519 private key for deploy SSH access                       |
+| `VPS_DEPLOY_PATH` | variable | Absolute path of repo checkout on VPS (e.g. `/opt/moonwitness`) |
+| `PRODUCTION_URL`  | variable | Public base URL for health/smoke checks                         |
 
 ## Rollback
 
-A failed health check means the release is not serving. In order:
-
-1. **Re-deploy the previous tag.** Run the Deploy workflow manually with the last known-good tag
-   (`gh workflow run deploy.yml -f tag=v0.0.9`). This is the fastest path and does not require a
-   revert commit.
-2. **If the platform keeps per-deployment history**, promote the previous deployment in the
-   platform UI instead; it is equivalent and faster.
-3. **Only if a rollback tag does not exist**, revert the offending commit on `dev`, promote to
-   `main` through a PR, and cut a new patch release. Do not force-push `main`; the ruleset blocks
-   it.
-4. **Record what happened** in the release notes of the replacement release, including the failed
-   tag and the root cause.
-
-Never delete or move a release tag to "undo" a deploy — the `release-tags` ruleset prevents it, and
-a moved tag makes every past deploy unattributable.
+On automated failure, `deploy.yml` checks out the prior tag and runs `docker compose up -d --remove-orphans`. For manual rollback, see [DEPLOYMENT-RUNBOOK.md#rollback-manual](../architecture/DEPLOYMENT-RUNBOOK.md#rollback-manual). Never delete or move `v*` release tags.
