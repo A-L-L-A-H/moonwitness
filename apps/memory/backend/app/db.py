@@ -6,6 +6,7 @@ from typing import Any
 from uuid import uuid4
 
 from .config import get_settings
+from .witness_ledger import init_witness_ledger
 
 
 def utc_now() -> str:
@@ -105,6 +106,8 @@ def init_db() -> None:
         ):
             if name not in columns:
                 db.execute(f"ALTER TABLE jobs ADD COLUMN {name} {definition}")
+
+        init_witness_ledger(db)
 
 
 def create_archive(file_name: str, file_path: str, size_bytes: int, sha256: str):
