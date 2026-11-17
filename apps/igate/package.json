@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@libsql/client": "^0.15.15",
+    "@libsql/client": "^0.18.0",
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
     "eslint": "^10.14.0",

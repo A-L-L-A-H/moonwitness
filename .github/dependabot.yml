@@ -15,6 +15,9 @@ updates:
           - "minor"
           - "patch"
     open-pull-requests-limit: 10
+    ignore:
+      - dependency-name: "p5"
+        versions: [">=2.4.0"]
     allow:
       - dependency-type: "direct"
       - dependency-type: "indirect"
