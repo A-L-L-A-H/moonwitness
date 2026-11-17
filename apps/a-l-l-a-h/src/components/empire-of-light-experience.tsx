@@ -18,6 +18,7 @@ import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import {
   NAVIGATION_TABS,
+  WORLD_ART,
   WORLD_DOMAINS,
   type NavigationSectionId,
   type WorldIdentifier,
@@ -29,47 +30,6 @@ import { triggerSacredViewTransition } from "./motion-primitives";
 import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
 import { UniversalSearchModal } from "./universal-search-modal";
 import { WorldsSanctum } from "./worlds-sanctum";
-
-const WORLD_ART: Readonly<
-  Record<WorldIdentifier, { readonly src: string; readonly subject: string }>
-> = {
-  moonwitness: {
-    src: "/art/world-moonwitness.webp",
-    subject: "An illustrated archive hall beneath a moonlit sky",
-  },
-  arsy: {
-    src: "/art/world-arsy.webp",
-    subject: "A radio relay dish overlooking a twilight skyline",
-  },
-  "human-pen": {
-    src: "/art/world-qalam.webp",
-    subject: "An illuminated writing pen over editorial panels",
-  },
-  sidra: {
-    src: "/art/world-sidra.webp",
-    subject: "A luminous tree of connected knowledge",
-  },
-  "rocksoul-dx": {
-    src: "/art/world-rocksoul.webp",
-    subject: "A playful creative studio controller over vibrant color",
-  },
-  crayon: {
-    src: "/art/story-plate-01.webp",
-    subject: "A bright spectrum of illustrated editorial lenses",
-  },
-  "sin-can": {
-    src: "/art/story-plate-02.webp",
-    subject: "An open archway leading into honest self-reflection",
-  },
-  mythos: {
-    src: "/art/story-plate-04.webp",
-    subject: "Historic stone arches preserving ancient human memory",
-  },
-  "angel-with-shotgun": {
-    src: "/art/celestial-gate-bg.webp",
-    subject: "Balanced architectural scales under dramatic sky light",
-  },
-};
 
 const WORLD_TAGLINES_ID: Readonly<Record<WorldIdentifier, string>> = {
   moonwitness: "Kisah · Pengetahuan · Arsip",
@@ -294,7 +254,7 @@ export function EmpireOfLightExperience() {
               {locale.toUpperCase()}
             </SecondaryAction>
 
-            <div className="hidden lg:inline-flex">
+            <div className="hidden xl:inline-flex">
               <SanctuaryIdentityControl />
             </div>
 
@@ -302,10 +262,23 @@ export function EmpireOfLightExperience() {
               aria-pressed={quietMode}
               onClick={() => setQuietMode((prev) => !prev)}
               aria-label="Toggle Quiet Contemplative Motion Mode"
-              className="hidden lg:inline-flex font-mono text-xs"
+              className="hidden xl:inline-flex font-mono text-xs"
             >
               {quietMode ? "QUIET" : "LIGHT"}
             </SecondaryAction>
+
+            <PrimaryAction
+              onClick={() => navigateToSection("the-dock")}
+              className="hidden 2xl:inline-flex px-3.5 py-1.5 text-xs"
+            >
+              <span>{locale === "id" ? "GABUNG KRU" : "JOIN THE CREW"}</span>
+              <span aria-hidden="true">&rarr;</span>
+            </PrimaryAction>
+
+            <CrownEmblemIcon
+              className="hidden 2xl:block h-7 w-7 shrink-0 text-[var(--dna-accent)]"
+              aria-hidden="true"
+            />
 
             <SecondaryAction
               aria-expanded={mobileMenuOpen}
@@ -409,18 +382,24 @@ export function EmpireOfLightExperience() {
             </PrimaryAction>
           }
           asideContent={
-            <div className="mw-editorial-aside-panel text-right">
-              <div className="flex items-center justify-end gap-2 text-[var(--dna-accent)]">
-                <CrownEmblemIcon className="h-6 w-6" />
-                <span>{locale === "id" ? "MISI BERSAMA" : "SHARED COMPASS"}</span>
+            <div className="mw-editorial-aside-panel text-center">
+              <div className="flex flex-col items-center gap-1.5 text-[var(--dna-accent)]">
+                <CrownEmblemIcon className="h-7 w-7" />
+                <span className="text-[11px] tracking-[0.14em]">
+                  {locale === "id" ? "MISI BERSAMA" : "SHARED COMPASS"}
+                </span>
               </div>
-              <p className="mt-2 text-sm leading-relaxed text-[var(--dna-text)]">
-                DREAM · EXPLORE · LEARN · CREATE · CONNECT
-              </p>
+              <ul className="mt-2.5 flex flex-col items-center gap-0.5 text-lg font-black leading-tight tracking-[0.06em] text-[var(--dna-text)]">
+                <li>DREAM</li>
+                <li>EXPLORE</li>
+                <li>LEARN</li>
+                <li>CREATE</li>
+                <li>CONNECT</li>
+              </ul>
               <button
                 type="button"
                 onClick={() => navigateToSection("the-worlds")}
-                className="mt-3 inline-flex min-h-[44px] items-center gap-2 border border-[var(--dna-accent)] bg-[var(--dna-surface-elevated)] px-3 py-1.5 text-xs text-[var(--dna-accent)] hover:bg-[var(--dna-accent)] hover:text-[var(--dna-canvas)] transition-colors cursor-pointer"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-2 border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] px-3.5 py-1.5 text-xs font-black text-[var(--dna-canvas)] shadow-[3px_3px_0_var(--dna-accent-secondary)] hover:bg-[var(--dna-text)] transition-colors cursor-pointer"
               >
                 <span>{locale === "id" ? "MENUJU DUNIA" : "TO THE WORLDS"}</span>
                 <span aria-hidden="true">&rarr;</span>
