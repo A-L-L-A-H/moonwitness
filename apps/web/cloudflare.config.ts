@@ -14,7 +14,8 @@ export default defineConfig({
     },
     env: {
       ASSETS: bindings.assets(),
-      API_INTERNAL_URL: bindings.text("https://moonwitness-api.bjo163.workers.dev"),
+      API_SERVICE: bindings.worker({ worker: "moonwitness-api" }),
+      API_INTERNAL_URL: bindings.text("https://api.moonwitness.biz.id"),
     },
   }),
 });
