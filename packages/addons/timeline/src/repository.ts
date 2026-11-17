@@ -39,6 +39,7 @@ function parseJson<T>(value: unknown, fallback: T): T {
 }
 
 function rowToEvent(row: Record<string, unknown>): TimelineEvent {
+  const rawImagePosition = row.imagePosition ?? row.imageposition;
   return {
     id: String(row.id),
     kind: String(row.kind) as TimelineEvent["kind"],
@@ -52,7 +53,7 @@ function rowToEvent(row: Record<string, unknown>): TimelineEvent {
     sources: Number(row.sources ?? 0),
     notes: Number(row.notes ?? 0),
     image: String(row.image) as TimelineEvent["image"],
-    imagePosition: row.imagePosition == null ? undefined : String(row.imagePosition),
+    imagePosition: rawImagePosition == null ? undefined : String(rawImagePosition),
     related: parseJson<string[]>(row.related, []),
   };
 }

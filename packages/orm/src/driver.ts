@@ -1,4 +1,5 @@
 import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
+import { isPostgresUrl } from "./drivers/postgres.driver.js";
 import { D1Driver, type D1DatabaseLike } from "./drivers/d1.driver.js";
 
 export interface OrmDriverHandle extends LibSqlExecutor {
@@ -8,14 +9,21 @@ export interface OrmDriverHandle extends LibSqlExecutor {
 
 let db: OrmDriverHandle | null = null;
 
-/** Initialize the active ORM handle using local libSQL (`LibSqlDriver`). */
-export async function initDb(dbPath: string): Promise<OrmDriverHandle> {
+/** Initialize the active ORM handle using PostgreSQL (`PostgresDriver`) or local libSQL (`LibSqlDriver`). */
+export async function initDb(dbPathOrUrl: string): Promise<OrmDriverHandle> {
   if (db) {
     throw new Error("Database already initialized. Call closeDb() first.");
   }
+  if (isPostgresUrl(dbPathOrUrl)) {
+    const { PostgresDriver } = await import("./drivers/postgres.driver.js");
+    const driver = new PostgresDriver();
+    await driver.init(dbPathOrUrl);
+    db = driver;
+    return driver;
+  }
   const { LibSqlDriver } = await import("./drivers/sqlite.driver.js");
   const driver = new LibSqlDriver();
-  await driver.init(dbPath);
+  await driver.init(dbPathOrUrl);
   db = driver;
   return driver;
 }
