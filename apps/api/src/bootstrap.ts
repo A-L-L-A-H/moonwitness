@@ -11,7 +11,6 @@ import {
 } from "@moonwitness/addon-timeline";
 import { authMigrations } from "./db/migrations";
 import type { FastifyInstance } from "fastify";
-import type { EdgeAppInstance } from "./infrastructure/adapters/edge-router";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "./interface/routes/command-center.routes";
@@ -95,26 +94,4 @@ export async function buildCoreApp(options: CoreAppOptions = {}): Promise<Fastif
 
   await registerAddonTree(fastify, prefix);
   return fastify;
-}
-
-/**
- * Builds the Web-Fetch-native Cloudflare Workers application (zero `eval`/`new Function`, zero `@libsql/client`).
- */
-export async function buildEdgeApp(options: CoreAppOptions = {}): Promise<EdgeAppInstance> {
-  const prefix = options.prefix ?? env.API_PREFIX ?? "/api/v1";
-  const seed = options.seed ?? process.env.SEED === "1";
-  if (seed) {
-    assertDemoSeedAllowed({
-      nodeEnv: env.NODE_ENV,
-      allowDemoSeed: process.env.ALLOW_DEMO_SEED ?? "0",
-    });
-  }
-
-  await migrateAndSeed(seed);
-
-  const { createEdgeFastifyAdapter } = await import("./infrastructure/adapters/edge-router");
-  const edgeApp = await createEdgeFastifyAdapter({ prefix });
-  await registerAddonTree(edgeApp.serverAdapter, prefix);
-  await edgeApp.ready();
-  return edgeApp;
 }

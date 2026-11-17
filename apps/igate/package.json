@@ -7,13 +7,11 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "dev": "wrangler dev",
     "build": "tsup",
-    "deploy": "wrangler deploy",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "clean": "rm -rf .turbo .wrangler dist node_modules"
+    "clean": "rm -rf .turbo dist node_modules"
   },
   "dependencies": {
     "@moonwitness/core": "workspace:*"
