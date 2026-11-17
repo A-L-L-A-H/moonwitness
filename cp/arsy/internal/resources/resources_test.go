@@ -694,3 +694,40 @@ func TestKubernetesBuildIngressWithBackendRules(t *testing.T) {
 		t.Fatalf("backend rule / tidak ada: %s", manifest)
 	}
 }
+
+func TestDockerComposeAbsentNoVolumes(t *testing.T) {
+	rec := &recordingRunner{}
+	dc := &DockerCompose{Runner: rec}
+	err := dc.Apply(context.Background(), Resource{
+		Kind:        "dockercompose",
+		Name:        "moonwitness",
+		ComposeFile: "/opt/moonwitness/docker-compose.yml",
+		State:       "absent",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, cmd := range rec.commands {
+		for _, arg := range cmd.Args {
+			if arg == "--volumes" || arg == "-v" {
+				t.Fatalf("absent must never pass --volumes, got: %v", cmd.Args)
+			}
+		}
+	}
+}
+
+func TestGitDeployPostCmdRejected(t *testing.T) {
+	rec := &recordingRunner{}
+	g := &GitDeploy{Runner: rec}
+	err := g.Validate(Resource{
+		Kind:    "gitdeploy",
+		Name:    "moonwitness",
+		Repo:    "https://github.com/A-L-L-A-H/moonwitness",
+		Branch:  "main",
+		WorkDir: "/opt/moonwitness",
+		PostCmd: "rm -rf /",
+	})
+	if err == nil {
+		t.Fatal("expected error for post_cmd, got nil")
+	}
+}

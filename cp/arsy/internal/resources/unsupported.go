@@ -51,120 +51,12 @@ func DefaultProviders(runner host.Runner, info host.Info) []Provider {
 		})
 	}
 
-	if info.Capabilities.Cron {
-		providers = append(providers, &Cron{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "cron",
-			Reason:       "crontab tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.Users {
-		providers = append(providers, &Users{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "user",
-			Reason:       "useradd/getent tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.Firewall {
-		providers = append(providers, &Firewall{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "firewall",
-			Reason:       "ufw/nft/iptables tidak tersedia",
-		})
-	}
-
-	if runner.LookPath("nft") {
-		providers = append(providers, &PortForward{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "portforward",
-			Reason:       "nftables tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.Network {
-		providers = append(providers, &Network{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "network",
-			Reason:       "ip command tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.SSH {
-		providers = append(providers, &SSH{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "ssh",
-			Reason:       "ssh-keygen/getent tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.Cert {
-		providers = append(providers, &Cert{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "cert",
-			Reason:       "openssl/certbot tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.Mount {
-		providers = append(providers, &Mount{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "mount",
-			Reason:       "mount/findmnt tidak tersedia",
-		})
-	}
-
-	if info.Capabilities.Alert {
-		providers = append(providers, &Alert{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "alert",
-			Reason:       "curl/metrics tidak tersedia",
-		})
-	}
-
-	if runner.LookPath("git") {
-		providers = append(providers, &GitDeploy{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "gitdeploy",
-			Reason:       "git tidak tersedia",
-		})
-	}
-
-	if runner.LookPath("curl") {
-		providers = append(providers, &Webhook{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "webhook",
-			Reason:       "curl tidak tersedia",
-		})
-	}
-
 	if info.Capabilities.Docker && runner.LookPath("docker") {
 		providers = append(providers, &DockerCompose{Runner: runner})
 	} else {
 		providers = append(providers, &Unsupported{
 			ResourceKind: "dockercompose",
 			Reason:       "docker compose tidak tersedia",
-		})
-	}
-
-	if runner.LookPath("apt-get") || runner.LookPath("dnf") || runner.LookPath("apk") {
-		providers = append(providers, &Package{Runner: runner})
-	} else {
-		providers = append(providers, &Unsupported{
-			ResourceKind: "package",
-			Reason:       "package manager tidak tersedia",
 		})
 	}
 
@@ -177,14 +69,30 @@ func DefaultProviders(runner host.Runner, info host.Info) []Provider {
 		})
 	}
 
-	if info.Capabilities.Kubernetes {
-		providers = append(providers, &Kubernetes{Runner: runner})
+	if info.Capabilities.Cert {
+		providers = append(providers, &Cert{Runner: runner})
 	} else {
 		providers = append(providers, &Unsupported{
-			ResourceKind: "kubernetes",
-			Reason:       "kubectl tidak tersedia",
+			ResourceKind: "cert",
+			Reason:       "openssl/certbot tidak tersedia",
 		})
 	}
+
+	// V1-deferred resource kinds — always unsupported in V1.
+	providers = append(providers,
+		&Unsupported{ResourceKind: "kubernetes", Reason: "kubernetes: tidak termasuk dalam scope v1 arsy; gunakan kubectl langsung"},
+		&Unsupported{ResourceKind: "gitdeploy", Reason: "gitdeploy: digantikan oleh github actions deployment pipeline (mw-0038)"},
+		&Unsupported{ResourceKind: "cron", Reason: "cron: tidak termasuk dalam scope v1; gunakan systemd timers"},
+		&Unsupported{ResourceKind: "user", Reason: "user: manajemen user tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "firewall", Reason: "firewall: manajemen firewall tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "portforward", Reason: "portforward: port forwarding tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "network", Reason: "network: manajemen jaringan tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "ssh", Reason: "ssh: manajemen ssh key tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "mount", Reason: "mount: mount filesystem tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "alert", Reason: "alert: alert engine tidak termasuk dalam scope v1; gunakan monitoring stack"},
+		&Unsupported{ResourceKind: "webhook", Reason: "webhook: webhook outbound tidak termasuk dalam scope v1"},
+		&Unsupported{ResourceKind: "package", Reason: "package: manajemen paket tidak termasuk dalam scope v1"},
+	)
 
 	return providers
 }
