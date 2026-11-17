@@ -1,10 +1,12 @@
 import {
   DEFAULT_MID_ISSUER_URL,
+  createJwksKeyResolver,
   createPkceAuthorizationRequest,
-  decodeJwtParts,
   exchangeAuthorizationCode,
   normalizeIssuerUrl,
   revokeOAuthToken,
+  verifyEs256Jwt,
+  type MidVerifiedClaims,
 } from "@moonwitness/core";
 
 const PKCE_STORAGE_KEY = "allah_sanctuary_mid_pkce_v1";
@@ -59,7 +61,7 @@ export async function startSanctuaryMidLogin(nextPath = "/"): Promise<void> {
   window.location.assign(pkce.authorizeUrl);
 }
 
-/** Complete OAuth 2.1 PKCE callback on `/auth/callback` and persist session claims. */
+/** Complete OAuth 2.1 PKCE callback on `/auth/callback` and persist verified session claims. */
 export async function completeSanctuaryMidCallback(
   searchParams: URLSearchParams,
   fetchFn?: typeof fetch,
@@ -80,18 +82,38 @@ export async function completeSanctuaryMidCallback(
     throw new Error("PKCE session expired. Return to the sanctuary gate and sign in again.");
   }
 
-  const stored = JSON.parse(rawStored) as {
-    verifier: string;
-    state: string;
-    nonce?: string;
-    nextPath?: string;
+  let stored: {
+    verifier?: unknown;
+    state?: unknown;
+    nonce?: unknown;
+    nextPath?: unknown;
   };
+  try {
+    stored = JSON.parse(rawStored) as typeof stored;
+  } catch {
+    throw new Error("Invalid PKCE session state. Return to the sanctuary gate and sign in again.");
+  }
+
+  if (
+    !stored ||
+    typeof stored !== "object" ||
+    typeof stored.verifier !== "string" ||
+    !stored.verifier ||
+    typeof stored.state !== "string" ||
+    !stored.state
+  ) {
+    throw new Error("Invalid PKCE session state. Return to the sanctuary gate and sign in again.");
+  }
   if (stored.state !== state) {
     throw new Error("State mismatch detected during MoonWitness ID callback.");
   }
+  if (typeof stored.nonce !== "string" || !stored.nonce) {
+    throw new Error("Missing OIDC nonce in stored PKCE session.");
+  }
 
+  const issuerUrl = getSanctuaryMidIssuer();
   const tokens = await exchangeAuthorizationCode({
-    issuerUrl: getSanctuaryMidIssuer(),
+    issuerUrl,
     clientId: ALLAH_SANCTUARY_CLIENT_ID,
     code,
     redirectUri: getCallbackUrl(),
@@ -99,37 +121,84 @@ export async function completeSanctuaryMidCallback(
     fetchFn,
   });
 
-  const decodedId = decodeJwtParts<
-    { alg?: string },
-    {
-      sub?: string;
-      preferred_username?: string;
-      name?: string;
-      role?: string;
-      nonce?: string;
-    }
-  >(tokens.id_token);
-
-  if (stored.nonce && decodedId?.claims.nonce !== stored.nonce) {
-    throw new Error("ID token nonce mismatch detected during MoonWitness ID callback.");
+  if (typeof tokens.id_token !== "string" || !tokens.id_token.trim()) {
+    throw new Error("Missing id_token in MoonWitness ID token response.");
   }
 
-  const claims = decodedId?.claims;
+  const jwksResolver = createJwksKeyResolver({
+    issuerUrl,
+    fetchFn,
+  });
+
+  let verifiedClaims: MidVerifiedClaims | null;
+  try {
+    verifiedClaims = await verifyEs256Jwt({
+      token: tokens.id_token,
+      issuerUrl,
+      expectedTokenUse: "id",
+      expectedAudience: ALLAH_SANCTUARY_CLIENT_ID,
+      expectedNonce: stored.nonce,
+      resolveJwkByKid: jwksResolver.resolveByKid,
+    });
+  } catch (err: unknown) {
+    const reason = err instanceof Error ? err.message : "JWKS unavailable";
+    throw new Error(`MoonWitness ID token verification failed: ${reason}`, { cause: err });
+  }
+
+  if (!verifiedClaims) {
+    throw new Error("MoonWitness ID token verification failed.");
+  }
+
+  const azp = (verifiedClaims as { readonly azp?: unknown }).azp;
+  if (azp !== undefined && azp !== ALLAH_SANCTUARY_CLIENT_ID) {
+    throw new Error("MoonWitness ID token authorized party mismatch.");
+  }
+  if (
+    Array.isArray(verifiedClaims.aud) &&
+    verifiedClaims.aud.length > 1 &&
+    azp !== ALLAH_SANCTUARY_CLIENT_ID
+  ) {
+    throw new Error("MoonWitness ID token audience includes untrusted parties.");
+  }
+
+  const nowEpochSec = Math.floor(Date.now() / 1000);
+  const expiresInSec =
+    typeof tokens.expires_in === "number" && Number.isFinite(tokens.expires_in)
+      ? Math.max(1, Math.floor(tokens.expires_in))
+      : Math.max(1, verifiedClaims.exp - nowEpochSec);
+
+  const username =
+    typeof verifiedClaims.preferred_username === "string" &&
+    verifiedClaims.preferred_username.trim()
+      ? verifiedClaims.preferred_username
+      : "witness";
+  const displayName =
+    typeof verifiedClaims.name === "string" && verifiedClaims.name.trim()
+      ? verifiedClaims.name
+      : username !== "witness"
+        ? username
+        : "Sanctuary Witness";
+  const role =
+    typeof verifiedClaims.role === "string" && verifiedClaims.role.trim()
+      ? verifiedClaims.role
+      : "viewer";
+
   const session: SanctuaryMidSession = {
     accessToken: tokens.access_token,
     ...(tokens.refresh_token ? { refreshToken: tokens.refresh_token } : {}),
-    sub: claims?.sub ?? "unknown",
-    username: claims?.preferred_username ?? "witness",
-    displayName: claims?.name ?? claims?.preferred_username ?? "Sanctuary Witness",
-    role: claims?.role ?? "viewer",
-    expiresAtEpochSec: Math.floor(Date.now() / 1000) + Math.max(1, tokens.expires_in),
+    sub: verifiedClaims.sub,
+    username,
+    displayName,
+    role,
+    expiresAtEpochSec: nowEpochSec + expiresInSec,
   };
 
   window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
   dispatchAuthChange();
 
+  const rawNext = typeof stored.nextPath === "string" ? stored.nextPath : "/";
   return {
-    nextPath: stored.nextPath && stored.nextPath.startsWith("/") ? stored.nextPath : "/",
+    nextPath: rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/",
     session,
   };
 }
