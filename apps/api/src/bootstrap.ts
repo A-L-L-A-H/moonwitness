@@ -9,9 +9,7 @@ import {
   timelineManifest,
   timelineRoutesPrefix,
 } from "@moonwitness/addon-timeline";
-import { authMigrations } from "./db/migrations";
-import { riotAiMigrations } from "./interface/routes/riot-ai.persistence";
-import { commandCenterMigrations } from "./interface/routes/command-center.persistence";
+import { domainMigrations } from "./infrastructure/persistence/domain";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
@@ -36,7 +34,7 @@ const BASE_MANIFEST = {
 async function migrateAndSeed(seed: boolean): Promise<void> {
   const db = getDb();
   await db.exec(timelineDdl);
-  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...riotAiMigrations]);
+  await applyMigrations(domainMigrations);
   if (seed) {
     await seedTimeline();
   }

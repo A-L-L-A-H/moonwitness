@@ -18,9 +18,7 @@ import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { ensureProbesSchema } from "../../interface/routes/probes.persistence";
 import { probesRoutes } from "../../interface/routes/probes.routes";
 import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
-import { authMigrations } from "../../db/migrations";
-import { riotAiMigrations } from "../../interface/routes/riot-ai.persistence";
-import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
+import { domainMigrations } from "../persistence/domain";
 import { seedBootstrapAdmin } from "../../services/user";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
@@ -137,7 +135,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   }
 
   // Ensure all domain schemas exist before serving routes.
-  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...riotAiMigrations]);
+  await applyMigrations(domainMigrations);
   await seedBootstrapAdmin();
   await ensureProbesSchema();
 
