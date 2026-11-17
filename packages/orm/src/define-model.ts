@@ -268,11 +268,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       if (typeof record[key] === "string") record[key] = new Date(record[key] as string);
     }
     for (const [key, spec] of this.fields) {
-      if (!(key in record)) continue;
-      const decoded = decodeValue(record[key], spec.codec);
+      const lowerKey = key.toLowerCase();
+      const rawKey = key in record ? key : lowerKey in record ? lowerKey : null;
+      if (rawKey === null) continue;
+      const decoded = decodeValue(record[rawKey], spec.codec);
       // A NULL column for an optional-but-not-nullable field means "absent",
       // so revive it as undefined instead of failing schema validation.
       record[key] = decoded === null && spec.optional && !spec.nullable ? undefined : decoded;
+      if (rawKey !== key) {
+        delete record[rawKey];
+      }
     }
     return record as T;
   }
