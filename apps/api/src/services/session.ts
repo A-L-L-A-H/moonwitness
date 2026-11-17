@@ -71,7 +71,7 @@ export async function createSession(userId: number): Promise<string> {
     before: null,
     after: {
       id: sessionId,
-      userId: userId,
+      userId,
     },
     metadata: null,
     occurredAt: now.toISOString(),
