@@ -116,6 +116,11 @@ services:
       MID_ISSUER_URL: ${MID_ISSUER_URL:-https://id.moonwitness.biz.id}
       MID_KEY_ENCRYPTION_SECRET: ${MID_KEY_ENCRYPTION_SECRET:-dev-insecure-encryption-secret-min16}
       MID_COOKIE_DOMAIN: ${MID_COOKIE_DOMAIN:-.moonwitness.biz.id}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-}
+      CONTROL_NATIVE_SETUP: ${CONTROL_NATIVE_SETUP:-1}
+      INSTANCE_NAME: ${INSTANCE_NAME:-Moonwitness}
       SEED: ${SEED:-0}
       ALLOW_DEMO_SEED: ${ALLOW_DEMO_SEED:-0}
     volumes:
@@ -155,11 +160,13 @@ services:
     restart: unless-stopped
     environment:
       HOST: 0.0.0.0
+      ALLOW_PUBLIC_BIND: "1"
       HTTP_PORT: 8090
       RADIUS_AUTH_PORT: 1812
       RADIUS_ACCT_PORT: 1813
       DATABASE_URL: sqlite:/data/radius.db?mode=rwc
       RADIUS_SECRET: ${RADIUS_SECRET:-}
+      RADIUS_NAS_CLIENTS: ${RADIUS_NAS_CLIENTS:-}
     volumes:
       - radius-data:/data
     networks:
@@ -186,8 +193,10 @@ services:
     restart: unless-stopped
     environment:
       HOST: 0.0.0.0
+      ALLOW_PUBLIC_BIND: "1"
       HTTP_PORT: 8094
       DATABASE_URL: sqlite:/data/snmp.db?mode=rwc
+      SNMP_CREDENTIAL_KEY: ${SNMP_CREDENTIAL_KEY:-}
       SNMP_POLL_INTERVAL: ${SNMP_POLL_INTERVAL:-60}
       SNMP_TIMEOUT_MS: ${SNMP_TIMEOUT_MS:-2000}
     volumes:
@@ -213,6 +222,7 @@ services:
     restart: unless-stopped
     environment:
       HOST: 0.0.0.0
+      ALLOW_PUBLIC_BIND: "1"
       HTTP_PORT: 8093
       SYSLOG_UDP_PORT: 5140
       SYSLOG_TCP_PORT: 5514

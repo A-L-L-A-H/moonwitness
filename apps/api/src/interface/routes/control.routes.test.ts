@@ -171,3 +171,211 @@ describe("control routes auth rate limiting", () => {
     }
   });
 });
+
+describe("Native first-light onboarding & control auth (CONTROL_NATIVE_SETUP=1)", () => {
+  const envBackup = { ...process.env };
+  let app: FastifyInstance | null = null;
+
+  beforeEach(async () => {
+    process.env = { ...envBackup, CONTROL_NATIVE_SETUP: "1" };
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("arsy offline")));
+    const { controlRoutes } = await loadRoutes("20");
+    const orm = await import("@moonwitness/orm");
+    await orm.initDb("file::memory:?cache=shared");
+    await orm.applyMigrations(Array.from(authMigrations));
+    const db = orm.getDb();
+    await db.run("DELETE FROM sessions");
+    await db.run("DELETE FROM users");
+
+    const fastifyCookie = (await import("@fastify/cookie")).default;
+    app = Fastify({ logger: false });
+    await app.register(fastifyCookie);
+    await app.register(controlRoutes);
+    await app.ready();
+  });
+
+  afterEach(async () => {
+    if (app) {
+      await app.close();
+      app = null;
+    }
+    process.env = { ...envBackup };
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+    await closeDb();
+  });
+
+  it("supports full uninitialized -> superuser -> locked -> login -> me -> logout lifecycle", async () => {
+    const initialStatus = await app!.inject({
+      method: "GET",
+      url: "/control/setup/status",
+    });
+    expect(initialStatus.statusCode).toBe(200);
+    expect(initialStatus.json()).toMatchObject({
+      initialized: false,
+      version: "0.1.0",
+      instance: {
+        id: "moonwitness-vps",
+        name: "Moonwitness",
+      },
+    });
+
+    const invalidShort = await app!.inject({
+      method: "POST",
+      url: "/control/setup/superuser",
+      payload: {
+        name: "Admin",
+        email: "admin@moonwitness.local",
+        password: "short",
+        instance_name: "MoonProd",
+      },
+    });
+    expect(invalidShort.statusCode).toBe(400);
+
+    const created = await app!.inject({
+      method: "POST",
+      url: "/control/setup/superuser",
+      headers: { "x-forwarded-proto": "http" },
+      payload: {
+        name: "Rezza Admin",
+        email: "rezza@moonwitness.local",
+        password: "CorrectHorseBatteryStaple12!",
+        instance_name: "MoonProd",
+      },
+    });
+    expect(created.statusCode).toBe(201);
+    expect(created.json()).toMatchObject({
+      initialized: true,
+      user: {
+        name: "Rezza Admin",
+        email: "rezza@moonwitness.local",
+        role: "superadmin",
+      },
+    });
+    const setCookieHeader = created.headers["set-cookie"];
+    const cookieStr = Array.isArray(setCookieHeader) ? setCookieHeader[0] : setCookieHeader;
+    expect(cookieStr).toContain("mw_session=");
+    const sessionPair = cookieStr!.split(";")[0]!;
+
+    const secondCreate = await app!.inject({
+      method: "POST",
+      url: "/control/setup/superuser",
+      payload: {
+        name: "Intruder",
+        email: "intruder@moonwitness.local",
+        password: "AnotherLongPassword1234!",
+        instance_name: "Evil",
+      },
+    });
+    expect(secondCreate.statusCode).toBe(409);
+
+    const postStatus = await app!.inject({
+      method: "GET",
+      url: "/control/setup/status",
+    });
+    expect(postStatus.statusCode).toBe(200);
+    expect(postStatus.json()).toMatchObject({
+      initialized: true,
+      instance: {
+        name: "MoonProd",
+      },
+    });
+    expect(postStatus.json().instance.initialized_at).toBeTruthy();
+
+    const meRes = await app!.inject({
+      method: "GET",
+      url: "/control/auth/me",
+      headers: { cookie: sessionPair },
+    });
+    expect(meRes.statusCode).toBe(200);
+    expect(meRes.json()).toMatchObject({
+      user: {
+        name: "Rezza Admin",
+        email: "rezza@moonwitness.local",
+        role: "superadmin",
+      },
+    });
+
+    const logoutRes = await app!.inject({
+      method: "POST",
+      url: "/control/auth/logout",
+      headers: { cookie: sessionPair },
+    });
+    expect(logoutRes.statusCode).toBe(200);
+    expect(logoutRes.json()).toEqual({ ok: true });
+
+    const revokedMe = await app!.inject({
+      method: "GET",
+      url: "/control/auth/me",
+      headers: { cookie: sessionPair },
+    });
+    expect(revokedMe.statusCode).toBe(401);
+
+    const badLogin = await app!.inject({
+      method: "POST",
+      url: "/control/auth/login",
+      payload: {
+        email: "rezza@moonwitness.local",
+        password: "WrongPassword1234!",
+      },
+    });
+    expect(badLogin.statusCode).toBe(401);
+
+    const goodLogin = await app!.inject({
+      method: "POST",
+      url: "/control/auth/login",
+      headers: { "x-forwarded-proto": "http" },
+      payload: {
+        email: "rezza@moonwitness.local",
+        password: "CorrectHorseBatteryStaple12!",
+      },
+    });
+    expect(goodLogin.statusCode).toBe(200);
+    expect(goodLogin.json().user).toMatchObject({
+      email: "rezza@moonwitness.local",
+      role: "superadmin",
+    });
+    const loginCookie = Array.isArray(goodLogin.headers["set-cookie"])
+      ? goodLogin.headers["set-cookie"][0]
+      : goodLogin.headers["set-cookie"];
+    expect(loginCookie).toContain("mw_session=");
+  });
+
+  it("sets Secure cookie when production request arrives over https and omits it on plain http", async () => {
+    process.env.NODE_ENV = "production";
+    await app!.inject({
+      method: "POST",
+      url: "/control/setup/superuser",
+      payload: {
+        name: "Proto Admin",
+        email: "proto@moonwitness.local",
+        password: "CorrectHorseBatteryStaple12!",
+        instance_name: "ProtoTest",
+      },
+    });
+
+    const httpLogin = await app!.inject({
+      method: "POST",
+      url: "/control/auth/login",
+      headers: { "x-forwarded-proto": "http" },
+      payload: {
+        email: "proto@moonwitness.local",
+        password: "CorrectHorseBatteryStaple12!",
+      },
+    });
+    expect(httpLogin.statusCode).toBe(200);
+    expect(String(httpLogin.headers["set-cookie"])).not.toContain("; Secure");
+
+    const httpsLogin = await app!.inject({
+      method: "POST",
+      url: "/control/auth/login",
+      headers: { "x-forwarded-proto": "https" },
+      payload: {
+        email: "proto@moonwitness.local",
+        password: "CorrectHorseBatteryStaple12!",
+      },
+    });
+    expect(httpsLogin.statusCode).toBe(200);
+    expect(String(httpsLogin.headers["set-cookie"])).toContain("Secure");
+  });
+});
