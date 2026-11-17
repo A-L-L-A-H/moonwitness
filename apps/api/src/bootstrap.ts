@@ -1,4 +1,4 @@
-import { getDb, applyMigrations } from "@moonwitness/orm";
+import { getDb } from "@moonwitness/orm";
 import { env } from "./shared/env";
 import { AddonRegistry } from "@moonwitness/addon-base/registry";
 import { registerBaseAddon } from "@moonwitness/addon-base";
@@ -9,12 +9,8 @@ import {
   timelineManifest,
   timelineRoutesPrefix,
 } from "@moonwitness/addon-timeline";
-import { domainMigrations } from "./infrastructure/persistence/domain";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
-import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
-import { commandCenterRoutes } from "./interface/routes/command-center.routes";
-import { memoryRoutes } from "./interface/routes/memory.routes";
 
 export interface CoreAppOptions {
   prefix?: string;
@@ -34,7 +30,7 @@ const BASE_MANIFEST = {
 async function migrateAndSeed(seed: boolean): Promise<void> {
   const db = getDb();
   await db.exec(timelineDdl);
-  await applyMigrations(domainMigrations);
+  // Migrations are applied in fastify.adapter.ts (buildFastify) — avoid duplicate.
   if (seed) {
     await seedTimeline();
   }
@@ -54,19 +50,8 @@ async function registerAddonTree(target: FastifyInstance, prefix: string): Promi
       await registerTimelineAddon(target, { prefix: prefix + timelineRoutesPrefix });
     },
   });
-  registry.add({
-    manifest: {
-      name: "riot-ai",
-      version: "0.1.0",
-      depends: [],
-      provides: { routes: ["riot-ai"], models: [] as string[] },
-    },
-    register: async () => {
-      await target.register(riotAiRoutes);
-      await target.register(commandCenterRoutes);
-      await target.register(memoryRoutes);
-    },
-  });
+  // riot-ai, command-center, memory routes are registered in fastify.adapter.ts
+  // to avoid duplicate registration. Only base and timeline addons are loaded here.
   await registry.load();
 }
 

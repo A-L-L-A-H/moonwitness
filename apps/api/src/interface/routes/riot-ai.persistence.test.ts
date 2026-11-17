@@ -16,8 +16,8 @@ describe("RIOT Intelligence persistence", () => {
       "SELECT id FROM _orm_schema_migrations ORDER BY id",
     );
     expect(migrations.map((migration) => migration.id)).toEqual([
-      "001_create_riot_ai_provider_configs",
-      "002_create_riot_ai_usage_summaries",
+      "riotai_001_create_riot_ai_provider_configs",
+      "riotai_002_create_riot_ai_usage_summaries",
     ]);
 
     const config = await persistence.upsertProviderConfig(
