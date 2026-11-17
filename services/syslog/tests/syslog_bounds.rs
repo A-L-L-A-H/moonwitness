@@ -340,7 +340,7 @@ async fn enforces_per_ip_connection_limit_before_global_saturation() {
 async fn prunes_retention_in_bounded_batches_outside_hot_path() {
     let config = Config {
         max_messages: 10,
-        retention_prune_threshold: 12,
+        retention_prune_threshold: 18,
         retention_prune_interval_secs: 60,
         retention_prune_batch_size: 4,
         ..Default::default()
@@ -366,7 +366,7 @@ async fn prunes_retention_in_bounded_batches_outside_hot_path() {
     assert_eq!(snap_before.retention_prune_batches_total, 0);
     assert_eq!(snap_before.retention_prune_rows_deleted_total, 0);
 
-    // Sending 7 more crosses retention_prune_threshold=12 (total 18 ingested -> 8 excess).
+    // Sending 7 more crosses retention_prune_threshold=18 (total 18 ingested -> 8 excess).
     for i in 12..=18 {
         conn.write_all(format!("<14>msg-{i:02}\n").as_bytes())
             .await
