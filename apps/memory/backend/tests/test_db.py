@@ -10,6 +10,14 @@ def test_init_db_and_dashboard(monkeypatch, tmp_path):
         "archives": 0, "messages": 0, "knowledge": 0,
         "active_jobs": 0, "failed_jobs": 0
     }
+    with db.connection() as conn:
+        tables = {
+            row["name"]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type='table'"
+            ).fetchall()
+        }
+    assert {"claims", "claim_sources", "claim_revisions", "claim_relations"}.issubset(tables)
 
 
 def test_resume_checkpoint_and_backup_job(monkeypatch, tmp_path):
