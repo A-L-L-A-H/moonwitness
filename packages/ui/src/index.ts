@@ -293,6 +293,8 @@ export {
   tape,
   sticker,
   brushUnderline,
+  scanlines,
+  resolveEffectStyle,
   composeEffects,
   effectPresets,
 } from "./skin/effects";
@@ -329,8 +331,11 @@ export {
   createSkinComponent,
   Skinned,
   skinCn,
+  skinBaseClasses,
+  isValidSkin,
   type SkinContextValue,
   type SkinProviderProps,
+  type SkinnedComponentProps,
 } from "./skin/index";
 export {
   useThemeMode,
@@ -342,10 +347,12 @@ export {
 export {
   MASTER_DNA_IDS,
   MASTER_DNA_WORLDS,
+  isValidDnaId,
   getDnaWorld,
   listDnaWorlds,
   dnaWorldCssVariables,
   useDnaWorld,
+  useOptionalDnaWorld,
   SkinScope,
   SkinRoot,
   type MasterDnaId,

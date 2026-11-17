@@ -2,6 +2,12 @@
 
 import React, { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 import type { SkinName } from "./compositions";
+import {
+  canonicalTokensToCssVariables,
+  resolveCanonicalTokens,
+  type CanonicalDensity,
+  type CanonicalThemeMode,
+} from "../dna/canonical";
 import { IMPERIUM_LUMEN_TOKENS, MASTER_DNA_PALETTES } from "./imperium-tokens";
 
 export type MasterDnaId =
@@ -54,6 +60,10 @@ export const MASTER_DNA_IDS: readonly MasterDnaId[] = [
   "06-mycelium",
   "09-simpul-nusantara",
 ] as const;
+
+export function isValidDnaId(value: string): value is MasterDnaId {
+  return value in MASTER_DNA_WORLDS;
+}
 
 export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>> = {
   "01-imperium-lumen": {
@@ -216,34 +226,61 @@ export function dnaWorldCssVariables(world: MasterDnaWorldSpec): CSSProperties {
   } as CSSProperties;
 }
 
-const DnaWorldContext = createContext<MasterDnaWorldSpec>(
-  MASTER_DNA_WORLDS["02-lunar-chronicles"],
-);
+const DnaWorldContext = createContext<MasterDnaWorldSpec | null>(null);
 
 export function useDnaWorld(): MasterDnaWorldSpec {
+  return useContext(DnaWorldContext) ?? MASTER_DNA_WORLDS["02-lunar-chronicles"];
+}
+
+export function useOptionalDnaWorld(): MasterDnaWorldSpec | null {
   return useContext(DnaWorldContext);
 }
 
 export interface SkinScopeProps {
   dnaId: MasterDnaId;
+  skin?: SkinName;
+  mode?: CanonicalThemeMode;
+  density?: CanonicalDensity;
   children: ReactNode;
   className?: string | undefined;
+  style?: CSSProperties | undefined;
 }
 
-export function SkinScope({ dnaId, children, className }: SkinScopeProps) {
+export function SkinScope({
+  dnaId,
+  skin,
+  mode = "dark",
+  density = "comfortable",
+  children,
+  className,
+  style,
+}: SkinScopeProps) {
   const world = getDnaWorld(dnaId);
+  const resolvedSkin = skin ?? world.mappedSkinPreset;
+  const resolved = resolveCanonicalTokens({
+    dnaId: world.id,
+    skin: resolvedSkin,
+    mode,
+    density,
+  });
+  const canonicalVars = canonicalTokensToCssVariables(resolved);
   const vars = dnaWorldCssVariables(world);
 
   return (
     <DnaWorldContext.Provider value={world}>
       <div
         data-dna={world.id}
+        data-skin={resolvedSkin}
         data-skin-preset={world.mappedSkinPreset}
+        data-theme={resolved.mode}
+        data-density={resolved.density}
         className={className}
         style={{
+          ...(canonicalVars as CSSProperties),
           ...vars,
-          backgroundColor: world.palette.canvas,
-          color: world.palette.text,
+          backgroundColor: resolved.semantic.canvas,
+          color: resolved.semantic.foreground,
+          ...style,
         }}
       >
         {children}
@@ -254,13 +291,25 @@ export function SkinScope({ dnaId, children, className }: SkinScopeProps) {
 
 export interface SkinRootProps {
   dnaId: MasterDnaId;
+  skin?: SkinName;
+  mode?: CanonicalThemeMode;
+  density?: CanonicalDensity;
   children: ReactNode;
   className?: string | undefined;
+  style?: CSSProperties | undefined;
 }
 
-export function SkinRoot({ dnaId, children, className }: SkinRootProps) {
+export function SkinRoot({
+  dnaId,
+  skin,
+  mode,
+  density,
+  children,
+  className,
+  style,
+}: SkinRootProps) {
   return (
-    <SkinScope dnaId={dnaId} className={className}>
+    <SkinScope dnaId={dnaId} skin={skin} mode={mode} density={density} className={className} style={style}>
       {children}
     </SkinScope>
   );
