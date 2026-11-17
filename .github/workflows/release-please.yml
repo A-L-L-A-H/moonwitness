@@ -30,7 +30,7 @@ jobs:
           target-branch: main
 
       - name: Enable auto-merge on the release pull request
-        if: steps.release.outputs.pr != '' || steps.release.outputs.prs != ''
+        if: success()
         env:
           GH_TOKEN: ${{ secrets.RELEASE_PAT || secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -43,11 +43,19 @@ jobs:
             const num = pr?.number ?? prs?.[0]?.number ?? "";
             process.stdout.write(String(num));
           ')
+          if [ -z "$pr_number" ]; then
+            pr_number=$(gh pr list --repo "$REPO" --base main --head "release-please--branches--main" --state open --json number --jq '.[0].number // empty')
+          fi
           if [ -n "$pr_number" ]; then
+            merge_state=$(gh pr view "$pr_number" --repo "$REPO" --json mergeStateStatus --jq '.mergeStateStatus // empty' 2>/dev/null || true)
+            if [ "$merge_state" = "BEHIND" ]; then
+              echo "Updating Release Please PR #$pr_number with main"
+              gh pr update-branch "$pr_number" --repo "$REPO" || true
+            fi
             echo "Enabling auto-merge on Release Please PR #$pr_number"
             gh pr merge "$pr_number" --auto --merge --repo "$REPO" || true
           else
-            echo "No release PR number returned in action outputs."
+            echo "No open release PR found."
           fi
 
       - name: Report release outcome
