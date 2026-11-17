@@ -7,6 +7,14 @@ import { MemoryDeckShell, type DeckMode } from "../components/memory-deck-shell"
 import { MemoryTape } from "../components/memory-tape";
 import { SoundtrackPlayer } from "../components/soundtrack-player";
 import { EmptyState, MetricCard, Panel, SectionLabel, StatusBadge } from "../components/ui";
+import {
+  clearMemoryMidSession,
+  getStoredMemoryAccessToken,
+  getStoredMemoryMidSession,
+  MEMORY_MID_AUTH_EVENT,
+  startMemoryMidLogin,
+  type MemoryMidSession,
+} from "../lib/mid-oidc";
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
@@ -83,6 +91,14 @@ type Knowledge = {
   source_message_ids?: string[];
 };
 type Theme = "dark" | "light";
+type AuthActor = {
+  authenticated: boolean;
+  mode?: string;
+  sub?: string;
+  username?: string;
+  role?: string;
+  issuer?: string;
+};
 
 const initialCounts: Counts = {
   archives: 0,
@@ -148,6 +164,11 @@ export default function Home() {
   const [expandedArchiveId, setExpandedArchiveId] = useState<string | null>(null);
   const [queueFilter, setQueueFilter] = useState<QueueFilter>("all");
   const [queueVisibleCount, setQueueVisibleCount] = useState(8);
+  const [midSession, setMidSession] = useState<MemoryMidSession | null>(null);
+  const [authActor, setAuthActor] = useState<AuthActor | null>(null);
+  const [authRequired, setAuthRequired] = useState(false);
+  const [authBusy, setAuthBusy] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const uploadInputRef = useRef<HTMLInputElement | null>(null);
   const sourcePanelRef = useRef<HTMLElement | null>(null);
 
@@ -228,15 +249,57 @@ export default function Home() {
     };
   }, [selectedKnowledge]);
 
+  useEffect(() => {
+    const syncAuth = () => setMidSession(getStoredMemoryMidSession());
+    syncAuth();
+    window.addEventListener(MEMORY_MID_AUTH_EVENT, syncAuth);
+    return () => window.removeEventListener(MEMORY_MID_AUTH_EVENT, syncAuth);
+  }, []);
+
+  const apiFetch = useCallback(async (path: string, init?: RequestInit): Promise<Response> => {
+    const headers = new Headers(init?.headers);
+    const token = getStoredMemoryAccessToken();
+    if (token && !headers.has("Authorization")) {
+      headers.set("Authorization", "Bearer " + token);
+    }
+    const response = await fetch(API + path, { ...init, headers });
+    if (response.status === 401) {
+      setAuthRequired(true);
+      setAuthActor(null);
+      if (token) {
+        void clearMemoryMidSession();
+      }
+    }
+    return response;
+  }, []);
+
   const refresh = useCallback(async () => {
     try {
+      const meResponse = await apiFetch("/api/me", { cache: "no-store" });
+      if (meResponse.status === 401) {
+        setApiOnline(true);
+        setAuthRequired(true);
+        setAuthActor(null);
+        setLastUpdated(new Date().toLocaleTimeString());
+        return;
+      }
+      if (!meResponse.ok) throw new Error("API unavailable");
+      const mePayload = (await meResponse.json()) as AuthActor;
+      setAuthActor(mePayload.authenticated ? mePayload : null);
+      setAuthRequired(false);
+
       const [c, a, j, k, s] = await Promise.all([
-        fetch(API + "/api/dashboard", { cache: "no-store" }),
-        fetch(API + "/api/archives?limit=500", { cache: "no-store" }),
-        fetch(API + "/api/jobs?limit=500", { cache: "no-store" }),
-        fetch(API + "/api/knowledge?limit=" + knowledgeLimit, { cache: "no-store" }),
-        fetch(API + "/api/system", { cache: "no-store" }),
+        apiFetch("/api/dashboard", { cache: "no-store" }),
+        apiFetch("/api/archives?limit=500", { cache: "no-store" }),
+        apiFetch("/api/jobs?limit=500", { cache: "no-store" }),
+        apiFetch("/api/knowledge?limit=" + knowledgeLimit, { cache: "no-store" }),
+        apiFetch("/api/system", { cache: "no-store" }),
       ]);
+      if ([c, a, j, k, s].some((response) => response.status === 401)) {
+        setApiOnline(true);
+        setAuthRequired(true);
+        return;
+      }
       if (![c, a, j, k, s].every((response) => response.ok)) throw new Error("API unavailable");
       const [nextCounts, nextArchives, nextJobs, nextKnowledge, nextSystem] = (await Promise.all([
         c.json(),
@@ -255,13 +318,13 @@ export default function Home() {
     } catch {
       setApiOnline(false);
     }
-  }, [apiOnline, knowledgeLimit, knowledgeMode]);
+  }, [apiFetch, knowledgeLimit, knowledgeMode]);
 
   useEffect(() => {
     void refresh();
     const timer = window.setInterval(() => void refresh(), 7000);
     return () => window.clearInterval(timer);
-  }, [refresh]);
+  }, [refresh, midSession?.accessToken]);
 
   const runningJobs = jobs.filter((job) =>
     ["pending", "processing", "retry"].includes(job.status),
@@ -347,6 +410,10 @@ export default function Home() {
         request.responseType = "text";
         request.setRequestHeader("Content-Type", "application/octet-stream");
         request.setRequestHeader("X-Archive-Filename", encodeURIComponent(file.name));
+        const token = getStoredMemoryAccessToken();
+        if (token) {
+          request.setRequestHeader("Authorization", "Bearer " + token);
+        }
         request.upload.addEventListener("progress", (event) => {
           if (event.lengthComputable) {
             setUploadProgress(
@@ -368,6 +435,11 @@ export default function Home() {
         result = JSON.parse(upload.body) as { detail?: string; duplicate?: boolean };
       } catch {
         throw new Error("UPLOAD FAILED // INVALID API RESPONSE");
+      }
+      if (upload.status === 401) {
+        setAuthRequired(true);
+        setAuthActor(null);
+        void clearMemoryMidSession();
       }
       if (upload.status < 200 || upload.status >= 300)
         throw new Error(result.detail || "UPLOAD FAILED");
@@ -416,7 +488,7 @@ export default function Home() {
   async function backup(archiveId: string) {
     setBackupBusyId(archiveId);
     try {
-      const response = await fetch(API + "/api/archives/" + archiveId + "/backup", {
+      const response = await apiFetch("/api/archives/" + archiveId + "/backup", {
         method: "POST",
       });
       const result = await response.json();
@@ -435,7 +507,7 @@ export default function Home() {
   async function resume(jobId: string) {
     setResumeBusyId(jobId);
     try {
-      const response = await fetch(API + "/api/jobs/" + jobId + "/resume", { method: "POST" });
+      const response = await apiFetch("/api/jobs/" + jobId + "/resume", { method: "POST" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.detail || "RESUME FAILED");
       setNotice("JOB RESUMED // CHECKPOINT PRESERVED");
@@ -458,8 +530,8 @@ export default function Home() {
     setKnowledgeLimit(30);
     setKnowledgeKind("all");
     try {
-      const response = await fetch(
-        API + "/api/search?q=" + encodeURIComponent(query.trim()) + "&limit=30",
+      const response = await apiFetch(
+        "/api/search?q=" + encodeURIComponent(query.trim()) + "&limit=30",
         { cache: "no-store" },
       );
       const result = await response.json();
@@ -480,7 +552,7 @@ export default function Home() {
     setKnowledgeKind("all");
     setSearching(true);
     try {
-      const response = await fetch(API + "/api/knowledge?limit=12", { cache: "no-store" });
+      const response = await apiFetch("/api/knowledge?limit=12", { cache: "no-store" });
       if (!response.ok) throw new Error("KNOWLEDGE LOAD FAILED");
       setKnowledge(await response.json());
     } catch (error) {
@@ -498,9 +570,9 @@ export default function Home() {
     try {
       const endpoint =
         knowledgeMode === "search"
-          ? API + "/api/search?q=" + encodeURIComponent(query.trim()) + "&limit=" + nextLimit
-          : API + "/api/knowledge?limit=" + nextLimit;
-      const response = await fetch(endpoint, { cache: "no-store" });
+          ? "/api/search?q=" + encodeURIComponent(query.trim()) + "&limit=" + nextLimit
+          : "/api/knowledge?limit=" + nextLimit;
+      const response = await apiFetch(endpoint, { cache: "no-store" });
       const result = await response.json();
       if (!response.ok) throw new Error(result.detail || "MORE KNOWLEDGE FAILED");
       setKnowledge(result);
@@ -512,14 +584,14 @@ export default function Home() {
     }
   }
 
-  async function openSources(item: Knowledge) {
-    setSelectedKnowledge(item);
+  async function openSources(record: Knowledge) {
+    setSelectedKnowledge(record);
     setSourceData(null);
     setSourceError(null);
     setSourceLoading(true);
     try {
-      const response = await fetch(
-        API + "/api/knowledge/" + encodeURIComponent(item.id) + "/sources",
+      const response = await apiFetch(
+        "/api/knowledge/" + encodeURIComponent(record.id) + "/sources",
         { cache: "no-store" },
       );
       const result = await response.json();
@@ -534,6 +606,57 @@ export default function Home() {
     }
   }
 
+  async function exportKnowledge() {
+    setExporting(true);
+    try {
+      const response = await apiFetch("/api/export.ndjson", { cache: "no-store" });
+      if (!response.ok) {
+        const errorPayload = (await response.json().catch(() => null)) as {
+          detail?: string;
+        } | null;
+        throw new Error(errorPayload?.detail || "EXPORT FAILED");
+      }
+      const blob = await response.blob();
+      const objectUrl = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = "moonwitness-knowledge.ndjson";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(objectUrl);
+      setNotice("KNOWLEDGE CORPUS EXPORTED // NDJSON");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "EXPORT FAILED");
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  function handleMidSignIn() {
+    setAuthBusy(true);
+    const nextPath =
+      typeof window !== "undefined" ? `${window.location.pathname}${window.location.search}` : "/";
+    void startMemoryMidLogin(nextPath).catch((error) => {
+      setAuthBusy(false);
+      setNotice(error instanceof Error ? error.message : "MOONWITNESS ID SIGN IN FAILED");
+    });
+  }
+
+  function handleMidSignOut() {
+    setAuthBusy(true);
+    void clearMemoryMidSession()
+      .then(() => {
+        setAuthActor(null);
+        return refresh();
+      })
+      .finally(() => setAuthBusy(false));
+  }
+
+  const activeUsername = midSession?.username ?? authActor?.username;
+  const activeRole = midSession?.role ?? authActor?.role;
+  const isAuthenticated = Boolean(midSession || authActor?.authenticated);
+
   return (
     <main className="app-shell" id="top">
       <MemoryDeckShell
@@ -544,6 +667,38 @@ export default function Home() {
         lastUpdated={lastUpdated}
         theme={theme}
         onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")}
+        authControl={
+          isAuthenticated ? (
+            <div className="deck-auth-controls">
+              <span
+                className="deck-auth-badge"
+                title={
+                  (midSession?.displayName ?? activeUsername ?? "Operator") +
+                  (activeRole ? ` (${activeRole})` : "")
+                }
+              >
+                @{activeUsername ?? "witness"}
+              </span>
+              <button
+                className="deck-auth-button"
+                type="button"
+                onClick={handleMidSignOut}
+                disabled={authBusy}
+              >
+                {authBusy ? "..." : "SIGN OUT"}
+              </button>
+            </div>
+          ) : (
+            <button
+              className="deck-auth-button"
+              type="button"
+              onClick={handleMidSignIn}
+              disabled={authBusy}
+            >
+              {authBusy ? "CONNECTING..." : "SIGN IN · ID"}
+            </button>
+          )
+        }
         loadControl={
           <>
             <button
@@ -572,6 +727,25 @@ export default function Home() {
         transport={<SoundtrackPlayer />}
       >
         <div className="content-wrap">
+          {authRequired && !isAuthenticated && (
+            <div className="auth-gate-banner" role="region" aria-label="MoonWitness ID sign-in">
+              <div>
+                <strong>MOONWITNESS ID REQUIRED</strong>
+                <span>
+                  This Memory Deck enforces SSO authentication. Sign in with MoonWitness ID to load
+                  archives, inspect jobs, and query knowledge.
+                </span>
+              </div>
+              <button
+                className="deck-load"
+                type="button"
+                onClick={handleMidSignIn}
+                disabled={authBusy}
+              >
+                <span>{authBusy ? "CONNECTING..." : "SIGN IN WITH MOONWITNESS ID"}</span>
+              </button>
+            </div>
+          )}
           {busy && uploadProgress !== null && (
             <div className="upload-progress" role="status" aria-live="polite">
               <div className="upload-progress__meta">
@@ -1146,11 +1320,16 @@ export default function Home() {
                   <h1 id="knowledge-mode-title">Search the signal</h1>
                   <p>Search extracted records, inspect context, and follow each source link.</p>
                 </div>
-                <a className="export-button" href={API + "/api/export.ndjson"}>
+                <button
+                  type="button"
+                  className="export-button"
+                  onClick={() => void exportKnowledge()}
+                  disabled={exporting}
+                >
                   <Icon name="file" size={17} />
-                  <span>EXPORT KNOWLEDGE</span>
+                  <span>{exporting ? "EXPORTING..." : "EXPORT KNOWLEDGE"}</span>
                   <Icon name="arrow-up-right" size={14} />
-                </a>
+                </button>
               </div>
               <Panel className="knowledge-panel">
                 <SectionLabel
