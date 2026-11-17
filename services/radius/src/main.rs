@@ -30,19 +30,17 @@ async fn main() -> anyhow::Result<()> {
 
     // RADIUS UDP server (auth + accounting) runs in the background.
     let radius = RadiusServer::new(state.clone(), pool.clone());
-    let radius_handle = radius.spawn();
+    let radius_handle = radius.try_spawn().await?;
 
     // HTTP admin API.
-    let app = Router::new()
-        .merge(api::router(pool.clone()))
-        .layer(
-            ServiceBuilder::new()
-                .layer(TraceLayer::new_for_http())
-                .layer(CorsLayer::permissive()),
-        );
+    let app = Router::new().merge(api::router(pool.clone())).layer(
+        ServiceBuilder::new()
+            .layer(TraceLayer::new_for_http())
+            .layer(CorsLayer::permissive()),
+    );
 
-    let listener = tokio::net::TcpListener::bind(format!("{}:{}", config.host, config.http_port))
-        .await?;
+    let listener =
+        tokio::net::TcpListener::bind(format!("{}:{}", config.host, config.http_port)).await?;
     tracing::info!(
         host = %config.host,
         http_port = config.http_port,

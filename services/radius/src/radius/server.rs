@@ -28,22 +28,37 @@ impl RadiusServer {
         RadiusServer { config, pool }
     }
 
-    /// Spawn both UDP listeners. Returns a handle for shutdown.
-    pub fn spawn(self) -> RadiusHandle {
+    /// Bind both UDP listeners and spawn their background loops.
+    /// Fails closed if config is invalid or either UDP socket cannot be bound.
+    pub async fn try_spawn(self) -> anyhow::Result<RadiusHandle> {
+        self.config.validate()?;
+        let auth_addr = format!("{}:{}", self.config.host, self.config.radius_auth_port);
+        let acct_addr = format!("{}:{}", self.config.host, self.config.radius_acct_port);
+
+        let auth_socket = UdpSocket::bind(&auth_addr)
+            .await
+            .map_err(|e| anyhow::anyhow!("failed to bind RADIUS auth socket {auth_addr}: {e}"))?;
+        let acct_socket = UdpSocket::bind(&acct_addr)
+            .await
+            .map_err(|e| anyhow::anyhow!("failed to bind RADIUS acct socket {acct_addr}: {e}"))?;
+
+        tracing::info!(addr = %auth_addr, "RADIUS auth listener started");
+        tracing::info!(addr = %acct_addr, "RADIUS accounting listener started");
+
         let (shutdown_tx, mut shutdown_rx) = tokio::sync::watch::channel(false);
 
-        let auth_task = {
-            let config = self.config.clone();
-            let pool = self.pool.clone();
-            let addr = format!("{}:{}", config.host, config.radius_auth_port);
-            tokio::spawn(run_loop(addr, config, pool, Role::Auth))
-        };
-        let acct_task = {
-            let config = self.config.clone();
-            let pool = self.pool.clone();
-            let addr = format!("{}:{}", config.host, config.radius_acct_port);
-            tokio::spawn(run_loop(addr, config, pool, Role::Accounting))
-        };
+        let auth_task = tokio::spawn(run_loop(
+            auth_socket,
+            self.config.clone(),
+            self.pool.clone(),
+            Role::Auth,
+        ));
+        let acct_task = tokio::spawn(run_loop(
+            acct_socket,
+            self.config,
+            self.pool,
+            Role::Accounting,
+        ));
 
         let handle = tokio::spawn(async move {
             let _ = shutdown_rx.changed().await;
@@ -51,10 +66,10 @@ impl RadiusServer {
             acct_task.abort();
         });
 
-        RadiusHandle {
+        Ok(RadiusHandle {
             shutdown_tx,
             task: handle,
-        }
+        })
     }
 }
 
@@ -76,16 +91,7 @@ enum Role {
     Accounting,
 }
 
-async fn run_loop(addr: String, config: Arc<Config>, pool: Pool, role: Role) {
-    let socket = match UdpSocket::bind(&addr).await {
-        Ok(s) => s,
-        Err(e) => {
-            tracing::error!(error = %e, %addr, "failed to bind RADIUS socket");
-            return;
-        }
-    };
-    tracing::info!(%addr, "RADIUS listener started");
-
+async fn run_loop(socket: UdpSocket, config: Arc<Config>, pool: Pool, role: Role) {
     let mut buf = vec![0u8; MAX_PACKET];
     loop {
         let (n, peer) = match socket.recv_from(&mut buf).await {
@@ -112,7 +118,9 @@ async fn handle_datagram(
 ) -> Option<Vec<u8>> {
     let packet = RadiusPacket::decode(data)?;
     match (role, packet.code) {
-        (Role::Auth, CODE_ACCESS_REQUEST) => Some(handle_access_request(packet, peer, config, pool).await),
+        (Role::Auth, CODE_ACCESS_REQUEST) => {
+            Some(handle_access_request(packet, peer, config, pool).await)
+        }
         (Role::Accounting, CODE_ACCOUNTING_REQUEST) => {
             if !packet.verify_accounting_request(data, &config.radius_secret) {
                 tracing::warn!(%peer, "accounting request with bad authenticator, dropping");
@@ -133,8 +141,8 @@ async fn handle_access_request(
     config: &Config,
     pool: &Pool,
 ) -> Vec<u8> {
-    let username = attributes::attr_string(&request.attributes, attributes::USER_NAME)
-        .unwrap_or_default();
+    let username =
+        attributes::attr_string(&request.attributes, attributes::USER_NAME).unwrap_or_default();
     let nas_ip = peer.ip().to_string();
 
     match authenticate(&request, &username, config, pool).await {
@@ -172,10 +180,7 @@ async fn handle_access_request(
             } else {
                 "invalid credentials or disabled"
             };
-            let attrs = vec![Attribute::new(
-                attributes::ERROR_MESSAGE,
-                reason.as_bytes(),
-            )];
+            let attrs = vec![Attribute::new(attributes::ERROR_MESSAGE, reason.as_bytes())];
             record_log_reject(pool, &username, &nas_ip, reason).await;
             RadiusPacket {
                 code: CODE_ACCESS_REJECT,
@@ -229,8 +234,8 @@ async fn handle_accounting(
     config: &Config,
     pool: &Pool,
 ) -> Vec<u8> {
-    let username = attributes::attr_string(&request.attributes, attributes::USER_NAME)
-        .unwrap_or_default();
+    let username =
+        attributes::attr_string(&request.attributes, attributes::USER_NAME).unwrap_or_default();
     let status = attributes::attr_u32(&request.attributes, attributes::ACCT_STATUS_TYPE)
         .map(|s| match s {
             1 => "start",
@@ -308,4 +313,314 @@ async fn record_log_accounting(pool: &Pool, username: &str, nas_ip: &str, status
     .bind(now)
     .execute(pool)
     .await;
+}
+
+#[cfg(test)]
+mod tests {
+    use std::net::{IpAddr, Ipv4Addr};
+
+    use sqlx::sqlite::SqlitePoolOptions;
+
+    use super::*;
+    use crate::radius::packet::{compute_response_authenticator, sign_accounting_request};
+
+    async fn test_pool() -> Pool {
+        let pool = SqlitePoolOptions::new()
+            .max_connections(1)
+            .connect("sqlite::memory:")
+            .await
+            .unwrap();
+        sqlx::migrate!("./migrations").run(&pool).await.unwrap();
+        pool
+    }
+
+    fn test_config() -> Config {
+        Config {
+            host: "127.0.0.1".to_string(),
+            http_port: 0,
+            radius_auth_port: 0,
+            radius_acct_port: 0,
+            radius_secret: "unit-test-radius-secret".to_string(),
+            database_url: "sqlite::memory:".to_string(),
+        }
+    }
+
+    async fn seed_user(pool: &Pool, username: &str, password: &str, enabled: bool) {
+        let hash = auth::hash_password(password).unwrap();
+        sqlx::query(
+            "INSERT INTO users (id, username, password, enabled, framed_ip, vlan_id, session_timeout, mac_address) \
+             VALUES (?, ?, ?, ?, ?, ?, ?, NULL)",
+        )
+        .bind(uuid::Uuid::new_v4().to_string())
+        .bind(username)
+        .bind(hash)
+        .bind(enabled)
+        .bind("10.20.30.40")
+        .bind(300i64)
+        .bind(3600i64)
+        .execute(pool)
+        .await
+        .unwrap();
+    }
+
+    fn build_access_request(
+        identifier: u8,
+        req_auth: [u8; 16],
+        username: &str,
+        password: &str,
+        secret: &str,
+    ) -> Vec<u8> {
+        let encrypted = auth::encrypt_user_password(password, secret, &req_auth);
+        RadiusPacket {
+            code: CODE_ACCESS_REQUEST,
+            identifier,
+            authenticator: req_auth,
+            attributes: vec![
+                Attribute::new(attributes::USER_NAME, username.as_bytes()),
+                Attribute::new(attributes::USER_PASSWORD, &encrypted),
+            ],
+        }
+        .encode(None, secret)
+    }
+
+    fn sample_peer() -> SocketAddr {
+        SocketAddr::new(IpAddr::V4(Ipv4Addr::new(192, 0, 2, 10)), 40123)
+    }
+
+    #[tokio::test]
+    async fn try_spawn_binds_ephemeral_ports_and_shuts_down() {
+        let pool = test_pool().await;
+        let server = RadiusServer::new(Arc::new(test_config()), pool);
+        let handle = server.try_spawn().await.unwrap();
+        handle.shutdown().await;
+    }
+
+    #[tokio::test]
+    async fn try_spawn_fails_closed_when_auth_or_acct_port_in_use() {
+        let pool = test_pool().await;
+        let occupied = UdpSocket::bind("127.0.0.1:0").await.unwrap();
+        let occupied_port = occupied.local_addr().unwrap().port();
+
+        let mut cfg_auth_conflict = test_config();
+        cfg_auth_conflict.radius_auth_port = occupied_port;
+        let err = RadiusServer::new(Arc::new(cfg_auth_conflict), pool.clone())
+            .try_spawn()
+            .await
+            .err()
+            .expect("occupied auth port must fail closed");
+        assert!(err.to_string().contains("auth socket"));
+
+        let mut cfg_acct_conflict = test_config();
+        cfg_acct_conflict.radius_acct_port = occupied_port;
+        let err = RadiusServer::new(Arc::new(cfg_acct_conflict), pool)
+            .try_spawn()
+            .await
+            .err()
+            .expect("occupied acct port must fail closed");
+        assert!(err.to_string().contains("acct socket"));
+    }
+
+    #[tokio::test]
+    async fn try_spawn_fails_closed_on_invalid_config_or_host() {
+        let pool = test_pool().await;
+
+        let mut empty_secret = test_config();
+        empty_secret.radius_secret = "   ".to_string();
+        assert!(RadiusServer::new(Arc::new(empty_secret), pool.clone())
+            .try_spawn()
+            .await
+            .is_err());
+
+        let mut invalid_host = test_config();
+        invalid_host.host = "invalid host name".to_string();
+        assert!(RadiusServer::new(Arc::new(invalid_host), pool)
+            .try_spawn()
+            .await
+            .is_err());
+    }
+
+    #[tokio::test]
+    async fn handle_datagram_accepts_valid_access_request_and_encodes_attributes() {
+        let pool = test_pool().await;
+        let cfg = test_config();
+        seed_user(&pool, "alice", "my-secret-pw", true).await;
+
+        let req_auth = [0x11u8; 16];
+        let request =
+            build_access_request(15, req_auth, "alice", "my-secret-pw", &cfg.radius_secret);
+        let raw_response = handle_datagram(&request, sample_peer(), &cfg, &pool, Role::Auth)
+            .await
+            .expect("Access-Request should yield a response");
+
+        let response = RadiusPacket::decode(&raw_response).unwrap();
+        assert_eq!(response.code, CODE_ACCESS_ACCEPT);
+        assert_eq!(response.identifier, 15);
+        assert_eq!(
+            response.authenticator,
+            compute_response_authenticator(&raw_response, &req_auth, &cfg.radius_secret)
+        );
+        assert_eq!(
+            attributes::attr_bytes(&response.attributes, attributes::FRAMED_IP_ADDRESS),
+            Some([10, 20, 30, 40].as_slice())
+        );
+        assert_eq!(
+            attributes::attr_u32(&response.attributes, attributes::SESSION_TIMEOUT),
+            Some(3600)
+        );
+        assert_eq!(
+            attributes::attr_string(&response.attributes, attributes::TUNNEL_PRIVATE_GROUP_ID)
+                .as_deref(),
+            Some("300")
+        );
+
+        let accepted: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM radius_logs WHERE username = 'alice' AND result = 'accept'",
+        )
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert_eq!(accepted, 1);
+    }
+
+    #[tokio::test]
+    async fn handle_datagram_rejects_access_request_with_wrong_shared_secret() {
+        let pool = test_pool().await;
+        let cfg = test_config();
+        seed_user(&pool, "alice", "my-secret-pw", true).await;
+
+        let request = build_access_request(
+            16,
+            [0x22u8; 16],
+            "alice",
+            "my-secret-pw",
+            "wrong-peer-secret",
+        );
+        let raw_response = handle_datagram(&request, sample_peer(), &cfg, &pool, Role::Auth)
+            .await
+            .expect("Access-Request with wrong secret should return Access-Reject");
+
+        let response = RadiusPacket::decode(&raw_response).unwrap();
+        assert_eq!(response.code, CODE_ACCESS_REJECT);
+        assert_eq!(response.identifier, 16);
+        assert!(attributes::attr_string(&response.attributes, attributes::ERROR_MESSAGE).is_some());
+
+        let accepts: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM radius_logs WHERE result = 'accept'")
+                .fetch_one(&pool)
+                .await
+                .unwrap();
+        assert_eq!(accepts, 0);
+    }
+
+    #[tokio::test]
+    async fn handle_datagram_rejects_disabled_user_and_wrong_password() {
+        let pool = test_pool().await;
+        let cfg = test_config();
+        seed_user(&pool, "disabled_user", "right-pw", false).await;
+        seed_user(&pool, "enabled_user", "right-pw", true).await;
+
+        let disabled_req = build_access_request(
+            21,
+            [0x33u8; 16],
+            "disabled_user",
+            "right-pw",
+            &cfg.radius_secret,
+        );
+        let disabled_resp = RadiusPacket::decode(
+            &handle_datagram(&disabled_req, sample_peer(), &cfg, &pool, Role::Auth)
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(disabled_resp.code, CODE_ACCESS_REJECT);
+
+        let wrong_pw_req = build_access_request(
+            22,
+            [0x44u8; 16],
+            "enabled_user",
+            "wrong-pw",
+            &cfg.radius_secret,
+        );
+        let wrong_pw_resp = RadiusPacket::decode(
+            &handle_datagram(&wrong_pw_req, sample_peer(), &cfg, &pool, Role::Auth)
+                .await
+                .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(wrong_pw_resp.code, CODE_ACCESS_REJECT);
+    }
+
+    #[tokio::test]
+    async fn handle_datagram_accounting_verifies_secret_and_drops_invalid_peer_secret() {
+        let pool = test_pool().await;
+        let cfg = test_config();
+        let peer = sample_peer();
+
+        let attrs = vec![
+            Attribute::new(attributes::USER_NAME, b"alice"),
+            Attribute::new(attributes::ACCT_STATUS_TYPE, &1u32.to_be_bytes()),
+        ];
+
+        // Wrong secret must be silently dropped without touching radius_logs.
+        let bad_signed = sign_accounting_request(31, attrs.clone(), "rogue-peer-secret");
+        assert!(
+            handle_datagram(&bad_signed, peer, &cfg, &pool, Role::Accounting)
+                .await
+                .is_none()
+        );
+        let logged_after_bad: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM radius_logs")
+            .fetch_one(&pool)
+            .await
+            .unwrap();
+        assert_eq!(logged_after_bad, 0);
+
+        // Valid secret must verify authenticator, record accounting log, and return signed response.
+        let valid_signed = sign_accounting_request(32, attrs, &cfg.radius_secret);
+        let req_pkt = RadiusPacket::decode(&valid_signed).unwrap();
+        let raw_resp = handle_datagram(&valid_signed, peer, &cfg, &pool, Role::Accounting)
+            .await
+            .expect("valid Accounting-Request should respond");
+        let resp_pkt = RadiusPacket::decode(&raw_resp).unwrap();
+        assert_eq!(resp_pkt.code, CODE_ACCOUNTING_RESPONSE);
+        assert_eq!(resp_pkt.identifier, 32);
+        assert_eq!(
+            resp_pkt.authenticator,
+            compute_response_authenticator(&raw_resp, &req_pkt.authenticator, &cfg.radius_secret)
+        );
+
+        let logged: i64 = sqlx::query_scalar(
+            "SELECT COUNT(*) FROM radius_logs WHERE username = 'alice' AND event = 'start' AND result = 'recorded'",
+        )
+        .fetch_one(&pool)
+        .await
+        .unwrap();
+        assert_eq!(logged, 1);
+    }
+
+    #[tokio::test]
+    async fn handle_datagram_drops_mismatched_code_and_malformed_packets() {
+        let pool = test_pool().await;
+        let cfg = test_config();
+        let peer = sample_peer();
+
+        let acct_pkt = sign_accounting_request(
+            40,
+            vec![Attribute::new(attributes::USER_NAME, b"alice")],
+            &cfg.radius_secret,
+        );
+        assert!(handle_datagram(&acct_pkt, peer, &cfg, &pool, Role::Auth)
+            .await
+            .is_none());
+
+        let auth_pkt = build_access_request(41, [0x55u8; 16], "alice", "pw", &cfg.radius_secret);
+        assert!(
+            handle_datagram(&auth_pkt, peer, &cfg, &pool, Role::Accounting)
+                .await
+                .is_none()
+        );
+
+        assert!(handle_datagram(&[1, 2, 3], peer, &cfg, &pool, Role::Auth)
+            .await
+            .is_none());
+    }
 }
