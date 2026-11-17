@@ -1,26 +1,32 @@
+"use client";
+
 import * as React from "react";
 import { cn } from "../../lib/utils";
+import { useComponentSkin, type ComponentSkinProp } from "./skin-adapter";
 
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  readonly skin?: "zine" | "dna" | "imperium";
+  readonly skin?: ComponentSkinProp;
 }
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ className, skin = "zine", ...props }, ref) => (
+const Card = React.forwardRef<HTMLDivElement, CardProps>(({ className, skin, ...props }, ref) => {
+  const { skin: resolvedSkin, legacySkin, dnaId, recipe } = useComponentSkin(skin);
+  return (
     <div
       ref={ref}
+      data-skin={resolvedSkin}
+      data-dna={dnaId}
       className={cn(
-        skin === "imperium"
-          ? "octa-bevel-shell relative rounded-none text-[#f5efe2]"
-          : skin === "dna"
-            ? "mw-dna-surface rounded-none border border-[var(--dna-border,#d6b46c)] bg-[var(--dna-surface,#080b14)] text-[var(--dna-text,#f5efe2)]"
-            : "rounded-lg border border-[var(--line)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm",
+        legacySkin === "imperium"
+          ? "octa-bevel-shell relative rounded-none text-[var(--dna-text)]"
+          : legacySkin === "dna"
+            ? "mw-dna-surface rounded-none border border-[var(--dna-border)] bg-[var(--dna-surface)] text-[var(--dna-text)]"
+            : recipe.card,
         className,
       )}
       {...props}
     />
-  ),
-);
+  );
+});
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(

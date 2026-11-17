@@ -1,50 +1,57 @@
-// Moonwitness Skin Layer -- Component Visual Variants
-// CVA recipes powered by DNA tokens
+// Moonwitness Skin Layer -- Canonical Button Variants (Single Authority)
+// CVA recipes consuming CSS custom properties mapped by DNA + Theme + Skin tokens.
 import { cva } from "../lib/utils";
 
 /**
- * Button skin variants mapping to DNA tokens  
- * Each skin applies a complete visual expression from the design system  
+ * Canonical Button variants consumed by both `components/ui/button.tsx` and `Skinned.Button`.
+ * Supports functional variants (`default`, `destructive`, `outline`, `secondary`, `ghost`, `link`),
+ * explicit skin variants (`riot`, `editorial`, `technical`, `archive`, `transmission`),
+ * and Master DNA variants (`dna`, `imperiumPrimary`, `imperiumSecondary`).
  */
 export const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98]",
   {
     variants: {
       variant: {
         default:
-          "bg-[var(--pink)] text-[var(--ink)] hover:bg-[var(--pink)]/90 active:bg-[var(--pink)]/80 shadow-[0_4px_0_var(--ink)]",
+          "bg-[var(--primary)] text-[var(--primary-foreground)] hover:brightness-110 active:brightness-95",
         destructive:
-          "bg-[var(--red)] text-white hover:bg-[var(--red)]/90 shadow-[0_4px_0_rgba(255,59,59,0.6)]",
+          "bg-[var(--destructive)] text-[var(--destructive-foreground)] hover:brightness-110",
         outline:
-          "border-2 border-[var(--line)] bg-transparent hover:bg-[var(--panel)] hover:border-[var(--pink)] text-[var(--pink)]",
+          "border-2 border-[var(--border)] bg-transparent text-[var(--foreground)] hover:bg-[var(--muted)] hover:border-[var(--primary)]",
         secondary:
-          "bg-[var(--yellow)] text-[var(--ink)] hover:bg-[var(--yellow)]/90 shadow-[0_4px_0_rgba(255,210,31,0.6)]",
-        ghost: "bg-transparent hover:bg-[var(--panel)] text-[var(--paper)]",
-        link: "text-[var(--pink)] underline-offset-4 hover:underline",
-        riot: "bg-[var(--pink)] text-[var(--ink)] hover:bg-[var(--pink)]/90 shadow-[var(--shadow-cmyk)] border-2 border-[var(--line)]",
+          "bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:brightness-105",
+        ghost: "bg-transparent hover:bg-[var(--muted)] text-[var(--foreground)]",
+        link: "border-0 bg-transparent shadow-none text-[var(--primary)] underline-offset-4 hover:underline",
+        riot: "bg-[var(--primary)] text-[var(--primary-foreground)] border-2 border-[var(--border)] shadow-[4px_4px_0_var(--ink)] hover:brightness-110",
         editorial:
-          "bg-transparent border-2 border-[var(--pink)] text-[var(--pink)] hover:bg-[var(--pink)]/10",
+          "bg-transparent border-2 border-[var(--primary)] text-[var(--foreground)] hover:bg-[var(--primary)]/10",
         technical:
-          "bg-[var(--panel)] border border-[var(--blue)] text-[var(--blue)] hover:bg-[var(--blue)]/10",
+          "bg-[var(--card)] border border-[var(--accent)] text-[var(--foreground)] hover:bg-[var(--accent)]/15",
         archive:
-          "bg-[var(--paper)] text-[var(--ink)] border-2 border-[var(--ink)] hover:bg-[var(--yellow)]/20",
+          "bg-[var(--card)] text-[var(--card-foreground)] border-2 border-[var(--border)] hover:bg-[var(--muted)]",
         transmission:
-          "bg-[var(--blue)] text-[var(--ink)] hover:bg-[var(--blue)]/90 shadow-[0_4px_0_rgba(46,168,255,0.6)]",
+          "bg-[var(--accent)] text-[var(--accent-foreground)] hover:brightness-110",
+        dna: "mw-dna-button rounded-none border border-[var(--dna-border)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] hover:brightness-110",
+        imperiumPrimary:
+          "btn-chamfer font-monument rounded-none text-[var(--brand-ink)] tracking-[0.2em] uppercase",
+        imperiumSecondary:
+          "btn-luxe-secondary font-mono rounded-none text-[var(--brand-white)] tracking-[0.16em] uppercase",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3 text-xs",
-        lg: "h-11 rounded-md px-8 text-base",
-        xl: "h-12 rounded-md px-10 text-lg",
-        icon: "h-10 w-10",
+        default: "min-h-11 px-4 py-2",
+        sm: "min-h-9 px-3 text-xs",
+        lg: "min-h-12 px-8 text-base",
+        xl: "min-h-14 px-10 text-lg",
+        icon: "h-11 w-11",
       },
       skin: {
         default: "",
-        riot: "relative overflow-hidden before:content-[''] before:absolute before:inset-0 before:bg-[var(--pink)] before:opacity-0 before:transition-opacity hover:before:opacity-5 before:mix-blend-multiply",
-        editorial: "font-brush tracking-wider",
-        technical: "font-mono tracking-normal",
-        archive: "font-hand",
-        transmission: "font-mono",
+        riot: "font-brush uppercase tracking-wider",
+        editorial: "font-serif tracking-wide",
+        technical: "font-mono uppercase tracking-wider",
+        archive: "font-serif",
+        transmission: "font-mono uppercase tracking-wider",
       },
     },
     compoundVariants: [

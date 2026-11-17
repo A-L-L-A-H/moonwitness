@@ -56,6 +56,8 @@ const VALID_SKINS: readonly SkinName[] = [
 export interface SkinContextValue {
   /** Whether an explicit ancestor SkinProvider exists in the React tree */
   isProvided?: boolean;
+  /** Whether an ancestor SkinProvider explicitly overrode dnaId */
+  hasExplicitDna?: boolean;
   skin: SkinName;
   dnaId: MasterDnaId;
   mode: ThemeMode;
@@ -404,6 +406,7 @@ export function SkinProvider({
   const value = useMemo<SkinContextValue>(
     () => ({
       isProvided: true,
+      hasExplicitDna: Boolean(defaultDna && isValidDnaId(defaultDna)),
       skin,
       dnaId,
       mode,
@@ -420,6 +423,7 @@ export function SkinProvider({
       effects: preset.effects,
     }),
     [
+      defaultDna,
       skin,
       dnaId,
       mode,

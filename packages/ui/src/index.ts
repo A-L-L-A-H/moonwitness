@@ -190,6 +190,10 @@ export { Popover, PopoverTrigger, PopoverContent } from "./components/ui/popover
 export { HoverCard, HoverCardTrigger, HoverCardContent } from "./components/ui/hover-card";
 export {
   Menubar,
+  MenubarMenu,
+  MenubarGroup,
+  MenubarPortal,
+  MenubarSub,
   MenubarTrigger,
   MenubarContent,
   MenubarItem,
