@@ -24,7 +24,11 @@ export const probeNodeModel = defineModel({
   name: "probe.node",
   table: "orm_probe_nodes",
   schema: probeNodeSchema,
-  indexes: [{ fields: ["node_key"], unique: true }, { fields: ["category"] }, { fields: ["enabled"] }],
+  indexes: [
+    { fields: ["node_key"], unique: true },
+    { fields: ["category"] },
+    { fields: ["enabled"] },
+  ],
 });
 
 export const probeEventModel = defineModel({

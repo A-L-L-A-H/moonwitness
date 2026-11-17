@@ -36,11 +36,7 @@ const BASE_MANIFEST = {
 async function migrateAndSeed(seed: boolean): Promise<void> {
   const db = getDb();
   await db.exec(timelineDdl);
-  await applyMigrations([
-    ...authMigrations,
-    ...commandCenterMigrations,
-    ...riotAiMigrations,
-  ]);
+  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...riotAiMigrations]);
   if (seed) {
     await seedTimeline();
   }

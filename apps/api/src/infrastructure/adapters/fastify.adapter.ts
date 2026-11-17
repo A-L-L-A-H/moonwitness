@@ -137,11 +137,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   }
 
   // Ensure all domain schemas exist before serving routes.
-  await applyMigrations([
-    ...authMigrations,
-    ...commandCenterMigrations,
-    ...riotAiMigrations,
-  ]);
+  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...riotAiMigrations]);
   await seedBootstrapAdmin();
   await ensureProbesSchema();
 

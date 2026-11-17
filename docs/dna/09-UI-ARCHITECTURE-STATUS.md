@@ -28,7 +28,7 @@ Status vocabulary: SPECIFIED (documented intent) · IMPLEMENTED (code exists) ·
 
 ## Remaining duplication (tracked, ratcheted)
 
-- `apps/rocksoul` CSS: 478 hex literals (`src/design-system/tokens.css` + feature CSS).
+- `apps/rocksoul` CSS: 456 hex literals (`src/design-system/tokens.css` + feature CSS).
 - `apps/memory/frontend`: separate standalone dashboard that does not consume `@moonwitness/ui`.
 
 ## Verification evidence (executed 2026-11-17, local)

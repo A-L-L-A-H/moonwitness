@@ -81,14 +81,22 @@ export const snmpDeviceModel = defineModel({
   name: "snmp.device",
   table: "snmp_devices",
   schema: snmpDeviceSchema,
-  indexes: [{ fields: ["device_key"], unique: true }, { fields: ["host"] }, { fields: ["enabled"] }],
+  indexes: [
+    { fields: ["device_key"], unique: true },
+    { fields: ["host"] },
+    { fields: ["enabled"] },
+  ],
 });
 
 export const snmpTargetModel = defineModel({
   name: "snmp.target",
   table: "snmp_targets",
   schema: snmpTargetSchema,
-  indexes: [{ fields: ["target_key"], unique: true }, { fields: ["device_key"] }, { fields: ["enabled"] }],
+  indexes: [
+    { fields: ["target_key"], unique: true },
+    { fields: ["device_key"] },
+    { fields: ["enabled"] },
+  ],
 });
 
 export const snmpSampleModel = defineModel({
@@ -96,7 +104,11 @@ export const snmpSampleModel = defineModel({
   table: "snmp_samples",
   schema: snmpSampleSchema,
   softDelete: false,
-  indexes: [{ fields: ["target_key", "sampled_at"] }, { fields: ["device_key", "sampled_at"] }, { fields: ["sampled_at"] }],
+  indexes: [
+    { fields: ["target_key", "sampled_at"] },
+    { fields: ["device_key", "sampled_at"] },
+    { fields: ["sampled_at"] },
+  ],
 });
 
 export const radiusClientSchema = z.object({
@@ -126,7 +138,11 @@ export const radiusClientModel = defineModel({
   name: "radius.client",
   table: "radius_clients",
   schema: radiusClientSchema,
-  indexes: [{ fields: ["client_key"], unique: true }, { fields: ["name"] }, { fields: ["enabled"] }],
+  indexes: [
+    { fields: ["client_key"], unique: true },
+    { fields: ["name"] },
+    { fields: ["enabled"] },
+  ],
 });
 
 export const radiusSessionModel = defineModel({
@@ -134,11 +150,20 @@ export const radiusSessionModel = defineModel({
   table: "radius_sessions",
   schema: radiusSessionSchema,
   softDelete: false,
-  indexes: [{ fields: ["session_key"], unique: true }, { fields: ["username"] }, { fields: ["client_key"] }, { fields: ["started_at"] }],
+  indexes: [
+    { fields: ["session_key"], unique: true },
+    { fields: ["username"] },
+    { fields: ["client_key"] },
+    { fields: ["started_at"] },
+  ],
 });
 
-export const memoryMigrations: Migration[] = [{ id: "070_create_memory_records", up: memoryRecordModel.ddl }];
-export const syslogMigrations: Migration[] = [{ id: "071_create_syslog_entries", up: syslogEntryModel.ddl }];
+export const memoryMigrations: Migration[] = [
+  { id: "070_create_memory_records", up: memoryRecordModel.ddl },
+];
+export const syslogMigrations: Migration[] = [
+  { id: "071_create_syslog_entries", up: syslogEntryModel.ddl },
+];
 export const snmpMigrations: Migration[] = [
   { id: "072_create_snmp_devices", up: snmpDeviceModel.ddl },
   { id: "073_create_snmp_targets", up: snmpTargetModel.ddl },

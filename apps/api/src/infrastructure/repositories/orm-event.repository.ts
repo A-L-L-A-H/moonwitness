@@ -61,17 +61,22 @@ export class OrmEventRepository implements ITimelineRepository {
     if (filters.era) where.era = filters.era;
     if (filters.kind) where.kind = filters.kind;
     // basic fetch; apply complex filters in-memory for parity with prior repo
-    const rows = await opsEventModel.repository.find(where as any, {
-      orderBy: "date",
-      direction: filters.sort === "newest" ? "DESC" : "ASC",
-    } as any);
+    const rows = await opsEventModel.repository.find(
+      where as any,
+      {
+        orderBy: "date",
+        direction: filters.sort === "newest" ? "DESC" : "ASC",
+      } as any,
+    );
     let events = rows.map(toTimelineEvent);
     if (filters.from) events = events.filter((e) => e.date >= filters.from!);
     if (filters.to) events = events.filter((e) => e.date <= filters.to!);
     if (filters.q?.trim()) {
       const q = filters.q.trim().toLowerCase();
       events = events.filter((e) =>
-        `${e.title} ${e.excerpt} ${e.body} ${e.location} ${(e.tags || []).join(" ")}`.toLowerCase().includes(q),
+        `${e.title} ${e.excerpt} ${e.body} ${e.location} ${(e.tags || []).join(" ")}`
+          .toLowerCase()
+          .includes(q),
       );
     }
     const offset = filters.offset ?? 0;

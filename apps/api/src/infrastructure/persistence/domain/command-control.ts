@@ -38,14 +38,20 @@ export const workflowModel = defineModel({
   name: "command.workflow",
   table: "command_center_workflows_orm",
   schema: workflowSchema,
-  indexes: [{ fields: ["actor_id", "workflow_key"], unique: true }, { fields: ["actor_id", "workflow_status"] }],
+  indexes: [
+    { fields: ["actor_id", "workflow_key"], unique: true },
+    { fields: ["actor_id", "workflow_status"] },
+  ],
 });
 
 export const alertModel = defineModel({
   name: "command.alert",
   table: "command_center_alerts_orm",
   schema: alertSchema,
-  indexes: [{ fields: ["actor_id", "alert_key"], unique: true }, { fields: ["actor_id", "dismissed"] }],
+  indexes: [
+    { fields: ["actor_id", "alert_key"], unique: true },
+    { fields: ["actor_id", "dismissed"] },
+  ],
 });
 
 export const controlCommandModel = defineModel({

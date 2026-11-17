@@ -57,7 +57,11 @@ export const identitySessionModel = defineModel({
   name: "identity.session",
   table: "identity_sessions",
   schema: identitySessionSchema,
-  indexes: [{ fields: ["session_token"], unique: true }, { fields: ["user_ref"] }, { fields: ["expires_at"] }],
+  indexes: [
+    { fields: ["session_token"], unique: true },
+    { fields: ["user_ref"] },
+    { fields: ["expires_at"] },
+  ],
 });
 
 export const oauthTokenModel = defineModel({

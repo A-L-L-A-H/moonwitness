@@ -37,7 +37,10 @@ export interface RecordAuditInput {
   entity: string;
   entityId: string;
   action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE" | "EXECUTE" | "ACCESS";
-  actor?: ActorContext | { actorId?: string | null; requestId?: string | null; role?: string | null } | null;
+  actor?:
+    | ActorContext
+    | { actorId?: string | null; requestId?: string | null; role?: string | null }
+    | null;
   actorRole?: string | null;
   correlationId?: string | null;
   requestPath?: string | null;
@@ -61,10 +64,12 @@ export async function recordAuditLog(input: RecordAuditInput): Promise<void> {
   const actorId = (input.actor && "actorId" in input.actor ? input.actor.actorId : null) ?? null;
   const correlationId =
     input.correlationId ??
-    (input.actor && "requestId" in input.actor ? input.actor.requestId ?? null : null);
+    (input.actor && "requestId" in input.actor ? (input.actor.requestId ?? null) : null);
   const actorRole =
     input.actorRole ??
-    (input.actor && "role" in input.actor ? ((input.actor as { role?: string | null }).role ?? null) : null);
+    (input.actor && "role" in input.actor
+      ? ((input.actor as { role?: string | null }).role ?? null)
+      : null);
 
   const occurredAt = input.occurredAt ?? new Date().toISOString();
   await getDb().run(

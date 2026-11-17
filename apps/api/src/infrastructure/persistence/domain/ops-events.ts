@@ -31,4 +31,6 @@ export const opsEventModel = defineModel({
   ],
 });
 
-export const opsEventMigrations: Migration[] = [{ id: "040_create_ops_events", up: opsEventModel.ddl }];
+export const opsEventMigrations: Migration[] = [
+  { id: "040_create_ops_events", up: opsEventModel.ddl },
+];
