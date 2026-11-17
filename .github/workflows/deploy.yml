@@ -20,7 +20,7 @@ concurrency:
 jobs:
   deploy:
     name: Deploy release to production
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     environment:
       name: production

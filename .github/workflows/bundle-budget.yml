@@ -10,7 +10,7 @@ concurrency:
 jobs:
   bundle-size:
     name: Bundle Size Check
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4

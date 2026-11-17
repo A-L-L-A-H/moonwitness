@@ -10,7 +10,7 @@ concurrency:
 jobs:
   size-check:
     name: PR Size Check
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
