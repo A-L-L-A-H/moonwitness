@@ -16,7 +16,7 @@ permissions:
 jobs:
   label:
     name: Auto Label
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
@@ -34,7 +34,7 @@ jobs:
 
   assign:
     name: Auto Assign
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       issues: write
