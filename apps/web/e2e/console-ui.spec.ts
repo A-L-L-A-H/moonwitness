@@ -39,6 +39,21 @@ const readFixtures: Record<string, unknown> = {
   "/api/v1/timeline/events": { data: [], total: 0 },
   "/api/v1/timeline/eras": { data: [] },
   "/api/v1/timeline/stats": { data: { total: 0, byEra: {}, byKind: {} } },
+  "/api/v1/probes/nodes": {
+    nodes: [
+      {
+        id: "id-provider",
+        name: "MID Sovereign",
+        targetUrl: "https://mid.moonwitness.biz.id/health",
+        environment: "production",
+        isEdge: true,
+      },
+    ],
+  },
+  "/api/v1/probes/events": {
+    events: [],
+    total: 0,
+  },
 };
 
 // All browser API traffic stays local to fixtures; accidental mutations fail without reaching a server.
