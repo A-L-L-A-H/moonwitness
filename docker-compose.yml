@@ -114,7 +114,7 @@ services:
       SNMP_POLLER_URL: http://snmp-poller:8094
       SYSLOG_URL: http://syslog:8093
       MID_ISSUER_URL: ${MID_ISSUER_URL:-https://id.moonwitness.biz.id}
-      MID_KEY_ENCRYPTION_SECRET: ${MID_KEY_ENCRYPTION_SECRET:-dev-insecure-encryption-secret-min16}
+      MID_KEY_ENCRYPTION_SECRET: ${MID_KEY_ENCRYPTION_SECRET:?MID_KEY_ENCRYPTION_SECRET must be set}
       MID_COOKIE_DOMAIN: ${MID_COOKIE_DOMAIN:-.moonwitness.biz.id}
       SESSION_SECRET: ${SESSION_SECRET:-}
       STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-}
@@ -254,7 +254,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-moonwitness}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-moonwitness}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
       POSTGRES_DB: ${POSTGRES_DB:-moonwitness}
     volumes:
       - postgres-data:/var/lib/postgresql/data

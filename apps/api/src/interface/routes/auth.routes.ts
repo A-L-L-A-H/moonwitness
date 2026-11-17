@@ -89,7 +89,9 @@ function isSameSiteMoonWitnessHost(originHost: string, requestHost: string): boo
 
 function isAllowedBffOrigin(request: FastifyRequest): boolean {
   const rawOrigin = request.headers.origin;
-  if (rawOrigin === undefined) return true;
+  // Reject requests with no Origin header on state-changing BFF endpoints
+  // to prevent CSRF attacks from non-browser clients.
+  if (rawOrigin === undefined) return false;
   if (typeof rawOrigin !== "string" || !rawOrigin.trim()) return false;
 
   let originUrl: URL;
@@ -132,10 +134,12 @@ function isAllowedBffOrigin(request: FastifyRequest): boolean {
 
 function isValidOptionalCsrfHeader(request: FastifyRequest): boolean {
   const headerVal = request.headers["x-csrf-token"];
-  if (headerVal === undefined) return true;
-  if (typeof headerVal !== "string" || !headerVal.trim()) return false;
   const cookieVal = request.cookies?.[CSRF_COOKIE_NAME];
-  if (!cookieVal) return false;
+  // If no CSRF cookie is set, there's nothing to validate against.
+  if (!cookieVal) return true;
+  // If a CSRF cookie exists, the header must be present and match.
+  if (headerVal === undefined) return false;
+  if (typeof headerVal !== "string" || !headerVal.trim()) return false;
   const a = Buffer.from(headerVal, "utf8");
   const b = Buffer.from(cookieVal, "utf8");
   return a.length === b.length && timingSafeEqual(a, b);

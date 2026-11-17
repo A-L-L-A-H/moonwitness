@@ -286,6 +286,19 @@ export function validateProductionEnv(config: typeof env): string[] {
     problems.push("STORAGE_SECRET_KEY must not use the example placeholder in production.");
   }
 
+  // MID key encryption secret is required in production for OIDC signing-key storage.
+  if (!config.MID_KEY_ENCRYPTION_SECRET?.trim()) {
+    problems.push(
+      "MID_KEY_ENCRYPTION_SECRET must be set for MID signing-key encryption in production.",
+    );
+  } else if (config.MID_KEY_ENCRYPTION_SECRET.trim() === "dev-insecure-encryption-secret-min16") {
+    problems.push(
+      "MID_KEY_ENCRYPTION_SECRET must not use the insecure development default in production.",
+    );
+  } else if (config.MID_KEY_ENCRYPTION_SECRET.trim().length < 16) {
+    problems.push("MID_KEY_ENCRYPTION_SECRET must be at least 16 characters in production.");
+  }
+
   return problems;
 }
 

@@ -4,7 +4,7 @@
 
 export const authMigrations = [
   {
-    id: "001_create_users_and_sessions",
+    id: "auth_001_create_users_and_sessions",
     up: `
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,7 +31,7 @@ export const authMigrations = [
     `,
   },
   {
-    id: "002_create_bff_oauth_tokens",
+    id: "auth_002_create_bff_oauth_tokens",
     up: `
       CREATE TABLE IF NOT EXISTS bff_oauth_tokens (
         session_id TEXT PRIMARY KEY,

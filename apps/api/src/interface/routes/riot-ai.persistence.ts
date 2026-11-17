@@ -44,8 +44,8 @@ const usageSummaryModel = defineModel({
 });
 
 export const riotAiMigrations: Migration[] = [
-  { id: "001_create_riot_ai_provider_configs", up: providerConfigModel.ddl },
-  { id: "002_create_riot_ai_usage_summaries", up: usageSummaryModel.ddl },
+  { id: "riotai_001_create_riot_ai_provider_configs", up: providerConfigModel.ddl },
+  { id: "riotai_002_create_riot_ai_usage_summaries", up: usageSummaryModel.ddl },
 ];
 
 export interface ProviderConfigInput {

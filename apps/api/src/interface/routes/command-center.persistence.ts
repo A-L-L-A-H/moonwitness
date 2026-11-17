@@ -59,7 +59,7 @@ export const commandCenterIdParamSchema = z.object({
 
 export const commandCenterMigrations: Migration[] = [
   {
-    id: "001_create_command_center_workflows",
+    id: "cc_001_create_command_center_workflows",
     up: `
       CREATE TABLE IF NOT EXISTS command_center_workflows (
         id TEXT NOT NULL,
@@ -75,7 +75,7 @@ export const commandCenterMigrations: Migration[] = [
     `,
   },
   {
-    id: "002_create_command_center_alerts",
+    id: "cc_002_create_command_center_alerts",
     up: `
       CREATE TABLE IF NOT EXISTS command_center_alerts (
         id TEXT NOT NULL,

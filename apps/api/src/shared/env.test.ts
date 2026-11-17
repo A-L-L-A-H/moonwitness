@@ -22,6 +22,7 @@ const base = {
   STORAGE_URL: "http://127.0.0.1:8091",
   STORAGE_ACCESS_KEY: "test-storage-access",
   STORAGE_SECRET_KEY: "test-storage-secret",
+  MID_KEY_ENCRYPTION_SECRET: "test-mid-key-encryption-secret-16",
   SYSLOG_URL: "http://127.0.0.1:8093",
   SNMP_POLLER_URL: "http://127.0.0.1:8094",
   TRUSTED_PROXY_COUNT: 0,
