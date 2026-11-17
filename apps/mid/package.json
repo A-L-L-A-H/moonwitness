@@ -3,6 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "dev": "wrangler dev",
     "build": "tsup",
@@ -12,12 +17,21 @@
     "test": "vitest run",
     "clean": "rm -rf .turbo .wrangler dist node_modules"
   },
+  "peerDependencies": {
+    "fastify": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "fastify": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@libsql/client": "^0.18.0",
     "@moonwitness/eslint-config": "workspace:*",
     "@moonwitness/typescript-config": "workspace:*",
     "eslint": "^10.14.0",
+    "fastify": "^5.1.0",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.72.2",

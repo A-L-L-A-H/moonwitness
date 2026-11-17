@@ -16,9 +16,10 @@ import { riotAiRoutes } from "../../interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "../../interface/routes/command-center.routes";
 import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
-import { applyMigrations } from "@moonwitness/orm";
+import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import { authMigrations } from "../../db/migrations";
 import { seedBootstrapAdmin } from "../../services/user";
+import { midFastifyPlugin } from "@moonwitness/mid";
 
 export interface BootstrapOptions {
   prefix?: string;
@@ -135,6 +136,17 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   // Ensure auth and command center schemas exist before serving routes.
   await applyMigrations([...authMigrations, ...commandCenterMigrations]);
   await seedBootstrapAdmin();
+
+  // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
+  if (env.MID_KEY_ENCRYPTION_SECRET) {
+    await fastify.register(midFastifyPlugin, {
+      db: createD1DatabaseFromOrm(getDb()),
+      keyEncryptionSecret: env.MID_KEY_ENCRYPTION_SECRET,
+      issuerUrl: env.MID_ISSUER_URL ?? "https://id.moonwitness.biz.id",
+      cookieDomain: env.MID_COOKIE_DOMAIN,
+      corsOrigins: env.CORS_ORIGINS,
+    });
+  }
 
   if (options.prefix) {
     await fastify.register(

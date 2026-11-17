@@ -43,6 +43,10 @@ const envSchema = {
   MID_ISSUER_URL: z.string().max(2048).optional(),
   MID_JWKS_URL: z.string().max(2048).optional(),
   MID_ALLOWED_AUDIENCES: z.string().max(2048).optional(),
+  /** AES-256-GCM key encryption secret for MID signing-key storage (min 16 chars). */
+  MID_KEY_ENCRYPTION_SECRET: z.string().min(16).optional(),
+  /** Cookie domain for MID session cookies (e.g. ".moonwitness.biz.id"). */
+  MID_COOKIE_DOMAIN: z.string().optional(),
 };
 
 export const env = parseEnv(envSchema);
