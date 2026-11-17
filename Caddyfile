@@ -38,3 +38,9 @@
 	encode zstd gzip
 	reverse_proxy api:3002
 }
+
+:80 {
+	import security_headers
+	encode zstd gzip
+	reverse_proxy web:3000
+}

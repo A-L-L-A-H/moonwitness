@@ -141,14 +141,13 @@ export async function seedBootstrapAdmin(): Promise<void> {
   const configuredValues = [username, email, password];
 
   if (configuredValues.every((value) => !value)) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("Set MW_BOOTSTRAP_ADMIN_USERNAME, EMAIL, and PASSWORD before first boot");
-    }
     return;
   }
 
   if (configuredValues.some((value) => !value)) {
-    throw new Error("MW_BOOTSTRAP_ADMIN_USERNAME, EMAIL, and PASSWORD must be set together");
+    throw new Error(
+      "Set MW_BOOTSTRAP_ADMIN_USERNAME, MW_BOOTSTRAP_ADMIN_EMAIL, and MW_BOOTSTRAP_ADMIN_PASSWORD together, or leave all three unset to use /setup web onboarding.",
+    );
   }
 
   await createUser({
