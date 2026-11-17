@@ -146,7 +146,8 @@ func (d *DockerCompose) Apply(ctx context.Context, r Resource) error {
 
 	switch r.State {
 	case "absent":
-		args := append(baseArgs, "down", "--volumes", "--remove-orphans")
+		// Volume deletion is an explicit separate guarded operation; never run --volumes automatically.
+		args := append(baseArgs, "down", "--remove-orphans")
 		_, err := d.Runner.Run(ctx, host.Command{Name: "docker", Args: args})
 		return err
 	case "down":
