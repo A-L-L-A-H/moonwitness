@@ -11,6 +11,15 @@ pub struct Device {
     #[allow(dead_code)]
     #[serde(skip_serializing)]
     pub community: String,
+    pub v3_username: Option<String>,
+    pub v3_auth_protocol: Option<String>,
+    #[allow(dead_code)]
+    #[serde(skip_serializing)]
+    pub v3_auth_passphrase: Option<String>,
+    pub v3_priv_protocol: Option<String>,
+    #[allow(dead_code)]
+    #[serde(skip_serializing)]
+    pub v3_priv_passphrase: Option<String>,
     pub enabled: bool,
     pub created_at: i64,
 }
@@ -42,6 +51,11 @@ pub struct CreateDeviceRequest {
     pub port: Option<i64>,
     pub version: Option<String>,
     pub community: Option<String>,
+    pub v3_username: Option<String>,
+    pub v3_auth_protocol: Option<String>,
+    pub v3_auth_passphrase: Option<String>,
+    pub v3_priv_protocol: Option<String>,
+    pub v3_priv_passphrase: Option<String>,
     pub enabled: Option<bool>,
 }
 
@@ -74,6 +88,11 @@ mod tests {
             port: 161,
             version: "2c".to_string(),
             community: "private-community".to_string(),
+            v3_username: None,
+            v3_auth_protocol: None,
+            v3_auth_passphrase: None,
+            v3_priv_protocol: None,
+            v3_priv_passphrase: None,
             enabled: true,
             created_at: 1,
         };
