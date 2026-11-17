@@ -10,6 +10,7 @@
     "./dna": "./src/dna/index.ts",
     "./skin": "./src/skin/index.ts",
     "./imperium": "./src/skin/imperium.tsx",
+    "./tokens": "./src/skin/imperium-tokens.ts",
     "./imperium-icons": "./src/skin/imperium-icons.tsx",
     "./layout": "./src/layout/index.ts",
     "./artwork": "./src/artwork/index.ts",

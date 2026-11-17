@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { SkinRoot } from "@moonwitness/ui/imperium";
+import { imperiumLumenCssVariables } from "@moonwitness/ui/tokens";
 import { SanctuaryLocaleProvider } from "@/lib/sanctuary-locale";
 import "./globals.css";
 
@@ -70,10 +71,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       data-motion="live"
       className={`min-h-screen antialiased ${cinzel.variable}`}
     >
-      <body className="min-h-screen antialiased bg-[var(--dna-canvas,#08090d)] text-[var(--dna-text,#fff8e8)]">
+      <body
+        data-dna="01-imperium-lumen"
+        style={imperiumLumenCssVariables()}
+        className="min-h-screen antialiased bg-[var(--dna-canvas)] text-[var(--dna-text)]"
+      >
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border-2 focus:border-[var(--dna-accent,#f6d438)] focus:bg-[var(--dna-canvas,#08090d)] focus:px-4 focus:py-2 focus:font-sans focus:text-xs focus:font-bold focus:tracking-[0.12em] focus:text-[var(--dna-text,#fff8e8)] focus:uppercase"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border-2 focus:border-[var(--dna-accent)] focus:bg-[var(--dna-canvas)] focus:px-4 focus:py-2 focus:font-sans focus:text-xs focus:font-bold focus:tracking-[0.12em] focus:text-[var(--dna-text)] focus:uppercase"
         >
           Skip to main content
         </a>

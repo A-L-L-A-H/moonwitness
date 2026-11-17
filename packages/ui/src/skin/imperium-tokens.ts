@@ -196,3 +196,33 @@ export const SACRED_VISUAL_COVENANT = {
     "monumental archways and landscapes",
   ],
 } as const;
+
+/**
+ * Server-safe `--dna-*` and `--brand-*` custom-property map for 01-imperium-lumen.
+ * Apply to an element that also carries `data-dna="01-imperium-lumen"` so page-level
+ * surfaces (body, skip link) consume semantic variables instead of literals.
+ */
+export function imperiumLumenCssVariables(): Readonly<Record<`--${string}`, string>> {
+  const { brand, semantic } = IMPERIUM_LUMEN_TOKENS;
+  return {
+    "--dna-canvas": semantic.canvas,
+    "--dna-surface": semantic.surface,
+    "--dna-surface-elevated": semantic.surfaceElevated,
+    "--dna-text": semantic.text,
+    "--dna-muted": semantic.textMuted,
+    "--dna-border": semantic.border,
+    "--dna-accent": semantic.accent,
+    "--dna-accent-secondary": semantic.accentSecondary,
+    "--dna-accent-fg": semantic.accentForeground,
+    "--dna-focus": semantic.focus,
+    "--dna-success": semantic.success,
+    "--dna-warning": semantic.warning,
+    "--dna-danger": semantic.danger,
+    "--brand-ink": brand.ink,
+    "--brand-paper": brand.paper,
+    "--brand-yellow": brand.yellow,
+    "--brand-pink": brand.pink,
+    "--brand-blue": brand.blue,
+    "--brand-white": brand.white,
+  };
+}
