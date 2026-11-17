@@ -34,9 +34,11 @@ export const baseMetadata = createMetadataRegistry([
 ]);
 
 export async function registerBaseAddon(fastify: FastifyInstance): Promise<void> {
-  fastify.get("/health", async () => {
-    return { status: "ok", timestamp: new Date().toISOString() };
-  });
+  if (!fastify.hasRoute({ method: "GET", url: "/health" })) {
+    fastify.get("/health", async () => {
+      return { status: "ok", timestamp: new Date().toISOString() };
+    });
+  }
 
   await registerMetadataRoutes(fastify, baseMetadata);
 }
