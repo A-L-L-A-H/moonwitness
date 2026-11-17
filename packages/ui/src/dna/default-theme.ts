@@ -3,36 +3,10 @@
 // Single source of truth for all visual design decisions
 
 import type { DNATokens, ColorToken, ColorScale, SemanticColors, LegacyColors, SpacingToken, RadiusToken, ShadowToken, TypographyToken, MotionToken, EffectToken, ZIndexToken, BreakpointToken } from './tokens';
+import { createCanonicalColorToken, hexToHslString } from './canonical';
 
-// Helper to create color tokens with both hex and HSL
-const hexToHsl = (hex: string): string => {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
-  
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-      case g: h = (b - r) / d + 2; break;
-      case b: h = (r - g) / d + 4; break;
-    }
-    h *= 60;
-  }
-  return Math.round(h) + ' ' + Math.round(s * 100) + '% ' + Math.round(l * 100) + '%';
-};
-
-const createColorToken = (hex: string, alpha?: number): ColorToken => ({
-  hex,
-  hsl: hexToHsl(hex),
-  alpha,
-});
+const createColorToken = (hex: string, alpha?: number): ColorToken =>
+  createCanonicalColorToken(hex, alpha);
 
 // Color scales - generated from base colors using HSL lightness variation
 const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
@@ -75,7 +49,7 @@ const createScale = (baseHex: string): ColorScale => {
   };
 };
 
-// Semantic colors from theme.css (HSL values)
+// Semantic colors synchronized with canonical tokens (WCAG AA compliant foreground pairs)
 const semanticColors: SemanticColors = {
   background: { hex: '#0b0b10', hsl: '220 13% 5%' },
   foreground: { hex: '#f5f3ee', hsl: '45 15% 96%' },
@@ -84,14 +58,14 @@ const semanticColors: SemanticColors = {
   popover: { hex: '#14141c', hsl: '220 13% 8%' },
   popoverForeground: { hex: '#f5f3ee', hsl: '45 15% 96%' },
   primary: { hex: '#ff2d78', hsl: '335 100% 56%' },
-  primaryForeground: { hex: '#ffffff', hsl: '0 0% 100%' },
+  primaryForeground: { hex: '#0b0b10', hsl: hexToHslString('#0b0b10') },
   secondary: { hex: '#ffd21f', hsl: '45 100% 57%' },
   secondaryForeground: { hex: '#060812', hsl: '6 8% 12%' },
   muted: { hex: '#1b1b26', hsl: '220 13% 11%' },
   mutedForeground: { hex: '#9b9b9b', hsl: '45 8% 65%' },
   accent: { hex: '#2ea8ff', hsl: '200 85% 56%' },
   accentForeground: { hex: '#060812', hsl: '6 8% 12%' },
-  destructive: { hex: '#ff3b3b', hsl: '0 85% 60%' },
+  destructive: { hex: '#d61f2c', hsl: hexToHslString('#d61f2c') },
   destructiveForeground: { hex: '#ffffff', hsl: '0 0% 100%' },
   border: { hex: '#2a2a38', hsl: '220 10% 19%' },
   input: { hex: '#2a2a38', hsl: '220 10% 19%' },

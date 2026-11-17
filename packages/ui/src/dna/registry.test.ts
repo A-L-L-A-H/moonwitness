@@ -269,5 +269,13 @@ describe("DNA Registry", () => {
         styleEl?.remove();
       }
     });
+
+    it("emits valid CSS hsl(...) variables and scalar --radius (never [object Object])", () => {
+      const css = generateCSSVariables();
+      expect(css).toContain("--radius: 0.5rem;");
+      expect(css).not.toContain("[object Object]");
+      expect(css).toMatch(/--background:\s*hsl\(/);
+      expect(css).toMatch(/--ring:\s*hsl\(/);
+    });
   });
 });
