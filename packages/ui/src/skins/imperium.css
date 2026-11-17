@@ -296,7 +296,19 @@
 
 @media (max-width: 639px) {
   [data-dna="01-imperium-lumen"] .mw-world-explorer-grid {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 12px;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-dna="01-imperium-lumen"] .mw-world-explorer-grid > .mw-world-tile {
+    flex: 0 0 78%;
+    min-width: 240px;
+    max-width: 300px;
+    scroll-snap-align: start;
   }
 }
 

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 import type { SkinName } from "./compositions";
+import { IMPERIUM_LUMEN_TOKENS } from "./imperium-tokens";
 
 export type MasterDnaId =
   | "01-imperium-lumen"
@@ -66,19 +67,19 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     motionGrammar: "Crisp transform/opacity entrance · tactile hover lift · static reduced-motion parity",
     mappedSkinPreset: "default",
     palette: {
-      canvas: "#08090d",
-      surface: "#10121a",
-      surfaceElevated: "#171a26",
-      text: "#fff8e8",
-      mutedText: "#d8d0c0",
-      border: "#f6d438",
-      accent: "#f6d438",
-      accentSecondary: "#ed149b",
-      accentForeground: "#08090d",
-      focus: "#f6d438",
-      success: "#3ddc84",
-      warning: "#f6d438",
-      danger: "#ff3b3b",
+      canvas: IMPERIUM_LUMEN_TOKENS.semantic.canvas,
+      surface: IMPERIUM_LUMEN_TOKENS.semantic.surface,
+      surfaceElevated: IMPERIUM_LUMEN_TOKENS.semantic.surfaceElevated,
+      text: IMPERIUM_LUMEN_TOKENS.semantic.text,
+      mutedText: IMPERIUM_LUMEN_TOKENS.semantic.textMuted,
+      border: IMPERIUM_LUMEN_TOKENS.semantic.border,
+      accent: IMPERIUM_LUMEN_TOKENS.semantic.accent,
+      accentSecondary: IMPERIUM_LUMEN_TOKENS.semantic.accentSecondary,
+      accentForeground: IMPERIUM_LUMEN_TOKENS.semantic.accentForeground,
+      focus: IMPERIUM_LUMEN_TOKENS.semantic.focus,
+      success: IMPERIUM_LUMEN_TOKENS.semantic.success,
+      warning: IMPERIUM_LUMEN_TOKENS.semantic.warning,
+      danger: IMPERIUM_LUMEN_TOKENS.semantic.danger,
     },
     cardClass:
       "rounded-none border-2 border-[#f4ecd8] bg-[#10121a] text-[#fff8e8] shadow-[4px_4px_0_#ed149b]",

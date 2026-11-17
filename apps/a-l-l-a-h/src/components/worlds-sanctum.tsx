@@ -611,7 +611,7 @@ export function WorldsSanctum({
                     </span>
                   ))}
                   <span className="border border-[#d6b46c]/30 bg-[#d6b46c]/10 px-3 py-1 text-xs font-mono text-[#f8eac6]">
-                    {activeWorld.activeWitnessCount}
+                    {activeWorld.summaryLabel}
                   </span>
                 </div>
               </div>

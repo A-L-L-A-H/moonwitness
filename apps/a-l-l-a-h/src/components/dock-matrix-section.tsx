@@ -269,7 +269,9 @@ export function DockMatrixSection({
                     <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
                       <dt className="text-[10px] text-[#8e8572]">SPEC TARGET</dt>
                       <dd className="mt-1 text-[#f5e3b8]">
-                        {activeNode.integrityPercent}% · {activeNode.latencyMs}ms
+                        {activeNode.integrityPercent !== null && activeNode.latencyMs !== null
+                          ? `${activeNode.integrityPercent}% · ${activeNode.latencyMs}ms`
+                          : "CANON EXPLORER"}
                       </dd>
                     </div>
                   </dl>

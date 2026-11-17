@@ -14,6 +14,7 @@ import {
   IMPERIUM_LUMEN_TOKENS,
   IllustratedHero,
   IllustrationFrame,
+  MASTER_DNA_WORLDS,
   MotionReveal,
   OctagramMandalaIcon,
   PrimaryAction,
@@ -178,5 +179,22 @@ describe("@moonwitness/ui imperium skin & scoped CSS layer", () => {
     expect(button?.className).toContain("mw-dna-button");
     expect(button?.className).not.toContain("btn-chamfer");
     expect(container.innerHTML).not.toContain("octa-bevel-shell");
+  });
+
+  it("keeps imperium-tokens.ts free of 'use client' and in parity with MASTER_DNA_WORLDS['01-imperium-lumen']", () => {
+    const tokensSource = readFileSync(resolve(__dirname, "imperium-tokens.ts"), "utf8");
+    expect(tokensSource).not.toMatch(/^\s*["']use client["']/m);
+
+    const imperiumPalette = MASTER_DNA_WORLDS["01-imperium-lumen"].palette;
+    expect(imperiumPalette.canvas).toBe(IMPERIUM_LUMEN_TOKENS.semantic.canvas);
+    expect(imperiumPalette.surface).toBe(IMPERIUM_LUMEN_TOKENS.semantic.surface);
+    expect(imperiumPalette.surfaceElevated).toBe(IMPERIUM_LUMEN_TOKENS.semantic.surfaceElevated);
+    expect(imperiumPalette.text).toBe(IMPERIUM_LUMEN_TOKENS.semantic.text);
+    expect(imperiumPalette.mutedText).toBe(IMPERIUM_LUMEN_TOKENS.semantic.textMuted);
+    expect(imperiumPalette.border).toBe(IMPERIUM_LUMEN_TOKENS.semantic.border);
+    expect(imperiumPalette.accent).toBe(IMPERIUM_LUMEN_TOKENS.semantic.accent);
+    expect(imperiumPalette.accentSecondary).toBe(IMPERIUM_LUMEN_TOKENS.semantic.accentSecondary);
+    expect(imperiumPalette.accentForeground).toBe(IMPERIUM_LUMEN_TOKENS.semantic.accentForeground);
+    expect(imperiumPalette.focus).toBe(IMPERIUM_LUMEN_TOKENS.semantic.focus);
   });
 });

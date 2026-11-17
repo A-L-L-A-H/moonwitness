@@ -105,27 +105,6 @@ export function EmpireOfLightExperience() {
     return () => window.removeEventListener("keydown", handleGlobalKey);
   }, []);
 
-  // Load the motion/moments kit after hydration
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.add("m-enter", "mo-js");
-    const enterTimer = window.setTimeout(() => root.classList.add("m-enter-done"), 700);
-    const safeTimer = window.setTimeout(() => root.classList.add("mo-safe"), 2500);
-    const load = (src: string) => {
-      if (document.querySelector(`script[src="${src}"]`)) return;
-      const el = document.createElement("script");
-      el.type = "module";
-      el.src = src;
-      document.body.appendChild(el);
-    };
-    load("/assets/motion/motion.js");
-    load("/assets/moments/moments.js");
-    return () => {
-      window.clearTimeout(enterTimer);
-      window.clearTimeout(safeTimer);
-    };
-  }, []);
-
   // Keep the fixed navigation in sync with the section currently in view
   useEffect(() => {
     let rafId = 0;

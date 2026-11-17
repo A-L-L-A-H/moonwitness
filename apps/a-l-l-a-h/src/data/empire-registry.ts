@@ -27,7 +27,7 @@ export interface WorldDomainEntry {
   readonly statusLabel: string;
   readonly implementationState: "ACTIVE_CONSOLE" | "CANON_EXPLORER";
   readonly canonicalAlias?: string;
-  readonly activeWitnessCount: string;
+  readonly summaryLabel: string;
   readonly artifacts: readonly WorldArtifactRecord[];
 }
 
@@ -36,8 +36,8 @@ export interface DockNodeTelemetry {
   readonly worldId: WorldIdentifier;
   readonly designation: string;
   readonly protocol: string;
-  readonly latencyMs: number;
-  readonly integrityPercent: number;
+  readonly latencyMs: number | null;
+  readonly integrityPercent: number | null;
   readonly orbitalBearing: string;
   readonly state: "SYNCHRONIZED" | "LUMINOUS" | "BROADCASTING" | "CANON_EXPLORER";
 }
@@ -88,7 +88,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "ARCHIVE ACTIVE",
     implementationState: "ACTIVE_CONSOLE",
     canonicalAlias: "MoonWitness II / XII / XV",
-    activeWitnessCount: "99 Chapters · 4 Lenses",
+    summaryLabel: "99 Chapters · 4 Lenses",
     artifacts: [
       {
         code: "MW-0114",
@@ -132,7 +132,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "RADIO & INFRA",
     implementationState: "ACTIVE_CONSOLE",
     canonicalAlias: "ARSY Radio · Distinct from cp/arsy Host Control Plane",
-    activeWitnessCount: "Harmonic Synthesizer",
+    summaryLabel: "Harmonic Synthesizer",
     artifacts: [
       {
         code: "AR-0800",
@@ -176,7 +176,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "SCRIPTORIUM OPEN",
     implementationState: "ACTIVE_CONSOLE",
     canonicalAlias: "MANUSIA PULPEN · Reconciles QALAM Scriptorium",
-    activeWitnessCount: "Folio Editor Active",
+    summaryLabel: "Folio Editor Active",
     artifacts: [
       {
         code: "HP-0001",
@@ -220,7 +220,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "KNOWLEDGE GRAPH",
     implementationState: "ACTIVE_CONSOLE",
     canonicalAlias: "SIDRA TREE Knowledge Graph",
-    activeWitnessCount: "6 Core Axioms",
+    summaryLabel: "6 Core Axioms",
     artifacts: [
       {
         code: "SD-0310",
@@ -264,7 +264,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "WORKBENCH BOUNDARY",
     implementationState: "ACTIVE_CONSOLE",
     canonicalAlias: "apps/rocksoul · NOISE × SILENCE",
-    activeWitnessCount: "Interactive Studio",
+    summaryLabel: "Interactive Studio",
     artifacts: [
       {
         code: "RX-0001",
@@ -307,7 +307,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "CANON EXPLORER",
     implementationState: "CANON_EXPLORER",
     canonicalAlias: "bjo163/ALLAH-CRAYON-RGBL-ENGINE · SRGBL v8",
-    activeWitnessCount: "5 SRGBL Stages",
+    summaryLabel: "5 SRGBL Stages",
     artifacts: [
       {
         code: "CR-S1R2",
@@ -351,7 +351,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "CANON EXPLORER",
     implementationState: "CANON_EXPLORER",
     canonicalAlias: "SIN CAN BE BETTER HUMAN · DX 4-Panel Arc",
-    activeWitnessCount: "4 Story Panels",
+    summaryLabel: "4 Story Panels",
     artifacts: [
       {
         code: "SC-01",
@@ -395,7 +395,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "CANON EXPLORER",
     implementationState: "CANON_EXPLORER",
     canonicalAlias: "DOM-02 MFTL · DOM-03 LEGEND",
-    activeWitnessCount: "Case 001 Benchmark",
+    summaryLabel: "Case 001 Benchmark",
     artifacts: [
       {
         code: "MY-01",
@@ -439,7 +439,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     statusLabel: "CANON EXPLORER",
     implementationState: "CANON_EXPLORER",
     canonicalAlias: "DOM-05 LAW · AWS Normative Engine",
-    activeWitnessCount: "6-Stage Legal Gate",
+    summaryLabel: "6-Stage Legal Gate",
     artifacts: [
       {
         code: "AWS-01",
@@ -525,8 +525,8 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "crayon",
     designation: "SRGBL v8 Prismatic Spectrum",
     protocol: "CRAYON-SRGBL/SPEC",
-    latencyMs: 0,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
     orbitalBearing: "045° NE · +28° Prism",
     state: "CANON_EXPLORER",
   },
@@ -535,8 +535,8 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "sin-can",
     designation: "Sin Can Reflection Arc",
     protocol: "DX-SYAFAAT/SPEC",
-    latencyMs: 0,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
     orbitalBearing: "210° SW · +16° Hall",
     state: "CANON_EXPLORER",
   },
@@ -545,8 +545,8 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "mythos",
     designation: "MFTL & Legend Correlation",
     protocol: "MFTL-CASE001/SPEC",
-    latencyMs: 0,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
     orbitalBearing: "315° NW · +40° Vault",
     state: "CANON_EXPLORER",
   },
@@ -555,8 +555,8 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
     worldId: "angel-with-shotgun",
     designation: "AWS Normative Law Engine",
     protocol: "AWS-LAW-6GATE/SPEC",
-    latencyMs: 0,
-    integrityPercent: 100,
+    latencyMs: null,
+    integrityPercent: null,
     orbitalBearing: "110° E · +55° Bench",
     state: "CANON_EXPLORER",
   },
