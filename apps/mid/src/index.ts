@@ -10,4 +10,9 @@ const worker = {
 };
 
 export { createMidHandler };
+export { midFastifyPlugin } from "./plugin";
+export type { MidFastifyPluginOptions } from "./plugin";
+export * from "./types";
+export * from "./crypto";
+export * from "./db";
 export default worker;

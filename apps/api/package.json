@@ -26,6 +26,7 @@
     "@moonwitness/ai": "workspace:*",
     "@moonwitness/core": "workspace:*",
     "@moonwitness/errors": "workspace:*",
+    "@moonwitness/mid": "workspace:*",
     "@moonwitness/orm": "workspace:*",
     "@moonwitness/schema": "workspace:*",
     "@moonwitness/types": "workspace:*",
