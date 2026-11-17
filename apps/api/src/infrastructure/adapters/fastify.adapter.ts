@@ -15,11 +15,12 @@ import { snmpPollerRoutes } from "../../interface/routes/snmp-poller.routes";
 import { riotAiRoutes } from "../../interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "../../interface/routes/command-center.routes";
 import { memoryRoutes } from "../../interface/routes/memory.routes";
-import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
-import { ensureProbesSchema, probesMigrations } from "../../interface/routes/probes.persistence";
+import { ensureProbesSchema } from "../../interface/routes/probes.persistence";
 import { probesRoutes } from "../../interface/routes/probes.routes";
 import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import { authMigrations } from "../../db/migrations";
+import { riotAiMigrations } from "../../interface/routes/riot-ai.persistence";
+import { commandCenterMigrations } from "../../interface/routes/command-center.persistence";
 import { seedBootstrapAdmin } from "../../services/user";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
@@ -135,8 +136,12 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     });
   }
 
-  // Ensure auth, command center, and probes schemas exist before serving routes.
-  await applyMigrations([...authMigrations, ...commandCenterMigrations, ...probesMigrations]);
+  // Ensure all domain schemas exist before serving routes.
+  await applyMigrations([
+    ...authMigrations,
+    ...commandCenterMigrations,
+    ...riotAiMigrations,
+  ]);
   await seedBootstrapAdmin();
   await ensureProbesSchema();
 

@@ -11,6 +11,8 @@ import {
   SESSION_COOKIE_NAME,
 } from "../shared/auth";
 import { getDb } from "@moonwitness/orm";
+import { recordAuditLog, tryRecordAuditLog } from "../infrastructure/audit/audit-log";
+import { createActorContext } from "@moonwitness/orm";
 
 export interface SessionData {
   id: string;
@@ -50,6 +52,26 @@ export async function createSession(userId: number): Promise<string> {
      VALUES (?, ?, ?, ?, 0)`,
     [sessionId, userId, now.toISOString(), expiresAt.toISOString()],
   );
+
+  // Record audit log for session creation
+  const actor = createActorContext(null, "api");
+  await tryRecordAuditLog({
+    domain: "identity",
+    entity: "session",
+    entityId: sessionId,
+    action: "CREATE",
+    actor: { actorId: actor.actorId, requestId: actor.requestId, role: actor.source },
+    correlationId: actor.requestId,
+    requestPath: null,
+    outcome: "success",
+    before: null,
+    after: {
+      id: sessionId,
+      userId: userId,
+    },
+    metadata: null,
+    occurredAt: now.toISOString(),
+  });
 
   return sessionId;
 }

@@ -10,11 +10,12 @@ import {
   timelineRoutesPrefix,
 } from "@moonwitness/addon-timeline";
 import { authMigrations } from "./db/migrations";
+import { riotAiMigrations } from "./interface/routes/riot-ai.persistence";
+import { commandCenterMigrations } from "./interface/routes/command-center.persistence";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 import { commandCenterRoutes } from "./interface/routes/command-center.routes";
-import { commandCenterMigrations } from "./interface/routes/command-center.persistence";
 import { memoryRoutes } from "./interface/routes/memory.routes";
 
 export interface CoreAppOptions {
@@ -35,7 +36,11 @@ const BASE_MANIFEST = {
 async function migrateAndSeed(seed: boolean): Promise<void> {
   const db = getDb();
   await db.exec(timelineDdl);
-  await applyMigrations([...authMigrations, ...commandCenterMigrations]);
+  await applyMigrations([
+    ...authMigrations,
+    ...commandCenterMigrations,
+    ...riotAiMigrations,
+  ]);
   if (seed) {
     await seedTimeline();
   }
