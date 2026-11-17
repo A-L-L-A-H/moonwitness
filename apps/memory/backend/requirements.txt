@@ -6,6 +6,7 @@ ijson>=3.3,<4
 google-genai>=1.0,<2
 boto3>=1.36,<2
 httpx>=0.28,<1
+cryptography>=44,<52
 lancedb>=0.20,<1
 fastembed>=0.7,<1
 pyarrow>=19,<25

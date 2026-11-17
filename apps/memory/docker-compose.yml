@@ -49,8 +49,12 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8000}
+        NEXT_PUBLIC_MID_ISSUER_URL: ${MID_ISSUER_URL:-https://id.moonwitness.biz.id}
+        NEXT_PUBLIC_MID_CLIENT_ID: ${MID_CLIENT_ID:-moonwitness-memory}
     environment:
       NEXT_PUBLIC_API_BASE_URL: http://localhost:${API_PORT:-8000}
+      NEXT_PUBLIC_MID_ISSUER_URL: ${MID_ISSUER_URL:-https://id.moonwitness.biz.id}
+      NEXT_PUBLIC_MID_CLIENT_ID: ${MID_CLIENT_ID:-moonwitness-memory}
     ports:
       - "127.0.0.1:${WEB_PORT:-3005}:3000"
     depends_on:
