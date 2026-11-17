@@ -18,4 +18,10 @@ export { D1Driver, splitSqlStatements, createD1DatabaseFromOrm } from "./drivers
 export type { D1DatabaseLike, D1PreparedStatementLike } from "./drivers/d1.driver.js";
 export { applyMigrations, listAppliedMigrations } from "./migrations.js";
 export type { Migration } from "./migrations.js";
-export { backupDatabase, restoreDatabase } from "./backup.js";
+export {
+  backupDatabase,
+  restoreDatabase,
+  verifyIntegrity,
+  encryptBackupFile,
+  decryptBackupFile,
+} from "./backup.js";

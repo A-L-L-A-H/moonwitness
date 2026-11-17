@@ -50,6 +50,8 @@ export class LibSqlDriver implements LibSqlExecutor {
     this.client = createClient({ url: toUrl(dbPath) });
     await this.client.execute("PRAGMA journal_mode = WAL");
     await this.client.execute("PRAGMA foreign_keys = ON");
+    await this.client.execute("PRAGMA busy_timeout = 5000");
+    await this.client.execute("PRAGMA synchronous = NORMAL");
   }
 
   close(): void {
