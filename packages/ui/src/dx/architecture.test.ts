@@ -39,7 +39,7 @@ const IGNORED_DIRS = new Set([
  * Every entry is tracked in the "Remaining duplication report".
  */
 const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
-  rocksoul: 478,
+  rocksoul: 456,
 };
 
 /** Apps whose CSS must not contain any palette literal (TSX is ratcheted separately). */

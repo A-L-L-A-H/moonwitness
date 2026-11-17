@@ -10,7 +10,13 @@ import {
   getSessionMaxAgeMs,
   SESSION_COOKIE_NAME,
 } from "../shared/auth";
-import { getDb } from "@moonwitness/orm";
+import { getDb, createActorContext } from "@moonwitness/orm";
+import { tryRecordAuditLog } from "../infrastructure/audit/audit-log";
+import {
+  identitySessionModel,
+  oauthTokenModel,
+  authEventModel,
+} from "../infrastructure/persistence/domain/identity";
 
 export interface SessionData {
   id: string;
@@ -50,6 +56,57 @@ export async function createSession(userId: number): Promise<string> {
      VALUES (?, ?, ?, ?, 0)`,
     [sessionId, userId, now.toISOString(), expiresAt.toISOString()],
   );
+
+  // Record audit log for session creation
+  const actor = createActorContext(null, "api");
+  await tryRecordAuditLog({
+    domain: "identity",
+    entity: "session",
+    entityId: sessionId,
+    action: "CREATE",
+    actor: { actorId: actor.actorId, requestId: actor.requestId, role: actor.source },
+    correlationId: actor.requestId,
+    requestPath: null,
+    outcome: "success",
+    before: null,
+    after: {
+      id: sessionId,
+      userId,
+    },
+    metadata: null,
+    occurredAt: now.toISOString(),
+  });
+
+  // Best-effort dual-write to identity ORM
+  try {
+    await identitySessionModel.repository.create(
+      {
+        session_token: sessionId,
+        user_ref: String(userId),
+        revoked: false,
+        expires_at: expiresAt.toISOString(),
+        ip_address: null,
+        user_agent: null,
+      },
+      actor,
+    );
+    await authEventModel.repository.create(
+      {
+        actor_user_ref: String(userId),
+        username: null,
+        event_type: "session_created",
+        outcome: "success",
+        reason: null,
+        ip_address: null,
+        user_agent: null,
+        correlation_id: actor.requestId ?? null,
+        occurred_at: now.toISOString(),
+      },
+      actor,
+    );
+  } catch {
+    // identity mirror is best-effort; do not break auth
+  }
 
   return sessionId;
 }
@@ -98,11 +155,41 @@ export async function getSessionWithUser(sessionId: string): Promise<SessionWith
 export async function revokeSession(sessionId: string): Promise<void> {
   const db = getDb();
   await db.run(`UPDATE sessions SET revoked = 1 WHERE id = ?`, [sessionId]);
+  const actor = createActorContext(null, "api");
+  try {
+    const rows = await identitySessionModel.repository.find({
+      session_token: sessionId,
+    });
+    for (const row of rows) {
+      await identitySessionModel.repository.update(
+        row.id,
+        { revoked: true },
+        actor,
+      );
+    }
+  } catch {
+    // best-effort
+  }
 }
 
 export async function revokeAllUserSessions(userId: number): Promise<void> {
   const db = getDb();
   await db.run(`UPDATE sessions SET revoked = 1 WHERE user_id = ?`, [userId]);
+  const actor = createActorContext(null, "api");
+  try {
+    const rows = await identitySessionModel.repository.find({
+      user_ref: String(userId),
+    });
+    for (const row of rows) {
+      await identitySessionModel.repository.update(
+        row.id,
+        { revoked: true },
+        actor,
+      );
+    }
+  } catch {
+    // best-effort
+  }
 }
 
 export async function cleanupExpiredSessions(): Promise<number> {
@@ -148,6 +235,29 @@ export async function storeBffOAuthTokens(input: {
       now.toISOString(),
     ],
   );
+
+  // Best-effort dual-write to identity ORM
+  const actor = createActorContext(null, "api");
+  try {
+    const existing = await oauthTokenModel.repository.find({
+      session_ref: input.sessionId,
+    });
+    const payload = {
+      session_ref: input.sessionId,
+      client_id: input.clientId,
+      access_token: input.accessToken,
+      refresh_token: input.refreshToken ?? null,
+      id_token: input.idToken ?? null,
+      expires_at: expiresAt.toISOString(),
+    };
+    if (existing[0]) {
+      await oauthTokenModel.repository.update(existing[0].id, payload, actor);
+    } else {
+      await oauthTokenModel.repository.create(payload, actor);
+    }
+  } catch {
+    // identity mirror is best-effort
+  }
 }
 
 export async function getBffOAuthTokens(sessionId: string): Promise<BffOAuthTokenRecord | null> {
