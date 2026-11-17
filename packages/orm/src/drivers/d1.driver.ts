@@ -6,6 +6,7 @@ export interface D1PreparedStatementLike {
   bind(...values: unknown[]): D1PreparedStatementLike;
   all<T = Record<string, unknown>>(): Promise<{ results?: T[] }>;
   run(): Promise<{ meta?: { last_row_id?: number; changes?: number } }>;
+  first?<T = Record<string, unknown>>(colName?: string): Promise<T | null>;
 }
 
 /** Structural subset of Cloudflare Workers `D1Database`. */
@@ -229,6 +230,16 @@ export function createD1DatabaseFromOrm(executor: LibSqlExecutor): D1DatabaseLik
           changes: res.rowsAffected,
         },
       };
+    }
+
+    async first<T = Record<string, unknown>>(colName?: string): Promise<T | null> {
+      const res = await executor.all<Record<string, unknown>>(this.query, this.params);
+      const row = res[0];
+      if (!row) return null;
+      if (colName) {
+        return (row[colName] as T) ?? null;
+      }
+      return row as T;
     }
   }
 
