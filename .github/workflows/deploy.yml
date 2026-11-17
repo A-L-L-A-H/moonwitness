@@ -19,9 +19,9 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy release to production
+    name: Deploy release to VPS
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment:
       name: production
       url: ${{ vars.PRODUCTION_URL }}
@@ -39,18 +39,23 @@ jobs:
           fi
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
-      - name: Require deployment configuration
+      - name: Require deployment secrets
         env:
-          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
-          HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
         run: |
           missing=""
-          [ -z "$DEPLOY_HOOK_URL" ] && missing="$missing DEPLOY_HOOK_URL(secret)"
-          [ -z "$HEALTHCHECK_URL" ] && missing="$missing HEALTHCHECK_URL(variable)"
+          [ -z "$VPS_HOST" ]        && missing="$missing VPS_HOST(secret)"
+          [ -z "$VPS_USER" ]        && missing="$missing VPS_USER(secret)"
+          [ -z "$VPS_SSH_KEY" ]     && missing="$missing VPS_SSH_KEY(secret)"
+          [ -z "$VPS_DEPLOY_PATH" ] && missing="$missing VPS_DEPLOY_PATH(var)"
+          [ -z "$PRODUCTION_URL" ]  && missing="$missing PRODUCTION_URL(var)"
           if [ -n "$missing" ]; then
-            echo "::error::Deployment is not configured. Missing:$missing"
-            echo "::error::Add them in Settings > Secrets and variables > Actions, then re-run."
-            echo "::error::This repository has no hosting target committed yet; see docs/engineering/DEPLOYMENT.md."
+            echo "::error::Deployment not configured. Missing:$missing"
+            echo "::error::Add them in Settings > Secrets and variables > Actions."
             exit 1
           fi
 
@@ -59,50 +64,126 @@ jobs:
         with:
           ref: ${{ steps.release.outputs.tag }}
 
-      - name: Trigger deployment
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@dc588b651fe13d2bfbd9f776b59e3a85c8f1e76b # v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS host to known_hosts
         env:
-          DEPLOY_HOOK_URL: ${{ secrets.DEPLOY_HOOK_URL }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Pre-flight check
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
           TAG: ${{ steps.release.outputs.tag }}
         run: |
-          status=$(curl -sS -o deploy-response.txt -w "%{http_code}" \
-            -X POST "$DEPLOY_HOOK_URL" \
-            -H "Content-Type: application/json" \
-            --data "{\"ref\":\"$TAG\",\"sha\":\"$GITHUB_SHA\"}")
-          echo "deploy hook responded $status"
-          head -c 2000 deploy-response.txt || true
-          if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
-            echo "::error::Deploy hook rejected the request with HTTP $status."
-            exit 1
-          fi
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<'REMOTE'
+            set -euo pipefail
+            echo "=== pre-flight: docker ==="
+            docker info --format '{{.ServerVersion}}' || { echo "ERROR: docker not running"; exit 1; }
+            echo "=== pre-flight: compose file ==="
+            test -f "${VPS_DEPLOY_PATH}/docker-compose.yml" || { echo "ERROR: compose file missing at ${VPS_DEPLOY_PATH}/docker-compose.yml"; exit 1; }
+            echo "=== pre-flight: validate compose ==="
+            docker compose -f "${VPS_DEPLOY_PATH}/docker-compose.yml" config --quiet
+            echo "=== pre-flight: disk space ==="
+            df -h "${VPS_DEPLOY_PATH}"
+            echo "pre-flight passed"
+          REMOTE
 
-      - name: Health check
+      - name: Pull release images and deploy
         env:
-          HEALTHCHECK_URL: ${{ vars.HEALTHCHECK_URL }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
+          TAG: ${{ steps.release.outputs.tag }}
         run: |
-          for attempt in 1 2 3 4 5 6 7 8 9 10; do
-            code=$(curl -sS -o health.txt -w "%{http_code}" "$HEALTHCHECK_URL" || echo "000")
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<REMOTE
+            set -euo pipefail
+            export MW_RELEASE_TAG="$TAG"
+            cd "\${VPS_DEPLOY_PATH}"
+            echo "=== deploy: pulling release tag \${MW_RELEASE_TAG} ==="
+            git fetch --all --tags --prune
+            git checkout "\${MW_RELEASE_TAG}"
+            echo "=== deploy: docker compose up ==="
+            docker compose pull --quiet
+            docker compose up -d --build --remove-orphans
+            echo "=== deploy: pruning old images ==="
+            docker image prune -f || true
+            echo "deploy step complete"
+          REMOTE
+
+      - name: Health check (Caddy + API)
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
+        run: |
+          echo "=== health check: waiting for services ==="
+          for attempt in $(seq 1 20); do
+            code=$(curl -sS -o /tmp/health.txt -w "%{http_code}" \
+              --connect-timeout 5 --max-time 10 \
+              "${PRODUCTION_URL%/}/api/health" 2>/dev/null || echo "000")
             if [ "$code" = "200" ]; then
               echo "health check passed on attempt $attempt"
-              head -c 500 health.txt || true
-              exit 0
+              cat /tmp/health.txt || true
+              break
             fi
-            echo "attempt $attempt: HTTP $code"
-            sleep 15
+            echo "attempt $attempt: HTTP $code (sleeping 10s)"
+            sleep 10
+            if [ "$attempt" -eq 20 ]; then
+              echo "::error::Health check never returned 200 after 20 attempts."
+              echo "=== container status ==="
+              ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" \
+                "cd '${VPS_DEPLOY_PATH}' && docker compose ps && docker compose logs --tail=50 --no-log-prefix 2>&1 | tail -100" || true
+              exit 1
+            fi
           done
-          echo "::error::Health check never returned 200. Treat this deploy as failed and follow docs/engineering/DEPLOYMENT.md#rollback."
-          exit 1
 
-      - name: Smoke test
+      - name: Smoke test (public URLs)
         env:
           PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
         run: |
-          if [ -z "$PRODUCTION_URL" ]; then
-            echo "::error::PRODUCTION_URL variable is required for the smoke test."
-            exit 1
-          fi
-          code=$(curl -sS -o page.html -w "%{http_code}" "$PRODUCTION_URL")
-          echo "root page responded $code"
-          if [ "$code" != "200" ]; then
-            echo "::error::Smoke test failed with HTTP $code."
-            exit 1
-          fi
+          check_url() {
+            local label="$1"
+            local url="$2"
+            local expected="${3:-200}"
+            code=$(curl -sS -o /tmp/smoke.txt -w "%{http_code}" \
+              --connect-timeout 5 --max-time 15 "$url" 2>/dev/null || echo "000")
+            if [ "$code" = "$expected" ]; then
+              echo "OK $label ($code)"
+            else
+              echo "::error::Smoke test $label failed: expected HTTP $expected, got $code"
+              head -c 500 /tmp/smoke.txt || true
+              return 1
+            fi
+          }
+          check_url "root page" "$PRODUCTION_URL"
+          check_url "api health" "${PRODUCTION_URL%/}/api/health"
+          echo "smoke tests passed"
+
+      - name: Rollback on failure
+        if: failure()
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
+        run: |
+          echo "::warning::Deployment failed. Attempting rollback to previous release."
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<'REMOTE' || true
+            set -euo pipefail
+            cd "${VPS_DEPLOY_PATH}"
+            prev_tag=$(git describe --abbrev=0 --tags HEAD^ 2>/dev/null || git rev-parse --short HEAD^)
+            echo "rolling back to $prev_tag"
+            git checkout "$prev_tag"
+            docker compose up -d --remove-orphans
+            echo "rollback to $prev_tag complete"
+          REMOTE
