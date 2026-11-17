@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { FOUR_CORPUS_CONCORDANCE, FOUR_CORPUS_POLICY } from "@/data/empire-canon-codex";
@@ -9,7 +10,12 @@ import {
   SpatialTiltCard,
   triggerSacredViewTransition,
 } from "./motion-primitives";
-import { DiamondStarOrnament, SacredCornerBrackets } from "@moonwitness/ui/imperium";
+import {
+  DiamondStarOrnament,
+  DnaButton,
+  DnaPortalArch,
+  SacredCornerBrackets,
+} from "@moonwitness/ui/imperium";
 
 export function FourScripturesSanctum({
   quietMode = false,
@@ -71,7 +77,7 @@ export function FourScripturesSanctum({
           const isSelected = corpus.code === selectedCorpus.code;
           return (
             <SpatialTiltCard key={corpus.code} disabled={quietMode} maxTiltDeg={3}>
-              <button
+              <DnaPortalArch
                 type="button"
                 role="tab"
                 aria-selected={isSelected}
@@ -80,13 +86,22 @@ export function FourScripturesSanctum({
                     setSelectedCode(corpus.code);
                   }, quietMode)
                 }
-                className={`portal-arch-card relative flex h-full w-full min-h-[168px] flex-col justify-between border px-5 pt-7 pb-5 text-left transition-all cursor-pointer ${
+                className={`relative flex h-full w-full min-h-[168px] flex-col justify-between border px-5 pt-7 pb-5 text-left transition-all cursor-pointer ${
                   isSelected
                     ? "border-[#fff4d2] bg-gradient-to-b from-[#d6b46c]/20 via-[#0e1320] to-[#070910] shadow-[0_0_28px_rgba(223,192,123,0.2)]"
                     : "border-[#d6b46c]/25 bg-[#090c16]/90 hover:border-[#d6b46c]/60 hover:bg-[#0d111e]"
                 }`}
               >
                 <div>
+                  <div className="relative mb-3 h-24 w-full overflow-hidden border border-[#d6b46c]/20 bg-[#05060a]">
+                    <Image
+                      src={`/art/story-plate-0${idx + 1}.webp`}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 90vw, (max-width: 1023px) 45vw, 22vw"
+                      className="object-cover"
+                    />
+                  </div>
                   <div className="flex items-center justify-between font-mono text-[10.5px] text-[#dfc07b]">
                     <span>
                       0{idx + 1} · {corpus.code}
@@ -103,7 +118,7 @@ export function FourScripturesSanctum({
                 <p className="mt-3 border-t border-[#d6b46c]/15 pt-2.5 font-serif text-xs leading-relaxed text-[#e0d7c4]">
                   {corpus.ethicalCore}
                 </p>
-              </button>
+              </DnaPortalArch>
             </SpatialTiltCard>
           );
         })}
@@ -151,13 +166,13 @@ export function FourScripturesSanctum({
                   : "OPEN 4-SCRIPTURE PARALLEL STUDIO ›"}
               </Link>
               {onInspectCorpusDoor && (
-                <button
+                <DnaButton
                   type="button"
                   onClick={onInspectCorpusDoor}
                   className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[#fff4d2] uppercase hover:text-white cursor-pointer"
                 >
                   INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
-                </button>
+                </DnaButton>
               )}
             </div>
           </div>
@@ -182,7 +197,7 @@ export function FourScripturesSanctum({
           {FOUR_CORPUS_CONCORDANCE.map((theme) => {
             const active = theme.id === selectedTheme.id;
             return (
-              <button
+              <DnaButton
                 key={theme.id}
                 type="button"
                 role="tab"
@@ -197,7 +212,7 @@ export function FourScripturesSanctum({
                 }`}
               >
                 {theme.title}
-              </button>
+              </DnaButton>
             );
           })}
         </div>

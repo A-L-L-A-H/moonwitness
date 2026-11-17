@@ -835,15 +835,16 @@ export function RemembranceSanctuary({
             {/* On-Device Reflection Journal (IndexedDB + LocalStorage, 0% Server Transmission) */}
             <div className="mt-3.5 border-t border-[#d6b46c]/15 pt-3 space-y-2">
               <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[9.5px] text-[#dfc07b]">
-                <span>
+                <label htmlFor="muhasabah-journal-input" className="cursor-pointer">
                   {locale === "id"
                     ? "JURNAL MUḤĀSABAH PRIVAT (LOKAL SAJA)"
                     : "ON-DEVICE REFLECTION JOURNAL (LOCAL ONLY)"}
-                </span>
+                </label>
                 <span className="text-[#9f9580]">{journalEngine}</span>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <input
+                  id="muhasabah-journal-input"
                   type="text"
                   value={journalDraft}
                   onChange={(e) => setJournalDraft(e.target.value)}
@@ -858,13 +859,12 @@ export function RemembranceSanctuary({
                       ? "Tulis refleksi jujur untuk diri sendiri..."
                       : "Write a private self-reflection note..."
                   }
-                  aria-label="Private on-device Muhasabah reflection journal"
-                  className="flex-1 border border-[#d6b46c]/30 bg-[#05070e] px-3 py-1.5 font-serif text-xs text-[#fff8e6] placeholder-[#8f8572] focus:outline-none"
+                  className="flex-1 min-h-[44px] border border-[#d6b46c]/30 bg-[#05070e] px-3 py-2 font-serif text-sm text-[#fff8e6] placeholder-[#8f8572]"
                 />
                 <button
                   type="button"
                   onClick={() => void saveJournalNote()}
-                  className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] text-[#f5dfa6] uppercase cursor-pointer"
+                  className="btn-luxe-secondary min-h-[44px] px-4 py-2 font-mono text-[10px] text-[#f5dfa6] uppercase cursor-pointer"
                 >
                   {locale === "id" ? "SIMPAN LOKAL" : "SEAL LOCALLY"}
                 </button>

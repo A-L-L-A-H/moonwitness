@@ -63,7 +63,7 @@ export const FOUR_ENTRY_DOORS: readonly EntryDoorMeta[] = [
     title: "100CENTER & EMPIRE ORGANIZATION",
     subtitle: "Prime Code PC01–PC09 · WINGS 10 · G.O.D. 99 Directory · 25 Amanah",
     sourceSpec: "bjo163/empire-of-the-light · A-L-L-A-H/master-docs · dhgs",
-    linkedWorldId: "qalam",
+    linkedWorldId: "human-pen",
     summary:
       "Inspect constitutional axioms, WINGS 10 (W01 SKYLINK – W10 HAVEN), all 99 G.O.D. unassigned ethical stewardship slots, and 25 Bidang Amanah.",
   },

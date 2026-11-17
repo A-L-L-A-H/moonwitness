@@ -54,12 +54,31 @@ export const metadata: Metadata = {
       "Neutral sanctuary uniting Taurat, Zabur, Injīl & Al-Qur’ān comparative study, M-Time calendrics, and open engineering.",
     images: ["/og-empire-light.jpg"],
   },
+  other: {
+    "page-type": "software",
+    "site-kind": "software",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`min-h-screen antialiased ${cinzel.variable}`}>
+    <html
+      lang="en"
+      data-type="software"
+      data-radius="soft"
+      data-buttons="solid"
+      data-motion="live"
+      className={`min-h-screen antialiased ${cinzel.variable}`}
+    >
       <body className="min-h-screen antialiased bg-[#040509] text-[#f5efe2]">
+        {/* Kit CSS ships as plain files in public/assets, so it loads via link tags, not imports. */}
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link rel="stylesheet" href="/assets/ui/cards.css" />
+        {/* eslint-disable-next-line @next/next/no-css-tags */}
+        <link rel="stylesheet" href="/assets/motion/motion.css" />
+        <link rel="modulepreload" href="/assets/moments/moments.js" />
+        <link rel="modulepreload" href="/assets/moments/lib.js" />
+        <link rel="modulepreload" href="/assets/moments/letters-assemble/moment.js" />
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border focus:border-[#dfc07b] focus:bg-[#040509] focus:px-4 focus:py-2 focus:font-serif focus:text-xs focus:tracking-[0.2em] focus:text-[#fff6df] focus:uppercase"

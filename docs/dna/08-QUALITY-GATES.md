@@ -1,8 +1,8 @@
 ---
 title: "Seven DNA Quality Gates"
-version: "1.2.0"
+version: "1.3.0"
 status: "approved"
-last_verified: "2026-11-15"
+last_verified: "2026-11-17"
 owner: "quality"
 ---
 
@@ -65,12 +65,12 @@ Reject the implementation when:
 - the same dashboard grid, rounded cards, and sidebar are reused without a world-specific reason;
 - the signature metaphor appears only in a hero image and disappears from navigation and interactions;
 - typography, composition, and motion are indistinguishable;
-- decorative effects outrank information hierarchy;
+- decorative effects outrank information hierarchy or text sits over busy illustrations without a clear reading layer;
 - controls work only with pointer or hover;
 - content loses meaning with animation or 3D disabled;
 - fake progress, telemetry, astronomy, or status is shown as real;
-- sacred names or Qur'anic text are used as decorative textures or ALLAH is depicted;
-- assets are copied from protected works without permission.
+- sacred names or Qur'anic text are used as decorative textures, ALLAH is depicted, or identifiable human faces are used against DNA guidelines;
+- violent/disturbing imagery or copyrighted characters, manga panels, or artist styles are imitated.
 
 ## Performance and experience quality thresholds
 

@@ -4,7 +4,6 @@
 @source "../../../../packages/ui/src";
 
 :root {
-  --scroll-progress: 0;
   --font-serif-monument:
     var(--font-cinzel), "Cinzel", "Palatino Linotype", "Book Antiqua", Georgia, serif;
   --font-serif-editorial:
@@ -19,24 +18,109 @@ html {
 }
 
 body {
-  background-color: #040509;
-  color: #f5efe2;
+  background-color: #08090d;
+  color: #fff8e8;
   font-family: var(--font-sans-ui);
   overflow-x: clip;
 }
 
-/* Monumental uppercase Cinzel display face — reserved for headings, navigation & numerals */
 .font-monument {
   font-family: var(--font-serif-monument);
 }
 
-/* Readable classical mixed-case serif for reflective prose, folios & wisdom passages */
 .font-serif {
   font-family: var(--font-serif-editorial);
 }
 
 .font-sans {
   font-family: var(--font-sans-ui);
+}
+
+.wrap {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+h2[id$="-heading"] {
+  padding-right: 0.25em;
+}
+
+.home-page {
+  --font-comic-display: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+}
+
+.home-brand-wordmark {
+  font-family: var(--font-comic-display);
+}
+
+.home-brand-tagline {
+  font-family: var(--font-comic-display);
+}
+
+.home-gate-art-image {
+  object-position: 61% center;
+  filter: saturate(1.08) contrast(1.02);
+  transition: filter 240ms ease;
+}
+
+.home-gate-art-image.is-radiant {
+  filter: saturate(1.18) brightness(1.12) contrast(1.04);
+}
+
+.home-gate-heading {
+  margin: 0;
+  color: #ed149b;
+  font-family: var(--font-comic-display);
+  font-size: clamp(2.8rem, 5.4vw, 4.75rem);
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  line-height: 0.94;
+  text-shadow:
+    3px 3px 0 #08090d,
+    6px 6px 0 #f6d438;
+}
+
+.home-gate-heading-visible {
+  display: block;
+}
+
+/* Moment section: 9 WORLDS 1 LIGHT */
+.home-moment {
+  background: #08090d;
+  color: #fff8e8;
+}
+
+.mo-la__type {
+  font-family: var(--font-comic-display);
+  font-size: clamp(3rem, 9vw, 7rem);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  color: #fff8e8;
+  text-shadow:
+    3px 3px 0 #ed149b,
+    6px 6px 0 #08090d;
+}
+
+.mo-la__sub {
+  margin-top: 1.5rem;
+  max-width: 48rem;
+  font-family: var(--font-sans-ui);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: #d8d0c0;
+}
+
+@media (max-width: 639px) {
+  .mw-illustrated-hero {
+    padding-top: 5.25rem;
+  }
+
+  footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

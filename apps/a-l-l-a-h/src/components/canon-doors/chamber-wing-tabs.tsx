@@ -1,5 +1,7 @@
 "use client";
 
+import { DnaButton } from "@moonwitness/ui/imperium";
+
 export interface ChamberWingOption<T extends string> {
   readonly id: T;
   readonly code: string;
@@ -33,7 +35,7 @@ export function ChamberWingTabs<T extends string>({
       {wings.map((wing) => {
         const isActive = wing.id === activeWing;
         return (
-          <button
+          <DnaButton
             key={wing.id}
             type="button"
             role="tab"
@@ -55,7 +57,7 @@ export function ChamberWingTabs<T extends string>({
             <div className="font-monument mt-0.5 text-xs tracking-[0.08em] uppercase">
               {wing.label}
             </div>
-          </button>
+          </DnaButton>
         );
       })}
     </div>
