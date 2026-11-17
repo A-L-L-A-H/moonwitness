@@ -19,6 +19,8 @@ import { ensureProbesSchema } from "../../interface/routes/probes.persistence";
 import { probesRoutes } from "../../interface/routes/probes.routes";
 import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import { domainMigrations } from "../persistence/domain";
+import { TimelineUseCase } from "../../domain/usecases/timeline/timeline.usecase";
+import { OrmEventRepository } from "../repositories/orm-event.repository";
 import { seedBootstrapAdmin } from "../../services/user";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
@@ -138,6 +140,11 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   await applyMigrations(domainMigrations);
   await seedBootstrapAdmin();
   await ensureProbesSchema();
+
+  // Wire persisted timeline use-case backed by ORM ops_events.
+  if (!fastify.hasDecorator("timelineUseCase")) {
+    fastify.decorate("timelineUseCase", new TimelineUseCase(new OrmEventRepository()));
+  }
 
   // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
   const midKeyEncryptionSecret =

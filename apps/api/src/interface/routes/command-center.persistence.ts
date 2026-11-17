@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { applyMigrations, getDb, type Migration } from "@moonwitness/orm";
+import { applyMigrations, createActorContext, getDb, type Migration } from "@moonwitness/orm";
+import { workflowModel, alertModel, controlCommandModel } from "../../infrastructure/persistence/domain/command-control";
+import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 
 export const workflowStatusSchema = z.enum([
   "Queued",
@@ -281,6 +283,40 @@ export async function createCommandCenterWorkflow(
     [id, actorId, parsed.name, parsed.detail, parsed.status, nextSort, now, now],
   );
 
+  // Best-effort mirror to ORM + audit
+  const actor = createActorContext(actorId, "api");
+  try {
+    await workflowModel.repository.create(
+      {
+        workflow_key: id,
+        actor_id: actorId,
+        name: parsed.name,
+        detail: parsed.detail,
+        workflow_status: parsed.status,
+        sort_order: nextSort,
+        metadata_json: null,
+      } as any,
+      actor,
+    );
+    await tryRecordAuditLog({
+      domain: "command-center",
+      entity: "workflow",
+      entityId: id,
+      action: "CREATE",
+      actor,
+      actorRole: null,
+      correlationId: actor.requestId ?? null,
+      requestPath: null,
+      outcome: "success",
+      before: null,
+      after: { id, name: parsed.name, status: parsed.status },
+      metadata: null,
+      occurredAt: now,
+    });
+  } catch {
+    // mirror best-effort
+  }
+
   return {
     id,
     name: parsed.name,
@@ -319,6 +355,46 @@ export async function transitionCommandCenterWorkflow(
       WHERE actor_id = ? AND id = ?`,
     [nextStatus, now, actorId, workflowId],
   );
+
+  // Best-effort mirror + audit
+  const actor = createActorContext(actorId, "api");
+  try {
+    const existing = await workflowModel.repository.find({
+      actor_id: actorId,
+      workflow_key: workflowId,
+    } as any);
+    const payload = {
+      workflow_key: workflowId,
+      actor_id: actorId,
+      name: String(row.name),
+      detail: String(row.detail),
+      workflow_status: nextStatus,
+      sort_order: 0,
+      metadata_json: null,
+    } as any;
+    if (existing[0]) {
+      await workflowModel.repository.update(existing[0].id, payload, actor);
+    } else {
+      await workflowModel.repository.create(payload, actor);
+    }
+    await tryRecordAuditLog({
+      domain: "command-center",
+      entity: "workflow",
+      entityId: workflowId,
+      action: "UPDATE",
+      actor,
+      actorRole: null,
+      correlationId: actor.requestId ?? null,
+      requestPath: null,
+      outcome: "success",
+      before: { status: current },
+      after: { status: nextStatus },
+      metadata: null,
+      occurredAt: now,
+    });
+  } catch {
+    // mirror best-effort
+  }
 
   return {
     id: String(row.id),
@@ -380,5 +456,37 @@ export async function dismissCommandCenterAlert(
       WHERE actor_id = ? AND id = ?`,
     [now, actorId, alertId],
   );
+
+  const actor = createActorContext(actorId, "api");
+  try {
+    const existing = await alertModel.repository.find({
+      actor_id: actorId,
+      alert_key: alertId,
+    } as any);
+    if (existing[0]) {
+      await alertModel.repository.update(
+        existing[0].id,
+        { dismissed: true, dismissed_at: now } as any,
+        actor,
+      );
+    }
+    await tryRecordAuditLog({
+      domain: "command-center",
+      entity: "alert",
+      entityId: alertId,
+      action: "UPDATE",
+      actor,
+      actorRole: null,
+      correlationId: actor.requestId ?? null,
+      requestPath: null,
+      outcome: "success",
+      before: { dismissed: false },
+      after: { dismissed: true },
+      metadata: null,
+      occurredAt: now,
+    });
+  } catch {
+    // mirror best-effort
+  }
   return true;
 }

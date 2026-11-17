@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { applyMigrations, getDb, type Migration } from "@moonwitness/orm";
+import { applyMigrations, createActorContext, getDb, type Migration } from "@moonwitness/orm";
+import { probeNodeModel, probeEventModel } from "../../infrastructure/persistence/domain/probes";
+import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 import { isBlockedRuntimeHost } from "../../shared/env";
 
 export interface ProbeNode {
@@ -94,6 +96,25 @@ export async function ensureProbesSchema(): Promise<void> {
        VALUES (?, ?, ?, ?, 1, ?)`,
       [node.id, node.name, node.targetUrl, node.category, now],
     );
+    const actor = createActorContext(null, "api");
+    try {
+      const existing = await probeNodeModel.repository.find({
+        node_key: node.id,
+      } as any);
+      const payload = {
+        node_key: node.id,
+        name: node.name,
+        target_url: node.targetUrl,
+        category: node.category,
+        enabled: true,
+        metadata_json: null,
+      } as any;
+      if (!existing[0]) {
+        await probeNodeModel.repository.create(payload, actor);
+      }
+    } catch {
+      // mirror best-effort
+    }
   }
 }
 
@@ -208,6 +229,40 @@ export async function recordProbeEvent(params: {
        SELECT id FROM igate_probe_events ORDER BY checked_at DESC LIMIT 1000
      )`,
   );
+
+  // Best-effort mirror to ORM + audit
+  const actor = createActorContext(params.actorSub, "api");
+  try {
+    await probeEventModel.repository.create(
+      {
+        node_key: record.nodeId,
+        status_code: record.statusCode,
+        ok: record.ok,
+        latency_ms: record.latencyMs,
+        actor_sub: record.actorSub,
+        checked_at: record.checkedAt,
+        error_message: null,
+      } as any,
+      actor,
+    );
+    await tryRecordAuditLog({
+      domain: "probes",
+      entity: "probe_event",
+      entityId: record.id,
+      action: "EXECUTE",
+      actor,
+      actorRole: null,
+      correlationId: actor.requestId ?? null,
+      requestPath: null,
+      outcome: record.ok ? "success" : "failure",
+      before: null,
+      after: { nodeId: record.nodeId, statusCode: record.statusCode, ok: record.ok },
+      metadata: null,
+      occurredAt: record.checkedAt,
+    });
+  } catch {
+    // mirror best-effort
+  }
 
   return record;
 }
