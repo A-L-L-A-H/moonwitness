@@ -245,11 +245,15 @@ const ORRERY_BEARINGS: Record<
   WorldIdentifier,
   { angleDeg: number; orbitRadius: number; shortName: string }
 > = {
-  arsy: { angleDeg: 0, orbitRadius: 144, shortName: "ARSY" },
-  sidra: { angleDeg: 76, orbitRadius: 156, shortName: "SIDRA" },
-  "rocksoul-dx": { angleDeg: 142, orbitRadius: 164, shortName: "ROCKSOUL DX" },
-  qalam: { angleDeg: 180, orbitRadius: 144, shortName: "QALAM" },
-  moonwitness: { angleDeg: 284, orbitRadius: 154, shortName: "MOONWITNESS" },
+  arsy: { angleDeg: 0, orbitRadius: 136, shortName: "ARSY" },
+  crayon: { angleDeg: 40, orbitRadius: 142, shortName: "CRAYON" },
+  sidra: { angleDeg: 80, orbitRadius: 146, shortName: "SIDRA" },
+  "angel-with-shotgun": { angleDeg: 120, orbitRadius: 142, shortName: "AWS" },
+  "rocksoul-dx": { angleDeg: 160, orbitRadius: 146, shortName: "ROCKSOUL" },
+  "human-pen": { angleDeg: 200, orbitRadius: 136, shortName: "HUMAN-PEN" },
+  "sin-can": { angleDeg: 240, orbitRadius: 142, shortName: "SIN CAN" },
+  moonwitness: { angleDeg: 280, orbitRadius: 144, shortName: "MOONWITNESS" },
+  mythos: { angleDeg: 320, orbitRadius: 140, shortName: "MYTHOS" },
 };
 
 /**
@@ -492,9 +496,13 @@ export function DoorPortalGlyph({
 const WORLD_ART_PLATES: Record<WorldIdentifier, string> = {
   moonwitness: "/art/meridian-sky-chart.webp",
   arsy: "/art/astrolabe-orrery-plate.webp",
-  qalam: "/art/nonagram-sanctuary-dial.webp",
+  "human-pen": "/art/nonagram-sanctuary-dial.webp",
   sidra: "/art/sidra-lote-constellation.webp",
   "rocksoul-dx": "/art/story-plate-03.webp",
+  crayon: "/art/story-plate-01.webp",
+  "sin-can": "/art/story-plate-02.webp",
+  mythos: "/art/story-plate-04.webp",
+  "angel-with-shotgun": "/art/celestial-gate-bg.webp",
 };
 
 /**

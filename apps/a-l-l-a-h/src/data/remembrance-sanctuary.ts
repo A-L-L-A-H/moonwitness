@@ -42,7 +42,7 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     contemplation:
       "Mercy encompasses creation before judgment; it heals fractured stories while keeping accountable truth intact.",
     practicePrompt:
-      "Respond gently to human frailty—starting with honest humility toward your own errors.",
+      "Respond gently to human frailty—starting with clear humility toward your own errors.",
   },
   {
     id: "al-hakim",
@@ -60,11 +60,11 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     arabic: "الشَّكُور",
     transliteration: "Ash-Shakūr",
     meaning: "The Most Appreciative",
-    linkedWorldId: "qalam",
-    worldLabel: "QALAM · Scriptorium of Gratitude",
+    linkedWorldId: "human-pen",
+    worldLabel: "HUMAN-PEN · Scriptorium of Gratitude",
     contemplation:
       "He notices every silent kindness, every unseen midnight repair, and multiplies sincere gratitude beyond measure.",
-    practicePrompt: "Name three quiet blessings right now and thank Him sincerely.",
+    practicePrompt: "Name three daily blessings right now and thank Him sincerely.",
   },
   {
     id: "as-salam",
@@ -74,7 +74,7 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     linkedWorldId: "arsy",
     worldLabel: "ARSY · Stillness Carrier",
     contemplation:
-      "True serenity is not the absence of duty, but quiet confidence anchored in ethical stewardship.",
+      "True serenity is not the absence of duty, but steady confidence anchored in ethical stewardship.",
     practicePrompt: "Exhale anxiety and align conscience before continuing your craft.",
   },
   {
@@ -93,11 +93,11 @@ export const LUMINOUS_NAMES_OF_ALLAH: readonly LuminousAttributeEntry[] = [
     arabic: "الْقُدُّوس",
     transliteration: "Al-Quddūs",
     meaning: "The Pure & Sacred",
-    linkedWorldId: "qalam",
-    worldLabel: "QALAM · Clean Intention",
+    linkedWorldId: "human-pen",
+    worldLabel: "HUMAN-PEN · Clean Intention",
     contemplation:
-      "Transcendent purity invites honest architecture—free from deceit, vanity, and manipulation.",
-    practicePrompt: "Keep output honest, transparent, and uncorrupted by ego.",
+      "Transcendent purity invites transparent architecture—free from deceit, vanity, and manipulation.",
+    practicePrompt: "Keep output accurate, transparent, and uncorrupted by ego.",
   },
   {
     id: "al-wadud",

@@ -58,14 +58,21 @@ When an application already owns an equivalent component:
 
 Do not perform a big-bang rewrite solely for visual consistency.
 
-## Theme rule
+## Theme & skin isolation rule
 
-Consumers may define semantic theme values, but they must not fork shared component geometry just to change color.
+Consumers consume `@moonwitness/ui` via `<SkinRoot dnaId="...">` (or route-scoped `<SkinScope dnaId="...">`) and import the scoped CSS skin (`@moonwitness/ui/skins/imperium.css`).
 
 ```text
-appearance + brand theme + semantic state
-          ↓
-        tokens
-          ↓
-same reusable component contract
+appearance + brand theme (`[data-dna]`) + semantic state
+                        ↓
+              centralized tokens (`packages/ui`)
+                        ↓
+           reusable component contract (`@moonwitness/ui/imperium`)
 ```
+
+To add a new world visual identity:
+1. Define its `MasterDnaWorldSpec` in `packages/ui/src/skin/dna-worlds.tsx` and document its DNA file under `docs/dna/`.
+2. Scope all CSS overrides under `[data-dna="<id>"]` (never `:root`, `html`, or `body`) to guarantee zero cross-app leakage.
+3. Verify WCAG AA contrast ratios via `pnpm ui:contrast` and unit/visual tests via `pnpm --filter @moonwitness/ui test`.
+
+Consumers must never duplicate authoritative token files locally or inject un-scoped global styles that alter sibling skins.

@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, type CSSProperties, type ReactNode } from "react";
 import type { SkinName } from "./compositions";
+import { IMPERIUM_LUMEN_TOKENS } from "./imperium-tokens";
 
 export type MasterDnaId =
   | "01-imperium-lumen"
@@ -20,8 +21,12 @@ export interface DnaWorldPalette {
   readonly mutedText: string;
   readonly border: string;
   readonly accent: string;
+  readonly accentSecondary?: string;
   readonly accentForeground: string;
   readonly focus: string;
+  readonly success?: string;
+  readonly warning?: string;
+  readonly danger?: string;
 }
 
 export interface MasterDnaWorldSpec {
@@ -55,29 +60,35 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
     id: "01-imperium-lumen",
     numeral: "01",
     name: "IMPERIUM LUMEN",
-    metaphor: "Monumental empire of light and impossible architecture",
+    metaphor: "Illustrated universe of electric light, graphic editorial worlds, and sacred orientation",
     primaryIdentity: "A-L-L-A-H.COM / Empire of the Light",
-    shapeLanguage: "Sharp chamfered bevels, 1px hairline brass borders, bilateral meridian symmetry",
-    motionGrammar: "Luminous architectural reveal · dignified horizon parallax",
+    shapeLanguage:
+      "Graphic editorial frames, bold ink borders, electric yellow & magenta offset accents, clear reading planes",
+    motionGrammar: "Crisp transform/opacity entrance · tactile hover lift · static reduced-motion parity",
     mappedSkinPreset: "default",
     palette: {
-      canvas: "#040509",
-      surface: "#080b14",
-      surfaceElevated: "#0e1322",
-      text: "#f5efe2",
-      mutedText: "#d8ceba",
-      border: "#d6b46c",
-      accent: "#d6b46c",
-      accentForeground: "#040509",
-      focus: "#fff4d2",
+      canvas: IMPERIUM_LUMEN_TOKENS.semantic.canvas,
+      surface: IMPERIUM_LUMEN_TOKENS.semantic.surface,
+      surfaceElevated: IMPERIUM_LUMEN_TOKENS.semantic.surfaceElevated,
+      text: IMPERIUM_LUMEN_TOKENS.semantic.text,
+      mutedText: IMPERIUM_LUMEN_TOKENS.semantic.textMuted,
+      border: IMPERIUM_LUMEN_TOKENS.semantic.border,
+      accent: IMPERIUM_LUMEN_TOKENS.semantic.accent,
+      accentSecondary: IMPERIUM_LUMEN_TOKENS.semantic.accentSecondary,
+      accentForeground: IMPERIUM_LUMEN_TOKENS.semantic.accentForeground,
+      focus: IMPERIUM_LUMEN_TOKENS.semantic.focus,
+      success: IMPERIUM_LUMEN_TOKENS.semantic.success,
+      warning: IMPERIUM_LUMEN_TOKENS.semantic.warning,
+      danger: IMPERIUM_LUMEN_TOKENS.semantic.danger,
     },
-    cardClass: "rounded-none border border-[#d6b46c]/45 bg-[#080b14] text-[#f5efe2]",
+    cardClass:
+      "rounded-none border-2 border-[#f4ecd8] bg-[#10121a] text-[#fff8e8] shadow-[4px_4px_0_#ed149b]",
     buttonClass:
-      "rounded-none border border-[#e6c987] bg-[#d6b46c] text-[#040509] font-semibold tracking-[0.14em] uppercase",
+      "rounded-none border-2 border-[#08090d] bg-[#f6d438] text-[#08090d] font-bold tracking-[0.08em] uppercase shadow-[4px_4px_0_#ed149b]",
     badgeClass:
-      "rounded-none border border-[#d6b46c]/55 bg-[#0e1322] text-[#f5dfa6] font-mono tracking-wider",
+      "rounded-none border border-[#f6d438] bg-[#171a26] text-[#f6d438] font-mono tracking-wider",
     inputClass:
-      "rounded-none border border-[#d6b46c]/45 bg-[#040509] text-[#f5efe2] placeholder:text-[#d8ceba]/75",
+      "rounded-none border border-[#f6d438]/60 bg-[#08090d] text-[#fff8e8] placeholder:text-[#d8d0c0]/75",
   },
   "02-lunar-chronicles": {
     id: "02-lunar-chronicles",
@@ -270,8 +281,12 @@ export function dnaWorldCssVariables(world: MasterDnaWorldSpec): CSSProperties {
     "--dna-muted": world.palette.mutedText,
     "--dna-border": world.palette.border,
     "--dna-accent": world.palette.accent,
+    "--dna-accent-secondary": world.palette.accentSecondary ?? world.palette.accent,
     "--dna-accent-fg": world.palette.accentForeground,
     "--dna-focus": world.palette.focus,
+    "--dna-success": world.palette.success ?? "#3ddc84",
+    "--dna-warning": world.palette.warning ?? world.palette.accent,
+    "--dna-danger": world.palette.danger ?? "#ff3b3b",
   } as CSSProperties;
 }
 

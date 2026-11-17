@@ -25,7 +25,9 @@ export interface WorldDomainEntry {
   readonly architecturalDescription: string;
   readonly accentColor: string;
   readonly statusLabel: string;
-  readonly activeWitnessCount: string;
+  readonly implementationState: "ACTIVE_CONSOLE" | "CANON_EXPLORER";
+  readonly canonicalAlias?: string;
+  readonly summaryLabel: string;
   readonly artifacts: readonly WorldArtifactRecord[];
 }
 
@@ -34,10 +36,10 @@ export interface DockNodeTelemetry {
   readonly worldId: WorldIdentifier;
   readonly designation: string;
   readonly protocol: string;
-  readonly latencyMs: number;
-  readonly integrityPercent: number;
+  readonly latencyMs: number | null;
+  readonly integrityPercent: number | null;
   readonly orbitalBearing: string;
-  readonly state: "SYNCHRONIZED" | "LUMINOUS" | "BROADCASTING";
+  readonly state: "SYNCHRONIZED" | "LUMINOUS" | "BROADCASTING" | "CANON_EXPLORER";
 }
 
 export interface SidraKnowledgeAxiom {
@@ -81,26 +83,28 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     harmonicFrequency: "1420.405 MHz · Hydrogen Line",
     primaryDirective: "Preserve human testimony and luminous narratives across borders.",
     architecturalDescription:
-      "An observatory and living archive where dispatches from every meridian converge under a single celestial vault. Every story is indexed as an enduring constellation of witness.",
-    accentColor: "#f3dfb2",
-    statusLabel: "ARCHIVE IMMUTABLE",
-    activeWitnessCount: "14,280 Chronicles",
+      "An observatory and living archive where dispatches from every meridian converge under one sky. Stories, eyewitness chronicles, and verifiable memories are indexed side by side.",
+    accentColor: "#f6d438",
+    statusLabel: "ARCHIVE ACTIVE",
+    implementationState: "ACTIVE_CONSOLE",
+    canonicalAlias: "MoonWitness II / XII / XV",
+    summaryLabel: "99 Chapters · 4 Lenses",
     artifacts: [
       {
         code: "MW-0114",
         title: "The Meridian of Silent Lanterns",
         classification: "Field Testimony · Cairo — Bukhara",
         summary:
-          "Oral histories of nocturnal astronomers who mapped desert trade routes using brass astrolabes and lunar mansions.",
-        timestampLabel: "Cycle 1448 · Verified",
+          "Oral histories of nocturnal astronomers who mapped trade routes using brass astrolabes and lunar mansions.",
+        timestampLabel: "Lens 01 · Witness",
       },
       {
         code: "MW-0209",
         title: "Codex of the Glass Horizon",
         classification: "Archival Monograph · Andalusia",
         summary:
-          "Architectural treatise on water-mirror courtyards designed to reflect starfields onto marble colonnades.",
-        timestampLabel: "Cycle 1448 · Sealed",
+          "Architectural treatise on water-mirror courtyards designed to reflect starfields onto stone colonnades.",
+        timestampLabel: "Lens 02 · Archive",
       },
       {
         code: "MW-0341",
@@ -108,7 +112,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
         classification: "Expedition Log · High Pamirs",
         summary:
           "High-altitude acoustic recordings and manuscript fragments gathered from mountain sanctuaries.",
-        timestampLabel: "Cycle 1448 · Live",
+        timestampLabel: "Lens 04 · Research",
       },
     ],
   },
@@ -120,78 +124,82 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     arabicEpithet: "العَرْشُ النُّورَانِي",
     transliteration: "Al-‘Arsh al-Nūrānī",
     citadelSector: "Zenith Crown Relay Array",
-    harmonicFrequency: "432.000 Hz · Sovereign Carrier",
-    primaryDirective: "Sustain zero-drift communication lattices and harmonic broadcasts.",
+    harmonicFrequency: "432.000 Hz · Harmonic Carrier",
+    primaryDirective: "Sustain zero-drift audio broadcasts and transparent communication lattices.",
     architecturalDescription:
-      "The high-availability technological backbone of the Empire of the Light. Arsy orchestrates continuous radio transmissions, distributed mesh telemetry, and cryptographic sanctuary storage.",
-    accentColor: "#ffd984",
-    statusLabel: "CARRIER LOCKED",
-    activeWitnessCount: "99.998% Coherence",
+      "The public acoustic broadcast and relay wing of the Empire of the Light. ARSY Radio (harmonic audio and broadcast edge) remains conceptually distinct from the internal ARSY Host Control Plane reconciler (`cp/arsy`).",
+    accentColor: "#2ea8ff",
+    statusLabel: "RADIO & INFRA",
+    implementationState: "ACTIVE_CONSOLE",
+    canonicalAlias: "ARSY Radio · Distinct from cp/arsy Host Control Plane",
+    summaryLabel: "Harmonic Synthesizer",
     artifacts: [
       {
         code: "AR-0800",
-        title: "Zenith Harmonic Beacon",
-        classification: "Orbital Carrier · Channel 01",
+        title: "Zenith Harmonic Beacon (ARSY Radio)",
+        classification: "Acoustic Broadcast · Channel 01",
         summary:
-          "Continuous low-noise acoustic and telemetry stream synchronizing all five realms of the Empire.",
-        timestampLabel: "0.42 ms Drift",
+          "Public harmonic radio synthesizer and broadcast telemetry edge (`moonwitness-radio.bjo163.workers.dev`).",
+        timestampLabel: "432 Hz Foundation",
       },
       {
         code: "AR-1024",
-        title: "Sovereign Mesh Ledger",
-        classification: "Infrastructure Node · Tier-0",
+        title: "ARSY Host Control Plane Boundary",
+        classification: "Infrastructure Plane · cp/arsy",
         summary:
-          "Byzantine-resilient replication fabric ensuring every manuscript in Qalam and Moonwitness endures.",
-        timestampLabel: "128 Relays Active",
+          "Private Go/Rust WireGuard and DNS reconciler layer kept separate from public radio listening.",
+        timestampLabel: "Plane Separated",
       },
       {
         code: "AR-1440",
         title: "Ionospheric Mirror Protocol",
         classification: "Radio Propagation · Deep Sky",
         summary:
-          "Adaptive shortwave and optical relay bridge engineered for uninterrupted cross-continental reach.",
-        timestampLabel: "Signal +42 dBm",
+          "Adaptive broadcast relay bridge engineered for resilient cross-continental audio delivery.",
+        timestampLabel: "Signal Relay",
       },
     ],
   },
   {
-    id: "qalam",
-    name: "QALAM",
-    tagline: "Create · Write · Share",
-    pillars: ["Create", "Write", "Share"],
+    id: "human-pen",
+    name: "HUMAN-PEN",
+    tagline: "Think · Write · Create · Share",
+    pillars: ["Think", "Write", "Share"],
     arabicEpithet: "نُون وَالقَلَم",
-    transliteration: "Nūn wa-al-Qalam",
-    citadelSector: "Central Golden Scriptorium",
+    transliteration: "Nūn wa-al-Qalam · Manusia Pulpen",
+    citadelSector: "Central Scriptorium & Inkwell",
     harmonicFrequency: "528.000 Hz · Inscription Resonance",
-    primaryDirective: "Empower sacred authorship, luminous typography, and shared wisdom.",
+    primaryDirective: "Publish accountable authorship, editorial essays, and Qalam folios.",
     architecturalDescription:
-      "At the heart of the Golden Gate stands the Scriptorium of Qalam—where thought becomes permanent inscription. Authors craft essays, visual codices, and poetic treatises in light.",
-    accentColor: "#ffeab8",
+      "Reconciling the classic Qalam Scriptorium with the featured MANUSIA PULPEN gate transmission: HUMAN-PEN is where thoughtful writing, local folio drafting, and visual storytelling meet.",
+    accentColor: "#ed149b",
     statusLabel: "SCRIPTORIUM OPEN",
-    activeWitnessCount: "8,940 Inscriptions",
+    implementationState: "ACTIVE_CONSOLE",
+    canonicalAlias: "MANUSIA PULPEN · Reconciles QALAM Scriptorium",
+    summaryLabel: "Folio Editor Active",
     artifacts: [
       {
-        code: "QL-0001",
-        title: "Treatise on Sacred Proportion",
-        classification: "Illuminated Folio · Geometry",
+        code: "HP-0001",
+        title: "Manusia Pulpen & The First Inscription",
+        classification: "Gate Transmission · Scriptorium",
         summary:
-          "How twelve-fold star girih tessellations encode harmonic ratios in both typography and sanctuary domes.",
-        timestampLabel: "Folio I · Master",
+          "Translating reflection into accountable writing—bridging the Qalam folio heritage with HUMAN-PEN authorship.",
+        timestampLabel: "Folio I · Canon",
       },
       {
-        code: "QL-0068",
+        code: "HP-0068",
         title: "Letters of the First Dawn",
-        classification: "Calligraphic Anthology · Gold Leaf",
+        classification: "Calligraphic Anthology · Editorial",
         summary:
-          "Meditations on clarity, gratitude, and disciplined craftsmanship as acts of devotion.",
+          "Essays on clarity, gratitude, and disciplined craftsmanship as everyday acts of stewardship.",
         timestampLabel: "Folio IV · Public",
       },
       {
-        code: "QL-0096",
-        title: "The Architecture of Stillness",
+        code: "HP-0096",
+        title: "The Architecture of Clear Reading",
         classification: "Editorial Essay · Sanctuary Design",
         summary:
-          "Designing digital spaces that elevate contemplation rather than fragmenting human attention.",
+          "Designing illustrated pages that welcome readers of all ages without visual fatigue.",
         timestampLabel: "Folio IX · Featured",
       },
     ],
@@ -205,19 +213,21 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     transliteration: "Sidrat al-Muntahā",
     citadelSector: "Eastern Observatory Dome",
     harmonicFrequency: "639.000 Hz · Lattice Synthesis",
-    primaryDirective: "Map the interconnected branches of science, ethics, and cosmic order.",
+    primaryDirective: "Map interconnected knowledge across ethics, science, and geometry.",
     architecturalDescription:
-      "Inspired by the Lote Tree of the Utmost Boundary, Sidra organizes human and machine knowledge into a living polyhedral graph where every inquiry illuminates neighboring disciplines.",
-    accentColor: "#e6c987",
-    statusLabel: "CONSTELLATION LIVE",
-    activeWitnessCount: "640 Knowledge Domes",
+      "Inspired by the Lote Tree of the Utmost Boundary, Sidra organizes interconnected inquiry into an interactive knowledge graph where each discipline illuminates its neighbors.",
+    accentColor: "#3ddc84",
+    statusLabel: "KNOWLEDGE GRAPH",
+    implementationState: "ACTIVE_CONSOLE",
+    canonicalAlias: "SIDRA TREE Knowledge Graph",
+    summaryLabel: "6 Core Axioms",
     artifacts: [
       {
         code: "SD-0310",
         title: "Atlas of Celestial Mechanics",
         classification: "Curriculum · Astrometry",
         summary:
-          "Interactive derivations of orbital resonances, spherical trigonometry, and twilight horizon optics.",
+          "Interactive study of orbital resonances, spherical trigonometry, and twilight horizon optics.",
         timestampLabel: "18 Modules",
       },
       {
@@ -225,7 +235,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
         title: "Ethics of Autonomous Craft",
         classification: "Symposium · Philosophy of Tech",
         summary:
-          "Principled engineering standards aligning computational systems with human dignity and truth.",
+          "Engineering standards aligning computational systems with human dignity and verifiable truth.",
         timestampLabel: "12 Seminars",
       },
       {
@@ -233,7 +243,7 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
         title: "The Polyhedral Tessellation Lab",
         classification: "Interactive Study · Mathematics",
         summary:
-          "Quasicrystalline symmetries and golden-ratio projections in classical and futuristic architecture.",
+          "Quasicrystalline symmetries and golden-ratio projections in classical and modern design.",
         timestampLabel: "24 Proofs",
       },
     ],
@@ -247,36 +257,213 @@ export const WORLD_DOMAINS: readonly WorldDomainEntry[] = [
     transliteration: "Rūḥ al-Ibdā‘",
     citadelSector: "Horizon Mirror Plaza",
     harmonicFrequency: "888.000 Hz · Prismatic Engine",
-    primaryDirective: "Simulate luminous worlds, interactive art, and generative geometry.",
+    primaryDirective: "Simulate interactive worlds, acoustic instruments, and generative geometry.",
     architecturalDescription:
-      "The spatial simulation and creative sandbox wing of the Empire. Rocksoul DX fuses procedural geometry, acoustic synthesis, and interactive worldbuilding into playable experiences.",
-    accentColor: "#f7dfa0",
-    statusLabel: "ENGINE ENGAGED",
-    activeWitnessCount: "120 FPS Lock",
+      "Maintaining its dedicated product boundary (`apps/rocksoul` / NOISE × SILENCE), ROCKSOUL DX bridges procedural mandala geometry, acoustic synthesis, and playable worldbuilding.",
+    accentColor: "#f5b027",
+    statusLabel: "WORKBENCH BOUNDARY",
+    implementationState: "ACTIVE_CONSOLE",
+    canonicalAlias: "apps/rocksoul · NOISE × SILENCE",
+    summaryLabel: "Interactive Studio",
     artifacts: [
       {
         code: "RX-0001",
         title: "Astrolabe of Light Engine",
-        classification: "Interactive Sandbox · WebGL/Canvas",
+        classification: "Interactive Sandbox · Canvas",
         summary:
-          "Real-time sacred geometry generator allowing creators to sculpt radial star mandalas and orbital fields.",
-        timestampLabel: "v4.8 Active",
+          "Real-time geometry generator allowing creators to sculpt radial star mandalas and orbital symmetries.",
+        timestampLabel: "Generator Active",
       },
       {
         code: "RX-0042",
         title: "Citadel Walk: Reflections",
         classification: "Spatial Experience · Horizon",
         summary:
-          "Procedural acoustic-visual journey across obsidian water mirrors and golden colonnades.",
-        timestampLabel: "Scene Ready",
+          "Acoustic-visual journey framed by the ROCKSOUL NOISE × SILENCE narrative contract.",
+        timestampLabel: "Product Boundary",
       },
       {
         code: "RX-0099",
         title: "Harmonic Prism Sequencer",
         classification: "Audio-Visual Instrument · DX",
-        summary:
-          "Polyrhythmic chime matrix tuned to pure Pythagorean ratios and celestial orbital periods.",
+        summary: "Polyrhythmic chime matrix tuned to pure ratios and celestial orbital periods.",
         timestampLabel: "Interactive",
+      },
+    ],
+  },
+  {
+    id: "crayon",
+    name: "CRAYON",
+    tagline: "Biar Hidup Lebih Berwarna!",
+    pillars: ["Source", "Reality", "Light"],
+    arabicEpithet: "سِرَاجُ الأَلْوَان",
+    transliteration: "SRGBL v8 · Crayon RGBL",
+    citadelSector: "Prismatic Hermeneutics Studio",
+    harmonicFrequency: "RGBL · 4-Layer Lens",
+    primaryDirective: "Illuminate meaning through the 5-stage SRGBL v8 hermeneutic spectrum.",
+    architecturalDescription:
+      "Anchored in `ALLAH-CRAYON-RGBL-ENGINE` and kept distinct from SIN CAN: CRAYON examines text and lived experience across five structured lenses—Source & Sense, Reality, Governing Order, Being, and Light.",
+    accentColor: "#2ea8ff",
+    statusLabel: "CANON EXPLORER",
+    implementationState: "CANON_EXPLORER",
+    canonicalAlias: "bjo163/ALLAH-CRAYON-RGBL-ENGINE · SRGBL v8",
+    summaryLabel: "5 SRGBL Stages",
+    artifacts: [
+      {
+        code: "CR-S1R2",
+        title: "S1 Source & R2 Reality Grounding",
+        classification: "SRGBL v8 · Primary Lenses",
+        summary:
+          "Anchors interpretation in verbatim primary passages and observable physical/historical facts.",
+        timestampLabel: "Stage S1–R2",
+      },
+      {
+        code: "CR-G3B4",
+        title: "G3 Governing Order & B4 Being",
+        classification: "SRGBL v8 · Ethical Bridge",
+        summary:
+          "Connects invariant creation laws with mercy, conscience, and practical moral transformation.",
+        timestampLabel: "Stage G3–B4",
+      },
+      {
+        code: "CR-L5",
+        title: "L5 Living Illuminated Output",
+        classification: "SRGBL v8 · Action",
+        summary:
+          "Turns understanding into reproducible, honest creative work that serves fellow travelers.",
+        timestampLabel: "Stage L5",
+      },
+    ],
+  },
+  {
+    id: "sin-can",
+    name: "SIN CAN",
+    tagline: "Reflect · Question · Understand",
+    pillars: ["Reflect", "Question", "Understand"],
+    arabicEpithet: "تَوْبَةٌ وَبِنَاء",
+    transliteration: "Sin Can Be Better Human",
+    citadelSector: "Editorial Reflection Hall",
+    harmonicFrequency: "6-State Syafaat Reflection",
+    primaryDirective: "Transform human imperfection and honest scars into responsible growth.",
+    architecturalDescription:
+      "Strictly distinct from CRAYON: SIN CAN centers on the `SIN CAN BE BETTER HUMAN` four-panel storyboard and six Syafaat reflection states—welcoming flawed humans toward humility and craft without false perfection.",
+    accentColor: "#ed149b",
+    statusLabel: "CANON EXPLORER",
+    implementationState: "CANON_EXPLORER",
+    canonicalAlias: "SIN CAN BE BETTER HUMAN · DX 4-Panel Arc",
+    summaryLabel: "4 Story Panels",
+    artifacts: [
+      {
+        code: "SC-01",
+        title: "Panel 01–02: From Scars to Low-Profile Refuge",
+        classification: "DX Storyboard · GOGOGO → SHUUU",
+        summary:
+          "Drops masks of false holiness and steps into honest reflection before rebuilding.",
+        timestampLabel: "Panels 01–02",
+      },
+      {
+        code: "SC-02",
+        title: "Panel 03–04: The Forge & Better Human",
+        classification: "DX Storyboard · BAAAN → DODODO",
+        summary:
+          "Converts remorse and struggle into verifiable discipline, responsibility, and accountable service.",
+        timestampLabel: "Panels 03–04",
+      },
+      {
+        code: "SC-03",
+        title: "Six Syafaat Reflection States",
+        classification: "Practice Matrix · Unexplored → Revisit",
+        summary:
+          "Tracks human reflection from Unexplored and Discovered through Practicing, Reflected, Sustaining, and Revisit.",
+        timestampLabel: "6 Reflection States",
+      },
+    ],
+  },
+  {
+    id: "mythos",
+    name: "MYTHOS",
+    tagline: "Explore · Discover · Remember",
+    pillars: ["Explore", "Discover", "Remember"],
+    arabicEpithet: "قَصَصُ الحَقّ",
+    transliteration: "MFTL · Where Myth Fades To Legend",
+    citadelSector: "Archaeological & Story Vault",
+    harmonicFrequency: "18 Families × 4 Layers",
+    primaryDirective: "Distinguish folkloric motif from verifiable historical and moral core.",
+    architecturalDescription:
+      "Grounded in `DOM-02 STORY · MFTL (Where Myth Fades To Legend)` and `DOM-03 EVENT · LEGEND`, MYTHOS cross-examines narrative traditions, eyewitness chronicles, and material history—as benchmarked on Shared Case 001 (Jerusalem 70 CE).",
+    accentColor: "#f6d438",
+    statusLabel: "CANON EXPLORER",
+    implementationState: "CANON_EXPLORER",
+    canonicalAlias: "DOM-02 MFTL · DOM-03 LEGEND",
+    summaryLabel: "Case 001 Benchmark",
+    artifacts: [
+      {
+        code: "MY-01",
+        title: "MFTL Four-Layer Audit",
+        classification: "18 Record Families · Mizan",
+        summary:
+          "Separates Myth, Integrity, Deviation, and Mizan balance across classical narratives.",
+        timestampLabel: "DOM-02 MFTL",
+      },
+      {
+        code: "MY-02",
+        title: "Shared Case 001: Jerusalem 70 CE",
+        classification: "Multi-Domain Correlation · Verified",
+        summary:
+          "Aligns Mark 13:2, Flavius Josephus eyewitness chronicles, Arch of Titus relief, and Roman siege law.",
+        timestampLabel: "DOM-03 Legend",
+      },
+      {
+        code: "MY-03",
+        title: "Material Strata Anchoring",
+        classification: "Historical Reconstruction",
+        summary:
+          "Examines extraordinary historical claims through dateable inscriptions and physical evidence.",
+        timestampLabel: "Verified Benchmark",
+      },
+    ],
+  },
+  {
+    id: "angel-with-shotgun",
+    name: "ANGEL WITH SHOTGUN",
+    tagline: "Law · Justice · Society",
+    pillars: ["Law", "Justice", "Society"],
+    arabicEpithet: "المِيزَانُ وَالقَانُون",
+    transliteration: "DOM-05 LAW · AWS Normative Engine",
+    citadelSector: "Normative Jurisprudence Chamber",
+    harmonicFrequency: "6-Gate Legal Scope Chain",
+    primaryDirective: "Validate jurisdiction and scope before claiming any legal rule applies.",
+    architecturalDescription:
+      "Anchored in `DOM-05 LAW · AWS` (`bjo163/rocksoul-aws`): enforces the core legal invariant that LEGAL TEXT ≠ APPLICABLE LAW without full validation across Source, Rule, Jurisdiction, Applicability, Argument, and Review.",
+    accentColor: "#2ea8ff",
+    statusLabel: "CANON EXPLORER",
+    implementationState: "CANON_EXPLORER",
+    canonicalAlias: "DOM-05 LAW · AWS Normative Engine",
+    summaryLabel: "6-Stage Legal Gate",
+    artifacts: [
+      {
+        code: "AWS-01",
+        title: "SOURCE → RULE → JURISDICTION",
+        classification: "Normative Gate · Scope I",
+        summary:
+          "Verifies primary statutory authority and territorial/temporal jurisdiction before interpreting obligations.",
+        timestampLabel: "Gates 01–03",
+      },
+      {
+        code: "AWS-02",
+        title: "APPLICABILITY → ARGUMENT → REVIEW",
+        classification: "Normative Gate · Scope II",
+        summary:
+          "Requires bounded applicability testing, structured argument, and human appeal/review.",
+        timestampLabel: "Gates 04–06",
+      },
+      {
+        code: "AWS-03",
+        title: "AngelWithShotgun Ch.01 & Kingslayer Pact",
+        classification: "Gate Transmission · Story × Law",
+        summary:
+          "Connects narrative explorations of accountability with rigorous normative verification.",
+        timestampLabel: "Canon Contract",
       },
     ],
   },
@@ -296,8 +483,8 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
   {
     nodeCode: "GATE-02",
     worldId: "arsy",
-    designation: "Zenith Carrier Array",
-    protocol: "ARSY-MESH/QUIC",
+    designation: "Zenith Radio Relay Array",
+    protocol: "ARSY-RADIO/QUIC",
     latencyMs: 2,
     integrityPercent: 99.99,
     orbitalBearing: "000° Z · +90° Apex",
@@ -305,8 +492,8 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
   },
   {
     nodeCode: "GATE-03",
-    worldId: "qalam",
-    designation: "Golden Scriptorium Core",
+    worldId: "human-pen",
+    designation: "Human-Pen & Qalam Scriptorium",
     protocol: "QALAM-FOLIO/ED25519",
     latencyMs: 3,
     integrityPercent: 100,
@@ -326,12 +513,52 @@ export const DOCK_TELEMETRY_NODES: readonly DockNodeTelemetry[] = [
   {
     nodeCode: "GATE-05",
     worldId: "rocksoul-dx",
-    designation: "Dreamforge Spatial Engine",
-    protocol: "ROCKSOUL-DX/WEBGPU",
+    designation: "Rocksoul DX Spatial Studio",
+    protocol: "ROCKSOUL-DX/CANVAS",
     latencyMs: 1,
     integrityPercent: 100,
     orbitalBearing: "142° SE · +12° Plaza",
     state: "LUMINOUS",
+  },
+  {
+    nodeCode: "GATE-06",
+    worldId: "crayon",
+    designation: "SRGBL v8 Prismatic Spectrum",
+    protocol: "CRAYON-SRGBL/SPEC",
+    latencyMs: null,
+    integrityPercent: null,
+    orbitalBearing: "045° NE · +28° Prism",
+    state: "CANON_EXPLORER",
+  },
+  {
+    nodeCode: "GATE-07",
+    worldId: "sin-can",
+    designation: "Sin Can Reflection Arc",
+    protocol: "DX-SYAFAAT/SPEC",
+    latencyMs: null,
+    integrityPercent: null,
+    orbitalBearing: "210° SW · +16° Hall",
+    state: "CANON_EXPLORER",
+  },
+  {
+    nodeCode: "GATE-08",
+    worldId: "mythos",
+    designation: "MFTL & Legend Correlation",
+    protocol: "MFTL-CASE001/SPEC",
+    latencyMs: null,
+    integrityPercent: null,
+    orbitalBearing: "315° NW · +40° Vault",
+    state: "CANON_EXPLORER",
+  },
+  {
+    nodeCode: "GATE-09",
+    worldId: "angel-with-shotgun",
+    designation: "AWS Normative Law Engine",
+    protocol: "AWS-LAW-6GATE/SPEC",
+    latencyMs: null,
+    integrityPercent: null,
+    orbitalBearing: "110° E · +55° Bench",
+    state: "CANON_EXPLORER",
   },
 ] as const;
 
@@ -365,7 +592,7 @@ export const SIDRA_KNOWLEDGE_AXIOMS: readonly SidraKnowledgeAxiom[] = [
     coordinateX: 76,
     coordinateY: 48,
     exposition:
-      "Planetary rings and sidereal trajectories trace deterministic ellipses around the primary luminary, providing a universal clock for all five worlds.",
+      "Planetary rings and sidereal trajectories trace deterministic ellipses around the primary luminary, providing a universal clock for all worlds.",
     geometricRatio: "2π = 6.2831853071",
     connectedIds: ["noor-optics", "ibda-synthesis"],
   },
@@ -387,7 +614,7 @@ export const SIDRA_KNOWLEDGE_AXIOMS: readonly SidraKnowledgeAxiom[] = [
     coordinateX: 50,
     coordinateY: 56,
     exposition:
-      "At the intersection of intention and form stands the Qalam: translating unseen wisdom into visible proportion, letter, and law.",
+      "At the intersection of intention and form stands the Human-Pen (Qalam): translating unseen wisdom into visible proportion, letter, and law.",
     geometricRatio: "1 : √3 Octagram",
     connectedIds: ["noor-optics", "hikmah-archive", "ibda-synthesis"],
   },
@@ -417,13 +644,13 @@ export const COVENANT_PILLARS: readonly CovenantPillar[] = [
     heading: "A WORLD TO LEARN",
     subtitle: "Wisdom · Geometry · Inquiry",
     statement:
-      "Creation is an open book of signs. Through Sidra, mathematics, astronomy, ethics, and engineering are studied not as fragmented utilities, but as unified expressions of divine proportion.",
+      "Creation is an open book of signs. Through Sidra, Crayon, and Mythos, mathematics, history, ethics, and engineering are studied as unified expressions of responsible inquiry.",
   },
   {
     numeral: "III",
     heading: "A WORLD TO BUILD",
-    subtitle: "Craft · Excellence · Radiance",
+    subtitle: "Craft · Excellence · Justice",
     statement:
-      "Excellence (Iḥsān) demands that whatever we construct—whether an infrastructure protocol, a written manuscript in Qalam, or a luminous world in Rocksoul DX—is built with supreme beauty and integrity.",
+      "Excellence (Iḥsān) demands that whatever we construct—whether a manuscript in Human-Pen, reflection in Sin Can, justice audit in Angel With Shotgun, or spatial art in Rocksoul DX—is built with beauty and integrity.",
   },
 ] as const;

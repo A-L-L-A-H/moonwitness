@@ -52,22 +52,31 @@ describe("Empire of the Light Registry", () => {
     ]);
   });
 
-  it("defines all five worlds with exact reference titles and taglines", () => {
+  it("defines all nine worlds with exact reconciled titles and taglines", () => {
     expect(WORLD_DOMAINS.map((world) => ({ name: world.name, tagline: world.tagline }))).toEqual([
       { name: "MOONWITNESS", tagline: "Stories · Knowledge · Archive" },
       { name: "ARSY", tagline: "Radio · Technology · Infrastructure" },
-      { name: "QALAM", tagline: "Create · Write · Share" },
+      { name: "HUMAN-PEN", tagline: "Think · Write · Create · Share" },
       { name: "SIDRA", tagline: "Connect · Explore · Learn" },
       { name: "ROCKSOUL DX", tagline: "Play · Create · Dream" },
+      { name: "CRAYON", tagline: "Biar Hidup Lebih Berwarna!" },
+      { name: "SIN CAN", tagline: "Reflect · Question · Understand" },
+      { name: "MYTHOS", tagline: "Explore · Discover · Remember" },
+      { name: "ANGEL WITH SHOTGUN", tagline: "Law · Justice · Society" },
     ]);
   });
 
-  it("maintains dock telemetry coherence across all five world gateways", () => {
-    expect(DOCK_TELEMETRY_NODES).toHaveLength(5);
+  it("maintains dock telemetry coherence across all nine world gateways", () => {
+    expect(DOCK_TELEMETRY_NODES).toHaveLength(9);
     const worldIds = new Set(WORLD_DOMAINS.map((world) => world.id));
     for (const node of DOCK_TELEMETRY_NODES) {
       expect(worldIds.has(node.worldId)).toBe(true);
-      expect(node.integrityPercent).toBeGreaterThanOrEqual(99.9);
+      if (node.state === "CANON_EXPLORER") {
+        expect(node.integrityPercent).toBeNull();
+        expect(node.latencyMs).toBeNull();
+      } else {
+        expect(node.integrityPercent).toBeGreaterThanOrEqual(99.9);
+      }
     }
   });
 
@@ -159,19 +168,20 @@ describe("Cross-Repo Master Canon Codex", () => {
 });
 
 describe("Living Light Design Tokens & Visual Covenant", () => {
-  it("defines coherent cosmic obsidian, warm ivory, and sacred gold palette tokens", () => {
-    expect(LIVING_LIGHT_PALETTE.cosmicBlack).toBe("#040509");
-    expect(LIVING_LIGHT_PALETTE.midnightBlue).toBe("#080a12");
-    expect(LIVING_LIGHT_PALETTE.warmIvory).toBe("#f5efe2");
-    expect(LIVING_LIGHT_PALETTE.sacredGold).toBe("#dfc07b");
-    expect(LIVING_LIGHT_PALETTE.luminousGold).toBe("#fff4d2");
-    expect(LIVING_LIGHT_PALETTE.softWhiteLight).toBe("#fffdf7");
-    expect(LIVING_LIGHT_PALETTE.subtleSilver).toBe("#c8d0de");
+  it("re-exports centralized illustrated-universe tokens from @moonwitness/ui", () => {
+    expect(LIVING_LIGHT_PALETTE.cosmicBlack).toBe("#08090d");
+    expect(LIVING_LIGHT_PALETTE.midnightBlue).toBe("#10121a");
+    expect(LIVING_LIGHT_PALETTE.warmIvory).toBe("#f4ecd8");
+    expect(LIVING_LIGHT_PALETTE.sacredGold).toBe("#f6d438");
+    expect(LIVING_LIGHT_PALETTE.luminousGold).toBe("#fff8e8");
+    expect(LIVING_LIGHT_PALETTE.softWhiteLight).toBe("#fff8e8");
+    expect(LIVING_LIGHT_PALETTE.deepAmber).toBe("#ed149b");
+    expect(LIVING_LIGHT_PALETTE.electricBlue).toBe("#2ea8ff");
   });
 
   it("defines bounded spring physics and progressive capability tiers", () => {
     expect(LIVING_LIGHT_MOTION.durationsMs.instant).toBe(0);
-    expect(LIVING_LIGHT_MOTION.durationsMs.entrance).toBe(2200);
+    expect(LIVING_LIGHT_MOTION.durationsMs.entrance).toBe(700);
     expect(LIVING_LIGHT_MOTION.springs.magnetic.maxDisplacementPx).toBeLessThanOrEqual(10);
     expect(LIVING_LIGHT_MOTION.springs.spatialTilt.maxDisplacementPx).toBeLessThanOrEqual(8);
     expect(LIVING_LIGHT_MOTION.capabilityTiers).toEqual([
@@ -181,14 +191,17 @@ describe("Living Light Design Tokens & Visual Covenant", () => {
     ]);
   });
 
-  it("enforces sacred visual boundaries and accessibility target minimums", () => {
+  it("enforces reformed illustrated-universe visual boundaries and accessibility minimums", () => {
     expect(SACRED_VISUAL_COVENANT.depictionOfAllahForbidden).toBe(true);
     expect(SACRED_VISUAL_COVENANT.humanFacesForbidden).toBe(true);
-    expect(SACRED_VISUAL_COVENANT.cartoonAndAnimeForbidden).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.cartoonAndAnimeForbidden).toBe(false);
+    expect(SACRED_VISUAL_COVENANT.originalIllustrationsAllowed).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.copyrightImitationForbidden).toBe(true);
+    expect(SACRED_VISUAL_COVENANT.violentImageryForbidden).toBe(true);
     expect(SACRED_VISUAL_COVENANT.decorativeSacredTextTexturesForbidden).toBe(true);
     expect(SACRED_VISUAL_COVENANT.requiresReducedMotionBypass).toBe(true);
     expect(SACRED_VISUAL_COVENANT.minimumInteractiveTargetPx).toBeGreaterThanOrEqual(44);
-    expect(LIVING_LIGHT_TYPOGRAPHY.displayFamily).toContain("Cinzel");
+    expect(LIVING_LIGHT_TYPOGRAPHY.displayFamily).toContain("Impact");
   });
 });
 

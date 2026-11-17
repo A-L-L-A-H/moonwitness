@@ -1,8 +1,8 @@
 ---
 title: "MoonFrame Skin Engine Contract"
-version: "1.1.0"
+version: "1.2.0"
 status: "approved"
-last_verified: "2026-11-15"
+last_verified: "2026-11-17"
 owner: "architecture"
 ---
 
@@ -16,33 +16,31 @@ A skin is a complete design language, not a theme-color switch.
 
 ## 2. Separation of concerns
 
-### Shared platform layer
+### Shared platform layer (`packages/ui` + `packages/assets`)
 
-Owns semantic behavior and stable contracts:
+`packages/ui` (`@moonwitness/ui`) is the single implementation owner for reusable UI foundations:
 
-- component APIs and event behavior;
-- keyboard interaction and focus management;
-- accessible names, roles, and states;
-- form validation and error semantics;
-- data formatting and business rules;
-- loading, empty, error, success, offline, and permission states;
-- responsive behavior and performance budgets;
-- application routing and authorization.
+- semantic design tokens and brand theme contracts;
+- DNA / skin definitions (`MASTER_DNA_WORLDS`, `SkinRoot`, `SkinScope`, scoped skin stylesheets);
+- layout, typography, spacing, motion, and responsive primitives;
+- reusable presentation components (`IllustratedHero`, `WorldExplorer`, `WorldTile`, `WorldAtlas`, `SiteNavigation`, `PrimaryAction`, `SecondaryAction`, `SectionHeading`, `StorySection`, `EditorialFeature`, `IllustrationFrame`, `ResponsiveImage`, `MotionReveal`, `DnaButton`, `DnaChamber`, `DnaPortalArch`, `DnaBadge`);
+- keyboard interaction, focus management, accessible names/roles/states, and WCAG contrast enforcement (`pnpm ui:contrast`);
+- `packages/assets` owns illustration assets, image manifests, icons/artwork, and fonts.
 
 ### Master DNA layer
 
-Owns presentation and experiential composition:
+Owns presentation and experiential composition via `[data-dna]` scoping:
 
 - color, typography, spacing, scale, density, radii, borders, elevation;
 - layout grammar and navigation metaphor;
 - component recipes and visual variants;
 - surfaces, textures, icons, illustration and image direction;
 - motion, transitions, sound policy, and reduced-motion fallback;
-- responsive composition for each world.
+- responsive composition for each DNA world without leaking styles across applications (`apps/a-l-l-a-h` vs `apps/web`).
 
-### Product layer
+### Product layer (`packages/canon` + `apps/*`)
 
-Owns product-specific information architecture, content, domain behavior, and canon. A product selects an approved DNA and may define documented product-specific compositions. It must not fork shared business logic for visual reasons.
+`packages/canon` owns canonical domain meaning and shared types (`WorldIdentifier` across the ecosystem). Applications (`apps/a-l-l-a-h`, `apps/web`) own product-specific information architecture, domain registries, application state, routes, localization, and auth—never duplicating reusable UI tokens or primitives locally.
 
 ## 3. Current repository compatibility
 

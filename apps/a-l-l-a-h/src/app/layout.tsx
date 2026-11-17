@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { SkinRoot } from "@moonwitness/ui/imperium";
+import { imperiumLumenCssVariables } from "@moonwitness/ui/tokens";
 import { SanctuaryLocaleProvider } from "@/lib/sanctuary-locale";
 import "./globals.css";
 
@@ -54,15 +55,30 @@ export const metadata: Metadata = {
       "Neutral sanctuary uniting Taurat, Zabur, Injīl & Al-Qur’ān comparative study, M-Time calendrics, and open engineering.",
     images: ["/og-empire-light.jpg"],
   },
+  other: {
+    "page-type": "software",
+    "site-kind": "software",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`min-h-screen antialiased ${cinzel.variable}`}>
-      <body className="min-h-screen antialiased bg-[#040509] text-[#f5efe2]">
+    <html
+      lang="en"
+      data-type="software"
+      data-radius="soft"
+      data-buttons="solid"
+      data-motion="live"
+      className={`min-h-screen antialiased ${cinzel.variable}`}
+    >
+      <body
+        data-dna="01-imperium-lumen"
+        style={imperiumLumenCssVariables()}
+        className="min-h-screen antialiased bg-[var(--dna-canvas)] text-[var(--dna-text)]"
+      >
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border focus:border-[#dfc07b] focus:bg-[#040509] focus:px-4 focus:py-2 focus:font-serif focus:text-xs focus:tracking-[0.2em] focus:text-[#fff6df] focus:uppercase"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:border-2 focus:border-[var(--dna-accent)] focus:bg-[var(--dna-canvas)] focus:px-4 focus:py-2 focus:font-sans focus:text-xs focus:font-bold focus:tracking-[0.12em] focus:text-[var(--dna-text)] focus:uppercase"
         >
           Skip to main content
         </a>

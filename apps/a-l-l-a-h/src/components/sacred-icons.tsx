@@ -1,13 +1,20 @@
 import type { SVGProps } from "react";
 import {
   CrescentStarIcon,
+  CrownEmblemIcon,
   DiamondStarOrnament,
   OctagramMandalaIcon,
   SearchLensIcon,
 } from "@moonwitness/ui/imperium";
 import type { WorldIdentifier } from "@/data/empire-registry";
 
-export { CrescentStarIcon, DiamondStarOrnament, OctagramMandalaIcon, SearchLensIcon };
+export {
+  CrescentStarIcon,
+  CrownEmblemIcon,
+  DiamondStarOrnament,
+  OctagramMandalaIcon,
+  SearchLensIcon,
+};
 
 export function PortalAstrolabeIcon(props: SVGProps<SVGSVGElement>) {
   return (
@@ -358,6 +365,77 @@ export function RocksoulCubeIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function CrayonPrismIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <polygon
+        points="32,8 54,50 10,50"
+        fill="rgba(46, 168, 255, 0.14)"
+        stroke="#2ea8ff"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path d="M22 36 H42 M18 43 H46" stroke="#f6d438" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="32" cy="24" r="3" fill="#ed149b" />
+    </svg>
+  );
+}
+
+export function SinCanMirrorIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M14 50 V24 C14 14 32 8 32 8 C32 8 50 14 50 24 V50 Z"
+        fill="rgba(237, 20, 155, 0.14)"
+        stroke="#ed149b"
+        strokeWidth="2"
+      />
+      <path d="M32 14 V46" stroke="#f6d438" strokeWidth="1.8" strokeDasharray="3 3" />
+      <circle cx="32" cy="29" r="5" fill="#fff8e8" />
+    </svg>
+  );
+}
+
+export function MythosArchIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <path d="M10 52 H54 M16 24 V52 M32 24 V52 M48 24 V52" stroke="#f6d438" strokeWidth="2.2" />
+      <polygon
+        points="8,24 32,10 56,24"
+        fill="rgba(246, 212, 56, 0.18)"
+        stroke="#f6d438"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function AwsScalesIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 64 64" fill="none" aria-hidden="true" {...props}>
+      <path
+        d="M32 10 V52 M20 52 H44 M14 20 H50"
+        stroke="#fff8e8"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <path
+        d="M14 20 L8 36 H20 Z"
+        fill="rgba(46, 168, 255, 0.25)"
+        stroke="#2ea8ff"
+        strokeWidth="1.6"
+      />
+      <path
+        d="M50 20 L44 36 H56 Z"
+        fill="rgba(246, 212, 56, 0.25)"
+        stroke="#f6d438"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
 export function WorldEmblemById({
   worldId,
   className,
@@ -370,11 +448,19 @@ export function WorldEmblemById({
       return <MoonwitnessCrestIcon className={className} />;
     case "arsy":
       return <ArsyTowerIcon className={className} />;
-    case "qalam":
+    case "human-pen":
       return <QalamNibIcon className={className} />;
     case "sidra":
       return <SidraPolyhedronIcon className={className} />;
     case "rocksoul-dx":
       return <RocksoulCubeIcon className={className} />;
+    case "crayon":
+      return <CrayonPrismIcon className={className} />;
+    case "sin-can":
+      return <SinCanMirrorIcon className={className} />;
+    case "mythos":
+      return <MythosArchIcon className={className} />;
+    case "angel-with-shotgun":
+      return <AwsScalesIcon className={className} />;
   }
 }

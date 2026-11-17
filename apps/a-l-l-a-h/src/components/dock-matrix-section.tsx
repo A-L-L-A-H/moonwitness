@@ -41,6 +41,7 @@ const DOCK_FILTER_OPTIONS: readonly { readonly id: DockFilterState; readonly lab
   { id: "SYNCHRONIZED", label: "SYNCHRONIZED" },
   { id: "LUMINOUS", label: "LUMINOUS" },
   { id: "BROADCASTING", label: "BROADCASTING" },
+  { id: "CANON_EXPLORER", label: "CANON EXPLORER" },
 ] as const;
 
 export function DockMatrixSection({
@@ -104,9 +105,9 @@ export function DockMatrixSection({
     <section
       id="the-dock"
       aria-labelledby="dock-heading"
-      className="scroll-mt-16 relative overflow-x-clip border-t border-[#d6b46c]/25 bg-[#040509]/95 py-24 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative overflow-x-clip bg-[#040509]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="wrap mx-auto max-w-7xl">
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
             <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[#d6b46c] uppercase">
@@ -268,7 +269,9 @@ export function DockMatrixSection({
                     <div className="border border-[#d6b46c]/20 bg-[#060911] p-3">
                       <dt className="text-[10px] text-[#8e8572]">SPEC TARGET</dt>
                       <dd className="mt-1 text-[#f5e3b8]">
-                        {activeNode.integrityPercent}% · {activeNode.latencyMs}ms
+                        {activeNode.integrityPercent !== null && activeNode.latencyMs !== null
+                          ? `${activeNode.integrityPercent}% · ${activeNode.latencyMs}ms`
+                          : "CANON EXPLORER"}
                       </dd>
                     </div>
                   </dl>

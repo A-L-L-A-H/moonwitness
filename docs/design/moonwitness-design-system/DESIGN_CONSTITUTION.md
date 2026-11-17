@@ -53,10 +53,14 @@ Canonical sentence:
 
 Distance, ΔT and proximity scores are measurements/discovery aids. They are not causal verdicts.
 
-## Product boundaries
+## Product boundaries & monorepo ownership
 
-`moonwitness-design-system` owns reusable interface language.
-
-Consumer apps own application logic, routes, database/API contracts, data fetching and product-specific composition.
+1. **Design tokens (`packages/ui`):** `@moonwitness/ui` owns all semantic and brand tokens (`MASTER_DNA_WORLDS`, `IMPERIUM_LUMEN_TOKENS`, `DNATokens`, CSS variables). Applications must never duplicate authoritative palette, typography, spacing, or motion tokens.
+2. **Themes and skins (`packages/ui`):** `@moonwitness/ui` owns `SkinRoot`, `SkinScope`, `useDnaWorld`, and scoped skin CSS (`packages/ui/src/skins/imperium.css`, `dna-base.css`).
+3. **Reusable components (`packages/ui`):** `@moonwitness/ui` owns shared layout, navigation, illustration frames, hero, world explorer, and action primitives.
+4. **Artwork and static assets (`packages/assets` & app public art):** `packages/assets` owns shared visual asset packs, fonts, and manifests; app-specific artwork serves app composition slots.
+5. **Domain and world data (`packages/canon` & app registries):** `@moonwitness/canon` owns shared domain identifiers (`WorldIdentifier`) and canonical structures; each app owns its product experience, routes, state, and public registry copy.
+6. **App independence (`apps/a-l-l-a-h` vs `apps/web`):** `apps/a-l-l-a-h` runs under `01-imperium-lumen` (Empire of the Light — The Illustrated Universe) while `apps/web` maintains its independent MoonWitness identity (`02-lunar-chronicles` / `05-riot-anarchy` / `06-mycelium`). Skin CSS is strictly scoped to `[data-dna="..."]` so neither leaks into global `body` or `:root`.
+7. **Testing:** Run `pnpm --filter @moonwitness/ui test`, `pnpm ui:contrast`, application unit tests, `typecheck`, `lint`, and Playwright/headless visual verification across desktop, tablet, mobile, keyboard navigation, and reduced-motion modes.
 
 A consumer must not duplicate a reusable primitive merely to change its accent color; use semantic themes/tokens instead.

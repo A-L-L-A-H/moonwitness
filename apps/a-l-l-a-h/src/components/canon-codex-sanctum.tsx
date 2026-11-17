@@ -44,9 +44,9 @@ export function CanonCodexSanctum({
     <section
       id="the-codex"
       aria-labelledby="codex-heading"
-      className="scroll-mt-16 relative border-t border-[#d6b46c]/25 bg-gradient-to-b from-[#040509]/95 via-[#080b13]/90 to-[#05060a]/95 py-24 px-4 sm:px-8 lg:px-16"
+      className="scroll-mt-16 relative bg-gradient-to-b from-[#040509]/95 via-[#080b13]/90 to-[#05060a]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="wrap mx-auto max-w-7xl">
         {/* Section Header */}
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
