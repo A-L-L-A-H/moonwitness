@@ -1,5 +1,7 @@
+import { webcrypto } from "node:crypto";
 import { afterEach, describe, expect, it } from "vitest";
 import type { D1DatabaseLike, D1PreparedStatementLike } from "@moonwitness/orm";
+import { resetMidJwksCacheForTests } from "./middleware/mid-jwt";
 import worker, { resetWorkerForTests, type ApiWorkerEnv } from "./worker";
 
 async function createInMemorySqliteD1(): Promise<D1DatabaseLike> {
@@ -50,6 +52,7 @@ async function createInMemorySqliteD1(): Promise<D1DatabaseLike> {
 const originalEnv = { ...process.env };
 
 afterEach(async () => {
+  resetMidJwksCacheForTests();
   await resetWorkerForTests();
   for (const key of Object.keys(process.env)) {
     if (!(key in originalEnv)) {
@@ -261,6 +264,96 @@ describe("API Cloudflare Worker adapter", () => {
         counts: { knowledge: 3 },
       });
       expect(seenBridgeHeaders).toEqual(["test-bridge-token-abcdef", "test-bridge-token-abcdef"]);
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("propagates MID_ALLOWED_AUDIENCES in ApiWorkerEnv and rejects out-of-policy Bearer tokens", async () => {
+    const d1 = await createInMemorySqliteD1();
+    const pair = await webcrypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, [
+      "sign",
+      "verify",
+    ]);
+    const publicJwk = await webcrypto.subtle.exportKey("jwk", pair.publicKey);
+    const kid = "worker-mid-k1";
+
+    const signJwt = async (aud: string | string[]) => {
+      const nowSec = Math.floor(Date.now() / 1000);
+      const header = Buffer.from(JSON.stringify({ alg: "ES256", typ: "JWT", kid })).toString(
+        "base64url",
+      );
+      const body = Buffer.from(
+        JSON.stringify({
+          iss: "https://id.moonwitness.biz.id",
+          sub: "1",
+          aud,
+          iat: nowSec,
+          exp: nowSec + 300,
+          token_use: "access",
+        }),
+      ).toString("base64url");
+      const sig = await webcrypto.subtle.sign(
+        { name: "ECDSA", hash: "SHA-256" },
+        pair.privateKey,
+        new TextEncoder().encode(`${header}.${body}`),
+      );
+      return `${header}.${body}.${Buffer.from(new Uint8Array(sig)).toString("base64url")}`;
+    };
+
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: string | URL | Request, init?: RequestInit) => {
+      const target =
+        typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+      if (target === "https://id.moonwitness.biz.id/.well-known/jwks.json") {
+        return new Response(
+          JSON.stringify({ keys: [{ ...publicJwk, kid, use: "sig", alg: "ES256" }] }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      return origFetch(input, init);
+    }) as typeof fetch;
+
+    try {
+      const env: ApiWorkerEnv = {
+        DB: d1,
+        NODE_ENV: "production",
+        API_PREFIX: "/api/v1",
+        DATABASE_URL: "d1:rocksoul-auth-db",
+        CORS_ORIGINS: "https://moonwitness.biz.id",
+        STORAGE_ACCESS_KEY: "test-storage-access-key",
+        STORAGE_SECRET_KEY: "test-storage-secret-key-for-worker-test",
+        MW_BOOTSTRAP_ADMIN_USERNAME: "mwadmin",
+        MW_BOOTSTRAP_ADMIN_EMAIL: "mwadmin@moonwitness.biz.id",
+        MW_BOOTSTRAP_ADMIN_PASSWORD: "worker-test-admin-password-2026",
+        MID_ISSUER_URL: "https://id.moonwitness.biz.id",
+        MID_JWKS_URL: "https://id.moonwitness.biz.id/.well-known/jwks.json",
+        MID_ALLOWED_AUDIENCES: "moonwitness-web,moonwitness-api",
+      };
+
+      const allowedRes = await worker.fetch(
+        new Request("https://api.moonwitness.biz.id/api/v1/auth/me", {
+          headers: { authorization: `Bearer ${await signJwt("moonwitness-web")}` },
+        }),
+        env,
+      );
+      expect(allowedRes.status).toBe(200);
+
+      const rejectedIgate = await worker.fetch(
+        new Request("https://api.moonwitness.biz.id/api/v1/auth/me", {
+          headers: { authorization: `Bearer ${await signJwt("igate-console")}` },
+        }),
+        env,
+      );
+      expect(rejectedIgate.status).toBe(401);
+
+      const rejectedCliOutsideOverride = await worker.fetch(
+        new Request("https://api.moonwitness.biz.id/api/v1/auth/me", {
+          headers: { authorization: `Bearer ${await signJwt("moonwitness-cli")}` },
+        }),
+        env,
+      );
+      expect(rejectedCliOutsideOverride.status).toBe(401);
     } finally {
       globalThis.fetch = origFetch;
     }

@@ -80,6 +80,8 @@ def _configure_app(
     memory_require_auth: bool = False,
     mid_issuer_url: str = "https://id.moonwitness.biz.id",
     mid_jwks_cache_ttl_seconds: int = 300,
+    mid_audience: str = "moonwitness-memory",
+    mid_allowed_audiences: str = "",
     moonwitness_sync_token: str = "",
 ) -> Settings:
     configured = Settings(
@@ -87,6 +89,8 @@ def _configure_app(
         memory_require_auth=memory_require_auth,
         mid_issuer_url=mid_issuer_url,
         mid_jwks_cache_ttl_seconds=mid_jwks_cache_ttl_seconds,
+        mid_audience=mid_audience,
+        mid_allowed_audiences=mid_allowed_audiences,
         moonwitness_sync_token=moonwitness_sync_token,
     )
     monkeypatch.setattr("app.config.get_settings", lambda: configured)
@@ -413,3 +417,102 @@ def test_sync_token_shared_secret_and_cors_authorization_header(monkeypatch, tmp
         assert preflight.status_code == 200
         allowed_headers = preflight.headers.get("access-control-allow-headers", "")
         assert "authorization" in allowed_headers.lower()
+
+
+def test_enforces_mid_audience_and_allowed_audiences_policy(monkeypatch, tmp_path):
+    private_key, public_jwk = _generate_es256_keypair("mid-aud-1")
+    _install_jwks_mock(monkeypatch, lambda: (200, {"keys": [public_jwk]}))
+
+    _configure_app(monkeypatch, tmp_path, memory_require_auth=True)
+    memory_token = _sign_es256_jwt(private_key, "mid-aud-1", _default_claims())
+    array_memory_token = _sign_es256_jwt(
+        private_key,
+        "mid-aud-1",
+        _default_claims(aud=["moonwitness-memory", "moonwitness-api"]),
+    )
+    web_token = _sign_es256_jwt(
+        private_key, "mid-aud-1", _default_claims(aud="moonwitness-web")
+    )
+    igate_token = _sign_es256_jwt(
+        private_key, "mid-aud-1", _default_claims(aud="igate-console")
+    )
+    empty_str_aud = _sign_es256_jwt(private_key, "mid-aud-1", _default_claims(aud=""))
+    empty_list_aud = _sign_es256_jwt(private_key, "mid-aud-1", _default_claims(aud=[]))
+    malformed_list_aud = _sign_es256_jwt(
+        private_key, "mid-aud-1", _default_claims(aud=["moonwitness-memory", 123])
+    )
+    no_aud_claims = _default_claims()
+    no_aud_claims.pop("aud", None)
+    missing_aud = _sign_es256_jwt(private_key, "mid-aud-1", no_aud_claims)
+
+    with TestClient(main.app) as client:
+        for ok_token in (memory_token, array_memory_token):
+            ok_resp = client.get("/api/me", headers={"Authorization": f"Bearer {ok_token}"})
+            assert ok_resp.status_code == 200
+
+        for bad_token in (
+            web_token,
+            igate_token,
+            empty_str_aud,
+            empty_list_aud,
+            malformed_list_aud,
+            missing_aud,
+        ):
+            bad_resp = client.get("/api/me", headers={"Authorization": f"Bearer {bad_token}"})
+            assert bad_resp.status_code == 401
+            assert bad_resp.headers.get("www-authenticate") == "Bearer"
+
+    # Override single mid_audience -> old moonwitness-memory token must fail closed.
+    _configure_app(
+        monkeypatch,
+        tmp_path,
+        memory_require_auth=True,
+        mid_audience="custom-memory",
+    )
+    custom_token = _sign_es256_jwt(
+        private_key, "mid-aud-1", _default_claims(aud="custom-memory")
+    )
+    with TestClient(main.app) as client:
+        assert (
+            client.get("/api/me", headers={"Authorization": f"Bearer {custom_token}"}).status_code
+            == 200
+        )
+        assert (
+            client.get("/api/me", headers={"Authorization": f"Bearer {memory_token}"}).status_code
+            == 401
+        )
+
+    # Comma-separated mid_allowed_audiences supports explicit multi-client allowlisting.
+    _configure_app(
+        monkeypatch,
+        tmp_path,
+        memory_require_auth=True,
+        mid_allowed_audiences="moonwitness-memory, moonwitness-web",
+    )
+    with TestClient(main.app) as client:
+        assert (
+            client.get("/api/me", headers={"Authorization": f"Bearer {memory_token}"}).status_code
+            == 200
+        )
+        assert (
+            client.get("/api/me", headers={"Authorization": f"Bearer {web_token}"}).status_code
+            == 200
+        )
+        assert (
+            client.get("/api/me", headers={"Authorization": f"Bearer {igate_token}"}).status_code
+            == 401
+        )
+
+    # Empty audience policy fails closed.
+    _configure_app(
+        monkeypatch,
+        tmp_path,
+        memory_require_auth=True,
+        mid_audience="",
+        mid_allowed_audiences="",
+    )
+    with TestClient(main.app) as client:
+        assert (
+            client.get("/api/me", headers={"Authorization": f"Bearer {memory_token}"}).status_code
+            == 401
+        )

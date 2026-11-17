@@ -31,6 +31,6 @@
     "REFRESH_TOKEN_TTL_SEC": "604800",
     "SESSION_TTL_SEC": "604800",
     "COOKIE_DOMAIN": ".moonwitness.biz.id",
-    "CORS_ORIGINS": "https://moonwitness.biz.id,https://a-l-l-a-h.com,https://codex.a-l-l-a-h.com,https://community.moonwitness.biz.id,https://igate.moonwitness.biz.id,https://api.moonwitness.biz.id",
+    "CORS_ORIGINS": "https://moonwitness.biz.id,https://a-l-l-a-h.com,https://codex.a-l-l-a-h.com,https://community.moonwitness.biz.id,https://igate.moonwitness.biz.id,https://api.moonwitness.biz.id,https://memory-edge.moonwitness.biz.id",
   },
 }

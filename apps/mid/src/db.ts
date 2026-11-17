@@ -39,6 +39,7 @@ const SCHEMA_STATEMENTS = [
     code_challenge TEXT NOT NULL,
     code_challenge_method TEXT NOT NULL,
     nonce TEXT,
+    resource TEXT,
     expires_at TEXT NOT NULL,
     consumed_at TEXT,
     created_at TEXT NOT NULL
@@ -49,6 +50,7 @@ const SCHEMA_STATEMENTS = [
     client_id TEXT NOT NULL,
     user_id INTEGER NOT NULL,
     scope TEXT NOT NULL,
+    resource TEXT,
     expires_at TEXT NOT NULL,
     revoked_at TEXT,
     replaced_by TEXT,
@@ -112,7 +114,30 @@ const FIRST_PARTY_CLIENTS = [
     clientType: "public",
     firstParty: 1,
   },
+  {
+    clientId: "moonwitness-memory",
+    name: "MoonWitness Memory Deck",
+    redirectUris: [
+      "https://memory-edge.moonwitness.biz.id/auth/callback",
+      "http://localhost:3005/auth/callback",
+    ],
+    allowedScopes: ["openid", "profile", "email", "offline_access"],
+    clientType: "public",
+    firstParty: 1,
+  },
 ] as const;
+
+async function ensureOptionalTextColumn(
+  db: D1DatabaseLike,
+  tableName: "mid_auth_codes" | "mid_refresh_tokens",
+  columnName: "resource",
+): Promise<void> {
+  const info = await db.prepare(`PRAGMA table_info(${tableName})`).all<{ name?: string }>();
+  const exists = (info.results ?? []).some((row) => row.name === columnName);
+  if (!exists) {
+    await db.prepare(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} TEXT`).run();
+  }
+}
 
 /** Initialize MoonWitness ID schema tables and first-party OIDC clients once per DB binding. */
 export async function ensureMidSchema(db: D1DatabaseLike): Promise<void> {
@@ -142,6 +167,8 @@ export async function ensureMidSchema(db: D1DatabaseLike): Promise<void> {
       ),
     ];
     await db.batch(statements);
+    await ensureOptionalTextColumn(db, "mid_auth_codes", "resource");
+    await ensureOptionalTextColumn(db, "mid_refresh_tokens", "resource");
   })().catch((error: unknown) => {
     INITIALIZED_DBS.delete(db);
     throw error;
@@ -479,6 +506,7 @@ export async function storeAuthorizationCode(
     codeChallenge: string;
     codeChallengeMethod: string;
     nonce: string | null;
+    resource?: string | null;
   },
 ): Promise<string> {
   const plainCode = `mwc_${generateOpaqueToken(24)}`;
@@ -488,8 +516,8 @@ export async function storeAuthorizationCode(
   await db
     .prepare(
       `INSERT INTO mid_auth_codes
-       (code_hash, client_id, user_id, redirect_uri, scope, code_challenge, code_challenge_method, nonce, expires_at, consumed_at, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
+       (code_hash, client_id, user_id, redirect_uri, scope, code_challenge, code_challenge_method, nonce, resource, expires_at, consumed_at, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)`,
     )
     .bind(
       codeHash,
@@ -500,6 +528,7 @@ export async function storeAuthorizationCode(
       params.codeChallenge,
       params.codeChallengeMethod,
       params.nonce,
+      params.resource ?? null,
       expiresAt.toISOString(),
       now.toISOString(),
     )
@@ -519,6 +548,7 @@ export async function consumeAuthorizationCode(
   codeChallenge: string;
   codeChallengeMethod: string;
   nonce: string | null;
+  resource: string | null;
 } | null> {
   const codeHash = await sha256Hex(plainCode);
   const nowIso = new Date().toISOString();
@@ -533,7 +563,7 @@ export async function consumeAuthorizationCode(
 
   const rowResult = await db
     .prepare(
-      `SELECT client_id, user_id, redirect_uri, scope, code_challenge, code_challenge_method, nonce
+      `SELECT client_id, user_id, redirect_uri, scope, code_challenge, code_challenge_method, nonce, resource
        FROM mid_auth_codes WHERE code_hash = ? LIMIT 1`,
     )
     .bind(codeHash)
@@ -545,6 +575,7 @@ export async function consumeAuthorizationCode(
       code_challenge: string;
       code_challenge_method: string;
       nonce: string | null;
+      resource: string | null;
     }>();
   const row = rowResult.results?.[0];
   if (!row) return null;
@@ -556,13 +587,21 @@ export async function consumeAuthorizationCode(
     codeChallenge: row.code_challenge,
     codeChallengeMethod: row.code_challenge_method,
     nonce: row.nonce,
+    resource: row.resource ?? null,
   };
 }
 
 /** Issue a refresh token belonging to a rotation family. */
 export async function issueRefreshToken(
   db: D1DatabaseLike,
-  params: { clientId: string; userId: number; scope: string; ttlSec: number; familyId?: string },
+  params: {
+    clientId: string;
+    userId: number;
+    scope: string;
+    ttlSec: number;
+    familyId?: string;
+    resource?: string | null;
+  },
 ): Promise<{ plainToken: string; familyId: string }> {
   const plainToken = `mwr_${generateOpaqueToken(32)}`;
   const tokenHash = await sha256Hex(plainToken);
@@ -572,8 +611,8 @@ export async function issueRefreshToken(
   await db
     .prepare(
       `INSERT INTO mid_refresh_tokens
-       (token_hash, family_id, client_id, user_id, scope, expires_at, revoked_at, replaced_by, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)`,
+       (token_hash, family_id, client_id, user_id, scope, resource, expires_at, revoked_at, replaced_by, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)`,
     )
     .bind(
       tokenHash,
@@ -581,6 +620,7 @@ export async function issueRefreshToken(
       params.clientId,
       params.userId,
       params.scope,
+      params.resource ?? null,
       expiresAt.toISOString(),
       now.toISOString(),
     )
@@ -594,16 +634,18 @@ export async function rotateRefreshToken(
   plainToken: string,
   clientId: string,
   ttlSec: number,
+  requestedResource?: string | null,
 ): Promise<{
-  status: "rotated" | "invalid" | "reused";
+  status: "rotated" | "invalid" | "reused" | "invalid_target";
   nextRefreshToken?: string;
   userId?: number;
   scope?: string;
+  resource?: string | null;
 }> {
   const tokenHash = await sha256Hex(plainToken);
   const lookup = await db
     .prepare(
-      `SELECT token_hash, family_id, client_id, user_id, scope, expires_at, revoked_at, replaced_by
+      `SELECT token_hash, family_id, client_id, user_id, scope, resource, expires_at, revoked_at, replaced_by
        FROM mid_refresh_tokens WHERE token_hash = ? LIMIT 1`,
     )
     .bind(tokenHash)
@@ -613,6 +655,7 @@ export async function rotateRefreshToken(
       client_id: string;
       user_id: number;
       scope: string;
+      resource: string | null;
       expires_at: string;
       revoked_at: string | null;
       replaced_by: string | null;
@@ -632,6 +675,12 @@ export async function rotateRefreshToken(
   }
   if (Date.parse(row.expires_at) <= Date.now()) return { status: "invalid" };
 
+  const boundResource = row.resource ?? null;
+  if (requestedResource && requestedResource !== clientId && boundResource !== requestedResource) {
+    return { status: "invalid_target" };
+  }
+  const effectiveResource = requestedResource ?? boundResource;
+
   const nextRefreshToken = `mwr_${generateOpaqueToken(32)}`;
   const nextHash = await sha256Hex(nextRefreshToken);
   const nextExpires = new Date(Date.now() + ttlSec * 1000).toISOString();
@@ -643,13 +692,28 @@ export async function rotateRefreshToken(
     db
       .prepare(
         `INSERT INTO mid_refresh_tokens
-         (token_hash, family_id, client_id, user_id, scope, expires_at, revoked_at, replaced_by, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, ?)`,
+         (token_hash, family_id, client_id, user_id, scope, resource, expires_at, revoked_at, replaced_by, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)`,
       )
-      .bind(nextHash, row.family_id, clientId, row.user_id, row.scope, nextExpires, nowIso),
+      .bind(
+        nextHash,
+        row.family_id,
+        clientId,
+        row.user_id,
+        row.scope,
+        boundResource,
+        nextExpires,
+        nowIso,
+      ),
   ]);
 
-  return { status: "rotated", nextRefreshToken, userId: row.user_id, scope: row.scope };
+  return {
+    status: "rotated",
+    nextRefreshToken,
+    userId: row.user_id,
+    scope: row.scope,
+    resource: effectiveResource,
+  };
 }
 
 /** Revoke refresh token and its family if present. */

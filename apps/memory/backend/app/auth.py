@@ -6,6 +6,7 @@ import math
 import re
 import threading
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -196,11 +197,35 @@ def _is_numeric_timestamp(value: Any) -> bool:
     )
 
 
+def _normalize_expected_audiences(expected_audience: str | Sequence[str]) -> tuple[str, ...]:
+    if isinstance(expected_audience, str):
+        raw_items = expected_audience.split(",")
+    else:
+        raw_items = [item for item in expected_audience if isinstance(item, str)]
+    return tuple(item.strip() for item in raw_items if item.strip())
+
+
+def _extract_token_audiences(claims: dict[str, Any]) -> tuple[str, ...]:
+    aud_claim = claims.get("aud")
+    if isinstance(aud_claim, str):
+        if not aud_claim.strip():
+            raise TokenVerificationError("Invalid JWT audience")
+        return (aud_claim,)
+    if isinstance(aud_claim, list):
+        if not aud_claim or any(
+            not isinstance(item, str) or not item.strip() for item in aud_claim
+        ):
+            raise TokenVerificationError("Invalid JWT audience")
+        return tuple(aud_claim)
+    raise TokenVerificationError("Invalid JWT audience")
+
+
 def verify_es256_jwt(
     token: str,
     issuer_url: str,
     ttl_seconds: int = 300,
     now_epoch_sec: float | None = None,
+    expected_audience: str | Sequence[str] = "moonwitness-memory",
 ) -> Actor:
     """Verify an ES256 access token issued by MoonWitness ID and return the authenticated Actor."""
     segments = token.strip().split(".")
@@ -222,6 +247,13 @@ def verify_es256_jwt(
         raise TokenVerificationError("Invalid JWT issuer")
     if claims.get("token_use") != "access":
         raise TokenVerificationError("Invalid JWT token_use")
+
+    allowed_audiences = _normalize_expected_audiences(expected_audience)
+    if not allowed_audiences:
+        raise TokenVerificationError("No allowed JWT audience configured")
+    token_audiences = _extract_token_audiences(claims)
+    if not any(aud in allowed_audiences for aud in token_audiences):
+        raise TokenVerificationError("Invalid JWT audience")
 
     sub = claims.get("sub")
     if not isinstance(sub, str) or not sub.strip():
@@ -298,6 +330,7 @@ def authenticate_request(request: Request, active_settings: Settings | None = No
                 token,
                 issuer_url=effective_settings.mid_issuer_url,
                 ttl_seconds=effective_settings.mid_jwks_cache_ttl_seconds,
+                expected_audience=effective_settings.mid_audience_allowlist,
             )
         except TokenVerificationError as exc:
             raise _unauthorized(str(exc)) from exc

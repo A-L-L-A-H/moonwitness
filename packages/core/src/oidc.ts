@@ -33,6 +33,7 @@ export interface MidVerifiedClaims {
   readonly iss: string;
   readonly sub: string;
   readonly aud: string | string[];
+  readonly azp?: string;
   readonly exp: number;
   readonly iat: number;
   readonly nbf?: number;
@@ -117,6 +118,7 @@ export async function createPkceAuthorizationRequest(params: {
   readonly redirectUri: string;
   readonly scope?: string;
   readonly prompt?: "login" | "consent";
+  readonly resource?: string;
 }): Promise<PkceAuthorizationRequest> {
   const issuer = normalizeIssuerUrl(params.issuerUrl);
   const verifier = randomUrlSafeString(48);
@@ -135,6 +137,9 @@ export async function createPkceAuthorizationRequest(params: {
   authUrl.searchParams.set("code_challenge_method", "S256");
   if (params.prompt) {
     authUrl.searchParams.set("prompt", params.prompt);
+  }
+  if (params.resource?.trim()) {
+    authUrl.searchParams.set("resource", params.resource.trim());
   }
 
   return {
@@ -174,6 +179,7 @@ export async function exchangeAuthorizationCode(params: {
   readonly code: string;
   readonly redirectUri: string;
   readonly codeVerifier: string;
+  readonly resource?: string;
   readonly fetchFn?: typeof fetch;
 }): Promise<MidTokenResponse> {
   const issuer = normalizeIssuerUrl(params.issuerUrl);
@@ -185,6 +191,7 @@ export async function exchangeAuthorizationCode(params: {
       code: params.code,
       redirect_uri: params.redirectUri,
       code_verifier: params.codeVerifier,
+      ...(params.resource?.trim() ? { resource: params.resource.trim() } : {}),
     },
     params.fetchFn,
   );
@@ -196,6 +203,7 @@ export async function refreshAccessTokens(params: {
   readonly clientId: string;
   readonly refreshToken: string;
   readonly scope?: string;
+  readonly resource?: string;
   readonly fetchFn?: typeof fetch;
 }): Promise<MidTokenResponse> {
   const issuer = normalizeIssuerUrl(params.issuerUrl);
@@ -204,6 +212,7 @@ export async function refreshAccessTokens(params: {
     client_id: params.clientId,
     refresh_token: params.refreshToken,
     ...(params.scope ? { scope: params.scope } : {}),
+    ...(params.resource?.trim() ? { resource: params.resource.trim() } : {}),
   };
   return postTokenEndpoint(`${issuer}/oauth/token`, form, params.fetchFn);
 }
@@ -367,12 +376,35 @@ export function createJwksKeyResolver(options?: {
   };
 }
 
+function normalizeExpectedAudiences(
+  expectedAudience: string | readonly string[],
+): readonly string[] {
+  const raw = typeof expectedAudience === "string" ? [expectedAudience] : expectedAudience;
+  return raw.map((entry) => (typeof entry === "string" ? entry.trim() : "")).filter(Boolean);
+}
+
+function extractJwtAudiences(rawAud: unknown): readonly string[] | null {
+  if (typeof rawAud === "string") {
+    return rawAud.trim().length > 0 ? [rawAud] : null;
+  }
+  if (Array.isArray(rawAud)) {
+    if (
+      rawAud.length === 0 ||
+      rawAud.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+    ) {
+      return null;
+    }
+    return rawAud as string[];
+  }
+  return null;
+}
+
 /** Verify an ES256 JWT issued by MoonWitness ID against a resolved P-256 public JWK. */
 export async function verifyEs256Jwt(params: {
   readonly token: string;
   readonly issuerUrl?: string;
   readonly expectedTokenUse?: "access" | "id";
-  readonly expectedAudience?: string;
+  readonly expectedAudience?: string | readonly string[];
   readonly expectedNonce?: string;
   readonly resolveJwkByKid: (kid: string) => Promise<PublicEs256Jwk | null>;
   readonly nowEpochSec?: number;
@@ -390,9 +422,15 @@ export async function verifyEs256Jwt(params: {
   if (params.expectedTokenUse && claims.token_use !== params.expectedTokenUse) return null;
   if (params.expectedNonce && claims.nonce !== params.expectedNonce) return null;
 
-  if (params.expectedAudience) {
-    const audList = Array.isArray(claims.aud) ? claims.aud : claims.aud ? [claims.aud] : [];
-    if (!audList.includes(params.expectedAudience)) return null;
+  if (params.expectedAudience !== undefined) {
+    const allowedAudiences = normalizeExpectedAudiences(params.expectedAudience);
+    if (allowedAudiences.length === 0) return null;
+
+    const tokenAudiences = extractJwtAudiences(claims.aud as unknown);
+    if (!tokenAudiences) return null;
+
+    const allowedSet = new Set(allowedAudiences);
+    if (!tokenAudiences.some((aud) => allowedSet.has(aud))) return null;
   }
 
   const nowSec = params.nowEpochSec ?? Math.floor(Date.now() / 1000);
@@ -405,7 +443,7 @@ export async function verifyEs256Jwt(params: {
   ) {
     return null;
   }
-  if (typeof claims.sub !== "string" || !claims.sub) return null;
+  if (typeof claims.sub !== "string" || !claims.sub.trim()) return null;
 
   const jwk = await params.resolveJwkByKid(decoded.header.kid);
   if (

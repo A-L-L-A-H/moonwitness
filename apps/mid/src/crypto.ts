@@ -258,11 +258,38 @@ export async function signEs256Jwt(
   return `${signingInput}.${encodeBase64Url(new Uint8Array(signature))}`;
 }
 
-/** Verify an ES256 JWT against a list of active public JWKs and check `iss` + `exp`. */
+function normalizeExpectedAudiences(
+  expectedAudience: string | readonly string[],
+): readonly string[] {
+  const raw = typeof expectedAudience === "string" ? [expectedAudience] : expectedAudience;
+  return raw.map((entry) => (typeof entry === "string" ? entry.trim() : "")).filter(Boolean);
+}
+
+function extractJwtAudiences(rawAud: unknown): readonly string[] | null {
+  if (typeof rawAud === "string") {
+    return rawAud.trim().length > 0 ? [rawAud] : null;
+  }
+  if (Array.isArray(rawAud)) {
+    if (
+      rawAud.length === 0 ||
+      rawAud.some((entry) => typeof entry !== "string" || entry.trim().length === 0)
+    ) {
+      return null;
+    }
+    return rawAud as string[];
+  }
+  return null;
+}
+
+/** Verify an ES256 JWT against active public JWKs, checking `iss`, `exp`, `token_use`, and `aud`. */
 export async function verifyEs256Jwt(
   token: string,
   publicJwks: PublicEs256Jwk[],
   expectedIssuer: string,
+  options?: {
+    expectedTokenUse?: "access" | "id";
+    expectedAudience?: string | readonly string[];
+  },
 ): Promise<MidTokenClaims | null> {
   const segments = token.split(".");
   if (segments.length !== 3 || !segments[0] || !segments[1] || !segments[2]) return null;
@@ -277,6 +304,36 @@ export async function verifyEs256Jwt(
   }
 
   if (header.alg !== "ES256" || !header.kid) return null;
+  const normalizedIssuer = expectedIssuer.replace(/\/+$/g, "");
+  if (claims.iss !== normalizedIssuer) return null;
+
+  if (options?.expectedTokenUse && claims.token_use !== options.expectedTokenUse) {
+    return null;
+  }
+
+  if (options?.expectedAudience !== undefined) {
+    const allowedAudiences = normalizeExpectedAudiences(options.expectedAudience);
+    if (allowedAudiences.length === 0) return null;
+
+    const tokenAudiences = extractJwtAudiences(claims.aud as unknown);
+    if (!tokenAudiences) return null;
+
+    const allowedSet = new Set(allowedAudiences);
+    if (!tokenAudiences.some((aud) => allowedSet.has(aud))) return null;
+  }
+
+  const nowSec = Math.floor(Date.now() / 1000);
+  if (typeof claims.exp !== "number" || !Number.isFinite(claims.exp) || claims.exp <= nowSec) {
+    return null;
+  }
+  if (
+    claims.nbf !== undefined &&
+    (typeof claims.nbf !== "number" || !Number.isFinite(claims.nbf) || claims.nbf > nowSec)
+  ) {
+    return null;
+  }
+  if (typeof claims.sub !== "string" || !claims.sub.trim()) return null;
+
   const matchingJwk = publicJwks.find((candidate) => candidate.kid === header.kid);
   if (!matchingJwk) return null;
 
@@ -294,7 +351,5 @@ export async function verifyEs256Jwt(
     toArrayBuffer(TEXT_ENCODER.encode(`${segments[0]}.${segments[1]}`)),
   );
   if (!signatureValid) return null;
-  if (claims.iss !== expectedIssuer) return null;
-  if (typeof claims.exp !== "number" || claims.exp <= Math.floor(Date.now() / 1000)) return null;
   return claims;
 }
