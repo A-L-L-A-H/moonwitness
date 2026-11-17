@@ -72,7 +72,7 @@ jobs:
           sha256sum dist-release/* > dist-release/SHA256SUMS.txt
 
       - name: Upload SBOM & Checksums Artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b5410d21290020b2d5b970862 # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-sbom-${{ github.sha }}
           path: dist-release/
