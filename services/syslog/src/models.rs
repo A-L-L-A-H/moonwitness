@@ -1,6 +1,8 @@
 use serde::Serialize;
 use sqlx::FromRow;
 
+use crate::metrics::MetricsSnapshot;
+
 #[derive(Debug, Clone, FromRow, Serialize)]
 pub struct SyslogMessage {
     pub id: String,
@@ -24,6 +26,7 @@ pub struct Stats {
     pub total_messages: i64,
     pub by_severity: Vec<SeverityCount>,
     pub recent_sources: Vec<String>,
+    pub metrics: MetricsSnapshot,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]
