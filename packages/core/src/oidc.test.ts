@@ -249,73 +249,98 @@ describe("@moonwitness/core oidc", () => {
     }
   });
 
-  it("refreshes cached JWKS on unseen kid during key rotation without hammering unknown kids", async () => {
+  it("refreshes JWKS on cache-miss for rotated signing keys and enforces nbf", async () => {
     const nowSec = Math.floor(Date.now() / 1000);
-    const k1 = await createSignedTestJwt({
-      kid: "rot-k1",
+    const firstKey = await createSignedTestJwt({
+      kid: "mid-k1",
       payload: {
         iss: "https://id.moonwitness.biz.id",
-        sub: "7",
-        aud: "igate-console",
+        sub: "42",
+        aud: "allah-sanctuary",
         exp: nowSec + 300,
         iat: nowSec,
-        token_use: "access",
+        nbf: nowSec - 5,
+        token_use: "id",
       },
     });
-    const k2 = await createSignedTestJwt({
-      kid: "rot-k2",
+    const rotatedKey = await createSignedTestJwt({
+      kid: "mid-k2",
       payload: {
         iss: "https://id.moonwitness.biz.id",
-        sub: "7",
-        aud: "igate-console",
+        sub: "42",
+        aud: "allah-sanctuary",
         exp: nowSec + 300,
         iat: nowSec,
-        token_use: "access",
+        token_use: "id",
+      },
+    });
+    const futureNbfJwt = await createSignedTestJwt({
+      kid: "mid-k2",
+      payload: {
+        iss: "https://id.moonwitness.biz.id",
+        sub: "42",
+        aud: "allah-sanctuary",
+        exp: nowSec + 600,
+        iat: nowSec,
+        nbf: nowSec + 120,
+        token_use: "id",
       },
     });
 
-    let activeKeys = [k1.publicJwk];
+    let activeJwks = [firstKey.publicJwk];
     let fetchCount = 0;
     const resolver = createJwksKeyResolver({
       issuerUrl: "https://id.moonwitness.biz.id",
-      ttlMs: 300_000,
       fetchFn: async () => {
         fetchCount += 1;
-        return new Response(JSON.stringify({ keys: activeKeys }), {
+        return new Response(JSON.stringify({ keys: activeJwks }), {
           status: 200,
           headers: { "content-type": "application/json" },
         });
       },
     });
 
-    expect(
-      await verifyEs256Jwt({
-        token: k1.jwt,
-        expectedTokenUse: "access",
-        expectedAudience: "igate-console",
-        resolveJwkByKid: resolver.resolveByKid,
-        nowEpochSec: nowSec,
-      }),
-    ).not.toBeNull();
+    const firstVerified = await verifyEs256Jwt({
+      token: firstKey.jwt,
+      expectedTokenUse: "id",
+      expectedAudience: "allah-sanctuary",
+      resolveJwkByKid: resolver.resolveByKid,
+      nowEpochSec: nowSec,
+    });
+    expect(firstVerified?.sub).toBe("42");
     expect(fetchCount).toBe(1);
 
-    // Rotate issuer keys within TTL.
-    activeKeys = [k1.publicJwk, k2.publicJwk];
-    expect(
-      await verifyEs256Jwt({
-        token: k2.jwt,
-        expectedTokenUse: "access",
-        expectedAudience: "igate-console",
-        resolveJwkByKid: resolver.resolveByKid,
-        nowEpochSec: nowSec,
-      }),
-    ).not.toBeNull();
+    // Rotate key on server without clearing resolver cache.
+    activeJwks = [rotatedKey.publicJwk];
+    const rotatedVerified = await verifyEs256Jwt({
+      token: rotatedKey.jwt,
+      expectedTokenUse: "id",
+      expectedAudience: "allah-sanctuary",
+      resolveJwkByKid: resolver.resolveByKid,
+      nowEpochSec: nowSec,
+    });
+    expect(rotatedVerified?.sub).toBe("42");
     expect(fetchCount).toBe(2);
 
-    // Unknown kid refreshes once then stays cached as a miss within TTL.
-    expect(await resolver.resolveByKid("unknown-kid")).toBeNull();
+    // Unknown kid refreshes once, then suppresses repeated unknown-kid lookups within TTL.
+    const unknown1 = await resolver.resolveByKid("mid-missing");
+    const unknown2 = await resolver.resolveByKid("mid-missing");
+    expect(unknown1).toBeNull();
+    expect(unknown2).toBeNull();
     expect(fetchCount).toBe(3);
-    expect(await resolver.resolveByKid("unknown-kid")).toBeNull();
-    expect(fetchCount).toBe(3);
+
+    // Future nbf must be rejected.
+    const rejectedFutureNbf = await verifyEs256Jwt({
+      token: futureNbfJwt.jwt,
+      expectedTokenUse: "id",
+      expectedAudience: "allah-sanctuary",
+      resolveJwkByKid: resolver.resolveByKid,
+      nowEpochSec: nowSec,
+    });
+    expect(rejectedFutureNbf).toBeNull();
+
+    // Non-object JWT segments must return null cleanly without throwing.
+    const nullSegment = encodeBase64Url(TEXT_ENCODER.encode("null"));
+    expect(decodeJwtParts(`${nullSegment}.${nullSegment}.sig`)).toBeNull();
   });
 });

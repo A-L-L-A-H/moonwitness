@@ -18,7 +18,7 @@ on:
 jobs:
   trivy:
     name: Trivy Security Scan
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     permissions:
       security-events: write
       contents: read

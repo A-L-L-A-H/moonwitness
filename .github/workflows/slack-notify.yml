@@ -9,7 +9,7 @@ jobs:
   notify:
     name: Notify Slack
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion != 'skipped'
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     steps:
       - name: Determine status
         id: status

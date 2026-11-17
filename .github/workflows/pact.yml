@@ -16,7 +16,7 @@ permissions:
 jobs:
   pact-consumer:
     name: Pact Consumer Tests
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -53,7 +53,7 @@ jobs:
   pact-provider:
     name: Pact Provider Verification
     needs: pact-consumer
-    runs-on: [self-hosted, vps]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
