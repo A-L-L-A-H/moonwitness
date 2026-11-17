@@ -37,6 +37,13 @@ impl Config {
             .unwrap_or_else(|_| (512 * 1024 * 1024).to_string())
             .parse::<u64>()?;
 
+        let allow_public_bind = std::env::var("ALLOW_PUBLIC_BIND")
+            .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false);
+        if !allow_public_bind && !is_private_or_loopback(&host) {
+            anyhow::bail!("HOST {host:?} is non-private; set ALLOW_PUBLIC_BIND=1 to override");
+        }
+
         Ok(Config {
             host,
             http_port,
@@ -47,5 +54,16 @@ impl Config {
             allow_anonymous,
             max_object_size,
         })
+    }
+}
+
+fn is_private_or_loopback(host: &str) -> bool {
+    if host.eq_ignore_ascii_case("localhost") {
+        return true;
+    }
+    match host.parse::<std::net::IpAddr>() {
+        Ok(std::net::IpAddr::V4(ip)) => ip.is_loopback() || ip.is_private() || ip.is_link_local(),
+        Ok(std::net::IpAddr::V6(ip)) => ip.is_loopback(),
+        Err(_) => false,
     }
 }
