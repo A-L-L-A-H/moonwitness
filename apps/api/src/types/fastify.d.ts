@@ -4,6 +4,7 @@ import type { ITimelineUseCase } from "../domain/usecases/timeline/timeline.usec
 declare module "fastify" {
   interface FastifyInstance {
     timelineUseCase: ITimelineUseCase;
+    midMounted?: boolean;
   }
 
   interface FastifyRequest {

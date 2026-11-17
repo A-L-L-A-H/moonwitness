@@ -141,14 +141,18 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   await ensureProbesSchema();
 
   // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
-  if (env.MID_KEY_ENCRYPTION_SECRET) {
+  const midKeyEncryptionSecret =
+    process.env.MID_KEY_ENCRYPTION_SECRET?.trim() || env.MID_KEY_ENCRYPTION_SECRET;
+  if (midKeyEncryptionSecret) {
     await fastify.register(midFastifyPlugin, {
       db: createD1DatabaseFromOrm(getDb()),
-      keyEncryptionSecret: env.MID_KEY_ENCRYPTION_SECRET,
-      issuerUrl: env.MID_ISSUER_URL ?? "https://id.moonwitness.biz.id",
-      cookieDomain: env.MID_COOKIE_DOMAIN,
-      corsOrigins: env.CORS_ORIGINS,
+      keyEncryptionSecret: midKeyEncryptionSecret,
+      issuerUrl:
+        process.env.MID_ISSUER_URL?.trim() || env.MID_ISSUER_URL || "https://id.moonwitness.biz.id",
+      cookieDomain: process.env.MID_COOKIE_DOMAIN?.trim() || env.MID_COOKIE_DOMAIN,
+      corsOrigins: process.env.CORS_ORIGINS ?? env.CORS_ORIGINS,
     });
+    fastify.decorate("midMounted", true);
   }
 
   if (options.prefix) {

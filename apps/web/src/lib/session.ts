@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { getStoredMidAccessToken } from "./mid-oidc";
 
 export interface Session {
   identity: string;
@@ -9,10 +8,7 @@ export interface Session {
 }
 
 function buildAuthFetchInit(): RequestInit {
-  const token = getStoredMidAccessToken();
-  return token
-    ? { credentials: "include", headers: { authorization: `Bearer ${token}` } }
-    : { credentials: "include" };
+  return { credentials: "include" };
 }
 
 /**
