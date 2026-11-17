@@ -510,7 +510,7 @@ def trace_claim_provenance(db: sqlite3.Connection, claim_id: str) -> dict[str, A
 
     sources = _query_all(
         db,
-        "SELECT * FROM claim_sources WHERE claim_id=? ORDER BY created_at ASC, id ASC",
+        "SELECT * FROM claim_sources WHERE claim_id=? ORDER BY created_at ASC, rowid ASC",
         (claim_id,),
     )
     enriched_sources: list[dict[str, Any]] = []
@@ -538,7 +538,7 @@ def trace_claim_provenance(db: sqlite3.Connection, claim_id: str) -> dict[str, A
         """
         SELECT * FROM claim_relations
         WHERE source_claim_id=? OR target_claim_id=?
-        ORDER BY created_at ASC, id ASC
+        ORDER BY created_at ASC, rowid ASC
         """,
         (claim_id, claim_id),
     )
@@ -570,14 +570,14 @@ def export_witness_ledger(db: sqlite3.Connection) -> dict[str, Any]:
     return {
         "schema_version": 1,
         "exported_at": _utc_now(),
-        "claims": _query_all(db, "SELECT * FROM claims ORDER BY created_at ASC, id ASC"),
+        "claims": _query_all(db, "SELECT * FROM claims ORDER BY created_at ASC, rowid ASC"),
         "sources": _query_all(
-            db, "SELECT * FROM claim_sources ORDER BY created_at ASC, id ASC"
+            db, "SELECT * FROM claim_sources ORDER BY created_at ASC, rowid ASC"
         ),
         "revisions": _query_all(
             db, "SELECT * FROM claim_revisions ORDER BY claim_id ASC, revision_no ASC"
         ),
         "relations": _query_all(
-            db, "SELECT * FROM claim_relations ORDER BY created_at ASC, id ASC"
+            db, "SELECT * FROM claim_relations ORDER BY created_at ASC, rowid ASC"
         ),
     }
