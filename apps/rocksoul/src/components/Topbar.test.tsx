@@ -40,4 +40,43 @@ describe("Topbar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Settings" }));
     expect(onSettings).toHaveBeenCalledTimes(1);
   });
+
+  it("supports optional MoonWitness ID sign-in and signed-in @username state", () => {
+    const onSignIn = vi.fn();
+    const onSignOut = vi.fn();
+
+    const { rerender } = render(
+      <Topbar
+        repositories={[]}
+        selectedRepository=""
+        onRepositoryChange={vi.fn()}
+        onCommand={vi.fn()}
+        onSettings={vi.fn()}
+        identity={null}
+        onSignIn={onSignIn}
+        onSignOut={onSignOut}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /SIGN IN/i }));
+    expect(onSignIn).toHaveBeenCalledTimes(1);
+
+    rerender(
+      <Topbar
+        repositories={[]}
+        selectedRepository=""
+        onRepositoryChange={vi.fn()}
+        onCommand={vi.fn()}
+        onSettings={vi.fn()}
+        identity={{ username: "mwadmin", displayName: "MoonWitness Admin", role: "admin" }}
+        onSignIn={onSignIn}
+        onSignOut={onSignOut}
+      />,
+    );
+
+    expect(screen.getByText("@mwadmin")).toBeInTheDocument();
+    expect(screen.getByText("MW")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Sign out @mwadmin" }));
+    expect(onSignOut).toHaveBeenCalledTimes(1);
+  });
 });

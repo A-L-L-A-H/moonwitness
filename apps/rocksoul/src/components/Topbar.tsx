@@ -1,7 +1,13 @@
 import React from "react";
-import { Activity, ChevronDown, Command, FolderGit2, RefreshCw, Settings2 } from "lucide-react";
+import { Activity, ChevronDown, Command, FolderGit2, LogIn, LogOut, RefreshCw, Settings2 } from "lucide-react";
 import { CrimsonCrownSvg } from "./ui/RocksoulVectors";
 import type { Repository } from "../lib/contracts";
+
+export interface TopbarIdentity {
+  username: string;
+  displayName?: string | undefined;
+  role?: string | undefined;
+}
 
 export interface TopbarProps {
   repositories: Repository[];
@@ -12,6 +18,10 @@ export interface TopbarProps {
   onOpenMonitor?: (() => void) | undefined;
   onRefresh?: (() => void) | undefined;
   monitorSummary?: string | undefined;
+  identity?: TopbarIdentity | null | undefined;
+  identityBusy?: boolean | undefined;
+  onSignIn?: (() => void) | undefined;
+  onSignOut?: (() => void) | undefined;
 }
 
 export default function Topbar({
@@ -23,6 +33,10 @@ export default function Topbar({
   onOpenMonitor,
   onRefresh,
   monitorSummary,
+  identity,
+  identityBusy,
+  onSignIn,
+  onSignOut,
 }: TopbarProps) {
   return (
     <header className="topbar">
@@ -86,7 +100,42 @@ export default function Topbar({
         <button className="icon-button" aria-label="Settings" onClick={onSettings}>
           <Settings2 size={19} />
         </button>
-        <div className="avatar">RS</div>
+        {identity ? (
+          <div className="identity-chip">
+            <span
+              className="identity-handle"
+              title={`${identity.displayName || identity.username}${identity.role ? ` (${identity.role})` : ""}`}
+            >
+              @{identity.username}
+            </span>
+            {onSignOut && (
+              <button
+                type="button"
+                className="icon-button identity-signout-btn"
+                aria-label={`Sign out @${identity.username}`}
+                title="Sign out of MoonWitness ID"
+                disabled={identityBusy}
+                onClick={onSignOut}
+              >
+                <LogOut size={15} />
+              </button>
+            )}
+          </div>
+        ) : (
+          onSignIn && (
+            <button
+              type="button"
+              className="shortcut identity-signin-btn"
+              disabled={identityBusy}
+              onClick={onSignIn}
+              title="Sign in with MoonWitness ID (optional)"
+            >
+              <LogIn size={13} />
+              <span>{identityBusy ? "SIGNING IN…" : "SIGN IN"}</span>
+            </button>
+          )
+        )}
+        <div className="avatar">{identity ? identity.username.slice(0, 2).toUpperCase() : "RS"}</div>
       </div>
     </header>
   );

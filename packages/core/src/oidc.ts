@@ -202,10 +202,8 @@ export async function refreshAccessTokens(params: {
     grant_type: "refresh_token",
     client_id: params.clientId,
     refresh_token: params.refreshToken,
+    ...(params.scope ? { scope: params.scope } : {}),
   };
-  if (params.scope) {
-    form.scope = params.scope;
-  }
   return postTokenEndpoint(`${issuer}/oauth/token`, form, params.fetchFn);
 }
 

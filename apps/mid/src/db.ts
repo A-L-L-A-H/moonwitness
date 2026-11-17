@@ -104,6 +104,14 @@ const FIRST_PARTY_CLIENTS = [
     clientType: "public",
     firstParty: 1,
   },
+  {
+    clientId: "rocksoul-dx",
+    name: "ROCKSOUL - DX",
+    redirectUris: ["http://127.0.0.1/callback", "http://localhost:1420/auth/callback"],
+    allowedScopes: ["openid", "profile", "email", "offline_access"],
+    clientType: "public",
+    firstParty: 1,
+  },
 ] as const;
 
 /** Initialize MoonWitness ID schema tables and first-party OIDC clients once per DB binding. */
