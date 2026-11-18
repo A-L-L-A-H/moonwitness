@@ -212,7 +212,7 @@ pub async fn create_multipart_upload(
     state.object_path(&bucket, &key)?;
 
     let upload_id = uuid::Uuid::new_v4().to_string();
-    let metadata = collect_metadata(&headers);
+    let metadata = collect_upload_metadata(&headers);
 
     sqlx::query(
         "INSERT INTO multipart_uploads (upload_id, bucket, key, initiated_at, metadata_json) \
@@ -601,6 +601,8 @@ async fn persist_bytes(
     content_type: &str,
     body: &[u8],
 ) -> S3Result<(String, Option<String>)> {
+    // Validate S3 keys before either backend is allowed to persist them.
+    let _validated_path = state.object_path(bucket, key)?;
     match state.config.storage_backend {
         crate::config::StorageBackend::Filesystem => {
             let path = state.object_path(bucket, key)?;
@@ -646,6 +648,8 @@ async fn persist_file(
     content_type: &str,
     source_path: &std::path::Path,
 ) -> S3Result<(String, Option<String>)> {
+    // Validate S3 keys before either backend is allowed to persist them.
+    let _validated_path = state.object_path(bucket, key)?;
     match state.config.storage_backend {
         crate::config::StorageBackend::Filesystem => {
             let destination = state.object_path(bucket, key)?;
@@ -828,6 +832,29 @@ async fn cleanup_multipart(state: &AppState, upload_id: &str) -> S3Result<()> {
         }
     }
     Ok(())
+}
+
+fn collect_upload_metadata(headers: &HeaderMap) -> Option<String> {
+    let mut map = BTreeMap::new();
+    for (name, value) in headers.iter() {
+        if let Some(meta) = name
+            .as_str()
+            .strip_prefix("x-amz-meta-")
+            .or_else(|| name.as_str().strip_prefix("X-Amz-Meta-"))
+        {
+            if let Ok(value) = value.to_str() {
+                map.insert(meta.to_string(), value.to_string());
+            }
+        }
+    }
+    if let Some(content_type) = headers.get(header::CONTENT_TYPE).and_then(|value| value.to_str().ok()) {
+        map.insert("content-type".to_string(), content_type.to_string());
+    }
+    if map.is_empty() {
+        None
+    } else {
+        serde_json::to_string(&map).ok()
+    }
 }
 
 fn collect_metadata(headers: &HeaderMap) -> Option<String> {
