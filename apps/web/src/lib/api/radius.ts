@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/radius";
@@ -61,7 +62,7 @@ function asRecord(value: unknown): Record<string, unknown> {
 }
 
 async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, {
+  const response = await requestApiResponse(url, {
     credentials: "include",
     cache: "no-store",
     signal,
@@ -78,7 +79,7 @@ async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
 }
 
 async function mutateJson<T>(url: string, init: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: "include", ...init });
+  const response = await requestApiResponse(url, { credentials: "include", ...init });
   const text = await response.text();
   if (!response.ok) {
     let message = `HTTP ${response.status}`;
@@ -180,7 +181,7 @@ export function useDeleteRadiusUser() {
   const invalidate = useRadiusUserInvalidation();
   return useMutation({
     mutationFn: async (username: string) => {
-      const response = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}`, {
+      const response = await requestApiResponse(`${API_BASE}/users/${encodeURIComponent(username)}`, {
         method: "DELETE",
         credentials: "include",
       });

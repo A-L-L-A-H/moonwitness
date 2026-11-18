@@ -12,6 +12,7 @@ import {
   Sticker,
   Tape,
   ZineCardRough,
+  NativeSelect,
 } from "@moonwitness/ui";
 import { Crown, Star4 } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
@@ -457,7 +458,7 @@ function CrewAndPlatformAuditSection() {
             placeholder="Display Name"
             className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
           />
-          <select
+          <NativeSelect
             value={role}
             onChange={(e) => setRole(e.target.value as CrewRoleName)}
             className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
@@ -465,7 +466,7 @@ function CrewAndPlatformAuditSection() {
             <option value="viewer">viewer</option>
             <option value="editor">editor</option>
             <option value="admin">admin</option>
-          </select>
+          </NativeSelect>
           <input
             type="password"
             required
@@ -503,7 +504,7 @@ function CrewAndPlatformAuditSection() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <select
+                  <NativeSelect
                     aria-label={`Role for ${crew.username}`}
                     disabled={isSelf || updateRoleMutation.isPending}
                     value={crew.role}
@@ -518,7 +519,7 @@ function CrewAndPlatformAuditSection() {
                     <option value="viewer">viewer</option>
                     <option value="editor">editor</option>
                     <option value="admin">admin</option>
-                  </select>
+                  </NativeSelect>
                   {!isSelf && (
                     <button
                       type="button"

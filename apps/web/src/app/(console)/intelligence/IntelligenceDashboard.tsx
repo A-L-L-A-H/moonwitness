@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { SRGBL_V8_STAGES } from "@moonwitness/canon";
-import { CutoutArtwork, RadialGauge, SkinOrnament, Sparkline } from "@moonwitness/ui";
+import { CutoutArtwork, RadialGauge, SkinOrnament, Sparkline , NativeSelect } from "@moonwitness/ui";
 import { MtimeHorizon } from "@moonwitness/ui/icons";
 import {
   useRiotAiChat,
@@ -430,7 +430,7 @@ export function IntelligenceDashboard({
               </label>
               <label className="block text-xs text-[var(--muted-foreground)]">
                 Approved model preference
-                <select
+                <NativeSelect
                   value={configModel}
                   onChange={(event) => setConfigModel(event.target.value)}
                   disabled={modelsLoading || models.length === 0}
@@ -442,7 +442,7 @@ export function IntelligenceDashboard({
                       {model.name} ({model.id})
                     </option>
                   ))}
-                </select>
+                </NativeSelect>
               </label>
               <label className="flex min-h-11 items-center gap-3 text-sm text-[var(--foreground)]">
                 <input

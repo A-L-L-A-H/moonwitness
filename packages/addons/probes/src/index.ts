@@ -3,6 +3,7 @@ import { getDb, SYSTEM_ACTOR } from "@moonwitness/orm";
 import type {
   AddonDefinition,
   AddonManifestInput,
+  IrMenuInput,
   IrRuleInput,
   IrViewInput,
 } from "@moonwitness/addon-base";
@@ -106,6 +107,18 @@ export const probesViews: IrViewInput[] = [
   },
 ];
 
+export const probesMenus: IrMenuInput[] = [
+  {
+    menu_key: "probes.targets",
+    label: "Probe Targets",
+    href: "/models/probe.node",
+    icon: "snmp",
+    plane: "operations",
+    sort_order: 35,
+    min_role: "viewer",
+  },
+];
+
 export function createProbesAddon(
   options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
 ): AddonDefinition {
@@ -114,6 +127,7 @@ export function createProbesAddon(
     models: [probeNodeModel, probeEventModel, opsEventModel],
     rules: probesRules,
     views: probesViews,
+    menus: probesMenus,
     register: async () => {
       await importLegacyProbes();
     },

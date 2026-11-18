@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import type { MissionAlert, Workflow } from "@moonwitness/types";
 
 const API_BASE = "/api/v1";
@@ -38,7 +39,7 @@ export class CommandCenterApiError extends Error {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await requestApiResponse(`${API_BASE}${path}`, {
     ...init,
     credentials: "include",
     cache: "no-store",

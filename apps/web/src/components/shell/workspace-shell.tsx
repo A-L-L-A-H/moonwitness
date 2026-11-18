@@ -1,9 +1,9 @@
 "use client";
 
+import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSavedAvatar } from "@/lib/avatar-store";
-import { buildCsrfLogoutInit } from "@/lib/api/auth";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { useSkin } from "@moonwitness/ui";
@@ -75,7 +75,7 @@ export function WorkspaceShell({
 
   function exitShadow() {
     clearStoredMidSession();
-    fetch("/api/v1/auth/logout", buildCsrfLogoutInit()).catch(() => {});
+    moonwitnessSdk.auth.logout().catch(() => {});
     router.push("/");
   }
 

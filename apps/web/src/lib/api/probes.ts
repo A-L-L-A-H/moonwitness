@@ -1,4 +1,5 @@
 "use client";
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 
 const API_BASE = "/api/v1";
 
@@ -43,7 +44,7 @@ export class ProbesApiError extends Error {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await requestApiResponse(`${API_BASE}${path}`, {
     ...init,
     credentials: "include",
     cache: "no-store",

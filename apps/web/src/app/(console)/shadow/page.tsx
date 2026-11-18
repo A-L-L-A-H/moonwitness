@@ -1,5 +1,6 @@
 "use client";
 
+import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -29,9 +30,9 @@ export default function ShadowPage() {
 
   useEffect(() => {
     let active = true;
-    fetch("/api/v1/control/setup/status", { credentials: "include", cache: "no-store" })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((payload: { initialized?: boolean } | null) => {
+    moonwitnessSdk.auth
+      .setupStatus()
+      .then((payload) => {
         if (active && payload && payload.initialized === false) {
           setNeedsSetup(true);
         }

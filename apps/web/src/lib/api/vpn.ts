@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/control";
@@ -46,7 +47,7 @@ export interface VPNStatus {
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
+  const res = await requestApiResponse(url, {
     credentials: "include",
     cache: "no-store",
     headers: init?.body ? { "content-type": "application/json" } : undefined,

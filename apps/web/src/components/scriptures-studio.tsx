@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -150,7 +151,7 @@ export function ScripturesStudio() {
     async function runSearch() {
       setLoading(true);
       try {
-        const res = await fetch(
+        const res = await requestApiResponse(
           `/api/scriptures?corpus=${encodeURIComponent(corpusFilter)}&q=${encodeURIComponent(query)}&limit=12`,
           {
             cache: "no-store",

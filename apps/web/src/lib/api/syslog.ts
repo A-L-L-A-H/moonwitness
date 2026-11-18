@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1";
@@ -28,7 +29,7 @@ export interface SyslogStats {
 }
 
 async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(url, { credentials: "include", cache: "no-store", signal });
+  const res = await requestApiResponse(url, { credentials: "include", cache: "no-store", signal });
   if (!res.ok) {
     const body: unknown = await res.json().catch(() => null);
     const message =

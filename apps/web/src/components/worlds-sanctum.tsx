@@ -1,5 +1,7 @@
 "use client";
 
+import { NativeSelect } from "@moonwitness/ui";
+import { artPlateSrc } from "@/lib/art";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
@@ -850,7 +852,7 @@ export function WorldsSanctum({
                           >
                             Sacred Seal
                           </label>
-                          <select
+                          <NativeSelect
                             id="qalam-seal-select"
                             value={draftSeal}
                             onChange={(e) => setDraftSeal(e.target.value)}
@@ -861,7 +863,7 @@ export function WorldsSanctum({
                                 {sealOption}
                               </option>
                             ))}
-                          </select>
+                          </NativeSelect>
                         </div>
                       </div>
                       <div>
@@ -953,7 +955,7 @@ export function WorldsSanctum({
                           className="relative h-60 sm:h-64 w-full overflow-hidden border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] shadow-[inset_0_0_28px_rgba(0,0,0,0.88)]"
                         >
                           <Image
-                            src="/art/sidra-lote-constellation.webp"
+                            src={artPlateSrc("sidra-lote-constellation")}
                             alt=""
                             fill
                             sizes="(max-width: 768px) 100vw, 480px"

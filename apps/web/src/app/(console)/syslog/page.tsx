@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { CutoutArtwork, RooftopAntennaArt, SkinOrnament } from "@moonwitness/ui";
+import { CutoutArtwork, RooftopAntennaArt, SkinOrnament , NativeSelect } from "@moonwitness/ui";
 import { SyslogStream } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
@@ -98,7 +98,7 @@ function SyslogExplorer() {
           </label>
           <label className="block text-xs text-[var(--muted-foreground)] sm:w-56">
             Severity
-            <select
+            <NativeSelect
               value={severity}
               onChange={(event) => setSeverity(event.target.value)}
               className="mt-1 min-h-11 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)]"
@@ -109,7 +109,7 @@ function SyslogExplorer() {
                   {value} · {name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
         </section>
         <button

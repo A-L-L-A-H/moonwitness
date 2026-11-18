@@ -47,6 +47,7 @@ import {
   type CanonicalDensity,
   type MasterDnaId,
   type ThemeMode,
+  NativeSelect,
 } from "@moonwitness/ui";
 import {
   ArsyRelay,
@@ -408,7 +409,7 @@ export function SkinLaboratory() {
                   onChange={(e) => setSampleInput(e.target.value)}
                   className={`min-h-11 w-full px-3 py-2 text-sm outline-none ${activeWorld.inputClass}`}
                 />
-                <select
+                <NativeSelect
                   aria-label="DNA sample lens"
                   value={selectValue}
                   onChange={(e) => setSelectValue(e.target.value)}
@@ -417,7 +418,7 @@ export function SkinLaboratory() {
                   <option value="witness">Lens 01 · Witness</option>
                   <option value="promise">Lens 02 · Heart &amp; Promise</option>
                   <option value="research">Lens 04 · Research &amp; Journey</option>
-                </select>
+                </NativeSelect>
               </div>
 
               {/* 5. Tabs */}

@@ -3,7 +3,7 @@
 import { Grid, List } from "@moonwitness/ui/icons";
 
 import type { Era, EraId } from "@moonwitness/types";
-import { cn } from "@moonwitness/ui";
+import { cn , NativeSelect } from "@moonwitness/ui";
 
 export type SortKey = "newest" | "oldest";
 
@@ -74,7 +74,7 @@ export function FilterBar({
         <label className="sr-only" htmlFor="dock-sort">
           Sort events
         </label>
-        <select
+        <NativeSelect
           id="dock-sort"
           value={sort}
           onChange={(e) => onSortChange(e.target.value as SortKey)}
@@ -82,7 +82,7 @@ export function FilterBar({
         >
           <option value="newest">Sort: Newest First</option>
           <option value="oldest">Sort: Oldest First</option>
-        </select>
+        </NativeSelect>
 
         <div
           className="flex rounded-md border border-[var(--border)]"

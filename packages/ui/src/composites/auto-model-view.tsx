@@ -6,7 +6,10 @@ import { cn } from "../cn";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Checkbox } from "../components/ui/checkbox";
 import { Input } from "../components/ui/input";
+import { NativeSelect } from "../components/ui/native-select";
+import { Textarea } from "../components/ui/textarea";
 import {
   ArsyRelay,
   MemoryTapeNode,
@@ -53,7 +56,18 @@ export interface AutoModelViewDescriptor {
   readonly domainIcon?: string;
   readonly cutoutId?: CutoutArtworkId;
   readonly fields: readonly AutoModelFieldSpec[];
+  /** Ordered subset of field names shown in list mode (ir.view spec.columns). */
+  readonly columns?: readonly string[];
+  readonly defaultViewMode?: "list" | "kanban";
   readonly acl?: Partial<AutoModelAcl>;
+}
+
+export interface AutoModelHistoryEntry {
+  readonly id: string;
+  readonly action: string;
+  readonly changed_by: string | null;
+  readonly changed_at: string;
+  readonly entity_version: number;
 }
 
 export interface AutoModelRow extends Record<string, unknown> {
@@ -80,6 +94,7 @@ export interface AutoModelViewProps {
   onRestore?: (id: string) => Promise<void> | void;
   onDelete?: (id: string) => Promise<void> | void;
   customActions?: readonly AutoModelCustomAction[];
+  onInspectHistory?: (id: string) => Promise<readonly AutoModelHistoryEntry[]>;
   className?: string;
   skin?: SkinName;
 }
@@ -124,6 +139,7 @@ export function AutoModelView({
   onRestore,
   onDelete,
   customActions = [],
+  onInspectHistory,
   className,
   skin: explicitSkin,
 }: AutoModelViewProps) {
@@ -144,6 +160,43 @@ export function AutoModelView({
   const [submitting, setSubmitting] = useState(false);
 
   const DomainIcon = DOMAIN_ICON_MAP[descriptor.domainIcon ?? "arsy"] ?? ArsyRelay;
+  const visibleFields = useMemo(() => {
+    const wanted = descriptor.columns;
+    if (!wanted || wanted.length === 0) return descriptor.fields;
+    const ordered = wanted
+      .map((name) => descriptor.fields.find((f) => f.name === name))
+      .filter((f): f is AutoModelFieldSpec => f !== undefined);
+    return ordered.length > 0 ? ordered : descriptor.fields;
+  }, [descriptor.columns, descriptor.fields]);
+  const groupField = useMemo(
+    () =>
+      descriptor.fields.find((f) => f.name === "status") ??
+      descriptor.fields.find((f) => f.type === "select"),
+    [descriptor.fields],
+  );
+  const [viewMode, setViewMode] = useState<"list" | "kanban">(
+    groupField ? (descriptor.defaultViewMode ?? "list") : "list",
+  );
+  const [historyRowId, setHistoryRowId] = useState<string | null>(null);
+  const [historyEntries, setHistoryEntries] = useState<readonly AutoModelHistoryEntry[]>([]);
+  const [historyBusy, setHistoryBusy] = useState(false);
+
+  async function inspectHistory(id: string) {
+    if (!onInspectHistory) return;
+    if (historyRowId === id) {
+      setHistoryRowId(null);
+      return;
+    }
+    setHistoryRowId(id);
+    setHistoryBusy(true);
+    try {
+      setHistoryEntries(await onInspectHistory(id));
+    } catch {
+      setHistoryEntries([]);
+    } finally {
+      setHistoryBusy(false);
+    }
+  }
   const editableFields = useMemo(
     () => descriptor.fields.filter((f) => !f.readonly),
     [descriptor.fields],
@@ -295,6 +348,18 @@ export function AutoModelView({
             aria-label={`Filter ${descriptor.model}`}
             className="w-48 sm:w-60"
           />
+          {groupField ? (
+            <Button
+              skin={activeSkin}
+              type="button"
+              size="sm"
+              variant="outline"
+              aria-pressed={viewMode === "kanban"}
+              onClick={() => setViewMode((mode) => (mode === "list" ? "kanban" : "list"))}
+            >
+              {viewMode === "list" ? "KANBAN" : "LIST"}
+            </Button>
+          ) : null}
           {acl.canCreate && onCreate ? (
             <Button skin={activeSkin} type="button" size="sm" onClick={openCreateForm}>
               + Create
@@ -356,12 +421,12 @@ export function AutoModelView({
                     </span>
 
                     {field.type === "select" && field.selection ? (
-                      <select
+                      <NativeSelect
+                        skin={activeSkin}
                         value={String(value ?? "")}
                         onChange={(e) =>
                           setDraftValues((prev) => ({ ...prev, [field.name]: e.target.value }))
                         }
-                        className="h-9 w-full border border-[var(--border)] bg-[var(--card)] px-2.5 text-xs text-[var(--foreground)]"
                       >
                         <option value="">Select {field.label}</option>
                         {field.selection.map((opt) => (
@@ -369,27 +434,28 @@ export function AutoModelView({
                             {opt}
                           </option>
                         ))}
-                      </select>
+                      </NativeSelect>
                     ) : field.type === "boolean" ? (
                       <div className="flex items-center gap-2 py-1.5">
-                        <input
-                          type="checkbox"
+                        <Checkbox
+                          skin={activeSkin}
                           checked={Boolean(value)}
-                          onChange={(e) =>
-                            setDraftValues((prev) => ({ ...prev, [field.name]: e.target.checked }))
+                          aria-label={field.label}
+                          onCheckedChange={(checked) =>
+                            setDraftValues((prev) => ({ ...prev, [field.name]: checked === true }))
                           }
                         />
                         <span>{value ? "Enabled" : "Disabled"}</span>
                       </div>
                     ) : field.type === "textarea" ? (
-                      <textarea
+                      <Textarea
+                        skin={activeSkin}
                         rows={2}
                         value={String(value ?? "")}
                         placeholder={field.placeholder}
                         onChange={(e) =>
                           setDraftValues((prev) => ({ ...prev, [field.name]: e.target.value }))
                         }
-                        className="w-full border border-[var(--border)] bg-[var(--card)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
                       />
                     ) : (
                       <Input
@@ -443,12 +509,60 @@ export function AutoModelView({
               </div>
             </div>
           </div>
+        ) : viewMode === "kanban" && groupField ? (
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" data-mw-view-mode="kanban">
+            {Array.from(
+              new Set(filteredRows.map((row) => formatCellValue(resolveFieldValue(row, groupField)))),
+            ).map((group) => (
+              <section
+                key={group}
+                aria-label={`${groupField.label}: ${group}`}
+                className="space-y-2 border border-[var(--border)] bg-[var(--background)] p-2"
+              >
+                <header className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
+                  <Badge skin={activeSkin} variant="outline">
+                    {group}
+                  </Badge>
+                  <span>
+                    {
+                      filteredRows.filter(
+                        (row) => formatCellValue(resolveFieldValue(row, groupField)) === group,
+                      ).length
+                    }
+                  </span>
+                </header>
+                {filteredRows
+                  .filter((row) => formatCellValue(resolveFieldValue(row, groupField)) === group)
+                  .map((row) => (
+                    <article
+                      key={row.id}
+                      className="space-y-1 border border-[var(--border)] bg-[var(--card)] p-2 text-xs"
+                    >
+                      <div className="font-semibold text-[var(--foreground)]">
+                        {formatCellValue(resolveFieldValue(row, visibleFields[0] ?? groupField))}
+                      </div>
+                      {acl.canUpdate && onUpdate ? (
+                        <Button
+                          skin={activeSkin}
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openEditForm(row)}
+                        >
+                          Edit
+                        </Button>
+                      ) : null}
+                    </article>
+                  ))}
+              </section>
+            ))}
+          </div>
         ) : (
           <div className="overflow-x-auto border border-[var(--border)]">
             <table className="w-full border-collapse text-left text-xs">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--muted)]/60 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
-                  {descriptor.fields.map((field) => (
+                  {visibleFields.map((field) => (
                     <th key={field.name} className="px-3 py-2">
                       {field.label}
                       {field.isCustom ? " *" : ""}
@@ -458,6 +572,7 @@ export function AutoModelView({
                   acl.canDelete ||
                   onArchive ||
                   onRestore ||
+                  onInspectHistory ||
                   customActions.length > 0 ? (
                     <th className="px-3 py-2 text-right">Actions</th>
                   ) : null}
@@ -469,18 +584,40 @@ export function AutoModelView({
                     key={row.id}
                     className="border-b border-[var(--border)]/60 transition-colors hover:bg-[var(--muted)]/35"
                   >
-                    {descriptor.fields.map((field) => (
-                      <td key={field.name} className="px-3 py-2 text-[var(--foreground)]">
-                        {formatCellValue(resolveFieldValue(row, field))}
-                      </td>
-                    ))}
+                    {visibleFields.map((field) => {
+                      const rawVal = resolveFieldValue(row, field);
+                      const textVal = formatCellValue(rawVal);
+                      return (
+                        <td key={field.name} className="px-3 py-2 text-[var(--foreground)]">
+                          {field.type === "boolean" || field.name === "status" ? (
+                            <Badge skin={activeSkin} variant="outline">
+                              {textVal}
+                            </Badge>
+                          ) : (
+                            textVal
+                          )}
+                        </td>
+                      );
+                    })}
                     {acl.canUpdate ||
                     acl.canDelete ||
                     onArchive ||
                     onRestore ||
+                    onInspectHistory ||
                     customActions.length > 0 ? (
                       <td className="px-3 py-2 text-right">
                         <div className="inline-flex items-center gap-1.5">
+                          {onInspectHistory ? (
+                            <Button
+                              skin={activeSkin}
+                              type="button"
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => void inspectHistory(row.id)}
+                            >
+                              History
+                            </Button>
+                          ) : null}
                           {acl.canUpdate && onUpdate ? (
                             <Button
                               skin={activeSkin}
@@ -546,6 +683,45 @@ export function AutoModelView({
             </table>
           </div>
         )}
+
+        {historyRowId ? (
+          <div className="space-y-2 border border-[var(--border)] bg-[var(--background)] p-3 text-xs">
+            <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
+              <span>Audit History · {historyRowId}</span>
+              <Button
+                skin={activeSkin}
+                type="button"
+                size="sm"
+                variant="ghost"
+                onClick={() => setHistoryRowId(null)}
+              >
+                Close
+              </Button>
+            </div>
+            {historyBusy ? (
+              <p className="text-[var(--muted-foreground)]">Loading audit entries…</p>
+            ) : historyEntries.length === 0 ? (
+              <p className="text-[var(--muted-foreground)]">No audit entries recorded.</p>
+            ) : (
+              <ul className="space-y-1 font-mono text-[11px]">
+                {historyEntries.slice(0, 8).map((entry) => (
+                  <li
+                    key={entry.id}
+                    className="flex items-center justify-between border border-[var(--border)] px-2 py-1"
+                  >
+                    <span>
+                      <strong>{entry.action}</strong> v{entry.entity_version}
+                    </span>
+                    <span className="text-[var(--muted-foreground)]">
+                      {entry.changed_by ?? "system"} ·{" "}
+                      {new Date(entry.changed_at).toLocaleDateString()}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

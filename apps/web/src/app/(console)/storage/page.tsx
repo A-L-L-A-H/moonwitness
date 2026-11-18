@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IndustrialBatteryArt, SkinOrnament } from "@moonwitness/ui";
+import { IndustrialBatteryArt, SkinOrnament , NativeSelect } from "@moonwitness/ui";
 import { StorageBucket } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
@@ -263,7 +263,7 @@ function UploadObjectForm({ uploadObject }: { uploadObject: ReturnType<typeof us
       </label>
       <label className="block text-xs text-[var(--muted-foreground)] sm:w-56">
         Content-Type
-        <select
+        <NativeSelect
           value={
             (CONTENT_TYPES as readonly string[]).includes(contentType)
               ? contentType
@@ -277,7 +277,7 @@ function UploadObjectForm({ uploadObject }: { uploadObject: ReturnType<typeof us
               {type}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </label>
       <button
         type="submit"

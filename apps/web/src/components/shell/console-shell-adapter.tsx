@@ -1,5 +1,6 @@
 "use client";
 
+import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -7,7 +8,6 @@ import { ConsoleShell, Input, type HudNavItem } from "@moonwitness/ui";
 import { Crown, SearchIcon } from "@moonwitness/ui/icons";
 import { ConsoleCommandPalette } from "@/components/console-command-palette";
 import { useSavedAvatar } from "@/lib/avatar-store";
-import { buildCsrfLogoutInit } from "@/lib/api/auth";
 import { useMetaNavigation } from "@/lib/api/meta-views";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
@@ -63,7 +63,7 @@ export function ConsoleShellAdapter({
 
   function exitShadow() {
     clearStoredMidSession();
-    fetch("/api/v1/auth/logout", buildCsrfLogoutInit()).catch(() => {});
+    moonwitnessSdk.auth.logout().catch(() => {});
     router.push("/");
   }
 
@@ -92,7 +92,6 @@ export function ConsoleShellAdapter({
       linkAs={Link}
       headerStart={
         <>
-          <Crown className="h-4 w-6 text-[var(--blue)]" />
           <Link href={rootHref} className="inline-flex min-h-11 items-center hover:underline">
             <span>{operations ? "Operations" : "The Empire"}</span>
           </Link>

@@ -10,12 +10,16 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Checkbox,
   CutoutArtwork,
   Input,
+  NativeSelect,
   SkinOrnament,
   type AutoModelCustomAction,
+  type AutoModelHistoryEntry,
   type CutoutArtworkId,
 } from "@moonwitness/ui";
+import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import { SkinPalette } from "@moonwitness/ui/icons";
 import { useCurrentIdentity } from "@/lib/session";
 import {
@@ -52,7 +56,7 @@ export function AutoModelConsole({
     loading: rowsLoading,
     error: rowsError,
     reload: reloadRows,
-  } = useModelRows(model, view?.actionBindings.listUrl);
+  } = useModelRows(model, view?.actionBindings.listUrl, view?.restEnabled);
 
   const [studioOpen, setStudioOpen] = useState(false);
   const [fieldName, setFieldName] = useState("");
@@ -225,15 +229,19 @@ export function AutoModelConsole({
                 <span className="font-mono uppercase text-[var(--muted-foreground)]">
                   Field Type
                 </span>
-                <select
+                <NativeSelect
                   value={fieldType}
                   onChange={(e) =>
                     setFieldType(
                       e.target.value as
-                        "text" | "integer" | "real" | "boolean" | "date" | "selection",
+                        | "text"
+                        | "integer"
+                        | "real"
+                        | "boolean"
+                        | "date"
+                        | "selection",
                     )
                   }
-                  className="flex h-10 w-full rounded-[var(--radius)] border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)]"
                 >
                   <option value="text">Text</option>
                   <option value="integer">Integer</option>
@@ -241,7 +249,7 @@ export function AutoModelConsole({
                   <option value="boolean">Boolean</option>
                   <option value="date">Date</option>
                   <option value="selection">Selection</option>
-                </select>
+                </NativeSelect>
               </label>
               {fieldType === "selection" ? (
                 <label className="space-y-1 text-xs">
@@ -256,10 +264,10 @@ export function AutoModelConsole({
                 </label>
               ) : null}
               <label className="flex items-center gap-2 text-xs sm:col-span-2">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={fieldRequired}
-                  onChange={(e) => setFieldRequired(e.target.checked)}
+                  aria-label="Required field"
+                  onCheckedChange={(checked) => setFieldRequired(checked === true)}
                 />
                 <span>Required field</span>
               </label>
@@ -278,6 +286,12 @@ export function AutoModelConsole({
         rows={visibleRows}
         loading={rowsLoading}
         error={rowsError}
+        onInspectHistory={async (id) => {
+          const res = await moonwitnessSdk
+            .model(model)
+            .history<AutoModelHistoryEntry>(id, bindings.historyUrl);
+          return res.data ?? [];
+        }}
         onCreate={
           bindings.createUrl
             ? async (values) => {

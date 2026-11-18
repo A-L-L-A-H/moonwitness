@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1";
@@ -69,7 +70,7 @@ export function sanitizeSnmpDevices(devices: SnmpDevice[]): SafeSnmpDevice[] {
 }
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, { ...init, credentials: "include" });
+  const res = await requestApiResponse(url, { ...init, credentials: "include" });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error ?? `HTTP ${res.status}`);
@@ -159,7 +160,7 @@ export function useCreateSnmpDevice() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreateDeviceRequest) => {
-      const res = await fetch(`${API_BASE}/snmp/devices`, {
+      const res = await requestApiResponse(`${API_BASE}/snmp/devices`, {
         method: "POST",
         credentials: "include",
         headers: { "content-type": "application/json" },
@@ -176,7 +177,7 @@ export function useDeleteSnmpDevice() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${API_BASE}/snmp/devices/${id}`, {
+      const res = await requestApiResponse(`${API_BASE}/snmp/devices/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -190,7 +191,7 @@ export function useCreateSnmpTarget(deviceId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (data: CreateTargetRequest) => {
-      const res = await fetch(`${API_BASE}/snmp/devices/${deviceId}/targets`, {
+      const res = await requestApiResponse(`${API_BASE}/snmp/devices/${deviceId}/targets`, {
         method: "POST",
         credentials: "include",
         headers: { "content-type": "application/json" },
@@ -207,7 +208,7 @@ export function useDeleteSnmpTarget() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`${API_BASE}/snmp/targets/${id}`, {
+      const res = await requestApiResponse(`${API_BASE}/snmp/targets/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

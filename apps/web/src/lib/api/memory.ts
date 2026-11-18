@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/memory";
@@ -54,7 +55,7 @@ export interface MemoryKnowledgeResponse {
 }
 
 async function requestMemoryJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, {
+  const response = await requestApiResponse(url, {
     credentials: "include",
     cache: "no-store",
     signal,

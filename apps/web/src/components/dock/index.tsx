@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import type { EraId, EventKind, TimelineEvent } from "@moonwitness/types";
 import { ConsoleShellAdapter } from "../shell/console-shell-adapter";
 import { Star4 } from "@moonwitness/ui/icons";
-import { EraBand } from "@moonwitness/ui";
+import { EraBand , NativeSelect } from "@moonwitness/ui";
 import { DockHero } from "./hero";
 import { FilterBar, type SortKey } from "./filter-bar";
 import { EventList } from "./event-list";
@@ -329,7 +329,7 @@ export function Dock() {
               </label>
               <label className="text-xs text-[var(--foreground)]">
                 <span className="mb-1 block font-mono text-[10px] tracking-widest">KIND *</span>
-                <select
+                <NativeSelect
                   value={newKind}
                   onChange={(e) => setNewKind(e.target.value as EventKind)}
                   className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
@@ -340,11 +340,11 @@ export function Dock() {
                   <option value="WORLD">WORLD</option>
                   <option value="PEOPLE">PEOPLE</option>
                   <option value="RESEARCH">RESEARCH</option>
-                </select>
+                </NativeSelect>
               </label>
               <label className="text-xs text-[var(--foreground)]">
                 <span className="mb-1 block font-mono text-[10px] tracking-widest">ERA *</span>
-                <select
+                <NativeSelect
                   value={newEra}
                   onChange={(e) => setNewEra(e.target.value as EraId)}
                   className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
@@ -354,7 +354,7 @@ export function Dock() {
                   <option value="fracture">fracture</option>
                   <option value="rebuilding">rebuilding</option>
                   <option value="expansions">expansions</option>
-                </select>
+                </NativeSelect>
               </label>
               <label className="text-xs text-[var(--foreground)]">
                 <span className="mb-1 block font-mono text-[10px] tracking-widest">DATE *</span>
