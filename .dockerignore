@@ -20,9 +20,9 @@ playwright-report
 .raw_archives
 apps/rocksoul/src-tauri/target
 apps/rocksoul/shots
-apps/memory/venv
-apps/memory/data
-apps/memory/**/__pycache__
+services/memory/venv
+services/memory/data
+services/memory/**/__pycache__
 .pytest_cache
 venv
 .venv

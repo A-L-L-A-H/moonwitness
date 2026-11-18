@@ -7,7 +7,7 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FORBIDDEN_PUSH_BRANCHES, getBranchAudit, isAllowedBranchName } from "./branch-guard.mjs";
@@ -365,8 +365,32 @@ function stepCommitMessages(gate) {
   }
 }
 
+const EXPECTED_APP_WORKSPACES = ["api", "rocksoul", "web"];
+
+function stepAppTopology(gate) {
+  const appsDir = join(ROOT, "apps");
+  if (!existsSync(appsDir)) {
+    gate.add(STATE.FAIL, "app-topology", "apps/ directory is missing");
+    return;
+  }
+  const actual = readdirSync(appsDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+    .map((entry) => entry.name)
+    .sort();
+  if (JSON.stringify(actual) === JSON.stringify(EXPECTED_APP_WORKSPACES)) {
+    gate.add(STATE.PASS, "app-topology", actual.join(", "));
+  } else {
+    gate.add(
+      STATE.FAIL,
+      "app-topology",
+      `expected [${EXPECTED_APP_WORKSPACES.join(", ")}], found [${actual.join(", ")}]`,
+    );
+  }
+}
+
 function quickSteps(gate) {
   stepToolchain(gate);
+  stepAppTopology(gate);
   stepCommand(gate, "format", "pnpm", ["format:check"]);
   stepCommand(gate, "lint", "pnpm", ["lint", "--filter=@moonwitness/*"]);
   stepCommand(gate, "typecheck", "pnpm", ["typecheck", "--filter=@moonwitness/*"]);
@@ -383,6 +407,7 @@ function quickSteps(gate) {
 
 function localSteps(gate) {
   stepToolchain(gate);
+  stepAppTopology(gate);
   stepCommand(gate, "install", "pnpm", ["install", "--frozen-lockfile"]);
   stepCommand(gate, "format", "pnpm", ["format:check"]);
   stepCommand(gate, "lint", "pnpm", ["lint"]);

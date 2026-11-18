@@ -80,11 +80,11 @@ services/*/target/
 # Qoder tool worktrees
 .qoder/
 
-# Local raw ChatGPT archives & runtime memory vault data (stored safely in gitignored apps/memory/data/inbox)
+# Local raw ChatGPT archives & runtime memory vault data (stored safely in gitignored services/memory/data/inbox)
 .raw_archives/
-apps/memory/data/
-apps/memory/**/__pycache__/
-apps/memory/.env
+services/memory/data/
+services/memory/**/__pycache__/
+services/memory/.env
 venv/
 .venv/
 

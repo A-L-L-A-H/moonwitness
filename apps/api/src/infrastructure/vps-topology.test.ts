@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -51,6 +51,14 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(existsSync(composePath)).toBe(true);
     expect(existsSync(caddyfilePath)).toBe(true);
     expect(existsSync(envExamplePath)).toBe(true);
+  });
+
+  it("enforces three-app workspace topology under apps/ (MW-0101)", () => {
+    const appDirs = readdirSync(resolve(repoRoot, "apps"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+      .map((entry) => entry.name)
+      .sort();
+    expect(appDirs).toEqual(["api", "rocksoul", "web"]);
   });
 
   it("validates Caddy reverse proxy routing and security headers", () => {

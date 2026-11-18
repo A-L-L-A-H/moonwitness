@@ -499,7 +499,7 @@ export const ECOSYSTEM_RUNTIME_CATALOG = {
         "Windows desktop spatial workbench integrating The Awakening threshold, SQLite & allowlisted Git ops.",
     },
     {
-      workspacePath: "apps/memory",
+      workspacePath: "services/memory",
       name: "How U Remind Me",
       stack: "FastAPI · SQLite FTS5 · FastEmbed · LanceDB · Rclone S3",
       dnaWorld: "Personal Archive Vault",
