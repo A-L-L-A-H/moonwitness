@@ -112,13 +112,12 @@ jobs:
           VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
           TAG: ${{ steps.release.outputs.tag }}
         run: |
-          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<REMOTE
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" env VPS_DEPLOY_PATH="$VPS_DEPLOY_PATH" MW_RELEASE_TAG="$TAG" bash -s <<'REMOTE'
             set -euo pipefail
-            export MW_RELEASE_TAG="$TAG"
-            cd "\${VPS_DEPLOY_PATH}"
-            echo "=== deploy: pulling release tag \${MW_RELEASE_TAG} ==="
+            cd "${VPS_DEPLOY_PATH}"
+            echo "=== deploy: pulling release tag ${MW_RELEASE_TAG} ==="
             git fetch --all --tags --prune
-            git checkout "\${MW_RELEASE_TAG}"
+            git checkout "${MW_RELEASE_TAG}"
             echo "=== deploy: docker compose up ==="
             docker compose pull --quiet
             docker compose up -d --build --remove-orphans
