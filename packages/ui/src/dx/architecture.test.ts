@@ -43,7 +43,7 @@ const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
 };
 
 /** Apps whose CSS must not contain any palette literal (TSX is ratcheted separately). */
-const STRICT_TOKEN_APPS: readonly string[] = ["a-l-l-a-h", "web"];
+const STRICT_TOKEN_APPS: readonly string[] = ["web"];
 
 /** 6-digit only in TSX: 3-digit matches collide with editorial labels such as "#014". */
 const TSX_HEX_LITERAL = /#[0-9a-fA-F]{6}\b/g;
@@ -230,7 +230,7 @@ describe("UI architecture: consumer applications", () => {
     });
   }
 
-  for (const app of ["a-l-l-a-h"] as const) {
+  for (const app of ["web"] as const) {
     it(`${app}: contains no hard-coded palette literals in TSX`, () => {
       const offenders: string[] = [];
       for (const file of appSources(app, [".tsx"])) {
@@ -342,5 +342,87 @@ describe("UI architecture: package boundaries", () => {
     const source = readFileSync(join(UI_ROOT, "src/skin/imperium-tokens.ts"), "utf8");
     expect(source).not.toMatch(/from\s+["']react/);
     expect(source).not.toMatch(/^\s*["']use client["']/m);
+  });
+});
+
+describe("UI architecture: unified web & sovereign DNA icon governance", () => {
+  it("GATE-01: enforces single web frontend app boundary in apps/web", () => {
+    const retiredDir = join(APPS_ROOT, "a-l-l-a-h");
+    expect(existsSync(join(retiredDir, "package.json"))).toBe(false);
+    expect(existsSync(join(retiredDir, "src"))).toBe(false);
+    if (existsSync(retiredDir)) {
+      expect(readdirSync(retiredDir)).toEqual([]);
+    }
+
+    const appsWithTsx = readdirSync(APPS_ROOT)
+      .filter((dir) => existsSync(join(APPS_ROOT, dir, "src")))
+      .filter((dir) => walk(join(APPS_ROOT, dir, "src"), [".tsx"]).length > 0)
+      .sort();
+    expect(appsWithTsx).toEqual(["rocksoul", "web"]);
+  });
+
+  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui and @moonwitness/web", () => {
+    const bannedDeps = ["lucide-react", "@heroicons/react", "react-icons", "@tabler/icons-react"];
+    for (const manifestPath of [
+      join(UI_ROOT, "package.json"),
+      join(APPS_ROOT, "web/package.json"),
+    ]) {
+      const pkg = JSON.parse(readFileSync(manifestPath, "utf8")) as {
+        dependencies?: Record<string, string>;
+        devDependencies?: Record<string, string>;
+      };
+      const allDeps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
+      for (const banned of bannedDeps) {
+        expect(
+          allDeps,
+          `${relative(REPO_ROOT, manifestPath)} declares ${banned}`,
+        ).not.toHaveProperty(banned);
+      }
+    }
+
+    const bannedImportRe = /from\s+["'](?:lucide-react|@heroicons\/|react-icons|@tabler\/icons)/;
+    const filesToScan = [
+      ...walk(join(UI_ROOT, "src"), [".ts", ".tsx"]),
+      ...walk(join(APPS_ROOT, "web/src"), [".ts", ".tsx"]),
+    ].filter((file) => !/\.test\.(ts|tsx)$/.test(file));
+    const offenders: string[] = [];
+    for (const file of filesToScan) {
+      if (bannedImportRe.test(stripJsComments(readFileSync(file, "utf8")))) {
+        offenders.push(relative(REPO_ROOT, file));
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("GATE-03: enforces sovereign DNA icon token purity in packages/ui/src/icons", () => {
+    const forbiddenColorRe = /#[0-9a-fA-F]{3,6}\b|rgba?\(|hsla?\(/g;
+    const offenders: string[] = [];
+    for (const file of walk(join(UI_ROOT, "src/icons"), [".ts", ".tsx"])) {
+      if (/\.test\.(ts|tsx)$/.test(file)) continue;
+      const hits = stripJsComments(readFileSync(file, "utf8")).match(forbiddenColorRe);
+      if (hits) offenders.push(`${relative(REPO_ROOT, file)} (${hits.join(", ")})`);
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("GATE-04: enforces centralized icon ownership in @moonwitness/ui/icons", () => {
+    const offenders: string[] = [];
+    for (const file of appSources("web", [".tsx"])) {
+      const source = stripJsComments(readFileSync(file, "utf8"));
+      if (
+        /export\s+(?:const|function)\s+[A-Za-z0-9]*(?:Icon|Emblem)\b/.test(source) &&
+        source.includes("<svg")
+      ) {
+        offenders.push(relative(REPO_ROOT, file));
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("GATE-05: verifies Vuexy route-group topology in apps/web", () => {
+    expect(existsSync(join(APPS_ROOT, "web/src/app/(sanctuary)/layout.tsx"))).toBe(true);
+    expect(existsSync(join(APPS_ROOT, "web/src/app/(sanctuary)/page.tsx"))).toBe(true);
+    expect(existsSync(join(APPS_ROOT, "web/src/app/(console)/layout.tsx"))).toBe(true);
+    expect(existsSync(join(APPS_ROOT, "web/src/app/(console)/moonwitness/page.tsx"))).toBe(true);
   });
 });

@@ -4,7 +4,7 @@ import {
   probeLocalGit,
   type FetchLike,
   type GitRunnerLike,
-} from "./ecosystem-probe";
+} from "@/lib/ecosystem-probe";
 
 describe("ecosystem-probe", () => {
   it("summarizes live services, timeline metrics, and dirty git worktree state", async () => {

@@ -8,7 +8,7 @@ import {
 } from "@moonwitness/ui/imperium";
 import { IMPERIUM_LUMEN_TOKENS, LIVING_LIGHT_PALETTE } from "@/data/design-tokens";
 import { SanctuaryLocaleProvider } from "@/lib/sanctuary-locale";
-import { EmpireOfLightExperience } from "./empire-of-light-experience";
+import { EmpireOfLightExperience } from "@/components/empire-of-light-experience";
 
 vi.mock("next/image", () => ({
   default: (props: Record<string, unknown>) => {

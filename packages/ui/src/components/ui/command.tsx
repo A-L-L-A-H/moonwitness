@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
+import { Search } from "../../icons";
 import { cn } from "../../lib/utils";
 import type { SkinName } from "../../skin/compositions";
 import { Dialog, DialogContent, DialogTitle } from "./dialog";

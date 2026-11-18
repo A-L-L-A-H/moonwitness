@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
-  testMatch: ["skin-lab-and-canon.spec.ts", "console-ui.spec.ts"],
+  testMatch: ["skin-lab-and-canon.spec.ts", "console-ui.spec.ts", "allah-homepage.spec.ts"],
   workers: 1,
   reporter: "list",
   outputDir: "../../.verify/cross-world-results",

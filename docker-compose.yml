@@ -15,8 +15,6 @@ services:
     depends_on:
       web:
         condition: service_healthy
-      allah:
-        condition: service_healthy
       api:
         condition: service_healthy
     healthcheck:
@@ -56,36 +54,6 @@ services:
           "node",
           "-e",
           "fetch('http://127.0.0.1:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
-        ]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 20s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  allah:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      target: allah
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      HOSTNAME: 0.0.0.0
-      PORT: 3003
-    networks:
-      - moonwitness-public
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-          "fetch('http://127.0.0.1:3003/api/ecosystem-health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
         ]
       interval: 15s
       timeout: 5s

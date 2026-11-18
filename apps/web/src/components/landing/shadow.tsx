@@ -64,7 +64,7 @@ export function Shadow() {
     <section
       ref={sectionRef}
       id="shadow"
-      className="relative scroll-mt-20 overflow-hidden bg-[#050508] py-28"
+      className="relative scroll-mt-20 overflow-hidden bg-[var(--ink)] py-28"
     >
       <Grain />
       <Image
@@ -76,7 +76,7 @@ export function Shadow() {
         loading="lazy"
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#050508] via-[rgba(5,5,8,0.7)] to-[#050508]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--ink)] via-[rgba(5,5,8,0.7)] to-[var(--ink)]" />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {[...Array(6)].map((_, i) => (
@@ -158,7 +158,7 @@ export function Shadow() {
                 href={`/dock?event=${encodeURIComponent(event.id)}`}
                 className="block min-h-11 break-words"
               >
-                <div className="relative aspect-[16/9] overflow-hidden bg-[#0a0a12]">
+                <div className="relative aspect-[16/9] overflow-hidden bg-[var(--ink)]">
                   <Image
                     src={artSrc(event.image)}
                     alt=""
@@ -168,7 +168,7 @@ export function Shadow() {
                     sizes="(max-width: 768px) 100vw, 720px"
                   />
                 </div>
-                <div className="border-t border-[var(--red)]/30 bg-[#08080e] p-5">
+                <div className="border-t border-[var(--red)]/30 bg-[var(--panel-2)] p-5">
                   <span className="font-mono text-xs text-zinc-400">
                     {event.kind} // {event.date}
                   </span>

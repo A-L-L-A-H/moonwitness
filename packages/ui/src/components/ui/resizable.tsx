@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { GripVertical } from "lucide-react";
+import { GripVertical } from "../../icons";
 import { cn } from "../../lib/utils";
 import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";

@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { cn } from "../../lib/utils";
-import { ChevronRight, Check } from "lucide-react";
+import { ChevronRight, Check } from "../../icons";
 import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";
 

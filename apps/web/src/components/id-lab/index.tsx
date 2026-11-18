@@ -124,7 +124,9 @@ function LabSwitchToggle({
       <span className="text-[10px] font-bold tracking-wider text-zinc-300">{label}</span>
       <span
         className={`relative h-4 w-8 shrink-0 rounded-full border transition-colors ${
-          checked ? "border-[var(--yellow)] bg-[var(--yellow)]" : "border-zinc-600 bg-[#15151d]"
+          checked
+            ? "border-[var(--yellow)] bg-[var(--yellow)]"
+            : "border-zinc-600 bg-[var(--panel-2)]"
         }`}
       >
         <span
@@ -328,7 +330,7 @@ export function IdLab() {
           <div className="space-y-6">
             <ZineCardRough className="relative overflow-hidden p-6">
               <Tape className="-top-3 left-10 -rotate-3" />
-              <div className="halftone relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-md bg-[#0d0d16] p-8">
+              <div className="halftone relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-md bg-[var(--ink)] p-8">
                 <div
                   className="pointer-events-none absolute inset-0 opacity-40"
                   style={{
@@ -441,7 +443,7 @@ export function IdLab() {
                     aria-pressed={seed === name}
                     className={`group flex flex-col items-center gap-1 border-2 p-2 transition-all ${
                       seed === name
-                        ? "border-[var(--yellow)] bg-[#1a1a12]"
+                        ? "border-[var(--yellow)] bg-[var(--panel)]"
                         : "border-transparent hover:border-[var(--pink)] hover:bg-[var(--panel-2)]"
                     }`}
                   >
@@ -502,7 +504,7 @@ export function IdLab() {
                         aria-pressed={palette === name}
                         className={`flex min-h-10 items-center gap-2 border-2 px-2 text-[9px] font-bold tracking-wider transition-all ${
                           palette === name
-                            ? "border-[var(--yellow)] bg-[#1a1a12] text-white"
+                            ? "border-[var(--yellow)] bg-[var(--panel)] text-white"
                             : "border-[var(--line)] bg-[var(--panel-2)] text-zinc-400 hover:border-[var(--pink)]"
                         }`}
                       >

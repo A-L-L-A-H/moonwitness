@@ -9,7 +9,7 @@
     "start": "next start",
     "test:pact": "tsx pact/consumer.pact.ts",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "next typegen && tsc --noEmit",
     "test:brush-lifecycle": "node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config brush-lifecycle.config.ts",
     "test:cross-world": "pnpm exec next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config cross-world-playwright.config.ts",
     "test:dock": "pnpm exec next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config dock-playwright.config.ts",

@@ -595,6 +595,52 @@ export {
 /* Layout System */
 export { Grid, GridItem, Stack, VStack, HStack, ZStack, Container, Flow } from "./layout";
 
+/* Sovereign DNA Icons */
+export * as SovereignIcons from "./icons";
+export * from "./icons/types";
+export {
+  Bolt,
+  Splatter,
+  PlayIcon,
+  PauseIcon,
+  GlobeIcon,
+  EyeIcon,
+  SearchIcon,
+  SafetyPin,
+  BarbedWire,
+  RazorBlade,
+  SprayCan,
+  SkullCrossbonesFunky,
+  TornTicket,
+  StaplerMark,
+} from "./icons/tactical";
+export {
+  PortalAstrolabeIcon,
+  MoonwitnessCrestIcon,
+  ArsyTowerIcon,
+  QalamNibIcon,
+  SidraPolyhedronIcon,
+  RocksoulCubeIcon,
+  CrayonPrismIcon,
+  SinCanMirrorIcon,
+  MythosArchIcon,
+  AwsScalesIcon,
+  WorldEmblemById,
+  type WorldIconId,
+} from "./icons/worlds";
+export {
+  ArrowUpRight,
+  ArrowUpDown,
+  ChevronsUpDown,
+  ChevronsLeftRight,
+  Circle,
+  GripVertical,
+  Loader2,
+  Calendar as CalendarIcon,
+  Clock,
+} from "./icons/primitives";
+export { Grid as GridIcon } from "./icons/modules";
+
 /* Artwork System */
 export * from "./artwork/vector";
 export * from "./artwork/generative";

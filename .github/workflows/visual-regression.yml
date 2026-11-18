@@ -42,22 +42,16 @@ jobs:
       - name: Cross-World Contrast Gate (dark + light)
         run: pnpm ui:contrast
 
-      - name: Build Web & A-L-L-A-H
-        run: |
-          pnpm --filter @moonwitness/web build
-          pnpm --filter @moonwitness/a-l-l-a-h build
+      - name: Build unified @moonwitness/web
+        run: pnpm --filter @moonwitness/web build
 
       - name: Install Playwright Chromium
         working-directory: ./apps/web
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Run Deterministic 6-Skin & Cross-World Visual Matrix
+      - name: Run Deterministic 6-Skin & Cross-World Visual Matrix (including A-L-L-A-H)
         working-directory: ./apps/web
         run: pnpm exec playwright test --config cross-world-playwright.config.ts
-
-      - name: Run A-L-L-A-H Multi-Viewport Visual Check
-        working-directory: ./apps/a-l-l-a-h
-        run: pnpm exec playwright test
 
       - name: Optional Percy Cloud Diff (when PERCY_TOKEN configured)
         if: ${{ secrets.PERCY_TOKEN != '' }}
@@ -76,5 +70,5 @@ jobs:
           path: |
             .verify/skin-matrix
             .verify/cross-world-results
-            apps/a-l-l-a-h/test-results/screenshots
+            apps/web/test-results/screenshots
           retention-days: 14

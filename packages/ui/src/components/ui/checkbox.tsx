@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, Minus } from "lucide-react";
+import { Check, Minus } from "../../icons";
 import { cn } from "../../lib/utils";
 import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";

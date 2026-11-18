@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
+import { X } from "../../icons";
 import { cva, type VariantProps } from "../../lib/utils";
 import { cn } from "../../lib/utils";
 import type { SkinName } from "../../skin/compositions";

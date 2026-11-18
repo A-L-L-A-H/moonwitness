@@ -4,7 +4,7 @@ import {
   LIVING_LIGHT_PALETTE,
   LIVING_LIGHT_TYPOGRAPHY,
   SACRED_VISUAL_COVENANT,
-} from "./design-tokens";
+} from "@/data/design-tokens";
 import {
   CENTER_100_STEWARDSHIP_CLUSTERS,
   CODEX_SEARCH_INDEX,
@@ -31,15 +31,15 @@ import {
   UNIVERSE_FOUR_LENSES,
   WORLD_PATCH_HIGHLIGHTS,
   WINGS_TEN_ARRAY,
-} from "./empire-canon-codex";
+} from "@/data/empire-canon-codex";
 import {
   COVENANT_PILLARS,
   DOCK_TELEMETRY_NODES,
   NAVIGATION_TABS,
   SIDRA_KNOWLEDGE_AXIOMS,
   WORLD_DOMAINS,
-} from "./empire-registry";
-import { LUMINOUS_NAMES_OF_ALLAH, TASBIH_PHRASES } from "./remembrance-sanctuary";
+} from "@/data/empire-registry";
+import { LUMINOUS_NAMES_OF_ALLAH, TASBIH_PHRASES } from "@/data/remembrance-sanctuary";
 
 describe("Empire of the Light Registry", () => {
   it("defines the five primary navigation tabs including THE CODEX", () => {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as MenubarPrimitive from "@radix-ui/react-menubar";
 import { cn } from "../../lib/utils";
-import { Check, ChevronRight } from "lucide-react";
+import { Check, ChevronRight } from "../../icons";
 import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";
 

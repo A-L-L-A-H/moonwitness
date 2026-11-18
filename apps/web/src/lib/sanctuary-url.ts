@@ -1,7 +1,4 @@
 /**
- * Resolves the external A-L-L-A-H Sanctuary gateway origin without leaking localhost into production builds.
+ * Resolves the A-L-L-A-H Sanctuary gateway origin (defaults to same-origin root `/` in unified apps/web).
  */
-export const IMPERIUM_GATE_URL = (
-  process.env.NEXT_PUBLIC_ALLAH_URL ??
-  (process.env.NODE_ENV === "production" ? "https://a-l-l-a-h.com" : "http://localhost:3003")
-).replace(/\/+$/, "");
+export const IMPERIUM_GATE_URL = (process.env.NEXT_PUBLIC_ALLAH_URL ?? "").replace(/\/+$/, "");

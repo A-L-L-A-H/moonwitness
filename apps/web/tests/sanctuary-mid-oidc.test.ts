@@ -7,7 +7,7 @@ import {
   completeSanctuaryMidCallback,
   getStoredSanctuaryMidSession,
   startSanctuaryMidLogin,
-} from "./mid-oidc";
+} from "@/lib/sanctuary-mid-oidc";
 
 const TEXT_ENCODER = new TextEncoder();
 const DEFAULT_ISSUER = "https://id.moonwitness.biz.id";

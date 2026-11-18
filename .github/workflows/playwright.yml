@@ -104,21 +104,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Chromium for A-L-L-A-H
-        working-directory: ./apps/a-l-l-a-h
+      - name: Install Playwright Chromium
+        working-directory: ./apps/web
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Build A-L-L-A-H
-        run: pnpm --filter @moonwitness/a-l-l-a-h build
+      - name: Build unified @moonwitness/web
+        run: pnpm --filter @moonwitness/web build
 
       - name: Run A-L-L-A-H Playwright E2E
-        working-directory: ./apps/a-l-l-a-h
-        run: pnpm exec playwright test
+        working-directory: ./apps/web
+        run: pnpm exec playwright test e2e/allah-homepage.spec.ts --config cross-world-playwright.config.ts
 
       - name: Upload A-L-L-A-H screenshots & Playwright report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: allah-playwright-evidence
-          path: apps/a-l-l-a-h/test-results
+          path: apps/web/test-results/screenshots
           retention-days: 14

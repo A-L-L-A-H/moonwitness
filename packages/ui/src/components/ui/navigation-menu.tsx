@@ -3,7 +3,7 @@
 import * as React from "react";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cn } from "../../lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "../../icons";
 import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";
 

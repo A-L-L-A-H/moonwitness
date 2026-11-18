@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import manifest from "../app/manifest";
-import robots from "../app/robots";
-import sitemap from "../app/sitemap";
-import { GET as getScriptures } from "../app/api/scriptures/route";
+import manifest from "@/app/manifest";
+import robots from "@/app/robots";
+import sitemap from "@/app/sitemap";
+import { GET as getScriptures } from "@/app/api/scriptures/route";
 import { NextRequest } from "next/server";
 
 describe("Sanctuary Metadata & API Route Contracts", () => {
