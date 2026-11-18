@@ -576,10 +576,10 @@ export function createSkinComponent(componentName: string, skinName: SkinName) {
       const mergedClass = [baseClasses[componentName] || "", className].filter(Boolean).join(" ");
       const defaultProps: Record<string, unknown> = {};
       if (Tag === "button" && !("type" in rest)) {
-        defaultProps.type = "button";
+        defaultProps["type"] = "button";
       }
       if (Tag === "input" && !("type" in rest)) {
-        defaultProps.type = "text";
+        defaultProps["type"] = "text";
       }
 
       return React.createElement(

@@ -104,7 +104,7 @@ function Segmented<T extends string>({
   );
 }
 
-function Toggle({
+function LabSwitchToggle({
   label,
   checked,
   onChange,
@@ -565,10 +565,14 @@ export function IdLab() {
 
               <Control label="ZINE LAYERS">
                 <div className="space-y-1.5">
-                  <Toggle label="HALFTONE DOTS" checked={halftone} onChange={setHalftone} />
-                  <Toggle label="CROWN" checked={crown} onChange={setCrown} />
-                  <Toggle label="BIG MOON" checked={moon} onChange={setMoon} />
-                  <Toggle label="TAPE" checked={tape} onChange={setTape} />
+                  <LabSwitchToggle
+                    label="HALFTONE DOTS"
+                    checked={halftone}
+                    onChange={setHalftone}
+                  />
+                  <LabSwitchToggle label="CROWN" checked={crown} onChange={setCrown} />
+                  <LabSwitchToggle label="BIG MOON" checked={moon} onChange={setMoon} />
+                  <LabSwitchToggle label="TAPE" checked={tape} onChange={setTape} />
                 </div>
               </Control>
 

@@ -122,6 +122,7 @@ export {
   CardTitle,
   CardDescription,
   CardContent,
+  type CardProps,
 } from "./components/ui/card";
 export { Input, type InputProps } from "./components/ui/input";
 export { Badge, badgeVariants, type BadgeProps } from "./components/ui/badge";

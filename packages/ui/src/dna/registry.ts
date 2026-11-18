@@ -105,7 +105,7 @@ function generateShadcnHSLVars(theme: DNATokens): Record<string, string> {
 
   // Scalar radius token (never stringify the RadiusToken object)
   if (theme.radius) {
-    vars.radius = typeof theme.radius === 'string' ? theme.radius : (theme.radius.lg ?? '0.5rem');
+    vars["radius"] = typeof theme.radius === "string" ? theme.radius : (theme.radius.lg ?? "0.5rem");
   }
 
   // Bridge legacy palette vars when defined on theme

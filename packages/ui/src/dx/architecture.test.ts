@@ -278,14 +278,26 @@ describe("UI architecture: consumer applications", () => {
     const owned = new Set<string>();
     const ownedSources = [
       join(UI_ROOT, "src/skin/imperium.tsx"),
+      ...walk(join(UI_ROOT, "src/components/ui"), [".tsx"]),
       ...walk(join(UI_ROOT, "src/primitives"), [".tsx"]),
       ...walk(join(UI_ROOT, "src/composites"), [".tsx"]),
     ].filter((file) => !/\.test\./.test(file));
     for (const file of ownedSources) {
-      for (const match of readFileSync(file, "utf8").matchAll(
-        /export\s+(?:const|function)\s+([A-Z][A-Za-z0-9]+)/g,
-      )) {
+      const src = readFileSync(file, "utf8");
+      for (const match of src.matchAll(/export\s+(?:const|function)\s+([A-Z][A-Za-z0-9]+)/g)) {
         if (match[1]) owned.add(match[1]);
+      }
+      // Also capture `export { Button, Card, ... }` named re-export lists in component barrels
+      for (const block of src.matchAll(/export\s*\{([^}]+)\}(?!\s*from)/g)) {
+        for (const item of (block[1] ?? "").split(",")) {
+          const sym = item
+            .trim()
+            .replace(/^type\s+/, "")
+            .split(/\s+as\s+/)
+            .pop()
+            ?.trim();
+          if (sym && /^[A-Z][A-Za-z0-9]+$/.test(sym)) owned.add(sym);
+        }
       }
     }
     const duplicates: string[] = [];

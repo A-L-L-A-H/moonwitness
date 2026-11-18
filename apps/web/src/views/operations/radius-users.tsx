@@ -39,7 +39,7 @@ function buildProfile(draft: ProfileDraft) {
   };
 }
 
-function FormField({
+function RadiusFormField({
   label,
   value,
   onChange,
@@ -86,28 +86,28 @@ function ProfileFields({
 }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <FormField
+      <RadiusFormField
         label="Framed IP"
         value={draft.framed_ip}
         onChange={(framed_ip) => onChange({ ...draft, framed_ip })}
         placeholder="192.0.2.50"
         disabled={disabled}
       />
-      <FormField
+      <RadiusFormField
         label="VLAN ID"
         value={draft.vlan_id}
         onChange={(vlan_id) => onChange({ ...draft, vlan_id })}
         placeholder="120"
         disabled={disabled}
       />
-      <FormField
+      <RadiusFormField
         label="Session timeout (s)"
         value={draft.session_timeout}
         onChange={(session_timeout) => onChange({ ...draft, session_timeout })}
         placeholder="3600"
         disabled={disabled}
       />
-      <FormField
+      <RadiusFormField
         label="MAC address"
         value={draft.mac_address}
         onChange={(mac_address) => onChange({ ...draft, mac_address })}
@@ -165,7 +165,7 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
         New RADIUS user
       </h4>
       <div className="grid gap-3 sm:grid-cols-2">
-        <FormField
+        <RadiusFormField
           label="Username"
           value={username}
           onChange={setUsername}
@@ -173,7 +173,7 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
           disabled={createUser.isPending}
           autoComplete="off"
         />
-        <FormField
+        <RadiusFormField
           label="Password"
           value={password}
           onChange={setPassword}
@@ -333,7 +333,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
           className="space-y-3 border-2 border-[var(--line)] bg-black/20 p-4"
         >
           <div className="grid gap-3 sm:grid-cols-2">
-            <FormField
+            <RadiusFormField
               label="New password (leave blank to keep current)"
               value={password}
               onChange={setPassword}

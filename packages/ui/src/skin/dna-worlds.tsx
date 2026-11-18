@@ -238,9 +238,9 @@ export function useOptionalDnaWorld(): MasterDnaWorldSpec | null {
 
 export interface SkinScopeProps {
   dnaId: MasterDnaId;
-  skin?: SkinName;
-  mode?: CanonicalThemeMode;
-  density?: CanonicalDensity;
+  skin?: SkinName | undefined;
+  mode?: CanonicalThemeMode | undefined;
+  density?: CanonicalDensity | undefined;
   children: ReactNode;
   className?: string | undefined;
   style?: CSSProperties | undefined;
@@ -291,9 +291,9 @@ export function SkinScope({
 
 export interface SkinRootProps {
   dnaId: MasterDnaId;
-  skin?: SkinName;
-  mode?: CanonicalThemeMode;
-  density?: CanonicalDensity;
+  skin?: SkinName | undefined;
+  mode?: CanonicalThemeMode | undefined;
+  density?: CanonicalDensity | undefined;
   children: ReactNode;
   className?: string | undefined;
   style?: CSSProperties | undefined;
