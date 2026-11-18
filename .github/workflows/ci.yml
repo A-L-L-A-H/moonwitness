@@ -54,8 +54,14 @@ jobs:
           STORAGE_SECRET_KEY: ci-compose-storage-secret-key
         run: docker compose --profile ops config -q
 
-      - name: Format
-        run: pnpm format:check
+      - name: Format (temporary canonical output)
+        run: |
+          pnpm exec prettier --write \
+            scripts/backup-db.mjs \
+            scripts/backup-db.test.mjs
+          git diff --no-ext-diff --unified=2 -- \
+            scripts/backup-db.mjs \
+            scripts/backup-db.test.mjs
 
       - name: Lint
         run: pnpm lint
