@@ -1,4 +1,5 @@
 pub mod cloud_backup;
+pub mod continuity;
 pub mod issues;
 pub mod milestones;
 pub mod monitor;
