@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { requireAuth, type AuthenticatedRequest } from "../../middleware/auth";
+import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import {
   commandCenterIdParamSchema,
   createCommandCenterWorkflow,
@@ -21,6 +21,7 @@ function actorIdFor(request: FastifyRequest): string | null {
 
 export async function commandCenterRoutes(fastify: FastifyInstance): Promise<void> {
   const authenticate = requireAuth();
+  const requireOperator = requireRole("admin", "editor");
 
   fastify.get(
     "/command-center/state",
@@ -48,7 +49,7 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
 
   fastify.post(
     "/command-center/workflows",
-    { preHandler: authenticate },
+    { preHandler: [authenticate, requireOperator] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const actorId = actorIdFor(request);
       if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
@@ -66,7 +67,7 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
 
   fastify.patch<{ Params: { id: string } }>(
     "/command-center/workflows/:id/toggle",
-    { preHandler: authenticate },
+    { preHandler: [authenticate, requireOperator] },
     async (request, reply) => {
       const actorId = actorIdFor(request);
       if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
@@ -85,7 +86,7 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
 
   fastify.patch<{ Params: { id: string }; Body: { status?: string } }>(
     "/command-center/workflows/:id/status",
-    { preHandler: authenticate },
+    { preHandler: [authenticate, requireOperator] },
     async (request, reply) => {
       const actorId = actorIdFor(request);
       if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
@@ -122,7 +123,7 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
 
   fastify.delete<{ Params: { id: string } }>(
     "/command-center/alerts/:id",
-    { preHandler: authenticate },
+    { preHandler: [authenticate, requireOperator] },
     async (request, reply) => {
       const actorId = actorIdFor(request);
       if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
