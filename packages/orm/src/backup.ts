@@ -50,8 +50,10 @@ export async function restoreDatabase(backupPath: string, targetPath: string): P
   if (!backupPath || !targetPath) {
     throw new Error("restore requires both a backup path and a target path");
   }
-  const { copyFile } = await import("node:fs/promises");
+  const { copyFile, rm } = await import("node:fs/promises");
   await copyFile(backupPath, targetPath);
+  await rm(`${targetPath}-wal`, { force: true }).catch(() => {});
+  await rm(`${targetPath}-shm`, { force: true }).catch(() => {});
 }
 
 /**

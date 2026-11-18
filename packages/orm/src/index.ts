@@ -1,11 +1,36 @@
-export { defineModel, uuidv7, BaseRepository } from "./define-model.js";
+export {
+  defineModel,
+  uuidv7,
+  BaseRepository,
+  AUDIT_DDL,
+  ormAuditMigrations,
+  ensureAuditTable,
+} from "./define-model.js";
 export type {
   DefineModelOptions,
   DefineModelReturn,
   AuditAction,
   AuditEntry,
   ModelRecord,
+  QueryFilterOperators,
+  FindOptions,
 } from "./define-model.js";
+export { modelRegistry, extendModel, onModelWrite } from "./registry.js";
+export type {
+  ModelExtensionDef,
+  ExtendModelOptions,
+  RegisteredModelDescriptor,
+  ModelWriteEvent,
+  ModelWriteHandler,
+} from "./registry.js";
+export type {
+  ModelIndex,
+  FieldSpec,
+  RuntimeCustomFieldSpec,
+  ZodObjectLike,
+} from "./schema-utils.js";
+export { syncModels } from "./sync.js";
+export type { SyncModelsOptions, SyncReport } from "./sync.js";
 export type { BaseMetadata, RecordStatus, RecordSource } from "./base-metadata.js";
 export { createActorContext, SYSTEM_ACTOR } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";

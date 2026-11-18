@@ -1,13 +1,15 @@
 # @moonwitness/orm
 
-Reusable libSQL/SQLite ORM layer for MoonWitness addons.
+Reusable PostgreSQL, libSQL/SQLite, and Cloudflare D1 ORM layer for MoonWitness addons and Core API.
 
 ## Driver boundary
 
-- Uses `@libsql/client` via `LibSqlDriver` for local file and in-memory databases (`:memory:` or `file:` paths).
+- **PostgreSQL (`PostgresDriver`):** Primary production driver when `DATABASE_URL` uses `postgres://` or `postgresql://` (via `pg` pool and automatic SQL translation `translateSqlForPostgres` / `isPostgresUrl`).
+- **SQLite / libSQL (`LibSqlDriver`):** Uses `@libsql/client` for local development, tests, and single-file databases (`:memory:` or `file:` paths).
+- **Cloudflare D1 (`D1Driver`, `createD1DatabaseFromOrm`):** Adapter compatibility layer for D1 bindings and MID plugin integration (`initD1Db`).
 - All operations are async (`initDb`, `run/all/get/exec`, repository methods, migrations). Callers must `await` results.
 - Transactions are scoped via `getDb().transaction(async (tx) => ...)` and commit/rollback atomically (entity writes + audit writes in the same transaction).
-- Lifecycle: `initDb(path)` once per process context, `closeDb()` to release; re-init after close is supported.
+- Lifecycle: `initDb(urlOrConfig)` once per process context, `closeDb()` to release; re-init after close is supported.
 
 ## Models and repository
 
@@ -29,4 +31,4 @@ Reusable libSQL/SQLite ORM layer for MoonWitness addons.
 
 ## Exports
 
-Public API is exported from `src/index.ts` (e.g. `defineModel`, `BaseRepository`, `initDb/closeDb/getDb`, `LibSqlDriver`, `applyMigrations`, `listAppliedMigrations`, actor/context/types/errors). Keep exports aligned with implementation; avoid parallel persistence abstractions.
+Public API is exported from `src/index.ts`: `defineModel`, `BaseRepository`, `AUDIT_DDL`, `ormAuditMigrations`, `initDb`, `initD1Db`, `closeDb`, `getDb`, `PostgresDriver`, `isPostgresUrl`, `translateSqlForPostgres`, `LibSqlDriver`, `D1Driver`, `splitSqlStatements`, `createD1DatabaseFromOrm`, `applyMigrations`, `listAppliedMigrations`, `backupDatabase`, `restoreDatabase`, `verifyIntegrity`, `encryptBackupFile`, `decryptBackupFile`, actor/context/types, and `ConflictError`. Keep exports aligned with implementation; avoid parallel persistence abstractions.
