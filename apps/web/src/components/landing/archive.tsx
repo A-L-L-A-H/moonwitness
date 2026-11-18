@@ -163,7 +163,7 @@ export function Archive() {
         <div>
           <DistressedSticker variant="hazard" text="REDACTED DOSSIER ARCHIVE" className="mb-3" />
           <h2 className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
-            A TIMELINE OF <span className="text-[var(--secondary)]">SIGNALS.</span>
+            A TIMELINE OF <span className="text-[var(--accent)]">SIGNALS.</span>
           </h2>
           <p className="mt-2 font-mono text-xs text-[var(--muted-foreground)]">
             Past transmissions, underground sightings, and leaked police scanner recordings.

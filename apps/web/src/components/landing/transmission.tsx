@@ -23,7 +23,7 @@ export function Transmission() {
         <header className="mb-8 flex flex-wrap items-end gap-x-6 gap-y-3 border-b-2 border-[var(--border)] pb-4">
           <span
             data-transmission-id
-            className="ink-tick font-brush text-5xl leading-none text-[var(--secondary)] sm:text-6xl"
+            className="ink-tick font-brush text-5xl leading-none text-[var(--accent)] sm:text-6xl"
           >
             001
           </span>

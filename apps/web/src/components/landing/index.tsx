@@ -44,7 +44,7 @@ export function Landing() {
           <Marquee className="border-y-2 border-[var(--border)] bg-[var(--primary)] py-2.5 font-brush text-lg text-[var(--primary-foreground)]">
             {MARQUEE_ITEMS.map((t) => (
               <span key={t} className="flex items-center gap-8">
-                {t} <Star4 className="h-4 w-4 text-[var(--secondary)]" />
+                {t} <Star4 className="h-4 w-4 text-[var(--primary-foreground)]" />
               </span>
             ))}
           </Marquee>

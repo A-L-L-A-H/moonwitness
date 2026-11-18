@@ -28,14 +28,14 @@ export interface KanbanColumnProps<C extends KanbanCard = KanbanCard> {
 const DEFAULT_STAGE_COLOR: Record<string, string> = {
   DRAFT: "var(--muted-foreground)",
   "IN REVIEW": "var(--primary)",
-  APPROVED: "var(--secondary)",
+  APPROVED: "var(--green)",
   PUBLISHED: "var(--accent)",
 };
 
 const KIND_TEXT_TOKEN: Record<string, string> = {
   PROJECT: "var(--primary)",
   STORY: "var(--accent)",
-  SIGNAL: "var(--secondary)",
+  SIGNAL: "var(--green)",
   WORLD: "var(--primary)",
   PEOPLE: "var(--primary)",
   RESEARCH: "var(--accent)",

@@ -13,7 +13,7 @@ export function Signals() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <SprayCan className="h-5 w-5 text-[var(--pink)]" />
-            <span className="font-mono text-xs font-black tracking-widest text-[var(--secondary)]">
+            <span className="font-mono text-xs font-black tracking-widest text-[var(--accent)]">
               FREQUENCY LOGS // PIRATE FEED
             </span>
           </div>
