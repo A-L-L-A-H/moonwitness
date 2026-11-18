@@ -19,11 +19,13 @@ Set `STORAGE_BACKEND=google_drive` and configure:
 | `GOOGLE_DRIVE_REFRESH_TOKEN` | Offline OAuth refresh token |
 | `GOOGLE_DRIVE_FOLDER_ID` | Existing Drive folder owned or accessible by the OAuth account |
 
-Enable Google Drive API in the Google Cloud project and grant the OAuth account Drive access with permission to manage objects in the selected folder. Use a dedicated Google account or dedicated folder; do not use personal files as the storage namespace. Keep OAuth and S3 credentials outside source control.
+Enable Google Drive API in the Google Cloud project and authorize the OAuth account with Drive file-management scope for the configured folder. Generate an offline refresh token (the OAuth consent flow must request offline access); use a dedicated Google account or dedicated folder rather than personal files. Keep OAuth and S3 credentials outside source control.
 
 Objects are uploaded with Drive resumable uploads in 8 MiB chunks. SQLite stores each Drive file ID in `storage_ref`; bucket/key, size, ETag, content type, and S3 metadata remain in the storage database. Downloads and deletes resolve through the stable file ID, not through a Drive filename search.
 
 S3 multipart uploads use the existing local `.multipart` staging area and upload the assembled object to the selected backend during completion. Keep `STORAGE_ROOT` on persistent storage for multipart staging and the SQLite database even when Google Drive is selected.
+
+**MVP limits:** the S3 request body is currently buffered by the existing Axum handler, and a Drive download is currently read fully into memory before the response is sent (a requested byte range is sliced after that read). Keep `STORAGE_MAX_OBJECT_SIZE` conservative and do not treat this implementation as a high-concurrency, large-object production object store. Streaming/range-aware Drive downloads, durable resumable-session recovery, Drive API retry/backoff, and automated provider migration are follow-up work.
 
 ## Security & configuration
 
