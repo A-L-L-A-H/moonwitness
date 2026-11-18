@@ -1,6 +1,13 @@
 // Moonwitness Skin — Unit tests for skin presets
 import { describe, it, expect } from 'vitest';
-import { skinPresets, getPreset, listPresets, applyPreset } from './presets';
+import {
+  skinPresets,
+  getPreset,
+  listPresets,
+  applyPreset,
+  MOONFRAME_SKIN_ALIAS_MAP,
+  resolveMoonframeSkinAlias,
+} from './presets';
 
 describe('Skin Presets', () => {
   describe('listPresets', () => {
@@ -92,6 +99,16 @@ describe('Skin Presets', () => {
         expect(applied.moduleSize).toBeDefined();
         expect(typeof applied.elevated).toBe('boolean');
       }
+    });
+  });
+
+  describe('moonframe legacy alias map', () => {
+    it('maps all 15 legacy moonframe skin ids to canonical presets', () => {
+      expect(Object.keys(MOONFRAME_SKIN_ALIAS_MAP)).toHaveLength(15);
+      expect(resolveMoonframeSkinAlias('moonpunk')).toBe('riot');
+      expect(resolveMoonframeSkinAlias('moonquest')).toBe('sanctuary');
+      expect(resolveMoonframeSkinAlias('moonledger')).toBe('transmission');
+      expect(resolveMoonframeSkinAlias('unknown')).toBe('default');
     });
   });
 });

@@ -129,3 +129,34 @@ export function applyPreset(name: SkinName) {
     hudSkin: preset.hudPanel.skin, sceneSkin: preset.scenePanel.skin, atlasSkin: preset.atlasStage.skin,
   };
 }
+
+/**
+ * Compatibility mapping from absorbed `engines/moonframe` 15-skin IDs to
+ * canonical `@moonwitness/ui` `SkinName` tokens (`ADR-009` P3-1 engine curation).
+ */
+export const MOONFRAME_SKIN_ALIAS_MAP = {
+  moonpunk: "riot",
+  moonriot: "riot",
+  moonzine: "editorial",
+  moonhalftone: "archive",
+  moonglitch: "technical",
+  moonsmash: "kinetic",
+  moonink: "editorial",
+  mooncrash: "brutalist",
+  moonpanel: "noir",
+  moonscrawl: "archive",
+  moonraw: "brutalist",
+  moonchrome: "technical",
+  classic: "default",
+  moonquest: "sanctuary",
+  moonledger: "transmission",
+} as const satisfies Record<string, SkinName>;
+
+export type MoonframeLegacySkinId = keyof typeof MOONFRAME_SKIN_ALIAS_MAP;
+
+export function resolveMoonframeSkinAlias(id: string): SkinName {
+  if (id in MOONFRAME_SKIN_ALIAS_MAP) {
+    return MOONFRAME_SKIN_ALIAS_MAP[id as MoonframeLegacySkinId];
+  }
+  return id in skinPresets ? (id as SkinName) : "default";
+}

@@ -60,6 +60,7 @@ only rebuilt when its inputs change.
 - [ADR-006: Three-App Topology & Trust Zones](./adr-006-three-app-topology-and-trust-zones.md)
 - [ADR-007: RockSoul Local Execution & Data Boundary](./adr-007-rocksoul-local-execution-and-data-boundary.md)
 - [ADR-008: RIOT Intelligence Architecture Baseline](./adr-008-riot-intelligence-baseline.md)
+- [ADR-009: P3 Engine Curation & Canonical Runtime Promotion](./adr-009-p3-engine-curation-and-canon-promotion.md)
 
 ### Architecture, Operations, Design & Domain Specs
 
