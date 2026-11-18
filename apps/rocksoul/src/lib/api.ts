@@ -701,5 +701,33 @@ export async function call<Command extends NativeCommand>(
     throw new Error("Loopback sign-in requires the native desktop app.");
   }
 
+  if (command === "discover_local_providers") {
+    return [] as unknown as CommandResult<Command>;
+  }
+  if (
+    command === "start_supervised_agent_run" ||
+    command === "cancel_supervised_agent_run" ||
+    command === "evaluate_agent_worktree_evidence"
+  ) {
+    throw new Error("Supervised agent execution requires the native desktop app.");
+  }
+  if (command === "get_agent_execution_steps" || command === "get_orchestration_tasks") {
+    return [] as unknown as CommandResult<Command>;
+  }
+  if (command === "list_studio_drafts" || command === "list_research_claims") {
+    return [] as unknown as CommandResult<Command>;
+  }
+  if (command === "get_companion_profile") {
+    return {
+      id: "default",
+      name: "RockSoul Sentinel",
+      personality: "Stoic, analytical, loyal companion",
+      state: "idle",
+      dailyBriefing: "Browser preview active.",
+      eveningRecap: "Local desktop required for live telemetry.",
+      updatedAt: new Date().toISOString(),
+    } as unknown as CommandResult<Command>;
+  }
+
   throw new Error(`Unsupported native command: ${command}`);
 }
