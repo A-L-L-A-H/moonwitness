@@ -29,6 +29,8 @@ impl TestServer {
             secret_key: "test-secret".to_string(),
             allow_anonymous: true,
             max_object_size: 1024 * 1024,
+            storage_backend: storage::config::StorageBackend::Filesystem,
+            google_drive: None,
         };
 
         let pool = db::init_db(&config.database_url).await.unwrap();
