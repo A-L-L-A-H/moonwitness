@@ -28,13 +28,13 @@ export interface HudNavItem {
 
 export interface TopRailProps {
   title: string;
-  brandHref?: string;
-  subtitle?: string;
-  start?: ReactNode;
-  search?: ReactNode;
-  actions?: ReactNode;
-  linkAs?: HudLinkComponent;
-  className?: string;
+  brandHref?: string | undefined;
+  subtitle?: string | undefined;
+  start?: ReactNode | undefined;
+  search?: ReactNode | undefined;
+  actions?: ReactNode | undefined;
+  linkAs?: HudLinkComponent | undefined;
+  className?: string | undefined;
 }
 
 export function TopRail({
@@ -80,13 +80,13 @@ export function TopRail({
 
 export interface SideRailProps {
   items: HudNavItem[];
-  active?: string;
-  activeSection?: string | null;
-  onNavigate?: () => void;
-  navLabel?: string;
-  footer?: ReactNode;
-  linkAs?: HudLinkComponent;
-  className?: string;
+  active?: string | undefined;
+  activeSection?: string | null | undefined;
+  onNavigate?: (() => void) | undefined;
+  navLabel?: string | undefined;
+  footer?: ReactNode | undefined;
+  linkAs?: HudLinkComponent | undefined;
+  className?: string | undefined;
 }
 
 function navigateRail(event: KeyboardEvent<HTMLDivElement>) {

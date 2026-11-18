@@ -18,9 +18,9 @@ interface CommandContextValue {
 const CommandContext = React.createContext<CommandContextValue | null>(null);
 
 export interface CommandProps extends React.HTMLAttributes<HTMLDivElement> {
-  value?: string;
+  value?: string | undefined;
   onValueChange?: (value: string) => void;
-  skin?: SkinName;
+  skin?: SkinName | undefined;
 }
 
 const Command = React.forwardRef<HTMLDivElement, CommandProps>(

@@ -34,7 +34,7 @@ export interface ArtEntry {
   fallback: string;
   fallbackSrcSet: string;
   alt: string;
-  position?: string;
+  position?: string | undefined;
   /** Nama file di packages/assets/references/ yang jadi acuan visualnya. */
   credit: string;
 }
@@ -47,7 +47,7 @@ function entry(key: ArtKey, alt: string, position: string | undefined, credit: s
     fallback: `/art/${key}-1440.webp`,
     fallbackSrcSet: legacySrcSetFor(key, "webp", ART_SOURCE_WIDTHS[key]),
     alt,
-    position,
+    ...(position !== undefined ? { position } : {}),
     credit,
   };
 }
@@ -234,12 +234,7 @@ export type DnaWorldAssetId =
   | "09-simpul-nusantara";
 
 export type SkinAssetKey =
-  | "default"
-  | "riot"
-  | "editorial"
-  | "technical"
-  | "archive"
-  | "transmission";
+  "default" | "riot" | "editorial" | "technical" | "archive" | "transmission";
 
 export interface DnaWorldArtworkMapping {
   dnaId: DnaWorldAssetId;

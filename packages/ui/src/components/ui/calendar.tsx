@@ -9,13 +9,13 @@ import { useComponentSkin } from "./skin-adapter";
 const WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
 
 export interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect"> {
-  selected?: Date;
-  defaultMonth?: Date;
+  selected?: Date | undefined;
+  defaultMonth?: Date | undefined;
   onSelect?: (date: Date) => void;
-  minDate?: Date;
-  maxDate?: Date;
+  minDate?: Date | undefined;
+  maxDate?: Date | undefined;
   disabledDates?: (date: Date) => boolean;
-  skin?: SkinName;
+  skin?: SkinName | undefined;
 }
 
 function isSameDay(a: Date | undefined, b: Date): boolean {

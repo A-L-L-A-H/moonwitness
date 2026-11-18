@@ -6,7 +6,7 @@ import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  skin?: SkinName;
+  skin?: SkinName | undefined;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
