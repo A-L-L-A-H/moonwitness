@@ -381,11 +381,13 @@ test.describe("Navigation & Active-Route", () => {
       await page.waitForSelector('nav[aria-label="Operations"]', { timeout: 5000 }).catch(() => {});
       // Verify page loaded
       await expect(page).toHaveURL(new RegExp(path.replace("/", "\\/") + "$"));
-      // Sidebar link is highlighted with the operations accent (blue) and
+      // Sidebar link is highlighted with the operations accent and
       // marked as the current page for assistive technology.
       const sidebarLink = page.getByRole("navigation").getByRole("link", { name: sidebarLabel });
       await expect(sidebarLink).toHaveAttribute("aria-current", "page");
-      await expect(sidebarLink).toHaveClass(/(?:bg-\[var\(--blue\)\]|hud-nav-link)/);
+      await expect(sidebarLink).toHaveClass(
+        /(?:bg-\[var\(--primary\)\]|bg-\[var\(--blue\)\]|hud-nav-link)/,
+      );
     });
   }
 });
