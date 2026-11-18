@@ -62,7 +62,7 @@ afterEach(() => {
 });
 
 describe("Multi-skin Visual & Component Surface Suite", () => {
-  it("renders SkinLaboratory across 6 skins, 6-Skin Matrix, Logos & Cutouts tabs without errors", async () => {
+  it("renders SkinLaboratory across 10 skins, 10-Skin Matrix, Logos & Cutouts tabs without errors", async () => {
     await act(async () => {
       root.render(
         <SkinProvider defaultSkin="technical" defaultDna="04-nexus-paradox" persist={false}>
@@ -76,7 +76,7 @@ describe("Multi-skin Visual & Component Surface Suite", () => {
     expect(document.documentElement.getAttribute("data-dna")).toBe("04-nexus-paradox");
 
     const matrixTab = Array.from(container.querySelectorAll('[role="tab"]')).find((el) =>
-      el.textContent?.includes("6-SKIN MATRIX"),
+      el.textContent?.includes("10-SKIN MATRIX"),
     ) as HTMLElement | undefined;
     expect(matrixTab).toBeDefined();
     await act(async () => {
@@ -94,8 +94,8 @@ describe("Multi-skin Visual & Component Surface Suite", () => {
     await act(async () => {
       assetsTab?.click();
     });
-    expect(container.querySelectorAll("svg[data-mw-brand-logo]").length).toBeGreaterThanOrEqual(10);
-    expect(container.querySelectorAll("svg[data-mw-cutout]").length).toBeGreaterThanOrEqual(12);
+    expect(container.querySelectorAll("svg[data-mw-brand-logo]").length).toBeGreaterThanOrEqual(18);
+    expect(container.querySelectorAll("svg[data-mw-cutout]").length).toBeGreaterThanOrEqual(24);
     expect(container.querySelectorAll('svg[data-mw-icon="true"]').length).toBeGreaterThanOrEqual(
       12,
     );

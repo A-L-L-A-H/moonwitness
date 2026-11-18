@@ -330,7 +330,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
         <form
           onSubmit={handleSave}
           aria-label={`Edit ${user.username}`}
-          className="space-y-3 border-2 border-[var(--border)] bg-black/20 p-4"
+          className="space-y-3 border-2 border-[var(--border)] bg-[var(--muted)]/60 p-4"
         >
           <div className="grid gap-3 sm:grid-cols-2">
             <RadiusFormField

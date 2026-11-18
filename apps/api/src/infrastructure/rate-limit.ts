@@ -1,10 +1,8 @@
+import { getDb, type OrmDriverHandle } from "@moonwitness/orm";
+
 /**
- * Minimal dependency-free fixed-window rate limiter.
- *
- * Each key (typically a client IP) gets `max` requests per `windowMs`. Counters
- * reset lazily when a window expires, so memory is bounded by active keys.
- * Intended for a single-process API; a multi-instance deployment should back
- * this with a shared store.
+ * Fixed-window rate limiter with synchronous in-memory implementation and
+ * pluggable asynchronous store support (including durable SQL via `@moonwitness/orm`).
  */
 export interface RateLimiterOptions {
   windowMs: number;
@@ -22,6 +20,22 @@ export interface RateLimiter {
   check(key: string): RateLimitResult;
   reset(key?: string): void;
   size(): number;
+}
+
+export interface RateLimitStore {
+  consume(key: string, windowMs: number, max: number, nowMs: number): Promise<RateLimitResult>;
+  reset(key?: string): Promise<void>;
+  size(): Promise<number>;
+}
+
+export interface AsyncRateLimiter {
+  check(key: string): Promise<RateLimitResult>;
+  reset(key?: string): Promise<void>;
+  size(): Promise<number>;
+}
+
+export interface AsyncRateLimiterOptions extends RateLimiterOptions {
+  store?: RateLimitStore;
 }
 
 interface Bucket {
@@ -83,5 +97,139 @@ export function createRateLimiter(options: RateLimiterOptions): RateLimiter {
     size(): number {
       return buckets.size;
     },
+  };
+}
+
+/** In-process `RateLimitStore` adapter for single-instance deployments and tests. */
+export function createMemoryRateLimitStore(): RateLimitStore {
+  const buckets = new Map<string, Bucket>();
+  return {
+    async consume(
+      key: string,
+      windowMs: number,
+      max: number,
+      nowMs: number,
+    ): Promise<RateLimitResult> {
+      let bucket = buckets.get(key);
+      if (!bucket || nowMs >= bucket.resetAt) {
+        bucket = { count: 0, resetAt: nowMs + windowMs };
+        buckets.set(key, bucket);
+      }
+      if (bucket.count >= max) {
+        return { allowed: false, remaining: 0, retryAfterMs: bucket.resetAt - nowMs };
+      }
+      bucket.count += 1;
+      return { allowed: true, remaining: max - bucket.count, retryAfterMs: 0 };
+    },
+    async reset(key?: string): Promise<void> {
+      if (key === undefined) buckets.clear();
+      else buckets.delete(key);
+    },
+    async size(): Promise<number> {
+      return buckets.size;
+    },
+  };
+}
+
+const RATE_LIMIT_TABLE = "ops_rate_limit_buckets";
+const initializedRateLimitDbs = new WeakSet<OrmDriverHandle>();
+
+async function ensureRateLimitBucketTable(db: OrmDriverHandle): Promise<void> {
+  if (initializedRateLimitDbs.has(db)) return;
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS ${RATE_LIMIT_TABLE} (
+      bucket_key TEXT PRIMARY KEY,
+      count INTEGER NOT NULL,
+      reset_at INTEGER NOT NULL
+    )
+  `);
+  initializedRateLimitDbs.add(db);
+}
+
+/** Shared SQL-backed `RateLimitStore` persisted through `@moonwitness/orm`. */
+export function createOrmRateLimitStore(): RateLimitStore {
+  return {
+    async consume(
+      key: string,
+      windowMs: number,
+      max: number,
+      nowMs: number,
+    ): Promise<RateLimitResult> {
+      const db = getDb();
+      await ensureRateLimitBucketTable(db);
+      return db.transaction(async (tx) => {
+        const current = await tx.get<{ count: number; reset_at: number }>(
+          `SELECT count, reset_at FROM ${RATE_LIMIT_TABLE} WHERE bucket_key = ?`,
+          [key],
+        );
+
+        if (!current || nowMs >= Number(current.reset_at)) {
+          const resetAt = nowMs + windowMs;
+          await tx.run(
+            `INSERT INTO ${RATE_LIMIT_TABLE} (bucket_key, count, reset_at)
+             VALUES (?, 1, ?)
+             ON CONFLICT(bucket_key) DO UPDATE SET count = excluded.count, reset_at = excluded.reset_at`,
+            [key, resetAt],
+          );
+          return {
+            allowed: max > 0,
+            remaining: Math.max(0, max - 1),
+            retryAfterMs: 0,
+          };
+        }
+
+        const currentCount = Number(current.count);
+        const resetAt = Number(current.reset_at);
+        if (currentCount >= max) {
+          return {
+            allowed: false,
+            remaining: 0,
+            retryAfterMs: Math.max(0, resetAt - nowMs),
+          };
+        }
+
+        const nextCount = currentCount + 1;
+        await tx.run(`UPDATE ${RATE_LIMIT_TABLE} SET count = ? WHERE bucket_key = ?`, [
+          nextCount,
+          key,
+        ]);
+        return {
+          allowed: true,
+          remaining: Math.max(0, max - nextCount),
+          retryAfterMs: 0,
+        };
+      });
+    },
+
+    async reset(key?: string): Promise<void> {
+      const db = getDb();
+      await ensureRateLimitBucketTable(db);
+      if (key === undefined) {
+        await db.run(`DELETE FROM ${RATE_LIMIT_TABLE}`);
+      } else {
+        await db.run(`DELETE FROM ${RATE_LIMIT_TABLE} WHERE bucket_key = ?`, [key]);
+      }
+    },
+
+    async size(): Promise<number> {
+      const db = getDb();
+      await ensureRateLimitBucketTable(db);
+      const row = await db.get<{ total: number }>(
+        `SELECT COUNT(*) AS total FROM ${RATE_LIMIT_TABLE}`,
+      );
+      return Number(row?.total ?? 0);
+    },
+  };
+}
+
+/** Creates an async fixed-window rate limiter backed by any `RateLimitStore`. */
+export function createAsyncRateLimiter(options: AsyncRateLimiterOptions): AsyncRateLimiter {
+  const { windowMs, max } = options;
+  const now = options.now ?? (() => Date.now());
+  const store = options.store ?? createMemoryRateLimitStore();
+  return {
+    check: (key: string) => store.consume(key, windowMs, max, now()),
+    reset: (key?: string) => store.reset(key),
+    size: () => store.size(),
   };
 }

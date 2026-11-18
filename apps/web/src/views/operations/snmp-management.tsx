@@ -222,7 +222,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
     <form
       onSubmit={handleSubmit}
       aria-label={`Create target for ${deviceId}`}
-      className="mt-3 space-y-3 border-2 border-[var(--border)] bg-black/20 p-3"
+      className="mt-3 space-y-3 border-2 border-[var(--border)] bg-[var(--muted)]/60 p-3"
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <Labeled label="Target name">

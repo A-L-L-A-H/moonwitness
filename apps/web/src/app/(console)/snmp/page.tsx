@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { SatelliteDishArt, SkinOrnament } from "@moonwitness/ui";
 import { SnmpProbe } from "@moonwitness/ui/icons";
-import { OperationsShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { normalizeRole } from "@/lib/roles";
 import {
@@ -39,7 +39,8 @@ function SnmpMonitor() {
   }, [devices.data, query]);
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="SNMP Monitor"
       search={{ value: query, onChange: setQuery, placeholder: "Search devices…" }}
     >
@@ -146,7 +147,7 @@ function SnmpMonitor() {
           </section>
         )}
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 

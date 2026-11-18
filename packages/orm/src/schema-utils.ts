@@ -52,6 +52,7 @@ export const METADATA_COLUMNS = [
   "version INTEGER NOT NULL DEFAULT 1",
   "source TEXT NOT NULL DEFAULT 'api'",
   "source_ref TEXT",
+  "tenant_id TEXT NOT NULL DEFAULT 'default'",
 ] as const;
 
 export const METADATA_NAMES = new Set([
@@ -66,6 +67,7 @@ export const METADATA_NAMES = new Set([
   "version",
   "source",
   "source_ref",
+  "tenant_id",
 ]);
 
 function isZodType(value: z.ZodTypeAny, name: string): boolean {

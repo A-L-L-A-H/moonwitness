@@ -61,7 +61,7 @@ import {
   SyslogStream,
   VpnTunnel,
 } from "@moonwitness/ui/icons";
-import { EmpireShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 
 const SOVEREIGN_DOMAIN_ICONS = [
   { id: "vpn", label: "VPN Tunnel", Icon: VpnTunnel },
@@ -113,7 +113,8 @@ export function SkinLaboratory() {
   }, [worlds, searchFilter]);
 
   return (
-    <EmpireShell
+    <ConsoleShellAdapter
+      plane="creator"
       breadcrumb="Skin Laboratory"
       search={{
         value: searchFilter,
@@ -134,8 +135,8 @@ export function SkinLaboratory() {
                 SKIN LABORATORY
               </h1>
               <p className="mt-2 max-w-2xl text-sm text-[var(--muted-foreground)]">
-                Interactive matrix verifying 8-axis skin presets, 10 brand logos, 12 vector cutouts,
-                12 domain icons, and measured WCAG 2.1 AA contrast across all 84 DNA combinations.
+                Interactive matrix verifying 8-axis skin presets, 18 brand logos, 24 vector cutouts,
+                12 domain icons, and measured WCAG 2.1 AA contrast across all 140 DNA combinations.
               </p>
             </div>
             <div
@@ -147,7 +148,7 @@ export function SkinLaboratory() {
                 [
                   { id: "focus", label: "SINGLE WORLD" },
                   { id: "compare", label: "7-WORLD AUDIT GRID" },
-                  { id: "matrix", label: "6-SKIN MATRIX" },
+                  { id: "matrix", label: "10-SKIN MATRIX" },
                   { id: "assets", label: "LOGOS & CUTOUTS" },
                   { id: "dx", label: "TOKEN & PLAYGROUND" },
                 ] as const
@@ -574,7 +575,7 @@ export function SkinLaboratory() {
             <div className="flex flex-wrap items-center justify-between gap-2 border border-[var(--border)] bg-[var(--card)] px-4 py-3">
               <div>
                 <h2 className="font-brush text-2xl text-[var(--foreground)]">
-                  6-SKIN LIVE MATRIX DIFF
+                  10-SKIN LIVE MATRIX DIFF
                 </h2>
                 <p className="text-xs text-[var(--muted-foreground)]">
                   Simultaneous comparison of Default, Riot, Editorial, Technical, Archive, and
@@ -592,7 +593,7 @@ export function SkinLaboratory() {
             <section className="relative overflow-hidden border-2 border-[var(--border)] bg-[var(--card)] p-5">
               <div className="mb-4 flex items-center justify-between">
                 <h2 className="font-brush text-2xl text-[var(--foreground)]">
-                  10 CANONICAL BRAND LOGO LOCKUPS
+                  18 CANONICAL BRAND LOGO LOCKUPS
                 </h2>
                 <SkinOrnament slot="tag" label={`${activeSkin.toUpperCase()} · ${globalDnaId}`} />
               </div>
@@ -614,7 +615,7 @@ export function SkinLaboratory() {
 
             <section className="border-2 border-[var(--border)] bg-[var(--card)] p-5">
               <h2 className="mb-4 font-brush text-2xl text-[var(--foreground)]">
-                12 ISOLATED VECTOR CUTOUTS
+                24 ISOLATED VECTOR CUTOUTS
               </h2>
               <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                 {CUTOUT_ARTWORK_IDS.map((cutoutId) => (
@@ -665,6 +666,6 @@ export function SkinLaboratory() {
           </div>
         )}
       </div>
-    </EmpireShell>
+    </ConsoleShellAdapter>
   );
 }

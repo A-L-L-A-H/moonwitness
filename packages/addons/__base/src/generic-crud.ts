@@ -4,6 +4,7 @@ import {
   BaseRepository,
   ConflictError,
   createActorContext,
+  DEFAULT_TENANT_ID,
   modelRegistry,
   type FindOptions,
 } from "@moonwitness/orm";
@@ -16,6 +17,7 @@ export interface BaseAddonAuthBridge {
   ) => (request: FastifyRequest, reply: FastifyReply) => Promise<void> | void;
   getActorRole: (request: FastifyRequest) => CrewRoleOrPublic;
   getActorId: (request: FastifyRequest) => string | null;
+  getActorTenant?: (request: FastifyRequest) => string;
 }
 
 export const defaultFailClosedAuthBridge: BaseAddonAuthBridge = {
@@ -46,7 +48,18 @@ export const defaultFailClosedAuthBridge: BaseAddonAuthBridge = {
     const id = (request as { user?: { id?: unknown } }).user?.id;
     return id !== undefined && id !== null ? String(id) : null;
   },
+  getActorTenant: (request) => {
+    const reqWithTenant = request as { tenantId?: unknown; user?: { tenantId?: unknown } };
+    const raw = reqWithTenant.tenantId ?? reqWithTenant.user?.tenantId;
+    return typeof raw === "string" && raw.trim() ? raw.trim() : DEFAULT_TENANT_ID;
+  },
 };
+
+function resolveActorTenant(auth: BaseAddonAuthBridge, request: FastifyRequest): string {
+  const fromAuth = auth.getActorTenant?.(request);
+  if (fromAuth && fromAuth.trim()) return fromAuth.trim();
+  return defaultFailClosedAuthBridge.getActorTenant!(request);
+}
 
 function repositoryForModel(modelName: string) {
   const desc = modelRegistry.get(modelName);
@@ -103,11 +116,13 @@ export async function registerGenericModelRoutes(
         }
       }
 
+      const tenantId = resolveActorTenant(auth, request);
       const limit = query.limit ? Math.min(200, Math.max(1, Number(query.limit))) : 50;
       const offset = query.offset ? Math.max(0, Number(query.offset)) : 0;
       const opts: FindOptions = {
         limit,
         offset,
+        tenantId,
         includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
         ...(query.orderBy ? { orderBy: query.orderBy } : {}),
       };
@@ -120,7 +135,7 @@ export async function registerGenericModelRoutes(
       }
       const total = query.q?.trim()
         ? filtered.length
-        : await target.repo.count(filters, { includeDeleted: opts.includeDeleted });
+        : await target.repo.count(filters, { includeDeleted: opts.includeDeleted, tenantId });
       return reply.send({ data: filtered, total });
     },
   );
@@ -138,7 +153,8 @@ export async function registerGenericModelRoutes(
       const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
       if (!acl.canRead) return reply.code(403).send({ error: "Forbidden" });
 
-      const row = await target.repo.findOne(request.params.id);
+      const tenantId = resolveActorTenant(auth, request);
+      const row = await target.repo.findOne(request.params.id, { tenantId });
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
     },
@@ -158,7 +174,8 @@ export async function registerGenericModelRoutes(
       if (!acl.canCreate) return reply.code(403).send({ error: "Forbidden" });
 
       try {
-        const actor = createActorContext(auth.getActorId(request), "api", request.id);
+        const tenantId = resolveActorTenant(auth, request);
+        const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
         const created = await target.repo.create(request.body ?? {}, actor);
         return reply.code(201).send({ data: created });
       } catch (error) {
@@ -181,7 +198,8 @@ export async function registerGenericModelRoutes(
       if (!acl.canUpdate) return reply.code(403).send({ error: "Forbidden" });
 
       try {
-        const actor = createActorContext(auth.getActorId(request), "api", request.id);
+        const tenantId = resolveActorTenant(auth, request);
+        const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
         const updated = await target.repo.update(request.params.id, request.body ?? {}, actor);
         if (!updated) return reply.code(404).send({ error: "Not found" });
         return reply.send({ data: updated });
@@ -199,7 +217,8 @@ export async function registerGenericModelRoutes(
       if (!target) return reply.code(404).send({ error: "Model not found" });
       const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
       if (!acl.canUpdate) return reply.code(403).send({ error: "Forbidden" });
-      const actor = createActorContext(auth.getActorId(request), "api", request.id);
+      const tenantId = resolveActorTenant(auth, request);
+      const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
       const row = await target.repo.archive(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -214,7 +233,8 @@ export async function registerGenericModelRoutes(
       if (!target) return reply.code(404).send({ error: "Model not found" });
       const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
       if (!acl.canUpdate) return reply.code(403).send({ error: "Forbidden" });
-      const actor = createActorContext(auth.getActorId(request), "api", request.id);
+      const tenantId = resolveActorTenant(auth, request);
+      const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
       const row = await target.repo.restore(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -229,7 +249,8 @@ export async function registerGenericModelRoutes(
       if (!target) return reply.code(404).send({ error: "Model not found" });
       const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
       if (!acl.canDelete) return reply.code(403).send({ error: "Forbidden" });
-      const actor = createActorContext(auth.getActorId(request), "api", request.id);
+      const tenantId = resolveActorTenant(auth, request);
+      const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
       const row = await target.repo.delete(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -244,6 +265,12 @@ export async function registerGenericModelRoutes(
       if (!target) return reply.code(404).send({ error: "Model not found" });
       const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
       if (!acl.canRead) return reply.code(403).send({ error: "Forbidden" });
+      const tenantId = resolveActorTenant(auth, request);
+      const row = await target.repo.findOne(request.params.id, {
+        includeDeleted: true,
+        tenantId,
+      });
+      if (!row) return reply.code(404).send({ error: "Not found" });
       const entries = await target.repo.history(request.params.id);
       return reply.send({ data: entries });
     },

@@ -163,6 +163,41 @@ export function ConsoleCommandPalette({
             </CommandItem>
           ))}
         </CommandGroup>
+        <CommandGroup heading="Studios, Models & Addons">
+          {[
+            { label: "Addons Catalog & Installs", href: "/addons", tag: "ADDONS" },
+            { label: "Skin Laboratory (10-Skin Engine)", href: "/skin-lab", tag: "SKIN LAB" },
+            { label: "Identity & Avatar Studio", href: "/id-lab", tag: "ID LAB" },
+            {
+              label: "Model Inspector: Timeline Event",
+              href: "/models/timeline.event",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: Witness Profile",
+              href: "/models/witness.profile",
+              tag: "MODEL",
+            },
+            { label: "ARSY Control Plane", href: "/control", tag: "OPS" },
+            { label: "VPN & Mesh Tunnel", href: "/vpn", tag: "OPS" },
+            { label: "SNMP Telemetry Probes", href: "/snmp", tag: "OPS" },
+            { label: "Syslog Stream", href: "/syslog", tag: "OPS" },
+            { label: "RADIUS Access Control", href: "/radius", tag: "OPS" },
+            { label: "Storage Browser", href: "/storage", tag: "OPS" },
+          ].map((entry) => (
+            <CommandItem
+              key={`jump-${entry.href}`}
+              value={`${entry.label} ${entry.href} ${entry.tag}`}
+              onSelect={() => {
+                router.push(entry.href);
+                setOpen(false);
+              }}
+            >
+              <span>{entry.label}</span>
+              <CommandShortcut>{entry.tag}</CommandShortcut>
+            </CommandItem>
+          ))}
+        </CommandGroup>
       </CommandList>
     </CommandDialog>
   );

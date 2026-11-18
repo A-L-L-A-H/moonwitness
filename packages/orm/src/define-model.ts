@@ -4,7 +4,7 @@ import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 import { ConflictError } from "./errors.js";
 import type { BaseMetadata, RecordStatus } from "./base-metadata.js";
 import type { ActorContext } from "./actor-context.js";
-import { SYSTEM_ACTOR } from "./actor-context.js";
+import { DEFAULT_TENANT_ID, normalizeTenantId, SYSTEM_ACTOR } from "./actor-context.js";
 import {
   assertIdentifier,
   fieldSpec,
@@ -38,6 +38,7 @@ export interface FindOptions {
   limit?: number;
   offset?: number;
   orderBy?: string | Array<{ field: string; direction?: "ASC" | "DESC" }>;
+  tenantId?: string;
 }
 
 export interface DefineModelOptions<TBusiness extends ZodObjectLike = ZodObjectLike> {
@@ -308,13 +309,17 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   private buildWhere(
     filters: Record<string, unknown> = {},
-    opts: { includeDeleted?: boolean } = {},
+    opts: { includeDeleted?: boolean; tenantId?: string } = {},
   ): { where: string; params: unknown[] } {
     const clauses: string[] = [];
     const params: unknown[] = [];
 
     if (this.softDelete && !opts.includeDeleted) {
       clauses.push("status != 'deleted'");
+    }
+    if (opts.tenantId !== undefined) {
+      clauses.push("tenant_id = ?");
+      params.push(normalizeTenantId(opts.tenantId));
     }
     for (const [key, value] of Object.entries(filters)) {
       if (value === undefined) continue;
@@ -400,7 +405,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   async findOne(
     id: string,
-    opts: { includeDeleted?: boolean } = {},
+    opts: { includeDeleted?: boolean; tenantId?: string } = {},
   ): Promise<ModelRecord<TBusiness> | null> {
     const rows = await this.find({ id }, opts);
     return rows[0] ?? null;
@@ -415,7 +420,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   async count(
     filters: Record<string, unknown> = {},
-    opts: { includeDeleted?: boolean } = {},
+    opts: { includeDeleted?: boolean; tenantId?: string } = {},
   ): Promise<number> {
     const { where, params } = this.buildWhere(filters, opts);
     const row = await getDb().get<{ total: number }>(
@@ -430,7 +435,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     data: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
   ): Promise<ModelRecord<TBusiness>> {
-    const existing = await this.find(whereFilters, { limit: 1 });
+    const existing = await this.find(whereFilters, {
+      limit: 1,
+      ...(actor.tenantId !== undefined ? { tenantId: actor.tenantId } : {}),
+    });
     if (existing[0]) {
       const updated = await this.update(existing[0].id, data, actor);
       if (updated) return updated;
@@ -456,6 +464,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     await ensureAuditTable();
     const { fullSchema, extensible, customFields } = this.descriptor();
     const now = new Date();
+    const resolvedTenantId =
+      actor.tenantId !== undefined
+        ? normalizeTenantId(actor.tenantId)
+        : normalizeTenantId(
+            typeof data.tenant_id === "string" ? data.tenant_id : DEFAULT_TENANT_ID,
+          );
     const record: Record<string, unknown> = {
       ...data,
       id: data.id ?? uuidv7(),
@@ -469,6 +483,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       version: 1,
       source: actor.source,
       source_ref: data.source_ref ?? null,
+      tenant_id: resolvedTenantId,
     };
     if (extensible) {
       record._attrs = validateAttrsPayload(data._attrs, customFields);
@@ -521,6 +536,9 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       if (this.softDelete && current.status === "deleted") {
         return null;
       }
+      if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
+        return null;
+      }
       if (data.version !== undefined && Number(data.version) !== Number(current.version)) {
         throw new ConflictError(
           `Version conflict on '${this.name}' ${id}: expected version ${String(current.version)}, got ${String(data.version)}.`,
@@ -543,6 +561,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         version: Number(current.version) + 1,
         source: actor.source,
         source_ref: current.source_ref,
+        tenant_id: current.tenant_id,
       };
       if (extensible) {
         const mergedAttrs = {
@@ -650,6 +669,9 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       if (!currentRow) return null;
 
       const current = this.decodeRow<Record<string, unknown>>(currentRow);
+      if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
+        return null;
+      }
       beforeSnapshot = current;
       const now = new Date();
       const updated = {

@@ -122,7 +122,7 @@ export function Onboarding() {
       <div className="flex min-h-screen items-center justify-center px-4">
         <ZineCardRough className="max-w-md p-7 text-center">
           <Crown className="mx-auto h-8 w-12 text-[var(--yellow)]" />
-          <h1 className="mt-3 font-brush text-3xl text-white">
+          <h1 className="mt-3 font-brush text-3xl text-[var(--foreground)]">
             SUDAH <span className="text-[var(--pink)]">TERPASANG</span>
           </h1>
           <p className="mt-2 text-sm text-[var(--muted-foreground)]">
@@ -182,10 +182,10 @@ export function Onboarding() {
       />
       <Star4 className="absolute right-[12%] top-24 hidden h-10 w-10 text-[var(--pink)] lg:block" />
 
-      <header className="relative z-10 flex h-16 items-center justify-between border-b border-white/10 px-4 sm:px-8">
+      <header className="relative z-10 flex h-16 items-center justify-between border-b border-[var(--border)] px-4 sm:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Crown className="h-5 w-8 text-[var(--yellow)]" />
-          <span className="font-brush text-xl text-white sm:text-2xl">
+          <span className="font-brush text-xl text-[var(--foreground)] sm:text-2xl">
             {" "}
             MOON<span className="text-[var(--pink)]">WITNESS</span>{" "}
           </span>
@@ -198,7 +198,7 @@ export function Onboarding() {
           <p className="text-[10px] tracking-[0.3em] text-[var(--muted-foreground)]">
             CONTROL PLANE / ONBOARDING
           </p>
-          <h1 className="mt-1 font-brush text-4xl text-white sm:text-5xl">
+          <h1 className="mt-1 font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
             {" "}
             WELCOME TO <span className="text-[var(--pink)]">THE SHADOW</span>{" "}
           </h1>
@@ -329,7 +329,7 @@ export function Onboarding() {
 
           {step === "review" && (
             <div className="space-y-5">
-              <h2 className="font-brush text-2xl text-white">
+              <h2 className="font-brush text-2xl text-[var(--foreground)]">
                 {" "}
                 SIAP <span className="text-[var(--green)]">DIBUKA</span>{" "}
               </h2>

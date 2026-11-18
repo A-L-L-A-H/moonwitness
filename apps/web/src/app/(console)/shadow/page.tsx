@@ -71,10 +71,10 @@ export default function ShadowPage() {
       <Star4 className="absolute right-[16%] top-40 hidden h-10 w-10 text-[var(--primary)] lg:block" />
 
       {/* top bar */}
-      <header className="relative z-10 flex min-h-16 items-center justify-between gap-2 border-b border-white/10 px-4 py-2 sm:px-8">
+      <header className="relative z-10 flex min-h-16 items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 px-4 py-2 backdrop-blur-sm sm:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-2 max-lg:min-h-11">
           <Crown className="h-5 w-8 shrink-0 text-[var(--primary)]" />
-          <span className="font-brush text-lg text-white sm:text-2xl">
+          <span className="font-brush text-lg text-[var(--foreground)] sm:text-2xl">
             MOON<span className="text-[var(--primary)]">WITNESS</span>
           </span>
           <span className="ml-2 hidden font-hand text-lg text-[var(--muted-foreground)] md:inline">
@@ -270,7 +270,7 @@ export default function ShadowPage() {
         </div>
       </main>
 
-      <footer className="relative z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-white/10 px-4 py-4 text-[11px] text-[var(--muted-foreground)] sm:px-8">
+      <footer className="relative z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-[var(--border)] bg-[var(--card)]/90 px-4 py-4 text-[11px] text-[var(--muted-foreground)] backdrop-blur-sm sm:px-8">
         <span className="flex items-center gap-2">
           <Smiley className="h-4 w-4 text-[var(--primary)]" />
           Moonwitness // Create · Curate · Publish

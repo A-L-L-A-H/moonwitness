@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { RooftopAntennaArt, SkinOrnament } from "@moonwitness/ui";
 import { SyslogStream } from "@moonwitness/ui/icons";
-import { OperationsShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { useSyslogMessages, type SyslogMessage } from "@/lib/api/syslog";
 
@@ -53,7 +53,8 @@ function SyslogExplorer() {
   );
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="Syslog Explorer"
       search={{
         value: query,
@@ -124,7 +125,7 @@ function SyslogExplorer() {
           )}
         </OperatorSession>
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 

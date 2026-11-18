@@ -128,7 +128,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
         <div className="mt-4 space-y-4">
           {status.data?.counts && (
             <dl className="grid gap-3 sm:grid-cols-4">
-              <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
+              <div className="border border-[var(--border)] bg-[var(--muted)]/60 px-3 py-2">
                 <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
                   ARCHIVES
                 </dt>
@@ -136,7 +136,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
                   {status.data.counts.archives}
                 </dd>
               </div>
-              <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
+              <div className="border border-[var(--border)] bg-[var(--muted)]/60 px-3 py-2">
                 <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
                   MESSAGES
                 </dt>
@@ -144,7 +144,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
                   {status.data.counts.messages}
                 </dd>
               </div>
-              <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
+              <div className="border border-[var(--border)] bg-[var(--muted)]/60 px-3 py-2">
                 <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
                   KNOWLEDGE
                 </dt>
@@ -152,7 +152,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
                   {status.data.counts.knowledge}
                 </dd>
               </div>
-              <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
+              <div className="border border-[var(--border)] bg-[var(--muted)]/60 px-3 py-2">
                 <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
                   EMBEDDINGS
                 </dt>
@@ -220,7 +220,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
               {knowledge.data.records.map((record) => (
                 <li
                   key={record.id}
-                  className="flex min-w-0 flex-col justify-between gap-3 border border-[var(--border)] bg-black/25 p-3"
+                  className="flex min-w-0 flex-col justify-between gap-3 border border-[var(--border)] bg-[var(--muted)]/60 p-3"
                 >
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center justify-between gap-2">

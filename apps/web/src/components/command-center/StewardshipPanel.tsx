@@ -42,7 +42,7 @@ export function StewardshipPanel() {
               <div
                 key={wing.code}
                 data-wing-card={wing.code}
-                className="min-w-0 overflow-hidden border border-[var(--border)] bg-black/25 p-3"
+                className="min-w-0 overflow-hidden border border-[var(--border)] bg-[var(--muted)]/60 p-3"
               >
                 <div className="font-mono text-[10px] text-[var(--primary)] break-words">
                   {wing.code} · {wing.callsign}
@@ -58,7 +58,7 @@ export function StewardshipPanel() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="border border-[var(--border)] bg-black/20 p-4 space-y-2">
+            <div className="border border-[var(--border)] bg-[var(--muted)]/60 p-4 space-y-2">
               <div className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
                 PRIME CODE PC01–PC09 &amp; 100CENTER ({CENTER_100_STEWARDSHIP_CLUSTERS.length}{" "}
                 CLUSTERS)
@@ -77,7 +77,7 @@ export function StewardshipPanel() {
               </div>
             </div>
 
-            <div className="border border-[var(--border)] bg-black/20 p-4 space-y-2">
+            <div className="border border-[var(--border)] bg-[var(--muted)]/60 p-4 space-y-2">
               <div className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
                 DHGS 13-STEP ASSURANCE LOOP (RECEIVE → LEARN)
               </div>

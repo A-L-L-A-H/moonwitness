@@ -52,6 +52,21 @@ export {
   defaultFailClosedAuthBridge,
   type BaseAddonAuthBridge,
 } from "./generic-crud.js";
+export {
+  opsJobSchema,
+  opsJobModel,
+  ensureJobQueueSchema,
+  enqueueJob,
+  claimNextJob,
+  completeJob,
+  failJob,
+  processNextJob,
+  type OpsJobRecord,
+  type EnqueueJobInput,
+  type ClaimJobOptions,
+  type FailJobOptions,
+  type JobHandler,
+} from "./job-queue.js";
 
 export interface BaseManifest {
   name: "__base";

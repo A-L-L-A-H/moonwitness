@@ -265,7 +265,7 @@ export function Dock() {
             onClick={() => setDockTab("chronicle")}
             className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
               dockTab === "chronicle"
-                ? "border-[var(--pink)] bg-[var(--pink)]/15 text-white"
+                ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--foreground)]"
                 : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
@@ -278,7 +278,7 @@ export function Dock() {
             onClick={() => setDockTab("canon")}
             className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
               dockTab === "canon"
-                ? "border-[var(--blue)] bg-[var(--blue)]/15 text-white"
+                ? "border-[var(--blue)] bg-[var(--blue)]/15 text-[var(--foreground)]"
                 : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
@@ -311,7 +311,7 @@ export function Dock() {
             aria-label="Create timeline event"
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-brush text-2xl text-white">
+              <h2 className="font-brush text-2xl text-[var(--foreground)]">
                 NEW <span className="text-[var(--primary)]">TIMELINE EVENT</span>
               </h2>
             </div>
@@ -324,7 +324,7 @@ export function Dock() {
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="Relay Node Activated"
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
                 />
               </label>
               <label className="text-xs text-[var(--foreground)]">
@@ -332,7 +332,7 @@ export function Dock() {
                 <select
                   value={newKind}
                   onChange={(e) => setNewKind(e.target.value as EventKind)}
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
                 >
                   <option value="PROJECT">PROJECT</option>
                   <option value="STORY">STORY</option>
@@ -347,7 +347,7 @@ export function Dock() {
                 <select
                   value={newEra}
                   onChange={(e) => setNewEra(e.target.value as EraId)}
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
                 >
                   <option value="origins">origins</option>
                   <option value="neon">neon</option>
@@ -363,7 +363,7 @@ export function Dock() {
                   required
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
                 />
               </label>
             </div>
@@ -375,7 +375,7 @@ export function Dock() {
                   value={newLocation}
                   onChange={(e) => setNewLocation(e.target.value)}
                   placeholder="Jakarta / Relay Sector 4"
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
                 />
               </label>
               <label className="text-xs text-[var(--foreground)]">
@@ -387,7 +387,7 @@ export function Dock() {
                   value={newTags}
                   onChange={(e) => setNewTags(e.target.value)}
                   placeholder="signal, archive, release"
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
                 />
               </label>
             </div>
@@ -398,7 +398,7 @@ export function Dock() {
                 value={newExcerpt}
                 onChange={(e) => setNewExcerpt(e.target.value)}
                 placeholder="Short one-line summary for card view"
-                className="min-h-10 w-full border-2 border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+                className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
               />
             </label>
             <label className="block text-xs text-[var(--foreground)]">
@@ -408,7 +408,7 @@ export function Dock() {
                 value={newBody}
                 onChange={(e) => setNewBody(e.target.value)}
                 placeholder="Full chronicle details…"
-                className="w-full border-2 border-[var(--border)] bg-black/40 p-3 text-xs text-white"
+                className="w-full border-2 border-[var(--border)] bg-[var(--background)] p-3 text-xs text-[var(--foreground)]"
               />
             </label>
             <div className="flex justify-end gap-2">

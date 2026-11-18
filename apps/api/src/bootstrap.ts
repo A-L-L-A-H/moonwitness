@@ -41,7 +41,12 @@ import { snmpPollerRoutes } from "./interface/routes/snmp-poller.routes";
 import { storageRoutes } from "./interface/routes/storage.routes";
 import { syslogRoutes } from "./interface/routes/syslog.routes";
 import { timelineRoutes } from "./interface/routes/timeline.routes";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "./middleware/auth";
+import {
+  requireAuth,
+  requireRole,
+  resolveRequestTenant,
+  type AuthenticatedRequest,
+} from "./middleware/auth";
 
 export interface CoreAppOptions {
   prefix?: string;
@@ -198,6 +203,7 @@ const authBridge: BaseAddonAuthBridge = {
     const id = (request as AuthenticatedRequest).user?.id;
     return id !== undefined && id !== null ? String(id) : null;
   },
+  getActorTenant: resolveRequestTenant,
 };
 
 async function registerAddonTree(

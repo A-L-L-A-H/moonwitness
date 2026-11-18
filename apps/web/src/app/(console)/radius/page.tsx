@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { SignalRadioArt, SkinOrnament } from "@moonwitness/ui";
 import { RadiusKey } from "@moonwitness/ui/icons";
-import { OperationsShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useRadiusHealth, useRadiusLogs, useRadiusStats, type RadiusLog } from "@/lib/api/radius";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { normalizeRole } from "@/lib/roles";
@@ -39,7 +39,8 @@ function RadiusConsole() {
   }, [refetchHealth, refetchStats, refetchLogs]);
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="RADIUS Console"
       search={{ value: query, onChange: setQuery, placeholder: "Search RADIUS logs…" }}
     >
@@ -70,7 +71,7 @@ function RadiusConsole() {
           className="border-2 border-[var(--border)] bg-[var(--card)] p-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-brush text-xl text-white">SERVICE HEALTH</h2>
+            <h2 className="font-brush text-xl text-[var(--foreground)]">SERVICE HEALTH</h2>
             <button
               type="button"
               onClick={() => {
@@ -181,7 +182,7 @@ function RadiusConsole() {
 
         <RadiusUserManagement canWrite={canWrite} />
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 

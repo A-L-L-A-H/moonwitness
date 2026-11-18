@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { IndustrialBatteryArt, SkinOrnament } from "@moonwitness/ui";
 import { StorageBucket } from "@moonwitness/ui/icons";
-import { OperationsShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
   useCreateBucket,
   useDeleteBucket,
@@ -439,7 +439,8 @@ function StorageBrowser() {
     health.isFetching || buckets.isFetching || (selectedBucket ? objects.isFetching : false);
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="Storage Browser"
       search={{
         value: prefix,
@@ -591,7 +592,7 @@ function StorageBrowser() {
           </section>
         )}
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 

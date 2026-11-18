@@ -63,6 +63,7 @@ const FULL_METADATA_SHAPE = {
   version: z.number().int().min(0),
   source: z.enum(["seed", "api", "import", "migration"]),
   source_ref: z.string().nullish(),
+  tenant_id: z.string().min(1).default("default"),
 };
 
 interface StoredModelBase {

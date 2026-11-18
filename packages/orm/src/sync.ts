@@ -32,6 +32,7 @@ const LEGACY_METADATA_COLUMN_DEFS: ReadonlyArray<{
   { name: "version", ddl: "version INTEGER NOT NULL DEFAULT 1" },
   { name: "source", ddl: "source TEXT NOT NULL DEFAULT 'migration'" },
   { name: "source_ref", ddl: "source_ref TEXT" },
+  { name: "tenant_id", ddl: "tenant_id TEXT NOT NULL DEFAULT 'default'" },
 ];
 
 function computeModelSchemaHash(descriptor: RegisteredModelDescriptor): string {
@@ -147,6 +148,12 @@ export async function syncModels(
     if (options.legacyBackfill) {
       const metaAdded = await backfillLegacyMetadata(table, existingCols);
       report.addedColumns.push(...metaAdded);
+    } else if (!existingCols.has("tenant_id")) {
+      await db.exec(
+        `ALTER TABLE "${table}" ADD COLUMN "tenant_id" TEXT NOT NULL DEFAULT 'default'`,
+      );
+      existingCols.add("tenant_id");
+      report.addedColumns.push({ table, column: "tenant_id" });
     }
 
     for (const [col, spec] of descriptor.fields) {

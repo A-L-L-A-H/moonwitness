@@ -4,8 +4,15 @@ import type { FastifyError } from "fastify";
 import FastifyCookie from "@fastify/cookie";
 import FastifyCors from "@fastify/cors";
 import { env, parseCorsOrigins } from "../../shared/env";
-import { createRateLimiter, resolveRateLimitKey } from "../rate-limit";
-import { registerHealthRoutes } from "../../interface/routes/health.routes";
+import { resolveTraceContext } from "../../shared/trace";
+import {
+  createAsyncRateLimiter,
+  createOrmRateLimitStore,
+  createRateLimiter,
+  resolveRateLimitKey,
+} from "../rate-limit";
+import { registerHealthRoutes, registerMetricsRoute } from "../../interface/routes/health.routes";
+import { createApiMetricsCollector } from "../../interface/routes/metrics";
 import { authRoutes } from "../../interface/routes/auth.routes";
 import { controlRoutes } from "../../interface/routes/control.routes";
 import { radiusRoutes } from "../../interface/routes/radius.routes";
@@ -74,9 +81,21 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     },
   });
 
-  // Echo the correlation id back and include it in every structured log line.
+  const metrics = createApiMetricsCollector();
+  if (!fastify.hasDecorator("metricsCollector")) {
+    fastify.decorate("metricsCollector", metrics);
+  }
+
+  // Echo correlation and trace identifiers back and observe latency/status telemetry.
   fastify.addHook("onRequest", async (request, reply) => {
+    const trace = resolveTraceContext(request.headers["traceparent"]);
     reply.header("x-request-id", request.id);
+    reply.header("traceparent", trace.traceparent);
+    (request as { traceparent?: string }).traceparent = trace.traceparent;
+  });
+
+  fastify.addHook("onResponse", async (request, reply) => {
+    metrics.observeRequest(request.method, reply.statusCode, reply.elapsedTime);
   });
 
   await fastify.register(FastifyCookie);
@@ -95,18 +114,19 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
 
   const maxRequests = Number(env.RATE_LIMIT_MAX);
   if (Number.isFinite(maxRequests) && maxRequests > 0) {
-    const limiter = createRateLimiter({
-      max: maxRequests,
-      windowMs: Number(env.RATE_LIMIT_WINDOW_MS),
-    });
+    const windowMs = Number(env.RATE_LIMIT_WINDOW_MS);
+    const useOrmStore = env.RATE_LIMIT_STORE === "orm";
+    const syncLimiter = useOrmStore ? null : createRateLimiter({ max: maxRequests, windowMs });
+    const asyncLimiter = useOrmStore
+      ? createAsyncRateLimiter({ max: maxRequests, windowMs, store: createOrmRateLimitStore() })
+      : null;
     fastify.addHook("onRequest", async (request, reply) => {
-      const result = limiter.check(
-        resolveRateLimitKey(
-          request.ip,
-          request.headers["x-forwarded-for"],
-          env.TRUSTED_PROXY_COUNT,
-        ),
+      const key = resolveRateLimitKey(
+        request.ip,
+        request.headers["x-forwarded-for"],
+        env.TRUSTED_PROXY_COUNT,
       );
+      const result = asyncLimiter ? await asyncLimiter.check(key) : syncLimiter!.check(key);
       reply.header("x-ratelimit-limit", maxRequests);
       reply.header("x-ratelimit-remaining", result.remaining);
       if (!result.allowed) {
@@ -236,10 +256,12 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     fastify.decorate("midMounted", true);
   }
 
+  await registerMetricsRoute(fastify, metrics);
+
   if (options.prefix) {
     await fastify.register(
       async (instance: FastifyInstance) => {
-        await registerHealthRoutes(instance);
+        await registerHealthRoutes(instance, { metrics });
         if (!options.authExternallyMounted) {
           await instance.register(authRoutes);
         }

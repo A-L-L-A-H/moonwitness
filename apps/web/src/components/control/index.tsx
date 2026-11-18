@@ -1,7 +1,18 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import { Sticker, Tape, Card, Badge, Gauge, ZineCardRough } from "@moonwitness/ui";
+import {
+  Badge,
+  BarChart,
+  Card,
+  CutoutArtwork,
+  DnaBrandLogo,
+  Gauge,
+  RadialGauge,
+  Sticker,
+  Tape,
+  ZineCardRough,
+} from "@moonwitness/ui";
 import { Crown, Star4 } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
@@ -142,7 +153,7 @@ function ResourcePanel({ kind }: { kind: Kind }) {
   return (
     <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
-        <h2 className="font-brush text-lg text-white">
+        <h2 className="font-brush text-lg text-[var(--foreground)]">
           {kind.toUpperCase()}{" "}
           <span className="text-[var(--primary)]">
             {kind === "systemd" || kind === "docker" ? "UNITS" : "RESOURCES"}
@@ -193,7 +204,9 @@ function HostCard({
     <ZineCardRough className="relative overflow-hidden p-5 skin-riot">
       <Star4 className="absolute right-4 top-4 h-6 w-6 text-[var(--primary)] opacity-70" />
       <p className="text-[10px] tracking-[0.25em] text-[var(--muted-foreground)]">HOST AGENT</p>
-      <h2 className="mt-1 font-brush text-2xl text-white">{host.hostname || "unknown-host"}</h2>
+      <h2 className="mt-1 font-brush text-2xl text-[var(--foreground)]">
+        {host.hostname || "unknown-host"}
+      </h2>
       <p className="mt-1 font-hand text-lg text-[var(--primary)]">
         {host.distro || host.os}
         {host.wsl_distro ? ` · WSL ${host.wsl_distro}` : ""} · {host.arch}
@@ -248,7 +261,7 @@ function AuditPanel() {
   return (
     <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
-        <h2 className="font-brush text-lg text-white">
+        <h2 className="font-brush text-lg text-[var(--foreground)]">
           AUDIT <span className="text-[var(--primary)]">TRAIL</span>
         </h2>
         <span className="text-[10px] tracking-widest text-[var(--muted-foreground)]">
@@ -321,7 +334,7 @@ function OnboardingPanel({ reachable }: { reachable: boolean }) {
     <ZineCardRough className="relative overflow-hidden p-5">
       <Tape className="-top-3 left-10 -rotate-3" />
       <p className="text-[10px] tracking-[0.25em] text-[var(--muted-foreground)]">ONBOARDING</p>
-      <h2 className="mt-1 font-brush text-2xl text-white">
+      <h2 className="mt-1 font-brush text-2xl text-[var(--foreground)]">
         ARSY <span className="text-[var(--primary)]">BELUM TERHUBUNG</span>
       </h2>
       <p className="mt-2 max-w-2xl text-sm text-[var(--muted-foreground)]">
@@ -407,7 +420,9 @@ function CrewAndPlatformAuditSection() {
             <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
               IDENTITY &amp; RBAC
             </p>
-            <h2 className="font-brush text-2xl text-white">CREW &amp; ACCESS MANAGEMENT</h2>
+            <h2 className="font-brush text-2xl text-[var(--foreground)]">
+              CREW &amp; ACCESS MANAGEMENT
+            </h2>
           </div>
           <Badge>{users.length} crew</Badge>
         </div>
@@ -425,7 +440,7 @@ function CrewAndPlatformAuditSection() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="username"
-            className="min-h-10 border border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+            className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
           />
           <input
             type="email"
@@ -433,19 +448,19 @@ function CrewAndPlatformAuditSection() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="email@moonwitness.org"
-            className="min-h-10 border border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+            className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
           />
           <input
             type="text"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Display Name"
-            className="min-h-10 border border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+            className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
           />
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as CrewRoleName)}
-            className="min-h-10 border border-[var(--border)] bg-black/40 px-3 text-xs text-white"
+            className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
           >
             <option value="viewer">viewer</option>
             <option value="editor">editor</option>
@@ -457,7 +472,7 @@ function CrewAndPlatformAuditSection() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password (12+ chars)"
-            className="min-h-10 border border-[var(--border)] bg-black/40 px-3 text-xs text-white sm:col-span-2"
+            className="min-h-10 border border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)] sm:col-span-2"
           />
           <button
             type="submit"
@@ -498,7 +513,7 @@ function CrewAndPlatformAuditSection() {
                         { onError: (err: Error) => setCrewNotice(err.message) },
                       )
                     }
-                    className="min-h-9 border border-[var(--border)] bg-black/40 px-2 font-mono text-[11px] text-[var(--foreground)] disabled:opacity-50"
+                    className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 font-mono text-[11px] text-[var(--foreground)] disabled:opacity-50"
                   >
                     <option value="viewer">viewer</option>
                     <option value="editor">editor</option>
@@ -513,7 +528,7 @@ function CrewAndPlatformAuditSection() {
                           onError: (err: Error) => setCrewNotice(err.message),
                         })
                       }
-                      className="min-h-9 border border-red-500/60 px-2 font-mono text-[10px] text-red-300 hover:bg-red-500/10"
+                      className="min-h-9 border border-[var(--red)]/60 px-2 font-mono text-[10px] text-[var(--red)] hover:bg-[var(--red)]/10"
                     >
                       REMOVE
                     </button>
@@ -592,13 +607,16 @@ function ControlDashboard() {
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="font-brush text-3xl text-white sm:text-4xl">
-              ARSY <span className="text-[var(--primary)]">CONTROL PLANE</span>
-            </h1>
-            <p className="mt-1 max-w-xl font-hand text-xl text-[var(--muted-foreground)]">
-              Observe the server, reconcile declared state, keep the empire honest.
-            </p>
+          <div className="flex items-start gap-3">
+            <DnaBrandLogo id="noc-gateway" variant="mark" size={44} decorative />
+            <div>
+              <h1 className="font-brush text-3xl text-[var(--foreground)] sm:text-4xl">
+                ARSY <span className="text-[var(--primary)]">CONTROL PLANE</span>
+              </h1>
+              <p className="mt-1 max-w-xl font-hand text-xl text-[var(--muted-foreground)]">
+                Observe the server, reconcile declared state, keep the empire honest.
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Sticker tone="yellow" className="-rotate-2 px-3 py-1 font-brush text-xs">
@@ -638,47 +656,101 @@ function ControlDashboard() {
             <>
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
                 <HostCard host={status.data.host} metrics={status.data.metrics} />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  <HostMetricCard
-                    label="CPU"
-                    pct={status.data.metrics.cpu_pct}
-                    detail={`load ${status.data.metrics.load1.toFixed(2)} / ${status.data.metrics.load5.toFixed(2)} / ${status.data.metrics.load15.toFixed(2)}`}
-                    tone="pink"
-                  />
-                  <HostMetricCard
-                    label="MEMORY"
-                    pct={status.data.metrics.mem_pct}
-                    detail={
-                      status.data.metrics.mem_total > 0
-                        ? `${formatBytes(status.data.metrics.mem_used)} / ${formatBytes(status.data.metrics.mem_total)}`
-                        : `${formatBytes(status.data.metrics.mem_used)} · total tidak tersedia`
-                    }
-                    tone="blue"
-                  />
-                  <HostMetricCard
-                    label="DISK"
-                    pct={status.data.metrics.disk_pct}
-                    detail={
-                      status.data.metrics.disk_total > 0
-                        ? `${formatBytes(status.data.metrics.disk_used)} / ${formatBytes(status.data.metrics.disk_total)}`
-                        : `${status.data.metrics.disk_path} · total tidak tersedia`
-                    }
-                    tone="yellow"
-                  />
-                  <HostMetricCard
-                    label="SWAP"
-                    pct={
-                      status.data.metrics.swap_total > 0
-                        ? (status.data.metrics.swap_used / status.data.metrics.swap_total) * 100
-                        : 0
-                    }
-                    detail={
-                      status.data.metrics.swap_total > 0
-                        ? `${formatBytes(status.data.metrics.swap_used)} / ${formatBytes(status.data.metrics.swap_total)}`
-                        : "no swap"
-                    }
-                    tone="green"
-                  />
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <HostMetricCard
+                      label="CPU"
+                      pct={status.data.metrics.cpu_pct}
+                      detail={`load ${status.data.metrics.load1.toFixed(2)} / ${status.data.metrics.load5.toFixed(2)} / ${status.data.metrics.load15.toFixed(2)}`}
+                      tone="pink"
+                    />
+                    <HostMetricCard
+                      label="MEMORY"
+                      pct={status.data.metrics.mem_pct}
+                      detail={
+                        status.data.metrics.mem_total > 0
+                          ? `${formatBytes(status.data.metrics.mem_used)} / ${formatBytes(status.data.metrics.mem_total)}`
+                          : `${formatBytes(status.data.metrics.mem_used)} · total tidak tersedia`
+                      }
+                      tone="blue"
+                    />
+                    <HostMetricCard
+                      label="DISK"
+                      pct={status.data.metrics.disk_pct}
+                      detail={
+                        status.data.metrics.disk_total > 0
+                          ? `${formatBytes(status.data.metrics.disk_used)} / ${formatBytes(status.data.metrics.disk_total)}`
+                          : `${status.data.metrics.disk_path} · total tidak tersedia`
+                      }
+                      tone="yellow"
+                    />
+                    <HostMetricCard
+                      label="SWAP"
+                      pct={
+                        status.data.metrics.swap_total > 0
+                          ? (status.data.metrics.swap_used / status.data.metrics.swap_total) * 100
+                          : 0
+                      }
+                      detail={
+                        status.data.metrics.swap_total > 0
+                          ? `${formatBytes(status.data.metrics.swap_used)} / ${formatBytes(status.data.metrics.swap_total)}`
+                          : "no swap"
+                      }
+                      tone="green"
+                    />
+                  </div>
+                  <Card className="grid grid-cols-1 items-center gap-4 p-4 sm:grid-cols-[auto_1fr_auto]">
+                    <RadialGauge
+                      value={status.data.metrics.cpu_pct}
+                      label="CPU"
+                      size={84}
+                      colorVar="var(--primary)"
+                      ariaLabel="Live host CPU utilization"
+                    />
+                    <div className="min-w-0">
+                      <p className="mb-1 font-mono text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                        LIVE RESOURCE TELEMETRY (%)
+                      </p>
+                      <BarChart
+                        height={92}
+                        ariaLabel="Host CPU, memory, disk and swap utilization percentages"
+                        data={[
+                          {
+                            label: "CPU",
+                            value: Math.round(status.data.metrics.cpu_pct),
+                            colorVar: "var(--primary)",
+                          },
+                          {
+                            label: "MEM",
+                            value: Math.round(status.data.metrics.mem_pct),
+                            colorVar: "var(--accent)",
+                          },
+                          {
+                            label: "DISK",
+                            value: Math.round(status.data.metrics.disk_pct),
+                            colorVar: "var(--secondary)",
+                          },
+                          {
+                            label: "SWAP",
+                            value:
+                              status.data.metrics.swap_total > 0
+                                ? Math.round(
+                                    (status.data.metrics.swap_used /
+                                      status.data.metrics.swap_total) *
+                                      100,
+                                  )
+                                : 0,
+                            colorVar: "var(--green)",
+                          },
+                        ]}
+                      />
+                    </div>
+                    <CutoutArtwork
+                      id="server-rack"
+                      className="hidden h-20 w-20 text-[var(--primary)] opacity-80 sm:block"
+                      decorative
+                    />
+                  </Card>
                 </div>
               </div>
 

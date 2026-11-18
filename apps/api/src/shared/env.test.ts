@@ -19,6 +19,7 @@ const base = {
   LOG_LEVEL: undefined,
   RATE_LIMIT_MAX: "120",
   RATE_LIMIT_WINDOW_MS: "60000",
+  RATE_LIMIT_STORE: "memory" as const,
   RADIUS_URL: "http://127.0.0.1:8090",
   STORAGE_URL: "http://127.0.0.1:8091",
   STORAGE_ACCESS_KEY: "test-storage-access",

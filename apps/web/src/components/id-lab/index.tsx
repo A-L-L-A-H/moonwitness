@@ -22,7 +22,7 @@ import {
   ZineInput,
 } from "@moonwitness/ui";
 import { Crown } from "@moonwitness/ui/icons";
-import { EmpireShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { savedOptions, savedSeed, useAvatarStore } from "@/lib/avatar-store";
 import { useCurrentIdentity } from "@/lib/session";
 
@@ -313,7 +313,8 @@ export function IdLab() {
   }
 
   return (
-    <EmpireShell
+    <ConsoleShellAdapter
+      plane="creator"
       breadcrumb="ID Lab"
       search={{ value: query, onChange: setQuery, placeholder: "Search the lab notes…" }}
     >
@@ -364,7 +365,7 @@ export function IdLab() {
                 <span className="sticker sticker-pink absolute bottom-3 left-3 -rotate-2 px-3 py-1 font-hand text-base font-bold">
                   {effectiveSeed.toUpperCase()}
                 </span>
-                <span className="absolute right-3 top-3 border border-[var(--border)] bg-black/60 px-2 py-1 text-[10px] tracking-widest text-[var(--muted-foreground)]">
+                <span className="absolute right-3 top-3 border border-[var(--border)] bg-[var(--card)]/90 px-2 py-1 text-[10px] tracking-widest text-[var(--muted-foreground)]">
                   {size}×{size}
                 </span>
               </div>
@@ -387,7 +388,7 @@ export function IdLab() {
 
             {/* ---- in-context preview ---- */}
             <ZineCard className="p-5">
-              <h2 className="mb-3 font-brush text-lg text-white">
+              <h2 className="mb-3 font-brush text-lg text-[var(--foreground)]">
                 IN THE <span className="text-[var(--primary)]">WILD</span>
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -403,7 +404,9 @@ export function IdLab() {
                       className="rounded-full border-2 border-[var(--pink)]"
                     />
                     <div className="min-w-0">
-                      <p className="truncate text-xs font-bold text-white">{effectiveSeed}</p>
+                      <p className="truncate text-xs font-bold text-[var(--foreground)]">
+                        {effectiveSeed}
+                      </p>
                       <p className="text-[10px] text-[var(--muted-foreground)]">Authorized crew</p>
                     </div>
                   </div>
@@ -420,7 +423,9 @@ export function IdLab() {
                       className="rounded-full border-2 border-[var(--pink)]"
                     />
                     <div className="min-w-0">
-                      <p className="truncate font-brush text-sm text-white">{effectiveSeed}</p>
+                      <p className="truncate font-brush text-sm text-[var(--foreground)]">
+                        {effectiveSeed}
+                      </p>
                       <p className="text-[10px] text-[var(--muted-foreground)]">Same sky</p>
                     </div>
                   </div>
@@ -446,7 +451,7 @@ export function IdLab() {
 
             {/* ---- crew roll ---- */}
             <ZineCard className="p-5">
-              <h2 className="mb-3 font-brush text-lg text-white">
+              <h2 className="mb-3 font-brush text-lg text-[var(--foreground)]">
                 CREW <span className="text-[var(--primary)]">ROLL</span>
                 <span className="ml-2 font-hand text-base text-[var(--muted-foreground)]">
                   tap a face to wear it
@@ -484,7 +489,7 @@ export function IdLab() {
           <div className="lg:sticky lg:top-20 lg:self-start">
             <ZineCardRough className="relative">
               <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
-                <h2 className="font-brush text-base text-white">
+                <h2 className="font-brush text-base text-[var(--foreground)]">
                   CONTROL <span className="text-[var(--primary)]">DECK</span>
                 </h2>
                 <span className="text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
@@ -524,7 +529,7 @@ export function IdLab() {
                         aria-pressed={palette === name}
                         className={`flex min-h-10 items-center gap-2 border-2 px-2 text-[9px] font-bold tracking-wider transition-all ${
                           palette === name
-                            ? "border-[var(--yellow)] bg-[var(--card)] text-white"
+                            ? "border-[var(--yellow)] bg-[var(--card)] text-[var(--foreground)]"
                             : "border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)] hover:border-[var(--pink)]"
                         }`}
                       >
@@ -668,6 +673,6 @@ export function IdLab() {
           {toast}
         </div>
       )}
-    </EmpireShell>
+    </ConsoleShellAdapter>
   );
 }

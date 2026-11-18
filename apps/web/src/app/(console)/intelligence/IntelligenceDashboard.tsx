@@ -795,7 +795,7 @@ export function IntelligenceDashboard({
                 className={`max-w-[90%] whitespace-pre-wrap break-words border-2 p-3 text-sm ${
                   message.role === "user"
                     ? "ml-auto border-[var(--blue)]/50 bg-[var(--blue)]/10 text-[var(--foreground)]"
-                    : "mr-auto border-[var(--border)] bg-black/20 text-[var(--foreground)]"
+                    : "mr-auto border-[var(--border)] bg-[var(--muted)]/60 text-[var(--foreground)]"
                 }`}
               >
                 <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
@@ -805,7 +805,7 @@ export function IntelligenceDashboard({
               </article>
             ))}
             {(chat.isPending || streamingContent) && (
-              <article className="mr-auto max-w-[90%] whitespace-pre-wrap break-words border-2 border-[var(--border)] bg-black/20 p-3 text-sm text-[var(--foreground)]">
+              <article className="mr-auto max-w-[90%] whitespace-pre-wrap break-words border-2 border-[var(--border)] bg-[var(--muted)]/60 p-3 text-sm text-[var(--foreground)]">
                 <p className="mb-1 font-mono text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
                   assistant
                 </p>
@@ -819,7 +819,7 @@ export function IntelligenceDashboard({
 
           {chatError && (
             <div
-              className="mx-4 mb-3 border border-red-500/50 bg-red-950/20 p-3 text-sm text-red-200"
+              className="mx-4 mb-3 border border-[var(--red)]/50 bg-[var(--red)]/10 p-3 text-sm text-[var(--red)]"
               role="alert"
             >
               {chatError}
@@ -843,8 +843,8 @@ export function IntelligenceDashboard({
                   onClick={() => setEpistemicFrame(opt.id)}
                   className={`min-h-8 border px-2.5 py-1 font-mono text-[10px] tracking-wider transition-colors ${
                     epistemicFrame === opt.id
-                      ? "border-[var(--blue)] bg-[var(--blue)]/20 text-white"
-                      : "border-[var(--border)] bg-black/20 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                      ? "border-[var(--blue)] bg-[var(--blue)]/20 text-[var(--foreground)]"
+                      : "border-[var(--border)] bg-[var(--muted)]/60 text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                   }`}
                 >
                   {opt.label}

@@ -22,6 +22,7 @@ export interface VerifiedMidUser {
   email: string;
   role: "admin" | "editor" | "viewer";
   displayName: string;
+  tenantId?: string;
 }
 
 const JWKS_CACHE_TTL_MS = 300_000;
@@ -125,7 +126,16 @@ export async function verifyMidBearerToken(
   if (!userId) return null;
 
   const user = await findUserById(userId);
-  return user ? getUserPublic(user) : null;
+  if (!user) return null;
+  const rawClaims = claims as unknown as Record<string, unknown>;
+  const claimTenant =
+    typeof rawClaims.tenant_id === "string" && rawClaims.tenant_id.trim()
+      ? rawClaims.tenant_id.trim()
+      : typeof rawClaims.tid === "string" && rawClaims.tid.trim()
+        ? rawClaims.tid.trim()
+        : undefined;
+  const pub = getUserPublic(user);
+  return claimTenant ? { ...pub, tenantId: claimTenant } : pub;
 }
 
 export interface VerifiedMidProvisionClaims {

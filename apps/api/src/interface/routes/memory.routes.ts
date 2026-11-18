@@ -253,7 +253,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         const upstreamUrl = new URL("/api/export.ndjson", bridge.baseUrl);
         const upstream = await fetch(upstreamUrl, {
           method: "GET",
-          headers: getUpstreamBridgeHeaders(),
+          headers: getUpstreamBridgeHeaders({}, request),
           signal: AbortSignal.timeout(env.MEMORY_API_TIMEOUT_MS),
         });
         if (!upstream.ok) {

@@ -32,7 +32,12 @@ export type {
 export { syncModels } from "./sync.js";
 export type { SyncModelsOptions, SyncReport } from "./sync.js";
 export type { BaseMetadata, RecordStatus, RecordSource } from "./base-metadata.js";
-export { createActorContext, SYSTEM_ACTOR } from "./actor-context.js";
+export {
+  createActorContext,
+  DEFAULT_TENANT_ID,
+  normalizeTenantId,
+  SYSTEM_ACTOR,
+} from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
 export { ConflictError } from "./errors.js";
 export { initDb, initD1Db, closeDb, getDb } from "./driver.js";

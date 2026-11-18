@@ -219,4 +219,36 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
     expect(headResponse.headers.get("x-head-ok")).toBe("1");
     expect(headResponse.body).toBeNull();
   });
+
+  it("propagates and generates x-request-id and W3C traceparent headers end-to-end", async () => {
+    let seenHeaders: Headers | null = null;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url, init?: RequestInit) => {
+        seenHeaders = new Headers(init?.headers);
+        return new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }),
+    );
+
+    const inboundTrace = "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01";
+    const explicitRes = await GET(
+      new Request("https://moonwitness.biz.id/api/v1/healthz", {
+        headers: {
+          "x-request-id": "web-corr-42",
+          traceparent: inboundTrace,
+        },
+      }),
+    );
+    expect(seenHeaders!.get("x-request-id")).toBe("web-corr-42");
+    expect(seenHeaders!.get("traceparent")).toBe(inboundTrace);
+    expect(explicitRes.headers.get("x-request-id")).toBe("web-corr-42");
+    expect(explicitRes.headers.get("traceparent")).toBe(inboundTrace);
+
+    const autoRes = await GET(new Request("https://moonwitness.biz.id/api/v1/healthz"));
+    expect(autoRes.headers.get("x-request-id")).toMatch(/^[0-9a-f-]{36}$/);
+    expect(autoRes.headers.get("traceparent")).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
+  });
 });

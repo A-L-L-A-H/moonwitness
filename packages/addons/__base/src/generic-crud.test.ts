@@ -133,4 +133,85 @@ describe("registerGenericModelRoutes", () => {
 
     await app.close();
   });
+
+  it("isolates REST CRUD reads, mutations, and audit history per tenant", async () => {
+    const runtime = new AddonRuntimeController();
+    const app = Fastify();
+    const tenantBridge: BaseAddonAuthBridge = {
+      ...roleAuth,
+      getActorTenant: (request) => {
+        const hdr = request.headers["x-tenant-id"];
+        return typeof hdr === "string" && hdr.trim() ? hdr.trim() : "default";
+      },
+    };
+    await runtime.syncAll(
+      [
+        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        {
+          manifest: {
+            name: "crud_tenant_demo",
+            version: "1.0.0",
+            depends: ["__base"],
+            provides: { models: ["crud.item"] },
+          },
+          models: [itemModel],
+          rules: [
+            {
+              model_name: "crud.item",
+              role: "editor",
+              can_read: true,
+              can_create: true,
+              can_update: true,
+              can_delete: true,
+            },
+          ],
+        },
+      ],
+      app,
+    );
+    await registerBaseAddon(app, { runtime, auth: tenantBridge, apiPrefix: "/api/v1" });
+    await app.ready();
+
+    const createdA = await app.inject({
+      method: "POST",
+      url: "/api/v1/m/crud.item",
+      headers: { "x-role": "editor", "x-tenant-id": "acme" },
+      payload: { label: "acme-secret" },
+    });
+    expect(createdA.statusCode).toBe(201);
+    const idA = createdA.json().data.id as string;
+    expect(createdA.json().data.tenant_id).toBe("acme");
+
+    const listB = await app.inject({
+      method: "GET",
+      url: "/api/v1/m/crud.item",
+      headers: { "x-role": "editor", "x-tenant-id": "beta" },
+    });
+    expect(listB.statusCode).toBe(200);
+    expect(listB.json().total).toBe(0);
+
+    const getFromB = await app.inject({
+      method: "GET",
+      url: `/api/v1/m/crud.item/${idA}`,
+      headers: { "x-role": "editor", "x-tenant-id": "beta" },
+    });
+    expect(getFromB.statusCode).toBe(404);
+
+    const patchFromB = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/m/crud.item/${idA}`,
+      headers: { "x-role": "editor", "x-tenant-id": "beta" },
+      payload: { label: "hijacked" },
+    });
+    expect(patchFromB.statusCode).toBe(404);
+
+    const historyFromB = await app.inject({
+      method: "GET",
+      url: `/api/v1/m/crud.item/${idA}/history`,
+      headers: { "x-role": "editor", "x-tenant-id": "beta" },
+    });
+    expect(historyFromB.statusCode).toBe(404);
+
+    await app.close();
+  });
 });

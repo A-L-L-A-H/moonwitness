@@ -20,7 +20,7 @@ function radiusProxyAdminEnabled(): boolean {
 function forwardHeaders(request: FastifyRequest): Record<string, string> {
   const headers: Record<string, string> = {};
   if (request.body) headers["content-type"] = "application/json";
-  return getUpstreamBridgeHeaders(headers);
+  return getUpstreamBridgeHeaders(headers, request);
 }
 
 async function forward(

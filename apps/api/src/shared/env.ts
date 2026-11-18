@@ -24,6 +24,8 @@ const envSchema = {
   RATE_LIMIT_MAX: z.string().default("120"),
   /** Rate-limit window in milliseconds. */
   RATE_LIMIT_WINDOW_MS: z.string().default("60000"),
+  /** Rate-limit storage backend: in-process memory or shared ORM SQL store. */
+  RATE_LIMIT_STORE: z.enum(["memory", "orm"]).default("memory"),
   /** Upstream Rust service base URLs (proxied by this API). */
   RADIUS_URL: z.string().default("http://127.0.0.1:8090"),
   STORAGE_URL: z.string().default("http://127.0.0.1:8091"),

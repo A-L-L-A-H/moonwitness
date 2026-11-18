@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ControlGate } from "@/components/control/gate";
-import { EmpireShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/auth";
 import {
   useRiotAiConfig,
@@ -29,7 +29,8 @@ export function IntelligenceShell() {
 
   return (
     <ControlGate>
-      <EmpireShell
+      <ConsoleShellAdapter
+        plane="creator"
         breadcrumb="RIOT Intelligence"
         search={{
           value: query,
@@ -68,7 +69,7 @@ export function IntelligenceShell() {
             INITIALIZING RIOT INTELLIGENCE…
           </div>
         )}
-      </EmpireShell>
+      </ConsoleShellAdapter>
     </ControlGate>
   );
 }

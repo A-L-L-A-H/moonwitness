@@ -101,7 +101,7 @@ export function ConsoleShellAdapter({
       }
       headerSearch={
         <div className="relative min-w-0 w-full">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--paper)]" />
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
           <Input
             value={search.value}
             onChange={(e) => search.onChange(e.target.value)}

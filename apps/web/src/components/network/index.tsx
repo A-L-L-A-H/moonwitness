@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { CableCoilArt, Tape, ZineBadge, ZineCard, ZineCardRough, ZineInput } from "@moonwitness/ui";
 import { Crown, VpnTunnel } from "@moonwitness/ui/icons";
-import { OperationsShell } from "@/components/shell";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { ControlGate } from "@/components/control/gate";
 import { PortForwardPanel } from "./portforward";
 import {
@@ -100,7 +100,7 @@ function ConfigPanel({
       <p className="mt-2 text-[11px] text-[var(--primary)]">
         Private key hanya ditampilkan sekarang. Salin sebelum menutup panel ini.
       </p>
-      <pre className="mt-3 max-h-80 overflow-auto border border-[var(--border)] bg-black/50 p-3 font-mono text-[11px] leading-relaxed text-[var(--foreground)]">
+      <pre className="mt-3 max-h-80 overflow-auto border border-[var(--border)] bg-[var(--muted)] p-3 font-mono text-[11px] leading-relaxed text-[var(--foreground)]">
         {config}
       </pre>
     </ZineCardRough>
@@ -305,14 +305,15 @@ function NetworkDashboard() {
   const data = status.data;
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="Network"
       search={{ value: query, onChange: setQuery, placeholder: "Filter peer…" }}
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-brush text-3xl text-white sm:text-4xl">
+            <h1 className="font-brush text-3xl text-[var(--foreground)] sm:text-4xl">
               VPN <span className="text-[var(--primary)]">TUNNEL</span>
             </h1>
             <p className="mt-1 max-w-xl font-hand text-xl text-[var(--muted-foreground)]">
@@ -350,7 +351,9 @@ function NetworkDashboard() {
                 <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">
                   INTERFACE
                 </p>
-                <p className="mt-1 font-brush text-2xl text-white">{data.interface}</p>
+                <p className="mt-1 font-brush text-2xl text-[var(--foreground)]">
+                  {data.interface}
+                </p>
                 <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">
                   {data.address}
                 </p>
@@ -389,7 +392,7 @@ function NetworkDashboard() {
 
             {!data.enabled && (
               <ZineCard className="p-5">
-                <h2 className="font-brush text-xl text-white">
+                <h2 className="font-brush text-xl text-[var(--foreground)]">
                   AKTIFKAN <span className="text-[var(--primary)]">TUNNEL</span>
                 </h2>
                 <p className="mt-1 text-sm text-[var(--muted-foreground)]">
@@ -429,7 +432,7 @@ function NetworkDashboard() {
             {data.enabled && (
               <>
                 <ZineCard className="p-5">
-                  <h2 className="font-brush text-xl text-white">
+                  <h2 className="font-brush text-xl text-[var(--foreground)]">
                     TAMBAH <span className="text-[var(--primary)]">PERANGKAT</span>
                   </h2>
                   <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
@@ -576,7 +579,7 @@ function NetworkDashboard() {
             <PortForwardPanel />
 
             <ZineCardRough className="p-5">
-              <h2 className="font-brush text-lg text-white">
+              <h2 className="font-brush text-lg text-[var(--foreground)]">
                 CARA <span className="text-[var(--primary)]">SAMBUNG</span>
               </h2>
               <ol className="mt-2 space-y-1.5 text-[11px] leading-relaxed text-[var(--muted-foreground)]">
@@ -601,6 +604,6 @@ function NetworkDashboard() {
           </>
         )}
       </div>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }

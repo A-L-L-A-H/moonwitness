@@ -55,14 +55,14 @@ function PortForwardPanelInner() {
     <Card className="overflow-hidden p-0">
       <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
         <div>
-          <h2 className="font-brush text-lg text-white">
+          <h2 className="font-brush text-lg text-[var(--foreground)]">
             PORT <span className="text-[var(--primary)]">FORWARDING</span>
           </h2>
           <p className="text-[11px] text-[var(--muted-foreground)]">
             Teruskan port publik host ke layanan di balik VPN (DNAT via nftables).
           </p>
         </div>
-        <Badge variant="default" className="bg-[var(--blue)] text-black">
+        <Badge variant="default" className="bg-[var(--blue)] text-[var(--primary-foreground)]">
           {isLoading ? "SYNCING" : `${forwards.length} ATURAN`}
         </Badge>
       </div>

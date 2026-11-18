@@ -21,6 +21,7 @@ import {
   irSystemModels,
   irViewModel,
 } from "./ir-models.js";
+import { opsJobModel } from "./job-queue.js";
 import {
   AddonManifestSchema,
   AddonRegistry,
@@ -211,7 +212,7 @@ export class AddonRuntimeController {
     const order = registry.validate();
     this.order = order;
 
-    await syncModels(irSystemModels);
+    await syncModels([...irSystemModels, opsJobModel]);
 
     const existingRows = await irAddonModel.repository.find();
     const existingByName = new Map(existingRows.map((row) => [row.name, row]));
