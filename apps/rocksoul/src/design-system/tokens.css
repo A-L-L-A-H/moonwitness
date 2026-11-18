@@ -26,6 +26,9 @@
   --color-pink: #ff5ac8;
   --color-purple: #6555ff;
   --color-moonlight: #e9d4b5;
+  --world-crimson: #e53e38;
+  --world-crimson-soft: #ff8b80;
+  --world-crimson-deep: #a8221d;
 
   /* Semantic aliases (bridged with @moonwitness/ui 8-axis skin & DNA vars) */
   --color-bg: var(--dna-canvas, var(--color-black));

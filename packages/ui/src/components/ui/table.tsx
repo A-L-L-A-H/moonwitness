@@ -14,10 +14,7 @@ const Table = React.forwardRef<
     <div
       data-skin={resolvedSkin}
       data-dna={dnaId}
-      className={cn(
-        "relative w-full overflow-x-auto",
-        recipe.card,
-      )}
+      className={cn("relative w-full overflow-x-auto", recipe.card)}
     >
       <table
         ref={ref}

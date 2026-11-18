@@ -129,9 +129,7 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
 
     const coords = values.map((val, idx) => {
       const x =
-        values.length <= 1
-          ? padding + innerW / 2
-          : padding + (idx / (values.length - 1)) * innerW;
+        values.length <= 1 ? padding + innerW / 2 : padding + (idx / (values.length - 1)) * innerW;
       const y = padding + innerH - ((val - min) / span) * innerH;
       return { x, y, val };
     });
@@ -213,8 +211,7 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
     const innerH = Math.max(1, height - padTop - padBottom);
 
     const coords = data.map((point, idx) => {
-      const x =
-        data.length <= 1 ? padX + innerW / 2 : padX + (idx / (data.length - 1)) * innerW;
+      const x = data.length <= 1 ? padX + innerW / 2 : padX + (idx / (data.length - 1)) * innerW;
       const y = padTop + innerH - ((point.value - min) / span) * innerH;
       return { x, y, point };
     });
@@ -265,9 +262,7 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
           strokeOpacity={0.7}
           strokeWidth={1}
         />
-        {areaPoints ? (
-          <polygon points={areaPoints} fill={colorVar} fillOpacity={0.18} />
-        ) : null}
+        {areaPoints ? <polygon points={areaPoints} fill={colorVar} fillOpacity={0.18} /> : null}
         {coords.length >= 2 ? (
           <polyline
             points={linePoints}
@@ -361,14 +356,7 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
         className={cn("shrink-0 select-none", className)}
         {...props}
       >
-        <circle
-          cx="44"
-          cy="44"
-          r={radius}
-          fill="none"
-          stroke="var(--muted)"
-          strokeWidth="7"
-        />
+        <circle cx="44" cy="44" r={radius} fill="none" stroke="var(--muted)" strokeWidth="7" />
         <circle
           cx="44"
           cy="44"

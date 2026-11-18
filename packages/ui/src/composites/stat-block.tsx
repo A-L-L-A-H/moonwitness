@@ -31,7 +31,7 @@ export function StatBlock({
   trend,
   density = "default",
 }: StatBlockProps) {
-  const color = TONE_VAR[tone] ?? TONE_VAR.pink;
+  const color = TONE_VAR[tone] ?? TONE_VAR["pink"];
   if (density === "compact") {
     return (
       <div className="min-w-0 border-l-2 pl-3" style={{ borderColor: color }}>

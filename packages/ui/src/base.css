@@ -61,7 +61,10 @@
   background-image: var(--mw-canvas-pattern, none);
   background-size: var(--mw-canvas-size, auto);
   color: var(--foreground, #f5f3ee);
-  font-family: var(--mw-font-body, var(--mw-font-component, var(--font-mono), ui-monospace, monospace));
+  font-family: var(
+    --mw-font-body,
+    var(--mw-font-component, var(--font-mono), ui-monospace, monospace)
+  );
   overflow-x: hidden;
   transition:
     background-color var(--mw-motion-duration, 200ms) ease,
@@ -258,7 +261,8 @@
   .zine-card {
     background: var(--card, var(--panel));
     color: var(--card-foreground, var(--foreground));
-    border: var(--mw-card-border-width, 2px) var(--mw-card-border-style, solid) var(--border, var(--line));
+    border: var(--mw-card-border-width, 2px) var(--mw-card-border-style, solid)
+      var(--border, var(--line));
     border-radius: var(--mw-card-radius, 0.5rem);
     box-shadow: var(--mw-card-shadow, 5px 5px 0 rgba(0, 0, 0, 0.55));
     transition:
@@ -274,7 +278,8 @@
   .zine-card-rough {
     background: var(--card, var(--panel));
     color: var(--card-foreground, var(--foreground));
-    border: var(--mw-card-border-width, 2px) var(--mw-card-border-style, solid) var(--border, #3a3a4a);
+    border: var(--mw-card-border-width, 2px) var(--mw-card-border-style, solid)
+      var(--border, #3a3a4a);
     border-radius: var(--mw-card-radius, 0.5rem);
     outline: 1px dashed color-mix(in srgb, var(--foreground, #f4eede) 22%, transparent);
     outline-offset: -7px;
@@ -791,14 +796,7 @@
     box-shadow: var(--mw-btn-shadow, none);
   }
   [data-skin="technical"] .btn-zine {
-    clip-path: polygon(
-      6px 0,
-      100% 0,
-      100% calc(100% - 6px),
-      calc(100% - 6px) 100%,
-      0 100%,
-      0 6px
-    );
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
     border: 1px solid var(--primary);
     font-family: var(--font-mono), monospace;
   }
@@ -1083,7 +1081,8 @@
   }
 
   @keyframes mwPulseSignal {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {

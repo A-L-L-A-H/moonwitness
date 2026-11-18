@@ -9,11 +9,11 @@ import { useSkin } from "../skin";
 /** Link injector: default 'a'. Consumer Next.js bisa melewati next/link. */
 export type HudLinkComponent = ComponentType<{
   href: string;
-  className?: string;
-  onClick?: () => void;
-  "aria-current"?: "page" | "location";
-  title?: string;
-  children?: ReactNode;
+  className?: string | undefined;
+  onClick?: (() => void) | undefined;
+  "aria-current"?: "page" | "location" | undefined;
+  title?: string | undefined;
+  children?: ReactNode | undefined;
 }>;
 
 export interface HudNavItem {

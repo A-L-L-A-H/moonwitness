@@ -78,7 +78,9 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     );
 
     const cssOut = formatSkinTokensAsCss("05-riot-anarchy", "technical", "light", "compact");
-    expect(cssOut).toContain('[data-skin="technical"][data-dna="05-riot-anarchy"][data-theme="light"]');
+    expect(cssOut).toContain(
+      '[data-skin="technical"][data-dna="05-riot-anarchy"][data-theme="light"]',
+    );
     expect(cssOut).toContain("--mw-motion-duration:");
 
     const jsonOut = JSON.parse(

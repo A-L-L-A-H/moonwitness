@@ -680,6 +680,7 @@ export {
   type AutoModelFieldType,
   type AutoModelFieldSpec,
   type AutoModelAcl,
+  type AutoModelCustomAction,
   type AutoModelViewDescriptor,
   type AutoModelRow,
   type AutoModelViewProps,

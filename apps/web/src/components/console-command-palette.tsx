@@ -68,7 +68,7 @@ export function ConsoleCommandPalette({
       title="Sovereign Command Palette"
       skin={skin}
     >
-      <CommandInput placeholder="Type a command, module, skin, or DNA world…" />
+      <CommandInput autoFocus placeholder="Type a command, module, skin, or DNA world…" />
       <CommandList>
         <CommandEmpty>No matching commands.</CommandEmpty>
 

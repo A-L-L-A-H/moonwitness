@@ -19,11 +19,16 @@ export interface WitnessAvatarProps {
 }
 
 /** Avatar default MoonWitness: satu seed = satu wajah zine, konsisten di seluruh app. */
-export function WitnessAvatar({ seed, size = 40, alt, className, dnaId, options }: WitnessAvatarProps) {
+export function WitnessAvatar({
+  seed,
+  size = 40,
+  alt,
+  className,
+  dnaId,
+  options,
+}: WitnessAvatarProps) {
   const resolvedOptions =
-    dnaId && !options?.palette
-      ? { ...options, palette: resolveDnaAvatarPalette(dnaId) }
-      : options;
+    dnaId && !options?.palette ? { ...options, palette: resolveDnaAvatarPalette(dnaId) } : options;
 
   return (
     <img

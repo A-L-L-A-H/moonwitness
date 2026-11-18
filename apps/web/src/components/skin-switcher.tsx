@@ -72,11 +72,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-            aria-hidden="true"
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} aria-hidden="true" />
           <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-lg">
             <div className="border-b border-[var(--border)] px-3 py-2">
               <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted-foreground)]">
@@ -93,7 +89,9 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                     type="button"
                     onClick={() => handleSelectSkin(key)}
                     className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-[var(--muted)] ${
-                      isActive ? "bg-[var(--primary)]/15 font-bold text-[var(--primary)]" : "text-[var(--foreground)]"
+                      isActive
+                        ? "bg-[var(--primary)]/15 font-bold text-[var(--primary)]"
+                        : "text-[var(--foreground)]"
                     }`}
                   >
                     <span className="h-2.5 w-2.5 rounded-full bg-[var(--primary)] opacity-80" />
@@ -122,11 +120,15 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                     type="button"
                     onClick={() => handleSelectDna(world.id)}
                     className={`flex w-full items-center justify-between rounded px-2 py-1 text-left text-[11px] transition-colors hover:bg-[var(--muted)] ${
-                      isActive ? "bg-[var(--primary)]/15 font-bold text-[var(--primary)]" : "text-[var(--foreground)]"
+                      isActive
+                        ? "bg-[var(--primary)]/15 font-bold text-[var(--primary)]"
+                        : "text-[var(--foreground)]"
                     }`}
                   >
                     <span className="truncate">{world.name}</span>
-                    <span className="text-[9px] uppercase text-[var(--muted-foreground)]">{world.id.slice(0, 2)}</span>
+                    <span className="text-[9px] uppercase text-[var(--muted-foreground)]">
+                      {world.id.slice(0, 2)}
+                    </span>
                   </button>
                 );
               })}

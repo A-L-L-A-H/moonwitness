@@ -26,14 +26,7 @@ import { SkinOrnament } from "../primitives/tactile-hardware";
 import { useSkin, type SkinName } from "../skin";
 
 export type AutoModelFieldType =
-  | "text"
-  | "textarea"
-  | "number"
-  | "integer"
-  | "boolean"
-  | "select"
-  | "date"
-  | "tags";
+  "text" | "textarea" | "number" | "integer" | "boolean" | "select" | "date" | "tags";
 
 export interface AutoModelFieldSpec {
   readonly name: string;
@@ -70,6 +63,12 @@ export interface AutoModelRow extends Record<string, unknown> {
   readonly version?: number;
 }
 
+export interface AutoModelCustomAction {
+  readonly id: string;
+  readonly label: string;
+  readonly onTrigger: (id: string) => Promise<void> | void;
+}
+
 export interface AutoModelViewProps {
   descriptor: AutoModelViewDescriptor;
   rows: readonly AutoModelRow[];
@@ -78,7 +77,9 @@ export interface AutoModelViewProps {
   onCreate?: (values: Record<string, unknown>) => Promise<void> | void;
   onUpdate?: (id: string, values: Record<string, unknown>) => Promise<void> | void;
   onArchive?: (id: string) => Promise<void> | void;
+  onRestore?: (id: string) => Promise<void> | void;
   onDelete?: (id: string) => Promise<void> | void;
+  customActions?: readonly AutoModelCustomAction[];
   className?: string;
   skin?: SkinName;
 }
@@ -120,7 +121,9 @@ export function AutoModelView({
   onCreate,
   onUpdate,
   onArchive,
+  onRestore,
   onDelete,
+  customActions = [],
   className,
   skin: explicitSkin,
 }: AutoModelViewProps) {
@@ -230,7 +233,7 @@ export function AutoModelView({
       }
     }
     if (Object.keys(customAttrs).length > 0) {
-      payload._attrs = customAttrs;
+      payload["_attrs"] = customAttrs;
     }
 
     setSubmitting(true);
@@ -345,7 +348,11 @@ export function AutoModelView({
                     <span className="flex items-center gap-1.5 font-mono text-[11px] text-[var(--muted-foreground)]">
                       <span>{field.label}</span>
                       {field.required ? <span className="text-[var(--destructive)]">*</span> : null}
-                      {field.isCustom ? <Badge skin={activeSkin} variant="outline">CUSTOM</Badge> : null}
+                      {field.isCustom ? (
+                        <Badge skin={activeSkin} variant="outline">
+                          CUSTOM
+                        </Badge>
+                      ) : null}
                     </span>
 
                     {field.type === "select" && field.selection ? (
@@ -426,9 +433,13 @@ export function AutoModelView({
               decorative
             />
             <div className="space-y-1">
-              <div className="text-sm font-semibold">No {descriptor.title ?? descriptor.model} entries</div>
+              <div className="text-sm font-semibold">
+                No {descriptor.title ?? descriptor.model} entries
+              </div>
               <div className="text-xs text-[var(--muted-foreground)]">
-                {query ? "Adjust filter criteria or clear search." : "Records created here inherit active Skin + DNA."}
+                {query
+                  ? "Adjust filter criteria or clear search."
+                  : "Records created here inherit active Skin + DNA."}
               </div>
             </div>
           </div>
@@ -443,7 +454,11 @@ export function AutoModelView({
                       {field.isCustom ? " *" : ""}
                     </th>
                   ))}
-                  {(acl.canUpdate || acl.canDelete || onArchive) ? (
+                  {acl.canUpdate ||
+                  acl.canDelete ||
+                  onArchive ||
+                  onRestore ||
+                  customActions.length > 0 ? (
                     <th className="px-3 py-2 text-right">Actions</th>
                   ) : null}
                 </tr>
@@ -459,7 +474,11 @@ export function AutoModelView({
                         {formatCellValue(resolveFieldValue(row, field))}
                       </td>
                     ))}
-                    {(acl.canUpdate || acl.canDelete || onArchive) ? (
+                    {acl.canUpdate ||
+                    acl.canDelete ||
+                    onArchive ||
+                    onRestore ||
+                    customActions.length > 0 ? (
                       <td className="px-3 py-2 text-right">
                         <div className="inline-flex items-center gap-1.5">
                           {acl.canUpdate && onUpdate ? (
@@ -473,7 +492,7 @@ export function AutoModelView({
                               Edit
                             </Button>
                           ) : null}
-                          {onArchive ? (
+                          {onArchive && row.status !== "archived" ? (
                             <Button
                               skin={activeSkin}
                               type="button"
@@ -484,6 +503,29 @@ export function AutoModelView({
                               Archive
                             </Button>
                           ) : null}
+                          {onRestore && row.status === "archived" ? (
+                            <Button
+                              skin={activeSkin}
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => void onRestore(row.id)}
+                            >
+                              Restore
+                            </Button>
+                          ) : null}
+                          {customActions.map((act) => (
+                            <Button
+                              key={act.id}
+                              skin={activeSkin}
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => void act.onTrigger(row.id)}
+                            >
+                              {act.label}
+                            </Button>
+                          ))}
                           {acl.canDelete && onDelete ? (
                             <Button
                               skin={activeSkin}

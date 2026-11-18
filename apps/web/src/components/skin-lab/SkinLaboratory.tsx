@@ -216,22 +216,26 @@ export function SkinLaboratory() {
                     {m}
                   </button>
                 ))}
-                {(["compact", "comfortable", "spacious"] as const satisfies readonly CanonicalDensity[]).map(
-                  (d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setDensity(d)}
-                      className={`border px-2.5 py-1 font-mono text-[10px] uppercase transition-colors ${
-                        activeDensity === d
-                          ? "border-[var(--secondary)] bg-[var(--secondary)]/20 text-[var(--foreground)] font-bold"
-                          : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"
-                      }`}
-                    >
-                      {d}
-                    </button>
-                  ),
-                )}
+                {(
+                  [
+                    "compact",
+                    "comfortable",
+                    "spacious",
+                  ] as const satisfies readonly CanonicalDensity[]
+                ).map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => setDensity(d)}
+                    className={`border px-2.5 py-1 font-mono text-[10px] uppercase transition-colors ${
+                      activeDensity === d
+                        ? "border-[var(--secondary)] bg-[var(--secondary)]/20 text-[var(--foreground)] font-bold"
+                        : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"
+                    }`}
+                  >
+                    {d}
+                  </button>
+                ))}
               </div>
             </div>
 

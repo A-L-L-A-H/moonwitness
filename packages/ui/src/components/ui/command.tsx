@@ -47,9 +47,12 @@ const Command = React.forwardRef<HTMLDivElement, CommandProps>(
         e.preventDefault();
         const prev = items[(currentIdx - 1 + items.length) % items.length];
         if (prev) setActiveValue(prev.getAttribute("data-value"));
-      } else if (e.key === "Enter" && currentIdx >= 0) {
-        e.preventDefault();
-        items[currentIdx]?.click();
+      } else if (e.key === "Enter") {
+        const target = currentIdx >= 0 ? items[currentIdx] : items[0];
+        if (target) {
+          e.preventDefault();
+          target.click();
+        }
       }
     };
 

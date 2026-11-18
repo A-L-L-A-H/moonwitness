@@ -125,7 +125,12 @@ export function SkinMatrixCompare({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
-                    <Button skin={skinName} size="sm" type="button" onClick={() => setExportSkin(skinName)}>
+                    <Button
+                      skin={skinName}
+                      size="sm"
+                      type="button"
+                      onClick={() => setExportSkin(skinName)}
+                    >
                       Inspect CSS
                     </Button>
                     <Badge skin={skinName}>{resolved.atmosphere.ornament}</Badge>

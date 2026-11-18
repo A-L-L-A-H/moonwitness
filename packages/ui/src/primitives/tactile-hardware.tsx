@@ -89,10 +89,7 @@ export function SkinOrnament({
           aria-hidden="true"
           data-mw-ornament={activeSkin}
           data-mw-ornament-slot={slot}
-          className={cn(
-            "block h-1 w-full border-y border-[var(--border)]",
-            className,
-          )}
+          className={cn("block h-1 w-full border-y border-[var(--border)]", className)}
           {...props}
         />
       );

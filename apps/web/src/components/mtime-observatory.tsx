@@ -177,7 +177,9 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
             <div className="min-w-0 flex-1 grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono">
               <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2.5">
                 <div className="text-[9.5px] text-[var(--dna-muted)]">MOON AGE</div>
-                <div className="mt-1 text-base text-[var(--dna-text)]">{geometry.moonAgeDays} d</div>
+                <div className="mt-1 text-base text-[var(--dna-text)]">
+                  {geometry.moonAgeDays} d
+                </div>
               </div>
               <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2.5">
                 <div className="text-[9.5px] text-[var(--dna-muted)]">ILLUMINATION</div>

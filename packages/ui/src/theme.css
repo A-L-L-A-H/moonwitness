@@ -184,7 +184,14 @@
   --mw-card-radius: 2px;
   --mw-card-border-width: 1px;
   --mw-card-border-style: dashed;
-  --mw-card-clip: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  --mw-card-clip: polygon(
+    0 0,
+    calc(100% - 10px) 0,
+    100% 10px,
+    100% 100%,
+    10px 100%,
+    0 calc(100% - 10px)
+  );
   --mw-card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --mw-input-radius: 2px;
   --mw-input-border-width: 1px;

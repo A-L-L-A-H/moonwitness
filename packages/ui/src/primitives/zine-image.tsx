@@ -5,13 +5,13 @@ import { cn } from "../cn";
 export interface ZineImageProps {
   art: ArtKey | string;
   /** Menggantikan alt dari manifest bila penempatannya butuh teks lain. */
-  alt?: string;
-  className?: string;
+  alt?: string | undefined;
+  className?: string | undefined;
   /** Atribut sizes CSS; wajib diisi bila lebar tampil berubah antar breakpoint. */
-  sizes?: string;
+  sizes?: string | undefined;
   /** Menimpa objectPosition manifest, mis. pemotongan per event di data timeline. */
-  position?: string;
-  eager?: boolean;
+  position?: string | undefined;
+  eager?: boolean | undefined;
 }
 
 /** Gambar non-LCP untuk komposit paket: <picture> avif + webp dari manifest. */
