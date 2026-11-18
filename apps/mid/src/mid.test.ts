@@ -924,7 +924,13 @@ describe("@moonwitness/mid OIDC & SSO Worker", () => {
       env,
     );
     expect(allowedLocal.status).toBe(200);
-    expect(await allowedLocal.text()).toContain("ALLAH Sanctuary");
+    const authorizeCsp = allowedLocal.headers.get("content-security-policy") ?? "";
+    expect(authorizeCsp).toMatch(/style-src 'nonce-[0-9a-f]{32}'/);
+    expect(authorizeCsp).not.toContain("'unsafe-inline'");
+    const authorizeHtml = await allowedLocal.text();
+    expect(authorizeHtml).toContain("ALLAH Sanctuary");
+    const nonceMatch = authorizeCsp.match(/style-src 'nonce-([0-9a-f]{32})'/);
+    expect(authorizeHtml).toContain(`<style nonce="${nonceMatch?.[1]}">`);
 
     const rejectedLegacyPort = await handler(
       new Request(
