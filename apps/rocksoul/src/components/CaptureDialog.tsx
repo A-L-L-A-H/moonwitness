@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { call } from "../lib";
 import type { MemoryCategory } from "../lib/contracts";
 
@@ -45,14 +46,14 @@ export default function CaptureDialog({ onClose, onCaptured }: CaptureDialogProp
         </label>
         <label className="field-label">
           <span>CATEGORY</span>
-          <select value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
+          <NativeSelect value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
             <option value="working">Working</option>
             <option value="project">Project</option>
             <option value="episodic">Episodic</option>
             <option value="semantic">Semantic</option>
             <option value="procedural">Procedural</option>
             <option value="preference">Preference</option>
-          </select>
+          </NativeSelect>
         </label>
         <label className="field-label">
           <span>CONTENT</span>

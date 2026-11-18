@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { Plus, Workflow } from "@moonwitness/ui/icons";
 import { thumbStudioUrl } from "../assets/art";
 import type {
@@ -192,7 +193,7 @@ export function WarRoom({
         <div className="milestone-fields">
           <label className="field-label">
             PROJECT
-            <select
+            <NativeSelect
               value={activeProjectId}
               onChange={(e) => setProjectId(e.target.value)}
               disabled={!projects.length}
@@ -203,7 +204,7 @@ export function WarRoom({
                   {project.name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
           <label className="field-label">
             MILESTONE TITLE

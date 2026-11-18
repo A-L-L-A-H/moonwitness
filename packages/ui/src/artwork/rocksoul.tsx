@@ -1,13 +1,14 @@
-import React from "react";
+import { useId } from "react";
 
-export interface VectorProp {
+export interface RocksoulVectorProps {
   className?: string;
 }
 
 /**
  * Sovereign Crimson Crown Emblem — pure vector SVG plate for infinite DPI clarity.
  */
-export function CrimsonCrownSvg({ className = "rs-crown-svg" }: VectorProp) {
+export function CrimsonCrownSvg({ className = "rs-crown-svg" }: RocksoulVectorProps) {
+  const gradId = useId();
   return (
     <svg
       className={className}
@@ -17,7 +18,7 @@ export function CrimsonCrownSvg({ className = "rs-crown-svg" }: VectorProp) {
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="rs-crown-grad" x1="0" y1="0" x2="96" y2="64" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradId} x1="0" y1="0" x2="96" y2="64" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="var(--world-crimson-soft)" />
           <stop offset="55%" stopColor="var(--world-crimson)" />
           <stop offset="100%" stopColor="var(--world-crimson-deep)" />
@@ -25,7 +26,7 @@ export function CrimsonCrownSvg({ className = "rs-crown-svg" }: VectorProp) {
       </defs>
       <path
         d="M8 52L14 14L32 34L48 6L64 34L82 14L88 52H8Z"
-        fill="url(#rs-crown-grad)"
+        fill={`url(#${gradId})`}
         stroke="var(--world-crimson-soft)"
         strokeWidth="2.2"
         strokeLinejoin="miter"
@@ -47,7 +48,8 @@ export function CrimsonCrownSvg({ className = "rs-crown-svg" }: VectorProp) {
 /**
  * Distress Crimson Brush Slash — razor-sharp vector katana/dry-brush stroke.
  */
-export function CrimsonBrushSlash({ className = "rs-brush-slash" }: VectorProp) {
+export function CrimsonBrushSlash({ className = "rs-brush-slash" }: RocksoulVectorProps) {
+  const gradId = useId();
   return (
     <svg
       className={className}
@@ -58,16 +60,13 @@ export function CrimsonBrushSlash({ className = "rs-brush-slash" }: VectorProp) 
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="rs-slash-grad" x1="0" y1="10" x2="420" y2="10" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradId} x1="0" y1="10" x2="420" y2="10" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="var(--world-crimson-soft)" />
           <stop offset="68%" stopColor="var(--world-crimson)" />
           <stop offset="100%" stopColor="var(--world-crimson)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path
-        d="M0 9L14 4L388 8L420 10L342 13L18 15L0 9Z"
-        fill="url(#rs-slash-grad)"
-      />
+      <path d="M0 9L14 4L388 8L420 10L342 13L18 15L0 9Z" fill={`url(#${gradId})`} />
       <path
         d="M6 17L196 15L280 17L6 17Z"
         fill="var(--world-crimson-soft)"
@@ -81,7 +80,7 @@ export function CrimsonBrushSlash({ className = "rs-brush-slash" }: VectorProp) 
 /**
  * Anarchy Star / Chaos Sigil — crisp tactical vector seal.
  */
-export function AnarchyStarSigil({ className = "rs-anarchy-sigil" }: VectorProp) {
+export function AnarchyStarSigil({ className = "rs-anarchy-sigil" }: RocksoulVectorProps) {
   return (
     <svg
       className={className}
@@ -127,7 +126,7 @@ export function AnarchyStarSigil({ className = "rs-anarchy-sigil" }: VectorProp)
 /**
  * Street Stencil Spray Tag — crisp angular pulse glyph.
  */
-export function SprayTagGlyph({ className = "rs-spray-glyph" }: VectorProp) {
+export function SprayTagGlyph({ className = "rs-spray-glyph" }: RocksoulVectorProps) {
   return (
     <svg
       className={className}
@@ -171,10 +170,33 @@ export function VectorBarcodeStamp({
   className?: string;
 }) {
   const bars = [
-    [2, 3], [7, 1], [10, 4], [16, 2], [20, 1], [23, 3], [28, 2], [32, 4],
-    [38, 1], [41, 2], [45, 3], [50, 1], [53, 4], [59, 2], [63, 1], [66, 3],
-    [71, 2], [75, 4], [81, 1], [84, 3], [89, 2], [93, 1], [96, 4], [102, 2],
-    [106, 3], [111, 1], [114, 3],
+    [2, 3],
+    [7, 1],
+    [10, 4],
+    [16, 2],
+    [20, 1],
+    [23, 3],
+    [28, 2],
+    [32, 4],
+    [38, 1],
+    [41, 2],
+    [45, 3],
+    [50, 1],
+    [53, 4],
+    [59, 2],
+    [63, 1],
+    [66, 3],
+    [71, 2],
+    [75, 4],
+    [81, 1],
+    [84, 3],
+    [89, 2],
+    [93, 1],
+    [96, 4],
+    [102, 2],
+    [106, 3],
+    [111, 1],
+    [114, 3],
   ] as const;
   return (
     <div className={className} aria-hidden="true">
@@ -204,7 +226,9 @@ export function VectorBarcodeStamp({
 /**
  * Signal Telemetry Waveform — dual-trace vector oscilloscope with tactical grid.
  */
-export function TelemetryWaveformSvg({ className = "rs-waveform-svg" }: VectorProp) {
+export function TelemetryWaveformSvg({ className = "rs-waveform-svg" }: RocksoulVectorProps) {
+  const redId = useId();
+  const limeId = useId();
   return (
     <svg
       className={className}
@@ -215,34 +239,97 @@ export function TelemetryWaveformSvg({ className = "rs-waveform-svg" }: VectorPr
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id="rs-wave-red" x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
+        <linearGradient id={redId} x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="var(--world-crimson)" stopOpacity="0.2" />
           <stop offset="18%" stopColor="var(--world-crimson-soft)" />
           <stop offset="82%" stopColor="var(--world-crimson)" />
           <stop offset="100%" stopColor="var(--world-crimson)" stopOpacity="0.25" />
         </linearGradient>
-        <linearGradient id="rs-wave-lime" x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
+        <linearGradient id={limeId} x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="var(--color-lime)" stopOpacity="0.15" />
           <stop offset="25%" stopColor="var(--color-lime)" stopOpacity="0.9" />
           <stop offset="75%" stopColor="var(--color-clean)" stopOpacity="0.85" />
           <stop offset="100%" stopColor="var(--color-lime)" stopOpacity="0.15" />
         </linearGradient>
       </defs>
-      <line x1="0" y1="36" x2="600" y2="36" stroke="var(--color-paper)" strokeOpacity="0.14" strokeDasharray="4 6" />
+      <line
+        x1="0"
+        y1="36"
+        x2="600"
+        y2="36"
+        stroke="var(--color-paper)"
+        strokeOpacity="0.14"
+        strokeDasharray="4 6"
+      />
       <line x1="150" y1="4" x2="150" y2="68" stroke="var(--color-paper)" strokeOpacity="0.08" />
       <line x1="300" y1="4" x2="300" y2="68" stroke="var(--color-paper)" strokeOpacity="0.08" />
       <line x1="450" y1="4" x2="450" y2="68" stroke="var(--color-paper)" strokeOpacity="0.08" />
       <path
         d="M0 36 L38 36 L54 18 L70 54 L88 10 L106 60 L124 26 L144 44 L168 34 L196 36 L216 14 L234 58 L252 20 L272 50 L294 32 L326 36 L346 12 L366 62 L386 16 L406 52 L426 28 L454 36 L478 22 L498 52 L518 18 L538 46 L560 36 L600 36"
-        stroke="url(#rs-wave-red)"
+        stroke={`url(#${redId})`}
         strokeWidth="2.4"
         strokeLinejoin="round"
       />
       <path
         d="M0 38 L44 38 L64 28 L84 48 L104 24 L126 46 L152 34 L184 38 L208 26 L228 48 L248 22 L270 44 L300 36 L334 38 L358 24 L378 50 L398 28 L420 44 L448 36 L486 30 L508 46 L530 26 L554 40 L600 36"
-        stroke="url(#rs-wave-lime)"
+        stroke={`url(#${limeId})`}
         strokeWidth="1.5"
         strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Orbital Astrolabe Plate — vector ring backdrop for ROCKSOUL's sky-reticle crown.
+ */
+export function AstrolabeOrbitPlate({ className = "astrolabe-svg" }: RocksoulVectorProps) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 920 150"
+      preserveAspectRatio="xMidYMid meet"
+      aria-hidden="true"
+    >
+      <ellipse
+        cx="460"
+        cy="75"
+        rx="410"
+        ry="56"
+        fill="none"
+        stroke="var(--world-crimson)"
+        strokeOpacity="0.38"
+        strokeWidth="1"
+        strokeDasharray="6 6"
+      />
+      <ellipse
+        cx="460"
+        cy="75"
+        rx="290"
+        ry="38"
+        fill="none"
+        stroke="var(--color-paper)"
+        strokeOpacity="0.2"
+        strokeWidth="0.9"
+      />
+      <circle
+        cx="460"
+        cy="75"
+        r="24"
+        fill="var(--world-crimson)"
+        fillOpacity="0.12"
+        stroke="var(--world-crimson)"
+        strokeWidth="1.4"
+      />
+      <circle cx="460" cy="75" r="5" fill="var(--color-lime)" />
+      <line
+        x1="50"
+        y1="75"
+        x2="870"
+        y2="75"
+        stroke="var(--world-crimson)"
+        strokeOpacity="0.2"
+        strokeDasharray="3 5"
       />
     </svg>
   );

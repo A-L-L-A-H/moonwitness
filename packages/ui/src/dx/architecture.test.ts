@@ -42,8 +42,8 @@ const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
   rocksoul: 0,
 };
 
-/** Apps whose CSS must not contain any palette literal (TSX is ratcheted separately). */
-const STRICT_TOKEN_APPS: readonly string[] = ["web"];
+/** Apps whose CSS and TSX must not contain any palette literal. */
+const STRICT_TOKEN_APPS: readonly string[] = ["web", "rocksoul"];
 
 /** 6-digit only in TSX: 3-digit matches collide with editorial labels such as "#014". */
 const TSX_HEX_LITERAL = /#[0-9a-fA-F]{6}\b/g;
@@ -230,7 +230,7 @@ describe("UI architecture: consumer applications", () => {
     });
   }
 
-  for (const app of ["web"] as const) {
+  for (const app of STRICT_TOKEN_APPS) {
     it(`${app}: contains no hard-coded palette literals in TSX`, () => {
       const offenders: string[] = [];
       for (const file of appSources(app, [".tsx"])) {
@@ -278,6 +278,7 @@ describe("UI architecture: consumer applications", () => {
     const owned = new Set<string>();
     const ownedSources = [
       join(UI_ROOT, "src/skin/imperium.tsx"),
+      ...walk(join(UI_ROOT, "src/skin/imperium"), [".tsx"]),
       ...walk(join(UI_ROOT, "src/components/ui"), [".tsx"]),
       ...walk(join(UI_ROOT, "src/primitives"), [".tsx"]),
       ...walk(join(UI_ROOT, "src/composites"), [".tsx"]),
@@ -445,18 +446,21 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("GATE-07: enforces zero raw <select> in apps/web and zero raw controls in composites/meta", () => {
+  it("GATE-07: enforces zero raw <select> across apps and zero raw controls in composites/meta", () => {
     const selectOffenders: string[] = [];
-    for (const file of appSources("web", [".tsx"])) {
-      const source = stripJsComments(readFileSync(file, "utf8"));
-      if (/<select\b/.test(source)) {
-        selectOffenders.push(relative(REPO_ROOT, file).replace(/\\/g, "/"));
+    for (const app of appNames()) {
+      for (const file of appSources(app, [".tsx"])) {
+        const source = stripJsComments(readFileSync(file, "utf8"));
+        if (/<select\b/.test(source)) {
+          selectOffenders.push(relative(REPO_ROOT, file).replace(/\\/g, "/"));
+        }
       }
     }
     expect(selectOffenders).toEqual([]);
 
     const metaAndCompositeFiles = [
       join(UI_ROOT, "src/composites/auto-model-view.tsx"),
+      ...walk(join(UI_ROOT, "src/composites/auto-model"), [".tsx"]),
       ...walk(join(APPS_ROOT, "web/src/components/meta"), [".tsx"]),
     ].filter((file) => !/\.test\.tsx$/.test(file));
     const rawControlOffenders: string[] = [];
@@ -476,17 +480,23 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
     let rawDialog = 0;
     let legacyZineClasses = 0;
     let rawSvg = 0;
-    for (const file of appSources("web", [".tsx"])) {
-      const lines = stripJsComments(readFileSync(file, "utf8")).split(/\r?\n/);
-      for (const line of lines) {
-        if (/<button\b/.test(line)) rawButton += 1;
-        if (/<input\b/.test(line)) rawInput += 1;
-        if (/<textarea\b/.test(line)) rawTextarea += 1;
-        if (/role="dialog"|aria-modal="true"/.test(line)) rawDialog += 1;
-        if (/className=.*\b(btn-zine|zine-card|btn-luxe-|btn-chamfer)\b/.test(line)) {
-          legacyZineClasses += 1;
+    let rawSvgAllApps = 0;
+    for (const app of appNames()) {
+      for (const file of appSources(app, [".tsx"])) {
+        const lines = stripJsComments(readFileSync(file, "utf8")).split(/\r?\n/);
+        for (const line of lines) {
+          if (/<svg\b/.test(line)) rawSvgAllApps += 1;
+          if (app === "web") {
+            if (/<button\b/.test(line)) rawButton += 1;
+            if (/<input\b/.test(line)) rawInput += 1;
+            if (/<textarea\b/.test(line)) rawTextarea += 1;
+            if (/role="dialog"|aria-modal="true"/.test(line)) rawDialog += 1;
+            if (/className=.*\b(btn-zine|zine-card|btn-luxe-|btn-chamfer)\b/.test(line)) {
+              legacyZineClasses += 1;
+            }
+            if (/<svg\b/.test(line)) rawSvg += 1;
+          }
         }
-        if (/<svg\b/.test(line)) rawSvg += 1;
       }
     }
     expect(rawButton).toBe(0);
@@ -495,6 +505,7 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
     expect(rawDialog).toBe(0);
     expect(legacyZineClasses).toBe(0);
     expect(rawSvg).toBe(0);
+    expect(rawSvgAllApps).toBe(0);
   });
 
   it("GATE-09: enforces Odoo addon menu & icon parity across i18n, probes, and resolveNavIconPath", async () => {

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { call } from "../lib";
 import type {
   MemoryCategory,
@@ -175,14 +176,14 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
             </label>
             <label>
               <span>Category</span>
-              <select value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
+              <NativeSelect value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
                 <option value="working">Working</option>
                 <option value="project">Project</option>
                 <option value="episodic">Episodic</option>
                 <option value="semantic">Semantic</option>
                 <option value="procedural">Procedural</option>
                 <option value="preference">Preference</option>
-              </select>
+              </NativeSelect>
             </label>
             <label>
               <span>Content</span>
@@ -235,11 +236,11 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
               <h2>ADD RESUME POINT</h2>
               <label>
                 <span>Session</span>
-                <select value={selectedSessionId} onChange={(event) => setSelectedSessionId(event.target.value)}>
+                <NativeSelect value={selectedSessionId} onChange={(event) => setSelectedSessionId(event.target.value)}>
                   {sessions.map((session) => (
                     <option key={session.id} value={session.id}>{session.name}</option>
                   ))}
-                </select>
+                </NativeSelect>
               </label>
               <label>
                 <span>Title</span>

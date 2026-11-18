@@ -1,7 +1,7 @@
 import React from "react";
 import { Activity } from "@moonwitness/ui/icons";
 import { thumbSignalUrl } from "../assets/art";
-import { TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
+import { TelemetryWaveformSvg } from "@moonwitness/ui/artwork";
 import type { ActivityEvent } from "../lib/contracts";
 import { PageTitle } from "./WorkspacePageTitle";
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { call } from "../lib/api";
 import type { StudioDraftRecord } from "../lib/contracts";
 
@@ -85,18 +86,18 @@ export function StudioRoom({ projectId }: { projectId?: string }) {
               placeholder="Draft title..."
               className="flex-1 rounded border bg-transparent px-3 py-1.5 text-sm"
             />
-            <select
+            <NativeSelect
               aria-label="Draft kind"
               value={kind}
               onChange={(e) => setKind(e.target.value)}
-              className="rounded border bg-transparent px-2 py-1.5 text-sm"
+              className="h-auto w-auto rounded border bg-transparent px-2 py-1.5 text-sm"
             >
               <option value="story">Story</option>
               <option value="episode">Episode</option>
               <option value="character">Character</option>
               <option value="research">Research</option>
               <option value="general">General</option>
-            </select>
+            </NativeSelect>
           </div>
           <textarea
             value={content}
