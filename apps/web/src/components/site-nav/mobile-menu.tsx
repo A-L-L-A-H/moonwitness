@@ -13,7 +13,7 @@ export interface MobileMenuProps {
 export function MobileMenu({ links, active, onSelect, onClose }: MobileMenuProps) {
   return (
     <nav
-      className="border-t border-[var(--line)] bg-[var(--ink)] px-4 py-3 lg:hidden"
+      className="border-t border-[var(--border)] bg-[var(--ink)] px-4 py-3 lg:hidden"
       aria-label="Mobile"
     >
       {links.map((link) => (
@@ -25,7 +25,7 @@ export function MobileMenu({ links, active, onSelect, onClose }: MobileMenuProps
             onClose();
           }}
           aria-current={active === link.id ? "true" : undefined}
-          className={`flex min-h-11 items-center px-2 py-2.5 font-brush text-lg ${active === link.id ? "text-[var(--pink)]" : "text-zinc-200"}`}
+          className={`flex min-h-11 items-center px-2 py-2.5 font-brush text-lg ${active === link.id ? "text-[var(--pink)]" : "text-[var(--foreground)]"}`}
         >
           {link.label}
         </a>

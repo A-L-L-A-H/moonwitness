@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   ApiErrorSchema,
+  CreateEventBodySchema,
+  EventHistoryResponseSchema,
   TimelineEndpoint,
   TimelineListQuerySchema,
   TimelineListResponseSchema,
   TimelineStatsSchema,
+  UpdateEventBodySchema,
 } from "./endpoints.js";
 
 const event = {
@@ -69,7 +72,48 @@ describe("timeline contracts", () => {
     // Response schemas must be concrete Zod objects, not z.any() passthroughs.
     expect(TimelineEndpoint.listEvents.response).toBeInstanceOf(z.ZodObject);
     expect(TimelineEndpoint.getEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.createEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.updateEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.archiveEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.restoreEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.deleteEvent.response).toBeInstanceOf(z.ZodObject);
+    expect(TimelineEndpoint.getEventHistory.response).toBeInstanceOf(z.ZodObject);
     expect(TimelineEndpoint.getStats.response).toBeInstanceOf(z.ZodObject);
     expect(TimelineEndpoint.getEras.response).toBeInstanceOf(z.ZodObject);
+  });
+
+  it("validates timeline create, update, and history contracts", () => {
+    const createParsed = CreateEventBodySchema.parse({
+      kind: "PROJECT",
+      date: "2026-11-18",
+      era: "expansions",
+      title: "Relay Expansion",
+    });
+    expect(createParsed.image).toBe("hero-witness");
+    expect(createParsed.tags).toEqual([]);
+
+    const updateParsed = UpdateEventBodySchema.parse({
+      title: "Relay Expansion v2",
+      version: 2,
+    });
+    expect(updateParsed.version).toBe(2);
+
+    const historyParsed = EventHistoryResponseSchema.parse({
+      data: [
+        {
+          id: "aud-1",
+          model: "timeline.event",
+          entity_id: "evt-1",
+          action: "CREATE",
+          changed_by: "1",
+          changed_at: "2026-11-18T00:00:00.000Z",
+          diff: "{}",
+          entity_version: 1,
+          source: "api",
+          request_id: "req-1",
+        },
+      ],
+    });
+    expect(historyParsed.data[0]?.action).toBe("CREATE");
   });
 });

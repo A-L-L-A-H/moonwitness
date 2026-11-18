@@ -37,6 +37,7 @@ export {
 export {
   BRAND_TOKENS,
   MASTER_DNA_LIGHT_PALETTES,
+  SKIN_SURFACE_PALETTES,
   DEPRECATED_TOKEN_ALIASES,
   hexToHslString,
   normalizeColorTokenToCss,

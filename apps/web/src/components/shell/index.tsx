@@ -1,11 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { navItems } from "./nav-items";
-import { WorkspaceShell } from "./workspace-shell";
+import { ConsoleShellAdapter } from "./console-shell-adapter";
 
 export { OperationsShell } from "./operations-shell";
 
+/** Creator-plane shell backed directly by @moonwitness/ui ConsoleShell. */
 export function EmpireShell({
   breadcrumb,
   search,
@@ -16,8 +16,8 @@ export function EmpireShell({
   children: ReactNode;
 }) {
   return (
-    <WorkspaceShell breadcrumb={breadcrumb} search={search} items={navItems}>
+    <ConsoleShellAdapter plane="creator" breadcrumb={breadcrumb} search={search}>
       {children}
-    </WorkspaceShell>
+    </ConsoleShellAdapter>
   );
 }

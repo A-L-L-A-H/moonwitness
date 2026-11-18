@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Crown } from "../icons";
 import { ZineImage } from "../primitives/zine-image";
+import { useSkin } from "../skin";
 import { KindBadge } from "./event-card";
 import { EventDetailRelated, type RelatedEventItem } from "./event-detail-related";
 
@@ -45,6 +46,7 @@ export function EventDetail<E extends EventDetailData, R extends RelatedEventIte
   onRelated,
   onClose,
 }: EventDetailProps<E, R>) {
+  const { skin } = useSkin();
   const [copied, setCopied] = useState(false);
 
   async function share() {
@@ -58,15 +60,15 @@ export function EventDetail<E extends EventDetailData, R extends RelatedEventIte
   }
 
   return (
-    <div className="zine-card-rough flex h-full flex-col overflow-hidden">
-      <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
-        <span className="flex items-center gap-2 font-brush text-lg text-white">
-          <Crown className="h-4 w-6 text-[var(--yellow)]" /> EVENT DETAIL
+    <div data-skin={skin} className="zine-card-rough flex h-full flex-col overflow-hidden">
+      <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
+        <span className="flex items-center gap-2 font-brush text-lg text-[var(--foreground)]">
+          <Crown className="h-4 w-6 text-[var(--primary)]" /> EVENT DETAIL
         </span>
         <div className="flex items-center gap-2">
           <button
             onClick={share}
-            className="text-xs text-[var(--blue)] hover:underline"
+            className="text-xs text-[var(--primary)] hover:underline"
             aria-label="Share event link"
           >
             {copied ? "Copied ✓" : "Share ↗"}
@@ -75,7 +77,7 @@ export function EventDetail<E extends EventDetailData, R extends RelatedEventIte
             <button
               onClick={onClose}
               aria-label="Close event detail"
-              className="p-1 text-zinc-400 hover:text-[var(--pink)]"
+              className="p-1 text-[var(--muted-foreground)] hover:text-[var(--primary)]"
             >
               ✕
             </button>
@@ -94,35 +96,37 @@ export function EventDetail<E extends EventDetailData, R extends RelatedEventIte
           <span className="absolute left-3 top-3">
             <KindBadge kind={event.kind} />
           </span>
-          <span className="absolute right-3 top-3 bg-black/70 px-2 py-0.5 text-[10px] text-zinc-200">
+          <span className="absolute right-3 top-3 bg-[var(--background)]/85 px-2 py-0.5 text-[10px] text-[var(--foreground)]">
             {event.date}
           </span>
         </div>
 
         <div className="p-4">
-          <h2 className="font-brush text-2xl leading-tight text-white">
+          <h2 className="font-brush text-2xl leading-tight text-[var(--foreground)]">
             {event.title.toUpperCase()}
           </h2>
-          <p className="mt-2 text-xs leading-relaxed text-zinc-400">{event.body}</p>
+          <p className="mt-2 text-xs leading-relaxed text-[var(--muted-foreground)]">
+            {event.body}
+          </p>
 
-          <dl className="mt-4 space-y-2 border-t border-[var(--line)] pt-3 text-xs">
+          <dl className="mt-4 space-y-2 border-t border-[var(--border)] pt-3 text-xs">
             <div className="flex justify-between gap-2">
-              <dt className="text-zinc-500">Era</dt>
-              <dd className="text-zinc-200">
+              <dt className="text-[var(--muted-foreground)]">Era</dt>
+              <dd className="text-[var(--foreground)]">
                 {era.name} ({era.years})
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-zinc-500">Location</dt>
-              <dd className="text-right text-zinc-200">{event.location}</dd>
+              <dt className="text-[var(--muted-foreground)]">Location</dt>
+              <dd className="text-right text-[var(--foreground)]">{event.location}</dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-zinc-500">Tags</dt>
+              <dt className="text-[var(--muted-foreground)]">Tags</dt>
               <dd className="flex flex-wrap justify-end gap-1">
                 {event.tags.map((t) => (
                   <span
                     key={t}
-                    className="rounded-full border border-[var(--line)] px-2 py-0.5 text-[10px] text-[var(--purple)]"
+                    className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] text-[var(--primary)]"
                   >
                     {t}
                   </span>
@@ -130,18 +134,20 @@ export function EventDetail<E extends EventDetailData, R extends RelatedEventIte
               </dd>
             </div>
             <div className="flex justify-between gap-2">
-              <dt className="text-zinc-500">Related</dt>
-              <dd className="text-zinc-200">
+              <dt className="text-[var(--muted-foreground)]">Related</dt>
+              <dd className="text-[var(--foreground)]">
                 {event.sources ?? 0} sources · {event.notes ?? 0} notes
               </dd>
             </div>
           </dl>
 
-          <div className="mt-4 border border-[var(--line)] bg-[var(--panel-2)] p-3">
+          <div className="mt-4 border border-[var(--border)] bg-[var(--muted)] p-3">
             <span className="sticker sticker-pink inline-block -rotate-1 px-2 py-0.5 font-brush text-[10px]">
               KEY EXCERPT
             </span>
-            <p className="mt-2 font-hand text-lg leading-snug text-zinc-200">“{event.excerpt}”</p>
+            <p className="mt-2 font-hand text-lg leading-snug text-[var(--foreground)]">
+              “{event.excerpt}”
+            </p>
           </div>
 
           <EventDetailRelated relatedEvents={relatedEvents} onRelated={onRelated} />

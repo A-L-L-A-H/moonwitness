@@ -292,6 +292,54 @@ describe("BaseRepository", () => {
     expect(onlyOne.map((row) => row.id)).toEqual(["with-title"]);
   });
 
+  it("supports operator filters, sorting, pagination, upsert, createMany, and soft-delete update guard", async () => {
+    const items = await taskModel.repository.createMany([
+      sample({ title: "alpha", priority: 1, note: "first" }),
+      sample({ title: "Beta Signal", priority: 3, note: "beta" }),
+      sample({ title: "gamma", priority: 5, note: null }),
+    ]);
+    expect(items).toHaveLength(3);
+
+    const ranged = await taskModel.repository.find(
+      { priority: { $gte: 2, $lte: 5 } },
+      { orderBy: [{ field: "priority", direction: "DESC" }], limit: 1, offset: 1 },
+    );
+    expect(ranged.map((row) => row.title)).toEqual(["Beta Signal"]);
+
+    const matched = await taskModel.repository.find({
+      title: { $ilike: "%beta%" },
+      priority: { $in: [1, 3] },
+      note: { $ne: "other" },
+    });
+    expect(matched.map((row) => row.title)).toEqual(["Beta Signal"]);
+
+    const nonNullNotes = await taskModel.repository.find(
+      { note: { $ne: null } },
+      { orderBy: "priority ASC" },
+    );
+    expect(nonNullNotes.map((row) => row.title)).toEqual(["alpha", "Beta Signal"]);
+
+    const emptyIn = await taskModel.repository.find({ priority: { $in: [] } });
+    expect(emptyIn).toHaveLength(0);
+
+    const upsertedNew = await taskModel.repository.upsert(
+      { title: "delta" },
+      sample({ title: "delta", priority: 4 }),
+    );
+    expect(upsertedNew.version).toBe(1);
+
+    const upsertedExisting = await taskModel.repository.upsert({ title: "delta" }, { priority: 9 });
+    expect(upsertedExisting.id).toBe(upsertedNew.id);
+    expect(upsertedExisting.priority).toBe(9);
+    expect(upsertedExisting.version).toBe(2);
+
+    await taskModel.repository.delete(upsertedNew.id);
+    expect(await taskModel.repository.update(upsertedNew.id, { priority: 10 })).toBeNull();
+    expect(
+      await taskModel.repository.history(upsertedNew.id, { limit: 2, offset: 1 }),
+    ).toHaveLength(2);
+  });
+
   it("persists across close and reopen of the same file", async () => {
     const dbPath = join(dir, "persist.db");
     closeDb();

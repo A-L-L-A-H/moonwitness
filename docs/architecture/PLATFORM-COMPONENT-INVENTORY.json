@@ -1,0 +1,777 @@
+{
+  "metadata": {
+    "title": "MoonWitness Platform Component Inventory",
+    "status": "PROPOSED",
+    "owner": "Repository Standards & Principal Architecture",
+    "repository": "A-L-L-A-H/moonwitness",
+    "branch": "dev",
+    "headSha": "5c38909019d1034fb671bd64344dc35b16bd29a4",
+    "auditedAt": "2026-11-18",
+    "scope": "apps (3), services (5), control plane (1), shared packages (15), addons (16), engines (17), infrastructure & CI"
+  },
+  "summary": {
+    "apps": 3,
+    "services": 5,
+    "controlPlanes": 1,
+    "sharedPackages": 15,
+    "addonPackages": 16,
+    "turboWorkspacePackages": 34,
+    "enginesDirectories": 17,
+    "githubWorkflows": 20,
+    "directEngineImportsInRuntime": 0,
+    "verifiedVitestSuites": {
+      "tasksPassed": 29,
+      "tasksTotal": 29,
+      "testFiles": 139,
+      "testsPassed": 790
+    },
+    "verifiedTypecheckTasks": {
+      "passed": 32,
+      "total": 32
+    },
+    "verifiedLintTasks": {
+      "passed": 32,
+      "total": 32,
+      "note": "All 32 workspace packages including @moonwitness/addon-base pass ESLint; apps/api reports 0 errors with pre-existing CLI no-console warnings"
+    }
+  },
+  "apps": [
+    {
+      "id": "app-web",
+      "name": "@moonwitness/web",
+      "path": "apps/web",
+      "version": "0.0.0",
+      "trustZone": "Zone A / Mixed SSR+Edge",
+      "status": "PRODUCTION_ACTIVE",
+      "runtime": "Next.js 16.4.6 + React 19.2.0",
+      "port": 3000,
+      "workspaceDeps": [
+        "@moonwitness/assets",
+        "@moonwitness/avatars",
+        "@moonwitness/canon",
+        "@moonwitness/contracts",
+        "@moonwitness/core",
+        "@moonwitness/types",
+        "@moonwitness/ui"
+      ],
+      "tests": {
+        "vitestFiles": 23,
+        "vitestPassed": 111,
+        "playwrightConfigs": 4,
+        "pact": true
+      },
+      "keyObservations": [
+        "Single App Router /api/v1/[...path]/route.ts proxy forwarding x-request-id and W3C traceparent headers",
+        "Consumes @moonwitness/contracts timeline DTOs in src/lib/api/timeline.ts",
+        "mid-oidc.ts deduplicated onto @moonwitness/core PKCE helpers; dead cloudflare-runtime.ts removed in favor of public-assets.ts"
+      ]
+    },
+    {
+      "id": "app-api",
+      "name": "@moonwitness/api",
+      "path": "apps/api",
+      "version": "0.0.0",
+      "trustZone": "Zone A",
+      "status": "PRODUCTION_ACTIVE",
+      "runtime": "Fastify + @moonwitness/orm + @moonwitness/mid + tsup bundle (Node 22)",
+      "port": 3002,
+      "workspaceDeps": [
+        "All 16 @moonwitness/addon-* packages",
+        "@moonwitness/ai",
+        "@moonwitness/contracts",
+        "@moonwitness/core",
+        "@moonwitness/errors",
+        "@moonwitness/mid",
+        "@moonwitness/orm",
+        "@moonwitness/schema",
+        "@moonwitness/types"
+      ],
+      "tests": {
+        "vitestFiles": 30,
+        "vitestPassed": 169
+      },
+      "keyObservations": [
+        "Mounts all 16 addons via AddonRuntimeController and supports tenant_id scoping via resolveRequestTenant",
+        "commandCenterMigrations & probesMigrations retired into syncModels() ORM definitions",
+        "control.routes.ts enforces fail-fast ARSY_V1_SUPPORTED_RESOURCE_KINDS validation matching cp/arsy",
+        "Exposes Prometheus /metrics & /api/v1/metrics, W3C traceparent propagation, and optional SQL createOrmRateLimitStore"
+      ]
+    },
+    {
+      "id": "app-rocksoul",
+      "name": "rocksoul-dx",
+      "path": "apps/rocksoul",
+      "version": "0.1.0",
+      "trustZone": "Zone C",
+      "status": "DEVELOPMENT_ACTIVE",
+      "runtime": "Tauri 2.8 (Rust) + React 19.1.1 / Vite + Three.js + local SQLite",
+      "workspaceDeps": ["@moonwitness/canon", "@moonwitness/core", "@moonwitness/ui"],
+      "tests": {
+        "vitestFiles": 16,
+        "vitestPassed": 62,
+        "playwrightSpecFiles": 1,
+        "rustFiles": 20,
+        "rustLibTestsPassed": 56,
+        "ciRustCoverage": true
+      },
+      "keyObservations": [
+        "Runs standalone local continuity SQLite DB, loopback OIDC callback listener, loopback S3 gateway, and Google Drive backup",
+        "agent_execution.rs enforces allowlisted OS child-process spawn, PID poll, and kill supervision",
+        "rocksoul-tauri cargo check --tests and cargo test --lib run in .github/workflows/ci.yml"
+      ]
+    }
+  ],
+  "servicesAndControlPlane": [
+    {
+      "id": "cp-arsy",
+      "name": "arsy",
+      "path": "cp/arsy",
+      "language": "Go 1.27",
+      "trustZone": "Zone B",
+      "status": "PRODUCTION_ACTIVE_HOST_AGENT",
+      "goSrcFiles": 45,
+      "goTestFiles": 13,
+      "ciCovered": true,
+      "testedResult": "go test ./... passed all 9 packages with tests; 5 packages have no test files",
+      "limitations": [
+        "Host-scoped VPS agent rather than container/cluster scheduler",
+        "Rejects 10 V1-deferred resource kinds while apps/api control.routes.ts still proxies them"
+      ]
+    },
+    {
+      "id": "svc-radius",
+      "name": "services/radius",
+      "path": "services/radius",
+      "language": "Rust",
+      "trustZone": "Zone B",
+      "status": "OPTIONAL_DAEMON_COMPOSE_PROFILE",
+      "ports": [8090, 1812, 1813],
+      "dockerfilePresent": true,
+      "ciCovered": true,
+      "limitations": [
+        "Only starts under docker-compose --profile ops",
+        "ORM radius.* tables are synced by @moonwitness/addon-radius while runtime requests proxy from Fastify directly to :8090"
+      ]
+    },
+    {
+      "id": "svc-snmp-poller",
+      "name": "services/snmp-poller",
+      "path": "services/snmp-poller",
+      "language": "Rust",
+      "trustZone": "Zone B",
+      "status": "OPTIONAL_DAEMON_COMPOSE_PROFILE",
+      "ports": [8094],
+      "dockerfilePresent": true,
+      "ciCovered": true,
+      "limitations": [
+        "Poller state lives in daemon while Fastify mirrors POST/DELETE mutations into snmp.* IR tables and redacts credentials"
+      ]
+    },
+    {
+      "id": "svc-syslog",
+      "name": "services/syslog",
+      "path": "services/syslog",
+      "language": "Rust",
+      "trustZone": "Zone B",
+      "status": "OPTIONAL_DAEMON_COMPOSE_PROFILE",
+      "ports": [8093, 5140, 5514],
+      "dockerfilePresent": true,
+      "ciCovered": true,
+      "limitations": [
+        "Exposes native Prometheus metrics in src/metrics.rs, unlike apps/api or other daemons"
+      ]
+    },
+    {
+      "id": "svc-storage",
+      "name": "services/storage",
+      "path": "services/storage",
+      "language": "Rust",
+      "trustZone": "Zone B",
+      "status": "OPTIONAL_DAEMON_COMPOSE_PROFILE",
+      "ports": [8091],
+      "dockerfilePresent": true,
+      "ciCovered": true,
+      "limitations": [
+        "Starts under docker-compose --profile ops; Rust suite passes 27 tests (19 unit + 8 s3_api integration)"
+      ]
+    },
+    {
+      "id": "svc-memory",
+      "name": "services/memory",
+      "path": "services/memory",
+      "language": "Python (FastAPI + SQLite FTS5 + LanceDB + Rclone)",
+      "trustZone": "Zone B / C",
+      "status": "STANDALONE_COMPOSE_OVERLAY_VERIFIED",
+      "dockerfilePresent": false,
+      "ciCovered": true,
+      "testsPassed": 33,
+      "limitations": [
+        "Runs via isolated docker-compose.memory.yml overlay preserving root docker-compose.yml vps-topology boundaries",
+        "33 passing pytest tests runnable from repo root via services/memory/backend/pyproject.toml and wired in .github/workflows/ci.yml"
+      ]
+    }
+  ],
+  "sharedPackages": [
+    {
+      "name": "@moonwitness/ai",
+      "path": "packages/ai",
+      "version": "0.0.0",
+      "srcFiles": 15,
+      "testFiles": 4,
+      "testsPassed": 84,
+      "consumers": ["apps/api"],
+      "status": "ACTIVE_SINGLE_CONSUMER"
+    },
+    {
+      "name": "@moonwitness/assets",
+      "path": "packages/assets",
+      "version": "0.0.0",
+      "srcFiles": 21,
+      "testFiles": 3,
+      "testsPassed": 16,
+      "consumers": ["apps/web", "packages/ui"],
+      "status": "ACTIVE_SHARED"
+    },
+    {
+      "name": "@moonwitness/avatars",
+      "path": "packages/avatars",
+      "version": "0.0.0",
+      "srcFiles": 6,
+      "testFiles": 2,
+      "testsPassed": 23,
+      "consumers": ["apps/web", "packages/ui"],
+      "status": "ACTIVE_SHARED"
+    },
+    {
+      "name": "@moonwitness/canon",
+      "path": "packages/canon",
+      "version": "0.1.0",
+      "srcFiles": 13,
+      "testFiles": 1,
+      "testsPassed": 8,
+      "consumers": ["apps/web", "apps/rocksoul", "packages/addons/epistemic"],
+      "status": "ACTIVE_SHARED_CANON"
+    },
+    {
+      "name": "@moonwitness/cli",
+      "path": "packages/cli",
+      "version": "0.1.0",
+      "srcFiles": 9,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "consumers": [],
+      "status": "ISOLATED_UTILITY"
+    },
+    {
+      "name": "@moonwitness/contracts",
+      "path": "packages/contracts",
+      "version": "0.0.0",
+      "srcFiles": 13,
+      "testFiles": 2,
+      "testsPassed": 15,
+      "consumers": ["apps/web", "apps/api"],
+      "status": "ACTIVE_SHARED_CONTRACTS",
+      "gap": "Timeline endpoints integrated; additional routes can adopt incrementally"
+    },
+    {
+      "name": "@moonwitness/core",
+      "path": "packages/core",
+      "version": "0.0.0",
+      "srcFiles": 8,
+      "testFiles": 2,
+      "testsPassed": 11,
+      "consumers": ["apps/web", "apps/api", "apps/rocksoul", "packages/cli"],
+      "status": "ACTIVE_FOUNDATION"
+    },
+    {
+      "name": "@moonwitness/errors",
+      "path": "packages/errors",
+      "version": "0.0.0",
+      "srcFiles": 2,
+      "testFiles": 0,
+      "testsPassed": 0,
+      "consumers": ["apps/api", "packages/ai", "packages/contracts"],
+      "status": "ACTIVE_FOUNDATION"
+    },
+    {
+      "name": "@moonwitness/eslint-config",
+      "path": "packages/eslint-config",
+      "version": "0.0.0",
+      "srcFiles": 5,
+      "testFiles": 0,
+      "testsPassed": 0,
+      "consumersCount": 31,
+      "status": "TOOLING_FOUNDATION"
+    },
+    {
+      "name": "@moonwitness/mid",
+      "path": "packages/mid",
+      "version": "0.0.0",
+      "srcFiles": 17,
+      "testFiles": 4,
+      "testsPassed": 14,
+      "consumers": ["apps/api", "packages/addons/auth"],
+      "status": "ACTIVE_IDENTITY_AUTHORITY"
+    },
+    {
+      "name": "@moonwitness/orm",
+      "path": "packages/orm",
+      "version": "0.1.0",
+      "srcFiles": 23,
+      "testFiles": 7,
+      "testsPassed": 50,
+      "consumersCount": 17,
+      "status": "ACTIVE_CORE_ENGINE",
+      "gap": "Dual SQLite/libSQL + Postgres + D1 drivers with tenant_id metadata & scoping; Postgres RLS deferred to P3"
+    },
+    {
+      "name": "@moonwitness/schema",
+      "path": "packages/schema",
+      "version": "0.0.0",
+      "srcFiles": 4,
+      "testFiles": 0,
+      "testsPassed": 0,
+      "consumers": ["apps/api", "packages/contracts", "packages/addons/timeline"],
+      "status": "ACTIVE_SHARED"
+    },
+    {
+      "name": "@moonwitness/types",
+      "path": "packages/types",
+      "version": "0.0.0",
+      "srcFiles": 2,
+      "testFiles": 0,
+      "testsPassed": 0,
+      "consumersCount": 9,
+      "status": "ACTIVE_FOUNDATION"
+    },
+    {
+      "name": "@moonwitness/typescript-config",
+      "path": "packages/typescript-config",
+      "version": "0.0.0",
+      "srcFiles": 4,
+      "testFiles": 0,
+      "testsPassed": 0,
+      "consumersCount": 31,
+      "status": "TOOLING_FOUNDATION"
+    },
+    {
+      "name": "@moonwitness/ui",
+      "path": "packages/ui",
+      "version": "0.0.0",
+      "srcFiles": 174,
+      "testFiles": 23,
+      "testsPassed": 182,
+      "consumers": ["apps/web", "apps/rocksoul"],
+      "status": "ACTIVE_DESIGN_SYSTEM"
+    }
+  ],
+  "addons": [
+    {
+      "dir": "__base",
+      "package": "@moonwitness/addon-base",
+      "category": "foundation",
+      "autoInstall": false,
+      "depends": [],
+      "srcFiles": 7,
+      "testFiles": 5,
+      "testsPassed": 23,
+      "models": [
+        "users",
+        "settings",
+        "ir_module",
+        "ir_model",
+        "ir_field",
+        "ir_rule",
+        "ir_view",
+        "ir_menu",
+        "ops.job"
+      ],
+      "routes": ["/_meta/*", "/api/v1/m/:model (tenant-scoped)", "/health"],
+      "classification": "FOUNDATION_IR_RUNTIME"
+    },
+    {
+      "dir": "i18n",
+      "package": "@moonwitness/addon-i18n",
+      "category": "foundation",
+      "autoInstall": true,
+      "depends": ["__base"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["i18n.locale", "i18n.term"],
+      "routes": ["/api/v1/i18n/*"],
+      "classification": "DOMAIN_IR_ADDON"
+    },
+    {
+      "dir": "audit",
+      "package": "@moonwitness/addon-audit",
+      "category": "governance",
+      "autoInstall": true,
+      "depends": ["__base"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["ops.audit_log"],
+      "routes": ["/api/v1/audit/*"],
+      "classification": "DOMAIN_IR_ADDON"
+    },
+    {
+      "dir": "auth",
+      "package": "@moonwitness/addon-auth",
+      "category": "security",
+      "autoInstall": true,
+      "depends": ["__base", "audit"],
+      "srcFiles": 5,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["auth.user", "auth.session", "auth.oauth_token"],
+      "routes": ["/api/v1/auth/*", "/oauth/*"],
+      "classification": "CORE_AUTH_AND_MID_STORE"
+    },
+    {
+      "dir": "timeline",
+      "package": "@moonwitness/addon-timeline",
+      "category": "narrative",
+      "autoInstall": true,
+      "depends": ["__base"],
+      "srcFiles": 6,
+      "testFiles": 2,
+      "testsPassed": 7,
+      "models": ["timeline.event", "timeline.era"],
+      "routes": ["/api/v1/timeline/*"],
+      "classification": "FULL_DOMAIN_ADDON"
+    },
+    {
+      "dir": "canon-lore",
+      "package": "@moonwitness/addon-canon-lore",
+      "category": "narrative",
+      "autoInstall": true,
+      "depends": ["__base", "timeline"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["canon.codex", "canon.entity", "canon.episode"],
+      "routes": ["/api/v1/canon/overview"],
+      "classification": "IR_EXTENSION_AND_OVERVIEW"
+    },
+    {
+      "dir": "witness-research",
+      "package": "@moonwitness/addon-witness-research",
+      "category": "research",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["knowledge.source", "witness.claim", "research.run", "sidra.edge"],
+      "routes": ["/api/v1/witness/summary"],
+      "classification": "IR_SCHEMA_AND_SUMMARY_ONLY"
+    },
+    {
+      "dir": "epistemic",
+      "package": "@moonwitness/addon-epistemic",
+      "category": "engines",
+      "autoInstall": true,
+      "depends": ["__base", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["epistemic.computation"],
+      "routes": ["/api/v1/epistemic/evaluate"],
+      "classification": "CONSOLIDATED_CANON_EVALUATOR_WRAPPER"
+    },
+    {
+      "dir": "command-center",
+      "package": "@moonwitness/addon-command-center",
+      "category": "operations",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["command.workflow", "command.alert"],
+      "routes": ["Mounted in apps/api commandCenterRoutes"],
+      "classification": "ADDON_OWNED_ORM_SCHEMA"
+    },
+    {
+      "dir": "control",
+      "package": "@moonwitness/addon-control",
+      "category": "operations",
+      "autoInstall": true,
+      "depends": ["__base", "auth"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["control.command"],
+      "routes": ["Mounted in apps/api controlRoutes"],
+      "classification": "IR_WRAPPER_FOR_ARSY_PROXY"
+    },
+    {
+      "dir": "probes",
+      "package": "@moonwitness/addon-probes",
+      "category": "telemetry",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["probe.node", "probe.event", "ops.event"],
+      "routes": ["Mounted in apps/api probesRoutes"],
+      "classification": "ADDON_OWNED_ORM_SCHEMA"
+    },
+    {
+      "dir": "ai",
+      "package": "@moonwitness/addon-ai",
+      "category": "intelligence",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["riot_ai.provider_config", "riot_ai.usage_summary", "memory.record"],
+      "routes": ["Mounted in apps/api riotAiRoutes + memoryRoutes"],
+      "classification": "IR_WRAPPER_FOR_API_AI_AND_MEMORY"
+    },
+    {
+      "dir": "storage",
+      "package": "@moonwitness/addon-storage",
+      "category": "infrastructure",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["storage.bucket", "storage.object", "storage.upload_session"],
+      "routes": ["Mounted in apps/api storageRoutes"],
+      "classification": "IR_MIRROR_FOR_RUST_DAEMON_PROXY"
+    },
+    {
+      "dir": "snmp",
+      "package": "@moonwitness/addon-snmp",
+      "category": "network",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["snmp.device", "snmp.target", "snmp.sample"],
+      "routes": ["Mounted in apps/api snmpPollerRoutes"],
+      "classification": "IR_MIRROR_FOR_RUST_DAEMON_PROXY"
+    },
+    {
+      "dir": "syslog",
+      "package": "@moonwitness/addon-syslog",
+      "category": "network",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["syslog.entry"],
+      "routes": ["Mounted in apps/api syslogRoutes"],
+      "classification": "IR_MIRROR_FOR_RUST_DAEMON_PROXY"
+    },
+    {
+      "dir": "radius",
+      "package": "@moonwitness/addon-radius",
+      "category": "network",
+      "autoInstall": true,
+      "depends": ["__base", "auth", "audit"],
+      "srcFiles": 2,
+      "testFiles": 1,
+      "testsPassed": 1,
+      "models": ["radius.client", "radius.session"],
+      "routes": ["Mounted in apps/api radiusRoutes"],
+      "classification": "IR_MIRROR_FOR_RUST_DAEMON_PROXY"
+    }
+  ],
+  "engines": [
+    {
+      "name": "aqel",
+      "path": "engines/aqel",
+      "totalFiles": 3,
+      "testNamedFiles": 1,
+      "readme": true,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "SPEC_AND_PROTOTYPE_ISOLATED"
+    },
+    {
+      "name": "chronicle-os",
+      "path": "engines/chronicle-os",
+      "totalFiles": 1474,
+      "testNamedFiles": 36,
+      "readme": false,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "LEGACY_CORPUS_ARCHIVE"
+    },
+    {
+      "name": "community",
+      "path": "engines/community",
+      "totalFiles": 26,
+      "testNamedFiles": 2,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "UNWIRED_STANDALONE_PACKAGE"
+    },
+    {
+      "name": "corpus-srgbl",
+      "path": "engines/corpus-srgbl",
+      "totalFiles": 4136,
+      "testNamedFiles": 48,
+      "readme": true,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "LEGACY_RESEARCH_CORPUS"
+    },
+    {
+      "name": "crayon",
+      "path": "engines/crayon",
+      "totalFiles": 1171,
+      "testNamedFiles": 105,
+      "readme": false,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "UNWIRED_RESEARCH_ENGINE_PORTED_LITE"
+    },
+    {
+      "name": "dhgs",
+      "path": "engines/dhgs",
+      "totalFiles": 100,
+      "testNamedFiles": 3,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "UNWIRED_STANDALONE_PACKAGE"
+    },
+    {
+      "name": "divine-text",
+      "path": "engines/divine-text",
+      "totalFiles": 159,
+      "testNamedFiles": 7,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "PORTED_TO_CANON_ENGINE_UNWIRED"
+    },
+    {
+      "name": "empire-origin",
+      "path": "engines/empire-origin",
+      "totalFiles": 1819,
+      "testNamedFiles": 231,
+      "readme": false,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "LEGACY_CORPUS_ARCHIVE"
+    },
+    {
+      "name": "moonframe",
+      "path": "engines/moonframe",
+      "totalFiles": 466,
+      "testNamedFiles": 7,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "UNWIRED_STANDALONE_PACKAGE"
+    },
+    {
+      "name": "mtime",
+      "path": "engines/mtime",
+      "totalFiles": 212,
+      "testNamedFiles": 1,
+      "readme": true,
+      "packageJson": false,
+      "cargoToml": true,
+      "runtimeImports": 0,
+      "status": "RUST_ENGINE_PORTED_TO_CANON"
+    },
+    {
+      "name": "mw-ui-docs",
+      "path": "engines/mw-ui-docs",
+      "totalFiles": 5,
+      "testNamedFiles": 0,
+      "readme": true,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "DOCS_ARCHIVE"
+    },
+    {
+      "name": "ontology",
+      "path": "engines/ontology",
+      "totalFiles": 445,
+      "testNamedFiles": 9,
+      "readme": true,
+      "packageJson": false,
+      "cargoToml": true,
+      "runtimeImports": 0,
+      "status": "RUST_ENGINE_ISOLATED"
+    },
+    {
+      "name": "prophetic",
+      "path": "engines/prophetic",
+      "totalFiles": 350,
+      "testNamedFiles": 38,
+      "readme": false,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "RESEARCH_ENGINE_ISOLATED"
+    },
+    {
+      "name": "rocksoul-assets",
+      "path": "engines/rocksoul-assets",
+      "totalFiles": 1049,
+      "testNamedFiles": 5,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "ASSET_CORPUS_ISOLATED"
+    },
+    {
+      "name": "rocksoul-domains",
+      "path": "engines/rocksoul-domains",
+      "totalFiles": 1841,
+      "testNamedFiles": 318,
+      "readme": false,
+      "packageJson": false,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "DOMAIN_ENGINE_ARCHIVE"
+    },
+    {
+      "name": "rocksoul-ui",
+      "path": "engines/rocksoul-ui",
+      "totalFiles": 523,
+      "testNamedFiles": 38,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "UI_ARCHIVE_SUPERSEDED_BY_PACKAGES_UI"
+    },
+    {
+      "name": "witness-semantic",
+      "path": "engines/witness-semantic",
+      "totalFiles": 64,
+      "testNamedFiles": 7,
+      "readme": true,
+      "packageJson": true,
+      "cargoToml": false,
+      "runtimeImports": 0,
+      "status": "UNWIRED_STANDALONE_PACKAGE"
+    }
+  ]
+}

@@ -1,3 +1,5 @@
+export type DevServiceTarget = "web" | "api" | "all";
+
 export type IssueStatus = "open" | "blocked" | "done" | "closed";
 export type IssuePriority = "P0" | "P1" | "P2" | "P3";
 export type ProjectStatus = "active" | "paused" | "done" | "archived";
@@ -118,6 +120,17 @@ export interface EcosystemServiceStatus {
   status: string;
   http_status: number | null;
   latency_ms: number | null;
+}
+
+export interface DevServiceEntry {
+  id: string;
+  name: string;
+  port: number;
+  managed: boolean;
+  listening: boolean;
+  pid: number | null;
+  recent_logs: string[];
+  last_error: string | null;
 }
 
 export interface AgentSessionActivity {
@@ -398,6 +411,9 @@ export interface NativeCommands {
   list_events: { args: Record<string, never>; result: ActivityEvent[] };
   get_monitor_snapshot: { args: Record<string, never>; result: MonitorSnapshot };
   open_ecosystem_url: { args: { url: string }; result: void };
+  get_dev_services_status: { args: Record<string, never>; result: DevServiceEntry[] };
+  start_dev_service: { args: { target: string }; result: DevServiceEntry[] };
+  stop_dev_service: { args: { target: string }; result: DevServiceEntry[] };
   list_issues: { args: Record<string, never>; result: Issue[] };
   list_repositories: { args: Record<string, never>; result: Repository[] };
   list_projects: { args: Record<string, never>; result: Project[] };

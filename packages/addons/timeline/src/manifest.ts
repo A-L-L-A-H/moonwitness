@@ -4,10 +4,15 @@ export interface TimelineManifest {
   name: "timeline";
   version: string;
   description: string;
+  category?: string;
+  autoInstall: boolean;
+  defaultEnabled: boolean;
   depends: string[];
   provides: {
     routes: string[];
     models: string[];
+    migrations: string[];
+    seeds: string[];
     auditActions: string[];
   };
 }

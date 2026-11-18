@@ -5,10 +5,13 @@ export type CrewRoleName = "admin" | "editor" | "viewer";
 export const WRITE_ROLES: readonly CrewRoleName[] = ["admin"];
 
 export function isWriteRole(role: string | null | undefined): boolean {
-  return role === "admin";
+  return normalizeRole(role) === "admin";
 }
 
-/** UI convenience: normalize a role string from /api/v1/auth/me. */
+/** UI convenience: normalize legacy or canonical role names from auth endpoints. */
 export function normalizeRole(role: unknown): CrewRoleName | null {
-  return role === "admin" || role === "editor" || role === "viewer" ? role : null;
+  if (role === "admin" || role === "superadmin") return "admin";
+  if (role === "editor") return "editor";
+  if (role === "viewer" || role === "readonly") return "viewer";
+  return null;
 }

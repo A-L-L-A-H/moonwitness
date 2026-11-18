@@ -1,3 +1,4 @@
+import { buildCsrfLogoutInit } from "@/lib/api/auth";
 import {
   DEFAULT_MID_ISSUER_URL,
   createJwksKeyResolver,
@@ -358,8 +359,7 @@ export async function clearSanctuaryMidSession(fetchFn?: typeof fetch): Promise<
   }
   dispatchAuthChange();
   const fetcher = fetchFn ?? globalThis.fetch;
-  await fetcher(`${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/logout`, {
-    method: "POST",
-    credentials: "include",
-  }).catch(() => {});
+  await fetcher(`${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/logout`, buildCsrfLogoutInit()).catch(
+    () => {},
+  );
 }

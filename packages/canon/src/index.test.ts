@@ -60,6 +60,10 @@ import {
   searchFourCorpora,
   stripUthmaniMacros,
   tokenizeAndParseAqel,
+  normalizeDivineText,
+  computeMtimeDelta,
+  rgbToCrayonRgbl,
+  scorePropheticWitness,
 } from "./index";
 
 describe("@moonwitness/canon SSOT invariants", () => {
@@ -268,5 +272,22 @@ describe("@moonwitness/canon SSOT invariants", () => {
       "radio",
       "igate",
     ]);
+
+    expect(normalizeDivineText("  بِسْمِ   ٱللَّهِ  ")).toEqual({
+      canonical: "بسم الله",
+      wordCount: 2,
+    });
+    expect(computeMtimeDelta("2026-03-19T00:00:00Z", "2026-03-20T00:00:00Z")).toEqual({
+      deltaMs: 86_400_000,
+      deltaDays: 1,
+      harmonicEpoch: "forward-witness",
+    });
+    const white = rgbToCrayonRgbl(255, 255, 255);
+    expect(white.luminance).toBeCloseTo(1, 5);
+    expect(white.contrastVsBlack).toBe(21);
+    expect(scorePropheticWitness([0.9, 0.8])).toEqual({
+      score: 0.85,
+      verdict: "corroborated",
+    });
   });
 });

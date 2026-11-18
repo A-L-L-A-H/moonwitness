@@ -7,8 +7,7 @@ Release Please is the single authoritative release system. Nothing else bumps ve
 
 - One release stream for the whole repository: the root `package.json` carries the product version.
 - `release-please-config.json` declares the root package (`"."`, release type `node`).
-- `.release-please-manifest.json` records the last released version. It is currently `0.1.0`, the
-  baseline, because the repository has no prior tagged release.
+- `.release-please-manifest.json` records the last released version (currently `0.13.0` as of `2026-11-18`, matching root `package.json` and [CHANGELOG.md](../../CHANGELOG.md)).
 - Tags are `vX.Y.Z` with no component prefix.
 - `bump-minor-pre-major` is on: while the version is `0.x`, breaking changes bump the minor.
 

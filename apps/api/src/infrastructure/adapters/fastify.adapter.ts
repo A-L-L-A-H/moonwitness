@@ -4,8 +4,15 @@ import type { FastifyError } from "fastify";
 import FastifyCookie from "@fastify/cookie";
 import FastifyCors from "@fastify/cors";
 import { env, parseCorsOrigins } from "../../shared/env";
-import { createRateLimiter, resolveRateLimitKey } from "../rate-limit";
-import { registerHealthRoutes } from "../../interface/routes/health.routes";
+import { resolveTraceContext } from "../../shared/trace";
+import {
+  createAsyncRateLimiter,
+  createOrmRateLimitStore,
+  createRateLimiter,
+  resolveRateLimitKey,
+} from "../rate-limit";
+import { registerHealthRoutes, registerMetricsRoute } from "../../interface/routes/health.routes";
+import { createApiMetricsCollector } from "../../interface/routes/metrics";
 import { authRoutes } from "../../interface/routes/auth.routes";
 import { controlRoutes } from "../../interface/routes/control.routes";
 import { radiusRoutes } from "../../interface/routes/radius.routes";
@@ -17,16 +24,37 @@ import { commandCenterRoutes } from "../../interface/routes/command-center.route
 import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { ensureProbesSchema } from "../../interface/routes/probes.persistence";
 import { probesRoutes } from "../../interface/routes/probes.routes";
-import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
-import { domainMigrations } from "../persistence/domain";
+import { applyMigrations, createD1DatabaseFromOrm, getDb, syncModels } from "@moonwitness/orm";
+import {
+  domainMigrations,
+  alertModel,
+  controlCommandModel,
+  memoryRecordModel,
+  opsEventModel,
+  probeEventModel,
+  probeNodeModel,
+  radiusClientModel,
+  radiusSessionModel,
+  snmpDeviceModel,
+  snmpSampleModel,
+  snmpTargetModel,
+  storageBucketModel,
+  storageObjectModel,
+  storageUploadSessionModel,
+  syslogEntryModel,
+  workflowModel,
+} from "../persistence/domain";
 import { TimelineUseCase } from "../../domain/usecases/timeline/timeline.usecase";
 import { TimelineRepository } from "@moonwitness/addon-timeline";
-import { seedBootstrapAdmin } from "../../services/user";
+import { seedBootstrapAdmin, ensureAuthSchema } from "../../services/user";
+import { createAuthMidIdentityStore } from "@moonwitness/addon-auth";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
 export interface BootstrapOptions {
   prefix?: string;
   disableDocs?: boolean;
+  authExternallyMounted?: boolean;
+  externallyMountedAddons?: boolean;
 }
 
 function corsOrigin(): string[] | false {
@@ -53,9 +81,21 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     },
   });
 
-  // Echo the correlation id back and include it in every structured log line.
+  const metrics = createApiMetricsCollector();
+  if (!fastify.hasDecorator("metricsCollector")) {
+    fastify.decorate("metricsCollector", metrics);
+  }
+
+  // Echo correlation and trace identifiers back and observe latency/status telemetry.
   fastify.addHook("onRequest", async (request, reply) => {
+    const trace = resolveTraceContext(request.headers["traceparent"]);
     reply.header("x-request-id", request.id);
+    reply.header("traceparent", trace.traceparent);
+    (request as { traceparent?: string }).traceparent = trace.traceparent;
+  });
+
+  fastify.addHook("onResponse", async (request, reply) => {
+    metrics.observeRequest(request.method, reply.statusCode, reply.elapsedTime);
   });
 
   await fastify.register(FastifyCookie);
@@ -74,18 +114,19 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
 
   const maxRequests = Number(env.RATE_LIMIT_MAX);
   if (Number.isFinite(maxRequests) && maxRequests > 0) {
-    const limiter = createRateLimiter({
-      max: maxRequests,
-      windowMs: Number(env.RATE_LIMIT_WINDOW_MS),
-    });
+    const windowMs = Number(env.RATE_LIMIT_WINDOW_MS);
+    const useOrmStore = env.RATE_LIMIT_STORE === "orm";
+    const syncLimiter = useOrmStore ? null : createRateLimiter({ max: maxRequests, windowMs });
+    const asyncLimiter = useOrmStore
+      ? createAsyncRateLimiter({ max: maxRequests, windowMs, store: createOrmRateLimitStore() })
+      : null;
     fastify.addHook("onRequest", async (request, reply) => {
-      const result = limiter.check(
-        resolveRateLimitKey(
-          request.ip,
-          request.headers["x-forwarded-for"],
-          env.TRUSTED_PROXY_COUNT,
-        ),
+      const key = resolveRateLimitKey(
+        request.ip,
+        request.headers["x-forwarded-for"],
+        env.TRUSTED_PROXY_COUNT,
       );
+      const result = asyncLimiter ? await asyncLimiter.check(key) : syncLimiter!.check(key);
       reply.header("x-ratelimit-limit", maxRequests);
       reply.header("x-ratelimit-remaining", result.remaining);
       if (!result.allowed) {
@@ -136,9 +177,32 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     });
   }
 
-  // Ensure all domain schemas exist before serving routes.
+  // Ensure remaining domain schemas exist before serving routes.
   await applyMigrations(domainMigrations);
-  await seedBootstrapAdmin();
+  if (!options.authExternallyMounted) {
+    await ensureAuthSchema();
+    await seedBootstrapAdmin();
+  }
+  if (!options.externallyMountedAddons) {
+    await syncModels([
+      controlCommandModel,
+      workflowModel,
+      alertModel,
+      probeNodeModel,
+      probeEventModel,
+      opsEventModel,
+      memoryRecordModel,
+      storageBucketModel,
+      storageObjectModel,
+      storageUploadSessionModel,
+      syslogEntryModel,
+      snmpDeviceModel,
+      snmpTargetModel,
+      snmpSampleModel,
+      radiusClientModel,
+      radiusSessionModel,
+    ]);
+  }
   await ensureProbesSchema();
 
   // Wire persisted timeline use-case backed by canonical timeline_events / timeline_eras.
@@ -152,6 +216,26 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
         getEvent: (id) => repo.getEvent(id),
         getStats: () => repo.getStats(),
         getEras: () => repo.getEras(),
+        createEvent: (input, actor) =>
+          repo.createEvent(
+            {
+              ...input,
+              excerpt: input.excerpt ?? "",
+              body: input.body ?? "",
+              location: input.location ?? "",
+              tags: input.tags ?? [],
+              sources: input.sources ?? 0,
+              notes: input.notes ?? 0,
+              image: input.image ?? "hero-witness",
+              related: input.related ?? [],
+            },
+            actor,
+          ),
+        updateEvent: (id, patch, actor) => repo.updateEvent(id, patch, actor),
+        archiveEvent: (id, actor) => repo.archiveEvent(id, actor),
+        restoreEvent: (id, actor) => repo.restoreEvent(id, actor),
+        deleteEvent: (id, actor) => repo.deleteEvent(id, actor),
+        getEventHistory: (id) => repo.getEventHistory(id),
       }),
     );
   }
@@ -159,9 +243,10 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
   const midKeyEncryptionSecret =
     process.env.MID_KEY_ENCRYPTION_SECRET?.trim() || env.MID_KEY_ENCRYPTION_SECRET;
-  if (midKeyEncryptionSecret) {
+  if (!options.authExternallyMounted && midKeyEncryptionSecret) {
     await fastify.register(midFastifyPlugin, {
       db: createD1DatabaseFromOrm(getDb()),
+      identityStore: createAuthMidIdentityStore(),
       keyEncryptionSecret: midKeyEncryptionSecret,
       issuerUrl:
         process.env.MID_ISSUER_URL?.trim() || env.MID_ISSUER_URL || "https://id.moonwitness.biz.id",
@@ -171,22 +256,26 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
     fastify.decorate("midMounted", true);
   }
 
+  await registerMetricsRoute(fastify, metrics);
+
   if (options.prefix) {
     await fastify.register(
       async (instance: FastifyInstance) => {
-        await registerHealthRoutes(instance);
-        await instance.register(authRoutes);
-        // Proxy aditif ke control plane arsy & layanan RADIUS.
-        await instance.register(controlRoutes);
-        await instance.register(radiusRoutes);
-        // Proxy ke layanan Rust: storage (S3), syslog, snmp-poller.
-        await instance.register(storageRoutes);
-        await instance.register(syslogRoutes);
-        await instance.register(snmpPollerRoutes);
-        await instance.register(riotAiRoutes);
-        await instance.register(commandCenterRoutes);
-        await instance.register(memoryRoutes);
-        await instance.register(probesRoutes);
+        await registerHealthRoutes(instance, { metrics });
+        if (!options.authExternallyMounted) {
+          await instance.register(authRoutes);
+        }
+        if (!options.externallyMountedAddons) {
+          await instance.register(radiusRoutes);
+          await instance.register(storageRoutes);
+          await instance.register(syslogRoutes);
+          await instance.register(snmpPollerRoutes);
+          await instance.register(controlRoutes);
+          await instance.register(riotAiRoutes);
+          await instance.register(commandCenterRoutes);
+          await instance.register(memoryRoutes);
+          await instance.register(probesRoutes);
+        }
       },
       { prefix: options.prefix },
     );

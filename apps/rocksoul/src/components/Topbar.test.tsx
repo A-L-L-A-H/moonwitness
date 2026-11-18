@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { SkinProvider } from "@moonwitness/ui";
 import Topbar from "./Topbar";
 
 describe("Topbar", () => {
@@ -39,6 +40,24 @@ describe("Topbar", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Settings" }));
     expect(onSettings).toHaveBeenCalledTimes(1);
+  });
+
+  it("cycles @moonwitness/ui skin state inside SkinProvider", () => {
+    render(
+      <SkinProvider defaultSkin="riot" defaultDna="03-rocksoul" persist={false}>
+        <Topbar
+          repositories={[]}
+          selectedRepository=""
+          onRepositoryChange={vi.fn()}
+          onCommand={vi.fn()}
+          onSettings={vi.fn()}
+        />
+      </SkinProvider>,
+    );
+
+    const skinBtn = screen.getByRole("button", { name: /Switch skin \(riot\)/i });
+    fireEvent.click(skinBtn);
+    expect(screen.getByRole("button", { name: /Switch skin \(technical\)/i })).toBeInTheDocument();
   });
 
   it("supports optional MoonWitness ID sign-in and signed-in @username state", () => {

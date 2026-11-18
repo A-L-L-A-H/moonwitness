@@ -4,14 +4,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Crown, GlobeIcon, Menu, SearchIcon, X } from "@moonwitness/ui/icons";
-import { Button } from "@moonwitness/ui";
+import { Button, DnaBrandLogo, useSkin, type BrandLogoId } from "@moonwitness/ui";
 import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
+import { SkinSwitcher } from "@/components/skin-switcher";
 import { links } from "./links";
 import { MobileMenu } from "./mobile-menu";
 import { SearchDialog } from "./search-dialog";
 
 export function SiteNav() {
   const router = useRouter();
+  const { dnaId } = useSkin();
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
@@ -48,7 +50,7 @@ export function SiteNav() {
   return (
     <>
       <header
-        className="fixed inset-x-0 top-0 z-50 border-b-2 border-[var(--line)] bg-[rgba(11,11,16,0.88)] backdrop-blur-md"
+        className="fixed inset-x-0 top-0 z-50 border-b-2 border-[var(--border)] bg-[var(--background)]/90 text-[var(--foreground)] backdrop-blur-md"
         onKeyDown={(event) => {
           if (menuOpen && event.key === "Escape") {
             event.preventDefault();
@@ -60,12 +62,18 @@ export function SiteNav() {
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link
             href="/moonwitness"
-            className="flex items-center gap-2 max-lg:min-h-11"
+            className="flex items-center gap-2.5 max-lg:min-h-11"
             aria-label="Moonwitness home"
           >
-            <Crown className="h-5 w-8 text-[var(--yellow)]" />
-            <span className="font-brush text-xl tracking-wide text-white sm:text-2xl">
-              MOON<span className="text-[var(--pink)]">WITNESS</span>
+            <DnaBrandLogo
+              id={(dnaId as BrandLogoId) ?? "moonwitness"}
+              variant="mark"
+              size={28}
+              decorative
+            />
+            <Crown className="hidden h-5 w-8 text-[var(--primary)] sm:inline-block" />
+            <span className="font-brush text-xl tracking-wide text-[var(--foreground)] sm:text-2xl">
+              MOON<span className="text-[var(--primary)]">WITNESS</span>
             </span>
           </Link>
 
@@ -78,31 +86,32 @@ export function SiteNav() {
                 aria-current={active === link.id ? "true" : undefined}
                 className={`px-3 py-1.5 font-brush text-sm tracking-wider transition-colors ${
                   active === link.id
-                    ? "text-[var(--pink)] underline decoration-[var(--yellow)] decoration-4 underline-offset-8"
-                    : "text-zinc-300 hover:text-white"
+                    ? "text-[var(--primary)] underline decoration-[var(--primary)] decoration-4 underline-offset-8"
+                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 }`}
               >
                 {link.label}
               </a>
             ))}
-            <SanctuaryGateLink className="whitespace-nowrap px-2.5 py-1.5 font-brush text-sm tracking-wider text-[var(--yellow)] transition-colors hover:text-white xl:px-3">
+            <SanctuaryGateLink className="whitespace-nowrap px-2.5 py-1.5 font-brush text-sm tracking-wider text-[var(--primary)] transition-colors hover:text-[var(--foreground)] xl:px-3">
               A-L-L-A-H
             </SanctuaryGateLink>
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
+            <SkinSwitcher />
             <button
               onClick={() => setSearchOpen(true)}
               ref={searchTriggerRef}
               aria-label="Search the archive"
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-zinc-300 transition-colors hover:bg-[var(--panel-2)] hover:text-white"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
             >
               <SearchIcon className="h-5 w-5" />
             </button>
             <Link
               href="/mission-control"
               aria-label="Open Mission Control"
-              className="hidden rounded-md p-2 text-zinc-300 transition-colors hover:bg-[var(--panel-2)] hover:text-white sm:block"
+              className="hidden rounded-md p-2 text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] sm:block"
             >
               <GlobeIcon className="h-5 w-5" />
             </Link>
@@ -112,7 +121,7 @@ export function SiteNav() {
               </Button>
             </Link>
             <button
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-zinc-200 lg:hidden"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               ref={menuToggleRef}
               aria-label="Toggle menu"

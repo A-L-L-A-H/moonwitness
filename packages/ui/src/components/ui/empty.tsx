@@ -7,7 +7,7 @@ import { useComponentSkin } from "./skin-adapter";
 
 const Empty = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { skin?: SkinName }
+  React.HTMLAttributes<HTMLDivElement> & { skin?: SkinName | undefined }
 >(({ className, skin, ...props }, ref) => {
   const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
   return (

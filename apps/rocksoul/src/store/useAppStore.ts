@@ -5,6 +5,8 @@ import type {
   CreateIssueArgs,
   CreateMilestoneArgs,
   CreateProjectArgs,
+  DevServiceEntry,
+  DevServiceTarget,
   GitView,
   Issue,
   IssueStatus,
@@ -18,11 +20,16 @@ import type {
   UpdateProjectArgs,
 } from "../lib/contracts";
 
+export type { DevServiceTarget };
+
 export interface AppState {
   page: "deck" | "monitor" | "pit" | "git" | "war-room" | "noise";
   loading: boolean;
   error: string;
   monitor: MonitorSnapshot | null;
+  devServices: DevServiceEntry[];
+  devActionTarget: string | null;
+  devActionError: string;
   monitorLoading: boolean;
   monitorError: string;
   autoMonitor: boolean;
@@ -42,6 +49,8 @@ export interface AppState {
   setGitPresetView: (gitPresetView: GitView | null) => void;
   refresh: () => Promise<void>;
   refreshMonitor: () => Promise<void>;
+  startDevService: (target: DevServiceTarget) => Promise<void>;
+  stopDevService: (target: DevServiceTarget) => Promise<void>;
   openEcosystemUrl: (url: string) => Promise<void>;
   createIssue: (payload: CreateIssueArgs) => Promise<void>;
   editIssue: (payload: UpdateIssueArgs) => Promise<void>;
@@ -62,6 +71,9 @@ export const useAppStore = create<AppState>((setState, getState) => ({
   loading: false,
   error: "",
   monitor: null,
+  devServices: [],
+  devActionTarget: null,
+  devActionError: "",
   monitorLoading: false,
   monitorError: "",
   autoMonitor: true,
@@ -83,12 +95,47 @@ export const useAppStore = create<AppState>((setState, getState) => ({
     if (getState().monitorLoading) return;
     setState({ monitorLoading: true, monitorError: "" });
     try {
-      const monitor = await call("get_monitor_snapshot");
-      setState({ monitor, monitorLoading: false });
+      const [monitor, devServices] = await Promise.all([
+        call("get_monitor_snapshot"),
+        call("get_dev_services_status").catch(() => getState().devServices),
+      ]);
+      setState({ monitor, devServices: devServices ?? [], monitorLoading: false });
     } catch (error) {
       setState({
         monitorLoading: false,
         monitorError: error instanceof Error ? error.message : String(error),
+      });
+    }
+  },
+  startDevService: async (target) => {
+    if (getState().devActionTarget) return;
+    setState({ devActionTarget: target, devActionError: "" });
+    try {
+      const devServices = await call("start_dev_service", { target });
+      setState({ devServices: devServices ?? [], devActionTarget: null });
+      await getState().refreshMonitor();
+      if (typeof window !== "undefined") {
+        window.setTimeout(() => void getState().refreshMonitor(), 1500);
+        window.setTimeout(() => void getState().refreshMonitor(), 3500);
+      }
+    } catch (error) {
+      setState({
+        devActionTarget: null,
+        devActionError: error instanceof Error ? error.message : String(error),
+      });
+    }
+  },
+  stopDevService: async (target) => {
+    if (getState().devActionTarget) return;
+    setState({ devActionTarget: target, devActionError: "" });
+    try {
+      const devServices = await call("stop_dev_service", { target });
+      setState({ devServices: devServices ?? [], devActionTarget: null });
+      await getState().refreshMonitor();
+    } catch (error) {
+      setState({
+        devActionTarget: null,
+        devActionError: error instanceof Error ? error.message : String(error),
       });
     }
   },

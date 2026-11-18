@@ -30,7 +30,7 @@ export function About() {
     <section
       ref={ref}
       id="about"
-      className="relative scroll-mt-20 overflow-hidden border-t-2 border-[var(--line)]"
+      className="relative scroll-mt-20 overflow-hidden border-t-2 border-[var(--border)]"
     >
       <div
         data-join-layer="paper"
@@ -46,7 +46,7 @@ export function About() {
           className="object-cover object-[50%_35%] opacity-60"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-[rgba(11,11,16,0.6)] to-[rgba(11,11,16,0.8)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[color-mix(in_srgb,var(--background)_75%,transparent)] to-[color-mix(in_srgb,var(--background)_92%,transparent)]" />
       </div>
       <div className="relative z-10 mx-auto max-w-5xl px-4 py-24 text-center sm:px-6">
         <div
@@ -58,7 +58,7 @@ export function About() {
           <h2 className="font-brush text-5xl leading-tight text-[var(--pink)] drop-shadow-[3px_3px_0_rgba(0,0,0,0.9)] sm:text-7xl">
             JOIN THE CREW
           </h2>
-          <p className="mx-auto mt-4 max-w-xl font-hand text-2xl text-zinc-200">
+          <p className="mx-auto mt-4 max-w-xl font-hand text-2xl text-[var(--foreground)]">
             More stories. More places. More perspectives. A brighter world.
           </p>
         </div>

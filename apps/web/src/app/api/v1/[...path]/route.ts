@@ -37,7 +37,18 @@ function resolveUpstreamBaseUrl(): string {
   return configuredUrl.replace(/\/+$/, "");
 }
 
-function buildUpstreamRequestHeaders(incomingHeaders: Headers): Headers {
+function createFallbackTraceparent(): string {
+  const bytes = new Uint8Array(24);
+  globalThis.crypto.getRandomValues(bytes);
+  const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+  return `00-${hex.slice(0, 32)}-${hex.slice(32, 48)}-01`;
+}
+
+function buildUpstreamRequestHeaders(incomingHeaders: Headers): {
+  headers: Headers;
+  requestId: string;
+  traceparent: string;
+} {
   const forwardedHeaders = new Headers();
   for (const [headerName, headerValue] of incomingHeaders.entries()) {
     const lowerName = headerName.toLowerCase();
@@ -46,14 +57,23 @@ function buildUpstreamRequestHeaders(incomingHeaders: Headers): Headers {
     }
     forwardedHeaders.append(headerName, headerValue);
   }
-  return forwardedHeaders;
+  const requestId = incomingHeaders.get("x-request-id")?.trim() || globalThis.crypto.randomUUID();
+  const traceparent = incomingHeaders.get("traceparent")?.trim() || createFallbackTraceparent();
+  forwardedHeaders.set("x-request-id", requestId);
+  forwardedHeaders.set("traceparent", traceparent);
+  return { headers: forwardedHeaders, requestId, traceparent };
 }
 
-async function buildUpstreamRequestInit(request: Request): Promise<RequestInit> {
+async function buildUpstreamRequestInit(request: Request): Promise<{
+  init: RequestInit;
+  requestId: string;
+  traceparent: string;
+}> {
   const method = request.method.toUpperCase();
+  const { headers, requestId, traceparent } = buildUpstreamRequestHeaders(request.headers);
   const requestInit: RequestInit = {
     method,
-    headers: buildUpstreamRequestHeaders(request.headers),
+    headers,
     redirect: "manual",
   };
   if (method !== "GET" && method !== "HEAD") {
@@ -62,7 +82,7 @@ async function buildUpstreamRequestInit(request: Request): Promise<RequestInit> 
       requestInit.body = bodyBuffer;
     }
   }
-  return requestInit;
+  return { init: requestInit, requestId, traceparent };
 }
 
 function buildCleanResponseHeaders(upstreamHeaders: Headers): Headers {
@@ -106,8 +126,18 @@ async function dispatchUpstreamRequest(
   return fetch(`${baseUrl}${pathname}${search}`, requestInit);
 }
 
-async function toProxyResponse(method: string, upstreamResponse: Response): Promise<Response> {
+async function toProxyResponse(
+  method: string,
+  upstreamResponse: Response,
+  correlation: { requestId: string; traceparent: string },
+): Promise<Response> {
   const responseHeaders = buildCleanResponseHeaders(upstreamResponse.headers);
+  if (!responseHeaders.has("x-request-id")) {
+    responseHeaders.set("x-request-id", correlation.requestId);
+  }
+  if (!responseHeaders.has("traceparent")) {
+    responseHeaders.set("traceparent", correlation.traceparent);
+  }
   const omitBody = method === "HEAD" || NULL_BODY_STATUSES.has(upstreamResponse.status);
   if (omitBody) {
     await upstreamResponse.body?.cancel().catch(() => {});
@@ -126,19 +156,26 @@ async function toProxyResponse(method: string, upstreamResponse: Response): Prom
 
 async function proxyApiRequest(request: Request): Promise<Response> {
   const incomingUrl = new URL(request.url);
-  const requestInit = await buildUpstreamRequestInit(request);
+  const { init, requestId, traceparent } = await buildUpstreamRequestInit(request);
 
   try {
     const upstreamResponse = await dispatchUpstreamRequest(
       incomingUrl.pathname,
       incomingUrl.search,
-      requestInit,
+      init,
     );
-    return await toProxyResponse(request.method.toUpperCase(), upstreamResponse);
+    return await toProxyResponse(request.method.toUpperCase(), upstreamResponse, {
+      requestId,
+      traceparent,
+    });
   } catch {
     return new Response(JSON.stringify({ error: "Upstream API unreachable" }), {
       status: 502,
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-request-id": requestId,
+        traceparent,
+      },
     });
   }
 }

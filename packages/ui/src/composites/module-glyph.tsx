@@ -18,7 +18,7 @@ export function ModuleGlyph({ icon, className }: ModuleGlyphProps) {
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d={MODULE_GLYPHS[icon] ?? MODULE_GLYPHS.gear ?? ""} />
+      <path d={MODULE_GLYPHS[icon] ?? MODULE_GLYPHS["gear"] ?? ""} />
     </svg>
   );
 }

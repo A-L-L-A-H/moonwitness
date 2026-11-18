@@ -1,0 +1,14 @@
+{
+  "name": "witness-research",
+  "version": "0.1.0",
+  "description": "ADR-006 Witness claims, knowledge sources, research runs, and SIDRA edges",
+  "category": "research",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["witness", "research"],
+    "models": ["knowledge.source", "witness.claim", "research.run", "sidra.edge"],
+    "migrations": []
+  }
+}

@@ -1,4 +1,8 @@
-import { MASTER_DNA_LIGHT_PALETTES, type CanonicalDnaId } from "../dna/canonical";
+import {
+  MASTER_DNA_LIGHT_PALETTES,
+  SKIN_SURFACE_PALETTES,
+  type CanonicalDnaId,
+} from "../dna/canonical";
 import { listDnaWorlds, type DnaWorldPalette, type MasterDnaWorldSpec } from "../skin/dna-worlds";
 
 export interface ContrastPairResult {
@@ -51,10 +55,18 @@ export function auditPaletteContrast(
   dnaName: string,
   p: DnaWorldPalette,
 ): ContrastAuditResult {
-  const checks: readonly [string, string, string, number][] = [
+  const checks: readonly (readonly [string, string, string, number])[] = [
     ["text on canvas", p.text, p.canvas, 4.5],
     ["text on surface", p.text, p.surface, 4.5],
+    ["text on surfaceElevated", p.text, p.surfaceElevated, 4.5],
     ["mutedText on surface", p.mutedText, p.surface, 4.5],
+    ["mutedText on surfaceElevated", p.mutedText, p.surfaceElevated, 4.5],
+    ...(p.success
+      ? ([
+          ["success on surface", p.success, p.surface, 4.5],
+          ["success on surfaceElevated", p.success, p.surfaceElevated, 4.5],
+        ] as const)
+      : []),
     ["accentForeground on accent", p.accentForeground, p.accent, 4.5],
     ["focus on canvas", p.focus, p.canvas, 3.0],
     ["focus on surface", p.focus, p.surface, 3.0],
@@ -98,4 +110,15 @@ export function auditAllDnaWorldsAndModes(): readonly ContrastAuditResult[] {
     ),
   );
   return [...dark, ...light];
+}
+
+export function auditAllSkinPalettesAndModes(): readonly ContrastAuditResult[] {
+  const results: ContrastAuditResult[] = [];
+  for (const [skinName, modes] of Object.entries(SKIN_SURFACE_PALETTES)) {
+    results.push(auditPaletteContrast(`skin:${skinName}:dark`, `${skinName} (Dark)`, modes.dark));
+    results.push(
+      auditPaletteContrast(`skin:${skinName}:light`, `${skinName} (Light)`, modes.light),
+    );
+  }
+  return results;
 }

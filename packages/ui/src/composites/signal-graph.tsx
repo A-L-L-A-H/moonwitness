@@ -1,15 +1,18 @@
 "use client";
 
 import type { WorldMapProps, MapCityItem } from "./world-map";
+import { useSkin } from "../skin";
 
 export function SignalGraph<T extends MapCityItem>({
   cities,
   selectedId,
   onSelect,
 }: Pick<WorldMapProps<T>, "cities" | "selectedId" | "onSelect">) {
+  const { skin } = useSkin();
   return (
     <svg
       viewBox="0 0 100 80"
+      data-skin={skin}
       className="h-64 w-full @[34rem]:h-80"
       role="group"
       aria-label="Universe map"
@@ -24,10 +27,10 @@ export function SignalGraph<T extends MapCityItem>({
               y1={a.y * 0.8}
               x2={b.x}
               y2={b.y * 0.8}
-              stroke={i % 2 ? "var(--pink)" : "var(--blue)"}
-              strokeWidth="0.32"
-              strokeDasharray="1.2 1.6"
-              opacity="0.6"
+              stroke={i % 2 ? "var(--primary)" : "var(--accent)"}
+              strokeWidth={skin === "brutalist" ? "0.55" : skin === "sanctuary" ? "0.25" : "0.32"}
+              strokeDasharray={skin === "brutalist" ? undefined : "1.2 1.6"}
+              opacity="0.65"
               aria-hidden="true"
             />
           )),

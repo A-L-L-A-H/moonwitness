@@ -1,47 +1,18 @@
-import { z } from "zod";
 import {
   applyMigrations,
   createActorContext,
-  defineModel,
   getDb,
   type ActorContext,
   type Migration,
 } from "@moonwitness/orm";
+import {
+  providerConfigModel,
+  providerConfigSchema,
+  usageSummaryModel,
+  usageSummarySchema,
+} from "@moonwitness/addon-ai";
 
-export const providerConfigSchema = z.object({
-  profile_key: z.string().min(1).max(100),
-  label: z.string().min(1).max(120),
-  provider: z.literal("ollama"),
-  enabled: z.boolean(),
-  preferred_model: z.string().max(200).nullable(),
-});
-
-const providerConfigModel = defineModel({
-  name: "riot_ai.provider_config",
-  table: "riot_ai_provider_configs",
-  schema: providerConfigSchema,
-  indexes: [{ fields: ["profile_key"], unique: true }],
-});
-
-export const usageSummarySchema = z.object({
-  actor_id: z.string().min(1).max(200),
-  provider: z.literal("ollama"),
-  model: z.string().min(1).max(200),
-  outcome: z.enum(["success", "failure"]),
-  duration_ms: z.number().int().nonnegative(),
-  prompt_tokens: z.number().int().nonnegative().nullable(),
-  completion_tokens: z.number().int().nonnegative().nullable(),
-  total_tokens: z.number().int().nonnegative().nullable(),
-  error_code: z.string().max(100).nullable(),
-  occurred_at: z.string().datetime(),
-});
-
-const usageSummaryModel = defineModel({
-  name: "riot_ai.usage_summary",
-  table: "riot_ai_usage_summaries",
-  schema: usageSummarySchema,
-  indexes: [{ fields: ["actor_id", "occurred_at"] }, { fields: ["occurred_at"] }],
-});
+export { providerConfigSchema, usageSummarySchema };
 
 export const riotAiMigrations: Migration[] = [
   { id: "riotai_001_create_riot_ai_provider_configs", up: providerConfigModel.ddl },

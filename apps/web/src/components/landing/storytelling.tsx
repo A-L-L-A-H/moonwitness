@@ -83,7 +83,7 @@ export function Storytelling() {
   return (
     <section
       id="storytelling"
-      className="relative scroll-mt-20 overflow-x-clip bg-[var(--ink)] py-24"
+      className="relative scroll-mt-20 overflow-x-clip bg-[var(--background)] py-24"
     >
       <Halftone tone="pink" className="pointer-events-none absolute inset-0 opacity-20" />
 
@@ -109,7 +109,7 @@ export function Storytelling() {
               <a
                 key={story.id}
                 href={`#story-${story.id}`}
-                className="group block border border-[var(--line)] bg-[var(--panel)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)]"
+                className="group block border border-[var(--border)] bg-[var(--card)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)]"
               >
                 <div className="relative aspect-video overflow-hidden">
                   <Image
@@ -120,7 +120,7 @@ export function Storytelling() {
                     className="object-cover grayscale transition-[filter] group-hover:grayscale-0 motion-reduce:transition-none"
                   />
                 </div>
-                <span className="block min-h-11 px-3 py-3 font-mono text-xs text-[var(--paper)]">
+                <span className="block min-h-11 px-3 py-3 font-mono text-xs text-[var(--card-foreground)]">
                   0{i + 1} / {story.title}
                 </span>
               </a>

@@ -1,5 +1,9 @@
 # Moonwitness DNA/Skin System -- Implementation Plan
 
+> [!NOTE]
+> **Historical Implementation Plan (`EVIDENCE:HISTORICAL`, 2026-11-18):**
+> Original planning document retained for traceability. For current ratified design contracts and actual implementation status, see [docs/dna/README.md](./README.md), [00-ENGINE-CONTRACT.md](./00-ENGINE-CONTRACT.md), [09-UI-ARCHITECTURE-STATUS.md](./09-UI-ARCHITECTURE-STATUS.md), and [packages/ui/README.md](../../packages/ui/README.md).
+
 ## Current State Analysis
 
 **Package Structure** (packages/ui):

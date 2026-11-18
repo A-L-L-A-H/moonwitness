@@ -284,6 +284,12 @@ describe("timeline API", () => {
       getEvent,
       getStats: async () => ok({ data: { total: 0, byEra: {}, byKind: {} } }),
       getEras: async () => ok({ data: [] }),
+      createEvent: async () => ok({ data: events[0]! }),
+      updateEvent: async () => ok({ data: events[0]! }),
+      archiveEvent: async () => ok({ data: events[0]! }),
+      restoreEvent: async () => ok({ data: events[0]! }),
+      deleteEvent: async () => ok({ data: events[0]! }),
+      getEventHistory: async () => ok({ data: [] }),
     };
     actorTestApp = Fastify({ logger: false });
     actorTestApp.decorate("timelineUseCase", timelineUseCase);
@@ -334,5 +340,123 @@ describe("timeline API", () => {
     expect(response.statusCode).toBe(200);
     const body = response.json() as { data: unknown[]; total: number };
     expect(body.total).toBe(5);
+  });
+
+  it("enforces RBAC on timeline mutations and records audit history", async () => {
+    const admin = await createUser({
+      username: "tl-admin",
+      email: "tl-admin@moon.world",
+      password: "tl-admin-password-2026",
+      role: "admin",
+      displayName: "TL Admin",
+    });
+    const editor = await createUser({
+      username: "tl-editor",
+      email: "tl-editor@moon.world",
+      password: "tl-editor-password-2026",
+      role: "editor",
+      displayName: "TL Editor",
+    });
+    const viewer = await createUser({
+      username: "tl-viewer",
+      email: "tl-viewer@moon.world",
+      password: "tl-viewer-password-2026",
+      role: "viewer",
+      displayName: "TL Viewer",
+    });
+    const adminSession = await createSession(admin.id);
+    const editorSession = await createSession(editor.id);
+    const viewerSession = await createSession(viewer.id);
+
+    const payload = {
+      kind: "SIGNAL",
+      date: "2026-11-18",
+      era: "expansions",
+      title: "New Relay Beacon",
+      excerpt: "Activated relay north.",
+      body: "Full beacon report.",
+      location: "North Tower",
+      tags: ["beacon"],
+    };
+
+    const unauth = await app.inject({
+      method: "POST",
+      url: "/api/v1/timeline/events",
+      payload,
+    });
+    expect(unauth.statusCode).toBe(401);
+
+    const forbiddenViewer = await app.inject({
+      method: "POST",
+      url: "/api/v1/timeline/events",
+      headers: { cookie: `mw_session=${viewerSession}` },
+      payload,
+    });
+    expect(forbiddenViewer.statusCode).toBe(403);
+
+    const created = await app.inject({
+      method: "POST",
+      url: "/api/v1/timeline/events",
+      headers: { cookie: `mw_session=${editorSession}` },
+      payload,
+    });
+    expect(created.statusCode).toBe(201);
+    const createdBody = created.json() as { data: { id: string; title: string } };
+    const eventId = createdBody.data.id;
+    expect(createdBody.data.title).toBe("New Relay Beacon");
+
+    const updated = await app.inject({
+      method: "PATCH",
+      url: `/api/v1/timeline/events/${eventId}`,
+      headers: { cookie: `mw_session=${editorSession}` },
+      payload: { title: "Updated Relay Beacon" },
+    });
+    expect(updated.statusCode).toBe(200);
+    expect((updated.json() as { data: { title: string } }).data.title).toBe("Updated Relay Beacon");
+
+    const archived = await app.inject({
+      method: "POST",
+      url: `/api/v1/timeline/events/${eventId}/archive`,
+      headers: { cookie: `mw_session=${editorSession}` },
+    });
+    expect(archived.statusCode).toBe(200);
+
+    const restored = await app.inject({
+      method: "POST",
+      url: `/api/v1/timeline/events/${eventId}/restore`,
+      headers: { cookie: `mw_session=${editorSession}` },
+    });
+    expect(restored.statusCode).toBe(200);
+
+    const editorDelete = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/timeline/events/${eventId}`,
+      headers: { cookie: `mw_session=${editorSession}` },
+    });
+    expect(editorDelete.statusCode).toBe(403);
+
+    const adminDelete = await app.inject({
+      method: "DELETE",
+      url: `/api/v1/timeline/events/${eventId}`,
+      headers: { cookie: `mw_session=${adminSession}` },
+    });
+    expect(adminDelete.statusCode).toBe(200);
+
+    const afterDelete = await app.inject({
+      method: "GET",
+      url: `/api/v1/timeline/events/${eventId}`,
+    });
+    expect(afterDelete.statusCode).toBe(404);
+
+    const history = await app.inject({
+      method: "GET",
+      url: `/api/v1/timeline/events/${eventId}/history`,
+      headers: { cookie: `mw_session=${viewerSession}` },
+    });
+    expect(history.statusCode).toBe(200);
+    const actions = (history.json() as { data: { action: string }[] }).data.map((h) => h.action);
+    expect(actions).toEqual(
+      expect.arrayContaining(["CREATE", "UPDATE", "ARCHIVE", "RESTORE", "DELETE"]),
+    );
   });
 });

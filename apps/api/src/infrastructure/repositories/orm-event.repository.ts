@@ -1,9 +1,17 @@
-import { createActorContext, type Migration, type ModelRecord } from "@moonwitness/orm";
+import {
+  createActorContext,
+  type ActorContext,
+  type AuditEntry,
+  type Migration,
+  type ModelRecord,
+} from "@moonwitness/orm";
 import type { Era, TimelineEvent } from "@moonwitness/types";
 import type {
+  CreateTimelineEventInput,
   ITimelineRepository,
   TimelineFilters,
   TimelineStats,
+  UpdateTimelineEventInput,
 } from "../../domain/usecases/timeline/timeline.repository";
 import { opsEventModel, opsEventMigrations } from "../persistence/domain/ops-events";
 
@@ -111,7 +119,7 @@ export class OrmEventRepository implements ITimelineRepository {
   async getEras(): Promise<Era[]> {
     // eras remain in timeline_eras addon table; fall back to empty if not seeded
     try {
-      const { timelineEraModel } = await import("../persistence/timeline-model");
+      const { timelineEraModel } = await import("@moonwitness/addon-timeline");
       const rows = await timelineEraModel.repository.find();
       return rows.map((row) => ({
         id: row.id as Era["id"],
@@ -123,6 +131,125 @@ export class OrmEventRepository implements ITimelineRepository {
     } catch {
       return [];
     }
+  }
+
+  async createEvent(
+    input: CreateTimelineEventInput,
+    actor: ActorContext = createActorContext(null, "api"),
+  ): Promise<TimelineEvent> {
+    const eventKey = input.id ?? `evt-${Date.now()}`;
+    const eventRecord: TimelineEvent = {
+      id: eventKey,
+      kind: input.kind,
+      date: input.date,
+      era: input.era,
+      title: input.title,
+      excerpt: input.excerpt ?? "",
+      body: input.body ?? "",
+      location: input.location ?? "",
+      tags: input.tags ?? [],
+      sources: input.sources ?? 0,
+      notes: input.notes ?? 0,
+      image: input.image ?? "hero-witness",
+      ...(input.imagePosition ? { imagePosition: input.imagePosition } : {}),
+      related: input.related ?? [],
+    };
+    const created = await opsEventModel.repository.create(
+      {
+        event_key: eventRecord.id,
+        kind: eventRecord.kind,
+        era: eventRecord.era,
+        date: eventRecord.date,
+        title: eventRecord.title,
+        excerpt: eventRecord.excerpt,
+        body: eventRecord.body,
+        location: eventRecord.location,
+        tags_json: JSON.stringify(eventRecord.tags),
+        sources_count: eventRecord.sources,
+        notes_count: eventRecord.notes,
+        image_key: eventRecord.image,
+        image_position: eventRecord.imagePosition ?? null,
+        related_json: JSON.stringify(eventRecord.related),
+        payload_json: JSON.stringify(eventRecord),
+      },
+      actor,
+    );
+    return toTimelineEvent(created);
+  }
+
+  async updateEvent(
+    id: string,
+    patch: UpdateTimelineEventInput,
+    actor: ActorContext = createActorContext(null, "api"),
+  ): Promise<TimelineEvent | null> {
+    const rows = await opsEventModel.repository.find({ event_key: id });
+    const row = rows[0];
+    if (!row) return null;
+    const current = toTimelineEvent(row);
+    const nextEvent: TimelineEvent = {
+      ...current,
+      ...patch,
+      id: current.id,
+      tags: patch.tags ?? current.tags,
+      related: patch.related ?? current.related,
+    };
+    const updated = await opsEventModel.repository.update(
+      row.id,
+      {
+        kind: nextEvent.kind,
+        era: nextEvent.era,
+        date: nextEvent.date,
+        title: nextEvent.title,
+        excerpt: nextEvent.excerpt,
+        body: nextEvent.body,
+        location: nextEvent.location,
+        tags_json: JSON.stringify(nextEvent.tags),
+        sources_count: nextEvent.sources,
+        notes_count: nextEvent.notes,
+        image_key: nextEvent.image,
+        image_position: nextEvent.imagePosition ?? null,
+        related_json: JSON.stringify(nextEvent.related),
+        payload_json: JSON.stringify(nextEvent),
+      },
+      actor,
+    );
+    return updated ? toTimelineEvent(updated) : null;
+  }
+
+  async archiveEvent(
+    id: string,
+    actor: ActorContext = createActorContext(null, "api"),
+  ): Promise<TimelineEvent | null> {
+    const rows = await opsEventModel.repository.find({ event_key: id });
+    if (!rows[0]) return null;
+    const archived = await opsEventModel.repository.archive(rows[0].id, actor);
+    return archived ? toTimelineEvent(archived) : null;
+  }
+
+  async restoreEvent(
+    id: string,
+    actor: ActorContext = createActorContext(null, "api"),
+  ): Promise<TimelineEvent | null> {
+    const rows = await opsEventModel.repository.find({ event_key: id }, { includeDeleted: true });
+    if (!rows[0]) return null;
+    const restored = await opsEventModel.repository.restore(rows[0].id, actor);
+    return restored ? toTimelineEvent(restored) : null;
+  }
+
+  async deleteEvent(
+    id: string,
+    actor: ActorContext = createActorContext(null, "api"),
+  ): Promise<TimelineEvent | null> {
+    const rows = await opsEventModel.repository.find({ event_key: id });
+    if (!rows[0]) return null;
+    const deleted = await opsEventModel.repository.delete(rows[0].id, actor);
+    return deleted ? toTimelineEvent(deleted) : null;
+  }
+
+  async getEventHistory(id: string): Promise<AuditEntry[]> {
+    const rows = await opsEventModel.repository.find({ event_key: id }, { includeDeleted: true });
+    if (!rows[0]) return [];
+    return opsEventModel.repository.history(rows[0].id);
   }
 }
 

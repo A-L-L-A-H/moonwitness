@@ -117,6 +117,18 @@ pub struct EcosystemServiceStatus {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct DevServiceEntry {
+    pub id: String,
+    pub name: String,
+    pub port: u16,
+    pub managed: bool,
+    pub listening: bool,
+    pub pid: Option<u32>,
+    pub recent_logs: Vec<String>,
+    pub last_error: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct AgentSessionActivity {
     pub session_id: String,
     pub updated_at: String,

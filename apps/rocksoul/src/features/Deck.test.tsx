@@ -98,4 +98,63 @@ describe("Deck", () => {
     fireEvent.click(screen.getByRole("button", { name: /moonwitness/i }));
     expect(onInspectRepo).toHaveBeenCalledWith("r1");
   });
+
+  it("renders START DEV / STOP DEV toggle in desktop mode", () => {
+    const onStartDev = vi.fn();
+    const onStopDev = vi.fn();
+
+    const { rerender } = render(
+      <Deck
+        issues={[]}
+        repositories={[]}
+        events={[]}
+        monitor={{
+          generated_at: "2026-11-16T07:05:00Z",
+          disks: [],
+          services: [{ id: "api", name: "Core API", url: "http://127.0.0.1:3002", status: "offline", http_status: null, latency_ms: null }],
+          agent_sessions: [],
+          repositories: [],
+          plans: [],
+        }}
+        desktop={true}
+        dataReady={true}
+        loading={false}
+        onCreate={vi.fn()}
+        onStatusChange={vi.fn()}
+        onNavigate={vi.fn()}
+        onStartDev={onStartDev}
+        onStopDev={onStopDev}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /START DEV/i }));
+    expect(onStartDev).toHaveBeenCalledWith("all");
+
+    rerender(
+      <Deck
+        issues={[]}
+        repositories={[]}
+        events={[]}
+        monitor={{
+          generated_at: "2026-11-16T07:05:00Z",
+          disks: [],
+          services: [{ id: "api", name: "Core API", url: "http://127.0.0.1:3002", status: "online", http_status: 200, latency_ms: 4 }],
+          agent_sessions: [],
+          repositories: [],
+          plans: [],
+        }}
+        desktop={true}
+        dataReady={true}
+        loading={false}
+        onCreate={vi.fn()}
+        onStatusChange={vi.fn()}
+        onNavigate={vi.fn()}
+        onStartDev={onStartDev}
+        onStopDev={onStopDev}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /STOP DEV/i }));
+    expect(onStopDev).toHaveBeenCalledWith("all");
+  });
 });

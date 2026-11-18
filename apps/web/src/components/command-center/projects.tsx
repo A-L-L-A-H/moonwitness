@@ -18,7 +18,7 @@ export function ProjectUniverse({ projects }: { projects: Project[] }) {
           <Link
             key={p.id}
             href={`/dock?q=${encodeURIComponent(p.title)}`}
-            className="group min-w-0 overflow-hidden rounded-md border border-[var(--line)] bg-[var(--panel-2)]"
+            className="group min-w-0 overflow-hidden rounded-md border border-[var(--border)] bg-[var(--muted)]"
           >
             <div className="relative h-20 overflow-hidden">
               <Image
@@ -43,7 +43,9 @@ export function ProjectUniverse({ projects }: { projects: Project[] }) {
               <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[var(--line)]">
                 <div className="h-full" style={{ width: `${p.progress}%`, background: p.color }} />
               </div>
-              <div className="mt-1 text-right text-[9px] text-zinc-500">{p.progress}%</div>
+              <div className="mt-1 text-right text-[9px] text-[var(--muted-foreground)]">
+                {p.progress}%
+              </div>
             </div>
           </Link>
         ))}

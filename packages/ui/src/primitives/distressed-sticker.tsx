@@ -61,7 +61,7 @@ export function DistressedSticker({
     return (
       <div
         className={cn(
-          "inline-block bg-[var(--yellow)] text-[var(--ink)] px-3 py-1 font-mono text-xs font-black tracking-wider uppercase rotate-[3deg] shadow-[3px_3px_0_var(--ink)] border-2 border-[var(--ink)] select-none",
+          "inline-block bg-[var(--secondary)] text-[var(--secondary-foreground)] px-3 py-1 font-mono text-xs font-black tracking-wider uppercase rotate-[3deg] shadow-[3px_3px_0_var(--ink)] border-2 border-[var(--border)] select-none",
           className,
         )}
         {...props}
@@ -89,7 +89,7 @@ export function DistressedSticker({
   return (
     <div
       className={cn(
-        "inline-block border-2 border-[var(--pink)] text-[var(--pink)] px-3 py-1 font-brush text-sm tracking-wider uppercase rotate-[4deg] shadow-[3px_3px_0_rgba(255,45,120,0.4)] select-none",
+        "inline-block border-2 border-[var(--primary)] text-[var(--primary)] px-3 py-1 font-brush text-sm tracking-wider uppercase rotate-[4deg] shadow-[3px_3px_0_color-mix(in_srgb,var(--primary)_40%,transparent)] select-none",
         className,
       )}
       {...props}

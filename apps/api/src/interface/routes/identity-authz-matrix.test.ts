@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { applyMigrations, closeDb, initDb } from "@moonwitness/orm";
-import { authMigrations } from "../../db/migrations";
-import { createUser } from "../../services/user";
+import { closeDb, initDb } from "@moonwitness/orm";
+import { createUser, ensureAuthSchema } from "../../services/user";
 import { resetMidJwksCacheForTests } from "../../middleware/mid-jwt";
 
 const API_PREFIX = "/api/v1";
@@ -48,7 +47,7 @@ describe("API identity & deny-by-default authorization matrix", () => {
     viewerUser = `matrix-viewer-${dbCounter}`;
 
     await initDb("file::memory:?cache=shared");
-    await applyMigrations(Array.from(authMigrations));
+    await ensureAuthSchema();
 
     await createUser({
       username: adminUser,

@@ -1,3 +1,5 @@
+import { buildChildTraceparent, resolveTraceContext } from "./trace";
+
 /**
  * Shared upstream resolution and Cloudflare Workers loopback guards for proxy routes.
  */
@@ -47,13 +49,48 @@ export function getEdgeLoopbackErrorPayload(
   };
 }
 
-/** Attaches optional shared bridge secret header when calling tunneled host services. */
+export interface UpstreamCorrelationInput {
+  id?: string;
+  requestId?: string;
+  traceparent?: string;
+  headers?: Record<string, string | string[] | undefined>;
+}
+
+function readCorrelationHeader(
+  correlation: UpstreamCorrelationInput | undefined,
+  name: string,
+): string | undefined {
+  if (!correlation?.headers) return undefined;
+  const raw = correlation.headers[name];
+  if (typeof raw === "string") return raw.trim() || undefined;
+  if (Array.isArray(raw)) return raw[0]?.trim() || undefined;
+  return undefined;
+}
+
+/**
+ * Attaches optional shared bridge secret header and propagates `x-request-id`
+ * and a child W3C `traceparent` header when calling tunneled host services.
+ */
 export function getUpstreamBridgeHeaders(
   baseHeaders: Record<string, string> = {},
+  correlation?: UpstreamCorrelationInput,
 ): Record<string, string> {
+  const headers: Record<string, string> = { ...baseHeaders };
   const token = typeof process !== "undefined" ? process.env.BRIDGE_SHARED_TOKEN?.trim() : "";
   if (token) {
-    return { ...baseHeaders, "x-moonwitness-bridge-token": token };
+    headers["x-moonwitness-bridge-token"] = token;
   }
-  return { ...baseHeaders };
+  const requestId =
+    correlation?.requestId?.trim() ||
+    correlation?.id?.trim() ||
+    readCorrelationHeader(correlation, "x-request-id");
+  if (requestId && !headers["x-request-id"]) {
+    headers["x-request-id"] = requestId;
+  }
+  const rawTraceparent =
+    correlation?.traceparent?.trim() || readCorrelationHeader(correlation, "traceparent");
+  if (rawTraceparent && !headers.traceparent) {
+    headers.traceparent = buildChildTraceparent(resolveTraceContext(rawTraceparent));
+  }
+  return headers;
 }

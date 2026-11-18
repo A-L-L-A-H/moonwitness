@@ -1,0 +1,15 @@
+{
+  "name": "i18n",
+  "version": "0.1.0",
+  "description": "Localization addon: active locales and dynamic UI translation bundles",
+  "category": "foundation",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base"],
+  "provides": {
+    "routes": ["i18n"],
+    "models": ["i18n.locale", "i18n.term"],
+    "migrations": [],
+    "seeds": ["i18n_default_locales"]
+  }
+}

@@ -3,6 +3,10 @@ import { describe, it, expect } from "vitest";
 import {
   generateTokenDocs,
   generateSkinDocs,
+  generateSkinAtmosphereDocs,
+  generateArtworkDocs,
+  generateBrandCatalogDocs,
+  generateTelemetryDocs,
   generateThemeCSSDocs,
   generateEffectsDocs,
   generateDocsMarkdown,
@@ -56,7 +60,7 @@ describe("DX Docs Generator", () => {
     it("returns array of SkinDoc", () => {
       const docs = generateSkinDocs();
       expect(Array.isArray(docs)).toBe(true);
-      expect(docs.length).toBe(6);
+      expect(docs.length).toBe(10);
     });
 
     it("each SkinDoc has required fields", () => {
@@ -79,6 +83,10 @@ describe("DX Docs Generator", () => {
       expect(names).toContain("technical");
       expect(names).toContain("archive");
       expect(names).toContain("transmission");
+      expect(names).toContain("sanctuary");
+      expect(names).toContain("brutalist");
+      expect(names).toContain("noir");
+      expect(names).toContain("kinetic");
     });
 
     it("each skin has component configs", () => {
@@ -197,6 +205,32 @@ describe("DX Docs Generator", () => {
       expect(md).toContain("Technical");
       expect(md).toContain("Archive");
       expect(md).toContain("Transmission");
+    });
+
+    it("documents 8-axis skin atmosphere, brand logos, cutouts, and telemetry primitives", () => {
+      const atmosphere = generateSkinAtmosphereDocs();
+      expect(atmosphere).toHaveLength(10);
+
+      const icons = generateArtworkDocs();
+      expect(icons).toHaveLength(12);
+
+      const catalog = generateBrandCatalogDocs();
+      expect(catalog.logos).toHaveLength(18);
+      expect(catalog.cutouts).toHaveLength(24);
+
+      const telemetry = generateTelemetryDocs();
+      const symbols = telemetry.map((c) => c.symbol);
+      expect(symbols).toContain("Sparkline");
+      expect(symbols).toContain("RadialGauge");
+      expect(symbols).toContain("AutoModelView");
+      expect(symbols).toContain("SkinBackdrop");
+      expect(symbols).toContain("SkinOrnament");
+
+      const md = generateDocsMarkdown();
+      expect(md).toContain("## 8-Axis Skin Atmosphere");
+      expect(md).toContain("## Brand Logos, Cutouts & Domain Icons");
+      expect(md).toContain("## Telemetry & Composite Components");
+      expect(md).toContain("AutoModelView");
     });
   });
 });

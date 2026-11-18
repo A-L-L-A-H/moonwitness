@@ -11,26 +11,15 @@ export interface D1DatabaseLike {
   batch(statements: D1PreparedStatementLike[]): Promise<unknown[]>;
 }
 
-/** Cloudflare Worker environment bindings for moonwitness-id. */
-export interface MidEnv {
-  DB: D1DatabaseLike;
-  MID_KEY_ENCRYPTION_SECRET: string;
-  ISSUER_URL?: string;
-  ACCESS_TOKEN_TTL_SEC?: string;
-  ID_TOKEN_TTL_SEC?: string;
-  REFRESH_TOKEN_TTL_SEC?: string;
-  SESSION_TTL_SEC?: string;
-  COOKIE_DOMAIN?: string;
-  CORS_ORIGINS?: string;
-  MID_ALLOWED_AUDIENCES?: string;
-}
-
 /** Canonical MoonWitness user role levels. */
 export type UserRole = "admin" | "editor" | "viewer";
 
+/** User identifier supporting both UUIDv7 (ORM) and legacy numeric SQL IDs. */
+export type MidUserId = string | number;
+
 /** Sanitized public identity profile returned to clients and userinfo callers. */
 export interface PublicUser {
-  id: number;
+  id: MidUserId;
   username: string;
   email: string;
   role: UserRole;
@@ -40,6 +29,41 @@ export interface PublicUser {
 /** Database user record including credential verifier hash. */
 export interface UserRecord extends PublicUser {
   passwordHash: string;
+}
+
+/** Pluggable identity, SSO session, and security audit adapter for moonwitness-id. */
+export interface MidIdentityStore {
+  findUserByLogin(login: string): Promise<UserRecord | null>;
+  findPublicUserById(userId: MidUserId): Promise<PublicUser | null>;
+  updateUserPasswordHash(userId: MidUserId, newPasswordHash: string): Promise<void>;
+  createSsoSession(userId: MidUserId, ttlSeconds: number): Promise<string>;
+  findActiveSsoSession(
+    sessionId: string,
+  ): Promise<{ sessionId: string; expiresAt: string; user: PublicUser } | null>;
+  revokeSsoSession(sessionId: string): Promise<void>;
+  recordAuditEvent(entry: {
+    eventType: string;
+    actorUserId: MidUserId | null;
+    clientId: string | null;
+    detail: Record<string, unknown>;
+    ipAddress: string;
+  }): Promise<void>;
+  listRecentAuditEvents(limit?: number): Promise<AuditEventRecord[]>;
+}
+
+/** Cloudflare Worker environment bindings for moonwitness-id. */
+export interface MidEnv {
+  DB: D1DatabaseLike;
+  IDENTITY_STORE?: MidIdentityStore;
+  MID_KEY_ENCRYPTION_SECRET: string;
+  ISSUER_URL?: string;
+  ACCESS_TOKEN_TTL_SEC?: string;
+  ID_TOKEN_TTL_SEC?: string;
+  REFRESH_TOKEN_TTL_SEC?: string;
+  SESSION_TTL_SEC?: string;
+  COOKIE_DOMAIN?: string;
+  CORS_ORIGINS?: string;
+  MID_ALLOWED_AUDIENCES?: string;
 }
 
 /** Registered OAuth 2.1 / OIDC client application metadata. */
@@ -98,7 +122,7 @@ export interface MidTokenClaims {
 export interface AuditEventRecord {
   id: string;
   eventType: string;
-  actorUserId: number | null;
+  actorUserId: MidUserId | null;
   clientId: string | null;
   detailJson: string;
   ipAddress: string;

@@ -11,22 +11,25 @@ flowchart TD
     VPNSyslog([VPN / Local Ingest]) -->|UDP 5140, TCP 5514| Syslog[Syslog Service]
 
     subgraph moonwitness-public [moonwitness-public Bridge Network]
-        Caddy -->|moonwitness.biz.id| Web[apps/web :3000]
-        Caddy -->|a-l-l-a-h.com| Allah[apps/a-l-l-a-h :3003]
+        Caddy -->|moonwitness.biz.id & a-l-l-a-h.com| Web[apps/web :3000]
         Caddy -->|api / id.moonwitness.biz.id| Api[apps/api :3002]
     end
 
     subgraph moonwitness-internal [moonwitness-internal Bridge Network (internal: true)]
+        Api -->|Postgres SQL| Postgres[(postgres:16-alpine)]
         Api -->|http://radius:8090| Radius
         Api -->|http://snmp-poller:8094| Snmp[SNMP Poller :8094]
         Api -->|http://syslog:8093| Syslog
+        Api -->|http://storage:8091| Storage[Object Storage :8091]
     end
 
     subgraph Persistent Storage
+        Postgres --- VolPostgres[(postgres-data)]
         Api --- VolApi[(moonwitness-data)]
         Radius --- VolRadius[(radius-data)]
         Snmp --- VolSnmp[(snmp-data)]
         Syslog --- VolSyslog[(syslog-data)]
+        Storage --- VolStorage[(storage-data)]
         Caddy --- VolCaddyData[(caddy_data)]
         Caddy --- VolCaddyCfg[(caddy_config)]
     end
@@ -34,7 +37,7 @@ flowchart TD
 
 ## Security & Network Boundaries
 
-1. **Ingress Protection**: Caddy is the only service that publishes public web ports (80/443 TCP, 443 UDP). Direct external access to application web ports (`3000`, `3002`, `3003`) and internal HTTP management ports (`8090`, `8093`, `8094`) is blocked by network architecture.
+1. **Ingress Protection**: Caddy is the only service that publishes public web ports (80/443 TCP, 443 UDP). Direct external access to application web ports (`3000`, `3002`), `postgres` (`5432`), and internal HTTP management ports (`8090`, `8091`, `8093`, `8094`) is blocked by network architecture.
 2. **Data-Plane Isolation**: The `moonwitness-internal` bridge network has `internal: true`, preventing internal services from receiving inbound or making outbound direct internet connections unless routed through approved internal pathways.
 3. **Protected Ingestion**:
    - **Syslog**: Bound to `127.0.0.1` (or operator VPN IP) by default (`SYSLOG_BIND_IP`). Never expose unauthenticated plaintext syslog directly to the public internet.

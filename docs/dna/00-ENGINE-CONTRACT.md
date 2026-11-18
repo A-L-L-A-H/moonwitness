@@ -36,22 +36,22 @@ Owns presentation and experiential composition via `[data-dna]` scoping:
 - component recipes and visual variants;
 - surfaces, textures, icons, illustration and image direction;
 - motion, transitions, sound policy, and reduced-motion fallback;
-- responsive composition for each DNA world without leaking styles across applications (`apps/a-l-l-a-h` vs `apps/web`).
+- responsive composition for each DNA world without leaking styles across applications (`apps/web` routes vs `apps/rocksoul` local workbench; pre-consolidation `apps/a-l-l-a-h` is unified inside `apps/web`).
 
 ### Product layer (`packages/canon` + `apps/*`)
 
-`packages/canon` owns canonical domain meaning and shared types (`WorldIdentifier` across the ecosystem). Applications (`apps/a-l-l-a-h`, `apps/web`) own product-specific information architecture, domain registries, application state, routes, localization, and auth—never duplicating reusable UI tokens or primitives locally.
+`packages/canon` owns canonical domain meaning and shared types (`WorldIdentifier` across the ecosystem). Active Zone A/B/C applications (`apps/web`, `apps/rocksoul`, `apps/api`) own product-specific information architecture, domain registries, application state, routes, localization, and auth—never duplicating reusable UI tokens or primitives locally.
 
 ## 3. Current repository compatibility
 
-The current shared UI package is `../packages/ui/`, published internally as `@moonwitness/ui` (React 19 / Next.js 16 / Tailwind CSS v4). Per [D-012](../DECISIONS.md#d-012-native-first-primitives-and-one-token-source), interaction primitives are **native-first** (`<select>`, `<dialog>`, `<table>`, `<form>`), with `@base-ui/react` having zero runtime imports unless a documented requirement cannot be satisfied natively.
+The shared UI package is `packages/ui/` (`../../packages/ui/README.md`), published internally as `@moonwitness/ui` (React 19 / Next.js 16 / Tailwind CSS v4). Per [D-012](../../engines/empire-origin/allah-com/DECISIONS.md), the long-term directional goal is native-first HTML primitives (`<select>`, `<dialog>`, `<table>`, `<form>`), **however the current verified implementation (`packages/ui/package.json`) ships with `20` `@radix-ui/react-*` primitive packages** wrapped cleanly alongside Tailwind CSS v4 tokens. Treat `@radix-ui/react-*` as an existing repository baseline rather than an undocumented exception, and do not introduce an additional competing UI primitive framework without architectural review.
 
 Implementation rules:
 
-- inspect the current package source and app integrations before coding;
+- inspect the current package source (`packages/ui/package.json`, `packages/ui/src/`) and app integrations before coding;
 - extend existing exports rather than creating a parallel component library;
-- retain the current native-first primitive and package contracts unless a separately reviewed architecture decision changes them;
-- do not add Radix, another component framework, a second token engine, or a heavy runtime dependency without evidence, progressive fallback, bundle review, and an explicit decision;
+- retain existing primitive and package contracts unless a separately reviewed architecture decision migrates or replaces them;
+- do not add another competing component framework, a second token engine, or an unapproved heavy runtime dependency without evidence, progressive fallback, bundle review, and an explicit architecture decision;
 - do not copy app-local components into a second shared library.
 
 ## 4. Skin selection and runtime contract

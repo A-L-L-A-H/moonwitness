@@ -3,9 +3,12 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useSavedAvatar } from "@/lib/avatar-store";
+import { buildCsrfLogoutInit } from "@/lib/api/auth";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
+import { useSkin } from "@moonwitness/ui";
 import { Crown } from "@moonwitness/ui/icons";
+import { ConsoleCommandPalette } from "@/components/console-command-palette";
 import { activeByPath, type NavItem } from "./nav-items";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
@@ -56,6 +59,7 @@ export function WorkspaceShell({
   const session = useCurrentIdentity();
   const identity = session?.identity ?? "Creator // Empire";
   const role = session?.role ?? "Empire crew";
+  const { skin, dnaId } = useSkin();
   const { seed: avatarSeed } = useSavedAvatar(identity);
 
   useEffect(() => {
@@ -71,16 +75,17 @@ export function WorkspaceShell({
 
   function exitShadow() {
     clearStoredMidSession();
-    fetch("/api/v1/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    }).catch(() => {});
+    fetch("/api/v1/auth/logout", buildCsrfLogoutInit()).catch(() => {});
     router.push("/");
   }
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 border-r-2 border-[var(--line)] bg-[var(--panel)] lg:block">
+    <div
+      className={`flex min-h-screen bg-[var(--background)] text-[var(--foreground)] skin-${skin}`}
+      data-skin={skin}
+      data-dna={dnaId}
+    >
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-60 border-r-2 border-[var(--border)] bg-[var(--card)] lg:block">
         <Sidebar
           items={items}
           active={active}
@@ -97,7 +102,7 @@ export function WorkspaceShell({
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-black/70" onClick={() => setSidebarOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-64 border-r-2 border-[var(--line)] bg-[var(--panel)]">
+          <aside className="absolute inset-y-0 left-0 w-64 border-r-2 border-[var(--border)] bg-[var(--card)]">
             <Sidebar
               items={items}
               active={active}
@@ -149,13 +154,17 @@ export function WorkspaceShell({
           {children}
         </main>
 
-        <footer className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-[var(--line)] px-4 py-3 text-[10px] tracking-wider text-zinc-600">
+        <footer className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-[var(--border)] px-4 py-3 text-[10px] tracking-wider text-[var(--muted-foreground)]">
           <span>{footerLeft}</span>
           <span className="flex items-center gap-2">
-            <Crown className="h-3 w-5 text-[var(--yellow)]" /> {footerRight}
+            <kbd className="rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 font-mono text-[9px]">
+              Ctrl+K
+            </kbd>
+            <Crown className="h-3 w-5 text-[var(--primary)]" /> {footerRight}
           </span>
         </footer>
       </div>
+      <ConsoleCommandPalette plane={accentColor === "blue" ? "operations" : "creator"} />
     </div>
   );
 }

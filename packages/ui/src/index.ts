@@ -16,8 +16,10 @@ export { RansomText, type RansomTextProps } from "./primitives/ransom-text";
 export {
   TactileTape,
   Staple,
+  SkinOrnament,
   type TactileTapeProps,
   type StapleProps,
+  type SkinOrnamentProps,
 } from "./primitives/tactile-hardware";
 export {
   DistressedSticker,
@@ -400,11 +402,19 @@ export { DataTable, type DataTableColumn, type DataTableProps } from "./componen
 export {
   ChartContainer,
   BarChart,
+  Sparkline,
+  LineChart,
+  AreaChart,
+  RadialGauge,
   ChartLegend,
   ChartTooltip,
   type ChartDataPoint,
   type ChartContainerProps,
   type BarChartProps,
+  type SparklineProps,
+  type LineChartProps,
+  type AreaChartProps,
+  type RadialGaugeProps,
 } from "./components/ui/chart";
 
 export { cva, type VariantProps } from "./lib/utils";
@@ -442,6 +452,7 @@ export {
 export {
   BRAND_TOKENS,
   MASTER_DNA_LIGHT_PALETTES,
+  SKIN_SURFACE_PALETTES,
   DEPRECATED_TOKEN_ALIASES,
   hexToHslString,
   normalizeColorTokenToCss,
@@ -639,31 +650,75 @@ export {
   Calendar as CalendarIcon,
   Clock,
 } from "./icons/primitives";
-export { Grid as GridIcon } from "./icons/modules";
+export {
+  Grid as GridIcon,
+  VpnTunnel,
+  SyslogStream,
+  SnmpProbe,
+  StorageBucket,
+  RadiusKey,
+  MtimeHorizon,
+  ScriptureFolio,
+  MemoryTapeNode,
+  ArsyRelay,
+  SimpulNode,
+  MyceliumSpore,
+  SkinPalette,
+} from "./icons/modules";
 
 /* Artwork System */
 export * from "./artwork/vector";
 export * from "./artwork/generative";
 export * from "./artwork/compositions";
+export * from "./artwork/logos";
+export * from "./artwork/cutouts";
+export * from "./artwork/backdrop";
+
+/* Schema-Driven Composite View */
+export {
+  AutoModelView,
+  type AutoModelFieldType,
+  type AutoModelFieldSpec,
+  type AutoModelAcl,
+  type AutoModelCustomAction,
+  type AutoModelViewDescriptor,
+  type AutoModelRow,
+  type AutoModelViewProps,
+} from "./composites/auto-model-view";
 
 /* DX Layer */
 export { TokenInspector, type TokenInspectorProps } from "./dx/inspector";
 export { SkinPlayground, type SkinPlaygroundProps } from "./dx/playground";
+export {
+  SkinMatrixCompare,
+  formatSkinTokensAsCss,
+  formatSkinTokensAsJson,
+  type SkinMatrixCompareProps,
+} from "./dx/matrix-compare";
 export {
   measureContrastRatio,
   auditPaletteContrast,
   auditDnaContrast,
   auditAllDnaWorlds,
   auditAllDnaWorldsAndModes,
+  auditAllSkinPalettesAndModes,
   type ContrastPairResult,
   type ContrastAuditResult,
 } from "./dx/contrast";
 export {
   generateTokenDocs,
   generateSkinDocs,
+  generateSkinAtmosphereDocs,
+  generateArtworkDocs,
+  generateBrandCatalogDocs,
+  generateTelemetryDocs,
   generateThemeCSSDocs,
   generateEffectsDocs,
   generateDocsMarkdown,
   type TokenDoc,
   type SkinDoc,
+  type ArtworkDoc,
+  type SkinAtmosphereDoc,
+  type BrandCatalogDoc,
+  type TelemetryComponentDoc,
 } from "./dx/docs";

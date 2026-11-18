@@ -22,10 +22,11 @@ rulesets; all changes enter `dev` via pull request and are immediately cleaned u
 ## The rules that matter
 
 1. **Only `dev` and `main` persist.** Delete ephemeral PR branches locally and remotely immediately after merge (run `pnpm branches:clean` locally; `branch-cleanup.yml` + `delete_branch_on_merge` handle `origin`).
-2. **Never reuse a merged branch.** Always branch fresh from updated `dev` and delete it once merged.
-3. **All development lands on `dev`.** Work branches from `dev` and merges back into `dev` through a pull request with CI green.
-4. **Nobody pushes to `main` directly.** `main` only moves by a promotion PR from `dev`.
-5. **Promotion is automatic.** As soon as CI on `dev` succeeds, `auto-promote.yml` opens (or refreshes) the `dev` → `main` PR with auto-merge enabled.
+2. **AI agents work strictly on `dev` locally.** Never switch the main working tree away from `dev` or leave extra local branches (`AGENTS.md`). Push PR refs directly from `dev` via `git push origin dev:refs/heads/<type>/<slug>` when GitHub branch protection requires a PR.
+3. **Never reuse a merged branch.** Always branch/push fresh from updated `dev` and delete it once merged.
+4. **All development lands on `dev`.** Work integrates into `dev` through a pull request with CI green.
+5. **Nobody pushes to `main` directly.** `main` only moves by a promotion PR from `dev`.
+6. **Promotion is automatic.** As soon as CI on `dev` succeeds, `auto-promote.yml` opens (or refreshes) the `dev` → `main` PR with auto-merge enabled.
 
 ## Day-to-day flow
 

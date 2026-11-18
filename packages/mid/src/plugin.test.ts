@@ -279,4 +279,28 @@ describe("midFastifyPlugin integration", () => {
     expect(aliasRes.statusCode).toBe(200);
     expect(aliasRes.json().issuer).toBe("https://id.moonwitness.biz.id");
   });
+
+  it("does not collide when host already registers /, /health, or /login", async () => {
+    const fastify = Fastify({ logger: false });
+    fastify.get("/health", async () => ({ status: "ok", owner: "host" }));
+    fastify.get("/", async () => ({ owner: "host-root" }));
+
+    await fastify.register(midFastifyPlugin, {
+      db,
+      keyEncryptionSecret: masterSecret,
+      issuerUrl: "https://id.moonwitness.biz.id",
+      identityHost: "id.moonwitness.biz.id",
+    });
+    await fastify.ready();
+
+    const hostHealth = await fastify.inject({ method: "GET", url: "/health" });
+    expect(hostHealth.statusCode).toBe(200);
+    expect(hostHealth.json()).toEqual({ status: "ok", owner: "host" });
+
+    const prefixedMidHealth = await fastify.inject({ method: "GET", url: "/api/v1/mid/health" });
+    expect(prefixedMidHealth.statusCode).toBe(200);
+    expect(prefixedMidHealth.json().service).toBe("moonwitness-id");
+
+    await fastify.close();
+  });
 });

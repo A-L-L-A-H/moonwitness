@@ -1,9 +1,12 @@
-import type { ITimelineRepository } from "../../domain/usecases/timeline/timeline.repository";
-import type { TimelineEvent, Era } from "@moonwitness/types";
+import { SYSTEM_ACTOR, uuidv7, type ActorContext, type AuditEntry } from "@moonwitness/orm";
 import type {
+  CreateTimelineEventInput,
+  ITimelineRepository,
   TimelineFilters,
   TimelineStats,
+  UpdateTimelineEventInput,
 } from "../../domain/usecases/timeline/timeline.repository";
+import type { TimelineEvent, Era } from "@moonwitness/types";
 
 export interface IEventDataSource {
   listEvents(_filters: TimelineFilters): Promise<TimelineEvent[]>;
@@ -40,6 +43,28 @@ export class EventDataSource implements IEventDataSource {
 export class InMemoryEventRepository implements ITimelineRepository {
   private events: TimelineEvent[] = [];
   private eras: Era[] = [];
+  private archivedIds = new Set<string>();
+  private historyEntries: AuditEntry[] = [];
+
+  private recordAudit(
+    entityId: string,
+    action: AuditEntry["action"],
+    actor: ActorContext,
+    diff: unknown,
+  ): void {
+    this.historyEntries.push({
+      id: uuidv7(),
+      model: "timeline.event",
+      entity_id: entityId,
+      action,
+      changed_by: actor.actorId,
+      changed_at: new Date().toISOString(),
+      diff: JSON.stringify(diff),
+      entity_version: 1,
+      source: actor.source,
+      request_id: actor.requestId ?? null,
+    });
+  }
 
   setEvents(events: TimelineEvent[]): void {
     this.events = events;
@@ -132,5 +157,84 @@ export class InMemoryEventRepository implements ITimelineRepository {
 
   async getEras(): Promise<Era[]> {
     return this.eras;
+  }
+
+  async createEvent(
+    input: CreateTimelineEventInput,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent> {
+    const created: TimelineEvent = {
+      id: input.id ?? uuidv7(),
+      kind: input.kind,
+      date: input.date,
+      era: input.era,
+      title: input.title,
+      excerpt: input.excerpt ?? "",
+      body: input.body ?? "",
+      location: input.location ?? "",
+      tags: input.tags ?? [],
+      sources: input.sources ?? 0,
+      notes: input.notes ?? 0,
+      image: input.image ?? "hero-witness",
+      ...(input.imagePosition ? { imagePosition: input.imagePosition } : {}),
+      related: input.related ?? [],
+    };
+    this.events.push(created);
+    this.recordAudit(created.id, "CREATE", actor, { after: created });
+    return created;
+  }
+
+  async updateEvent(
+    id: string,
+    patch: UpdateTimelineEventInput,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent | null> {
+    const index = this.events.findIndex((e) => e.id === id);
+    if (index === -1) return null;
+    const before = this.events[index]!;
+    const updated: TimelineEvent = {
+      ...before,
+      ...patch,
+      id: before.id,
+      tags: patch.tags ?? before.tags,
+      related: patch.related ?? before.related,
+    };
+    this.events[index] = updated;
+    this.recordAudit(id, "UPDATE", actor, { before, after: updated });
+    return updated;
+  }
+
+  async archiveEvent(
+    id: string,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent | null> {
+    const found = this.events.find((e) => e.id === id) ?? null;
+    if (!found) return null;
+    this.archivedIds.add(id);
+    this.recordAudit(id, "ARCHIVE", actor, { before: found, after: found });
+    return found;
+  }
+
+  async restoreEvent(
+    id: string,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent | null> {
+    const found = this.events.find((e) => e.id === id) ?? null;
+    if (!found) return null;
+    this.archivedIds.delete(id);
+    this.recordAudit(id, "RESTORE", actor, { before: found, after: found });
+    return found;
+  }
+
+  async deleteEvent(id: string, actor: ActorContext = SYSTEM_ACTOR): Promise<TimelineEvent | null> {
+    const index = this.events.findIndex((e) => e.id === id);
+    if (index === -1) return null;
+    const [removed] = this.events.splice(index, 1);
+    this.recordAudit(id, "DELETE", actor, { before: removed });
+    return removed ?? null;
+  }
+
+  async getEventHistory(id: string): Promise<AuditEntry[]> {
+    return this.historyEntries.filter((entry) => entry.entity_id === id);
   }
 }

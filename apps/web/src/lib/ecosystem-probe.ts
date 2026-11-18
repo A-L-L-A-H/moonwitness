@@ -1,9 +1,20 @@
 import { ECOSYSTEM_HEALTH_CONTRACT_VERSION } from "@moonwitness/canon";
-import {
-  getCloudflareWorkerEnv,
-  type D1DatabaseLike,
-  type SanctuaryWorkerEnv,
-} from "./cloudflare-runtime";
+
+export interface D1PreparedStatementLike {
+  all<T = Record<string, unknown>>(): Promise<{ readonly results?: readonly T[] }>;
+}
+
+export interface D1DatabaseLike {
+  prepare(query: string): D1PreparedStatementLike;
+}
+
+export interface SanctuaryWorkerEnv {
+  readonly DB?: D1DatabaseLike;
+  readonly WEB_INTERNAL_URL?: string;
+  readonly API_INTERNAL_URL?: string;
+  readonly ARSY_URL?: string;
+  readonly MEMORY_API_URL?: string;
+}
 
 export type ServiceHealthState = "online" | "degraded" | "offline";
 export type EcosystemRuntimeMode = "local-node" | "cloudflare-edge";
@@ -349,7 +360,7 @@ async function probeCodexGovernance(
   };
 
   try {
-    const db = explicitDb ?? (await getCloudflareWorkerEnv())?.DB ?? null;
+    const db = explicitDb ?? null;
     if (!db) return emptySnapshot;
 
     const [countsRes, releasesRes, docsRes] = await Promise.all([
@@ -412,12 +423,7 @@ export async function probeEcosystemHealth(options?: {
   const runtimeMode: EcosystemRuntimeMode =
     options?.runtimeMode ?? (isNodeRuntime() ? "local-node" : "cloudflare-edge");
   const skipLoopbackOnEdge = !options?.fetchFn && runtimeMode === "cloudflare-edge";
-  const cfEnv =
-    options?.cfEnv !== undefined
-      ? options.cfEnv
-      : options?.fetchFn
-        ? null
-        : await getCloudflareWorkerEnv();
+  const cfEnv = options?.cfEnv ?? null;
 
   const targets = buildProbeTargets(cfEnv);
   const edgeTargets = buildEdgeTargets();

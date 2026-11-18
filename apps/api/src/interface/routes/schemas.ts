@@ -124,3 +124,100 @@ export const paramIdSchema = {
   },
   required: ["id"],
 } as const;
+
+const TIMELINE_EVENT_KINDS = ["PROJECT", "STORY", "SIGNAL", "WORLD", "PEOPLE", "RESEARCH"] as const;
+
+const TIMELINE_ERA_IDS = ["origins", "neon", "fracture", "rebuilding", "expansions"] as const;
+
+const TIMELINE_ART_KEYS = [
+  "hero-witness",
+  "city-shadow",
+  "crew-rooftop",
+  "signal-tunnel",
+  "shadow-command",
+  "night-shift",
+  "signal-sky",
+  "fog-voices",
+  "mirror-archive",
+  "crew-wall",
+  "crowd-moon",
+] as const;
+
+export const createTimelineEventBodySchema = {
+  type: "object",
+  properties: {
+    id: { type: "string", minLength: 1, maxLength: 120 },
+    kind: { type: "string", enum: [...TIMELINE_EVENT_KINDS] },
+    date: { type: "string", minLength: 1, maxLength: 40 },
+    era: { type: "string", enum: [...TIMELINE_ERA_IDS] },
+    title: { type: "string", minLength: 1, maxLength: 200 },
+    excerpt: { type: "string", maxLength: 1000 },
+    body: { type: "string" },
+    location: { type: "string", maxLength: 200 },
+    tags: { type: "array", items: { type: "string" } },
+    sources: { type: "integer", minimum: 0 },
+    notes: { type: "integer", minimum: 0 },
+    image: { type: "string", enum: [...TIMELINE_ART_KEYS] },
+    imagePosition: { type: "string", maxLength: 80 },
+    related: { type: "array", items: { type: "string" } },
+  },
+  required: ["kind", "date", "era", "title"],
+  additionalProperties: false,
+} as const;
+
+export const updateTimelineEventBodySchema = {
+  type: "object",
+  properties: {
+    kind: { type: "string", enum: [...TIMELINE_EVENT_KINDS] },
+    date: { type: "string", minLength: 1, maxLength: 40 },
+    era: { type: "string", enum: [...TIMELINE_ERA_IDS] },
+    title: { type: "string", minLength: 1, maxLength: 200 },
+    excerpt: { type: "string", maxLength: 1000 },
+    body: { type: "string" },
+    location: { type: "string", maxLength: 200 },
+    tags: { type: "array", items: { type: "string" } },
+    sources: { type: "integer", minimum: 0 },
+    notes: { type: "integer", minimum: 0 },
+    image: { type: "string", enum: [...TIMELINE_ART_KEYS] },
+    imagePosition: { type: "string", maxLength: 80 },
+    related: { type: "array", items: { type: "string" } },
+    version: { type: "integer", minimum: 1 },
+  },
+  additionalProperties: false,
+} as const;
+
+export const timelineEventAuditEntrySchema = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    model: { type: "string" },
+    entity_id: { type: "string" },
+    action: { type: "string", enum: ["CREATE", "UPDATE", "ARCHIVE", "RESTORE", "DELETE"] },
+    changed_by: { type: ["string", "null"] },
+    changed_at: { type: "string" },
+    diff: { type: "string" },
+    entity_version: { type: "integer" },
+    source: { type: "string", enum: ["seed", "api", "import", "migration"] },
+    request_id: { type: ["string", "null"] },
+  },
+  required: [
+    "id",
+    "model",
+    "entity_id",
+    "action",
+    "changed_by",
+    "changed_at",
+    "diff",
+    "entity_version",
+    "source",
+    "request_id",
+  ],
+} as const;
+
+export const timelineEventHistoryResponseSchema = {
+  type: "object",
+  properties: {
+    data: { type: "array", items: timelineEventAuditEntrySchema },
+  },
+  required: ["data"],
+} as const;

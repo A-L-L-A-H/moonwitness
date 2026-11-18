@@ -21,6 +21,7 @@
     "@moonwitness/assets": "workspace:*",
     "@moonwitness/avatars": "workspace:*",
     "@moonwitness/canon": "workspace:*",
+    "@moonwitness/contracts": "workspace:*",
     "@moonwitness/core": "workspace:*",
     "@moonwitness/types": "workspace:*",
     "@moonwitness/ui": "workspace:*",

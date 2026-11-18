@@ -1,8 +1,8 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import type { EraId, TimelineEvent } from "@moonwitness/types";
+import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import type { EraId, EventKind, TimelineEvent } from "@moonwitness/types";
 import { ConsoleShellAdapter } from "../shell/console-shell-adapter";
 import { Star4 } from "@moonwitness/ui/icons";
 import { EraBand } from "@moonwitness/ui";
@@ -11,9 +11,14 @@ import { FilterBar, type SortKey } from "./filter-bar";
 import { EventList } from "./event-list";
 import { EventDetailPanel } from "./event-detail-panel";
 import { CanonLorePanel } from "./CanonLorePanel";
+import { useCurrentUser } from "@/lib/api/auth";
 import {
+  useArchiveTimelineEvent,
+  useCreateTimelineEvent,
+  useDeleteTimelineEvent,
   useTimelineEras,
   useTimelineEvent,
+  useTimelineEventHistory,
   useTimelineEvents,
   useTimelineRelatedEvents,
   useTimelineStats,
@@ -44,6 +49,16 @@ export function Dock() {
   const [dockTab, setDockTab] = useState<"chronicle" | "canon">("chronicle");
   const [view, setView] = useState<"grid" | "list">("grid");
   const [origin, setOrigin] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newKind, setNewKind] = useState<EventKind>("PROJECT");
+  const [newEra, setNewEra] = useState<EraId>("expansions");
+  const [newDate, setNewDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [newLocation, setNewLocation] = useState("");
+  const [newExcerpt, setNewExcerpt] = useState("");
+  const [newBody, setNewBody] = useState("");
+  const [newTags, setNewTags] = useState("");
+  const [mutationNotice, setMutationNotice] = useState<string | null>(null);
 
   const updateSearchParams = useCallback(
     (
@@ -63,6 +78,11 @@ export function Dock() {
     [paramsString, router],
   );
 
+  const currentUserQuery = useCurrentUser();
+  const currentUser = currentUserQuery.data?.user ?? null;
+  const canEditTimeline = currentUser?.role === "admin" || currentUser?.role === "editor";
+  const canDeleteTimeline = currentUser?.role === "admin";
+
   const eventsQuery = useTimelineEvents({
     era: rawEra ?? undefined,
     q: queryFromUrl || undefined,
@@ -72,6 +92,9 @@ export function Dock() {
   });
   const erasQuery = useTimelineEras();
   const statsQuery = useTimelineStats();
+  const createEventMutation = useCreateTimelineEvent();
+  const archiveEventMutation = useArchiveTimelineEvent();
+  const deleteEventMutation = useDeleteTimelineEvent();
   const timelineEvents = eventsQuery.data?.data ?? EMPTY_EVENTS;
   const eras = erasQuery.data?.data ?? [];
   const selectedFromList = timelineEvents[0] ?? null;
@@ -80,6 +103,10 @@ export function Dock() {
     : null;
   const selectedDetailQuery = useTimelineEvent(eventId);
   const selected = eventId ? (selectedDetailQuery.data?.data ?? selectedInList) : selectedFromList;
+  const historyQuery = useTimelineEventHistory(
+    selected?.id ?? null,
+    Boolean(currentUser && selected?.id),
+  );
   const relatedQuery = useTimelineRelatedEvents(selected?.related ?? []);
   const relatedEvents = relatedQuery.data ?? EMPTY_EVENTS;
   const selectedEra = selected
@@ -147,6 +174,71 @@ export function Dock() {
     void statsQuery.refetch();
   };
 
+  function handleCreateEvent(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setMutationNotice(null);
+    const title = newTitle.trim();
+    if (!title) {
+      setMutationNotice("Title is required.");
+      return;
+    }
+    const tags = newTags
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    createEventMutation.mutate(
+      {
+        title,
+        kind: newKind,
+        era: newEra,
+        date: newDate.trim() || new Date().toISOString().slice(0, 10),
+        location: newLocation.trim(),
+        excerpt: newExcerpt.trim(),
+        body: newBody.trim(),
+        tags,
+      },
+      {
+        onSuccess: (created) => {
+          setNewTitle("");
+          setNewLocation("");
+          setNewExcerpt("");
+          setNewBody("");
+          setNewTags("");
+          setCreateOpen(false);
+          setMutationNotice(`Created timeline event "${created.data.title}".`);
+          updateSearchParams({ event: created.data.id, page: null }, "push");
+        },
+        onError: (err: Error) => {
+          setMutationNotice(err.message);
+        },
+      },
+    );
+  }
+
+  function handleArchiveEvent(id: string) {
+    setMutationNotice(null);
+    archiveEventMutation.mutate(id, {
+      onSuccess: () => {
+        setMutationNotice(`Archived event "${id}".`);
+        updateSearchParams({ event: null });
+        setDrawerOpen(false);
+      },
+      onError: (err: Error) => setMutationNotice(err.message),
+    });
+  }
+
+  function handleDeleteEvent(id: string) {
+    setMutationNotice(null);
+    deleteEventMutation.mutate(id, {
+      onSuccess: () => {
+        setMutationNotice(`Deleted event "${id}".`);
+        updateSearchParams({ event: null });
+        setDrawerOpen(false);
+      },
+      onError: (err: Error) => setMutationNotice(err.message),
+    });
+  }
+
   const stats = statsQuery.data?.data;
   const pageStart = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const pageEnd = Math.min(page * PAGE_SIZE, total);
@@ -173,8 +265,8 @@ export function Dock() {
             onClick={() => setDockTab("chronicle")}
             className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
               dockTab === "chronicle"
-                ? "border-[var(--pink)] bg-[var(--pink)]/15 text-white"
-                : "border-[var(--line)] bg-[var(--panel)] text-zinc-400 hover:text-white"
+                ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--foreground)]"
+                : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
             CHRONICLE EVENTS
@@ -186,20 +278,157 @@ export function Dock() {
             onClick={() => setDockTab("canon")}
             className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
               dockTab === "canon"
-                ? "border-[var(--blue)] bg-[var(--blue)]/15 text-white"
-                : "border-[var(--line)] bg-[var(--panel)] text-zinc-400 hover:text-white"
+                ? "border-[var(--blue)] bg-[var(--blue)]/15 text-[var(--foreground)]"
+                : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
             CANON LORE ARCHIVE
           </button>
+          {canEditTimeline && dockTab === "chronicle" && (
+            <button
+              type="button"
+              onClick={() => setCreateOpen((open) => !open)}
+              className="btn-zine btn-pink ml-auto min-h-11 px-4 py-2 font-mono text-xs tracking-wider"
+            >
+              {createOpen ? "CLOSE FORM" : "+ NEW EVENT"}
+            </button>
+          )}
         </div>
+
+        {mutationNotice && (
+          <p
+            role="status"
+            className="border border-[var(--border)] bg-[var(--card)] px-4 py-2 font-mono text-xs text-[var(--primary)]"
+          >
+            {mutationNotice}
+          </p>
+        )}
+
+        {canEditTimeline && createOpen && dockTab === "chronicle" && (
+          <form
+            onSubmit={handleCreateEvent}
+            className="zine-card-rough space-y-4 p-5"
+            aria-label="Create timeline event"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="font-brush text-2xl text-[var(--foreground)]">
+                NEW <span className="text-[var(--primary)]">TIMELINE EVENT</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <label className="text-xs text-[var(--foreground)]">
+                <span className="mb-1 block font-mono text-[10px] tracking-widest">TITLE *</span>
+                <input
+                  type="text"
+                  required
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="Relay Node Activated"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+                />
+              </label>
+              <label className="text-xs text-[var(--foreground)]">
+                <span className="mb-1 block font-mono text-[10px] tracking-widest">KIND *</span>
+                <select
+                  value={newKind}
+                  onChange={(e) => setNewKind(e.target.value as EventKind)}
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+                >
+                  <option value="PROJECT">PROJECT</option>
+                  <option value="STORY">STORY</option>
+                  <option value="SIGNAL">SIGNAL</option>
+                  <option value="WORLD">WORLD</option>
+                  <option value="PEOPLE">PEOPLE</option>
+                  <option value="RESEARCH">RESEARCH</option>
+                </select>
+              </label>
+              <label className="text-xs text-[var(--foreground)]">
+                <span className="mb-1 block font-mono text-[10px] tracking-widest">ERA *</span>
+                <select
+                  value={newEra}
+                  onChange={(e) => setNewEra(e.target.value as EraId)}
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+                >
+                  <option value="origins">origins</option>
+                  <option value="neon">neon</option>
+                  <option value="fracture">fracture</option>
+                  <option value="rebuilding">rebuilding</option>
+                  <option value="expansions">expansions</option>
+                </select>
+              </label>
+              <label className="text-xs text-[var(--foreground)]">
+                <span className="mb-1 block font-mono text-[10px] tracking-widest">DATE *</span>
+                <input
+                  type="date"
+                  required
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+                />
+              </label>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <label className="text-xs text-[var(--foreground)]">
+                <span className="mb-1 block font-mono text-[10px] tracking-widest">LOCATION</span>
+                <input
+                  type="text"
+                  value={newLocation}
+                  onChange={(e) => setNewLocation(e.target.value)}
+                  placeholder="Jakarta / Relay Sector 4"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+                />
+              </label>
+              <label className="text-xs text-[var(--foreground)]">
+                <span className="mb-1 block font-mono text-[10px] tracking-widest">
+                  TAGS (comma separated)
+                </span>
+                <input
+                  type="text"
+                  value={newTags}
+                  onChange={(e) => setNewTags(e.target.value)}
+                  placeholder="signal, archive, release"
+                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+                />
+              </label>
+            </div>
+            <label className="block text-xs text-[var(--foreground)]">
+              <span className="mb-1 block font-mono text-[10px] tracking-widest">EXCERPT</span>
+              <input
+                type="text"
+                value={newExcerpt}
+                onChange={(e) => setNewExcerpt(e.target.value)}
+                placeholder="Short one-line summary for card view"
+                className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
+              />
+            </label>
+            <label className="block text-xs text-[var(--foreground)]">
+              <span className="mb-1 block font-mono text-[10px] tracking-widest">BODY</span>
+              <textarea
+                rows={3}
+                value={newBody}
+                onChange={(e) => setNewBody(e.target.value)}
+                placeholder="Full chronicle details…"
+                className="w-full border-2 border-[var(--border)] bg-[var(--background)] p-3 text-xs text-[var(--foreground)]"
+              />
+            </label>
+            <div className="flex justify-end gap-2">
+              <button
+                type="submit"
+                disabled={createEventMutation.isPending}
+                className="btn-zine btn-pink min-h-10 px-5 py-2 text-xs"
+              >
+                {createEventMutation.isPending ? "SAVING…" : "PUBLISH EVENT"}
+              </button>
+            </div>
+          </form>
+        )}
 
         {dockTab === "canon" ? (
           <CanonLorePanel />
         ) : chronicleError ? (
           <div className="flex h-[45vh] flex-col items-center justify-center gap-4 text-center">
-            <p className="font-brush text-xl text-[var(--pink)]">THE ARCHIVE SIGNAL WAS LOST…</p>
-            <p className="text-sm text-zinc-400">
+            <p className="font-brush text-xl text-[var(--primary)]">THE ARCHIVE SIGNAL WAS LOST…</p>
+            <p className="text-sm text-[var(--muted-foreground)]">
               We couldn&apos;t load the timeline. Check your connection and try again.
             </p>
             <button
@@ -212,7 +441,7 @@ export function Dock() {
           </div>
         ) : chronicleLoading ? (
           <div
-            className="flex h-[45vh] items-center justify-center font-brush text-xl text-[var(--pink)]"
+            className="flex h-[45vh] items-center justify-center font-brush text-xl text-[var(--primary)]"
             role="status"
             aria-live="polite"
           >
@@ -225,18 +454,20 @@ export function Dock() {
               className="grid grid-cols-3 gap-3 text-center"
             >
               <div className="zine-card-rough p-3">
-                <p className="font-brush text-2xl text-[var(--yellow)]">{stats?.total ?? "—"}</p>
-                <p className="text-[11px] tracking-widest text-zinc-300">ARCHIVE EVENTS</p>
+                <p className="font-brush text-2xl text-[var(--primary)]">{stats?.total ?? "—"}</p>
+                <p className="text-[11px] tracking-widest text-[var(--foreground)]">
+                  ARCHIVE EVENTS
+                </p>
               </div>
               <div className="zine-card-rough p-3">
-                <p className="font-brush text-2xl text-[var(--blue)]">{eras.length}</p>
-                <p className="text-[11px] tracking-widest text-zinc-300">ERAS</p>
+                <p className="font-brush text-2xl text-[var(--primary)]">{eras.length}</p>
+                <p className="text-[11px] tracking-widest text-[var(--foreground)]">ERAS</p>
               </div>
               <div className="zine-card-rough p-3">
-                <p className="font-brush text-2xl text-[var(--pink)]">
+                <p className="font-brush text-2xl text-[var(--primary)]">
                   {Object.keys(stats?.byKind ?? {}).length}
                 </p>
-                <p className="text-[11px] tracking-widest text-zinc-300">EVENT TYPES</p>
+                <p className="text-[11px] tracking-widest text-[var(--foreground)]">EVENT TYPES</p>
               </div>
             </section>
 
@@ -293,7 +524,7 @@ export function Dock() {
                   }
                 />
                 {eventId && !selected && selectedDetailQuery.isError && (
-                  <p className="mt-4 text-sm text-[var(--yellow)]" role="alert">
+                  <p className="mt-4 text-sm text-[var(--primary)]" role="alert">
                     The selected event could not be loaded from the archive.
                   </p>
                 )}
@@ -307,9 +538,16 @@ export function Dock() {
                   relatedEvents={relatedEvents}
                   shareUrl={shareUrl}
                   onRelated={selectEvent}
+                  canEdit={canEditTimeline}
+                  canDelete={canDeleteTimeline}
+                  mutating={archiveEventMutation.isPending || deleteEventMutation.isPending}
+                  onArchive={handleArchiveEvent}
+                  onDelete={handleDeleteEvent}
+                  historyEntries={historyQuery.data?.data}
+                  historyLoading={historyQuery.isLoading}
                 />
               ) : eventId && selectedDetailQuery.isLoading ? (
-                <p className="p-5 text-sm text-zinc-400" role="status">
+                <p className="p-5 text-sm text-[var(--muted-foreground)]" role="status">
                   Loading event details…
                 </p>
               ) : null}
@@ -327,10 +565,17 @@ export function Dock() {
           shareUrl={shareUrl}
           onRelated={selectEvent}
           onClose={() => setDrawerOpen(false)}
+          canEdit={canEditTimeline}
+          canDelete={canDeleteTimeline}
+          mutating={archiveEventMutation.isPending || deleteEventMutation.isPending}
+          onArchive={handleArchiveEvent}
+          onDelete={handleDeleteEvent}
+          historyEntries={historyQuery.data?.data}
+          historyLoading={historyQuery.isLoading}
         />
       )}
 
-      <Star4 className="pointer-events-none fixed bottom-24 right-6 hidden h-6 w-6 text-[var(--yellow)] opacity-50 xl:block" />
+      <Star4 className="pointer-events-none fixed bottom-24 right-6 hidden h-6 w-6 text-[var(--primary)] opacity-50 xl:block" />
     </ConsoleShellAdapter>
   );
 }

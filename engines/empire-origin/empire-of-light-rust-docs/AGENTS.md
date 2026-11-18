@@ -1,5 +1,8 @@
 # AGENTS.md
 
+> [!IMPORTANT]
+> **Absorbed Engine Subordination Notice (`2026-11-18`):** This file belongs to the absorbed reference documentation under `engines/empire-origin/empire-of-light-rust-docs/` ([CONSOLIDATION-CATALOG.md](../../../docs/CONSOLIDATION-CATALOG.md)). Root [AGENTS.md](../../../AGENTS.md) and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md) govern monorepo Git, security, and validation rules.
+
 The rules for working on Temps, for people and for every coding agent. Claude
 Code loads this file through `CLAUDE.md`; Codex, Cursor and others read it
 directly. **Core philosophy: code that works safely, and when it fails,

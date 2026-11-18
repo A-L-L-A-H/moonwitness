@@ -19,6 +19,9 @@ last_verified: "2026-11-05"
 
 # World Observatory Agent Guidance
 
+> [!IMPORTANT]
+> **Absorbed Legacy App Notice (`2026-11-18`):** Standalone `allah-com/apps/jizz` (`WORLD OBSERVATORY`) has been consolidated into active `apps/web` per [ADR-006](../../../../../docs/architecture/adr-006-three-app-topology-and-trust-zones.md). Obey root [AGENTS.md](../../../../../AGENTS.md) and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../../../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md).
+
 Follow the repository-wide [AGENTS.md](../../AGENTS.md) and [documentation contract](../../DOCUMENTATION_CONTRACT.md). This file adds Next.js-specific guidance for the WORLD OBSERVATORY app.
 
 ## App-specific instructions

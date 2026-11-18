@@ -1,0 +1,15 @@
+{
+  "name": "auth",
+  "version": "0.1.0",
+  "description": "Canonical identity, sessions, RBAC, and OIDC adapter addon",
+  "category": "security",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "audit"],
+  "provides": {
+    "routes": ["auth", "oauth"],
+    "models": ["auth.user", "auth.session", "auth.oauth_token"],
+    "migrations": [],
+    "permissions": ["auth.admin"]
+  }
+}

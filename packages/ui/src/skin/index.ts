@@ -12,6 +12,7 @@ import React, {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { flushSync } from "react-dom";
 import {
   canonicalTokensToCssVariables,
   resolveCanonicalTokens,
@@ -43,7 +44,9 @@ export type { SkinPreset } from "./presets";
 export type ThemeMode = "dark" | "light" | "system";
 
 const SKIN_STORAGE_KEY = "mw-skin";
+const DNA_STORAGE_KEY = "mw-dna";
 const THEME_STORAGE_KEY = "mw-theme";
+const DENSITY_STORAGE_KEY = "mw-density";
 const VALID_SKINS: readonly SkinName[] = [
   "default",
   "riot",
@@ -51,7 +54,29 @@ const VALID_SKINS: readonly SkinName[] = [
   "technical",
   "archive",
   "transmission",
+  "sanctuary",
+  "brutalist",
+  "noir",
+  "kinetic",
 ];
+
+function runWithViewTransition(update: () => void): void {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    update();
+    return;
+  }
+  const prefersReduced =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
+  if (!prefersReduced && typeof doc.startViewTransition === "function") {
+    doc.startViewTransition(() => {
+      flushSync(update);
+    });
+    return;
+  }
+  update();
+}
 
 export interface SkinContextValue {
   /** Whether an explicit ancestor SkinProvider exists in the React tree */
@@ -200,6 +225,30 @@ function readStoredSkin(fallback: SkinName): SkinName {
   return fallback;
 }
 
+function readStoredDna(fallback: MasterDnaId): MasterDnaId {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(DNA_STORAGE_KEY);
+    if (stored && isValidDnaId(stored)) return stored;
+  } catch {
+    /* ignore storage failures */
+  }
+  return fallback;
+}
+
+function readStoredDensity(fallback: CanonicalDensity): CanonicalDensity {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(DENSITY_STORAGE_KEY);
+    if (stored === "compact" || stored === "comfortable" || stored === "spacious") {
+      return stored;
+    }
+  } catch {
+    /* ignore storage failures */
+  }
+  return fallback;
+}
+
 function writeStyleVariables(elementId: string, selector: string, vars: Readonly<Record<`--${string}`, string>>): void {
   if (typeof document === "undefined") return;
   let el = document.getElementById(elementId) as HTMLStyleElement | null;
@@ -288,6 +337,16 @@ export function SkinProvider({
     if (storedSkin !== initialSafeSkin) {
       setSkinState(storedSkin);
     }
+    if (!defaultDna && !parentDnaWorld) {
+      const storedDna = readStoredDna(initialSafeDna);
+      if (storedDna !== initialSafeDna) {
+        setDnaState(storedDna);
+      }
+    }
+    const storedDensity = readStoredDensity(defaultDensity);
+    if (storedDensity !== defaultDensity) {
+      setDensityState(storedDensity);
+    }
     const storedMode = getStoredThemeMode();
     if (storedMode !== defaultTheme) {
       setModeState(storedMode);
@@ -334,18 +393,18 @@ export function SkinProvider({
   useEffect(() => {
     if (resolvedScope !== "document" || typeof document === "undefined") return;
     document.documentElement.setAttribute("data-skin", skin);
+    document.documentElement.setAttribute("data-dna", dnaId);
     document.documentElement.setAttribute("data-theme", resolvedMode);
     document.documentElement.setAttribute("data-density", density);
-    if (defaultDna) {
-      document.documentElement.setAttribute("data-dna", dnaId);
-    }
     writeStyleVariables("mw-skin-engine-variables", ":root", cssVariables);
-  }, [resolvedScope, skin, dnaId, resolvedMode, density, defaultDna, cssVariables]);
+  }, [resolvedScope, skin, dnaId, resolvedMode, density, cssVariables]);
 
   const setSkin = useCallback(
     (nextSkin: SkinName) => {
       const valid = isValidSkin(nextSkin) ? nextSkin : "default";
-      setSkinState(valid);
+      runWithViewTransition(() => {
+        setSkinState(valid);
+      });
       if (resolvedScope === "document" && persist && typeof window !== "undefined") {
         try {
           window.localStorage.setItem(SKIN_STORAGE_KEY, valid);
@@ -361,29 +420,50 @@ export function SkinProvider({
   const setDna = useCallback(
     (nextDna: MasterDnaId) => {
       const valid: MasterDnaId = isValidDnaId(nextDna) ? nextDna : "02-lunar-chronicles";
-      setDnaState(valid);
+      runWithViewTransition(() => {
+        setDnaState(valid);
+      });
+      if (resolvedScope === "document" && persist && typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem(DNA_STORAGE_KEY, valid);
+        } catch {
+          /* ignore storage failures */
+        }
+      }
       onDnaChange?.(valid);
     },
-    [onDnaChange],
+    [resolvedScope, persist, onDnaChange],
   );
 
   const setMode = useCallback(
     (nextMode: ThemeMode) => {
       const safeMode: ThemeMode =
         nextMode === "dark" || nextMode === "light" || nextMode === "system" ? nextMode : "system";
-      setModeState(safeMode);
-      setResolvedMode(resolveThemeMode(safeMode));
-      if (resolvedScope === "document") {
-        applyThemeMode(safeMode, persist);
-      }
+      runWithViewTransition(() => {
+        setModeState(safeMode);
+        setResolvedMode(resolveThemeMode(safeMode));
+        if (resolvedScope === "document") {
+          applyThemeMode(safeMode, persist);
+        }
+      });
       onThemeChange?.(safeMode);
     },
     [resolvedScope, persist, onThemeChange],
   );
 
-  const setDensity = useCallback((nextDensity: CanonicalDensity) => {
-    setDensityState(nextDensity);
-  }, []);
+  const setDensity = useCallback(
+    (nextDensity: CanonicalDensity) => {
+      setDensityState(nextDensity);
+      if (resolvedScope === "document" && persist && typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem(DENSITY_STORAGE_KEY, nextDensity);
+        } catch {
+          /* ignore storage failures */
+        }
+      }
+    },
+    [resolvedScope, persist],
+  );
 
   const preset = getPreset(skin);
   const getClasses = useCallback(
@@ -608,42 +688,70 @@ export const Skinned = {
   TechnicalButton: createSkinComponent("button", "technical"),
   ArchiveButton: createSkinComponent("button", "archive"),
   TransmissionButton: createSkinComponent("button", "transmission"),
+  SanctuaryButton: createSkinComponent("button", "sanctuary"),
+  BrutalistButton: createSkinComponent("button", "brutalist"),
+  NoirButton: createSkinComponent("button", "noir"),
+  KineticButton: createSkinComponent("button", "kinetic"),
   Card: createSkinComponent("card", "default"),
   RiotCard: createSkinComponent("card", "riot"),
   EditorialCard: createSkinComponent("card", "editorial"),
   TechnicalCard: createSkinComponent("card", "technical"),
   ArchiveCard: createSkinComponent("card", "archive"),
   TransmissionCard: createSkinComponent("card", "transmission"),
+  SanctuaryCard: createSkinComponent("card", "sanctuary"),
+  BrutalistCard: createSkinComponent("card", "brutalist"),
+  NoirCard: createSkinComponent("card", "noir"),
+  KineticCard: createSkinComponent("card", "kinetic"),
   Input: createSkinComponent("input", "default"),
   RiotInput: createSkinComponent("input", "riot"),
   EditorialInput: createSkinComponent("input", "editorial"),
   TechnicalInput: createSkinComponent("input", "technical"),
   ArchiveInput: createSkinComponent("input", "archive"),
   TransmissionInput: createSkinComponent("input", "transmission"),
+  SanctuaryInput: createSkinComponent("input", "sanctuary"),
+  BrutalistInput: createSkinComponent("input", "brutalist"),
+  NoirInput: createSkinComponent("input", "noir"),
+  KineticInput: createSkinComponent("input", "kinetic"),
   Badge: createSkinComponent("badge", "default"),
   RiotBadge: createSkinComponent("badge", "riot"),
   EditorialBadge: createSkinComponent("badge", "editorial"),
   TechnicalBadge: createSkinComponent("badge", "technical"),
   ArchiveBadge: createSkinComponent("badge", "archive"),
   TransmissionBadge: createSkinComponent("badge", "transmission"),
+  SanctuaryBadge: createSkinComponent("badge", "sanctuary"),
+  BrutalistBadge: createSkinComponent("badge", "brutalist"),
+  NoirBadge: createSkinComponent("badge", "noir"),
+  KineticBadge: createSkinComponent("badge", "kinetic"),
   EventCard: createSkinComponent("eventCard", "default"),
   RiotEventCard: createSkinComponent("eventCard", "riot"),
   EditorialEventCard: createSkinComponent("eventCard", "editorial"),
   TechnicalEventCard: createSkinComponent("eventCard", "technical"),
   ArchiveEventCard: createSkinComponent("eventCard", "archive"),
   TransmissionEventCard: createSkinComponent("eventCard", "transmission"),
+  SanctuaryEventCard: createSkinComponent("eventCard", "sanctuary"),
+  BrutalistEventCard: createSkinComponent("eventCard", "brutalist"),
+  NoirEventCard: createSkinComponent("eventCard", "noir"),
+  KineticEventCard: createSkinComponent("eventCard", "kinetic"),
   KanbanColumn: createSkinComponent("kanbanColumn", "default"),
   RiotKanbanColumn: createSkinComponent("kanbanColumn", "riot"),
   EditorialKanbanColumn: createSkinComponent("kanbanColumn", "editorial"),
   TechnicalKanbanColumn: createSkinComponent("kanbanColumn", "technical"),
   ArchiveKanbanColumn: createSkinComponent("kanbanColumn", "archive"),
   TransmissionKanbanColumn: createSkinComponent("kanbanColumn", "transmission"),
+  SanctuaryKanbanColumn: createSkinComponent("kanbanColumn", "sanctuary"),
+  BrutalistKanbanColumn: createSkinComponent("kanbanColumn", "brutalist"),
+  NoirKanbanColumn: createSkinComponent("kanbanColumn", "noir"),
+  KineticKanbanColumn: createSkinComponent("kanbanColumn", "kinetic"),
   ModuleCard: createSkinComponent("moduleCard", "default"),
   RiotModuleCard: createSkinComponent("moduleCard", "riot"),
   EditorialModuleCard: createSkinComponent("moduleCard", "editorial"),
   TechnicalModuleCard: createSkinComponent("moduleCard", "technical"),
   ArchiveModuleCard: createSkinComponent("moduleCard", "archive"),
   TransmissionModuleCard: createSkinComponent("moduleCard", "transmission"),
+  SanctuaryModuleCard: createSkinComponent("moduleCard", "sanctuary"),
+  BrutalistModuleCard: createSkinComponent("moduleCard", "brutalist"),
+  NoirModuleCard: createSkinComponent("moduleCard", "noir"),
+  KineticModuleCard: createSkinComponent("moduleCard", "kinetic"),
 };
 
 export function skinCn(

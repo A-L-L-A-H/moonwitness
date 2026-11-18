@@ -1,0 +1,14 @@
+{
+  "name": "syslog",
+  "version": "0.1.0",
+  "description": "Structured syslog ingestion and retention logs",
+  "category": "network",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["syslog"],
+    "models": ["syslog.entry"],
+    "migrations": []
+  }
+}

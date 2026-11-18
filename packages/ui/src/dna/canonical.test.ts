@@ -7,13 +7,14 @@ import {
   IMPERIUM_LUMEN_TOKENS,
   MASTER_DNA_LIGHT_PALETTES,
   MASTER_DNA_PALETTES,
+  SKIN_SURFACE_PALETTES,
   assertCanonicalTokensValid,
   canonicalTokensToCssVariables,
   hexToHslString,
   resolveCanonicalTokens,
   type CanonicalDnaId,
 } from "./index";
-import { measureContrastRatio } from "../dx/contrast";
+import { auditPaletteContrast, measureContrastRatio } from "../dx/contrast";
 import type { SkinName } from "../skin/compositions";
 
 const DNA_IDS: readonly CanonicalDnaId[] = [
@@ -33,6 +34,10 @@ const SKINS: readonly SkinName[] = [
   "technical",
   "archive",
   "transmission",
+  "sanctuary",
+  "brutalist",
+  "noir",
+  "kinetic",
 ];
 
 describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
@@ -133,5 +138,72 @@ describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
     expect(DEPRECATED_TOKEN_ALIASES.length).toBeGreaterThanOrEqual(4);
     expect(hexToHslString("#fff")).toBe("0 0% 100%");
     expect(hexToHslString("#000000")).toBe("0 0% 0%");
+  });
+
+  it("passes WCAG 2.1 AA contrast and emits all 8-axis CSS variables across all 84 (7 DNAs × 6 skins × 2 modes)", () => {
+    const surfaceSkins = ["riot", "editorial", "technical", "archive", "transmission"] as const;
+    for (const skin of surfaceSkins) {
+      for (const mode of ["dark", "light"] as const) {
+        const p = SKIN_SURFACE_PALETTES[skin][mode];
+        const surfaceAudit = auditPaletteContrast(skin, `${skin}-${mode}`, p);
+        expect(surfaceAudit.passed, `Surface palette ${skin}:${mode} failed contrast`).toBe(true);
+      }
+    }
+
+    const expectedMwVars = [
+      "--dna-world-accent",
+      "--mw-card-border-style",
+      "--mw-card-clip",
+      "--mw-font-display",
+      "--mw-font-heading",
+      "--mw-font-body",
+      "--mw-heading-tracking",
+      "--mw-heading-transform",
+      "--mw-canvas-pattern",
+      "--mw-icon-stroke",
+      "--mw-icon-cap",
+      "--mw-card-transform",
+      "--mw-card-hover-transform",
+      "--mw-ornament",
+      "--mw-media-filter",
+      "--mw-motion-duration",
+    ] as const;
+
+    let count = 0;
+    for (const dnaId of DNA_IDS) {
+      for (const skin of SKINS) {
+        for (const mode of ["dark", "light"] as const) {
+          count += 1;
+          const resolved = resolveCanonicalTokens({ dnaId, skin, mode });
+          expect(assertCanonicalTokensValid(resolved)).toEqual([]);
+
+          const semanticAudit = auditPaletteContrast(dnaId, `${dnaId}:${skin}:${mode}`, {
+            canvas: resolved.semantic.canvas,
+            surface: resolved.semantic.surface,
+            surfaceElevated: resolved.semantic.surfaceElevated,
+            text: resolved.semantic.foreground,
+            mutedText: resolved.semantic.mutedForeground,
+            border: resolved.semantic.border,
+            accent: resolved.semantic.accent,
+            accentSecondary: resolved.semantic.accentSecondary,
+            accentForeground: resolved.semantic.accentForeground,
+            focus: resolved.semantic.focus,
+            success: resolved.semantic.success,
+            warning: resolved.semantic.warning,
+            danger: resolved.semantic.destructive,
+          });
+          expect(
+            semanticAudit.passed,
+            `Combo ${dnaId}:${skin}:${mode} failed AA contrast: ${JSON.stringify(semanticAudit.pairs)}`,
+          ).toBe(true);
+
+          const cssVars = canonicalTokensToCssVariables(resolved);
+          for (const varName of expectedMwVars) {
+            expect(cssVars[varName], `Missing ${varName} on ${dnaId}:${skin}:${mode}`).toBeDefined();
+          }
+        }
+      }
+    }
+    expect(count).toBe(140);
   });
 });

@@ -116,3 +116,43 @@ describe("migrations", () => {
     expect(tables).toHaveLength(0);
   });
 });
+
+describe("multi-tenant isolation on BaseRepository", () => {
+  it("isolates records across tenants for find, findOne, count, upsert, update, and delete", async () => {
+    const actorA = createActorContext("user-a", "api", "req-a", "tenant-a");
+    const actorB = createActorContext("user-b", "api", "req-b", "tenant-b");
+
+    const rowA = await noteModel.repository.create(
+      { title: "alpha-doc", body: "secret-a" },
+      actorA,
+    );
+    const rowB = await noteModel.repository.create({ title: "beta-doc", body: "secret-b" }, actorB);
+
+    expect(rowA.tenant_id).toBe("tenant-a");
+    expect(rowB.tenant_id).toBe("tenant-b");
+
+    expect(await noteModel.repository.count({}, { tenantId: "tenant-a" })).toBe(1);
+    expect(
+      (await noteModel.repository.list({}, { tenantId: "tenant-a" })).map((r) => r.id),
+    ).toEqual([rowA.id]);
+    expect(await noteModel.repository.findOne(rowA.id, { tenantId: "tenant-b" })).toBeNull();
+    expect(await noteModel.repository.findOne(rowA.id, { tenantId: "tenant-a" })).not.toBeNull();
+
+    // Cross-tenant update and delete fail closed
+    expect(await noteModel.repository.update(rowA.id, { title: "hijacked" }, actorB)).toBeNull();
+    expect(await noteModel.repository.delete(rowA.id, actorB)).toBeNull();
+
+    // Tenant B upsert with same business title creates an isolated Tenant B copy
+    const upsertedB = await noteModel.repository.upsert(
+      { title: "alpha-doc" },
+      { body: "owned-by-b" },
+      actorB,
+    );
+    expect(upsertedB.id).not.toBe(rowA.id);
+    expect(upsertedB.tenant_id).toBe("tenant-b");
+
+    // Tenant A record remains untouched
+    const reloadedA = await noteModel.repository.findOne(rowA.id, { tenantId: "tenant-a" });
+    expect(reloadedA?.body).toBe("secret-a");
+  });
+});

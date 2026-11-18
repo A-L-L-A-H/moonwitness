@@ -31,10 +31,12 @@ export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
       <Card className="absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[10px] tracking-wider text-zinc-500">
+            <p className="text-[10px] tracking-wider text-[var(--muted-foreground)]">
               {detail.subtitle.toUpperCase()}
             </p>
-            <h2 className="font-brush mt-1 text-3xl leading-tight text-white">{detail.title}</h2>
+            <h2 className="font-brush mt-1 text-3xl leading-tight text-[var(--card-foreground)]">
+              {detail.title}
+            </h2>
           </div>
           <Button
             type="button"
@@ -48,17 +50,19 @@ export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
           </Button>
         </div>
         {detail.art && (
-          <div className="relative mt-4 h-40 overflow-hidden rounded-md border-2 border-[var(--line)]">
+          <div className="relative mt-4 h-40 overflow-hidden rounded-md border-2 border-[var(--border)]">
             <ZineImage art={detail.art} sizes="(max-width: 768px) 100vw, 448px" />
           </div>
         )}
         <dl className="mt-5 divide-y divide-[var(--line)]">
           {detail.rows.map((row) => (
             <div key={row.label} className="flex items-center justify-between gap-3 py-2.5">
-              <dt className="text-[10px] tracking-wider text-zinc-500">
+              <dt className="text-[10px] tracking-wider text-[var(--muted-foreground)]">
                 {row.label.toUpperCase()}
               </dt>
-              <dd className="min-w-0 truncate text-right text-xs text-zinc-200">{row.value}</dd>
+              <dd className="min-w-0 truncate text-right text-xs text-[var(--foreground)]">
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>

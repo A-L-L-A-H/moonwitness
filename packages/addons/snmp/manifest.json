@@ -1,0 +1,14 @@
+{
+  "name": "snmp",
+  "version": "0.1.0",
+  "description": "SNMP network poller devices, OID targets, and telemetry samples",
+  "category": "network",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["snmp"],
+    "models": ["snmp.device", "snmp.target", "snmp.sample"],
+    "migrations": []
+  }
+}

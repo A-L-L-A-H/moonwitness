@@ -2,7 +2,9 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { OperationsShell } from "@/components/shell";
+import { RooftopAntennaArt, SkinOrnament } from "@moonwitness/ui";
+import { SyslogStream } from "@moonwitness/ui/icons";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { useSyslogMessages, type SyslogMessage } from "@/lib/api/syslog";
 
@@ -22,14 +24,14 @@ function OperatorSession({ children }: { children: (authorized: boolean) => Reac
 
   if (identity.isLoading) {
     return (
-      <p className="p-5 text-sm text-zinc-400" role="status">
+      <p className="p-5 text-sm text-[var(--muted-foreground)]" role="status">
         Verifying operator session…
       </p>
     );
   }
   if (identity.isError) {
     return (
-      <p className="p-5 text-sm text-zinc-400" role="status">
+      <p className="p-5 text-sm text-[var(--muted-foreground)]" role="status">
         Sign in through the Control Center to view Syslog messages.
       </p>
     );
@@ -51,7 +53,8 @@ function SyslogExplorer() {
   );
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="Syslog Explorer"
       search={{
         value: query,
@@ -60,12 +63,16 @@ function SyslogExplorer() {
       }}
     >
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-8">
-        <header className="border-b-2 border-[var(--line)] pb-5">
-          <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--blue)]">
-            OPERATIONS / READ ONLY
-          </p>
-          <h1 className="mt-2 font-brush text-4xl text-zinc-100">SYSLOG EXPLORER</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+        <header className="border-b-2 border-[var(--border)] pb-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <SyslogStream className="h-4 w-4 text-[var(--primary)]" />
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--primary)]">
+              OPERATIONS / READ ONLY
+            </p>
+            <SkinOrnament slot="tag" label="LOG INGEST" />
+          </div>
+          <h1 className="mt-2 font-brush text-4xl text-[var(--foreground)]">SYSLOG EXPLORER</h1>
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
             Recent messages from the authenticated Syslog service. This view does not stream live
             events.
           </p>
@@ -73,23 +80,23 @@ function SyslogExplorer() {
 
         <section
           aria-label="Syslog filters"
-          className="flex flex-col gap-3 border-2 border-[var(--line)] bg-[var(--panel)] p-4 sm:flex-row sm:items-end"
+          className="flex flex-col gap-3 border-2 border-[var(--border)] bg-[var(--card)] p-4 sm:flex-row sm:items-end"
         >
-          <label className="block flex-1 text-xs text-zinc-400">
+          <label className="block flex-1 text-xs text-[var(--muted-foreground)]">
             Message search
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               maxLength={200}
-              className="mt-1 min-h-11 w-full border-2 border-[var(--line)] bg-black/30 px-3 text-sm text-zinc-100 outline-none focus:border-[var(--blue)]"
+              className="mt-1 min-h-11 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)]"
             />
           </label>
-          <label className="block text-xs text-zinc-400 sm:w-56">
+          <label className="block text-xs text-[var(--muted-foreground)] sm:w-56">
             Severity
             <select
               value={severity}
               onChange={(event) => setSeverity(event.target.value)}
-              className="mt-1 min-h-11 w-full border-2 border-[var(--line)] bg-black/30 px-3 text-sm text-zinc-100 outline-none focus:border-[var(--blue)]"
+              className="mt-1 min-h-11 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)]"
             >
               <option value="">All severities</option>
               {severityNames.map((name, value) => (
@@ -103,7 +110,7 @@ function SyslogExplorer() {
         <button
           type="button"
           onClick={() => setRefreshVersion((version) => version + 1)}
-          className="min-h-11 text-xs text-[var(--blue)] underline"
+          className="min-h-11 text-xs text-[var(--primary)] underline"
         >
           Refresh messages
         </button>
@@ -118,7 +125,7 @@ function SyslogExplorer() {
           )}
         </OperatorSession>
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 
@@ -139,7 +146,7 @@ function SyslogMessages({
   if (!authorized) {
     return (
       <p
-        className="border-2 border-[var(--line)] bg-[var(--panel)] p-5 text-sm text-zinc-400"
+        className="border-2 border-[var(--border)] bg-[var(--card)] p-5 text-sm text-[var(--muted-foreground)]"
         role="status"
       >
         Complete instance setup before viewing Syslog messages.
@@ -149,7 +156,7 @@ function SyslogMessages({
   if (messages.isLoading) {
     return (
       <p
-        className="border-2 border-[var(--line)] bg-[var(--panel)] p-5 text-sm text-zinc-400"
+        className="border-2 border-[var(--border)] bg-[var(--card)] p-5 text-sm text-[var(--muted-foreground)]"
         role="status"
       >
         Loading recent messages…
@@ -158,15 +165,15 @@ function SyslogMessages({
   }
   if (messages.isError) {
     return (
-      <section className="border-2 border-[var(--yellow)]/50 bg-[var(--panel)] p-5" role="alert">
-        <h2 className="font-brush text-xl text-[var(--yellow)]">SYSLOG UNAVAILABLE</h2>
-        <p className="mt-2 text-sm text-zinc-300">
+      <section className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5" role="alert">
+        <h2 className="font-brush text-xl text-[var(--primary)]">SYSLOG UNAVAILABLE</h2>
+        <p className="mt-2 text-sm text-[var(--foreground)]">
           {(messages.error as Error).message || "The Syslog service could not return messages."}
         </p>
         <button
           type="button"
           onClick={() => void messages.refetch()}
-          className="mt-3 min-h-11 text-xs text-[var(--blue)] underline"
+          className="mt-3 min-h-11 text-xs text-[var(--primary)] underline"
         >
           Retry query
         </button>
@@ -178,12 +185,13 @@ function SyslogMessages({
   }
   if (messages.data?.length === 0) {
     return (
-      <p
-        className="border-2 border-[var(--line)] bg-[var(--panel)] p-5 text-sm text-zinc-400"
+      <div
+        className="flex flex-col items-center gap-3 border-2 border-[var(--border)] bg-[var(--card)] p-6 text-center text-sm text-[var(--muted-foreground)]"
         role="status"
       >
-        No messages match these filters.
-      </p>
+        <RooftopAntennaArt className="h-20 w-20 opacity-85" decorative />
+        <p>No messages match these filters.</p>
+      </div>
     );
   }
   return <MessageList messages={messages.data ?? []} stale={messages.isFetching} />;
@@ -193,13 +201,13 @@ function MessageList({ messages, stale }: { messages: SyslogMessage[]; stale: bo
   return (
     <section aria-label="Recent Syslog messages" className="space-y-3">
       {stale && (
-        <p className="text-xs text-zinc-500" role="status">
+        <p className="text-xs text-[var(--muted-foreground)]" role="status">
           Showing previously loaded results while refreshing.
         </p>
       )}
-      <div className="overflow-x-auto border-2 border-[var(--line)] bg-[var(--panel)]">
+      <div className="overflow-x-auto border-2 border-[var(--border)] bg-[var(--card)]">
         <table className="w-full min-w-[42rem] text-left text-xs">
-          <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+          <thead className="bg-[var(--background)] font-mono text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
             <tr>
               <th scope="col" className="p-3">
                 Received
@@ -218,7 +226,7 @@ function MessageList({ messages, stale }: { messages: SyslogMessage[]; stale: bo
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[var(--line)] text-zinc-300">
+          <tbody className="divide-y divide-[var(--line)] text-[var(--foreground)]">
             {messages.map((message) => (
               <tr key={message.id}>
                 <td className="whitespace-nowrap p-3">
@@ -239,7 +247,7 @@ function MessageList({ messages, stale }: { messages: SyslogMessage[]; stale: bo
           </tbody>
         </table>
       </div>
-      <p className="text-xs text-zinc-500">Showing at most 100 messages.</p>
+      <p className="text-xs text-[var(--muted-foreground)]">Showing at most 100 messages.</p>
     </section>
   );
 }

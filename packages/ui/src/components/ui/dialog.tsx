@@ -28,7 +28,7 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName;
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { skin?: SkinName }
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { skin?: SkinName | undefined }
 >(({ className, children, skin, ...props }, ref) => {
   const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
   return (

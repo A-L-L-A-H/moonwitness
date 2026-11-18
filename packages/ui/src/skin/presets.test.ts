@@ -4,9 +4,20 @@ import { skinPresets, getPreset, listPresets, applyPreset } from './presets';
 
 describe('Skin Presets', () => {
   describe('listPresets', () => {
-    it('returns all 6 skin names', () => {
+    it('returns all 10 skin names', () => {
       const skins = listPresets();
-      expect(skins).toEqual(['default', 'riot', 'editorial', 'technical', 'archive', 'transmission']);
+      expect(skins).toEqual([
+        'default',
+        'riot',
+        'editorial',
+        'technical',
+        'archive',
+        'transmission',
+        'sanctuary',
+        'brutalist',
+        'noir',
+        'kinetic',
+      ]);
     });
   });
 

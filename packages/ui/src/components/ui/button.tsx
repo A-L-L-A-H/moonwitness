@@ -13,7 +13,7 @@ export interface ButtonProps
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     Omit<VariantProps<typeof buttonVariants>, "skin"> {
   asChild?: boolean;
-  skin?: SkinName;
+  skin?: SkinName | undefined;
   loading?: boolean;
 }
 

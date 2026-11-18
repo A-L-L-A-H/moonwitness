@@ -1,5 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { requireAuth, requireRole } from "../../middleware/auth";
+import { createActorContext } from "@moonwitness/orm";
+import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import {
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
@@ -18,7 +20,7 @@ function radiusProxyAdminEnabled(): boolean {
 function forwardHeaders(request: FastifyRequest): Record<string, string> {
   const headers: Record<string, string> = {};
   if (request.body) headers["content-type"] = "application/json";
-  return getUpstreamBridgeHeaders(headers);
+  return getUpstreamBridgeHeaders(headers, request);
 }
 
 async function forward(
@@ -50,6 +52,38 @@ async function forward(
   }
 
   const text = await upstream.text();
+  if (
+    upstream.status < 400 &&
+    (method === "POST" || method === "PUT" || method === "DELETE") &&
+    target.startsWith("/api/users")
+  ) {
+    const authUser = (request as AuthenticatedRequest).user;
+    const bodyObj =
+      request.body && typeof request.body === "object"
+        ? (request.body as Record<string, unknown>)
+        : {};
+    const targetSuffix = target.replace(/^\/api\/users\/?/, "");
+    const entityId =
+      decodeURIComponent(targetSuffix || String(bodyObj.username ?? "unknown")).slice(0, 200) ||
+      "unknown";
+    const action = method === "POST" ? "CREATE" : method === "PUT" ? "UPDATE" : "DELETE";
+    await tryRecordAuditLog({
+      domain: "radius",
+      entity: "radius_user",
+      entityId,
+      action,
+      actor: createActorContext(authUser ? String(authUser.id) : null, "api", request.id),
+      actorRole: authUser?.role ?? null,
+      requestPath: request.url,
+      outcome: "success",
+      metadata: {
+        method,
+        target,
+        username: bodyObj.username ? String(bodyObj.username) : entityId,
+        enabled: typeof bodyObj.enabled === "boolean" ? bodyObj.enabled : undefined,
+      },
+    });
+  }
   return reply
     .code(upstream.status)
     .header("content-type", upstream.headers.get("content-type") ?? "application/json")

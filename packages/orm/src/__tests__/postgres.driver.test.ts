@@ -49,6 +49,13 @@ describe("translateSqlForPostgres", () => {
     const pragmaOther = translateSqlForPostgres("PRAGMA journal_mode = WAL");
     expect(pragmaOther.sql).toBe("SELECT 1 AS ok");
 
+    expect(translateSqlForPostgres("PRAGMA integrity_check").sql).toBe(
+      "SELECT 'ok' AS integrity_check",
+    );
+    expect(translateSqlForPostgres("PRAGMA foreign_key_check").sql).toBe(
+      "SELECT 1 AS fk_violation WHERE 1 = 0",
+    );
+
     const commentAndRowid = translateSqlForPostgres(
       "-- ? keep comment untouched\n/* ? also comment */\nSELECT * FROM logs WHERE note != '?literal' AND flag = ? ORDER BY rowid ASC",
     );

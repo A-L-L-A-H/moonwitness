@@ -64,8 +64,8 @@ export function KatanaSkyHud({ monitor, mode = "compact", onOpenUrl }: KatanaSky
               stroke="rgba(243, 235, 217, 0.2)"
               strokeWidth="0.9"
             />
-            <circle cx="460" cy="75" r="24" fill="rgba(229, 62, 56, 0.12)" stroke="#e53e38" strokeWidth="1.4" />
-            <circle cx="460" cy="75" r="5" fill="#d7ff36" />
+            <circle cx="460" cy="75" r="24" fill="rgba(229, 62, 56, 0.12)" stroke="var(--world-crimson)" strokeWidth="1.4" />
+            <circle cx="460" cy="75" r="5" fill="var(--color-lime)" />
             <line x1="50" y1="75" x2="870" y2="75" stroke="rgba(229, 62, 56, 0.2)" strokeDasharray="3 5" />
           </svg>
           <div className="astrolabe-nodes">

@@ -1,5 +1,8 @@
 # R!OT OS — Local AI Operating Instructions
 
+> [!IMPORTANT]
+> **Absorbed Engine Subordination Notice (`2026-11-18`):** This file belongs to the absorbed archive under `engines/chronicle-os/moonwitness-os/` ([CONSOLIDATION-CATALOG.md](../../../docs/CONSOLIDATION-CATALOG.md)). Root [AGENTS.md](../../../AGENTS.md) and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md) override this file on repository-wide Git branching (`dev` only), security, and CI gates.
+
 > This file is the entry point for any coding agent working in this repository.
 
 ## Mandatory reading

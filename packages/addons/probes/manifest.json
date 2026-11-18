@@ -1,0 +1,14 @@
+{
+  "name": "probes",
+  "version": "0.1.0",
+  "description": "Edge health probes, telemetry targets, and operational events",
+  "category": "telemetry",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["probes"],
+    "models": ["probe.node", "probe.event", "ops.event"],
+    "migrations": []
+  }
+}

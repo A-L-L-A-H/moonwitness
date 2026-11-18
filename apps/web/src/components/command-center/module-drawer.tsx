@@ -49,33 +49,39 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
             ✕
           </Button>
         </div>
-        <h2 className="font-brush mt-4 text-3xl text-white">{module.name.toUpperCase()}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-zinc-400">{module.description}</p>
+        <h2 className="font-brush mt-4 text-3xl text-[var(--card-foreground)]">
+          {module.name.toUpperCase()}
+        </h2>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+          {module.description}
+        </p>
         <div className="mt-5 grid grid-cols-2 gap-3">
           {module.stats.map((s) => (
             <div
               key={s.label}
-              className="border border-[var(--line)] bg-[var(--panel-2)] p-3 text-center"
+              className="border border-[var(--border)] bg-[var(--muted)] p-3 text-center"
             >
               <div className="font-brush text-2xl" style={{ color: s.color }}>
                 {s.value}
               </div>
-              <div className="mt-1 text-[10px] tracking-wider text-zinc-500">
+              <div className="mt-1 text-[10px] tracking-wider text-[var(--muted-foreground)]">
                 {s.label.toUpperCase()}
               </div>
             </div>
           ))}
         </div>
-        <h3 className="font-brush mt-6 text-sm text-[var(--yellow)]">CONNECTED PROJECTS</h3>
+        <h3 className="font-brush mt-6 text-sm text-[var(--primary)]">CONNECTED PROJECTS</h3>
         <div className="mt-2 space-y-2">
           {projects.slice(0, 3).map((p) => (
             <div
               key={p.id}
-              className="flex items-center gap-3 border border-[var(--line)] px-3 py-2"
+              className="flex items-center gap-3 border border-[var(--border)] px-3 py-2"
             >
               <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-              <span className="flex-1 min-w-0 truncate text-xs text-zinc-200">{p.title}</span>
-              <span className="text-[10px] text-zinc-500">{p.progress}%</span>
+              <span className="flex-1 min-w-0 truncate text-xs text-[var(--foreground)]">
+                {p.title}
+              </span>
+              <span className="text-[10px] text-[var(--muted-foreground)]">{p.progress}%</span>
             </div>
           ))}
         </div>
@@ -86,7 +92,7 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
         >
           QUEUE NEW RUN <ArrowRight className="h-5 w-5" />
         </Button>
-        <p className="mt-3 text-center text-[10px] text-zinc-600">
+        <p className="mt-3 text-center text-[10px] text-[var(--muted-foreground)]">
           Starts a workflow in the Automation Center immediately.
         </p>
       </Card>

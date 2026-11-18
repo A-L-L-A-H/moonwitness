@@ -9,7 +9,7 @@ export default function SkinLabPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--pink)]">
+        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--primary)]">
           CALIBRATING SKIN LABORATORY…
         </div>
       }

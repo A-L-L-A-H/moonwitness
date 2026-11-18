@@ -1,6 +1,7 @@
 pub mod agent_execution;
 pub mod cloud_backup;
 pub mod continuity;
+pub mod dev_control;
 pub mod issues;
 pub mod milestones;
 pub mod monitor;

@@ -391,6 +391,8 @@ function stepAppTopology(gate) {
 function quickSteps(gate) {
   stepToolchain(gate);
   stepAppTopology(gate);
+  stepCommand(gate, "docs-governance", "pnpm", ["docs:check"]);
+  stepCommand(gate, "docs-tests", "pnpm", ["docs:test"]);
   stepCommand(gate, "format", "pnpm", ["format:check"]);
   stepCommand(gate, "lint", "pnpm", ["lint", "--filter=@moonwitness/*"]);
   stepCommand(gate, "typecheck", "pnpm", ["typecheck", "--filter=@moonwitness/*"]);
@@ -409,6 +411,8 @@ function localSteps(gate) {
   stepToolchain(gate);
   stepAppTopology(gate);
   stepCommand(gate, "install", "pnpm", ["install", "--frozen-lockfile"]);
+  stepCommand(gate, "docs-governance", "pnpm", ["docs:check"]);
+  stepCommand(gate, "docs-tests", "pnpm", ["docs:test"]);
   stepCommand(gate, "format", "pnpm", ["format:check"]);
   stepCommand(gate, "lint", "pnpm", ["lint"]);
   stepCommand(gate, "typecheck", "pnpm", ["typecheck"]);

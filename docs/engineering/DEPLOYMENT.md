@@ -7,11 +7,11 @@
 
 MoonWitness deploys as a single-VPS Docker Compose stack fronted exclusively by **Caddy** on ports `80`/`443`:
 
-- `caddy` (`moonwitness-public`) → TLS termination & reverse proxy (`moonwitness.biz.id` → `web:3000`, `a-l-l-a-h.com` → `allah:3003`, `api.moonwitness.biz.id` / `id.moonwitness.biz.id` → `api:3002`)
-- `web` (Next.js App Router) → `apps/web` (internal `:3000`)
-- `allah` (Next.js App Router) → `apps/a-l-l-a-h` (internal `:3003`)
-- `api` (Fastify Core API + MID OIDC + IGate) → `apps/api` (internal `:3002`, SQLite `moonwitness-data`)
-- `radius`, `snmp-poller`, `syslog` (Rust services on `moonwitness-internal`, no public ports)
+- `caddy` (`moonwitness-public`) → TLS termination & reverse proxy (`moonwitness.biz.id` & `a-l-l-a-h.com` → `web:3000`; `api.moonwitness.biz.id` / `id.moonwitness.biz.id` → `api:3002`)
+- `web` (Next.js App Router) → `apps/web` (internal `:3000`, exposes `/api/health`)
+- `api` (Fastify Core API + MID OIDC + IGate) → `apps/api` (internal `:3002`, exposes `/api/v1/healthz` & `/api/v1/readyz`)
+- `postgres` (`postgres:16-alpine`) → primary relational database for `api` on `moonwitness-internal`
+- `radius`, `snmp-poller`, `syslog`, `storage` (Rust `--profile ops` services on `moonwitness-internal`, per-service SQLite volumes)
 - `arsy` (`cp/arsy`) → native loopback-only host agent (`127.0.0.1:8787`)
 
 See [VPS-TOPOLOGY-OPERATIONS.md](../architecture/VPS-TOPOLOGY-OPERATIONS.md) and [DEPLOYMENT-RUNBOOK.md](../architecture/DEPLOYMENT-RUNBOOK.md) for full service, volume, and backup details.

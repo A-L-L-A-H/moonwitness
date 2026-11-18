@@ -1,11 +1,16 @@
 {
   "name": "timeline",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Timeline addon: events, eras, and witness data",
+  "category": "narrative",
+  "autoInstall": true,
+  "defaultEnabled": true,
   "depends": ["__base"],
   "provides": {
     "routes": ["timeline"],
-    "models": ["timeline.event"],
-    "auditActions": ["CREATE", "UPDATE", "ARCHIVE", "RESTORE"]
+    "models": ["timeline.event", "timeline.era"],
+    "migrations": [],
+    "seeds": ["timeline_demo_seed"],
+    "auditActions": ["CREATE", "UPDATE", "ARCHIVE", "RESTORE", "DELETE"]
   }
 }

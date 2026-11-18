@@ -1,0 +1,15 @@
+{
+  "name": "audit",
+  "version": "0.1.0",
+  "description": "Unified platform audit log & ORM outbox subscriber",
+  "category": "governance",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base"],
+  "provides": {
+    "routes": ["audit"],
+    "models": ["ops.audit_log"],
+    "migrations": [],
+    "auditActions": ["CREATE", "UPDATE", "ARCHIVE", "RESTORE", "DELETE", "EXECUTE", "ACCESS"]
+  }
+}

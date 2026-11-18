@@ -13,4 +13,5 @@ export interface BaseMetadata {
   version: number; // optimistic locking
   source: RecordSource;
   source_ref: string | null;
+  tenant_id: string;
 }

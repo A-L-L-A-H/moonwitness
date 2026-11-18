@@ -4,20 +4,40 @@
  */
 
 import type { FastifyRequest, FastifyReply } from "fastify";
+import { DEFAULT_TENANT_ID, normalizeTenantId } from "@moonwitness/orm";
 import { getSessionWithUser, SESSION_COOKIE_NAME } from "../services/session";
 import { verifyMidBearerToken } from "./mid-jwt";
 
 export interface AuthenticatedRequest extends FastifyRequest {
+  tenantId?: string;
   user?: {
-    id: number;
+    id: string;
     username: string;
     email: string;
     role: "admin" | "editor" | "viewer";
     displayName: string;
+    tenantId?: string;
   };
 }
 
 type AuthenticatedUser = NonNullable<AuthenticatedRequest["user"]>;
+
+/** Resolves effective tenant id; ignores client `x-tenant-id` header unless caller is an admin. */
+export function resolveRequestTenant(request: FastifyRequest): string {
+  const typedReq = request as AuthenticatedRequest;
+  const user = typedReq.user;
+  if (!user) return DEFAULT_TENANT_ID;
+  const rawHeader = request.headers["x-tenant-id"];
+  const candidateHeader = Array.isArray(rawHeader) ? rawHeader[0] : rawHeader;
+  if (user.role === "admin" && typeof candidateHeader === "string" && candidateHeader.trim()) {
+    try {
+      return normalizeTenantId(candidateHeader);
+    } catch {
+      return user.tenantId ? normalizeTenantId(user.tenantId) : DEFAULT_TENANT_ID;
+    }
+  }
+  return user.tenantId ? normalizeTenantId(user.tenantId) : DEFAULT_TENANT_ID;
+}
 
 /** Resolve caller identity from session cookie or MoonWitness ID Bearer JWT. */
 export async function resolveRequestIdentity(request: FastifyRequest): Promise<{
@@ -70,6 +90,7 @@ async function resolveAuthenticatedUser(
   }
 
   typedReq.user = user;
+  typedReq.tenantId = resolveRequestTenant(typedReq);
   return typedReq.user;
 }
 
@@ -98,10 +119,14 @@ export function optionalAuth() {
   return async (request: FastifyRequest, _reply: FastifyReply) => {
     if (request.method === "OPTIONS") return;
     const typedReq = request as AuthenticatedRequest;
-    if (typedReq.user) return;
+    if (typedReq.user) {
+      typedReq.tenantId = resolveRequestTenant(typedReq);
+      return;
+    }
     const { user } = await resolveRequestIdentity(request);
     if (user) {
       typedReq.user = user;
+      typedReq.tenantId = resolveRequestTenant(typedReq);
     }
   };
 }

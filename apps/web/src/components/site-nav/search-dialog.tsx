@@ -79,13 +79,15 @@ export function SearchDialog({ query, onQueryChange, onSubmit, onClose }: Search
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder="stories, signals, people, places…"
-            className="rounded-md bg-[var(--background)] border-[var(--line)] px-4 py-3 text-sm focus:border-[var(--pink)] focus:ring-[var(--pink)]"
+            className="rounded-md bg-[var(--background)] border-[var(--border)] px-4 py-3 text-sm focus:border-[var(--pink)] focus:ring-[var(--pink)]"
           />
           <Button type="submit" className="btn-zine px-5 py-2 text-sm">
             GO
           </Button>
         </div>
-        <p className="mt-3 text-xs text-zinc-500">Searches the Dock timeline chronicle.</p>
+        <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+          Searches the Dock timeline chronicle.
+        </p>
       </form>
     </div>
   );

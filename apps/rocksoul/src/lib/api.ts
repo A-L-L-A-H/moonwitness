@@ -679,6 +679,35 @@ export async function call<Command extends NativeCommand>(
     return undefined as unknown as CommandResult<Command>;
   }
 
+  if (command === "get_dev_services_status") {
+    return [
+      {
+        id: "api",
+        name: "Core API",
+        port: 3002,
+        managed: false,
+        listening: false,
+        pid: null,
+        recent_logs: [],
+        last_error: null,
+      },
+      {
+        id: "web",
+        name: "MoonWitness Web",
+        port: 3000,
+        managed: false,
+        listening: false,
+        pid: null,
+        recent_logs: [],
+        last_error: null,
+      },
+    ] as unknown as CommandResult<Command>;
+  }
+
+  if (command === "start_dev_service" || command === "stop_dev_service") {
+    throw new Error("Dev server process control requires the native desktop app.");
+  }
+
   if (command === "add_repository") {
     throw new Error("Repository registration is available in the native desktop app.");
   }
@@ -699,6 +728,34 @@ export async function call<Command extends NativeCommand>(
 
   if (command === "await_mid_loopback_callback") {
     throw new Error("Loopback sign-in requires the native desktop app.");
+  }
+
+  if (command === "discover_local_providers") {
+    return [] as unknown as CommandResult<Command>;
+  }
+  if (
+    command === "start_supervised_agent_run" ||
+    command === "cancel_supervised_agent_run" ||
+    command === "evaluate_agent_worktree_evidence"
+  ) {
+    throw new Error("Supervised agent execution requires the native desktop app.");
+  }
+  if (command === "get_agent_execution_steps" || command === "get_orchestration_tasks") {
+    return [] as unknown as CommandResult<Command>;
+  }
+  if (command === "list_studio_drafts" || command === "list_research_claims") {
+    return [] as unknown as CommandResult<Command>;
+  }
+  if (command === "get_companion_profile") {
+    return {
+      id: "default",
+      name: "RockSoul Sentinel",
+      personality: "Stoic, analytical, loyal companion",
+      state: "idle",
+      dailyBriefing: "Browser preview active.",
+      eveningRecap: "Local desktop required for live telemetry.",
+      updatedAt: new Date().toISOString(),
+    } as unknown as CommandResult<Command>;
   }
 
   throw new Error(`Unsupported native command: ${command}`);

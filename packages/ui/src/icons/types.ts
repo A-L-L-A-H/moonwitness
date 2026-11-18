@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { CSSProperties, SVGProps } from "react";
 
 export type DnaIconTone = "current" | "accent" | "duotone" | "triad";
 
@@ -16,6 +16,7 @@ export function resolveIconSvgProps({
   width,
   height,
   viewBox = "0 0 24 24",
+  style,
   ...rest
 }: DnaIconProps) {
   const accentColor =
@@ -31,8 +32,12 @@ export function resolveIconSvgProps({
       viewBox,
       fill: "none",
       "aria-hidden": true as const,
+      "data-mw-icon": "true",
       width: size ?? width,
       height: size ?? height,
+      style: {
+        ...style,
+      } as CSSProperties,
       ...rest,
     },
   };

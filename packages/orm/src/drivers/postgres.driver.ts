@@ -190,6 +190,31 @@ export function translateSqlForPostgres(sql: string): {
     };
   }
 
+  const indexListMatch = sql.match(
+    /^\s*PRAGMA\s+index_list\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)\s*;?\s*$/i,
+  );
+  if (indexListMatch) {
+    const tableName = indexListMatch[1]!.toLowerCase();
+    return {
+      sql: `SELECT indexname AS name FROM pg_indexes WHERE schemaname = 'public' AND tablename = '${tableName}'`,
+      isInsertWithoutReturning: false,
+    };
+  }
+
+  if (/^\s*PRAGMA\s+integrity_check\b/i.test(sql)) {
+    return {
+      sql: "SELECT 'ok' AS integrity_check",
+      isInsertWithoutReturning: false,
+    };
+  }
+
+  if (/^\s*PRAGMA\s+foreign_key_check\b/i.test(sql)) {
+    return {
+      sql: "SELECT 1 AS fk_violation WHERE 1 = 0",
+      isInsertWithoutReturning: false,
+    };
+  }
+
   if (/^\s*PRAGMA\b/i.test(sql)) {
     return {
       sql: "SELECT 1 AS ok",
@@ -241,7 +266,10 @@ function normalizePgParams(params: unknown[]): unknown[] {
 function normalizePgRow(row: Record<string, unknown>): Record<string, unknown> {
   const normalized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(row)) {
-    if (INTEGER_RESULT_KEYS.has(key) && typeof value === "string" && /^-?\d+$/.test(value)) {
+    const isIntKey =
+      INTEGER_RESULT_KEYS.has(key) ||
+      /(_count|_id|_sec|_ms|_bytes|_port|^min_|^max_|^total_)$/i.test(key);
+    if (isIntKey && typeof value === "string" && /^-?\d+$/.test(value)) {
       const parsed = Number(value);
       normalized[key] = Number.isSafeInteger(parsed) ? parsed : value;
     } else {

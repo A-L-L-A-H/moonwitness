@@ -37,7 +37,18 @@ export interface SavedAvatar {
   updatedAt: string;
 }
 
-const PALETTES: readonly PaletteName[] = ["street", "moon", "acid", "signal"];
+const PALETTES: readonly PaletteName[] = [
+  "street",
+  "moon",
+  "acid",
+  "signal",
+  "imperium",
+  "lunar",
+  "rocksoul",
+  "nexus",
+  "mycelium",
+  "nusantara",
+];
 const BACKGROUNDS: readonly BackgroundName[] = ["ink", "paper", "transparent"];
 
 export function normalizeSeed(seed: string): string {
@@ -52,33 +63,43 @@ function isOneOf<T extends string>(value: unknown, list: readonly T[]): value is
 export function validateSavedAvatar(raw: unknown): SavedAvatar | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
-  if (r.version !== AVATAR_STORAGE_VERSION) return null;
-  if (typeof r.identity !== "string" || r.identity.trim() === "") return null;
-  if (typeof r.seed !== "string") return null;
-  const o = r.options;
+  if (r["version"] !== AVATAR_STORAGE_VERSION) return null;
+  const identity = r["identity"];
+  if (typeof identity !== "string" || identity.trim() === "") return null;
+  const seed = r["seed"];
+  if (typeof seed !== "string") return null;
+  const o = r["options"];
   if (!o || typeof o !== "object") return null;
   const op = o as Record<string, unknown>;
-  if (!isOneOf(op.palette, PALETTES)) return null;
-  if (!isOneOf(op.background, BACKGROUNDS)) return null;
-  if (typeof op.radius !== "number" || !Number.isFinite(op.radius)) return null;
-  if (typeof op.halftone !== "boolean") return null;
-  if (typeof op.crown !== "boolean") return null;
-  if (typeof op.moon !== "boolean") return null;
-  if (typeof op.tape !== "boolean") return null;
+  const palette = op["palette"];
+  const background = op["background"];
+  const radius = op["radius"];
+  const halftone = op["halftone"];
+  const crown = op["crown"];
+  const moon = op["moon"];
+  const tape = op["tape"];
+  if (!isOneOf(palette, PALETTES)) return null;
+  if (!isOneOf(background, BACKGROUNDS)) return null;
+  if (typeof radius !== "number" || !Number.isFinite(radius)) return null;
+  if (typeof halftone !== "boolean") return null;
+  if (typeof crown !== "boolean") return null;
+  if (typeof moon !== "boolean") return null;
+  if (typeof tape !== "boolean") return null;
+  const updatedAt = r["updatedAt"];
   return {
     version: AVATAR_STORAGE_VERSION,
-    identity: r.identity,
-    seed: normalizeSeed(r.seed),
+    identity,
+    seed: normalizeSeed(seed),
     options: {
-      palette: op.palette,
-      background: op.background,
-      radius: op.radius,
-      halftone: op.halftone,
-      crown: op.crown,
-      moon: op.moon,
-      tape: op.tape,
+      palette,
+      background,
+      radius,
+      halftone,
+      crown,
+      moon,
+      tape,
     },
-    updatedAt: typeof r.updatedAt === "string" ? r.updatedAt : new Date().toISOString(),
+    updatedAt: typeof updatedAt === "string" ? updatedAt : new Date().toISOString(),
   };
 }
 

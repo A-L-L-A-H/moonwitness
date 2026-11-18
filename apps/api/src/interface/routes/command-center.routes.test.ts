@@ -11,11 +11,11 @@ vi.mock("../../middleware/auth", () => ({
     if (!cookieHeader.includes("mw_session=")) {
       return reply.code(401).send({ error: "Not authenticated" });
     }
-    const actor = request.headers["x-test-actor"] === "second" ? 2 : 1;
+    const actor = request.headers["x-test-actor"] === "second" ? "2" : "1";
     const role = (request.headers["x-test-role"] as "admin" | "editor" | "viewer") ?? "editor";
     request.user = {
       id: actor,
-      username: actor === 2 ? "editor-two" : "creator-one",
+      username: actor === "2" ? "editor-two" : "creator-one",
       email: `actor${actor}@moonwitness.local`,
       role,
       displayName: `Actor ${actor}`,
@@ -71,9 +71,12 @@ describe("command center persistence routes", () => {
     const body = initial.json() as {
       workflows: Array<{ id: string; status: string }>;
       alerts: Array<{ id: string }>;
+      feed: Array<{ time: string; tag: string; msg: string }>;
     };
     expect(body.workflows).toHaveLength(5);
     expect(body.alerts).toHaveLength(3);
+    expect(body.feed.length).toBeGreaterThan(0);
+    expect(body.feed[0]).toHaveProperty("tag");
 
     const created = await app!.inject({
       method: "POST",
