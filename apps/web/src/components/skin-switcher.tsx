@@ -73,13 +73,16 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} aria-hidden="true" />
-          <div className="absolute right-0 top-full z-50 mt-2 w-72 overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-lg">
+          <div
+            data-mw-skin-switcher-menu="true"
+            className="absolute right-0 top-full z-50 mt-2 max-h-[80vh] w-72 overflow-y-auto rounded-lg border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] shadow-lg"
+          >
             <div className="border-b border-[var(--border)] px-3 py-2">
               <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--muted-foreground)]">
                 Surface Skin
               </span>
             </div>
-            <div className="py-1">
+            <div className="max-h-52 overflow-y-auto py-1">
               {presets.map((key) => {
                 const preset = skinPresets[key];
                 const isActive = skin === key;

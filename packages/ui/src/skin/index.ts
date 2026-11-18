@@ -12,6 +12,7 @@ import React, {
   type CSSProperties,
   type ReactNode,
 } from "react";
+import { flushSync } from "react-dom";
 import {
   canonicalTokensToCssVariables,
   resolveCanonicalTokens,
@@ -69,7 +70,9 @@ function runWithViewTransition(update: () => void): void {
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const doc = document as Document & { startViewTransition?: (cb: () => void) => unknown };
   if (!prefersReduced && typeof doc.startViewTransition === "function") {
-    doc.startViewTransition(update);
+    doc.startViewTransition(() => {
+      flushSync(update);
+    });
     return;
   }
   update();
