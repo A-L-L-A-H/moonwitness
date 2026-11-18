@@ -2,6 +2,10 @@ import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { ConflictError, createActorContext } from "@moonwitness/orm";
 import { z } from "@moonwitness/core";
+import {
+  MemorySyncBatchPayloadSchema,
+  type MemorySyncRecordPayload,
+} from "@moonwitness/contracts/continuity";
 import { memoryRecordModel } from "../../infrastructure/persistence/domain";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import { env, validateMemoryRuntimeConfig } from "../../shared/env";
@@ -82,47 +86,6 @@ const memoryEntryCreateSchema = z.object({
   expires_at: z.string().nullable().optional(),
 });
 
-const memorySyncRecordSchema = z
-  .object({
-    id: z.string().min(1).max(200).optional(),
-    record_key: z.string().min(1).max(200).optional(),
-    owner_id: z.string().max(200).nullable().optional(),
-    scope: z.string().min(1).max(80).optional(),
-    archive_id: z.string().max(200).optional(),
-    conversation_id: z.string().max(200).optional(),
-    kind: z.string().min(1).max(80),
-    title: z.string().min(1).max(300),
-    summary: z
-      .string()
-      .nullish()
-      .transform((value) => value ?? ""),
-    content: z
-      .string()
-      .nullish()
-      .transform((value) => value ?? ""),
-    tags: z.array(z.string()).optional().default([]),
-    entities: z.array(z.string()).optional().default([]),
-    source_message_ids: z.array(z.string()).optional().default([]),
-    confidence: z
-      .number()
-      .nullish()
-      .transform((value) => (typeof value === "number" ? value : 0.5)),
-    metadata: z.record(z.string(), z.unknown()).optional(),
-    retention_days: z.number().int().positive().nullable().optional(),
-    expires_at: z.string().nullable().optional(),
-    created_at: z.string().optional(),
-    updated_at: z.string().optional(),
-  })
-  .refine((value) => Boolean((value.record_key ?? value.id)?.trim()), {
-    message: "Each sync record must provide id or record_key",
-  });
-
-const memorySyncPayloadSchema = z.object({
-  source: z.enum(["moonwitness-memory", "rocksoul-desktop"]),
-  schema_version: z.literal(1),
-  records: z.array(memorySyncRecordSchema).min(1).max(250),
-});
-
 type MemoryBridgeResolution =
   | { configured: boolean; baseUrl: null; error?: string }
   | { configured: true; baseUrl: string; error?: string };
@@ -167,10 +130,7 @@ async function fetchMemoryJson<T>(url: URL, schema: z.ZodType<T>, timeoutMs: num
   return parsed.data;
 }
 
-function toMemoryRecordData(
-  item: z.infer<typeof memorySyncRecordSchema>,
-  ownerIdFallback: string | null,
-) {
+function toMemoryRecordData(item: MemorySyncRecordPayload, ownerIdFallback: string | null) {
   const recordKey = (item.record_key ?? item.id ?? "").trim().slice(0, 200);
   return {
     record_key: recordKey,
@@ -495,7 +455,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
       },
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const parsed = memorySyncPayloadSchema.safeParse(request.body);
+      const parsed = MemorySyncBatchPayloadSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.code(400).send({
           error: parsed.error.issues[0]?.message ?? "Invalid memory sync payload",

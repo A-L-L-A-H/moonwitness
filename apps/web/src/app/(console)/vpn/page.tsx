@@ -1,21 +1,5 @@
-import { Suspense } from "react";
-import { VpnView } from "@/views/vpn";
+import { redirect } from "next/navigation";
 
-export const metadata = {
-  title: "VPN & Mesh Tunnel — MoonWitness Underground",
-  description: "WireGuard & encrypted peer-to-peer mesh networking command tunnel.",
-};
-
-export default function VpnPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--primary)]">
-          CONNECTING UNDERGROUND VPN TUNNEL…
-        </div>
-      }
-    >
-      <VpnView />
-    </Suspense>
-  );
+export default function LegacyVpnPage() {
+  redirect("/control?tab=vpn");
 }

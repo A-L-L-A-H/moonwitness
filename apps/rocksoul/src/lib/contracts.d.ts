@@ -1,4 +1,39 @@
-export type DevServiceTarget = "web" | "api" | "all";
+import type {
+  CaptureMemoryArgs,
+  ContinuityMemoryRecord,
+  ContinuitySyncBundle,
+  CreateExperienceArgs,
+  CreateMemoryArgs,
+  CreateResumePointArgs,
+  CreateWorkSessionArgs,
+  ExperienceRecord,
+  LessonRecord,
+  MemoryCategory,
+  MemoryStatus,
+  ResumePointRecord,
+  SoulJournalEntry,
+  UpdateMemoryArgs,
+  WorkSessionRecord,
+} from "@moonwitness/contracts/continuity";
+
+export type {
+  CaptureMemoryArgs,
+  ContinuityMemoryRecord,
+  ContinuityMemoryRecord as MemoryRecord,
+  ContinuitySyncBundle,
+  CreateExperienceArgs,
+  CreateMemoryArgs,
+  CreateResumePointArgs,
+  CreateWorkSessionArgs,
+  ExperienceRecord,
+  LessonRecord,
+  MemoryCategory,
+  MemoryStatus,
+  ResumePointRecord,
+  SoulJournalEntry,
+  UpdateMemoryArgs,
+  WorkSessionRecord,
+};
 
 export type IssueStatus = "open" | "blocked" | "done" | "closed";
 export type IssuePriority = "P0" | "P1" | "P2" | "P3";
@@ -181,85 +216,7 @@ export interface MidLoopbackCallback {
   redirect_uri: string;
 }
 
-export type MemoryCategory =
-  | "working"
-  | "project"
-  | "episodic"
-  | "semantic"
-  | "procedural"
-  | "preference";
-
-export type MemoryStatus = "active" | "corrected" | "archived" | "deleted";
-
-export interface MemoryRecord {
-  id: string;
-  category: MemoryCategory;
-  title: string;
-  content: string;
-  sourceType: string;
-  sourceRef: string;
-  confidence: string;
-  status: MemoryStatus;
-  retention: string;
-  projectId: string | null;
-  repositoryId: string | null;
-  issueId: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface WorkSessionRecord {
-  id: string;
-  name: string;
-  status: "active" | "closed" | "interrupted";
-  projectId: string | null;
-  repositoryId: string | null;
-  issueId: string | null;
-  contextJson: string;
-  createdAt: string;
-  updatedAt: string;
-  closedAt: string | null;
-}
-
-export interface ResumePointRecord {
-  id: string;
-  workSessionId: string;
-  title: string;
-  summary: string;
-  contextJson: string;
-  createdAt: string;
-}
-
-export interface ExperienceRecord {
-  id: string;
-  title: string;
-  summary: string;
-  evidenceJson: string;
-  taskId: string | null;
-  runId: string | null;
-  artifactId: string | null;
-  status: "observed" | "verified" | "rejected";
-  createdAt: string;
-}
-
-export interface LessonRecord {
-  id: string;
-  experienceId: string | null;
-  proposal: string;
-  status: "proposed" | "accepted" | "rejected";
-  acceptedAt: string | null;
-  createdAt: string;
-}
-
-export interface SoulJournalEntry {
-  id: string;
-  kind: "experience" | "lesson";
-  title: string;
-  summary: string;
-  status: string;
-  evidenceJson: string;
-  createdAt: string;
-}
+export type DevServiceTarget = "web" | "api" | "all";
 
 export interface CreateIssueArgs {
   title: string;
@@ -309,61 +266,6 @@ export interface GitExecuteArgs {
   operation: GitOperation;
   branch?: string | undefined;
   message?: string | undefined;
-}
-
-export interface CaptureMemoryArgs {
-  title: string;
-  content: string;
-  category?: MemoryCategory;
-  sourceRef?: string;
-  projectId?: string | null;
-}
-
-export interface CreateMemoryArgs {
-  category: MemoryCategory;
-  title: string;
-  content: string;
-  sourceType: string;
-  sourceRef: string;
-  confidence: string;
-  retention: string;
-  projectId?: string | null;
-  repositoryId?: string | null;
-  issueId?: string | null;
-}
-
-export interface UpdateMemoryArgs {
-  memoryId: string;
-  title: string;
-  content: string;
-  category: MemoryCategory;
-  status: MemoryStatus;
-  retention: string;
-  sourceRef: string;
-}
-
-export interface CreateWorkSessionArgs {
-  name: string;
-  projectId?: string | null;
-  repositoryId?: string | null;
-  issueId?: string | null;
-  contextJson?: string;
-}
-
-export interface CreateResumePointArgs {
-  workSessionId: string;
-  title: string;
-  summary: string;
-  contextJson?: string;
-}
-
-export interface CreateExperienceArgs {
-  title: string;
-  summary: string;
-  evidenceJson?: string;
-  taskId?: string | null;
-  runId?: string | null;
-  artifactId?: string | null;
 }
 
 export interface SaveStudioDraftArgs {

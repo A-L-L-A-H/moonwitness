@@ -43,7 +43,12 @@ const ACTIVE_BY_PATH: Record<string, string> = {
   "/skin-lab": "skin-lab",
 };
 
-export function activeByPath(pathname: string): string {
+const CONTROL_TAB_IDS = new Set(["vpn", "syslog", "snmp", "storage", "radius"]);
+
+export function activeByPath(pathname: string, tab?: string | null): string {
+  if (pathname === "/control" && tab && CONTROL_TAB_IDS.has(tab)) {
+    return tab;
+  }
   return ACTIVE_BY_PATH[pathname] ?? "";
 }
 
@@ -58,31 +63,31 @@ export const operationsNavItems: NavItem[] = [
     id: "vpn",
     label: "VPN",
     icon: HUD_NAV_ICON_PATHS.vpn,
-    target: { kind: "route", href: "/vpn" },
+    target: { kind: "route", href: "/control?tab=vpn" },
   },
   {
     id: "syslog",
     label: "Syslog",
     icon: HUD_NAV_ICON_PATHS.syslog,
-    target: { kind: "route", href: "/syslog" },
+    target: { kind: "route", href: "/control?tab=syslog" },
   },
   {
     id: "snmp",
     label: "SNMP",
     icon: HUD_NAV_ICON_PATHS.snmp,
-    target: { kind: "route", href: "/snmp" },
+    target: { kind: "route", href: "/control?tab=snmp" },
   },
   {
     id: "storage",
     label: "Storage",
     icon: HUD_NAV_ICON_PATHS.storage,
-    target: { kind: "route", href: "/storage" },
+    target: { kind: "route", href: "/control?tab=storage" },
   },
   {
     id: "radius",
     label: "RADIUS",
     icon: HUD_NAV_ICON_PATHS.radius,
-    target: { kind: "route", href: "/radius" },
+    target: { kind: "route", href: "/control?tab=radius" },
   },
   {
     id: "dashboard",

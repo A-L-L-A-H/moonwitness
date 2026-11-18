@@ -2,8 +2,8 @@
 
 import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { ArrowRight, Crown, EyeIcon, Smiley, Splatter, Star4 } from "@moonwitness/ui/icons";
 import {
   Button,
@@ -17,11 +17,34 @@ import {
   ZineInput,
   useSkin,
 } from "@moonwitness/ui";
+import { Onboarding } from "@/components/onboarding";
 import { authenticate } from "@/lib/auth";
 import { startMidLogin } from "@/lib/mid-oidc";
 import { notifySessionChange } from "@/lib/session";
 
 export default function ShadowPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--primary)]">
+          OPENING THE SHADOW…
+        </div>
+      }
+    >
+      <ShadowEntry />
+    </Suspense>
+  );
+}
+
+function ShadowEntry() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("mode") === "setup") {
+    return <Onboarding />;
+  }
+  return <ShadowLoginView />;
+}
+
+function ShadowLoginView() {
   const router = useRouter();
   const { skin } = useSkin();
   const [email, setEmail] = useState("");
@@ -152,10 +175,10 @@ export default function ShadowPage() {
                   Selesaikan setup admin awal terlebih dahulu sebelum masuk ke platform.
                 </p>
                 <Link
-                  href="/setup"
+                  href="/shadow?mode=setup"
                   className="mt-2 inline-block font-mono text-[var(--primary)] underline"
                 >
-                  BUKA ONBOARDING /SETUP →
+                  BUKA ONBOARDING SETUP →
                 </Link>
               </div>
             )}

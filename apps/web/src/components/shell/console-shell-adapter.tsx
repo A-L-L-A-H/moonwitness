@@ -26,12 +26,14 @@ export function ConsoleShellAdapter({
   search,
   onNavigate,
   plane = "creator",
+  activeOverride,
   children,
 }: {
   breadcrumb: string;
   search: { value: string; onChange: (v: string) => void; placeholder: string };
   onNavigate?: () => void;
   plane?: "creator" | "operations";
+  activeOverride?: string;
   children: ReactNode;
 }) {
   const operations = plane === "operations";
@@ -41,7 +43,7 @@ export function ConsoleShellAdapter({
   const rootHref = operations ? "/control" : "/";
   const router = useRouter();
   const pathname = usePathname();
-  const active = activeByPath(pathname);
+  const active = activeOverride ?? activeByPath(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const popRef = useRef<HTMLDivElement>(null);

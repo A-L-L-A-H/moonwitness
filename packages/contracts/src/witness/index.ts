@@ -14,6 +14,29 @@ export const EpistemicKindSchema = z.enum([
 ]);
 export type EpistemicKind = z.infer<typeof EpistemicKindSchema>;
 
+/** Witness Ledger temporal provenance epistemic registers aligned with services/memory witness_ledger.py. */
+export const WitnessEpistemicRegisterSchema = z.enum([
+  "fact",
+  "testimony",
+  "hypothesis",
+  "interpretation",
+  "dream",
+  "fiction",
+  "unknown",
+]);
+export type WitnessEpistemicRegister = z.infer<typeof WitnessEpistemicRegisterSchema>;
+
+export const WitnessClaimStatusSchema = z.enum(["active", "superseded", "disputed", "unverified"]);
+export type WitnessClaimStatus = z.infer<typeof WitnessClaimStatusSchema>;
+
+export const WitnessRelationTypeSchema = z.enum([
+  "supports",
+  "contradicts",
+  "derived_from",
+  "supersedes",
+]);
+export type WitnessRelationType = z.infer<typeof WitnessRelationTypeSchema>;
+
 /** Provenance metadata for witness records (MW-0406). */
 export const WitnessProvenanceSchema = z
   .object({

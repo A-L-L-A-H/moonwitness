@@ -103,7 +103,7 @@ describe("ConsoleShellAdapter", () => {
     await render({ plane: "operations" });
     const navigation = container.querySelector('nav[aria-label="Operations"]');
     expect(navigation).not.toBeNull();
-    expect(navigation?.querySelector('a[href="/radius"]')).not.toBeNull();
+    expect(navigation?.querySelector('a[href="/control?tab=radius"]')).not.toBeNull();
     expect(navigation?.querySelector('a[href="/dock"]')).toBeNull();
     expect(navigation?.querySelector('[aria-current="page"]')?.getAttribute("href")).toBe(
       "/control",

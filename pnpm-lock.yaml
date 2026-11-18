@@ -290,6 +290,9 @@ importers:
       '@moonwitness/canon':
         specifier: workspace:*
         version: link:../../packages/canon
+      '@moonwitness/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@moonwitness/core':
         specifier: workspace:*
         version: link:../../packages/core

@@ -416,5 +416,34 @@ describe("memory bridge routes", () => {
     });
     expect(afterSync.statusCode).toBe(200);
     expect(afterSync.json()).toMatchObject({ total: 2 });
+
+    const desktopSync = await app.inject({
+      method: "POST",
+      url: "/api/v1/memory/sync",
+      headers: { authorization: "Bearer shared-sync-secret-123456" },
+      payload: {
+        source: "rocksoul-desktop",
+        schema_version: 1,
+        records: [
+          {
+            id: "rocksoul:memory:rs-1",
+            record_key: "rocksoul:memory:rs-1",
+            scope: "project",
+            kind: "continuity.procedural",
+            title: "Stay on dev branch",
+            summary: "procedural · active (owner)",
+            content: "Keep only local dev and main branches.",
+            tags: ["rocksoul", "continuity"],
+          },
+        ],
+      },
+    });
+    expect(desktopSync.statusCode).toBe(200);
+    expect(desktopSync.json()).toMatchObject({
+      ok: true,
+      source: "rocksoul-desktop",
+      synced: 1,
+      record_keys: ["rocksoul:memory:rs-1"],
+    });
   });
 });

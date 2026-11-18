@@ -56,7 +56,7 @@ export function AutoModelConsole({
     loading: rowsLoading,
     error: rowsError,
     reload: reloadRows,
-  } = useModelRows(model, view?.actionBindings.listUrl, view?.restEnabled);
+  } = useModelRows(model, view?.actionBindings?.listUrl, view?.restEnabled);
 
   const [studioOpen, setStudioOpen] = useState(false);
   const [fieldName, setFieldName] = useState("");
@@ -94,7 +94,7 @@ export function AutoModelConsole({
     );
   }
 
-  if (viewError || !view) {
+  if (viewError || !view || !view.actionBindings) {
     return (
       <Card className="relative overflow-hidden">
         <SkinOrnament slot="corner" className="right-2 top-2" />

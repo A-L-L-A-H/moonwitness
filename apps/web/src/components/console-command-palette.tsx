@@ -97,7 +97,7 @@ export function ConsoleCommandPalette({
 
         <CommandGroup heading="Live ORM Models">
           {catalog.map((model) => {
-            const href = `/models/${encodeURIComponent(model)}`;
+            const href = `/addons?model=${encodeURIComponent(model)}`;
             return (
               <CommandItem
                 key={`model-${model}`}
@@ -137,27 +137,6 @@ export function ConsoleCommandPalette({
 
         <CommandSeparator />
 
-        <CommandGroup heading="Live ORM Models">
-          {catalog.map((model) => {
-            const href = `/models/${encodeURIComponent(model)}`;
-            return (
-              <CommandItem
-                key={`model-${model}`}
-                value={`model ${model}`}
-                onSelect={() => {
-                  setOpen(false);
-                  router.push(href);
-                }}
-              >
-                <span>{model}</span>
-                <CommandShortcut>{href}</CommandShortcut>
-              </CommandItem>
-            );
-          })}
-        </CommandGroup>
-
-        <CommandSeparator />
-
         <CommandGroup heading="Master DNA Worlds">
           {worlds.map((world) => (
             <CommandItem
@@ -175,27 +154,6 @@ export function ConsoleCommandPalette({
               <CommandShortcut>{dnaId === world.id ? "ACTIVE" : world.numeral}</CommandShortcut>
             </CommandItem>
           ))}
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Live ORM Models">
-          {catalog.map((model) => {
-            const href = `/models/${encodeURIComponent(model)}`;
-            return (
-              <CommandItem
-                key={`model-${model}`}
-                value={`model ${model}`}
-                onSelect={() => {
-                  setOpen(false);
-                  router.push(href);
-                }}
-              >
-                <span>{model}</span>
-                <CommandShortcut>{href}</CommandShortcut>
-              </CommandItem>
-            );
-          })}
         </CommandGroup>
 
         <CommandSeparator />
@@ -235,20 +193,20 @@ export function ConsoleCommandPalette({
             { label: "Identity & Avatar Studio", href: "/id-lab", tag: "ID LAB" },
             {
               label: "Model Inspector: Timeline Event",
-              href: "/models/timeline.event",
+              href: "/addons?model=timeline.event",
               tag: "MODEL",
             },
             {
               label: "Model Inspector: Witness Profile",
-              href: "/models/witness.profile",
+              href: "/addons?model=witness.profile",
               tag: "MODEL",
             },
             { label: "ARSY Control Plane", href: "/control", tag: "OPS" },
-            { label: "VPN & Mesh Tunnel", href: "/vpn", tag: "OPS" },
-            { label: "SNMP Telemetry Probes", href: "/snmp", tag: "OPS" },
-            { label: "Syslog Stream", href: "/syslog", tag: "OPS" },
-            { label: "RADIUS Access Control", href: "/radius", tag: "OPS" },
-            { label: "Storage Browser", href: "/storage", tag: "OPS" },
+            { label: "VPN & Mesh Tunnel", href: "/control?tab=vpn", tag: "OPS" },
+            { label: "SNMP Telemetry Probes", href: "/control?tab=snmp", tag: "OPS" },
+            { label: "Syslog Stream", href: "/control?tab=syslog", tag: "OPS" },
+            { label: "RADIUS Access Control", href: "/control?tab=radius", tag: "OPS" },
+            { label: "Storage Browser", href: "/control?tab=storage", tag: "OPS" },
           ].map((entry) => (
             <CommandItem
               key={`jump-${entry.href}`}

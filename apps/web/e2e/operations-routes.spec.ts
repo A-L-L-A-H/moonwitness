@@ -36,7 +36,7 @@ test("Syslog filters, renders messages, and limits same-origin API requests", as
       ],
     });
   });
-  await page.goto("/syslog");
+  await page.goto("/control?tab=syslog");
   await expect(page.getByRole("cell", { name: "route changed" })).toBeVisible();
   await page.getByLabel("Message search").fill("edge-router");
   await expect(page.getByRole("cell", { name: "route changed" })).toBeVisible();
@@ -56,7 +56,7 @@ test("Syslog denies message queries without an authenticated session", async ({ 
     await route.fulfill({ json: [] });
   });
 
-  await page.goto("/syslog");
+  await page.goto("/control?tab=syslog");
   await expect(
     page.getByText("Sign in through the Control Center to view Syslog messages."),
   ).toBeVisible();
@@ -89,7 +89,7 @@ test("SNMP renders summaries without credentials and gives an empty state", asyn
     await route.fulfill({ json: [] });
   });
 
-  await page.goto("/snmp");
+  await page.goto("/control?tab=snmp");
   await expect(page.getByRole("heading", { name: "North Router" })).toBeVisible();
   await expect(page.getByText("No targets are configured for this device.")).toBeVisible();
   await expect(page.getByText("must-not-appear")).toHaveCount(0);
@@ -116,7 +116,7 @@ test("RADIUS renders redacted read-only service data and no users", async ({ pag
     });
   });
 
-  await page.goto("/radius");
+  await page.goto("/control?tab=radius");
   await expect(page.getByText("access accepted")).toBeVisible();
   await expect(page.getByText("must-not-appear")).toHaveCount(0);
   await expect(page.getByRole("button", { name: /create|delete|update/i })).toHaveCount(0);
@@ -154,7 +154,7 @@ test("RADIUS admin sees user management and can create a user", async ({ page })
     await route.fulfill({ status: 201, json: created });
   });
 
-  await page.goto("/radius");
+  await page.goto("/control?tab=radius");
   await expect(page.getByText("alice")).toBeVisible();
 
   await page.getByRole("button", { name: "Add user" }).click();
@@ -172,7 +172,7 @@ test("RADIUS non-admin is denied management controls", async ({ page }) => {
     await route.fulfill({ json: [{ id: "user-1", username: "alice", enabled: true }] });
   });
 
-  await page.goto("/radius");
+  await page.goto("/control?tab=radius");
   await expect(page.getByText("alice")).toBeVisible();
   await expect(page.getByRole("button", { name: "Add user" })).toHaveCount(0);
   await expect(
@@ -214,7 +214,7 @@ test("SNMP admin can create and delete a device with confirmation", async ({ pag
     await route.fulfill({ json: [] });
   });
 
-  await page.goto("/snmp");
+  await page.goto("/control?tab=snmp");
   await expect(page.getByText("No SNMP devices are configured.")).toBeVisible();
 
   await page.getByRole("button", { name: "Add device" }).click();
@@ -235,7 +235,7 @@ test("SNMP viewer role sees no management controls", async ({ page }) => {
     await route.fulfill({ json: [] });
   });
 
-  await page.goto("/snmp");
+  await page.goto("/control?tab=snmp");
   await expect(page.getByRole("button", { name: "Add device" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Delete" })).toHaveCount(0);
 });
@@ -246,12 +246,12 @@ test("SNMP viewer role sees no management controls", async ({ page }) => {
 
 test.describe("Navigation & Active-Route", () => {
   const routes = [
-    { path: "/syslog", sidebarLabel: "Syslog" },
-    { path: "/snmp", sidebarLabel: "SNMP" },
-    { path: "/storage", sidebarLabel: "Storage" },
-    { path: "/radius", sidebarLabel: "RADIUS" },
+    { path: "/control?tab=syslog", sidebarLabel: "Syslog" },
+    { path: "/control?tab=snmp", sidebarLabel: "SNMP" },
+    { path: "/control?tab=storage", sidebarLabel: "Storage" },
+    { path: "/control?tab=radius", sidebarLabel: "RADIUS" },
     { path: "/control", sidebarLabel: "Control Plane" },
-    { path: "/vpn", sidebarLabel: "VPN" },
+    { path: "/control?tab=vpn", sidebarLabel: "VPN" },
   ];
 
   for (const { path, sidebarLabel } of routes) {
@@ -380,7 +380,7 @@ test.describe("Navigation & Active-Route", () => {
       await page.goto(path);
       await page.waitForSelector('nav[aria-label="Operations"]', { timeout: 5000 }).catch(() => {});
       // Verify page loaded
-      await expect(page).toHaveURL(new RegExp(path.replace("/", "\\/") + "$"));
+      await expect(page).toHaveURL((url) => `${url.pathname}${url.search}` === path);
       // Sidebar link is highlighted with the operations accent and
       // marked as the current page for assistive technology.
       const sidebarLink = page.getByRole("navigation").getByRole("link", { name: sidebarLabel });
@@ -411,7 +411,7 @@ test.describe("Keyboard Navigation & Focus", () => {
       await route.fulfill({ json: [] });
     });
 
-    await page.goto("/syslog");
+    await page.goto("/control?tab=syslog");
 
     // Tab through focusable elements
     await page.keyboard.press("Tab");
@@ -425,7 +425,12 @@ test.describe("Keyboard Navigation & Focus", () => {
 });
 
 test.describe("Reduced Motion", () => {
-  const routes = ["/syslog", "/snmp", "/storage", "/radius"];
+  const routes = [
+    "/control?tab=syslog",
+    "/control?tab=snmp",
+    "/control?tab=storage",
+    "/control?tab=radius",
+  ];
 
   for (const path of routes) {
     test(`${path} respects prefers-reduced-motion`, async ({ page }) => {
@@ -450,7 +455,7 @@ test.describe("Reduced Motion", () => {
       await page.goto(path);
 
       // Verify page loads without errors under reduced motion
-      await expect(page).toHaveURL(new RegExp(path.replace("/", "\\/") + "$"));
+      await expect(page).toHaveURL((url) => `${url.pathname}${url.search}` === path);
     });
   }
 });
@@ -486,7 +491,7 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
       await route.fulfill({ json: [] });
     });
 
-    await page.goto("/syslog");
+    await page.goto("/control?tab=syslog");
 
     // Verify loading status region exists and is announced
     const statusRegion = page.getByRole("status");
@@ -525,7 +530,7 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
       await route.fulfill({ json: [] });
     });
 
-    await page.goto("/snmp");
+    await page.goto("/control?tab=snmp");
     await expect(page.getByText("No SNMP devices are configured.")).toBeVisible();
     // Just verify the empty state message is visible
     await expect(page.getByText("No SNMP devices are configured.")).toBeVisible();
@@ -549,7 +554,7 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
       await route.fulfill({ status: 500, json: { error: "Internal Server Error" } });
     });
 
-    await page.goto("/syslog");
+    await page.goto("/control?tab=syslog");
     // Verify error message is shown (SYSLOG UNAVAILABLE section)
     await expect(page.getByText("SYSLOG UNAVAILABLE")).toBeVisible();
   });
@@ -577,7 +582,7 @@ test.describe("ARIA Live Regions & Accessible Status", () => {
       }
     });
 
-    await page.goto("/radius");
+    await page.goto("/control?tab=radius");
     // Viewer should see denied message
     await expect(
       page.getByText(/cannot manage|tidak dapat mengelola|denied|ditolak/i),
@@ -592,7 +597,12 @@ test.describe("Viewport - No Horizontal Overflow", () => {
     { name: "desktop", width: 1440, height: 900 },
   ];
 
-  const routes = ["/syslog", "/snmp", "/storage", "/radius"];
+  const routes = [
+    "/control?tab=syslog",
+    "/control?tab=snmp",
+    "/control?tab=storage",
+    "/control?tab=radius",
+  ];
 
   for (const vp of viewports) {
     for (const path of routes) {
@@ -658,7 +668,7 @@ test.describe("Mutation Failure States", () => {
       }
     });
 
-    await page.goto("/snmp");
+    await page.goto("/control?tab=snmp");
     await page.getByRole("button", { name: "Add device" }).click();
     await page.getByLabel("Name").fill("Test Device");
     await page.getByLabel("Host").fill("192.0.2.1");
@@ -691,7 +701,7 @@ test.describe("Mutation Failure States", () => {
       }
     });
 
-    await page.goto("/radius");
+    await page.goto("/control?tab=radius");
     await page.getByRole("button", { name: "Add user" }).click();
     await page.getByLabel("Username").fill("testuser");
     await page.getByLabel("Password").fill("password123");
@@ -724,7 +734,7 @@ test.describe("Mutation Failure States", () => {
       }
     });
 
-    await page.goto("/storage");
+    await page.goto("/control?tab=storage");
     // Attempt any mutation if available (e.g., create bucket, upload)
     const createBtn = page.getByRole("button", { name: /create|add|upload/i }).first();
     if ((await createBtn.count()) > 0) {
@@ -733,6 +743,96 @@ test.describe("Mutation Failure States", () => {
         page.getByRole("alert").or(page.getByText(/error|gagal|failed|unavailable/i)),
       ).toBeVisible();
     }
+  });
+});
+
+test.describe("Consolidated Console Hubs & Legacy Redirects", () => {
+  test("redirects legacy operations, setup, and model routes to canonical consolidated views", async ({
+    page,
+  }) => {
+    await page.route("**/api/v1/**", async (route) => {
+      await route.fulfill({ json: [] });
+    });
+    await page.route("**/api/v1/control/setup/status", async (route) => {
+      await route.fulfill({ json: { initialized: false } });
+    });
+    await page.route("**/api/v1/control/auth/me", async (route) => {
+      await route.fulfill({ status: 401, json: { error: "Unauthorized" } });
+    });
+    await page.route("**/api/v1/_meta/models", async (route) => {
+      await route.fulfill({ json: { models: ["timeline.event"] } });
+    });
+    await page.route("**/api/v1/_meta/addons", async (route) => {
+      await route.fulfill({ json: { addons: [] } });
+    });
+    await page.route("**/api/v1/_meta/views/**", async (route) => {
+      await route.fulfill({
+        json: {
+          model: "timeline.event",
+          table: "timeline_events",
+          extensible: true,
+          restEnabled: true,
+          acl: { canRead: true, canCreate: false, canUpdate: false, canDelete: false },
+          fields: [],
+          views: [],
+          actionBindings: { customActions: [] },
+        },
+      });
+    });
+
+    await page.goto("/snmp");
+    await expect(page).toHaveURL(/\/control\?tab=snmp$/);
+
+    await page.goto("/syslog");
+    await expect(page).toHaveURL(/\/control\?tab=syslog$/);
+
+    await page.goto("/radius");
+    await expect(page).toHaveURL(/\/control\?tab=radius$/);
+
+    await page.goto("/storage");
+    await expect(page).toHaveURL(/\/control\?tab=storage$/);
+
+    await page.goto("/vpn");
+    await expect(page).toHaveURL(/\/control\?tab=vpn$/);
+
+    await page.goto("/setup");
+    await expect(page).toHaveURL(/\/shadow\?mode=setup$/);
+    await expect(page.getByRole("heading", { name: /welcome to the shadow/i })).toBeVisible();
+
+    await page.goto("/models/timeline.event");
+    await expect(page).toHaveURL(/\/addons\?model=timeline\.event$/);
+    await expect(page.getByText("MODEL EXPLORER")).toBeVisible();
+  });
+
+  test("switches Control Plane hub tabs smoothly without page reload errors", async ({ page }) => {
+    await page.route("**/api/v1/**", async (route) => {
+      await route.fulfill({ json: [] });
+    });
+    await page.route("**/api/v1/control/auth/me", async (route) => {
+      await route.fulfill({
+        json: {
+          user: {
+            id: "1",
+            name: "Operator",
+            email: "op@test",
+            role: "admin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        },
+      });
+    });
+    await page.route("**/api/v1/snmp/stats", async (route) => {
+      await route.fulfill({
+        json: { total_devices: 0, enabled_devices: 0, total_targets: 0, total_samples: 0 },
+      });
+    });
+
+    await page.goto("/control?tab=snmp");
+    await expect(page.getByText("No SNMP devices are configured.")).toBeVisible();
+
+    await page.getByRole("tab", { name: "RADIUS" }).click();
+    await expect(page).toHaveURL(/\/control\?tab=radius$/);
+    await expect(page.getByRole("heading", { name: /radius/i })).toBeVisible();
   });
 });
 

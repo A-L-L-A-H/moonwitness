@@ -17,7 +17,7 @@ function FullScreen({ children }: { children: ReactNode }) {
 function RedirectToSetup() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/setup");
+    router.replace("/shadow?mode=setup");
   }, [router]);
   return <FullScreen>MEMBUKA SETUP…</FullScreen>;
 }

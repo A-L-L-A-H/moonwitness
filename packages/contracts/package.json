@@ -6,6 +6,8 @@
   "license": "UNLICENSED",
   "exports": {
     ".": "./src/index.ts",
+    "./continuity": "./src/continuity/index.ts",
+    "./witness": "./src/witness/index.ts",
     "./errors": "./src/errors/index.ts",
     "./types": "./src/types/index.ts",
     "./schema": "./src/schema/index.ts",
