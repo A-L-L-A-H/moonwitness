@@ -25,15 +25,26 @@ export {
   irSystemModels,
 } from "./ir-models.js";
 export {
+  AddonManifestSignatureSchema,
   AddonManifestSchema,
   AddonRegistry,
   AddonRegistryError,
   type AddonContext,
   type AddonManifest,
   type AddonManifestInput,
+  type AddonManifestSignature,
   type RegisteredAddon,
   type RegistryState,
 } from "./registry.js";
+export {
+  canonicalizeAddonManifestPayload,
+  signAddonManifest,
+  verifyAddonManifestSignature,
+  type AddonSignerConfig,
+  type TrustedAddonSigningKey,
+  type AddonSignatureVerificationResult,
+  type AddonSigningPolicy,
+} from "./signing.js";
 export {
   AddonRuntimeController,
   type AddonDefinition,

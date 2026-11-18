@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export const AddonManifestSignatureSchema = z.object({
+  algorithm: z.enum(["ed25519", "hmac-sha256"]),
+  keyId: z.string().min(1),
+  digest: z.string().min(1),
+  signedAt: z.string().optional(),
+});
+export type AddonManifestSignature = z.infer<typeof AddonManifestSignatureSchema>;
+
 /**
  * Addon manifest contract. Every addon declares its identity, dependencies and
  * what it provides so the registry can load it deterministically.
@@ -15,6 +23,8 @@ export const AddonManifestSchema = z.object({
   autoInstall: z.boolean().default(false),
   defaultEnabled: z.boolean().default(true),
   depends: z.array(z.string().min(1)).default([]),
+  capabilities: z.array(z.string().min(1)).default([]),
+  signature: AddonManifestSignatureSchema.optional(),
   provides: z
     .object({
       routes: z.array(z.string().min(1)).default([]),

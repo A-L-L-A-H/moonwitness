@@ -25,10 +25,12 @@ import { opsJobModel } from "./job-queue.js";
 import {
   AddonManifestSchema,
   AddonRegistry,
+  AddonRegistryError,
   type AddonContext,
   type AddonManifest,
   type AddonManifestInput,
 } from "./registry.js";
+import { verifyAddonManifestSignature, type AddonSigningPolicy } from "./signing.js";
 
 export type CrewRoleOrPublic = "admin" | "editor" | "viewer" | "public";
 
@@ -193,7 +195,11 @@ export class AddonRuntimeController {
   async syncAll(
     addons: AddonDefinition[],
     fastify?: FastifyInstance,
-    options: { runSeeds?: boolean; legacyBackfillTables?: Set<string> } = {},
+    options: {
+      runSeeds?: boolean;
+      legacyBackfillTables?: Set<string>;
+      signingPolicy?: AddonSigningPolicy;
+    } = {},
   ): Promise<{ order: string[]; syncReport: SyncReport }> {
     this.definitions.clear();
     this.enabled.clear();
@@ -211,6 +217,26 @@ export class AddonRuntimeController {
 
     const order = registry.validate();
     this.order = order;
+
+    const signingMode = options.signingPolicy?.mode ?? "permissive";
+    const trustedKeys = options.signingPolicy?.trustedKeys ?? [];
+    const signatureByName = new Map<
+      string,
+      { status: "verified" | "unsigned" | "invalid"; keyId: string | null }
+    >();
+    for (const name of order) {
+      const entry = this.definitions.get(name)!;
+      const verification = verifyAddonManifestSignature(entry.manifest, trustedKeys);
+      signatureByName.set(name, {
+        status: verification.status,
+        keyId: verification.keyId,
+      });
+      if (signingMode === "strict" && verification.status !== "verified") {
+        throw new AddonRegistryError(
+          `Addon '${name}' rejected by strict signature policy (${verification.status}${verification.reason ? `: ${verification.reason}` : ""}).`,
+        );
+      }
+    }
 
     await syncModels([...irSystemModels, opsJobModel]);
 
@@ -299,6 +325,7 @@ export class AddonRuntimeController {
       const existing = existingByName.get(name);
       const addonSchemaHash = this.computeAddonHash(entry.manifest, entry.def, report.schemaHashes);
 
+      const sigMeta = signatureByName.get(name) ?? { status: "unsigned" as const, keyId: null };
       await irAddonModel.repository.upsert(
         { name },
         {
@@ -308,8 +335,11 @@ export class AddonRuntimeController {
           category: entry.manifest.category ?? "general",
           depends_json: JSON.stringify(entry.manifest.depends),
           provides_json: JSON.stringify(entry.manifest.provides),
+          capabilities_json: JSON.stringify(entry.manifest.capabilities),
           schema_hash: addonSchemaHash,
           state: isActive ? "installed" : "disabled",
+          signature_status: sigMeta.status,
+          signature_key_id: sigMeta.keyId,
           auto_install: entry.manifest.autoInstall,
           last_error: null,
         },
