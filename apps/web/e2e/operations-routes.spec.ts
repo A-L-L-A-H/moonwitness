@@ -903,4 +903,126 @@ test.describe("Intelligence - ArchiveMemoryBridge Integration", () => {
     );
     expect(overflow).toBeLessThanOrEqual(1);
   });
+
+  test("Memory Vault renders knowledge corpus, provenance drawer, archive vault, and resume action", async ({
+    page,
+  }) => {
+    await page.route("**/api/memory/**", async (route) => {
+      const url = new URL(route.request().url());
+      const path = url.pathname;
+      if (path === "/api/memory/system") {
+        await route.fulfill({
+          json: {
+            mode: "local-first",
+            gemini_configured: true,
+            gemini_model: "gemini-2.5-flash",
+            embeddings_enabled: true,
+            embedding_model: "bge-m3",
+            drive_configured: false,
+            moonwitness_sync_configured: true,
+            max_upload_gb: 2,
+          },
+        });
+        return;
+      }
+      if (path === "/api/memory/dashboard") {
+        await route.fulfill({
+          json: { archives: 1, messages: 12, knowledge: 1, active_jobs: 0, failed_jobs: 1 },
+        });
+        return;
+      }
+      if (path === "/api/memory/archives") {
+        await route.fulfill({
+          json: [
+            {
+              id: "arc-1",
+              file_name: "export-2026.zip",
+              size_bytes: 2048,
+              sha256: "a".repeat(64),
+              status: "complete",
+              drive_status: "pending",
+              created_at: "2026-11-18T00:00:00Z",
+            },
+          ],
+        });
+        return;
+      }
+      if (path === "/api/memory/jobs") {
+        await route.fulfill({
+          json: [
+            {
+              id: "job-1",
+              archive_id: "arc-1",
+              status: "awaiting_ai",
+              processed_conversations: 4,
+              total_conversations: 10,
+              error: "Missing GEMINI_API_KEY",
+            },
+          ],
+        });
+        return;
+      }
+      if (path === "/api/memory/knowledge" || path === "/api/memory/search") {
+        await route.fulfill({
+          json: [
+            {
+              id: "know-1",
+              kind: "decision",
+              title: "Single Web Shell Consolidation",
+              summary: "Merged companion memory UI into apps/web under /memory.",
+              content: "Full detail on why apps/web hosts the single console shell.",
+              confidence: 0.94,
+              tags: ["architecture", "memory"],
+              source_message_ids: ["msg-1"],
+            },
+          ],
+        });
+        return;
+      }
+      if (path === "/api/memory/knowledge/know-1/sources") {
+        await route.fulfill({
+          json: {
+            knowledge_id: "know-1",
+            archive_id: "arc-1",
+            conversation_id: "conv-1",
+            messages: [
+              {
+                message_id: "msg-1",
+                conversation_id: "conv-1",
+                conversation_title: "Monorepo Simplification",
+                role: "assistant",
+                content: "We should serve /memory directly inside apps/web.",
+                created_at: "2026-11-18T12:00:00Z",
+              },
+            ],
+          },
+        });
+        return;
+      }
+      if (path === "/api/memory/jobs/job-1/resume" && route.request().method() === "POST") {
+        await route.fulfill({ json: { status: "queued", job_id: "job-1" } });
+        return;
+      }
+      await route.fulfill({ json: {} });
+    });
+
+    await page.goto("/memory");
+    await expect(
+      page.getByRole("heading", { name: /HOW U REMIND ME — ARCHIVE MEMORY/i }),
+    ).toBeVisible();
+    await expect(page.getByText("Single Web Shell Consolidation")).toBeVisible();
+
+    await page.getByRole("button", { name: /Sources \(1\)/i }).click();
+    await expect(page.getByText("SOURCE PROVENANCE MESSAGES")).toBeVisible();
+    await expect(page.getByText("We should serve /memory directly inside apps/web.")).toBeVisible();
+    await page.getByRole("button", { name: "Close source provenance drawer" }).click();
+
+    await page.getByRole("tab", { name: /Vault & Upload \(1\)/i }).click();
+    await expect(page.getByText("export-2026.zip")).toBeVisible();
+
+    await page.getByRole("tab", { name: /Worker Queue \(1\)/i }).click();
+    await expect(page.getByText("Conversations: 4 / 10")).toBeVisible();
+    await page.getByRole("button", { name: "Resume" }).click();
+    await expect(page.getByText("Job resumed from saved checkpoint.")).toBeVisible();
+  });
 });

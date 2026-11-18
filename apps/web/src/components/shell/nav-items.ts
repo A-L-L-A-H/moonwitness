@@ -29,6 +29,7 @@ export function navHref(item: NavItem): string {
 const ACTIVE_BY_PATH: Record<string, string> = {
   "/addons": "base.addons",
   "/dock": "archive",
+  "/memory": "memory",
   "/mission-control": "dashboard",
   "/intelligence": "intelligence",
   "/control": "control",
@@ -163,6 +164,12 @@ export const navItems: NavItem[] = [
     label: "Archive",
     icon: HUD_NAV_ICON_PATHS.archive,
     target: { kind: "route", href: "/dock" },
+  },
+  {
+    id: "memory",
+    label: "Memory Vault",
+    icon: HUD_NAV_ICON_PATHS.missionLog,
+    target: { kind: "route", href: "/memory" },
   },
   {
     id: "settings",
