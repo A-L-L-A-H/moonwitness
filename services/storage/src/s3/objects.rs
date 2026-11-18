@@ -1,7 +1,6 @@
 //! Object-level S3 operations, including multipart uploads.
 
 use std::collections::BTreeMap;
-use std::io::SeekFrom;
 
 use axum::body::Bytes;
 use axum::extract::State;
@@ -17,6 +16,7 @@ use crate::s3::state::{safe_component, AppState, Principal};
 use crate::xml::{self, Element};
 
 /// `PUT /{bucket}/{key}` — PutObject, or CopyObject when `x-amz-copy-source` is set.
+
 pub async fn put_object(
     State(state): State<AppState>,
     _principal: Principal,
@@ -29,7 +29,7 @@ pub async fn put_object(
 
     if let Some(source) = headers
         .get("x-amz-copy-source")
-        .and_then(|v| v.to_str().ok())
+        .and_then(|value| value.to_str().ok())
     {
         return copy_object(&state, &bucket, &key, source).await;
     }
@@ -39,28 +39,24 @@ pub async fn put_object(
     }
 
     let etag = format!("{:x}", Sha256::digest(&body));
-    let path = state.object_path(&bucket, &key)?;
-    if let Some(parent) = path.parent() {
-        tokio::fs::create_dir_all(parent)
-            .await
-            .map_err(|e| S3Error::internal(format!("cannot create object directory: {e}")))?;
-    }
-    tokio::fs::write(&path, &body)
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot write object: {e}")))?;
-
     let content_type = headers
         .get(header::CONTENT_TYPE)
-        .and_then(|v| v.to_str().ok())
-        .map(|s| s.to_string());
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("application/octet-stream")
+        .to_string();
     let metadata = collect_metadata(&headers);
+    let previous = fetch_object_optional(&state, &bucket, &key).await?;
+    let (storage_backend, storage_ref) =
+        persist_bytes(&state, &bucket, &key, &content_type, &body).await?;
 
-    sqlx::query(
+    let result = sqlx::query(
         "INSERT INTO objects (bucket, key, etag, size, content_type, storage_class, metadata_json, \
-         created_at, is_delete_marker) VALUES (?, ?, ?, ?, ?, 'STANDARD', ?, ?, 0) \
+         created_at, is_delete_marker, storage_backend, storage_ref) \
+         VALUES (?, ?, ?, ?, ?, 'STANDARD', ?, ?, 0, ?, ?) \
          ON CONFLICT(bucket, key) DO UPDATE SET etag = excluded.etag, size = excluded.size, \
          content_type = excluded.content_type, metadata_json = excluded.metadata_json, \
-         created_at = excluded.created_at, is_delete_marker = 0",
+         created_at = excluded.created_at, is_delete_marker = 0, \
+         storage_backend = excluded.storage_backend, storage_ref = excluded.storage_ref",
     )
     .bind(&bucket)
     .bind(&key)
@@ -69,8 +65,17 @@ pub async fn put_object(
     .bind(&content_type)
     .bind(metadata)
     .bind(chrono::Utc::now().timestamp())
+    .bind(&storage_backend)
+    .bind(&storage_ref)
     .execute(&state.pool)
-    .await?;
+    .await;
+
+    if let Err(error) = result {
+        cleanup_new_object(&state, &storage_backend, storage_ref.as_deref()).await;
+        return Err(S3Error::internal(format!("cannot persist object metadata: {error}")));
+    }
+
+    cleanup_previous_object(&state, previous, &storage_backend, storage_ref.as_deref()).await;
 
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::OK;
@@ -81,6 +86,7 @@ pub async fn put_object(
 }
 
 /// `GET /{bucket}/{key}` — GetObject, with `Range` support.
+
 pub async fn get_object(
     State(state): State<AppState>,
     _principal: Principal,
@@ -90,48 +96,31 @@ pub async fn get_object(
 ) -> S3Result<Response> {
     ensure_bucket(&state, &bucket).await?;
     let row = fetch_object(&state, &bucket, &key).await?;
+    let bytes = read_stored_object(&state, &row).await?;
+    let total = bytes.len() as u64;
+    let range = range_bounds(&headers, total);
 
-    let path = state.object_path(&bucket, &key)?;
-    let total = tokio::fs::metadata(&path)
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot stat object: {e}")))?
-        .len();
-
-    let (start, end) = match range_bounds(&headers, total) {
-        Some((start, end)) => (start, end),
-        None => (0, total.saturating_sub(1)),
+    let (body, status) = match range {
+        Some((start, end)) => {
+            (bytes[start as usize..=end as usize].to_vec(), StatusCode::PARTIAL_CONTENT)
+        }
+        None => (bytes, StatusCode::OK),
     };
-    let length = end.saturating_sub(start) + 1;
+    let length = body.len() as u64;
 
-    let mut file = tokio::fs::File::open(&path)
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot open object: {e}")))?;
-    use tokio::io::{AsyncReadExt, AsyncSeekExt};
-    file.seek(SeekFrom::Start(start))
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot seek object: {e}")))?;
-    let mut buf = vec![0u8; length as usize];
-    file.read_exact(&mut buf)
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot read object: {e}")))?;
-
-    let status = if headers.contains_key(header::RANGE) {
-        StatusCode::PARTIAL_CONTENT
-    } else {
-        StatusCode::OK
-    };
-
-    let mut response = Response::new(Bytes::from(buf).into());
+    let mut response = Response::new(Bytes::from(body).into());
     *response.status_mut() = status;
     let out_headers = response.headers_mut();
     out_headers.insert(
         header::CONTENT_LENGTH,
         try_header_value(&length.to_string())?,
     );
-    out_headers.insert(
-        header::CONTENT_RANGE,
-        try_header_value(&format!("bytes {start}-{end}/{total}"))?,
-    );
+    if let Some((start, end)) = range {
+        out_headers.insert(
+            header::CONTENT_RANGE,
+            try_header_value(&format!("bytes {start}-{end}/{total}"))?,
+        );
+    }
     out_headers.insert(
         header::ETAG,
         try_header_value(&format!("\"{}\"", row.etag))?,
@@ -186,6 +175,7 @@ pub async fn head_object(
 }
 
 /// `DELETE /{bucket}/{key}` — DeleteObject.
+
 pub async fn delete_object(
     State(state): State<AppState>,
     _principal: Principal,
@@ -193,13 +183,9 @@ pub async fn delete_object(
     key: String,
 ) -> S3Result<Response> {
     ensure_bucket(&state, &bucket).await?;
+    let row = fetch_object(&state, &bucket, &key).await?;
+    delete_stored_object(&state, &row).await?;
 
-    let path = state.object_path(&bucket, &key)?;
-    if path.exists() {
-        tokio::fs::remove_file(&path)
-            .await
-            .map_err(|e| S3Error::internal(format!("cannot delete object: {e}")))?;
-    }
     sqlx::query("DELETE FROM objects WHERE bucket = ? AND key = ?")
         .bind(&bucket)
         .bind(&key)
@@ -303,6 +289,7 @@ pub async fn upload_part(
 }
 
 /// `POST /{bucket}/{key}?uploadId=…` — CompleteMultipartUpload.
+
 pub async fn complete_multipart_upload(
     State(state): State<AppState>,
     _principal: Principal,
@@ -332,9 +319,8 @@ pub async fn complete_multipart_upload(
         return Err(S3Error::invalid_request("no parts were uploaded"));
     }
 
-    // Every requested part must exist with a matching ETag.
     for part in &requested {
-        let stored = parts.iter().find(|p| p.part_number == part.part_number);
+        let stored = parts.iter().find(|stored| stored.part_number == part.part_number);
         match stored {
             Some(stored)
                 if stored
@@ -357,16 +343,15 @@ pub async fn complete_multipart_upload(
         }
     }
 
-    let object_path = state.object_path(&bucket, &key)?;
-    if let Some(parent) = object_path.parent() {
-        tokio::fs::create_dir_all(parent)
-            .await
-            .map_err(|e| S3Error::internal(format!("cannot create object directory: {e}")))?;
+    let staging_path = state.staging_path();
+    if let Some(parent) = staging_path.parent() {
+        tokio::fs::create_dir_all(parent).await.map_err(|error| {
+            S3Error::internal(format!("cannot create staging directory: {error}"))
+        })?;
     }
-
-    let mut output = tokio::fs::File::create(&object_path)
+    let mut output = tokio::fs::File::create(&staging_path)
         .await
-        .map_err(|e| S3Error::internal(format!("cannot create object: {e}")))?;
+        .map_err(|error| S3Error::internal(format!("cannot create staged object: {error}")))?;
     use tokio::io::AsyncWriteExt;
 
     let mut total: i64 = 0;
@@ -374,46 +359,80 @@ pub async fn complete_multipart_upload(
         let path = state.part_path(&params.upload_id, part.part_number)?;
         let mut file = tokio::fs::File::open(&path)
             .await
-            .map_err(|e| S3Error::internal(format!("cannot open part: {e}")))?;
+            .map_err(|error| S3Error::internal(format!("cannot open part: {error}")))?;
         use tokio::io::AsyncReadExt;
-        let mut buf = Vec::new();
-        file.read_to_end(&mut buf)
+        let mut buffer = Vec::new();
+        file.read_to_end(&mut buffer)
             .await
-            .map_err(|e| S3Error::internal(format!("cannot read part: {e}")))?;
+            .map_err(|error| S3Error::internal(format!("cannot read part: {error}")))?;
         output
-            .write_all(&buf)
+            .write_all(&buffer)
             .await
-            .map_err(|e| S3Error::internal(format!("cannot assemble object: {e}")))?;
+            .map_err(|error| S3Error::internal(format!("cannot assemble object: {error}")))?;
         total += part.size;
     }
     output
         .flush()
         .await
-        .map_err(|e| S3Error::internal(format!("cannot flush object: {e}")))?;
+        .map_err(|error| S3Error::internal(format!("cannot flush object: {error}")))?;
+    drop(output);
+
+    if total < 0 || total as u64 > state.config.max_object_size {
+        let _ = tokio::fs::remove_file(&staging_path).await;
+        let _ = cleanup_multipart(&state, &params.upload_id).await;
+        return Err(S3Error::entity_too_large(state.config.max_object_size));
+    }
+
+    let content_type = upload
+        .metadata_json
+        .as_deref()
+        .and_then(|metadata| serde_json::from_str::<serde_json::Value>(metadata).ok())
+        .and_then(|value| {
+            value
+                .get("content-type")
+                .and_then(|value| value.as_str().map(String::from))
+        })
+        .unwrap_or_else(|| "application/octet-stream".to_string());
+    let previous = fetch_object_optional(&state, &bucket, &key).await?;
+    let (storage_backend, storage_ref) =
+        match persist_file(&state, &bucket, &key, &content_type, &staging_path).await {
+            Ok(location) => location,
+            Err(error) => {
+                let _ = tokio::fs::remove_file(&staging_path).await;
+                return Err(error);
+            }
+        };
 
     let etag = format!("{:x}-{}", Sha256::digest(total.to_string()), parts.len());
-    sqlx::query(
+    let result = sqlx::query(
         "INSERT INTO objects (bucket, key, etag, size, content_type, storage_class, metadata_json, \
-         created_at, is_delete_marker) VALUES (?, ?, ?, ?, ?, 'STANDARD', ?, ?, 0) \
+         created_at, is_delete_marker, storage_backend, storage_ref) \
+         VALUES (?, ?, ?, ?, ?, 'STANDARD', ?, ?, 0, ?, ?) \
          ON CONFLICT(bucket, key) DO UPDATE SET etag = excluded.etag, size = excluded.size, \
-         created_at = excluded.created_at, is_delete_marker = 0",
+         content_type = excluded.content_type, metadata_json = excluded.metadata_json, \
+         created_at = excluded.created_at, is_delete_marker = 0, \
+         storage_backend = excluded.storage_backend, storage_ref = excluded.storage_ref",
     )
     .bind(&bucket)
     .bind(&key)
     .bind(&etag)
     .bind(total)
-    .bind(
-        upload
-            .metadata_json
-            .as_deref()
-            .and_then(|m| serde_json::from_str::<serde_json::Value>(m).ok())
-            .and_then(|v| v.get("content-type").and_then(|c| c.as_str().map(String::from))),
-    )
+    .bind(&content_type)
     .bind(upload.metadata_json.clone())
     .bind(chrono::Utc::now().timestamp())
+    .bind(&storage_backend)
+    .bind(&storage_ref)
     .execute(&state.pool)
-    .await?;
+    .await;
 
+    if let Err(error) = result {
+        cleanup_new_object(&state, &storage_backend, storage_ref.as_deref()).await;
+        let _ = tokio::fs::remove_file(&staging_path).await;
+        return Err(S3Error::internal(format!("cannot persist multipart metadata: {error}")));
+    }
+
+    cleanup_previous_object(&state, previous, &storage_backend, storage_ref.as_deref()).await;
+    let _ = tokio::fs::remove_file(&staging_path).await;
     cleanup_multipart(&state, &params.upload_id).await?;
 
     let root = Element::new("CompleteMultipartUploadResult")
@@ -496,6 +515,7 @@ pub struct PartParams {
     pub part_number: i64,
 }
 
+
 async fn copy_object(
     state: &AppState,
     bucket: &str,
@@ -510,23 +530,20 @@ async fn copy_object(
         .ok_or_else(|| S3Error::invalid_request("invalid x-amz-copy-source"))?;
 
     let row = fetch_object(state, source_bucket, source_key).await?;
-    let src_path = state.object_path(source_bucket, source_key)?;
-    let dst_path = state.object_path(bucket, key)?;
-    if let Some(parent) = dst_path.parent() {
-        tokio::fs::create_dir_all(parent)
-            .await
-            .map_err(|e| S3Error::internal(format!("cannot create object directory: {e}")))?;
-    }
-    tokio::fs::copy(&src_path, &dst_path)
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot copy object: {e}")))?;
+    let bytes = read_stored_object(state, &row).await?;
+    let previous = fetch_object_optional(state, bucket, key).await?;
+    let content_type = row.content_type.as_deref().unwrap_or("application/octet-stream");
+    let (storage_backend, storage_ref) =
+        persist_bytes(state, bucket, key, content_type, &bytes).await?;
 
-    sqlx::query(
+    let result = sqlx::query(
         "INSERT INTO objects (bucket, key, etag, size, content_type, storage_class, metadata_json, \
-         created_at, is_delete_marker) VALUES (?, ?, ?, ?, ?, 'STANDARD', ?, ?, 0) \
+         created_at, is_delete_marker, storage_backend, storage_ref) \
+         VALUES (?, ?, ?, ?, ?, 'STANDARD', ?, ?, 0, ?, ?) \
          ON CONFLICT(bucket, key) DO UPDATE SET etag = excluded.etag, size = excluded.size, \
-         content_type = excluded.content_type, created_at = excluded.created_at, \
-         is_delete_marker = 0",
+         content_type = excluded.content_type, metadata_json = excluded.metadata_json, \
+         created_at = excluded.created_at, is_delete_marker = 0, \
+         storage_backend = excluded.storage_backend, storage_ref = excluded.storage_ref",
     )
     .bind(bucket)
     .bind(key)
@@ -535,8 +552,16 @@ async fn copy_object(
     .bind(&row.content_type)
     .bind(&row.metadata_json)
     .bind(chrono::Utc::now().timestamp())
+    .bind(&storage_backend)
+    .bind(&storage_ref)
     .execute(&state.pool)
-    .await?;
+    .await;
+
+    if let Err(error) = result {
+        cleanup_new_object(state, &storage_backend, storage_ref.as_deref()).await;
+        return Err(S3Error::internal(format!("cannot persist copied object metadata: {error}")));
+    }
+    cleanup_previous_object(state, previous, &storage_backend, storage_ref.as_deref()).await;
 
     let root = Element::new("CopyObjectResult")
         .with(Element::text("ETag", format!("\"{}\"", row.etag)))
@@ -547,19 +572,222 @@ async fn copy_object(
     Ok(xml_response(StatusCode::OK, xml::document(root)))
 }
 
-async fn fetch_object(state: &AppState, bucket: &str, key: &str) -> S3Result<ObjectRow> {
+async fn fetch_object_optional(
+    state: &AppState,
+    bucket: &str,
+    key: &str,
+) -> S3Result<Option<ObjectRow>> {
     let row = sqlx::query_as::<_, ObjectRow>(
         "SELECT bucket, key, etag, size, content_type, storage_class, metadata_json, created_at, \
-         is_delete_marker FROM objects WHERE bucket = ? AND key = ?",
+         is_delete_marker, storage_backend, storage_ref FROM objects WHERE bucket = ? AND key = ?",
     )
     .bind(bucket)
     .bind(key)
     .fetch_optional(&state.pool)
     .await?;
+    Ok(row.filter(|row| !row.is_delete_marker))
+}
 
-    match row {
-        Some(row) if !row.is_delete_marker => Ok(row),
-        _ => Err(S3Error::no_such_key(key)),
+async fn fetch_object(state: &AppState, bucket: &str, key: &str) -> S3Result<ObjectRow> {
+    fetch_object_optional(state, bucket, key)
+        .await?
+        .ok_or_else(|| S3Error::no_such_key(key))
+}
+
+async fn persist_bytes(
+    state: &AppState,
+    bucket: &str,
+    key: &str,
+    content_type: &str,
+    body: &[u8],
+) -> S3Result<(String, Option<String>)> {
+    match state.config.storage_backend {
+        crate::config::StorageBackend::Filesystem => {
+            let path = state.object_path(bucket, key)?;
+            if let Some(parent) = path.parent() {
+                tokio::fs::create_dir_all(parent).await.map_err(|error| {
+                    S3Error::internal(format!("cannot create object directory: {error}"))
+                })?;
+            }
+            tokio::fs::write(&path, body)
+                .await
+                .map_err(|error| S3Error::internal(format!("cannot write object: {error}")))?;
+            Ok(("filesystem".to_string(), None))
+        }
+        crate::config::StorageBackend::GoogleDrive => {
+            let staging_path = state.staging_path();
+            let parent = staging_path
+                .parent()
+                .ok_or_else(|| S3Error::internal("invalid staging path"))?;
+            tokio::fs::create_dir_all(parent).await.map_err(|error| {
+                S3Error::internal(format!("cannot create staging directory: {error}"))
+            })?;
+            tokio::fs::write(&staging_path, body)
+                .await
+                .map_err(|error| S3Error::internal(format!("cannot stage object: {error}")))?;
+
+            let result = state
+                .google_drive
+                .as_ref()
+                .ok_or_else(|| S3Error::internal("Google Drive backend is not configured"))?
+                .upload_path(bucket, key, content_type, &staging_path)
+                .await
+                .map_err(|error| S3Error::internal(format!("Google Drive upload failed: {error}")));
+            let _ = tokio::fs::remove_file(&staging_path).await;
+            result.map(|file_id| ("google_drive".to_string(), Some(file_id)))
+        }
+    }
+}
+
+async fn persist_file(
+    state: &AppState,
+    bucket: &str,
+    key: &str,
+    content_type: &str,
+    source_path: &std::path::Path,
+) -> S3Result<(String, Option<String>)> {
+    match state.config.storage_backend {
+        crate::config::StorageBackend::Filesystem => {
+            let destination = state.object_path(bucket, key)?;
+            if let Some(parent) = destination.parent() {
+                tokio::fs::create_dir_all(parent).await.map_err(|error| {
+                    S3Error::internal(format!("cannot create object directory: {error}"))
+                })?;
+            }
+            tokio::fs::copy(source_path, &destination)
+                .await
+                .map_err(|error| S3Error::internal(format!("cannot store object: {error}")))?;
+            Ok(("filesystem".to_string(), None))
+        }
+        crate::config::StorageBackend::GoogleDrive => {
+            let file_id = state
+                .google_drive
+                .as_ref()
+                .ok_or_else(|| S3Error::internal("Google Drive backend is not configured"))?
+                .upload_path(bucket, key, content_type, source_path)
+                .await
+                .map_err(|error| S3Error::internal(format!("Google Drive upload failed: {error}")))?;
+            Ok(("google_drive".to_string(), Some(file_id)))
+        }
+    }
+}
+
+async fn read_stored_object(state: &AppState, row: &ObjectRow) -> S3Result<Vec<u8>> {
+    match row.storage_backend.as_str() {
+        "filesystem" => {
+            let path = state.object_path(&row.bucket, &row.key)?;
+            tokio::fs::read(&path)
+                .await
+                .map_err(|error| S3Error::internal(format!("cannot read object: {error}")))
+        }
+        "google_drive" => {
+            let file_id = row
+                .storage_ref
+                .as_deref()
+                .ok_or_else(|| S3Error::internal("Google Drive object has no file ID"))?;
+            state
+                .google_drive
+                .as_ref()
+                .ok_or_else(|| S3Error::internal("Google Drive backend is not configured"))?
+                .download_file(file_id)
+                .await
+                .map_err(|error| S3Error::internal(format!("Google Drive download failed: {error}")))
+        }
+        backend => Err(S3Error::internal(format!(
+            "object uses unknown storage backend '{backend}'"
+        ))),
+    }
+}
+
+async fn delete_stored_object(state: &AppState, row: &ObjectRow) -> S3Result<()> {
+    match row.storage_backend.as_str() {
+        "filesystem" => {
+            let path = state.object_path(&row.bucket, &row.key)?;
+            if path.exists() {
+                tokio::fs::remove_file(&path)
+                    .await
+                    .map_err(|error| S3Error::internal(format!("cannot delete object: {error}")))?;
+            }
+            Ok(())
+        }
+        "google_drive" => {
+            let file_id = row
+                .storage_ref
+                .as_deref()
+                .ok_or_else(|| S3Error::internal("Google Drive object has no file ID"))?;
+            state
+                .google_drive
+                .as_ref()
+                .ok_or_else(|| S3Error::internal("Google Drive backend is not configured"))?
+                .delete_file(file_id)
+                .await
+                .map_err(|error| S3Error::internal(format!("Google Drive delete failed: {error}")))
+        }
+        backend => Err(S3Error::internal(format!(
+            "object uses unknown storage backend '{backend}'"
+        ))),
+    }
+}
+
+async fn cleanup_previous_object(
+    state: &AppState,
+    previous: Option<ObjectRow>,
+    new_backend: &str,
+    new_ref: Option<&str>,
+) {
+    let Some(previous) = previous else {
+        return;
+    };
+    if previous.storage_backend == new_backend
+        && previous.storage_ref.as_deref() == new_ref
+    {
+        return;
+    }
+
+    let result: Result<(), String> = match previous.storage_backend.as_str() {
+        "google_drive" => match (state.google_drive.as_ref(), previous.storage_ref.as_deref()) {
+            (Some(drive), Some(file_id)) => drive
+                .delete_file(file_id)
+                .await
+                .map_err(|error| error.to_string()),
+            (None, _) => Err("Google Drive backend is not configured".to_string()),
+            (_, None) => Err("Google Drive object has no file ID".to_string()),
+        },
+        "filesystem" if new_backend != "filesystem" => state
+            .object_path(&previous.bucket, &previous.key)
+            .map_err(|error| error.to_string())
+            .and_then(|path| {
+                if path.exists() {
+                    std::fs::remove_file(path).map_err(|error| error.to_string())
+                } else {
+                    Ok(())
+                }
+            }),
+        _ => Ok(()),
+    };
+
+    if let Err(error) = result {
+        tracing::warn!(
+            bucket = %previous.bucket,
+            key = %previous.key,
+            error = %error,
+            "old object cleanup failed after replacement"
+        );
+    }
+}
+
+async fn cleanup_new_object(state: &AppState, backend: &str, storage_ref: Option<&str>) {
+    if backend != "google_drive" {
+        return;
+    }
+    if let (Some(drive), Some(file_id)) = (state.google_drive.as_ref(), storage_ref) {
+        if let Err(error) = drive.delete_file(file_id).await {
+            tracing::warn!(
+                file_id = %file_id,
+                error = %error,
+                "failed to clean up an unindexed Google Drive object"
+            );
+        }
     }
 }
 
