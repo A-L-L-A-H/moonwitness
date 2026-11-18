@@ -121,8 +121,8 @@ export function SkinPlayground({
       style={{ display: "flex", flexDirection: "column", gap: 20 }}
     >
       {/* Controls Bar using semantic CSS variables */}
-      <div className="grid grid-cols-1 gap-3 rounded-[var(--radius,0.5rem)] border border-[var(--border)] bg-[var(--card)] p-4 text-[var(--card-foreground)] md:grid-cols-4">
-        <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-3 rounded-[var(--radius,0.5rem)] border border-[var(--border)] bg-[var(--card)] p-4 text-[var(--card-foreground)]">
+        <div className="flex min-w-0 flex-col gap-1">
           <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
             Skin
           </span>
@@ -145,65 +145,67 @@ export function SkinPlayground({
           </div>
         </div>
 
-        <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
-          DNA Identity
-          <select
-            aria-label="DNA Identity"
-            value={dnaId}
-            onChange={(e) => setDnaId(e.target.value as MasterDnaId)}
-            className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
-          >
-            {MASTER_DNA_IDS.map((id) => (
-              <option key={id} value={id}>
-                {MASTER_DNA_WORLDS[id].numeral} · {MASTER_DNA_WORLDS[id].name}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <label className="flex min-w-0 flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
+            DNA Identity
+            <select
+              aria-label="DNA Identity"
+              value={dnaId}
+              onChange={(e) => setDnaId(e.target.value as MasterDnaId)}
+              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+            >
+              {MASTER_DNA_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {MASTER_DNA_WORLDS[id].numeral} · {MASTER_DNA_WORLDS[id].name}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
-          Theme / Density / Viewport
-          <div className="flex flex-wrap gap-1.5">
-            <select
-              aria-label="Theme Mode"
-              value={mode}
-              onChange={(e) => setMode(e.target.value as CanonicalThemeMode)}
-              className="min-h-9 flex-1 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
-            >
-              <option value="dark">dark</option>
-              <option value="light">light</option>
-            </select>
-            <select
-              aria-label="Density"
-              value={density}
-              onChange={(e) => setDensity(e.target.value as CanonicalDensity)}
-              className="min-h-9 flex-1 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
-            >
-              <option value="compact">compact</option>
-              <option value="comfortable">comfortable</option>
-              <option value="spacious">spacious</option>
-            </select>
-            <select
-              aria-label="Viewport Preview"
-              value={viewport}
-              onChange={(e) => setViewport(e.target.value as ViewportPreset)}
-              className="min-h-9 flex-1 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
-            >
-              <option value="desktop">Desktop</option>
-              <option value="tablet">Tablet (768px)</option>
-              <option value="mobile">Mobile (390px)</option>
-            </select>
+          <div className="flex min-w-0 flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
+            <span>Theme / Density / Viewport</span>
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
+              <select
+                aria-label="Theme Mode"
+                value={mode}
+                onChange={(e) => setMode(e.target.value as CanonicalThemeMode)}
+                className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              >
+                <option value="dark">dark</option>
+                <option value="light">light</option>
+              </select>
+              <select
+                aria-label="Density"
+                value={density}
+                onChange={(e) => setDensity(e.target.value as CanonicalDensity)}
+                className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              >
+                <option value="compact">compact</option>
+                <option value="comfortable">comfortable</option>
+                <option value="spacious">spacious</option>
+              </select>
+              <select
+                aria-label="Viewport Preview"
+                value={viewport}
+                onChange={(e) => setViewport(e.target.value as ViewportPreset)}
+                className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              >
+                <option value="desktop">Desktop</option>
+                <option value="tablet">Tablet (768px)</option>
+                <option value="mobile">Mobile (390px)</option>
+              </select>
+            </div>
           </div>
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
-          Component / Variant / Size / State
-          <div className="grid grid-cols-2 gap-1.5">
+        <div className="flex min-w-0 flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
+          <span>Component / Variant / Size / State</span>
+          <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
             <select
               aria-label="Component Filter"
               value={componentFocus}
               onChange={(e) => setComponentFocus(e.target.value as ComponentFocus)}
-              className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
             >
               <option value="all">all components</option>
               <option value="button">Button</option>
@@ -219,7 +221,7 @@ export function SkinPlayground({
               aria-label="Button Variant"
               value={variant}
               onChange={(e) => setVariant(e.target.value as ShowcaseVariant)}
-              className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
             >
               <option value="default">default</option>
               <option value="secondary">secondary</option>
@@ -236,7 +238,7 @@ export function SkinPlayground({
               aria-label="Button Size"
               value={size}
               onChange={(e) => setSize(e.target.value as "sm" | "default" | "lg")}
-              className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
             >
               <option value="sm">sm</option>
               <option value="default">default</option>
@@ -246,7 +248,7 @@ export function SkinPlayground({
               aria-label="Interactive State"
               value={state}
               onChange={(e) => setState(e.target.value as InteractiveState)}
-              className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
             >
               <option value="idle">idle</option>
               <option value="disabled">disabled</option>
@@ -254,7 +256,7 @@ export function SkinPlayground({
               <option value="invalid">invalid</option>
             </select>
           </div>
-        </label>
+        </div>
       </div>
 
       {/* Live Scoped Stage rendering REAL exported @moonwitness/ui components */}
@@ -282,7 +284,7 @@ export function SkinPlayground({
               <div className="space-y-6">
                 {/* Active Token & Accessibility Telemetry */}
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] pb-3 font-mono text-xs">
-                  <span>
+                  <span className="min-w-0 break-all">
                     Active: <strong>{dnaId}</strong> · skin=<strong>{skin}</strong> · mode=
                     <strong>{mode}</strong> · btn-radius=
                     <strong>{cssVars["--mw-btn-radius"]}</strong>
@@ -292,9 +294,9 @@ export function SkinPlayground({
                   </Badge>
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4">
                   {show("button") ? (
-                    <Card>
+                    <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
                         <CardTitle className="text-base">Button Matrix</CardTitle>
                         <CardDescription>Real @moonwitness/ui Button</CardDescription>
@@ -319,7 +321,7 @@ export function SkinPlayground({
                   ) : null}
 
                   {show("badge") ? (
-                    <Card>
+                    <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
                         <CardTitle className="text-base">Badge & Alert</CardTitle>
                         <CardDescription>Status tokens & semantic roles</CardDescription>
@@ -333,14 +335,16 @@ export function SkinPlayground({
                         </div>
                         <Alert variant="info">
                           <AlertTitle>Theme Synchronized</AlertTitle>
-                          <AlertDescription>--primary={cssVars["--primary"]}</AlertDescription>
+                          <AlertDescription className="break-all font-mono text-xs">
+                            --primary={cssVars["--primary"]}
+                          </AlertDescription>
                         </Alert>
                       </CardContent>
                     </Card>
                   ) : null}
 
                   {show("input") ? (
-                    <Card>
+                    <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
                         <CardTitle className="text-base">Input, Checkbox & Switch</CardTitle>
                         <CardDescription>Form semantics & state styles</CardDescription>
@@ -355,7 +359,7 @@ export function SkinPlayground({
                             placeholder="Type to inspect focus ring..."
                           />
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex flex-wrap items-center gap-4">
                           <div className="flex items-center gap-2">
                             <Checkbox
                               id="pg-check"
@@ -378,7 +382,7 @@ export function SkinPlayground({
                   ) : null}
 
                   {show("select") || show("dialog") ? (
-                    <Card>
+                    <Card className="min-w-0 overflow-hidden">
                       <CardHeader>
                         <CardTitle className="text-base">Select & Dialog Overlay</CardTitle>
                         <CardDescription>Radix focus-managed controls</CardDescription>
@@ -424,16 +428,16 @@ export function SkinPlayground({
                       <TabsTrigger value="a11y">Contrast Pairs</TabsTrigger>
                     </TabsList>
                     <TabsContent value="tokens" className="font-mono text-xs">
-                      <div className="grid grid-cols-2 gap-2 border border-[var(--border)] p-3 sm:grid-cols-3">
-                        <div>bg: {cssVars["--background"]}</div>
-                        <div>fg: {cssVars["--foreground"]}</div>
-                        <div>ring: {cssVars["--ring"]}</div>
+                      <div className="grid grid-cols-1 gap-2 border border-[var(--border)] p-3 sm:grid-cols-3">
+                        <div className="min-w-0 break-all">bg: {cssVars["--background"]}</div>
+                        <div className="min-w-0 break-all">fg: {cssVars["--foreground"]}</div>
+                        <div className="min-w-0 break-all">ring: {cssVars["--ring"]}</div>
                       </div>
                     </TabsContent>
                     <TabsContent value="a11y" className="font-mono text-xs">
                       <div className="grid grid-cols-1 gap-2 border border-[var(--border)] p-3 sm:grid-cols-2">
                         {a11yAudit.pairs.map((p) => (
-                          <div key={p.pairName}>
+                          <div key={p.pairName} className="min-w-0 break-words">
                             {p.pairName}: <strong>{p.ratio}:1</strong> ({p.passed ? "PASS" : "FAIL"}
                             )
                           </div>
@@ -444,36 +448,40 @@ export function SkinPlayground({
                 ) : null}
 
                 {show("card") && componentFocus === "card" ? (
-                  <Card>
+                  <Card className="min-w-0 overflow-hidden">
                     <CardHeader>
                       <CardTitle>Full Surface Card</CardTitle>
-                      <CardDescription>
+                      <CardDescription className="break-all">
                         Border radius: {cssVars["--mw-card-radius"]}
                       </CardDescription>
                     </CardHeader>
-                    <CardFooter>Shadow: {cssVars["--mw-card-shadow"]}</CardFooter>
+                    <CardFooter className="break-all">
+                      Shadow: {cssVars["--mw-card-shadow"]}
+                    </CardFooter>
                   </Card>
                 ) : null}
 
                 {show("table") ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Token</TableHead>
-                        <TableHead>Value</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>--mw-btn-radius</TableCell>
-                        <TableCell>{cssVars["--mw-btn-radius"]}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>--radius</TableCell>
-                        <TableCell>{cssVars["--radius"]}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                  <div className="w-full overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Token</TableHead>
+                          <TableHead>Value</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>--mw-btn-radius</TableCell>
+                          <TableCell className="break-all">{cssVars["--mw-btn-radius"]}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>--radius</TableCell>
+                          <TableCell className="break-all">{cssVars["--radius"]}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 ) : null}
               </div>
             </SkinProvider>

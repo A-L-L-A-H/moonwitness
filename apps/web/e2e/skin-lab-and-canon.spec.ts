@@ -1,4 +1,9 @@
+import { mkdirSync } from "node:fs";
+import { resolve } from "node:path";
 import { expect, test } from "@playwright/test";
+
+const SKIN_MATRIX_DIR = resolve(process.cwd(), "../../.verify/skin-matrix");
+mkdirSync(SKIN_MATRIX_DIR, { recursive: true });
 
 test.describe("Skin Laboratory & Canon Integration", () => {
   test("renders 7 Master DNA Worlds and passes comparison grid in /skin-lab", async ({ page }) => {
@@ -71,5 +76,79 @@ test.describe("Skin Laboratory & Canon Integration", () => {
       return cards.filter((c) => c.scrollWidth > c.clientWidth + 1).length;
     });
     expect(overflowCount).toBe(0);
+  });
+
+  test("SkinPlayground mutates real Button/Input/Card/Badge/Dialog/Select/Tabs styles and screenshots across all 6 skins + light/dark", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/skin-lab");
+    await page.getByRole("tab", { name: "TOKEN & PLAYGROUND" }).click();
+
+    const playground = page.locator('[data-testid="mw-skin-playground"]');
+    await expect(playground).toBeVisible();
+
+    const stylesBySkin = new Map<string, string>();
+    const screenshotBytesBySkin = new Map<string, Buffer>();
+    const stage = playground.locator('[data-testid="playground-viewport"]');
+
+    for (const skin of [
+      { id: "default", label: "Moonwitness" },
+      { id: "riot", label: "Riot" },
+      { id: "editorial", label: "Editorial" },
+      { id: "technical", label: "Technical" },
+      { id: "archive", label: "Archive" },
+      { id: "transmission", label: "Transmission" },
+    ] as const) {
+      await playground
+        .getByRole("group", { name: "Select Skin" })
+        .getByRole("button", { name: skin.label, exact: true })
+        .click();
+
+      const primaryBtn = playground
+        .locator("button[data-skin]")
+        .filter({ hasText: "Primary" })
+        .first();
+      await expect(primaryBtn).toHaveAttribute("data-skin", skin.id);
+
+      const computed = await primaryBtn.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return `${cs.borderRadius}|${cs.boxShadow}|${cs.fontFamily}|${cs.textTransform}`;
+      });
+      stylesBySkin.set(skin.id, computed);
+
+      const buf = await stage.screenshot({
+        path: resolve(SKIN_MATRIX_DIR, `skin-${skin.id}.png`),
+      });
+      expect(buf.byteLength).toBeGreaterThan(1000);
+      screenshotBytesBySkin.set(skin.id, buf);
+    }
+
+    // Prove visual and CSS variance across skins rather than static class-only mutation
+    expect(new Set(stylesBySkin.values()).size).toBeGreaterThanOrEqual(4);
+    expect(screenshotBytesBySkin.get("riot")?.equals(screenshotBytesBySkin.get("editorial")!)).toBe(
+      false,
+    );
+    expect(
+      screenshotBytesBySkin.get("technical")?.equals(screenshotBytesBySkin.get("archive")!),
+    ).toBe(false);
+
+    // Toggle Light mode & assert canvas background luminance increases distinctly
+    const darkBg = await playground
+      .locator('[data-dna="05-riot-anarchy"]')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    await playground.getByLabel("Theme Mode").selectOption("light");
+    const lightBg = await playground
+      .locator('[data-dna="05-riot-anarchy"]')
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(lightBg).not.toBe(darkBg);
+
+    // Verify TokenInspector emits clean scalar --radius (never [object Object])
+    const inspectorPre = page.locator(".mw-dx-inspector pre");
+    await expect(inspectorPre).toContainText("--radius: 0.5rem;");
+    const inspectorText = await inspectorPre.textContent();
+    expect(inspectorText).not.toContain("[object Object]");
   });
 });

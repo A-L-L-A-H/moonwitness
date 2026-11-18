@@ -1,4 +1,4 @@
-name: Visual Regression (Percy)
+name: Visual & Cross-Skin Regression
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -15,9 +15,9 @@ permissions:
 
 jobs:
   visual-regression:
-    name: Visual Regression (Percy)
+    name: Cross-Skin Matrix & Visual Verification
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     steps:
       - name: Checkout
@@ -39,35 +39,28 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Cross-World Contrast Gate
+      - name: Cross-World Contrast Gate (dark + light)
         run: pnpm ui:contrast
 
-      - name: Build web
-        working-directory: ./apps/web
-        run: pnpm build
-
-      - name: Cross-World Playwright Skin & Console Regression
-        if: env.CI != ''
-        working-directory: ./apps/web
+      - name: Build Web & A-L-L-A-H
         run: |
-          pnpm exec playwright install chromium
-          pnpm exec playwright test --config cross-world-playwright.config.ts
+          pnpm --filter @moonwitness/web build
+          pnpm --filter @moonwitness/a-l-l-a-h build
 
-      - name: Build A-L-L-A-H Imperium Sanctuary
-        working-directory: ./apps/a-l-l-a-h
-        run: pnpm build
-
-      - name: Install Playwright browser
-        if: env.PERCY_TOKEN != ''
+      - name: Install Playwright Chromium
         working-directory: ./apps/web
-        run: pnpm exec playwright install chromium
+        run: pnpm exec playwright install --with-deps chromium
 
-      - name: Report Percy not configured
-        if: env.PERCY_TOKEN == ''
-        run: echo "::notice::PERCY_TOKEN is not configured; visual comparison was skipped"
+      - name: Run Deterministic 6-Skin & Cross-World Visual Matrix
+        working-directory: ./apps/web
+        run: pnpm exec playwright test --config cross-world-playwright.config.ts
 
-      - name: Run Percy visual regression
-        if: env.PERCY_TOKEN != ''
+      - name: Run A-L-L-A-H Multi-Viewport Visual Check
+        working-directory: ./apps/a-l-l-a-h
+        run: pnpm exec playwright test
+
+      - name: Optional Percy Cloud Diff (when PERCY_TOKEN configured)
+        if: ${{ secrets.PERCY_TOKEN != '' }}
         working-directory: ./apps/web
         run: |
           pnpm --silent dlx @percy/cli@1.32.12 exec -- \
@@ -75,10 +68,13 @@ jobs:
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 
-      - name: Upload Percy artifacts
+      - name: Upload Skin Matrix & Viewport Screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: percy-report
-          path: apps/web/.percy
-          retention-days: 30
+          name: ui-visual-matrix-evidence
+          path: |
+            .verify/skin-matrix
+            .verify/cross-world-results
+            apps/a-l-l-a-h/test-results/screenshots
+          retention-days: 14
