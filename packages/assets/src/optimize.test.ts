@@ -3,10 +3,11 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { ART_SOURCES, ART_SOURCE_WIDTHS, effectiveWidths, outputNames } from "./optimize";
-import { ARTWORK } from "./index";
+import { ARTWORK, SKIN_ARTWORK_MAP, WORLD_ART_PLATES, resolveArtworkEntry } from "./index";
 import type { ArtKey } from "@moonwitness/types";
 
 const KEYS = Object.keys(ARTWORK) as ArtKey[];
+const PLATE_KEYS = Object.keys(WORLD_ART_PLATES) as (keyof typeof WORLD_ART_PLATES)[];
 
 // ART_SOURCES berisi path relatif terhadap root repo. vitest bisa berjalan
 // dengan cwd = packages/assets, jadi root diturunkan dari lokasi file ini,
@@ -99,5 +100,28 @@ describe("ARTWORK manifest", () => {
       const metadata = await sharp(abs).metadata();
       expect(metadata.width, `${key} source width`).toBe(ART_SOURCE_WIDTHS[key]);
     }
+  });
+
+  it("setiap WORLD_ART_PLATES punya derivative AVIF+WebP sesuai lebar asli tanpa upscaling", async () => {
+    expect(PLATE_KEYS.length).toBeGreaterThanOrEqual(29);
+    for (const plateKey of PLATE_KEYS) {
+      const plate = WORLD_ART_PLATES[plateKey];
+      expect(resolveArtworkEntry(plateKey)).toBeDefined();
+      for (const srcSet of [plate.srcSet, plate.fallbackSrcSet]) {
+        const widths = new Set<number>();
+        for (const candidate of srcSet.split(", ")) {
+          const [url, descriptor] = candidate.split(" ");
+          const width = Number(descriptor?.replace("w", ""));
+          const metadata = await sharp(
+            resolve(REPO_ROOT, "apps/web/public", url!.slice(1)),
+          ).metadata();
+          expect(metadata.width, `${plateKey} ${url}`).toBe(width);
+          expect(widths.has(width)).toBe(false);
+          widths.add(width);
+        }
+        expect([...widths]).toEqual(effectiveWidths(plate.width));
+      }
+    }
+    expect(Object.keys(SKIN_ARTWORK_MAP)).toHaveLength(10);
   });
 });

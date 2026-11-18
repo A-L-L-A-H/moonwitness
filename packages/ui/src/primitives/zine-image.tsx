@@ -1,4 +1,4 @@
-import { ARTWORK } from "@moonwitness/assets";
+import { ARTWORK, resolveArtworkEntry } from "@moonwitness/assets";
 import type { ArtKey } from "@moonwitness/types";
 import { cn } from "../cn";
 
@@ -23,7 +23,7 @@ export function ZineImage({
   position,
   eager = false,
 }: ZineImageProps) {
-  const entry = ARTWORK[art as ArtKey] ?? Object.values(ARTWORK)[0];
+  const entry = resolveArtworkEntry(art) ?? Object.values(ARTWORK)[0];
   if (!entry) return null;
   return (
     <picture>

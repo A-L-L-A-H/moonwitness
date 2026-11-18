@@ -665,6 +665,7 @@ export {
   MyceliumSpore,
   SkinPalette,
 } from "./icons/modules";
+export { HUD_NAV_ICON_PATHS, type HudNavIconPathKey } from "./icons/nav-paths";
 
 /* Artwork System */
 export * from "./artwork/vector";
@@ -673,6 +674,7 @@ export * from "./artwork/compositions";
 export * from "./artwork/logos";
 export * from "./artwork/cutouts";
 export * from "./artwork/backdrop";
+export * from "./artwork/skin-artwork-frame";
 
 /* Schema-Driven Composite View */
 export {

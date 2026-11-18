@@ -1,3 +1,7 @@
+"use client";
+
+import { Badge } from "../components/ui/badge";
+import { useSkin } from "../skin";
 import { ZineBadge } from "../primitives/zine-badge";
 
 export interface StatusBadgeProps {
@@ -9,28 +13,33 @@ export interface StatusBadgeProps {
   dark?: boolean;
 }
 
-const STATUS_COLOR: Record<string, string> = {
-  DRAFT: "#a855f7",
-  READY: "#2ea8ff",
-  "IN REVIEW": "#ffd21f",
-  APPROVED: "#3ddc84",
-  PUBLISHED: "#ff2d78",
-};
-
-const STATUS_DARK: Record<string, boolean> = {
-  DRAFT: false,
-  READY: false,
-  "IN REVIEW": true,
-  APPROVED: true,
-  PUBLISHED: false,
+const STATUS_BORDER: Record<string, string> = {
+  DRAFT: "border-[var(--purple)] bg-[var(--purple)]/15 text-[var(--foreground)]",
+  READY: "border-[var(--blue)] bg-[var(--blue)]/15 text-[var(--foreground)]",
+  "IN REVIEW": "border-[var(--accent)] bg-[var(--accent)]/15 text-[var(--foreground)]",
+  APPROVED: "border-[var(--green)] bg-[var(--green)]/15 text-[var(--foreground)]",
+  PUBLISHED: "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]",
 };
 
 export function StatusBadge({ status, tone, dark }: StatusBadgeProps) {
-  const color = tone ?? STATUS_COLOR[status] ?? "#9ca3af";
-  const isDark = dark ?? STATUS_DARK[status] ?? false;
+  const { skin } = useSkin();
+  if (tone) {
+    return (
+      <ZineBadge color={tone} dark={dark ?? false} data-skin={skin}>
+        {status}
+      </ZineBadge>
+    );
+  }
   return (
-    <ZineBadge color={color} dark={isDark}>
+    <Badge
+      variant="outline"
+      skin={skin}
+      className={
+        STATUS_BORDER[status] ??
+        "border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)]"
+      }
+    >
       {status}
-    </ZineBadge>
+    </Badge>
   );
 }

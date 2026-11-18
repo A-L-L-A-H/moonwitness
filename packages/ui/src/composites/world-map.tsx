@@ -36,7 +36,7 @@ export function WorldMap<T extends MapCityItem>({
                 type="button"
                 onClick={() => onSelect(city.id)}
                 aria-pressed={selectedId === city.id}
-                className={`zine-card min-h-11 px-3 py-2 text-[11px] tracking-widest transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--yellow)] ${selectedId === city.id ? "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]" : "text-[var(--paper)] hover:border-[var(--pink)] hover:text-[var(--pink)]"}`}
+                className={`zine-card min-h-11 px-3 py-2 text-[11px] tracking-widest transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--focus)] ${selectedId === city.id ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]" : "text-[var(--foreground)] hover:border-[var(--accent)] hover:text-[var(--accent)]"}`}
               >
                 {city.city} <span className="ml-2 opacity-80">{city.signals}</span>
               </button>
