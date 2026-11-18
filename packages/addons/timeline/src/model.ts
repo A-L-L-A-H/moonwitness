@@ -1,5 +1,5 @@
 import { defineModel } from "@moonwitness/orm";
-import { TimelineEventSchema, EraSchema } from "@moonwitness/schema/timeline";
+import { TimelineEventSchema, EraSchema } from "@moonwitness/contracts/schema/timeline";
 
 export const timelineEventModel = defineModel({
   name: "timeline.event",

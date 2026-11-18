@@ -1,4 +1,4 @@
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 
 import catalogue from "./catalogue.json" with { type: "json" };
 

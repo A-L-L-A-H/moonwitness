@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defineModel, type Migration } from "@moonwitness/orm";
+import { defineModel } from "@moonwitness/orm";
 
 export const userProfileSchema = z.object({
   legacy_user_id: z.number().int().positive().nullable(),
@@ -78,6 +78,3 @@ export const authEventModel = defineModel({
   softDelete: false,
   indexes: [{ fields: ["event_type", "occurred_at"] }, { fields: ["actor_user_ref"] }],
 });
-
-/** Retired: identity tables are consolidated in `@moonwitness/addon-auth` (`auth_users`, `auth_sessions`, `auth_oauth_tokens`). */
-export const identityMigrations: Migration[] = [];

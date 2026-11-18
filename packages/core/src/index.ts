@@ -27,3 +27,25 @@ export type {
   PkceAuthorizationRequest,
   PublicEs256Jwk,
 } from "./oidc";
+export {
+  beginBrowserPkceRedirect,
+  buildOidcSessionFromTokens,
+  consumeStoredPkceEnvelope,
+  createCallbackDeduplicator,
+  dispatchBrowserAuthEvent,
+  extractOAuthCallbackParams,
+  readBrowserStorage,
+  removeBrowserStorage,
+  resolveBrowserOriginCallbackUrl,
+  resolveConfiguredMidIssuer,
+  sanitizeRedirectPath,
+  verifyDirectIdTokenAndBuildDisplaySession,
+  writeBrowserStorage,
+} from "./oidc-client";
+export type {
+  BffDisplaySession,
+  BrowserPkceRedirectOptions,
+  BrowserStorageKind,
+  StorageAdapter,
+  StoredPkceEnvelope,
+} from "./oidc-client.js";

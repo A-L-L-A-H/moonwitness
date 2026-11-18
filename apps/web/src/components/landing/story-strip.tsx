@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
 import { artSrc } from "@/lib/art";
 

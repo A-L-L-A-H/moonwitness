@@ -2,7 +2,7 @@
 
 import { Grid, List } from "@moonwitness/ui/icons";
 
-import type { Era, EraId } from "@moonwitness/types";
+import type { Era, EraId } from "@moonwitness/contracts/types";
 import { Button, cn, NativeSelect } from "@moonwitness/ui";
 
 export type SortKey = "newest" | "oldest";

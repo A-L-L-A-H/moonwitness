@@ -1,5 +1,5 @@
 import type p5 from "p5";
-import type { MapCity } from "@moonwitness/types";
+import type { MapCity } from "@moonwitness/contracts/types";
 import type { P5Context } from "../use-p5";
 import { hexToRgb } from "../palette";
 

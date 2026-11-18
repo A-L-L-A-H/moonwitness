@@ -7,4 +7,4 @@ export {
   ConflictError,
   TimeoutError,
   isDomainError,
-} from "@moonwitness/errors";
+} from "@moonwitness/contracts/errors";

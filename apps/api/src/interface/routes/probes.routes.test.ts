@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import { applyMigrations, closeDb, initDb } from "@moonwitness/orm";
-import { authMigrations } from "../../db/migrations";
 import { ensureProbesSchema, probesMigrations } from "./probes.persistence";
 import { registerHealthRoutes } from "./health.routes";
 
@@ -39,7 +38,7 @@ describe("probes routes & NOC consolidation", () => {
 
   beforeEach(async () => {
     await initDb("file::memory:?cache=shared");
-    await applyMigrations([...authMigrations, ...probesMigrations]);
+    await applyMigrations(probesMigrations);
     await ensureProbesSchema();
 
     const { probesRoutes } = await import("./probes.routes");

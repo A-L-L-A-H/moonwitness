@@ -1,5 +1,5 @@
 import { createActorContext, type ActorContext, type AuditEntry } from "@moonwitness/orm";
-import type { TimelineEvent, Era } from "@moonwitness/types";
+import type { TimelineEvent, Era } from "@moonwitness/contracts/types";
 import type {
   CreateTimelineEventInput,
   ITimelineRepository,

@@ -13,7 +13,7 @@ import type {
   QuickAction,
   WorkspaceItem,
   Workflow,
-} from "@moonwitness/types";
+} from "@moonwitness/contracts/types";
 import {
   collections,
   feedItems,

@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import { applyMigrations, closeDb, initDb } from "@moonwitness/orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { authMigrations } from "../../db/migrations";
 import { commandCenterMigrations } from "./command-center.persistence";
 
 vi.mock("../../middleware/auth", () => ({
@@ -38,7 +37,7 @@ describe("command center persistence routes", () => {
 
   beforeEach(async () => {
     await initDb("file::memory:?cache=shared");
-    await applyMigrations([...authMigrations, ...commandCenterMigrations]);
+    await applyMigrations(commandCenterMigrations);
     const { commandCenterRoutes } = await import("./command-center.routes");
     app = Fastify({ logger: false });
     await app.register(commandCenterRoutes, { prefix: "/api/v1" });

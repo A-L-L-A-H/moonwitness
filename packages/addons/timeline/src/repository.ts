@@ -1,4 +1,4 @@
-import type { Era, TimelineEvent } from "@moonwitness/types";
+import type { Era, TimelineEvent } from "@moonwitness/contracts/types";
 import { SYSTEM_ACTOR, getDb, uuidv7, type ActorContext, type AuditEntry } from "@moonwitness/orm";
 import { timelineEventModel, timelineEraModel } from "./model.js";
 

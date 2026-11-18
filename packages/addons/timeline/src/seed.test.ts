@@ -3,7 +3,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { closeDb, getDb, initDb } from "@moonwitness/orm";
-import { TimelineEventSchema } from "@moonwitness/schema/timeline";
+import { TimelineEventSchema } from "@moonwitness/contracts/schema/timeline";
 import { timelineDdl, timelineEventModel, timelineEraModel } from "./model.js";
 import { eras, events, seedTimeline } from "./seed.js";
 

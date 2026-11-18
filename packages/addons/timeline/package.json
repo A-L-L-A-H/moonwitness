@@ -15,9 +15,8 @@
   },
   "dependencies": {
     "@moonwitness/addon-base": "workspace:*",
-    "@moonwitness/orm": "workspace:*",
-    "@moonwitness/schema": "workspace:*",
-    "@moonwitness/types": "workspace:*"
+    "@moonwitness/contracts": "workspace:*",
+    "@moonwitness/orm": "workspace:*"
   },
   "devDependencies": {
     "@moonwitness/eslint-config": "workspace:*",

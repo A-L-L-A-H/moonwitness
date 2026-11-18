@@ -2,10 +2,9 @@ import {
   createActorContext,
   type ActorContext,
   type AuditEntry,
-  type Migration,
   type ModelRecord,
 } from "@moonwitness/orm";
-import type { Era, TimelineEvent } from "@moonwitness/types";
+import type { Era, TimelineEvent } from "@moonwitness/contracts/types";
 import type {
   CreateTimelineEventInput,
   ITimelineRepository,
@@ -13,7 +12,7 @@ import type {
   TimelineStats,
   UpdateTimelineEventInput,
 } from "../../domain/usecases/timeline/timeline.repository";
-import { opsEventModel, opsEventMigrations } from "../persistence/domain/ops-events";
+import { opsEventModel } from "../persistence/domain/ops-events";
 
 function toTimelineEvent(row: ModelRecord<typeof opsEventModel.schema>): TimelineEvent {
   const tags: unknown =
@@ -252,5 +251,3 @@ export class OrmEventRepository implements ITimelineRepository {
     return opsEventModel.repository.history(rows[0].id);
   }
 }
-
-export const ormEventMigrations: Migration[] = [...opsEventMigrations];

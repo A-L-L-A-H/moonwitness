@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { MapCity } from "@moonwitness/types";
+import type { MapCity } from "@moonwitness/contracts/types";
 import { WorldMap, Card } from "@moonwitness/ui";
 import { GlobeIcon } from "@moonwitness/ui/icons";
 import { AtmosphereField } from "@/components/atmosphere";

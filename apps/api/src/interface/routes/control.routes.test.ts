@@ -1,8 +1,7 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
-import { initDb, closeDb, applyMigrations } from "@moonwitness/orm";
-import { authMigrations } from "../../db/migrations";
+import { initDb, closeDb } from "@moonwitness/orm";
 
 async function loadRoutes(max: string) {
   vi.resetModules();
@@ -18,7 +17,6 @@ describe("control routes auth rate limiting", () => {
   beforeEach(async () => {
     process.env = { ...envBackup };
     await initDb("file::memory:?cache=shared");
-    await applyMigrations(Array.from(authMigrations));
   });
 
   afterEach(async () => {

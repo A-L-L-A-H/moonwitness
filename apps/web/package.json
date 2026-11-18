@@ -23,7 +23,6 @@
     "@moonwitness/canon": "workspace:*",
     "@moonwitness/contracts": "workspace:*",
     "@moonwitness/core": "workspace:*",
-    "@moonwitness/types": "workspace:*",
     "@moonwitness/ui": "workspace:*",
     "@tanstack/react-query": "^5.60.0",
     "@tanstack/react-query-devtools": "^5.60.0",

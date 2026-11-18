@@ -6,7 +6,7 @@ import type {
   TimelineStats,
   UpdateTimelineEventInput,
 } from "../../domain/usecases/timeline/timeline.repository";
-import type { TimelineEvent, Era } from "@moonwitness/types";
+import type { TimelineEvent, Era } from "@moonwitness/contracts/types";
 
 export interface IEventDataSource {
   listEvents(_filters: TimelineFilters): Promise<TimelineEvent[]>;
