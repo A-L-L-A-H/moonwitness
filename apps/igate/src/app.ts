@@ -12,7 +12,7 @@ import {
   recordProbeEvent,
 } from "./db";
 import type { IgateEnv } from "./types";
-import { renderIgateClientScript, renderIgateConsoleHtml } from "./ui";
+import { renderIgateClientScript, renderIgateConsoleHtml, renderIgateStylesheet } from "./ui";
 
 export interface IgateRuntimeDependencies {
   readonly resolveJwkByKid?: (kid: string) => Promise<PublicEs256Jwk | null>;
@@ -63,7 +63,7 @@ function htmlResponse(html: string, issuerUrl: string, status = 200): Response {
   const csp = [
     "default-src 'none'",
     "script-src 'self'",
-    "style-src 'unsafe-inline'",
+    "style-src 'self'",
     `connect-src 'self' ${issuerUrl}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
@@ -145,6 +145,18 @@ export function createIgateHandler(deps: IgateRuntimeDependencies = {}) {
 
     if (request.method === "OPTIONS") {
       return finalize(new Response(null, { status: 204 }));
+    }
+
+    if (request.method === "GET" && url.pathname === "/assets/igate.css") {
+      return finalize(
+        new Response(renderIgateStylesheet(), {
+          status: 200,
+          headers: {
+            "content-type": "text/css; charset=utf-8",
+            "cache-control": "public, max-age=300",
+          },
+        }),
+      );
     }
 
     if (request.method === "GET" && url.pathname === "/assets/igate.js") {

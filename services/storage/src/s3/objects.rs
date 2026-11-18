@@ -5,14 +5,14 @@ use std::io::SeekFrom;
 
 use axum::body::Bytes;
 use axum::extract::State;
-use axum::http::{header, HeaderMap, StatusCode};
+use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::Response;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
 use crate::models::{CompletePart, ObjectRow, UploadPart};
 use crate::s3::buckets::{ensure_bucket, range_bounds, xml_response};
-use crate::s3::errors::{S3Error, S3Result};
+use crate::s3::errors::{request_id_header, try_header_value, S3Error, S3Result};
 use crate::s3::state::{safe_component, AppState, Principal};
 use crate::xml::{self, Element};
 
@@ -75,11 +75,8 @@ pub async fn put_object(
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::OK;
     let headers = response.headers_mut();
-    headers.insert("etag", format!("\"{etag}\"").parse().unwrap());
-    headers.insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    headers.insert("etag", try_header_value(&format!("\"{etag}\""))?);
+    headers.insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -127,33 +124,31 @@ pub async fn get_object(
     let mut response = Response::new(Bytes::from(buf).into());
     *response.status_mut() = status;
     let out_headers = response.headers_mut();
-    out_headers.insert(header::CONTENT_LENGTH, length.to_string().parse().unwrap());
+    out_headers.insert(
+        header::CONTENT_LENGTH,
+        try_header_value(&length.to_string())?,
+    );
     out_headers.insert(
         header::CONTENT_RANGE,
-        format!("bytes {start}-{end}/{total}").parse().unwrap(),
+        try_header_value(&format!("bytes {start}-{end}/{total}"))?,
     );
-    out_headers.insert(header::ETAG, format!("\"{}\"", row.etag).parse().unwrap());
     out_headers.insert(
-        header::LAST_MODIFIED,
-        chrono::DateTime::<chrono::Utc>::from_timestamp(row.created_at, 0)
-            .unwrap_or_else(chrono::Utc::now)
-            .to_rfc2822()
-            .parse()
-            .unwrap(),
+        header::ETAG,
+        try_header_value(&format!("\"{}\"", row.etag))?,
     );
-    out_headers.insert(header::ACCEPT_RANGES, "bytes".parse().unwrap());
+    let last_modified = chrono::DateTime::<chrono::Utc>::from_timestamp(row.created_at, 0)
+        .unwrap_or_else(chrono::Utc::now)
+        .to_rfc2822();
+    out_headers.insert(header::LAST_MODIFIED, try_header_value(&last_modified)?);
+    out_headers.insert(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"));
     if let Some(content_type) = &row.content_type {
         out_headers.insert(
             header::CONTENT_TYPE,
-            content_type
-                .parse()
-                .unwrap_or_else(|_| "application/octet-stream".parse().unwrap()),
+            HeaderValue::from_str(content_type)
+                .unwrap_or_else(|_| HeaderValue::from_static("application/octet-stream")),
         );
     }
-    out_headers.insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    out_headers.insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -172,22 +167,21 @@ pub async fn head_object(
     let headers = response.headers_mut();
     headers.insert(
         header::CONTENT_LENGTH,
-        row.size.to_string().parse().unwrap(),
+        try_header_value(&row.size.to_string())?,
     );
-    headers.insert(header::ETAG, format!("\"{}\"", row.etag).parse().unwrap());
-    headers.insert(header::ACCEPT_RANGES, "bytes".parse().unwrap());
+    headers.insert(
+        header::ETAG,
+        try_header_value(&format!("\"{}\"", row.etag))?,
+    );
+    headers.insert(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"));
     if let Some(content_type) = &row.content_type {
         headers.insert(
             header::CONTENT_TYPE,
-            content_type
-                .parse()
-                .unwrap_or_else(|_| "application/octet-stream".parse().unwrap()),
+            HeaderValue::from_str(content_type)
+                .unwrap_or_else(|_| HeaderValue::from_static("application/octet-stream")),
         );
     }
-    headers.insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    headers.insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -214,10 +208,9 @@ pub async fn delete_object(
 
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::NO_CONTENT;
-    response.headers_mut().insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    response
+        .headers_mut()
+        .insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -304,11 +297,8 @@ pub async fn upload_part(
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::OK;
     let headers = response.headers_mut();
-    headers.insert("etag", format!("\"{etag}\"").parse().unwrap());
-    headers.insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    headers.insert("etag", try_header_value(&format!("\"{etag}\""))?);
+    headers.insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -453,10 +443,9 @@ pub async fn abort_multipart_upload(
 
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::NO_CONTENT;
-    response.headers_mut().insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    response
+        .headers_mut()
+        .insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 

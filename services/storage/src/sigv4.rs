@@ -313,19 +313,20 @@ fn signature(
     let k_date = hmac_sha256(
         &format!("AWS4{secret_key}").into_bytes(),
         date_stamp.as_bytes(),
-    );
-    let k_region = hmac_sha256(&k_date, scope_region.as_bytes());
-    let k_service = hmac_sha256(&k_region, scope_service.as_bytes());
-    let k_signing = hmac_sha256(&k_service, b"aws4_request");
+    )?;
+    let k_region = hmac_sha256(&k_date, scope_region.as_bytes())?;
+    let k_service = hmac_sha256(&k_region, scope_service.as_bytes())?;
+    let k_signing = hmac_sha256(&k_service, b"aws4_request")?;
 
-    let signature = hmac_sha256(&k_signing, string_to_sign.as_bytes());
+    let signature = hmac_sha256(&k_signing, string_to_sign.as_bytes())?;
     Ok(hex::encode(signature))
 }
 
-fn hmac_sha256(key: &[u8], data: &[u8]) -> Vec<u8> {
-    let mut mac = HmacSha256::new_from_slice(key).expect("HMAC accepts keys of any length");
+fn hmac_sha256(key: &[u8], data: &[u8]) -> Result<Vec<u8>, SigV4Error> {
+    let mut mac = HmacSha256::new_from_slice(key)
+        .map_err(|_| SigV4Error::Malformed("invalid hmac signing key".into()))?;
     mac.update(data);
-    mac.finalize().into_bytes().to_vec()
+    Ok(mac.finalize().into_bytes().to_vec())
 }
 
 /// Builds the canonical query string: sorted, RFC 3986 encoded, `X-Amz-Signature` removed.

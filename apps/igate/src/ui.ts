@@ -7,6 +7,29 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/** Render the Neo-Brutalist IGate NOC Edge Console stylesheet for strict CSP `style-src 'self'`. */
+export function renderIgateStylesheet(): string {
+  return `:root { --bg: #0a0a0c; --card: #f8f7f2; --ink: #111116; --yellow: #ffe600; --muted: #555562; --green: #10b981; --red: #e60023; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; padding: 28px 16px; }
+main { max-width: 920px; margin: 0 auto; }
+.panel { background: var(--card); border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--yellow); padding: 24px; margin-bottom: 20px; }
+.row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+h1 { margin: 8px 0 6px; font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; }
+.tag { display: inline-block; background: var(--ink); color: var(--yellow); padding: 3px 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; }
+button { border: 2px solid var(--ink); background: var(--yellow); color: var(--ink); font-family: inherit; font-weight: 800; font-size: 12px; padding: 10px 14px; cursor: pointer; text-transform: uppercase; box-shadow: 3px 3px 0 var(--ink); }
+button.sec { background: #fff; }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+.status { font-size: 13px; color: var(--muted); margin-top: 8px; }
+table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; }
+th, td { border: 2px solid var(--ink); padding: 8px 10px; text-align: left; }
+th { background: #eceae0; text-transform: uppercase; font-size: 11px; }
+.ok { color: #047857; font-weight: 800; }
+.fail { color: var(--red); font-weight: 800; }
+.err { border: 2px solid var(--ink); background: #ffe5ea; color: #8c0018; padding: 10px; margin-top: 12px; font-size: 12px; font-weight: 700; display: none; }
+.hidden { display: none; }`;
+}
+
 /** Render the Neo-Brutalist IGate NOC Edge Console HTML document. */
 export function renderIgateConsoleHtml(params: {
   readonly issuerUrl: string;
@@ -22,27 +45,7 @@ export function renderIgateConsoleHtml(params: {
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MoonWitness IGate // Sovereign Edge NOC</title>
-  <style>
-    :root { --bg: #0a0a0c; --card: #f8f7f2; --ink: #111116; --yellow: #ffe600; --muted: #555562; --green: #10b981; --red: #e60023; }
-    * { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg); color: var(--ink); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; padding: 28px 16px; }
-    main { max-width: 920px; margin: 0 auto; }
-    .panel { background: var(--card); border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--yellow); padding: 24px; margin-bottom: 20px; }
-    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-    h1 { margin: 8px 0 6px; font-size: 24px; letter-spacing: 0.04em; text-transform: uppercase; }
-    .tag { display: inline-block; background: var(--ink); color: var(--yellow); padding: 3px 8px; font-size: 11px; font-weight: 800; letter-spacing: 0.14em; }
-    button { border: 2px solid var(--ink); background: var(--yellow); color: var(--ink); font-family: inherit; font-weight: 800; font-size: 12px; padding: 10px 14px; cursor: pointer; text-transform: uppercase; box-shadow: 3px 3px 0 var(--ink); }
-    button.sec { background: #fff; }
-    button:disabled { opacity: 0.55; cursor: not-allowed; }
-    .status { font-size: 13px; color: var(--muted); margin-top: 8px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 12px; }
-    th, td { border: 2px solid var(--ink); padding: 8px 10px; text-align: left; }
-    th { background: #eceae0; text-transform: uppercase; font-size: 11px; }
-    .ok { color: #047857; font-weight: 800; }
-    .fail { color: var(--red); font-weight: 800; }
-    .err { border: 2px solid var(--ink); background: #ffe5ea; color: #8c0018; padding: 10px; margin-top: 12px; font-size: 12px; font-weight: 700; display: none; }
-    .hidden { display: none; }
-  </style>
+  <link rel="stylesheet" href="/assets/igate.css" />
 </head>
 <body data-issuer="${escapedIssuer}" data-client-id="${escapedClient}" data-callback="${params.isCallbackRoute ? "true" : "false"}">
   <main>

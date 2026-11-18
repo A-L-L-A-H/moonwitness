@@ -1,11 +1,11 @@
 //! Bucket-level S3 operations.
 
 use axum::extract::State;
-use axum::http::{HeaderMap, StatusCode};
+use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::Response;
 
 use crate::models::Bucket;
-use crate::s3::errors::{S3Error, S3Result};
+use crate::s3::errors::{request_id_header, try_header_value, S3Error, S3Result};
 use crate::s3::state::{parse_range, validate_bucket_name, AppState, Principal, DEFAULT_REGION};
 use crate::xml::{self, Element};
 
@@ -74,11 +74,10 @@ pub async fn create_bucket(
     *response.status_mut() = StatusCode::OK;
     response
         .headers_mut()
-        .insert("location", format!("/{bucket}").parse().unwrap());
-    response.headers_mut().insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+        .insert("location", try_header_value(&format!("/{bucket}"))?);
+    response
+        .headers_mut()
+        .insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -91,9 +90,10 @@ pub async fn head_bucket(
     ensure_bucket(&state, &bucket).await?;
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::OK;
-    response
-        .headers_mut()
-        .insert("x-amz-bucket-region", DEFAULT_REGION.parse().unwrap());
+    response.headers_mut().insert(
+        "x-amz-bucket-region",
+        HeaderValue::from_static(DEFAULT_REGION),
+    );
     Ok(response)
 }
 
@@ -127,10 +127,9 @@ pub async fn delete_bucket(
 
     let mut response = Response::new(String::new().into());
     *response.status_mut() = StatusCode::NO_CONTENT;
-    response.headers_mut().insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    response
+        .headers_mut()
+        .insert("x-amz-request-id", request_id_header());
     Ok(response)
 }
 
@@ -360,11 +359,8 @@ pub fn xml_response(status: StatusCode, body: String) -> Response {
     let mut response = Response::new(body.into());
     *response.status_mut() = status;
     let headers = response.headers_mut();
-    headers.insert("content-type", "application/xml".parse().unwrap());
-    headers.insert(
-        "x-amz-request-id",
-        uuid::Uuid::new_v4().to_string().parse().unwrap(),
-    );
+    headers.insert("content-type", HeaderValue::from_static("application/xml"));
+    headers.insert("x-amz-request-id", request_id_header());
     response
 }
 

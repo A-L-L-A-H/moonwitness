@@ -1,6 +1,6 @@
 //! S3-compatible error codes and XML error responses.
 
-use axum::http::StatusCode;
+use axum::http::{HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 
 use crate::sigv4::SigV4Error;
@@ -120,15 +120,26 @@ impl IntoResponse for S3Error {
         let mut response = (self.status, body).into_response();
         response
             .headers_mut()
-            .insert("content-type", "application/xml".parse().unwrap());
+            .insert("content-type", HeaderValue::from_static("application/xml"));
         response.headers_mut().insert(
             "x-amz-request-id",
             request_id
                 .parse()
-                .unwrap_or_else(|_| axum::http::HeaderValue::from_static("unknown")),
+                .unwrap_or_else(|_| HeaderValue::from_static("unknown")),
         );
         response
     }
+}
+
+/// Parses an HTTP header value safely without panicking on invalid ASCII.
+pub fn try_header_value(raw: &str) -> S3Result<HeaderValue> {
+    HeaderValue::from_str(raw).map_err(|_| S3Error::internal("invalid response header value"))
+}
+
+/// Builds a unique `x-amz-request-id` header value.
+pub fn request_id_header() -> HeaderValue {
+    HeaderValue::from_str(&request_id_from_extensions())
+        .unwrap_or_else(|_| HeaderValue::from_static("unknown"))
 }
 
 fn request_id_from_extensions() -> String {

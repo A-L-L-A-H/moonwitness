@@ -25,7 +25,9 @@ impl IntoResponse for AppError {
         };
 
         let body = serde_json::json!({ "error": message });
-        (status, serde_json::to_string(&body).unwrap()).into_response()
+        let serialized = serde_json::to_string(&body)
+            .unwrap_or_else(|_| r#"{"error":"internal error"}"#.to_string());
+        (status, serialized).into_response()
     }
 }
 
