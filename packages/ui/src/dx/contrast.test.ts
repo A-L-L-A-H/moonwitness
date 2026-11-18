@@ -1,18 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { auditAllDnaWorlds } from "./contrast";
+import { auditAllDnaWorlds, auditAllDnaWorldsAndModes } from "./contrast";
 
-describe("7 Master DNA WCAG Contrast Gate (ui:contrast)", () => {
-  it("passes WCAG 2.1 contrast thresholds for every pair across all 7 Master DNA Worlds", () => {
-    const audits = auditAllDnaWorlds();
-    expect(audits).toHaveLength(7);
-
-    for (const audit of audits) {
-      for (const pair of audit.pairs) {
-        expect(
-          pair.passed,
-          `${audit.dnaId} [${pair.pairName}] ${pair.foreground} on ${pair.background} measured ${pair.ratio}:1 (< ${pair.minimumRequired}:1)`,
-        ).toBe(true);
-      }
+describe("WCAG 2.1 AA Contrast Gate across all 7 Master DNA identities (dark + light)", () => {
+  it("keeps foreground, accent, muted, and focus pairs compliant", () => {
+    const darkResults = auditAllDnaWorlds();
+    const allResults = auditAllDnaWorldsAndModes();
+    expect(darkResults).toHaveLength(7);
+    expect(allResults).toHaveLength(14);
+    for (const result of allResults) {
+      const failed = result.pairs.filter((pair) => !pair.passed);
+      expect(
+        failed,
+        `${result.dnaId} (${result.dnaName}) failed WCAG AA contrast: ${JSON.stringify(failed)}`,
+      ).toEqual([]);
+      expect(result.passed).toBe(true);
     }
   });
 });

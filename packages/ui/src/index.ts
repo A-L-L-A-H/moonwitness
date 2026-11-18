@@ -604,8 +604,10 @@ export { TokenInspector, type TokenInspectorProps } from "./dx/inspector";
 export { SkinPlayground, type SkinPlaygroundProps } from "./dx/playground";
 export {
   measureContrastRatio,
+  auditPaletteContrast,
   auditDnaContrast,
   auditAllDnaWorlds,
+  auditAllDnaWorldsAndModes,
   type ContrastPairResult,
   type ContrastAuditResult,
 } from "./dx/contrast";
