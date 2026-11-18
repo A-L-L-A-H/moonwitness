@@ -247,8 +247,13 @@ fn migrate(connection: &Connection) -> Result<(), String> {
             .execute_batch(include_str!("../migrations/003_google_drive_backup.sql"))
             .map_err(|error| error.to_string())?;
     }
+    if version < 4 {
+        transaction
+            .execute_batch(include_str!("../migrations/004_continuity.sql"))
+            .map_err(|error| error.to_string())?;
+    }
     transaction
-        .pragma_update(None, "user_version", 3)
+        .pragma_update(None, "user_version", 4)
         .map_err(|error| error.to_string())?;
     transaction.commit().map_err(|error| error.to_string())
 }
@@ -385,7 +390,25 @@ mod tests {
             .expect("cloud backup settings table should exist");
         assert_eq!(issue_title, "Existing issue");
         assert_eq!(backup_table, 1);
-        assert_eq!(version, 3);
+        assert_eq!(version, 4);
+        for table in [
+            "memories",
+            "memory_corrections",
+            "memories_fts",
+            "work_sessions",
+            "resume_points",
+            "experiences",
+            "lessons",
+        ] {
+            let exists: i64 = connection
+                .query_row(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type IN ('table', 'virtual') AND name = ?1",
+                    [table],
+                    |row| row.get(0),
+                )
+                .expect("continuity table lookup should work");
+            assert_eq!(exists, 1, "missing continuity table: {table}");
+        }
     }
 
     #[test]
@@ -451,7 +474,7 @@ mod tests {
             .query_row("PRAGMA user_version", [], |row| row.get(0))
             .expect("schema version should load");
         assert_eq!(closed_at_columns, 1);
-        assert_eq!(version, 3);
+        assert_eq!(version, 4);
         let title: String = connection
             .query_row("SELECT title FROM issues WHERE id = 'i1'", [], |row| {
                 row.get(0)
