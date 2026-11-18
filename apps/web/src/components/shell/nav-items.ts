@@ -25,6 +25,7 @@ export function navHref(item: NavItem): string {
 }
 
 const ACTIVE_BY_PATH: Record<string, string> = {
+  "/addons": "base.addons",
   "/dock": "archive",
   "/mission-control": "dashboard",
   "/intelligence": "intelligence",

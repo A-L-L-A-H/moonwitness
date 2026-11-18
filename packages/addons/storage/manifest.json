@@ -1,0 +1,14 @@
+{
+  "name": "storage",
+  "version": "0.1.0",
+  "description": "S3 object storage gateway metadata & multipart upload tracking",
+  "category": "infrastructure",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["storage"],
+    "models": ["storage.bucket", "storage.object", "storage.upload_session"],
+    "migrations": []
+  }
+}

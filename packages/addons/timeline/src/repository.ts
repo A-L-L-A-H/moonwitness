@@ -1,6 +1,9 @@
 import type { Era, TimelineEvent } from "@moonwitness/types";
-import { getDb } from "@moonwitness/orm";
+import { SYSTEM_ACTOR, getDb, uuidv7, type ActorContext, type AuditEntry } from "@moonwitness/orm";
 import { timelineEventModel, timelineEraModel } from "./model.js";
+
+export type CreateTimelineEventInput = Omit<TimelineEvent, "id"> & { id?: string };
+export type UpdateTimelineEventInput = Partial<Omit<TimelineEvent, "id">> & { version?: number };
 
 export interface TimelineFilters {
   era?: string;
@@ -24,6 +27,17 @@ export interface ITimelineRepository {
   getEvent(id: string): Promise<TimelineEvent | null>;
   getStats(): Promise<TimelineStats>;
   getEras(): Promise<Era[]>;
+  createEvent(input: CreateTimelineEventInput, actor?: ActorContext): Promise<TimelineEvent>;
+  updateEvent(
+    id: string,
+    patch: UpdateTimelineEventInput,
+    actor?: ActorContext,
+  ): Promise<TimelineEvent | null>;
+  archiveEvent(id: string, actor?: ActorContext): Promise<TimelineEvent | null>;
+  restoreEvent(id: string, actor?: ActorContext): Promise<TimelineEvent | null>;
+  deleteEvent(id: string, actor?: ActorContext): Promise<TimelineEvent | null>;
+  getEventHistory(id: string): Promise<AuditEntry[]>;
+  upsertEra(input: Era, actor?: ActorContext): Promise<Era>;
 }
 
 function parseJson<T>(value: unknown, fallback: T): T {
@@ -40,6 +54,7 @@ function parseJson<T>(value: unknown, fallback: T): T {
 
 function rowToEvent(row: Record<string, unknown>): TimelineEvent {
   const rawImagePosition = row.imagePosition ?? row.imageposition;
+  const attrs = parseJson<Record<string, unknown> | undefined>(row._attrs, undefined);
   return {
     id: String(row.id),
     kind: String(row.kind) as TimelineEvent["kind"],
@@ -55,7 +70,8 @@ function rowToEvent(row: Record<string, unknown>): TimelineEvent {
     image: String(row.image) as TimelineEvent["image"],
     imagePosition: rawImagePosition == null ? undefined : String(rawImagePosition),
     related: parseJson<string[]>(row.related, []),
-  };
+    ...(attrs && Object.keys(attrs).length > 0 ? { _attrs: attrs } : {}),
+  } as TimelineEvent;
 }
 
 function rowToEra(row: Record<string, unknown>): Era {
@@ -162,5 +178,69 @@ export class TimelineRepository implements ITimelineRepository {
     return rows
       .map((row) => rowToEra(row as unknown as Record<string, unknown>))
       .sort((a, b) => a.years.localeCompare(b.years));
+  }
+
+  async createEvent(
+    input: CreateTimelineEventInput,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent> {
+    const created = await this.events.create(
+      {
+        ...input,
+        id: input.id ?? uuidv7(),
+      },
+      actor,
+    );
+    return rowToEvent(created as unknown as Record<string, unknown>);
+  }
+
+  async updateEvent(
+    id: string,
+    patch: UpdateTimelineEventInput,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent | null> {
+    const cleanPatch = Object.fromEntries(
+      Object.entries(patch).filter(([key, value]) => key !== "id" && value !== undefined),
+    );
+    const updated = await this.events.update(id, cleanPatch, actor);
+    if (!updated) return null;
+    return rowToEvent(updated as unknown as Record<string, unknown>);
+  }
+
+  async archiveEvent(
+    id: string,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent | null> {
+    const archived = await this.events.archive(id, actor);
+    if (!archived) return null;
+    return rowToEvent(archived as unknown as Record<string, unknown>);
+  }
+
+  async restoreEvent(
+    id: string,
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<TimelineEvent | null> {
+    const restored = await this.events.restore(id, actor);
+    if (!restored) return null;
+    return rowToEvent(restored as unknown as Record<string, unknown>);
+  }
+
+  async deleteEvent(id: string, actor: ActorContext = SYSTEM_ACTOR): Promise<TimelineEvent | null> {
+    const deleted = await this.events.delete(id, actor);
+    if (!deleted) return null;
+    return rowToEvent(deleted as unknown as Record<string, unknown>);
+  }
+
+  async getEventHistory(id: string): Promise<AuditEntry[]> {
+    return this.events.history(id);
+  }
+
+  async upsertEra(input: Era, actor: ActorContext = SYSTEM_ACTOR): Promise<Era> {
+    const saved = await this.eras.upsert(
+      { id: input.id },
+      input as unknown as Record<string, unknown>,
+      actor,
+    );
+    return rowToEra(saved as unknown as Record<string, unknown>);
   }
 }

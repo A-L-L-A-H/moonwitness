@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import { createSession } from "../../services/session";
-import { createUser } from "../../services/user";
+import { createUser, ensureAuthSchema } from "../../services/user";
 
 vi.mock("../../middleware/auth", () => ({
   requireRole:
@@ -22,9 +22,9 @@ vi.mock("../../middleware/auth", () => ({
         return reply.code(403).send({ error: "Forbidden" });
       }
       request.user = {
-        id: request.headers["x-test-actor"] === "first" ? 1 : 2,
+        id: request.headers["x-test-actor"] === "first" ? "1" : "2",
         role: request.headers["x-test-role"] ?? "admin",
-      } as FastifyRequest["user"];
+      } as unknown as FastifyRequest["user"];
     },
 }));
 
@@ -37,7 +37,6 @@ import {
   defineModel,
 } from "@moonwitness/orm";
 import { z } from "zod";
-import { authMigrations } from "../../db/migrations";
 import { env } from "../../shared/env";
 import { riotAiMigrations } from "./riot-ai.persistence";
 import {
@@ -103,7 +102,8 @@ describe("RIOT Intelligence inference routes", () => {
     const databaseUrl = `file:${crypto.randomUUID()}.db`;
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
-    await applyMigrations([...authMigrations, ...riotAiMigrations]);
+    await ensureAuthSchema();
+    await applyMigrations([...riotAiMigrations]);
     const { riotAiRoutes } = await import("./riot-ai.routes");
     auditRecords.length = 0;
     setInferenceAuditWriterForTests();
@@ -122,7 +122,8 @@ describe("RIOT Intelligence inference routes", () => {
     const databaseUrl = `file:${crypto.randomUUID()}.db`;
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
-    await applyMigrations([...authMigrations, ...riotAiMigrations]);
+    await ensureAuthSchema();
+    await applyMigrations([...riotAiMigrations]);
     const { riotAiRoutes } = await import("./riot-ai.routes");
     const server = Fastify({ logger: false });
     await server.register(riotAiRoutes);
@@ -138,7 +139,8 @@ describe("RIOT Intelligence inference routes", () => {
     const databaseUrl = `file:${crypto.randomUUID()}.db`;
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
-    await applyMigrations([...authMigrations, ...riotAiMigrations]);
+    await ensureAuthSchema();
+    await applyMigrations([...riotAiMigrations]);
     const { riotAiRoutes } = await import("./riot-ai.routes");
     auditRecords.length = 0;
     setInferenceAuditWriterForTests();

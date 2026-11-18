@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Crown } from "../icons";
 import { Tape } from "../primitives/tape";
 import { WitnessAvatar } from "../primitives/witness-avatar";
+import { useSkin } from "../skin";
 import { CountUp } from "./count-up";
 
 export interface WitnessItem {
@@ -70,15 +71,19 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
       media.removeEventListener("change", reduce);
     };
   }, []);
+  const { skin } = useSkin();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = witnesses.find((w) => w.id === selectedId) ?? witnesses[0];
   if (!selected) return null;
 
   return (
-    <div className="@container">
+    <div className="@container" data-skin={skin}>
       <div className="grid grid-cols-1 items-start gap-6 @[40rem]:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
         <div className="zine-card-rough relative min-w-0 overflow-hidden p-4">
-          <div ref={mapRef} className="halftone relative aspect-[10/7] rounded-md bg-[#0d0d16]">
+          <div
+            ref={mapRef}
+            className="halftone relative aspect-[10/7] rounded-md bg-[var(--background)]"
+          >
             {backdrop}
             <svg viewBox="0 0 100 70" className="absolute inset-0 h-full w-full" aria-hidden>
               {witnesses.slice(0, 6).map((a, i) => {
@@ -117,10 +122,10 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
                 aria-label={`${demo ? "Demo witness" : "Witness"} ${w.name}, ${w.place}`}
                 aria-pressed={selected.id === w.id}
                 aria-controls={detailId}
-                className={`absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 bg-[#0d0d16] transition-colors active:border-white ${
+                className={`absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 bg-[var(--background)] transition-colors active:border-[var(--foreground)] ${
                   selected.id === w.id
-                    ? "z-10 border-[var(--yellow)]"
-                    : "border-white/60 hover:border-[var(--pink)]"
+                    ? "z-10 border-[var(--primary)]"
+                    : "border-[var(--border)] hover:border-[var(--primary)]"
                 }`}
                 style={{ left: `${w.x}%`, top: `${w.y}%` }}
               >
@@ -137,7 +142,7 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
             {stickerText}
           </p>
           {demo && (
-            <p className="mt-3 text-xs text-zinc-300">
+            <p className="mt-3 text-xs text-[var(--muted-foreground)]">
               Fictional demo profiles, illustrated avatars and story quotes. Not verified witnesses
               or activity.
             </p>
@@ -153,11 +158,11 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
                   onClick={() => setSelectedId(w.id)}
                   aria-pressed={selected.id === w.id}
                   aria-controls={detailId}
-                  className={`min-h-11 border-2 px-3 py-2 text-sm text-zinc-100 hover:underline active:bg-black ${selected.id === w.id ? "border-[var(--yellow)]" : "border-zinc-400"}`}
+                  className={`min-h-11 border-2 px-3 py-2 text-sm text-[var(--foreground)] hover:underline active:bg-[var(--muted)] ${selected.id === w.id ? "border-[var(--primary)]" : "border-[var(--border)]"}`}
                 >
                   {w.name}
                   {selected.id === w.id && (
-                    <span className="ml-2 bg-[var(--yellow)] px-1 text-xs font-bold text-black">
+                    <span className="ml-2 bg-[var(--primary)] px-1 text-xs font-bold text-[var(--primary-foreground)]">
                       Selected
                     </span>
                   )}
@@ -169,12 +174,14 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
             {stats.map((s) => (
               <div
                 key={s.label}
-                className="border border-[var(--line)] bg-[var(--panel-2)] px-2 py-3"
+                className="border border-[var(--border)] bg-[var(--muted)] px-2 py-3"
               >
-                <div className="font-brush text-xl text-[var(--yellow)] sm:text-2xl">
+                <div className="font-brush text-xl text-[var(--primary)] sm:text-2xl">
                   <CountUp target={s.target} />
                 </div>
-                <div className="mt-1 text-[11px] tracking-widest text-zinc-400">{s.label}</div>
+                <div className="mt-1 text-[11px] tracking-widest text-[var(--muted-foreground)]">
+                  {s.label}
+                </div>
               </div>
             ))}
           </div>
@@ -193,23 +200,26 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
                 seed={selected.name}
                 size={48}
                 alt={`${demo ? "Demo illustration" : "Avatar"} ${selected.name}`}
-                className="rounded-full border-2 border-[var(--pink)]"
+                className="rounded-full border-2 border-[var(--primary)]"
                 options={{ radius: 50 }}
               />
               <div>
-                <div className="font-brush text-lg text-white">{selected.name}</div>
-                <div className="text-xs text-zinc-300">{selected.place}</div>
+                <div className="font-brush text-lg text-[var(--foreground)]">{selected.name}</div>
+                <div className="text-xs text-[var(--muted-foreground)]">{selected.place}</div>
               </div>
-              <Crown className="ml-auto h-4 w-6 text-[var(--yellow)]" />
+              <Crown className="ml-auto h-4 w-6 text-[var(--primary)]" />
             </div>
-            <p className="mt-4 font-hand text-xl leading-snug text-zinc-200">“{selected.quote}”</p>
+            <p className="mt-4 font-hand text-xl leading-snug text-[var(--foreground)]">
+              “{selected.quote}”
+            </p>
             {demo ? (
-              <p className="mt-4 text-xs text-zinc-300">
+              <p className="mt-4 text-xs text-[var(--muted-foreground)]">
                 Fictional story quote, not a testimonial.
               </p>
             ) : (
-              <div className="mt-4 text-xs text-zinc-300">
-                <span className="text-[var(--blue)]">{selected.signals}</span> signals contributed
+              <div className="mt-4 text-xs text-[var(--muted-foreground)]">
+                <span className="text-[var(--primary)]">{selected.signals}</span> signals
+                contributed
               </div>
             )}
           </div>

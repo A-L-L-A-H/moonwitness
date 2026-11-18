@@ -1,4 +1,12 @@
 import type { NextConfig } from "next";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+
+// Share the monorepo root `.env` without overriding apps/web/.env* or process env.
+const rootEnvPath = resolve(process.cwd(), "../../.env");
+if (existsSync(rootEnvPath) && typeof process.loadEnvFile === "function") {
+  process.loadEnvFile(rootEnvPath);
+}
 
 const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
@@ -49,18 +57,6 @@ const nextConfig: NextConfig = {
             ].join("; "),
           },
         ],
-      },
-    ];
-  },
-  async rewrites() {
-    const apiUrl = process.env.API_INTERNAL_URL?.trim();
-    if (!apiUrl) {
-      return [];
-    }
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: apiUrl.replace(/\/+$/, "") + "/api/v1/:path*",
       },
     ];
   },

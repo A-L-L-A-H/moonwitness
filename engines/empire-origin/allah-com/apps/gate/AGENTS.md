@@ -7,3 +7,6 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+> [!IMPORTANT]
+> **Absorbed Legacy App Notice (`2026-11-18`):** Standalone `allah-com/apps/gate` has been consolidated into active `apps/web` per [ADR-006](../../../../../docs/architecture/adr-006-three-app-topology-and-trust-zones.md). Obey root [AGENTS.md](../../../../../AGENTS.md) and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../../../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md).

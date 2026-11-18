@@ -1,7 +1,15 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
+import {
+  MEMORY_SKIN_META,
+  MEMORY_SKIN_STORAGE_KEY,
+  applyMemorySkin,
+  nextMemorySkin,
+  resolveMemorySkin,
+  type MemorySkin,
+} from "../lib/skins";
 
 export type DeckMode = "overview" | "vault" | "queue" | "knowledge";
 type Theme = "dark" | "light";
@@ -43,6 +51,24 @@ export function MemoryDeckShell({
   transport,
   children,
 }: Props) {
+  const [skin, setSkin] = useState<MemorySkin>("archive");
+
+  useEffect(() => {
+    try {
+      const resolved = resolveMemorySkin(window.localStorage.getItem(MEMORY_SKIN_STORAGE_KEY));
+      setSkin(resolved);
+      document.documentElement.dataset.skin = resolved;
+    } catch {
+      document.documentElement.dataset.skin = "archive";
+    }
+  }, []);
+
+  function cycleSkin() {
+    const next = nextMemorySkin(skin);
+    setSkin(next);
+    applyMemorySkin(next);
+  }
+
   return (
     <div className="memory-deck">
       <a className="skip-link" href="#active-workspace">
@@ -51,7 +77,12 @@ export function MemoryDeckShell({
       <header className="deck-fascia">
         <div className="deck-brand">
           <span className="deck-brand__mark" aria-hidden="true">
-            MW
+            <svg viewBox="0 0 32 32" width="22" height="22" fill="none">
+              <rect x="2" y="6" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
+              <circle cx="11" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+              <circle cx="21" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+              <line x1="14" y1="16" x2="18" y2="16" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
           </span>
           <span className="deck-brand__type">
             <strong>MOONWITNESS</strong>
@@ -76,6 +107,17 @@ export function MemoryDeckShell({
         <div className="deck-fascia__actions">
           {authControl}
           {loadControl}
+          <button
+            className="deck-icon-button"
+            type="button"
+            onClick={cycleSkin}
+            aria-label={`Memory skin preset (${skin})`}
+            title={`Skin: ${MEMORY_SKIN_META[skin].label} (${MEMORY_SKIN_META[skin].grammar}) — click to cycle`}
+          >
+            <span style={{ fontSize: "10px", fontFamily: "var(--mono-type)", fontWeight: 700 }}>
+              {skin.slice(0, 4).toUpperCase()}
+            </span>
+          </button>
           <button
             className="deck-icon-button"
             type="button"

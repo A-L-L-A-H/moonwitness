@@ -1,0 +1,14 @@
+{
+  "name": "command-center",
+  "version": "0.1.0",
+  "description": "Mission Control workflows & operational alert state machine",
+  "category": "operations",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["command-center"],
+    "models": ["command.workflow", "command.alert"],
+    "migrations": []
+  }
+}

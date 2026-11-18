@@ -37,7 +37,10 @@ function statBlocks(stats: CommandCenterStats | null) {
 
 const STATUS_UI: Record<CommandCenterSyncStatus, { label: string; className: string }> = {
   live: { label: "LIVE", className: "bg-[var(--green)] text-black" },
-  loading: { label: "SYNCING", className: "bg-[var(--yellow)] text-black" },
+  loading: {
+    label: "SYNCING",
+    className: "bg-[var(--secondary)] text-[var(--secondary-foreground)]",
+  },
   offline: { label: "OFFLINE", className: "bg-[var(--red)] text-white" },
 };
 
@@ -70,9 +73,9 @@ export function UniverseStatus({
           aria-hidden
           className="absolute inset-0 bg-gradient-to-r from-[color-mix(in_srgb,var(--ink)_96%,transparent)] via-[color-mix(in_srgb,var(--ink)_72%,transparent)] to-[color-mix(in_srgb,var(--ink)_8%,transparent)]"
         />
-        <div className="relative z-10 flex h-full min-h-[220px] flex-col gap-4">
+        <div className="relative z-10 flex h-full min-h-[220px] flex-col gap-4 [--card-foreground:var(--paper)] [--foreground:var(--paper)] [--muted-foreground:var(--paper)]">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--yellow)]">
+            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--primary)]">
               EMPIRE TELEMETRY
             </p>
             <Badge variant="default" className={badge.className}>

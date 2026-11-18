@@ -1,0 +1,14 @@
+{
+  "name": "control",
+  "version": "0.1.0",
+  "description": "Operations control plane proxy & command audit history",
+  "category": "operations",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth"],
+  "provides": {
+    "routes": ["control"],
+    "models": ["control.command"],
+    "migrations": []
+  }
+}

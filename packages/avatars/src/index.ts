@@ -39,3 +39,5 @@ export {
   type SavedAvatar,
   type SavedAvatarOptions,
 } from "./contract";
+
+export { DNA_AVATAR_PALETTE_MAP, resolveDnaAvatarPalette } from "./witness";

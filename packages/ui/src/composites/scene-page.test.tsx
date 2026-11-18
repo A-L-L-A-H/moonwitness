@@ -6,7 +6,18 @@ import { ScenePage, ScenePanel, ChapterBanner, FilmStrip } from "./scene-page";
 import { AtlasStage } from "./atlas-stage";
 import { SkinProvider, useSkin, type SkinName } from "../skin";
 
-const SKINS: SkinName[] = ["default", "riot", "editorial", "technical", "archive", "transmission"];
+const SKINS: SkinName[] = [
+  "default",
+  "riot",
+  "editorial",
+  "technical",
+  "archive",
+  "transmission",
+  "sanctuary",
+  "brutalist",
+  "noir",
+  "kinetic",
+];
 const EFFECTS = ".halftone, .grain, .scanlines, .cmyk-slip, .duotone, .brush-underline, .sticker";
 
 let container: HTMLDivElement;

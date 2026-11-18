@@ -1,5 +1,8 @@
 # Moonframe repository agent policy — M13 autonomous execution
 
+> [!IMPORTANT]
+> **Absorbed Engine Subordination Notice (`2026-11-18`):** This file belongs to the absorbed archive under `engines/moonframe/` ([CONSOLIDATION-CATALOG.md](../../docs/CONSOLIDATION-CATALOG.md)). Root [AGENTS.md](../../AGENTS.md) and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md) override any absorbed repository-level Git, branch, or gate rules here.
+
 This repository's standing agent instructions are defined here. They apply to Codex and other local coding agents. The owner authorized **unattended implementation of ordinary, reversible M13 work**, not fictional approvals, destructive changes, publishing or unsafe security bypasses.
 
 ## Canonical sources (read before changing files)

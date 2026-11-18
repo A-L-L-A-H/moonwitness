@@ -260,5 +260,14 @@ describe("ROCKSOUL browser-preview workflow", () => {
     ).rejects.toMatchObject({
       message: "Loopback sign-in requires the native desktop app.",
     });
+
+    const devStatus = await call("get_dev_services_status");
+    expect(devStatus.map((entry) => entry.id)).toEqual(["api", "web"]);
+    await expect(call("start_dev_service", { target: "all" })).rejects.toMatchObject({
+      message: "Dev server process control requires the native desktop app.",
+    });
+    await expect(call("stop_dev_service", { target: "all" })).rejects.toMatchObject({
+      message: "Dev server process control requires the native desktop app.",
+    });
   });
 });

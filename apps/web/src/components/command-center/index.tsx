@@ -110,7 +110,7 @@ export function CommandCenter() {
         </div>
       )}
 
-      <Star4 className="pointer-events-none fixed bottom-24 right-6 hidden h-6 w-6 text-[var(--pink)] opacity-50 xl:block" />
+      <Star4 className="pointer-events-none fixed bottom-24 right-6 hidden h-6 w-6 text-[var(--primary)] opacity-50 xl:block" />
     </ConsoleShellAdapter>
   );
 }

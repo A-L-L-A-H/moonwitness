@@ -18,12 +18,12 @@ const ROTATIONS = [
 ];
 
 const STYLES = [
-  "bg-[var(--pink)] text-white font-brush",
-  "bg-[var(--yellow)] text-black font-brush",
-  "bg-white text-black font-mono font-black",
-  "bg-[var(--blue)] text-black font-brush",
-  "bg-black text-[var(--yellow)] border border-[var(--yellow)] font-mono",
-  "bg-[var(--panel-2)] text-[var(--paper)] font-hand font-bold",
+  "bg-[var(--primary)] text-[var(--primary-foreground)] font-brush",
+  "bg-[var(--secondary)] text-[var(--secondary-foreground)] font-brush",
+  "bg-[var(--card)] text-[var(--card-foreground)] border border-[var(--border)] font-mono font-black",
+  "bg-[var(--accent)] text-[var(--accent-foreground)] font-brush",
+  "bg-[var(--foreground)] text-[var(--background)] font-mono",
+  "bg-[var(--muted)] text-[var(--foreground)] border border-[var(--border)] font-hand font-bold",
 ];
 
 export function RansomText({ children, size = "md", className, ...props }: RansomTextProps) {

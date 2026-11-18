@@ -7,7 +7,7 @@ import {
   type CompactScriptureTuple,
   type ScriptureCorpusFilter,
 } from "@moonwitness/canon";
-import { loadPublicJsonAsset } from "@/lib/cloudflare-runtime";
+import { loadPublicJsonAsset } from "@/lib/public-assets";
 
 interface WitnessCrosswalkPayload {
   readonly invariant: string;

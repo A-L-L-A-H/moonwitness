@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { OperationsShell } from "@/components/shell";
+import { SatelliteDishArt, SkinOrnament } from "@moonwitness/ui";
+import { SnmpProbe } from "@moonwitness/ui/icons";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { normalizeRole } from "@/lib/roles";
 import {
@@ -37,17 +39,22 @@ function SnmpMonitor() {
   }, [devices.data, query]);
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="SNMP Monitor"
       search={{ value: query, onChange: setQuery, placeholder: "Search devices…" }}
     >
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-8">
-        <header className="border-b-2 border-[var(--line)] pb-5">
-          <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--blue)]">
-            OPERATIONS / {canWrite ? "MANAGEMENT" : "READ ONLY"}
-          </p>
-          <h1 className="mt-2 font-brush text-4xl text-zinc-100">SNMP MONITOR</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+        <header className="border-b-2 border-[var(--border)] pb-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <SnmpProbe className="h-4 w-4 text-[var(--primary)]" />
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--primary)]">
+              OPERATIONS / {canWrite ? "MANAGEMENT" : "READ ONLY"}
+            </p>
+            <SkinOrnament slot="tag" label="SNMP POLLER" />
+          </div>
+          <h1 className="mt-2 font-brush text-4xl text-[var(--foreground)]">SNMP MONITOR</h1>
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
             Device, target, and polling summaries from the authenticated SNMP service.
             {canWrite
               ? " You can create and delete devices and targets."
@@ -63,22 +70,21 @@ function SnmpMonitor() {
 
         {stats.isLoading ? (
           <p
-            className="border-2 border-[var(--line)] bg-[var(--panel)] p-5 text-sm text-zinc-400"
+            className="border-2 border-[var(--border)] bg-[var(--card)] p-5 text-sm text-[var(--muted-foreground)]"
             role="status"
           >
             Loading SNMP statistics…
           </p>
         ) : stats.isError ? (
-          <section
-            className="border-2 border-[var(--yellow)]/50 bg-[var(--panel)] p-5"
-            role="alert"
-          >
-            <h2 className="font-brush text-xl text-[var(--yellow)]">SNMP SERVICE UNAVAILABLE</h2>
-            <p className="mt-2 text-sm text-zinc-300">{(stats.error as Error).message}</p>
+          <section className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5" role="alert">
+            <h2 className="font-brush text-xl text-[var(--primary)]">SNMP SERVICE UNAVAILABLE</h2>
+            <p className="mt-2 text-sm text-[var(--foreground)]">
+              {(stats.error as Error).message}
+            </p>
             <button
               type="button"
               onClick={() => void stats.refetch()}
-              className="mt-3 min-h-11 text-xs text-[var(--blue)] underline"
+              className="mt-3 min-h-11 text-xs text-[var(--primary)] underline"
             >
               Retry statistics
             </button>
@@ -97,39 +103,41 @@ function SnmpMonitor() {
 
         {devices.isLoading ? (
           <p
-            className="border-2 border-[var(--line)] bg-[var(--panel)] p-5 text-sm text-zinc-400"
+            className="border-2 border-[var(--border)] bg-[var(--card)] p-5 text-sm text-[var(--muted-foreground)]"
             role="status"
           >
             Loading devices…
           </p>
         ) : devices.isError ? (
-          <section
-            className="border-2 border-[var(--yellow)]/50 bg-[var(--panel)] p-5"
-            role="alert"
-          >
-            <h2 className="font-brush text-xl text-[var(--yellow)]">DEVICES UNAVAILABLE</h2>
-            <p className="mt-2 text-sm text-zinc-300">{(devices.error as Error).message}</p>
+          <section className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5" role="alert">
+            <h2 className="font-brush text-xl text-[var(--primary)]">DEVICES UNAVAILABLE</h2>
+            <p className="mt-2 text-sm text-[var(--foreground)]">
+              {(devices.error as Error).message}
+            </p>
             <button
               type="button"
               onClick={() => void devices.refetch()}
-              className="mt-3 min-h-11 text-xs text-[var(--blue)] underline"
+              className="mt-3 min-h-11 text-xs text-[var(--primary)] underline"
             >
               Retry devices
             </button>
           </section>
         ) : visibleDevices.length === 0 ? (
-          <p
-            className="border-2 border-[var(--line)] bg-[var(--panel)] p-5 text-sm text-zinc-400"
+          <div
+            className="flex flex-col items-center gap-3 border-2 border-[var(--border)] bg-[var(--card)] p-6 text-center text-sm text-[var(--muted-foreground)]"
             role="status"
           >
-            {devices.data?.length
-              ? "No devices match this search."
-              : "No SNMP devices are configured."}
-          </p>
+            <SatelliteDishArt className="h-20 w-20 opacity-85" decorative />
+            <p>
+              {devices.data?.length
+                ? "No devices match this search."
+                : "No SNMP devices are configured."}
+            </p>
+          </div>
         ) : (
           <section aria-label="SNMP devices" className="space-y-4">
             {devices.isFetching && (
-              <p className="text-xs text-zinc-500" role="status">
+              <p className="text-xs text-[var(--muted-foreground)]" role="status">
                 Refreshing device data; showing the previous results.
               </p>
             )}
@@ -139,15 +147,17 @@ function SnmpMonitor() {
           </section>
         )}
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 
 function Stat({ label, value }: { label: string; value?: number }) {
   return (
-    <div className="border-2 border-[var(--line)] bg-[var(--panel)] p-4">
-      <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">{label}</p>
-      <p className="mt-2 font-brush text-3xl text-zinc-100">{value ?? "—"}</p>
+    <div className="border-2 border-[var(--border)] bg-[var(--card)] p-4">
+      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+        {label}
+      </p>
+      <p className="mt-2 font-brush text-3xl text-[var(--foreground)]">{value ?? "—"}</p>
     </div>
   );
 }
@@ -156,37 +166,41 @@ function DeviceCard({ device, canWrite }: { device: SafeSnmpDevice; canWrite: bo
   const { id: deviceId, name, host, port, version, enabled } = device;
   const targets = useSnmpTargets(deviceId);
   return (
-    <article className="border-2 border-[var(--line)] bg-[var(--panel)]">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--line)] p-4">
+    <article className="border-2 border-[var(--border)] bg-[var(--card)]">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] p-4">
         <div>
-          <h2 className="font-brush text-xl text-white">{name}</h2>
-          <p className="mt-1 font-mono text-xs text-zinc-400">
+          <h2 className="font-brush text-xl text-[var(--foreground)]">{name}</h2>
+          <p className="mt-1 font-mono text-xs text-[var(--muted-foreground)]">
             {host}:{port} · {version}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-zinc-400">{enabled ? "Enabled" : "Disabled"}</span>
+          <span className="text-xs text-[var(--muted-foreground)]">
+            {enabled ? "Enabled" : "Disabled"}
+          </span>
           <DeviceManagementActions device={device} canWrite={canWrite} />
         </div>
       </header>
       <div className="p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h3 className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <h3 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
             Targets and samples
           </h3>
           {canWrite && <CreateTargetForm deviceId={deviceId} />}
         </div>
         {targets.isLoading ? (
-          <p className="mt-3 text-sm text-zinc-400" role="status">
+          <p className="mt-3 text-sm text-[var(--muted-foreground)]" role="status">
             Loading targets…
           </p>
         ) : targets.isError ? (
           <div className="mt-3" role="alert">
-            <p className="text-sm text-zinc-400">{(targets.error as Error).message}</p>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              {(targets.error as Error).message}
+            </p>
             <button
               type="button"
               onClick={() => void targets.refetch()}
-              className="mt-2 min-h-11 text-xs text-[var(--blue)] underline"
+              className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
             >
               Retry targets
             </button>
@@ -198,7 +212,7 @@ function DeviceCard({ device, canWrite }: { device: SafeSnmpDevice; canWrite: bo
             ))}
           </ul>
         ) : (
-          <p className="mt-3 text-sm text-zinc-400" role="status">
+          <p className="mt-3 text-sm text-[var(--muted-foreground)]" role="status">
             No targets are configured for this device.
           </p>
         )}
@@ -211,8 +225,8 @@ function TargetRow({ target, canWrite }: { target: SnmpTarget; canWrite: boolean
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 py-3">
       <div>
-        <p className="text-sm text-zinc-200">{target.name}</p>
-        <p className="mt-1 font-mono text-xs text-zinc-500">
+        <p className="text-sm text-[var(--foreground)]">{target.name}</p>
+        <p className="mt-1 font-mono text-xs text-[var(--muted-foreground)]">
           {target.oid} · {target.enabled ? "Enabled" : "Disabled"}
         </p>
       </div>
@@ -223,7 +237,7 @@ function TargetRow({ target, canWrite }: { target: SnmpTarget; canWrite: boolean
           canWrite={canWrite}
         />
         <div>
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-[var(--muted-foreground)]">
             {target.poll_interval === null
               ? "Default polling interval"
               : `Poll every ${target.poll_interval}s`}
@@ -239,24 +253,24 @@ function LatestSample({ targetId }: { targetId: string }) {
   const latest = useSnmpLatestSample(targetId);
   if (latest.isLoading)
     return (
-      <p className="mt-1 text-[10px] text-zinc-500" role="status">
+      <p className="mt-1 text-[10px] text-[var(--muted-foreground)]" role="status">
         Loading latest sample…
       </p>
     );
   if (latest.isError)
     return (
-      <p className="mt-1 text-[10px] text-[var(--yellow)]" role="status">
+      <p className="mt-1 text-[10px] text-[var(--primary)]" role="status">
         Latest sample unavailable
       </p>
     );
   if (!latest.data)
     return (
-      <p className="mt-1 text-[10px] text-zinc-500" role="status">
+      <p className="mt-1 text-[10px] text-[var(--muted-foreground)]" role="status">
         No samples yet
       </p>
     );
   return (
-    <p className="mt-1 font-mono text-[10px] text-zinc-500">
+    <p className="mt-1 font-mono text-[10px] text-[var(--muted-foreground)]">
       {latest.data.rate === null ? "Rate unavailable" : `${latest.data.rate} / s`} ·{" "}
       {new Date(latest.data.ts * 1000).toLocaleString()}
     </p>

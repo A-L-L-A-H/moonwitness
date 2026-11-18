@@ -1,44 +1,45 @@
-# MoonWitness SQLite Data Ownership, Initialization, Backup and Restore Specification (MW-0036)
+# MoonWitness Data Ownership, Initialization, Backup and Restore Specification (MW-0036)
+
+> [!NOTE]
+> **Reconciliation Note (2026-11-18):** Originally written when Core API used SQLite/libSQL (`moonwitness.db`) across all environments. In the current repository (`docker-compose.yml`, `packages/orm`), production VPS Compose uses **PostgreSQL 16 (`postgres:16-alpine`)** via `PostgresDriver` for Core API & MID, while SQLite/libSQL (`LibSqlDriver`) remains active for local development and for each specialized Rust worker (`radius`, `snmp-poller`, `syslog`, `storage`).
 
 ## 1. Executive Summary
 
-MoonWitness implements a modular persistent data architecture on a single VPS, using SQLite/libSQL as the standard storage engine. To guarantee transactional stability, data hygiene, and fault isolation:
+MoonWitness implements a modular persistent data architecture on a single VPS, isolating relational core state (PostgreSQL in Compose production, SQLite/libSQL in local development) from per-worker SQLite stores on the Rust ops tier:
 
-- Each service owns exactly one designated SQLite database file.
-- There is no monolithic shared database file across unrelated services.
-- Core API and the integrated MoonWitness Identity (MID) authority share a single database (`moonwitness.db`) through one shared connection pool and transaction manager (`@moonwitness/orm`).
-- All production databases initialize empty with versioned SQL migrations; there is zero legacy migration from Cloudflare D1.
+- Core API and the integrated MoonWitness Identity (MID) authority (`packages/mid` mounted in `apps/api`) share the primary database configured via `DATABASE_URL` through `@moonwitness/orm`.
+- Each Rust telemetry/storage service (`--profile ops`) owns one dedicated SQLite database file on its named volume.
+- Local companion services (`apps/rocksoul`, `services/memory`) maintain strictly local-first SQLite / LanceDB stores outside the VPS stack (`ADR-007`).
+- All production databases initialize with versioned migrations; there is zero legacy migration from Cloudflare D1 in the VPS runtime.
 - No application data or database clients exist on MikroTik / RouterOS.
 
 ---
 
 ## 2. Service & Database Ownership Matrix
 
-| Service                         | Database File    | Docker Volume Mount      | Owning Runtime                          | Authorized Consumers               | Primary Tables                                                                                                                                                                                                               |
-| ------------------------------- | ---------------- | ------------------------ | --------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Core API & MID**              | `moonwitness.db` | `moonwitness-data:/data` | Node.js Fastify (`apps/api`)            | `apps/api`, `apps/mid`             | `users`, `sessions`, `_orm_audit_log`, `command_center_workflows`, `command_center_alerts`, `igate_nodes`, `igate_probe_events`, `mid_signing_keys`, `mid_clients`, `mid_auth_codes`, `mid_refresh_tokens`, `mid_audit_logs` |
-| **RADIUS Service**              | `radius.db`      | `radius-data:/data`      | Rust axum/sqlx (`services/radius`)      | `services/radius` exclusively      | `users` (NAS credentials), `radius_logs` (auth/acct audit events)                                                                                                                                                            |
-| **SNMP Poller**                 | `snmp.db`        | `snmp-data:/data`        | Rust axum/sqlx (`services/snmp-poller`) | `services/snmp-poller` exclusively | `devices`, `targets`, `samples` (MRTG time series)                                                                                                                                                                           |
-| **Syslog Collector**            | `syslog.db`      | `syslog-data:/data`      | Rust axum/sqlx (`services/syslog`)      | `services/syslog` exclusively      | `syslog_messages` (bounded ring buffer)                                                                                                                                                                                      |
-| **Object Storage** _(Deferred)_ | `storage.db`     | `storage-data:/data`     | Rust axum/sqlx (`services/storage`)     | `services/storage` exclusively     | `buckets`, `objects`, `multipart_uploads`, `upload_parts`                                                                                                                                                                    |
-| **Memory**                      | `memory.db`      | Local user directory     | Python FastAPI (`apps/memory`)          | Local desktop only                 | Excluded from VPS production stack                                                                                                                                                                                           |
-| **MikroTik RouterOS**           | _None_           | _None_                   | RouterOS                                | _None_                             | Zero persistent application database                                                                                                                                                                                         |
+| Service                      | Storage / DB File                           | Docker Volume Mount                      | Owning Runtime                                       | Authorized Consumers               | Primary Tables                                                                                                                                                                                                               |
+| ---------------------------- | ------------------------------------------- | ---------------------------------------- | ---------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Core API & MID**           | PostgreSQL (`postgres` prod) / `libSQL` dev | `postgres-data:/var/lib/postgresql/data` | Node.js Fastify (`apps/api`)                         | `apps/api` (incl. `packages/mid`)  | `users`, `sessions`, `_orm_audit_log`, `command_center_workflows`, `command_center_alerts`, `igate_nodes`, `igate_probe_events`, `mid_signing_keys`, `mid_clients`, `mid_auth_codes`, `mid_refresh_tokens`, `mid_audit_logs` |
+| **RADIUS Service** (`ops`)   | `radius.db` (SQLite)                        | `radius-data:/data`                      | Rust axum/sqlx (`services/radius`)                   | `services/radius` exclusively      | `users` (NAS credentials), `radius_logs` (auth/acct audit events)                                                                                                                                                            |
+| **SNMP Poller** (`ops`)      | `snmp.db` (SQLite)                          | `snmp-data:/data`                        | Rust axum/sqlx (`services/snmp-poller`)              | `services/snmp-poller` exclusively | `devices`, `targets`, `samples` (MRTG time series)                                                                                                                                                                           |
+| **Syslog Collector** (`ops`) | `syslog.db` (SQLite)                        | `syslog-data:/data`                      | Rust axum/sqlx (`services/syslog`)                   | `services/syslog` exclusively      | `syslog_messages` (bounded ring buffer)                                                                                                                                                                                      |
+| **Object Storage** (`ops`)   | `storage.db` (SQLite)                       | `storage-data:/data`                     | Rust axum/sqlx (`services/storage`)                  | `services/storage` exclusively     | `buckets`, `objects`, `multipart_uploads`, `upload_parts`                                                                                                                                                                    |
+| **ROCKSOUL & Memory**        | Local SQLite / `memory.db` + LanceDB        | Local user/app directory                 | Tauri (`apps/rocksoul`), FastAPI (`services/memory`) | Local workstation only             | Excluded from VPS production stack (`ADR-007`)                                                                                                                                                                               |
+| **MikroTik RouterOS**        | _None_                                      | _None_                                   | RouterOS                                             | _None_                             | Zero persistent application database                                                                                                                                                                                         |
 
 ---
 
 ## 3. Core API & MID Unified Handle Architecture
 
-To eliminate file-locking races and corrupted WAL states:
-
-1. **Single Handle**: `@moonwitness/orm` initializes a single `LibSqlDriver` (`getDb()`).
-2. **D1 Bridge Adapter**: The MID Fastify plugin receives `createD1DatabaseFromOrm(getDb())`, allowing MID queries to execute on the exact same underlying connection pool and transaction manager as the Core API.
-3. **Transaction Isolation**: All write transactions use SQLite's native `BEGIN IMMEDIATE` / `transaction("write")` semantics to serialize writers and prevent `SQLITE_BUSY` contention.
+1. **Driver Selection (`packages/orm`)**: `@moonwitness/orm` selects `PostgresDriver` when `DATABASE_URL` uses `postgres://` or `postgresql://` (the VPS Compose default) and `LibSqlDriver` for SQLite/libSQL local/test databases (`D1Driver` is also retained for Cloudflare D1 workers compatibility).
+2. **D1 Bridge Adapter**: The MID Fastify plugin receives `createD1DatabaseFromOrm(getDb())`, executing MID queries through the same `@moonwitness/orm` connection handle as Core API.
+3. **Transaction Isolation**: PostgreSQL uses standard ACID transactions; SQLite/libSQL write transactions serialize via `BEGIN IMMEDIATE` / `transaction("write")`.
 
 ---
 
-## 4. SQLite Engine & WAL Configuration
+## 4. Database Engines & SQLite WAL Configuration
 
-Every service engine (Node.js `@moonwitness/orm` and Rust `sqlx::sqlite::SqliteConnectOptions`) enforces the canonical SQLite pragmas:
+PostgreSQL (`postgres:16-alpine`) runs as an internal network service on `moonwitness-internal`. For SQLite/libSQL services (local Core API dev/test and Rust `ops` services `sqlx::sqlite::SqliteConnectOptions`), MoonWitness enforces canonical WAL pragmas:
 
 ```sql
 PRAGMA journal_mode = WAL;
@@ -71,37 +72,25 @@ PRAGMA foreign_keys = ON;
 
 ## 6. Backup & Restore Architecture
 
-### Online Non-Blocking Backups
+### PostgreSQL (Production Core API & MID) & SQLite Workers
 
-Standard filesystem copy of active SQLite databases causes corrupted snapshot states when WAL files are active. MoonWitness uses SQLite's official `VACUUM INTO`:
+- **Production Core DB (`postgres`)**: Use `pg_dump --format=custom` / `pg_restore` against `postgres-data` inside the Compose stack, encrypted before off-host transfer.
+- **SQLite Workers (`services/*`) & Local libSQL Mode**: Standard filesystem copy of active SQLite databases causes corrupted snapshot states when WAL files are active. MoonWitness uses SQLite's official `VACUUM INTO`:
+  - Generates a fully consolidated, compacted, transactionally consistent single-file database.
+  - Does not block live readers or writers.
+  - Eliminates reliance on `-wal` and `-shm` sidecars in backup storage.
 
-- Generates a fully consolidated, compacted, transactionally consistent single-file database.
-- Does not block live readers or writers.
-- Eliminates reliance on `-wal` and `-shm` sidecars in backup storage.
+### SQLite Security, Integrity & CLI Utilities
 
-### Security & Integrity
-
-- **Integrity Validation**: Runs `PRAGMA integrity_check` and `PRAGMA foreign_key_check` on the snapshot before encryption.
-- **Encryption**: Backups are encrypted with AES-256-GCM using `MW_BACKUP_ENCRYPTION_KEY`.
-- **Signed Manifest**: Every backup run writes a JSON manifest recording timestamp, database names, table lists, plaintext SHA-256 hashes, and ciphertext SHA-256 hashes.
-
-### Disaster Recovery Runbook
-
-```bash
-# 1. Run full automated backup
-node scripts/backup-sqlite.mjs --out /var/backups/moonwitness --key "$MW_BACKUP_ENCRYPTION_KEY"
-
-# 2. Restore database into target path with integrity verification
-node scripts/restore-sqlite.mjs \
-  --backup /var/backups/moonwitness/moonwitness.db.<TIMESTAMP>.bak.enc \
-  --target /data/moonwitness.db \
-  --key "$MW_BACKUP_ENCRYPTION_KEY"
-```
+- **Integrity Validation**: Runs `PRAGMA integrity_check` and `PRAGMA foreign_key_check` on SQLite snapshots before encryption.
+- **Encryption**: SQLite backups are encrypted with AES-256-GCM using `MW_BACKUP_ENCRYPTION_KEY`.
+- **Signed Manifest**: Backup runs record timestamp, database names, table lists, and SHA-256 checksums.
+- **Tooling on `dev`:** Use [scripts/backup-sqlite.mjs](../../scripts/backup-sqlite.mjs) (`--out`, `--key`) and [scripts/restore-sqlite.mjs](../../scripts/restore-sqlite.mjs) (`--backup`, `--target`, `--key`), or the `@moonwitness/orm` helpers `backupDatabase` / `restoreDatabase` for SQLite/libSQL (`--profile ops` services & local dev) and `pg_dump` / `pg_restore` for Compose PostgreSQL.
 
 ---
 
 ## 7. Deployment Rollback & Data Preservation
 
-1. **Named Volumes**: Docker Compose uses named persistent volumes (`moonwitness-data`, `radius-data`, `snmp-data`, `syslog-data`). `docker compose down` will NEVER remove volumes.
+1. **Named Volumes**: Docker Compose uses named persistent volumes (`postgres-data`, `moonwitness-data`, `radius-data`, `snmp-data`, `syslog-data`, `storage-data`). `docker compose down` will NEVER remove volumes.
 2. **Schema Protection**: Schema rollbacks must be forward-fixing migrations. A deployment rollback never rolls database schema backwards or reformats storage.
 3. **Pre-Restore Snapshot**: Restoring a database file automatically preserves a `.pre-restore.bak` copy of the existing target before replacing it.

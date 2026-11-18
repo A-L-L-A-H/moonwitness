@@ -1,5 +1,7 @@
 # MOONWITNESS
 
+> **Monorepo Placement (Zone C Local Companion Service):** Within `A-L-L-A-H/moonwitness`, this standalone memory engine lives at `services/memory/` and operates in Trust Zone C alongside `apps/rocksoul` ([ADR-006](../../docs/architecture/adr-006-three-app-topology-and-trust-zones.md), [ADR-007](../../docs/architecture/adr-007-rocksoul-local-execution-and-data-boundary.md)). It runs locally via its own Docker Compose stack and never shares a database with VPS production services.
+
 **How U Remind Me** is a MoonWitness product for turning chat exports into searchable, source-linked knowledge.
 
 The local-first memory engine preserves original AI conversation archives, extracts useful knowledge, and keeps each result linked to its source. It runs on your own Windows machine with Docker Compose. Other MoonWitness products can consume its knowledge through a documented REST API or NDJSON export; this repository does not depend on MoonWitness internals or its database.
@@ -26,7 +28,7 @@ This is a local utility, not a hosted service. The web dashboard, API and option
 
 Requirements: Windows 10/11, Docker Desktop with the Linux container engine, and an internet connection for container/model downloads.
 
-1. Clone this repository and open its folder.
+1. Open `services/memory/` inside your checkout of `A-L-L-A-H/moonwitness`.
 2. Double-click `start.bat`. On first launch it creates `.env` and opens it in Notepad.
 3. Add your Gemini API key to `GEMINI_API_KEY`. Keep the rest of the defaults initially. Save the file.
 4. Double-click `start.bat` again. Docker builds and starts the local stack.

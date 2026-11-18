@@ -11,9 +11,12 @@ const envSchema = {
   HOST: z.string().default("localhost"),
 
   // Next.js Configuration
+  API_INTERNAL_URL: z.string().optional(),
   NEXT_PUBLIC_API_BASE_URL: z.string().default("http://localhost:3000"),
   NEXT_PUBLIC_API_URL: z.string().default("http://localhost:3000"),
   NEXT_PUBLIC_APP_NAME: z.string().min(1).default("Moonwitness"),
+  NEXT_PUBLIC_MID_ISSUER_URL: z.string().optional(),
+  NEXT_PUBLIC_MID_BFF_URL: z.string().optional(),
 
   // Authentication
   JWT_SECRET: z.string().min(8).default("change-this-secret-key-in-production"),

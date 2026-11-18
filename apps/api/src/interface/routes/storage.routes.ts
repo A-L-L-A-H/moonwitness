@@ -1,5 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { requireAuth, requireRole } from "../../middleware/auth";
+import { createActorContext } from "@moonwitness/orm";
+import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
+import { storageBucketModel, storageObjectModel } from "../../infrastructure/persistence/domain";
 import {
   encodeStoragePath,
   getStorageSigningCredentials,
@@ -46,6 +48,91 @@ function forwardHeaders(request: FastifyRequest): Record<string, string> {
     headers["content-type"] = "application/json";
   }
   return headers;
+}
+
+/**
+ * Parse the wildcard tail into bucket + optional key.
+ * `/storage/buckets/*` captures everything after `/storage/buckets/`.
+ * - `mybucket`            → bucket="mybucket", key=""
+ * - `mybucket/path/to.js` → bucket="mybucket", key="path/to.js"
+ */
+function parseBucketKey(wildcard: string): { bucket: string; key: string } {
+  const trimmed = wildcard.replace(/^\/+/, "").split("?")[0] ?? "";
+  const slash = trimmed.indexOf("/");
+  if (slash === -1) return { bucket: trimmed, key: "" };
+  return { bucket: trimmed.slice(0, slash), key: trimmed.slice(slash + 1) };
+}
+
+async function mirrorStorageMutation(
+  request: FastifyRequest,
+  target: string,
+  method: string,
+  bodyBytes: Buffer,
+  upstream: Response,
+): Promise<void> {
+  if (upstream.status >= 400 || (method !== "PUT" && method !== "DELETE")) return;
+  try {
+    const [rawPath, rawQuery = ""] = target.split("?", 2);
+    if (!rawPath || rawQuery.includes("uploadId=") || rawQuery.includes("partNumber=")) return;
+    const { bucket, key } = parseBucketKey(rawPath);
+    if (!bucket) return;
+
+    const authUser = (request as AuthenticatedRequest).user;
+    const actor = createActorContext(authUser ? String(authUser.id) : null, "api", request.id);
+
+    if (!key) {
+      if (method === "PUT") {
+        await storageBucketModel.repository.upsert(
+          { name: bucket.slice(0, 255) },
+          {
+            name: bucket.slice(0, 255),
+            region: null,
+            owner_id: authUser ? String(authUser.id) : null,
+            versioning: false,
+            is_public: false,
+            metadata_json: null,
+          },
+          actor,
+        );
+      } else if (method === "DELETE") {
+        const existing = await storageBucketModel.repository.find({ name: bucket.slice(0, 255) });
+        for (const row of existing) {
+          await storageBucketModel.repository.delete(row.id, actor);
+        }
+      }
+      return;
+    }
+
+    if (method === "PUT") {
+      const contentTypeHeader = request.headers["content-type"];
+      await storageObjectModel.repository.upsert(
+        { bucket: bucket.slice(0, 255), object_key: key.slice(0, 1024) },
+        {
+          bucket: bucket.slice(0, 255),
+          object_key: key.slice(0, 1024),
+          etag: upstream.headers.get("etag")?.slice(0, 200) ?? null,
+          content_type:
+            typeof contentTypeHeader === "string" ? contentTypeHeader.slice(0, 255) : null,
+          size_bytes: bodyBytes.byteLength,
+          checksum_sha256: null,
+          storage_class: null,
+          metadata_json: null,
+          last_modified_at: new Date().toISOString(),
+        },
+        actor,
+      );
+    } else if (method === "DELETE") {
+      const existing = await storageObjectModel.repository.find({
+        bucket: bucket.slice(0, 255),
+        object_key: key.slice(0, 1024),
+      });
+      for (const row of existing) {
+        await storageObjectModel.repository.delete(row.id, actor);
+      }
+    }
+  } catch {
+    // Best-effort ORM mirror for S3 proxy operations
+  }
 }
 
 async function forward(
@@ -116,6 +203,8 @@ async function forward(
     return reply.code(502).send({ error: "storage tidak dapat dihubungi", reachable: false });
   }
 
+  await mirrorStorageMutation(request, target, method, bodyBytes, upstream);
+
   const responseBody = Buffer.from(await upstream.arrayBuffer());
   return reply
     .code(upstream.status)
@@ -126,19 +215,6 @@ async function forward(
 
 interface WildcardParams {
   "*": string;
-}
-
-/**
- * Parse the wildcard tail into bucket + optional key.
- * `/storage/buckets/*` captures everything after `/storage/buckets/`.
- * - `mybucket`            → bucket="mybucket", key=""
- * - `mybucket/path/to.js` → bucket="mybucket", key="path/to.js"
- */
-function parseBucketKey(wildcard: string): { bucket: string; key: string } {
-  const trimmed = wildcard.replace(/^\/+/, "").split("?")[0] ?? "";
-  const slash = trimmed.indexOf("/");
-  if (slash === -1) return { bucket: trimmed, key: "" };
-  return { bucket: trimmed.slice(0, slash), key: trimmed.slice(slash + 1) };
 }
 
 function queryOf(request: FastifyRequest): string {

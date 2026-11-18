@@ -1,5 +1,9 @@
 # Arsy — Control Plane VPS (Go)
 
+> [!NOTE]
+> **Historical Design Spec / Partially Superseded (`EVIDENCE:PROPOSED`, 2026-11-18):**
+> Retained intact as the 2026-11-11 exploratory control-plane design. In current V1 execution ([ARSY-HOST-AGENT-V1.md](../../architecture/ARSY-HOST-AGENT-V1.md) & [cp/arsy/README.md](../../../cp/arsy/README.md)), only **7 resource kinds** (`docker`, `dockercompose`, `systemd`, `dir`, `file`, `backup`, `cert`) are active; `cron`, `user`, `firewall`, and `9` other kinds are explicitly V1-deferred in `cp/arsy/internal/resources/unsupported.go`.
+
 > **Status:** desain disetujui arahnya (2026-11-11). Bukan LLM gateway.
 > **Lokasi:** `cp/arsy` (modul Go mandiri, di luar workspace pnpm), `install.sh` di root repo.
 

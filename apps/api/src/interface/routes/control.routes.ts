@@ -1,7 +1,12 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import rateLimit from "@fastify/rate-limit";
-import { getDb } from "@moonwitness/orm";
-import { requireAuth, requireRole, resolveRequestIdentity } from "../../middleware/auth";
+import { createActorContext, getDb } from "@moonwitness/orm";
+import {
+  requireAuth,
+  requireRole,
+  resolveRequestIdentity,
+  type AuthenticatedRequest,
+} from "../../middleware/auth";
 import {
   createSession,
   getSessionCookieOptions,
@@ -15,6 +20,7 @@ import {
   findUserByUsername,
   verifyUserPassword,
 } from "../../services/user";
+import { controlCommandModel } from "../../infrastructure/persistence/domain";
 import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 
 function getArsyUrl(): string {
@@ -33,22 +39,35 @@ function getArsyTokens(): { readonlyToken: string; adminToken: string } {
 const AUTH_RATE_MAX = Number(process.env.ARSY_AUTH_RATE_MAX ?? "30");
 const AUTH_RATE_WINDOW_MS = Number(process.env.ARSY_AUTH_RATE_WINDOW_MS ?? "60000");
 
-// New resource kinds that need proxy support
-const NEW_RESOURCE_KINDS = new Set([
-  "network",
-  "ssh",
-  "cert",
-  "mount",
-  "alert",
-  "gitdeploy",
+/** Declarative resource kinds supported or capability-gated by cp/arsy V1. */
+export const ARSY_V1_SUPPORTED_RESOURCE_KINDS = new Set([
+  "files",
+  "dir",
+  "docker",
+  "systemd",
   "dockercompose",
-  "package",
   "backup",
-  "kubernetes",
+  "cert",
 ]);
 
-// Hanya endpoint arsy yang dikenal yang boleh diproxy. Ini mencegah web
-// menjadi open proxy ke apa pun yang kebetulan listen di ARSY_URL.
+/** Resource kinds explicitly rejected by cp/arsy internal/resources/unsupported.go in V1. */
+export const ARSY_V1_DEFERRED_RESOURCE_KINDS = new Set([
+  "kubernetes",
+  "gitdeploy",
+  "cron",
+  "user",
+  "firewall",
+  "portforward",
+  "network",
+  "ssh",
+  "mount",
+  "alert",
+  "webhook",
+  "package",
+]);
+
+// Hanya endpoint arsy yang dikenal di cp/arsy/internal/api/server.go yang boleh diproxy.
+// Ini mencegah web menjadi open proxy ke path arsy yang tidak eksis.
 const READ_PATHS = new Set([
   "health",
   "host",
@@ -64,7 +83,6 @@ const READ_PATHS = new Set([
   "vpn/status",
   "vpn/subnets",
   "vpn/peers",
-  ...NEW_RESOURCE_KINDS,
 ]);
 
 const WRITE_PATHS = new Set([
@@ -77,7 +95,6 @@ const WRITE_PATHS = new Set([
   "vpn/up",
   "vpn/down",
   "vpn/peers",
-  ...NEW_RESOURCE_KINDS,
 ]);
 
 // Endpoint onboarding/auth memakai cookie sesi, bukan token server-side.
@@ -178,6 +195,55 @@ async function forwardAuth(request: FastifyRequest, reply: FastifyReply, subPath
     .send(text);
 }
 
+function sanitizeControlRequestBody(body: unknown): string | null {
+  if (body === undefined || body === null) return null;
+  if (typeof body === "string") return body.slice(0, 2000);
+  if (Buffer.isBuffer(body)) return `[binary:${body.byteLength}]`;
+  if (typeof body !== "object") return String(body).slice(0, 2000);
+  const redacted: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(body as Record<string, unknown>)) {
+    redacted[key] = /password|token|secret|private_key/i.test(key) ? "[redacted]" : value;
+  }
+  return JSON.stringify(redacted).slice(0, 2000);
+}
+
+async function recordControlCommand(
+  request: FastifyRequest,
+  subPath: string,
+  targetUrl: string,
+  responseStatus: number,
+): Promise<void> {
+  if (["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) return;
+  try {
+    const authUser = (request as AuthenticatedRequest).user;
+    const outcome =
+      responseStatus === 401 || responseStatus === 403
+        ? "denied"
+        : responseStatus < 400
+          ? "success"
+          : "failure";
+    const correlationHeader = request.headers["x-correlation-id"];
+    await controlCommandModel.repository.create(
+      {
+        actor_id: authUser ? String(authUser.id) : null,
+        actor_role: authUser?.role ?? null,
+        target_path: subPath.slice(0, 300),
+        method: request.method.toUpperCase().slice(0, 16),
+        upstream_url: targetUrl.slice(0, 1000),
+        request_body_json: sanitizeControlRequestBody(request.body),
+        response_status: responseStatus,
+        outcome,
+        correlation_id:
+          typeof correlationHeader === "string" ? correlationHeader.slice(0, 200) : null,
+        executed_at: new Date().toISOString(),
+      },
+      createActorContext(authUser ? String(authUser.id) : null, "api", request.id),
+    );
+  } catch {
+    // Best-effort persistence: never break upstream proxy responses if DB is uninitialized.
+  }
+}
+
 async function forward(request: FastifyRequest, reply: FastifyReply, subPath: string) {
   const query = request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
   const arsyUrl = getArsyUrl();
@@ -202,11 +268,13 @@ async function forward(request: FastifyRequest, reply: FastifyReply, subPath: st
     });
   } catch (error) {
     request.log.warn({ err: error, target }, "arsy tidak dapat dihubungi");
+    await recordControlCommand(request, subPath, target, 502);
     return reply.code(502).send({ error: "arsy tidak dapat dihubungi" });
   }
 
   const text = await response.text();
   forwardCookies(reply, response);
+  await recordControlCommand(request, subPath, target, response.status);
   return reply
     .code(response.status)
     .header("content-type", "application/json; charset=utf-8")
@@ -215,7 +283,9 @@ async function forward(request: FastifyRequest, reply: FastifyReply, subPath: st
 }
 
 function isNativeSetupEnabled(): boolean {
-  return process.env.CONTROL_NATIVE_SETUP === "1";
+  if (process.env.CONTROL_NATIVE_SETUP === "1") return true;
+  if (process.env.CONTROL_NATIVE_SETUP === "0") return false;
+  return process.env.NODE_ENV === "development" && !process.env.ARSY_URL?.trim();
 }
 
 function isHttpsRequest(request: FastifyRequest): boolean {
@@ -253,7 +323,7 @@ function toIsoTimestamp(raw: unknown): string | undefined {
 }
 
 function formatControlUser(user: {
-  id: number;
+  id: string | number;
   displayName: string;
   email: string;
   role: string;
@@ -277,7 +347,7 @@ function sendNoStoreJson(reply: FastifyReply, statusCode: number, payload: unkno
 
 async function handleNativeSetupStatus(reply: FastifyReply) {
   const row = await getDb().get<{ count: number; initialized_at: string | number | null }>(
-    "SELECT COUNT(*) as count, MIN(created_at) as initialized_at FROM users",
+    "SELECT COUNT(*) as count, MIN(create_date) as initialized_at FROM auth_users",
   );
   const initialized = (row?.count ?? 0) > 0;
   const initializedAt = initialized ? toIsoTimestamp(row?.initialized_at) : undefined;
@@ -333,7 +403,7 @@ async function handleNativeCreateSuperuser(request: FastifyRequest, reply: Fasti
     return sendNoStoreJson(reply, 400, { error: "Password harus 12–72 karakter" });
   }
 
-  const existing = await getDb().get<{ count: number }>("SELECT COUNT(*) as count FROM users");
+  const existing = await getDb().get<{ count: number }>("SELECT COUNT(*) as count FROM auth_users");
   if ((existing?.count ?? 0) > 0) {
     return sendNoStoreJson(reply, 409, { error: "instance sudah diinisialisasi" });
   }
@@ -351,7 +421,9 @@ async function handleNativeCreateSuperuser(request: FastifyRequest, reply: Fasti
       displayName: name,
     });
   } catch (error) {
-    const afterRace = await getDb().get<{ count: number }>("SELECT COUNT(*) as count FROM users");
+    const afterRace = await getDb().get<{ count: number }>(
+      "SELECT COUNT(*) as count FROM auth_users",
+    );
     if ((afterRace?.count ?? 0) > 0) {
       return sendNoStoreJson(reply, 409, { error: "instance sudah diinisialisasi" });
     }
@@ -570,6 +642,36 @@ export async function controlRoutes(fastify: FastifyInstance) {
         const { path } = request.params;
         if (!WRITE_PATHS.has(path)) {
           return reply.code(404).send({ error: `path control tidak dikenal: ${path}` });
+        }
+        if (path === "plan" || path === "apply") {
+          const body = request.body as
+            { resources?: unknown; state?: { resources?: unknown } } | undefined;
+          const rawResources = Array.isArray(body?.resources)
+            ? body.resources
+            : Array.isArray(body?.state?.resources)
+              ? body.state.resources
+              : [];
+          const unsupportedKinds = Array.from(
+            new Set(
+              rawResources
+                .map((item) =>
+                  item && typeof item === "object" ? (item as { kind?: unknown }).kind : undefined,
+                )
+                .filter(
+                  (kind): kind is string =>
+                    typeof kind === "string" &&
+                    (ARSY_V1_DEFERRED_RESOURCE_KINDS.has(kind) ||
+                      !ARSY_V1_SUPPORTED_RESOURCE_KINDS.has(kind)),
+                ),
+            ),
+          );
+          if (unsupportedKinds.length > 0) {
+            return reply.code(400).send({
+              error: `Unsupported arsy V1 resource kind(s): ${unsupportedKinds.join(", ")}`,
+              unsupportedKinds,
+              supportedKinds: Array.from(ARSY_V1_SUPPORTED_RESOURCE_KINDS),
+            });
+          }
         }
         return forward(request, reply, path);
       },

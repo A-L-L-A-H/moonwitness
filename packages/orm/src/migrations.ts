@@ -16,10 +16,10 @@ async function ensureMigrationsTable(): Promise<void> {
       applied_at TEXT NOT NULL
     )
   `);
-  try {
+  const columns = await getDb().all<{ name: string }>("PRAGMA table_info(_orm_schema_migrations)");
+  const hasOwner = columns.some((col) => String(col.name).toLowerCase() === "owner");
+  if (!hasOwner) {
     await getDb().exec("ALTER TABLE _orm_schema_migrations ADD COLUMN owner TEXT");
-  } catch {
-    // Column already exists on newly created or previously migrated tables.
   }
 }
 

@@ -1,12 +1,111 @@
 use crate::db;
 use serde::{Deserialize, Serialize};
 use std::{
+    collections::HashMap,
     path::Path,
-    process::Command,
+    process::{Child, Command, Stdio},
+    sync::{Mutex, OnceLock},
     time::{SystemTime, UNIX_EPOCH},
 };
 use tauri::AppHandle;
 use uuid::Uuid;
+
+const ALLOWLISTED_EXECUTABLES: &[&str] = &["git", "node", "pnpm", "cargo", "gh", "timeout"];
+
+fn supervised_children() -> &'static Mutex<HashMap<String, Child>> {
+    static REGISTRY: OnceLock<Mutex<HashMap<String, Child>>> = OnceLock::new();
+    REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+#[derive(Debug, Deserialize)]
+struct StructuredAgentCommand {
+    command: String,
+    #[serde(default)]
+    args: Vec<String>,
+}
+
+fn resolve_command_executable(command: &str) -> Result<String, String> {
+    let trimmed = command.trim();
+    if trimmed.is_empty() || !ALLOWLISTED_EXECUTABLES.contains(&trimmed) {
+        return Err(format!(
+            "Command '{trimmed}' is not in the supervised agent allowlist"
+        ));
+    }
+    Ok(trimmed.to_string())
+}
+
+fn validate_command_args(args: &[String]) -> Result<(), String> {
+    for arg in args {
+        if arg.contains('\0') || arg.contains('\n') || arg.contains('\r') {
+            return Err("Command argument contains disallowed control characters".to_string());
+        }
+    }
+    Ok(())
+}
+
+pub fn spawn_supervised_process(
+    run_id: &str,
+    worktree_dir: &Path,
+    command: &str,
+    args: &[String],
+) -> Result<u32, String> {
+    if !worktree_dir.exists() || !worktree_dir.is_dir() {
+        return Err(format!(
+            "Worktree path must exist and be an isolated directory: {}",
+            worktree_dir.display()
+        ));
+    }
+    let executable = resolve_command_executable(command)?;
+    validate_command_args(args)?;
+
+    let child = Command::new(&executable)
+        .args(args)
+        .current_dir(worktree_dir)
+        .stdin(Stdio::null())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to spawn supervised executable '{executable}': {e}"))?;
+
+    let pid = child.id();
+    let mut guard = supervised_children()
+        .lock()
+        .map_err(|_| "Supervised process registry lock poisoned".to_string())?;
+    guard.insert(run_id.to_string(), child);
+    Ok(pid)
+}
+
+pub fn poll_supervised_process(run_id: &str) -> Result<Option<i32>, String> {
+    let mut guard = supervised_children()
+        .lock()
+        .map_err(|_| "Supervised process registry lock poisoned".to_string())?;
+    let Some(child) = guard.get_mut(run_id) else {
+        return Ok(None);
+    };
+    match child.try_wait().map_err(|e| e.to_string())? {
+        Some(status) => {
+            guard.remove(run_id);
+            Ok(Some(status.code().unwrap_or(-1)))
+        }
+        None => Ok(None),
+    }
+}
+
+pub fn kill_supervised_process(run_id: &str) -> Result<Option<u32>, String> {
+    let child_opt = {
+        let mut guard = supervised_children()
+            .lock()
+            .map_err(|_| "Supervised process registry lock poisoned".to_string())?;
+        guard.remove(run_id)
+    };
+    let Some(mut child) = child_opt else {
+        return Ok(None);
+    };
+    let pid = child.id();
+    let _ = child.kill();
+    let _ = child.wait();
+    Ok(Some(pid))
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentExecutionStep {
@@ -102,6 +201,14 @@ pub async fn start_supervised_agent_run(
     let supervisor_id = Uuid::new_v4().to_string();
     let branch_name = format!("agent/{}", &run_id[..8]);
 
+    let spawned_pid: Option<i64> = if let Ok(parsed) =
+        serde_json::from_str::<StructuredAgentCommand>(&prompt)
+    {
+        Some(spawn_supervised_process(&run_id, worktree_dir, &parsed.command, &parsed.args)? as i64)
+    } else {
+        None
+    };
+
     let transaction = connection
         .unchecked_transaction()
         .map_err(|e| e.to_string())?;
@@ -117,17 +224,21 @@ pub async fn start_supervised_agent_run(
     transaction
         .execute(
             "INSERT INTO agent_supervisors (id, run_id, pid, status, worktree_path, timeout_seconds, heartbeat_at, started_at)
-             VALUES (?1, ?2, NULL, 'running', ?3, 600, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-            rusqlite::params![supervisor_id, run_id, worktree_path],
+             VALUES (?1, ?2, ?3, 'running', ?4, 600, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
+            rusqlite::params![supervisor_id, run_id, spawned_pid, worktree_path],
         )
         .map_err(|e| e.to_string())?;
 
     let step_id = Uuid::new_v4().to_string();
+    let step_output = match spawned_pid {
+        Some(pid) => format!("Target worktree: {worktree_path} (supervised OS pid: {pid})"),
+        None => format!("Target worktree: {worktree_path}"),
+    };
     transaction
         .execute(
             "INSERT INTO agent_execution_steps (id, run_id, step_index, kind, summary, status, payload_json, output_text)
              VALUES (?1, ?2, 1, 'init', 'Agent process supervisor initialized in worktree', 'completed', '{}', ?3)",
-            rusqlite::params![step_id, run_id, format!("Target worktree: {worktree_path}")],
+            rusqlite::params![step_id, run_id, step_output],
         )
         .map_err(|e| e.to_string())?;
 
@@ -141,7 +252,7 @@ pub async fn start_supervised_agent_run(
 
     Ok(AgentSupervisorStatus {
         run_id,
-        pid: None,
+        pid: spawned_pid,
         status: "running".to_string(),
         worktree_path,
         timeout_seconds: 600,
@@ -156,6 +267,7 @@ pub async fn cancel_supervised_agent_run(
     app: AppHandle,
     run_id: String,
 ) -> Result<AgentSupervisorStatus, String> {
+    let killed_pid = kill_supervised_process(&run_id)?.map(|pid| pid as i64);
     let connection = db::connect(&app)?;
     let transaction = connection
         .unchecked_transaction()
@@ -184,11 +296,17 @@ pub async fn cancel_supervised_agent_run(
         )
         .map_err(|e| e.to_string())?;
 
+    let cancel_output = match killed_pid {
+        Some(pid) => {
+            format!("Terminated supervised OS process pid {pid} and cleaned up boundaries")
+        }
+        None => "Cleaned up process supervisor and boundaries".to_string(),
+    };
     transaction
         .execute(
             "INSERT INTO agent_execution_steps (id, run_id, step_index, kind, summary, status, output_text)
-             VALUES (?1, ?2, ?3, 'cancellation', 'Agent run cancelled by supervisor policy', 'cancelled', 'Cleaned up process supervisor and boundaries')",
-            rusqlite::params![step_id, run_id, next_index],
+             VALUES (?1, ?2, ?3, 'cancellation', 'Agent run cancelled by supervisor policy', 'cancelled', ?4)",
+            rusqlite::params![step_id, run_id, next_index, cancel_output],
         )
         .map_err(|e| e.to_string())?;
 
@@ -196,7 +314,7 @@ pub async fn cancel_supervised_agent_run(
 
     Ok(AgentSupervisorStatus {
         run_id,
-        pid: None,
+        pid: killed_pid,
         status: "killed".to_string(),
         worktree_path: String::new(),
         timeout_seconds: 600,
@@ -282,4 +400,73 @@ pub async fn evaluate_agent_worktree_evidence(
         changed_files,
         diff_stat,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        kill_supervised_process, poll_supervised_process, resolve_command_executable,
+        spawn_supervised_process, validate_command_args,
+    };
+    use std::{env, path::Path, thread::sleep, time::Duration};
+    use uuid::Uuid;
+
+    #[test]
+    fn rejects_non_allowlisted_shells_and_control_characters() {
+        assert!(resolve_command_executable("bash").is_err());
+        assert!(resolve_command_executable("cmd").is_err());
+        assert!(resolve_command_executable("powershell").is_err());
+        assert!(resolve_command_executable("sh").is_err());
+        assert!(resolve_command_executable("").is_err());
+        assert_eq!(resolve_command_executable("git").as_deref(), Ok("git"));
+
+        assert!(validate_command_args(&["-e".to_string(), "ok".to_string()]).is_ok());
+        assert!(validate_command_args(&["bad\narg".to_string()]).is_err());
+        assert!(validate_command_args(&["bad\0arg".to_string()]).is_err());
+    }
+
+    #[test]
+    fn rejects_missing_worktree_directory() {
+        let bogus = Path::new("/nonexistent-rocksoul-worktree-dir-12345");
+        let err = spawn_supervised_process("run-missing", bogus, "git", &[])
+            .expect_err("expected missing worktree error");
+        assert!(err.contains("Worktree path must exist"));
+    }
+
+    #[test]
+    fn spawns_polls_and_kills_real_os_child_process() {
+        let run_id = format!("test-run-{}", Uuid::new_v4());
+        let worktree_dir = env::temp_dir();
+
+        // Spawn short-lived allowlisted command first and observe real OS PID + completion.
+        let done_id = format!("{run_id}-quick");
+        let quick_pid =
+            spawn_supervised_process(&done_id, &worktree_dir, "git", &["--version".to_string()])
+                .expect("git --version should spawn cleanly");
+        assert!(quick_pid > 0);
+        let mut exited = None;
+        for _ in 0..40 {
+            if let Some(code) = poll_supervised_process(&done_id).expect("poll") {
+                exited = Some(code);
+                break;
+            }
+            sleep(Duration::from_millis(25));
+        }
+        assert_eq!(exited, Some(0));
+
+        // Spawn long-running node child and verify real OS kill cleanup.
+        let live_id = format!("{run_id}-live");
+        let args = vec!["-e".to_string(), "setTimeout(() => {}, 15000)".to_string()];
+        let live_pid = spawn_supervised_process(&live_id, &worktree_dir, "node", &args)
+            .expect("node sleep child should spawn cleanly");
+        assert!(live_pid > 0);
+        assert_eq!(poll_supervised_process(&live_id).expect("live poll"), None);
+
+        let killed = kill_supervised_process(&live_id).expect("kill child");
+        assert_eq!(killed, Some(live_pid));
+        assert_eq!(
+            kill_supervised_process(&live_id).expect("idempotent kill"),
+            None
+        );
+    }
 }

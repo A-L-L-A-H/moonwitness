@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertProductionEnv,
   parseCorsOrigins,
+  resolveApiEnvSource,
   validateMemoryRuntimeConfig,
   validateProductionEnv,
   validateRiotAiRuntimeConfig,
@@ -18,6 +19,7 @@ const base = {
   LOG_LEVEL: undefined,
   RATE_LIMIT_MAX: "120",
   RATE_LIMIT_WINDOW_MS: "60000",
+  RATE_LIMIT_STORE: "memory" as const,
   RADIUS_URL: "http://127.0.0.1:8090",
   STORAGE_URL: "http://127.0.0.1:8091",
   STORAGE_ACCESS_KEY: "test-storage-access",
@@ -155,5 +157,28 @@ describe("validateProductionEnv", () => {
       /Insecure or incomplete production configuration/,
     );
     expect(() => assertProductionEnv(base)).not.toThrow();
+  });
+});
+
+describe("resolveApiEnvSource", () => {
+  it("prefers API_PORT and API_HOST over shared PORT and HOST", () => {
+    const resolved = resolveApiEnvSource({
+      PORT: "3000",
+      HOST: "localhost",
+      API_PORT: "3002",
+      API_HOST: "127.0.0.1",
+    });
+    expect(resolved.PORT).toBe("3002");
+    expect(resolved.HOST).toBe("127.0.0.1");
+  });
+
+  it("falls back to PORT/HOST or undefined defaults when API_* are blank", () => {
+    const fallback = resolveApiEnvSource({ PORT: "4000", HOST: "0.0.0.0", API_PORT: "  " });
+    expect(fallback.PORT).toBe("4000");
+    expect(fallback.HOST).toBe("0.0.0.0");
+
+    const empty = resolveApiEnvSource({ PORT: "", HOST: "" });
+    expect(empty.PORT).toBeUndefined();
+    expect(empty.HOST).toBeUndefined();
   });
 });

@@ -1,50 +1,89 @@
-import { afterEach, describe, expect, it } from "vitest";
-import { applyMigrations, closeDb, createActorContext, getDb, initDb } from "@moonwitness/orm";
-import { domainMigrations } from "./domain";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { afterAll, afterEach, describe, expect, it } from "vitest";
+import { closeDb, createActorContext, getDb, initDb, syncModels } from "@moonwitness/orm";
+import {
+  alertModel,
+  controlCommandModel,
+  memoryRecordModel,
+  opsEventModel,
+  probeEventModel,
+  probeNodeModel,
+  radiusClientModel,
+  radiusSessionModel,
+  snmpDeviceModel,
+  snmpSampleModel,
+  snmpTargetModel,
+  storageBucketModel,
+  storageObjectModel,
+  storageUploadSessionModel,
+  syslogEntryModel,
+  workflowModel,
+} from "./domain";
+import { ensureAuthSchema } from "../../services/user";
 import { recordAuditLog } from "../audit/audit-log";
-import { opsEventModel } from "./domain/ops-events";
 
-describe("domain migrations (P0)", () => {
+const tempDirs: string[] = [];
+
+async function createTempDbPath(): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), "mw-domain-migrations-"));
+  tempDirs.push(dir);
+  return join(dir, "domain.db");
+}
+
+const zeroMigrationDomainModels = [
+  controlCommandModel,
+  workflowModel,
+  alertModel,
+  probeNodeModel,
+  probeEventModel,
+  opsEventModel,
+  memoryRecordModel,
+  storageBucketModel,
+  storageObjectModel,
+  storageUploadSessionModel,
+  syslogEntryModel,
+  snmpDeviceModel,
+  snmpTargetModel,
+  snmpSampleModel,
+  radiusClientModel,
+  radiusSessionModel,
+];
+
+describe("zero-migration domain auto-sync (Odoo++)", () => {
   afterEach(() => {
     closeDb();
   });
 
-  it("applies all domain migrations idempotently and creates expected tables", async () => {
-    await initDb(`file:${crypto.randomUUID()}.db`);
-    const first = await applyMigrations(domainMigrations);
-    expect(first.applied.length).toBeGreaterThan(0);
+  afterAll(async () => {
+    for (const dir of tempDirs) {
+      await rm(dir, { recursive: true, force: true, maxRetries: 10, retryDelay: 50 }).catch(
+        () => {},
+      );
+    }
+  });
 
-    const second = await applyMigrations(domainMigrations);
-    expect(second.applied).toHaveLength(0);
-    expect(second.skipped.length).toBe(domainMigrations.length);
+  it("syncs all domain tables idempotently via syncModels without SQL migration files", async () => {
+    await initDb(await createTempDbPath());
+    await ensureAuthSchema();
+    const first = await syncModels(zeroMigrationDomainModels);
+    expect(first.createdTables.length).toBe(zeroMigrationDomainModels.length);
+
+    const second = await syncModels(zeroMigrationDomainModels);
+    expect(second.createdTables).toHaveLength(0);
+    expect(second.addedColumns).toHaveLength(0);
 
     const tables = await getDb().all<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
     );
     const names = tables.map((t) => t.name);
 
-    // legacy/core tables still present
     for (const t of [
-      "users",
-      "sessions",
-      "bff_oauth_tokens",
-      "command_center_workflows",
-      "command_center_alerts",
-      "igate_nodes",
-      "igate_probe_events",
-      "riot_ai_provider_configs",
-      "riot_ai_usage_summaries",
-    ]) {
-      expect(names, `missing legacy table ${t}`).toContain(t);
-    }
-
-    // new domain tables
-    for (const t of [
+      "auth_users",
+      "auth_sessions",
+      "auth_oauth_tokens",
       "ops_audit_logs",
-      "identity_user_profiles",
-      "identity_sessions",
-      "identity_oauth_tokens",
-      "identity_auth_events",
       "storage_buckets",
       "storage_objects",
       "storage_upload_sessions",
@@ -67,8 +106,9 @@ describe("domain migrations (P0)", () => {
   });
 
   it("supports audit log and ops event smoke writes", async () => {
-    await initDb(`file:${crypto.randomUUID()}.db`);
-    await applyMigrations(domainMigrations);
+    await initDb(await createTempDbPath());
+    await ensureAuthSchema();
+    await syncModels([opsEventModel]);
 
     await recordAuditLog({
       domain: "test",
@@ -103,8 +143,8 @@ describe("domain migrations (P0)", () => {
       },
       actor,
     );
-    const found = await opsEventModel.repository.find({ event_key: "evt-smoke-1" });
-    expect(found).toHaveLength(1);
-    expect(found[0]?.title).toBe("Smoke event");
+    const ops = await opsEventModel.repository.find({ event_key: "evt-smoke-1" });
+    expect(ops).toHaveLength(1);
+    expect(ops[0]?.title).toBe("Smoke event");
   });
 });

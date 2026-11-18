@@ -32,6 +32,14 @@ export const buttonVariants = cva(
           "bg-[var(--card)] text-[var(--card-foreground)] border-2 border-[var(--border)] hover:bg-[var(--muted)]",
         transmission:
           "bg-[var(--accent)] text-[var(--accent-foreground)] hover:brightness-110",
+        sanctuary:
+          "border border-[var(--primary)] bg-transparent text-[var(--primary)] font-serif uppercase tracking-[0.18em] hover:bg-[var(--primary)]/12",
+        brutalist:
+          "rounded-none border-4 border-[var(--border)] bg-[var(--foreground)] text-[var(--background)] font-bold uppercase tracking-widest hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]",
+        noir:
+          "border border-[var(--border)] bg-[var(--card)] text-[var(--card-foreground)] font-mono uppercase tracking-wider hover:border-[var(--primary)]",
+        kinetic:
+          "border-2 border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] font-brush uppercase -skew-x-3 hover:skew-x-0 hover:scale-105",
         dna: "mw-dna-button rounded-none border border-[var(--dna-border)] bg-[var(--dna-accent)] text-[var(--dna-accent-fg)] hover:brightness-110",
         imperiumPrimary:
           "btn-chamfer font-monument rounded-none text-[var(--brand-ink)] tracking-[0.2em] uppercase",
@@ -52,6 +60,10 @@ export const buttonVariants = cva(
         technical: "font-mono uppercase tracking-wider",
         archive: "font-serif",
         transmission: "font-mono uppercase tracking-wider",
+        sanctuary: "font-serif tracking-[0.16em] uppercase",
+        brutalist: "font-bold uppercase tracking-widest rounded-none",
+        noir: "font-mono tracking-wider",
+        kinetic: "font-brush uppercase tracking-wide",
       },
     },
     compoundVariants: [

@@ -1,52 +1,9 @@
+import type { Migration } from "@moonwitness/orm";
+
 /**
- * Database migrations for authentication system
+ * Retired legacy `identity_*` and raw `users`/`sessions` migrations.
+ * Canonical identity tables (`auth_users`, `auth_sessions`, `auth_oauth_tokens`)
+ * are owned and auto-synced by `@moonwitness/addon-auth`.
  */
-
-export const authMigrations = [
-  {
-    id: "auth_001_create_users_and_sessions",
-    up: `
-      CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        email TEXT NOT NULL UNIQUE,
-        password_hash TEXT NOT NULL,
-        role TEXT NOT NULL CHECK (role IN ('admin', 'editor', 'viewer')),
-        display_name TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE TABLE IF NOT EXISTS sessions (
-        id TEXT PRIMARY KEY,
-        user_id INTEGER NOT NULL,
-        created_at TEXT NOT NULL,
-        expires_at TEXT NOT NULL,
-        revoked INTEGER NOT NULL DEFAULT 0,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);
-      CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);
-    `,
-  },
-  {
-    id: "auth_002_create_bff_oauth_tokens",
-    up: `
-      CREATE TABLE IF NOT EXISTS bff_oauth_tokens (
-        session_id TEXT PRIMARY KEY,
-        client_id TEXT NOT NULL,
-        access_token TEXT NOT NULL,
-        refresh_token TEXT,
-        id_token TEXT,
-        expires_at TEXT NOT NULL,
-        created_at TEXT NOT NULL,
-        FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_bff_oauth_tokens_expires_at ON bff_oauth_tokens(expires_at);
-    `,
-  },
-] as const;
-
-export type AuthMigration = (typeof authMigrations)[number];
+export const authMigrations: Migration[] = [];
+export type AuthMigration = Migration;

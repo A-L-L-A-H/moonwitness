@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { OperationsShell } from "@/components/shell";
+import { SignalRadioArt, SkinOrnament } from "@moonwitness/ui";
+import { RadiusKey } from "@moonwitness/ui/icons";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useRadiusHealth, useRadiusLogs, useRadiusStats, type RadiusLog } from "@/lib/api/radius";
 import { useCurrentUser } from "@/lib/api/onboarding";
 import { normalizeRole } from "@/lib/roles";
@@ -37,34 +39,39 @@ function RadiusConsole() {
   }, [refetchHealth, refetchStats, refetchLogs]);
 
   return (
-    <OperationsShell
+    <ConsoleShellAdapter
+      plane="operations"
       breadcrumb="RADIUS Console"
       search={{ value: query, onChange: setQuery, placeholder: "Search RADIUS logs…" }}
     >
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-8">
-        <header className="border-b-2 border-[var(--line)] pb-5">
-          <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--blue)]">
-            OPERATIONS / READ ONLY
-          </p>
-          <h1 className="mt-2 font-brush text-4xl text-zinc-100">RADIUS CONSOLE</h1>
-          <p className="mt-2 text-sm text-zinc-400">
+        <header className="border-b-2 border-[var(--border)] pb-5">
+          <div className="flex flex-wrap items-center gap-2">
+            <RadiusKey className="h-4 w-4 text-[var(--primary)]" />
+            <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--primary)]">
+              OPERATIONS / {canWrite ? "MANAGEMENT" : "READ ONLY"}
+            </p>
+            <SkinOrnament slot="tag" label="AUTH AAA" />
+          </div>
+          <h1 className="mt-2 font-brush text-4xl text-[var(--foreground)]">RADIUS CONSOLE</h1>
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
             Health, aggregate statistics, service logs, and role-gated user management. Passwords
             are never displayed after submission.
           </p>
         </header>
 
         {refreshing && (health.data || stats.data || logs.data) && (
-          <p role="status" className="text-xs text-zinc-500">
+          <p role="status" className="text-xs text-[var(--muted-foreground)]">
             Refreshing service data; previously loaded results remain visible.
           </p>
         )}
 
         <section
           aria-label="RADIUS service health"
-          className="border-2 border-[var(--line)] bg-[var(--panel)] p-4"
+          className="border-2 border-[var(--border)] bg-[var(--card)] p-4"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-brush text-xl text-white">SERVICE HEALTH</h2>
+            <h2 className="font-brush text-xl text-[var(--foreground)]">SERVICE HEALTH</h2>
             <button
               type="button"
               onClick={() => {
@@ -72,13 +79,13 @@ function RadiusConsole() {
                 void stats.refetch();
                 void logs.refetch();
               }}
-              className="min-h-11 text-xs text-[var(--blue)] underline"
+              className="min-h-11 text-xs text-[var(--primary)] underline"
             >
               Refresh console
             </button>
           </div>
           {health.isLoading ? (
-            <p className="mt-3 text-sm text-zinc-400" role="status">
+            <p className="mt-3 text-sm text-[var(--muted-foreground)]" role="status">
               Checking RADIUS service…
             </p>
           ) : health.isError ? (
@@ -87,7 +94,7 @@ function RadiusConsole() {
               onRetry={() => void health.refetch()}
             />
           ) : (
-            <p className="mt-3 text-sm text-zinc-300">
+            <p className="mt-3 text-sm text-[var(--foreground)]">
               {health.data?.service ?? "RADIUS"} · {health.data?.status ?? "Status unavailable"}
               {health.data?.reachable === false ? " · Unreachable" : ""}
             </p>
@@ -95,12 +102,12 @@ function RadiusConsole() {
         </section>
 
         <section aria-label="RADIUS statistics">
-          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+          <h2 className="mb-3 font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
             Aggregate statistics
           </h2>
           {stats.isLoading ? (
             <p
-              className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+              className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
               role="status"
             >
               Loading statistics…
@@ -112,7 +119,7 @@ function RadiusConsole() {
             />
           ) : Object.keys(stats.data ?? {}).length === 0 ? (
             <p
-              className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+              className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
               role="status"
             >
               No statistics are available.
@@ -120,11 +127,11 @@ function RadiusConsole() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {Object.entries(stats.data ?? {}).map(([key, value]) => (
-                <div key={key} className="border-2 border-[var(--line)] bg-[var(--panel)] p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+                <div key={key} className="border-2 border-[var(--border)] bg-[var(--card)] p-4">
+                  <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
                     {key.replaceAll("_", " ")}
                   </p>
-                  <p className="mt-2 break-words font-brush text-2xl text-zinc-100">
+                  <p className="mt-2 break-words font-brush text-2xl text-[var(--foreground)]">
                     {value ?? "—"}
                   </p>
                 </div>
@@ -135,14 +142,18 @@ function RadiusConsole() {
 
         <section aria-label="RADIUS logs">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">
+            <h2 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
               Service logs
             </h2>
-            {logs.data && <span className="text-xs text-zinc-500">{visibleLogs.length} shown</span>}
+            {logs.data && (
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {visibleLogs.length} shown
+              </span>
+            )}
           </div>
           {logs.isLoading ? (
             <p
-              className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+              className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
               role="status"
             >
               Loading service logs…
@@ -153,12 +164,17 @@ function RadiusConsole() {
               onRetry={() => void logs.refetch()}
             />
           ) : visibleLogs.length === 0 ? (
-            <p
-              className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+            <div
+              className="flex flex-col items-center gap-3 border-2 border-[var(--border)] bg-[var(--card)] p-6 text-center text-sm text-[var(--muted-foreground)]"
               role="status"
             >
-              {logs.data?.length ? "No logs match this search." : "No service logs are available."}
-            </p>
+              <SignalRadioArt className="h-20 w-20 opacity-85" decorative />
+              <p>
+                {logs.data?.length
+                  ? "No logs match this search."
+                  : "No service logs are available."}
+              </p>
+            </div>
           ) : (
             <LogList entries={visibleLogs} />
           )}
@@ -166,18 +182,18 @@ function RadiusConsole() {
 
         <RadiusUserManagement canWrite={canWrite} />
       </main>
-    </OperationsShell>
+    </ConsoleShellAdapter>
   );
 }
 
 function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div role="alert" className="mt-3 border-2 border-[var(--yellow)]/50 bg-[var(--panel)] p-4">
-      <p className="text-sm text-zinc-300">{message}</p>
+    <div role="alert" className="mt-3 border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-4">
+      <p className="text-sm text-[var(--foreground)]">{message}</p>
       <button
         type="button"
         onClick={onRetry}
-        className="mt-2 min-h-11 text-xs text-[var(--blue)] underline"
+        className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
       >
         Retry
       </button>
@@ -187,9 +203,9 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
 
 function LogList({ entries }: { entries: RadiusLog[] }) {
   return (
-    <div className="overflow-x-auto border-2 border-[var(--line)] bg-[var(--panel)]">
+    <div className="overflow-x-auto border-2 border-[var(--border)] bg-[var(--card)]">
       <table className="w-full min-w-[36rem] text-left text-xs">
-        <thead className="bg-black/30 font-mono text-[9px] uppercase tracking-widest text-zinc-500">
+        <thead className="bg-[var(--background)] font-mono text-[9px] uppercase tracking-widest text-[var(--muted-foreground)]">
           <tr>
             <th scope="col" className="p-3">
               Time
@@ -202,7 +218,7 @@ function LogList({ entries }: { entries: RadiusLog[] }) {
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[var(--line)] text-zinc-300">
+        <tbody className="divide-y divide-[var(--line)] text-[var(--foreground)]">
           {entries.map((entry, index) => (
             <tr key={String(entry.id ?? entry.timestamp ?? index)}>
               <td className="whitespace-nowrap p-3">

@@ -17,11 +17,12 @@ export const DEFAULT_API_ALLOWED_AUDIENCES = [
 ] as const;
 
 export interface VerifiedMidUser {
-  id: number;
+  id: string;
   username: string;
   email: string;
   role: "admin" | "editor" | "viewer";
   displayName: string;
+  tenantId?: string;
 }
 
 const JWKS_CACHE_TTL_MS = 300_000;
@@ -121,11 +122,20 @@ export async function verifyMidBearerToken(
   });
   if (!claims) return null;
 
-  const userId = Number(claims.sub);
-  if (!Number.isInteger(userId) || userId <= 0) return null;
+  const userId = claims.sub?.trim();
+  if (!userId) return null;
 
   const user = await findUserById(userId);
-  return user ? getUserPublic(user) : null;
+  if (!user) return null;
+  const rawClaims = claims as unknown as Record<string, unknown>;
+  const claimTenant =
+    typeof rawClaims.tenant_id === "string" && rawClaims.tenant_id.trim()
+      ? rawClaims.tenant_id.trim()
+      : typeof rawClaims.tid === "string" && rawClaims.tid.trim()
+        ? rawClaims.tid.trim()
+        : undefined;
+  const pub = getUserPublic(user);
+  return claimTenant ? { ...pub, tenantId: claimTenant } : pub;
 }
 
 export interface VerifiedMidProvisionClaims {

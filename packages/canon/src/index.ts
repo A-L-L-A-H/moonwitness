@@ -7,3 +7,4 @@ export * from "./sovereign";
 export * from "./mtime-engine";
 export * from "./divine-text-engine";
 export * from "./research-engines";
+export * from "./epistemic-evaluators";

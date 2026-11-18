@@ -1,9 +1,8 @@
 import { webcrypto } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { applyMigrations, closeDb, getDb, initDb } from "@moonwitness/orm";
-import { authMigrations } from "../db/migrations";
-import { createUser } from "../services/user";
+import { closeDb, getDb, initDb } from "@moonwitness/orm";
+import { createUser, ensureAuthSchema } from "../services/user";
 import { resetMidJwksCacheForTests } from "./mid-jwt";
 
 const ENCODER = new TextEncoder();
@@ -38,11 +37,11 @@ describe("moonwitness-id ES256 Bearer JWT auth", () => {
     process.env.MID_ISSUER_URL = "https://id.moonwitness.biz.id";
     resetMidJwksCacheForTests();
     await initDb("file::memory:?cache=shared");
-    await applyMigrations(Array.from(authMigrations));
+    await ensureAuthSchema();
     const tablesAfterMigrate = await getDb().all<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table'",
     );
-    expect(tablesAfterMigrate.map((row) => row.name)).toContain("users");
+    expect(tablesAfterMigrate.map((row) => row.name)).toContain("auth_users");
     await getDb().run(
       `CREATE TABLE IF NOT EXISTS mid_signing_keys (
         kid TEXT PRIMARY KEY,
@@ -58,7 +57,7 @@ describe("moonwitness-id ES256 Bearer JWT auth", () => {
     const tablesAfterReady = await getDb().all<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table'",
     );
-    expect(tablesAfterReady.map((row) => row.name)).toContain("users");
+    expect(tablesAfterReady.map((row) => row.name)).toContain("auth_users");
   });
 
   afterEach(async () => {

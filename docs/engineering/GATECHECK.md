@@ -5,13 +5,13 @@ works on my machine" is a claim with evidence attached.
 
 ## Commands
 
-| Command             | Runs                                                                                | Use when                   |
-| ------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
-| `pnpm gate:quick`   | format check, lint, typecheck (packages)                                            | inner loop                 |
-| `pnpm gate:local`   | frozen install, format, lint, typecheck, test, build                                | before opening a PR        |
-| `pnpm gate:push`    | branch policy, worktree, local gate, whitespace, secrets, audit, commit messages    | before pushing             |
-| `pnpm gate:release` | branch/worktree, local gate, manifest vs version, changelog entry, tag availability | on `main`, before tagging  |
-| `pnpm gate:doctor`  | toolchain, git identity, remote, branch, upstream, hook                             | when something feels wrong |
+| Command             | Runs                                                                                                          | Use when                   |
+| ------------------- | ------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| `pnpm gate:quick`   | topology, `docs:check`, `docs:test`, format check, lint, typecheck (packages), `ui:contrast`, `ui-governance` | inner loop                 |
+| `pnpm gate:local`   | frozen install, `docs:check`, `docs:test`, format, lint, typecheck, test, build                               | before opening a PR        |
+| `pnpm gate:push`    | branch policy, worktree, local gate, whitespace, secrets, audit, commit messages                              | before pushing             |
+| `pnpm gate:release` | branch/worktree, local gate, manifest vs version, changelog entry, tag availability                           | on `main`, before tagging  |
+| `pnpm gate:doctor`  | toolchain, git identity, remote, branch, upstream, hook                                                       | when something feels wrong |
 
 `gate:push` accepts `--allow-dirty` to acknowledge a dirty worktree. That produces
 `NOT APPLICABLE` for the worktree step — it never turns a failure into a pass.

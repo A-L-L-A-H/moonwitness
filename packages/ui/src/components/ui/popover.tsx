@@ -14,7 +14,7 @@ const PopoverContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
     align?: "start" | "center" | "end";
     sideOffset?: number;
-    skin?: SkinName;
+    skin?: SkinName | undefined;
   }
 >(({ className, align = "center", sideOffset = 4, skin, ...props }, ref) => {
   const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);

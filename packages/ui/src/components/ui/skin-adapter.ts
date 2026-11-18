@@ -127,6 +127,78 @@ const SKIN_RECIPES: Readonly<Record<SkinName, ComponentSkinRecipe>> = {
     tabsTrigger:
       "rounded-[var(--mw-btn-radius,4px)] font-mono uppercase data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)]",
   },
+  sanctuary: {
+    button:
+      "rounded-none border border-[var(--primary)]/70 font-serif uppercase tracking-[0.16em] shadow-none",
+    card: "rounded-none border border-[var(--primary)]/45 bg-[var(--card)] text-[var(--card-foreground)] font-serif shadow-[0_8px_28px_rgba(0,0,0,0.22)]",
+    input:
+      "rounded-none border border-[var(--primary)]/60 bg-[var(--background)] text-[var(--foreground)] font-serif",
+    badge: "rounded-none border border-[var(--primary)]/50 font-serif uppercase tracking-widest",
+    dialog:
+      "rounded-none border border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] font-serif shadow-2xl",
+    selectTrigger:
+      "rounded-none border border-[var(--primary)]/60 bg-[var(--background)] text-[var(--foreground)] font-serif",
+    selectContent:
+      "rounded-none border border-[var(--primary)] bg-[var(--popover)] text-[var(--popover-foreground)] font-serif",
+    tabsList:
+      "rounded-none border-b border-[var(--primary)]/40 bg-transparent text-[var(--muted-foreground)]",
+    tabsTrigger:
+      "rounded-none font-serif uppercase tracking-wider data-[state=active]:border-b-2 data-[state=active]:border-[var(--primary)] data-[state=active]:text-[var(--primary)]",
+  },
+  brutalist: {
+    button:
+      "rounded-none border-4 border-[var(--border)] font-bold uppercase tracking-widest shadow-[4px_4px_0_var(--border)]",
+    card: "rounded-none border-4 border-[var(--border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-[6px_6px_0_var(--border)]",
+    input:
+      "rounded-none border-4 border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-bold",
+    badge: "rounded-none border-2 border-[var(--border)] font-bold uppercase tracking-widest",
+    dialog:
+      "rounded-none border-4 border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] shadow-[10px_10px_0_var(--border)]",
+    selectTrigger:
+      "rounded-none border-4 border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-bold",
+    selectContent:
+      "rounded-none border-4 border-[var(--border)] bg-[var(--popover)] text-[var(--popover-foreground)] font-bold",
+    tabsList:
+      "rounded-none border-4 border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)]",
+    tabsTrigger:
+      "rounded-none font-bold uppercase data-[state=active]:bg-[var(--foreground)] data-[state=active]:text-[var(--background)]",
+  },
+  noir: {
+    button:
+      "rounded-[var(--mw-btn-radius,2px)] border border-[var(--border)] font-mono uppercase tracking-widest shadow-none",
+    card: "rounded-[var(--mw-card-radius,2px)] border border-[var(--border)] bg-[var(--card)] text-[var(--card-foreground)] font-mono",
+    input:
+      "rounded-[var(--mw-input-radius,2px)] border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-mono",
+    badge: "rounded-[2px] border border-[var(--border)] font-mono uppercase tracking-wider",
+    dialog:
+      "rounded-[2px] border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-mono shadow-2xl",
+    selectTrigger:
+      "rounded-[2px] border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] font-mono",
+    selectContent:
+      "rounded-[2px] border border-[var(--border)] bg-[var(--popover)] text-[var(--popover-foreground)] font-mono",
+    tabsList:
+      "rounded-[2px] border border-[var(--border)] bg-[var(--muted)] font-mono text-[var(--muted-foreground)]",
+    tabsTrigger:
+      "rounded-[2px] font-mono uppercase data-[state=active]:bg-[var(--primary)] data-[state=active]:text-[var(--primary-foreground)]",
+  },
+  kinetic: {
+    button:
+      "rounded-[var(--mw-btn-radius,4px)] border-2 border-[var(--primary)] font-brush uppercase tracking-wide -skew-x-3 hover:skew-x-0 transition-transform",
+    card: "rounded-[var(--mw-card-radius,6px)] border-2 border-[var(--primary)] bg-[var(--card)] text-[var(--card-foreground)] shadow-[4px_4px_0_var(--accent)]",
+    input:
+      "rounded-[var(--mw-input-radius,4px)] border-2 border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] font-mono",
+    badge: "rounded-[2px] font-brush uppercase tracking-wider -skew-x-3",
+    dialog:
+      "rounded-[6px] border-2 border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] shadow-[8px_8px_0_var(--accent)]",
+    selectTrigger:
+      "rounded-[4px] border-2 border-[var(--primary)] bg-[var(--background)] text-[var(--foreground)] font-mono",
+    selectContent:
+      "rounded-[6px] border-2 border-[var(--primary)] bg-[var(--popover)] text-[var(--popover-foreground)] font-mono",
+    tabsList:
+      "rounded-[4px] border-2 border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)]",
+    tabsTrigger:
+      "rounded-[2px] font-brush uppercase -skew-x-3 data-[state=active]:skew-x-0 data-[state=active]:bg-[var(--primary)] data-[state=active]:text-[var(--primary-foreground)]",
+  },
 };
 
 export function resolveComponentSkinName(

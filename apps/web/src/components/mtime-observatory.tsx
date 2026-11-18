@@ -10,6 +10,8 @@ import {
   type MTimeElongationBasis,
   type MTimeProfileId,
 } from "@moonwitness/canon";
+import { LunarDiscArt, RadialGauge, SkinOrnament } from "@moonwitness/ui";
+import { MtimeHorizon } from "@moonwitness/ui/icons";
 import { DnaBadge, DnaButton, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { SiteSubpageHeader } from "./site-subpage-header";
@@ -147,37 +149,55 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
         {/* Computed Geometry Layer */}
         <div className="lg:col-span-7 border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-4 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/15 pb-2.5">
-            <span className="font-mono text-[10.5px] text-[var(--dna-accent)] uppercase">
-              {locale === "id"
-                ? "LAPIS 2 · GEOMETRI BULAN-MATAHARI"
-                : "LAYER 2 · SOLAR-LUNAR GEOMETRY ESTIMATE"}
+            <span className="inline-flex items-center gap-2 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase">
+              <MtimeHorizon className="h-4 w-4" />
+              <span>
+                {locale === "id"
+                  ? "LAPIS 2 · GEOMETRI BULAN-MATAHARI"
+                  : "LAYER 2 · SOLAR-LUNAR GEOMETRY ESTIMATE"}
+              </span>
             </span>
-            <span className="font-mono text-[10px] text-[var(--dna-muted)]">
-              JD {geometry.julianDayUtc}
-            </span>
+            <div className="flex items-center gap-2">
+              <SkinOrnament slot="tag" label="MABIMS / DIYANET" />
+              <span className="font-mono text-[10px] text-[var(--dna-muted)]">
+                JD {geometry.julianDayUtc}
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono">
-            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
-              <div className="text-[9.5px] text-[var(--dna-muted)]">MOON AGE</div>
-              <div className="mt-1 text-base text-[var(--dna-text)]">{geometry.moonAgeDays} d</div>
-            </div>
-            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
-              <div className="text-[9.5px] text-[var(--dna-muted)]">ILLUMINATION</div>
-              <div className="mt-1 text-base text-[var(--dna-text)]">
-                {geometry.illuminatedPercent}%
+          <div className="flex flex-wrap items-center gap-4 border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
+            <RadialGauge
+              value={geometry.illuminatedPercent}
+              max={100}
+              size={68}
+              label="ILLUM"
+              colorVar="var(--dna-accent)"
+            />
+            <LunarDiscArt className="h-14 w-14 shrink-0" decorative />
+            <div className="min-w-0 flex-1 grid grid-cols-2 gap-3 sm:grid-cols-4 font-mono">
+              <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2.5">
+                <div className="text-[9.5px] text-[var(--dna-muted)]">MOON AGE</div>
+                <div className="mt-1 text-base text-[var(--dna-text)]">
+                  {geometry.moonAgeDays} d
+                </div>
               </div>
-            </div>
-            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
-              <div className="text-[9.5px] text-[var(--dna-muted)]">ELONGATION</div>
-              <div className="mt-1 text-base text-[var(--dna-accent)]">
-                {geometry.elongationGeocentricDeg}°
+              <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2.5">
+                <div className="text-[9.5px] text-[var(--dna-muted)]">ILLUMINATION</div>
+                <div className="mt-1 text-base text-[var(--dna-text)]">
+                  {geometry.illuminatedPercent}%
+                </div>
               </div>
-            </div>
-            <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] p-3">
-              <div className="text-[9.5px] text-[var(--dna-muted)]">SUNSET ALTITUDE</div>
-              <div className="mt-1 text-base text-[var(--dna-accent)]">
-                {geometry.estimatedSunsetAltitudeDeg}°
+              <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2.5">
+                <div className="text-[9.5px] text-[var(--dna-muted)]">ELONGATION</div>
+                <div className="mt-1 text-base text-[var(--dna-accent)]">
+                  {geometry.elongationGeocentricDeg}°
+                </div>
+              </div>
+              <div className="border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-2.5">
+                <div className="text-[9.5px] text-[var(--dna-muted)]">SUNSET ALTITUDE</div>
+                <div className="mt-1 text-base text-[var(--dna-accent)]">
+                  {geometry.estimatedSunsetAltitudeDeg}°
+                </div>
               </div>
             </div>
           </div>

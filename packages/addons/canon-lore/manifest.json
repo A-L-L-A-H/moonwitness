@@ -1,0 +1,15 @@
+{
+  "name": "canon-lore",
+  "version": "0.1.0",
+  "description": "Canon codex entries, world entities, episodes, and timeline event extensions",
+  "category": "narrative",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "timeline"],
+  "provides": {
+    "routes": ["canon"],
+    "models": ["canon.codex", "canon.entity", "canon.episode"],
+    "extends": ["timeline.event"],
+    "migrations": []
+  }
+}

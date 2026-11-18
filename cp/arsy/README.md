@@ -1,6 +1,6 @@
 # Arsy — Control Plane Host (Go)
 
-Arsy adalah control plane host untuk VPS: observe (metrik/resource), operate (ops terbatas), dan reconcile (declarative `state.json` → `plan`/`apply`) untuk resource host seperti systemd, docker, file/dir, cron, user, firewall, network, mount, ssh, cert, gitdeploy, docker compose, package, backup, alert, webhook, dan kubernetes.
+Arsy adalah control plane host untuk VPS: observe (metrik/resource), operate (ops terbatas), dan reconcile (declarative `state.json` → `plan`/`apply`). Pada **V1 saat ini** (`internal/resources/unsupported.go`, [ARSY-HOST-AGENT-V1.md](../../docs/architecture/ARSY-HOST-AGENT-V1.md)), hanya **7 resource kind** yang aktif: `docker`, `dockercompose`, `systemd`, `dir`, `file`, `backup`, dan `cert`; 12 kind lainnya (`user`, `cron`, `firewall`, `portforward`, `network`, `mount`, `ssh`, `gitdeploy`, `alert`, `webhook`, `package`, `kubernetes`) dideklarasikan secara eksplisit sebagai **V1-deferred** (`Unsupported`).
 
 - **Binary:** `arsy` (Go stdlib, `CGO_ENABLED=0`)
 - **API:** HTTP di `127.0.0.1:8787` (default), akses via SSH tunnel / reverse proxy lokal
@@ -55,35 +55,28 @@ Override via env: `ARSY_LISTEN`, `ARSY_STATE_PATH`, `ARSY_AUDIT_PATH`, `ARSY_DAT
       "restart": "unless-stopped"
     },
     {
-      "kind": "gitdeploy",
-      "name": "app",
-      "repo": "https://...",
-      "branch": "main",
-      "work_dir": "/opt/app",
-      "post_cmd": "sh deploy.sh"
-    },
-    {
       "kind": "dockercompose",
       "name": "stack",
       "compose_file": "/opt/app/docker-compose.yml",
       "project_name": "app",
       "state": "up"
     },
-    { "kind": "package", "name": "curl", "state": "present" },
+    { "kind": "dir", "name": "/var/lib/app", "state": "present" },
+    { "kind": "file", "name": "/etc/app/config.json", "state": "present" },
+    { "kind": "cert", "name": "moonwitness.biz.id", "state": "present" },
     {
       "kind": "backup",
       "name": "app-data",
       "source": "/var/lib/app",
       "dest": "/var/backups/app.tar.gz",
       "schedule": "0 2 * * *"
-    },
-    { "kind": "alert", "name": "high-cpu", "metric": "cpu_pct", "op": "gt", "value": "85" },
-    { "kind": "webhook", "name": "notify", "url": "https://example/hook", "event": "alert" }
+    }
   ]
 }
 ```
 
-Kind yang didukung (bergantung kapabilitas host): `user, dir, file, cron, firewall, portforward, network, mount, ssh, cert, gitdeploy, docker, dockercompose, systemd, alert, webhook, package, backup, kubernetes`.
+- **Active V1 kinds (7, capability-checked at host runtime):** `docker`, `dockercompose`, `systemd`, `dir`, `file`, `backup`, `cert`.
+- **V1-deferred kinds (12, rejected by `internal/resources/unsupported.go` in V1):** `kubernetes`, `gitdeploy`, `cron`, `user`, `firewall`, `portforward`, `network`, `ssh`, `mount`, `alert`, `webhook`, `package`.
 
 ## API (ringkas)
 

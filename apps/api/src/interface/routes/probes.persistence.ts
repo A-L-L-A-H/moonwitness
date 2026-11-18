@@ -1,5 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { applyMigrations, createActorContext, getDb, type Migration } from "@moonwitness/orm";
+import { createActorContext, getDb, syncModels, type Migration } from "@moonwitness/orm";
+import { importLegacyProbes } from "@moonwitness/addon-probes";
 import { probeNodeModel, probeEventModel } from "../../infrastructure/persistence/domain/probes";
 import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 import { isBlockedRuntimeHost } from "../../shared/env";
@@ -56,119 +56,67 @@ export const DEFAULT_PROBE_NODES = [
   },
 ] as const;
 
-export const probesMigrations: Migration[] = [
-  {
-    id: "probes_001_create_igate_probes_tables",
-    up: `
-      CREATE TABLE IF NOT EXISTS igate_nodes (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        target_url TEXT NOT NULL,
-        category TEXT NOT NULL,
-        enabled INTEGER NOT NULL DEFAULT 1,
-        created_at TEXT NOT NULL
-      );
-
-      CREATE TABLE IF NOT EXISTS igate_probe_events (
-        id TEXT PRIMARY KEY,
-        node_id TEXT NOT NULL,
-        status_code INTEGER NOT NULL,
-        ok INTEGER NOT NULL,
-        latency_ms INTEGER NOT NULL,
-        actor_sub TEXT NOT NULL,
-        checked_at TEXT NOT NULL,
-        FOREIGN KEY (node_id) REFERENCES igate_nodes(id) ON DELETE CASCADE
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_igate_probe_events_node_id ON igate_probe_events(node_id);
-      CREATE INDEX IF NOT EXISTS idx_igate_probe_events_checked_at ON igate_probe_events(checked_at);
-    `,
-  },
-];
+/** Retired: Probe node and event tables are auto-synced by `@moonwitness/addon-probes`. */
+export const probesMigrations: Migration[] = [];
 
 export async function ensureProbesSchema(): Promise<void> {
-  await applyMigrations(probesMigrations);
-  const now = new Date().toISOString();
-  const db = getDb();
+  await syncModels([probeNodeModel, probeEventModel]);
+  await importLegacyProbes();
+  const actor = createActorContext(null, "api");
   for (const node of DEFAULT_PROBE_NODES) {
-    await db.run(
-      `INSERT OR IGNORE INTO igate_nodes (id, name, target_url, category, enabled, created_at)
-       VALUES (?, ?, ?, ?, 1, ?)`,
-      [node.id, node.name, node.targetUrl, node.category, now],
-    );
-    const actor = createActorContext(null, "api");
-    try {
-      const existing = await probeNodeModel.repository.find({
-        node_key: node.id,
-      });
-      const payload = {
-        node_key: node.id,
-        name: node.name,
-        target_url: node.targetUrl,
-        category: node.category,
-        enabled: true,
-        metadata_json: null,
-      };
-      if (!existing[0]) {
-        await probeNodeModel.repository.create(payload, actor);
-      }
-    } catch {
-      // mirror best-effort
+    const existing = await probeNodeModel.repository.find({ node_key: node.id }, { limit: 1 });
+    if (!existing[0]) {
+      await probeNodeModel.repository.create(
+        {
+          node_key: node.id,
+          name: node.name,
+          target_url: node.targetUrl,
+          category: node.category,
+          enabled: true,
+          metadata_json: null,
+        },
+        actor,
+      );
     }
   }
 }
 
 export async function listProbeNodes(): Promise<ProbeNode[]> {
   await ensureProbesSchema();
-  const rows = await getDb().all<{
-    id: string;
-    name: string;
-    target_url: string;
-    category: string;
-    enabled: number;
-    created_at: string;
-  }>(
-    `SELECT id, name, target_url, category, enabled, created_at
-     FROM igate_nodes
-     ORDER BY id ASC`,
+  const rows = await probeNodeModel.repository.find(
+    {},
+    { orderBy: [{ field: "node_key", direction: "ASC" }] },
   );
 
   return rows.map((row) => ({
-    id: row.id,
+    id: row.node_key,
     name: row.name,
     targetUrl: row.target_url,
     category: row.category,
-    enabled: row.enabled === 1,
-    createdAt: row.created_at,
+    enabled: row.enabled,
+    createdAt:
+      row.create_date instanceof Date ? row.create_date.toISOString() : String(row.create_date),
   }));
 }
 
 export async function listRecentProbeEvents(limit = 25): Promise<ProbeEvent[]> {
   await ensureProbesSchema();
   const boundedLimit = Math.max(1, Math.min(100, limit));
-  const rows = await getDb().all<{
-    id: string;
-    node_id: string;
-    status_code: number;
-    ok: number;
-    latency_ms: number;
-    actor_sub: string;
-    checked_at: string;
-  }>(
-    `SELECT id, node_id, status_code, ok, latency_ms, actor_sub, checked_at
-     FROM igate_probe_events
-     ORDER BY checked_at DESC
-     LIMIT ?`,
-    [boundedLimit],
+  const rows = await probeEventModel.repository.find(
+    {},
+    {
+      limit: boundedLimit,
+      orderBy: [{ field: "checked_at", direction: "DESC" }],
+    },
   );
 
   return rows.map((row) => ({
     id: row.id,
-    nodeId: row.node_id,
+    nodeId: row.node_key,
     statusCode: row.status_code,
-    ok: row.ok === 1,
+    ok: row.ok,
     latencyMs: row.latency_ms,
-    actorSub: row.actor_sub,
+    actorSub: row.actor_sub ?? "system",
     checkedAt: row.checked_at,
   }));
 }
@@ -196,75 +144,59 @@ export async function recordProbeEvent(params: {
   actorSub: string;
 }): Promise<ProbeEvent> {
   await ensureProbesSchema();
-  const record: ProbeEvent = {
-    id: randomUUID(),
-    nodeId: params.nodeId,
-    statusCode: params.statusCode,
-    ok: params.ok,
-    latencyMs: params.latencyMs,
-    actorSub: params.actorSub,
-    checkedAt: new Date().toISOString(),
-  };
+  const checkedAt = new Date().toISOString();
+  const actor = createActorContext(params.actorSub, "api");
 
-  const db = getDb();
-  await db.run(
-    `INSERT INTO igate_probe_events
-     (id, node_id, status_code, ok, latency_ms, actor_sub, checked_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [
-      record.id,
-      record.nodeId,
-      record.statusCode,
-      record.ok ? 1 : 0,
-      record.latencyMs,
-      record.actorSub,
-      record.checkedAt,
-    ],
+  const created = await probeEventModel.repository.create(
+    {
+      node_key: params.nodeId,
+      status_code: params.statusCode,
+      ok: params.ok,
+      latency_ms: params.latencyMs,
+      actor_sub: params.actorSub,
+      checked_at: checkedAt,
+      error_message: null,
+    },
+    actor,
   );
 
-  // Retain up to 1000 events (bounded audit retention)
-  await db.run(
-    `DELETE FROM igate_probe_events
+  // Retain up to 1000 recent events cleanly in SQLite and Postgres alike.
+  await getDb().run(
+    `DELETE FROM orm_probe_events
      WHERE id NOT IN (
-       SELECT id FROM igate_probe_events ORDER BY checked_at DESC LIMIT 1000
+       SELECT id FROM orm_probe_events ORDER BY checked_at DESC LIMIT 1000
      )`,
   );
 
-  // Best-effort mirror to ORM + audit
-  const actor = createActorContext(params.actorSub, "api");
   try {
-    await probeEventModel.repository.create(
-      {
-        node_key: record.nodeId,
-        status_code: record.statusCode,
-        ok: record.ok,
-        latency_ms: record.latencyMs,
-        actor_sub: record.actorSub,
-        checked_at: record.checkedAt,
-        error_message: null,
-      },
-      actor,
-    );
     await tryRecordAuditLog({
       domain: "probes",
       entity: "probe_event",
-      entityId: record.id,
+      entityId: created.id,
       action: "EXECUTE",
       actor,
       actorRole: null,
       correlationId: actor.requestId ?? null,
       requestPath: null,
-      outcome: record.ok ? "success" : "failure",
+      outcome: params.ok ? "success" : "failure",
       before: null,
-      after: { nodeId: record.nodeId, statusCode: record.statusCode, ok: record.ok },
+      after: { nodeId: params.nodeId, statusCode: params.statusCode, ok: params.ok },
       metadata: null,
-      occurredAt: record.checkedAt,
+      occurredAt: checkedAt,
     });
   } catch {
-    // mirror best-effort
+    // audit logging optional in isolated unit tests
   }
 
-  return record;
+  return {
+    id: created.id,
+    nodeId: created.node_key,
+    statusCode: created.status_code,
+    ok: created.ok,
+    latencyMs: created.latency_ms,
+    actorSub: created.actor_sub ?? params.actorSub,
+    checkedAt: created.checked_at,
+  };
 }
 
 export async function executeProbeForNode(

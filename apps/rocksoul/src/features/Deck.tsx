@@ -1,16 +1,19 @@
 import React from "react";
-import { ArrowUpRight, GitCommitHorizontal, Plus, Radio, ShieldAlert } from "lucide-react";
+import { ArrowUpRight, GitCommitHorizontal, Play, Plus, Radio, ShieldAlert, Square } from "lucide-react";
 import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
 import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
-import type { ActivityEvent, Issue, MonitorSnapshot, Repository } from "../lib/contracts";
+import type { ActivityEvent, DevServiceEntry, DevServiceTarget, Issue, MonitorSnapshot, Repository } from "../lib/contracts";
 
 export interface DeckProps {
   issues: Issue[];
   repositories: Repository[];
   events: ActivityEvent[];
   monitor?: MonitorSnapshot | null | undefined;
+  devServices?: DevServiceEntry[] | undefined;
+  devActionTarget?: string | null | undefined;
+  desktop?: boolean | undefined;
   dataReady: boolean;
   loading: boolean;
   onCreate: () => void;
@@ -18,6 +21,8 @@ export interface DeckProps {
   onNavigate: (page: any) => void;
   onInspectRepo?: ((repositoryId: string) => void) | undefined;
   onOpenUrl?: ((url: string) => void) | undefined;
+  onStartDev?: ((target: DevServiceTarget) => void) | undefined;
+  onStopDev?: ((target: DevServiceTarget) => void) | undefined;
 }
 
 export default function Deck({
@@ -25,6 +30,9 @@ export default function Deck({
   repositories,
   events,
   monitor,
+  devServices = [],
+  devActionTarget = null,
+  desktop = false,
   dataReady,
   loading,
   onCreate,
@@ -32,6 +40,8 @@ export default function Deck({
   onNavigate,
   onInspectRepo,
   onOpenUrl,
+  onStartDev,
+  onStopDev,
 }: DeckProps) {
   const activeIssues = issues.filter((item) => !["done", "closed"].includes(item.status)).slice(0, 4);
   const unavailableMessage = loading ? "READING LOCAL WORKSPACE." : "LOCAL DATA UNAVAILABLE.";
@@ -39,6 +49,9 @@ export default function Deck({
   const onlineServices = monitor?.services?.filter((svc) => svc.status === "online").length ?? 0;
   const dirtyFiles = (monitor?.repositories ?? []).reduce((acc, repo) => acc + repo.dirty_count, 0);
   const latestSession = monitor?.agent_sessions?.[0];
+  const anyDevRunning =
+    devServices.some((entry) => entry.managed || entry.listening) ||
+    Boolean(monitor?.services?.some((svc) => (svc.id === "allah" || svc.id === "web" || svc.id === "api") && svc.status !== "offline"));
   return (
     <main className="page-content deck-page">
       {monitor && (
@@ -61,6 +74,17 @@ export default function Deck({
             )}
           </div>
           <div className="deck-overseer-actions">
+            {desktop && onStartDev && onStopDev && (
+              <button
+                type="button"
+                className={`outline-button ${anyDevRunning ? "monitor-stop-btn" : "monitor-start-btn"}`}
+                disabled={Boolean(devActionTarget)}
+                onClick={() => (anyDevRunning ? onStopDev("all") : onStartDev("all"))}
+              >
+                {anyDevRunning ? <Square size={12} /> : <Play size={12} />}
+                {devActionTarget === "all" ? "WORKING…" : anyDevRunning ? "STOP DEV" : "START DEV"}
+              </button>
+            )}
             {onOpenUrl && (
               <button
                 type="button"

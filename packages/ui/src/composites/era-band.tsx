@@ -49,22 +49,22 @@ export function EraBand<T extends EraItem>({ eras, active, onSelect }: EraBandPr
               <div className="font-brush text-sm leading-tight" style={{ color: e.color }}>
                 {e.name.toUpperCase()}
               </div>
-              <div className="text-[9px] text-zinc-400">{e.years}</div>
-              <div className="mt-0.5 hidden font-hand text-sm leading-tight text-zinc-300 sm:block">
+              <div className="text-[9px] text-zinc-300">{e.years}</div>
+              <div className="mt-0.5 hidden font-hand text-sm leading-tight text-zinc-200 sm:block">
                 {e.tagline}
               </div>
             </div>
           </button>
         ))}
       </div>
-      <div className="relative h-8 border-t border-[var(--line)] bg-[var(--panel-2)]">
-        <div className="absolute inset-x-6 top-1/2 h-0.5 -translate-y-1/2 bg-gradient-to-r from-[var(--paper)] via-[var(--pink)] via-40% to-[var(--purple)]" />
+      <div className="relative h-8 border-t border-[var(--border)] bg-[var(--muted)]">
+        <div className="absolute inset-x-6 top-1/2 h-0.5 -translate-y-1/2 bg-gradient-to-r from-[var(--border)] via-[var(--primary)] via-40% to-[var(--accent)]" />
         {eras.map((e, i) => (
           <button
             key={e.id}
             onClick={() => onSelect(active === e.id ? "all" : e.id)}
             aria-label={`Filter ${e.name}`}
-            className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--ink)] transition-transform hover:scale-125 after:absolute after:-inset-4 after:content-[""] ${active === e.id ? "scale-125" : ""}`}
+            className={`absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[var(--background)] transition-transform hover:scale-125 after:absolute after:-inset-4 after:content-[""] ${active === e.id ? "scale-125" : ""}`}
             style={{ left: `${10 + i * 20}%`, background: e.color }}
           />
         ))}

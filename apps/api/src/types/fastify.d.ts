@@ -9,7 +9,7 @@ declare module "fastify" {
 
   interface FastifyRequest {
     user?: {
-      id: number;
+      id: string;
       username: string;
       email: string;
       role: "admin" | "editor" | "viewer";

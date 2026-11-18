@@ -8,7 +8,7 @@ import { ControlLogin } from "./login";
 
 function FullScreen({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 font-brush text-2xl text-[var(--pink)]">
+    <div className="flex min-h-screen items-center justify-center px-4 font-brush text-2xl text-[var(--primary)]">
       {children}
     </div>
   );
@@ -37,8 +37,10 @@ export function ControlGate({ children }: { children: ReactNode }) {
       <div className="flex min-h-screen items-center justify-center px-4">
         <ZineCardRough className="max-w-lg p-6">
           <h1 className="font-brush text-2xl text-[var(--red)]">ARSY TIDAK TERJANGKAU</h1>
-          <p className="mt-2 text-sm text-zinc-400">{(setup.error as Error).message}</p>
-          <p className="mt-3 text-xs text-zinc-500">
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+            {(setup.error as Error).message}
+          </p>
+          <p className="mt-3 text-xs text-[var(--muted-foreground)]">
             Pastikan <code>arsy serve</code> berjalan dan <code>ARSY_URL</code> di apps/api benar.
           </p>
         </ZineCardRough>

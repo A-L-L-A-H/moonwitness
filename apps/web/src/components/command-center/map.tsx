@@ -45,23 +45,25 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
           />
         </div>
         <Card className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-4">
-          <h3 className="flex items-center gap-2 font-brush text-lg text-white">
-            <GlobeIcon className="h-4 w-4 text-[var(--blue)]" />
+          <h3 className="flex items-center gap-2 font-brush text-lg text-[var(--card-foreground)]">
+            <GlobeIcon className="h-4 w-4 text-[var(--primary)]" />
             CITY DETAIL
           </h3>
           {selected ? (
             <dl className="flex flex-wrap items-center gap-x-8 gap-y-2">
               <div>
-                <dt className="text-[11px] tracking-wider text-zinc-400">CITY</dt>
-                <dd className="font-brush text-2xl text-[var(--pink)]">{selected.city}</dd>
+                <dt className="text-[11px] tracking-wider text-[var(--muted-foreground)]">CITY</dt>
+                <dd className="font-brush text-2xl text-[var(--primary)]">{selected.city}</dd>
               </div>
               <div>
-                <dt className="text-[11px] tracking-wider text-zinc-400">SIGNALS</dt>
-                <dd className="text-sm text-zinc-200">{selected.signals}</dd>
+                <dt className="text-[11px] tracking-wider text-[var(--muted-foreground)]">
+                  SIGNALS
+                </dt>
+                <dd className="text-sm text-[var(--foreground)]">{selected.signals}</dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-3 text-xs leading-relaxed text-zinc-400">
+            <p className="mt-3 text-xs leading-relaxed text-[var(--muted-foreground)]">
               Pick a node on the map, or use the city list beside it.
             </p>
           )}

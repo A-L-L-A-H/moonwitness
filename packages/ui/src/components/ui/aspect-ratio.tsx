@@ -15,7 +15,10 @@ const AspectRatio = React.forwardRef<HTMLDivElement, AspectRatioProps>(
         paddingBottom: `${100 / ratio}%`,
         ...style,
       }}
-      className={cn("overflow-hidden", className)}
+      className={cn(
+        "overflow-hidden rounded-[var(--mw-card-radius,0.5rem)] [clip-path:var(--mw-card-clip,none)]",
+        className,
+      )}
       {...props}
     >
       <div className="absolute inset-0">{children}</div>

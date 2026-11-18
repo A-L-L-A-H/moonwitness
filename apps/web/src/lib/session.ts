@@ -4,7 +4,7 @@ export interface Session {
   identity: string;
   role: string;
   username?: string;
-  id?: number;
+  id?: string | number;
 }
 
 function buildAuthFetchInit(): RequestInit {
@@ -38,7 +38,10 @@ export function useCurrentIdentity(): Session | null {
             identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
             role: typeof profile.role === "string" ? profile.role : "viewer",
             username: typeof profile.username === "string" ? profile.username : undefined,
-            id: typeof profile.id === "number" ? profile.id : undefined,
+            id:
+              typeof profile.id === "string" || typeof profile.id === "number"
+                ? profile.id
+                : undefined,
           });
         } else {
           setSession(null);
@@ -68,7 +71,10 @@ export function useCurrentIdentity(): Session | null {
               identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
               role: typeof profile.role === "string" ? profile.role : "viewer",
               username: typeof profile.username === "string" ? profile.username : undefined,
-              id: typeof profile.id === "number" ? profile.id : undefined,
+              id:
+                typeof profile.id === "string" || typeof profile.id === "number"
+                  ? profile.id
+                  : undefined,
             });
           } else {
             setSession(null);

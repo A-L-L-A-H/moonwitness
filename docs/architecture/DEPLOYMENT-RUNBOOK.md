@@ -12,13 +12,14 @@ GitHub Actions (ubuntu-latest)
   ▼
 VPS (single Linux host)
   ├── docker compose up -d --build --remove-orphans
-  ├── caddy  → public TLS ingress (ports 80, 443)
-  ├── web    → moonwitness.biz.id
-  ├── allah  → a-l-l-a-h.com
-  ├── api    → api.moonwitness.biz.id / id.moonwitness.biz.id
-  ├── radius → UDP 1812/1813 (internal)
-  ├── snmp-poller → internal
-  └── syslog → UDP 514 (internal)
+  ├── caddy       → public TLS ingress (ports 80, 443)
+  ├── web         → moonwitness.biz.id & a-l-l-a-h.com (Next.js :3000)
+  ├── api         → api.moonwitness.biz.id / id.moonwitness.biz.id (Fastify :3002)
+  ├── postgres    → PostgreSQL 16 primary DB (moonwitness-internal)
+  ├── radius      → (--profile ops) UDP 1812/1813 + HTTP 8090 (internal)
+  ├── snmp-poller → (--profile ops) HTTP 8094 (internal)
+  ├── syslog      → (--profile ops) UDP 5140 / TCP 5514 + HTTP 8093 (internal)
+  └── storage     → (--profile ops) S3 SigV4 HTTP 8091 (internal)
 ```
 
 ## Required GitHub Environment: `production`
@@ -98,15 +99,19 @@ git checkout v0.X.Y
 docker compose up -d --remove-orphans
 ```
 
-## Healthcheck Endpoint
+## Healthcheck Endpoints
 
-The workflow polls `GET /api/health`. The Core API (Fastify) must respond:
+The deployment workflow (`deploy.yml`) polls `GET $PRODUCTION_URL/api/health`, which is served by **`@moonwitness/web`** (`apps/web/src/app/api/health/route.ts`):
 
 ```json
-{ "ok": true, "version": "x.y.z" }
+{ "ok": true, "data": { "status": "healthy", "timestamp": "..." } }
 ```
 
-with HTTP 200 within 200 seconds of the compose stack starting.
+with HTTP 200 within 200 seconds of the compose stack starting. Internally, **Core API (`apps/api`, port `3002`)** exposes:
+
+- `GET /api/v1/healthz` -> `200 {"status":"ok"}` (Docker Compose `api` healthcheck)
+- `GET /api/v1/health` -> process health metadata
+- `GET /api/v1/readyz` -> `200 {"status":"ready","database":"ok"}` / `503` when the database is unavailable
 
 ## Security Notes
 

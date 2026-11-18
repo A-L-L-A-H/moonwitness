@@ -19,7 +19,12 @@ export function Container({
   return React.createElement(
     "div",
     {
-      className: cn("mx-auto w-full", sizeClass, centered && "mx-auto", className),
+      className: cn(
+        "mx-auto w-full px-[var(--mw-card-padding,1rem)]",
+        sizeClass,
+        centered && "mx-auto",
+        className,
+      ),
       style,
       ...props,
     },

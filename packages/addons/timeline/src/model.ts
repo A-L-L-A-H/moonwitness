@@ -6,6 +6,9 @@ export const timelineEventModel = defineModel({
   table: "timeline_events",
   schema: TimelineEventSchema,
   softDelete: true,
+  extensible: true,
+  restEnabled: true,
+  publicFields: ["id", "kind", "date", "era", "title", "excerpt", "tags"],
   indexes: [{ fields: ["era"] }, { fields: ["kind"] }, { fields: ["date"] }],
 });
 
@@ -14,6 +17,8 @@ export const timelineEraModel = defineModel({
   table: "timeline_eras",
   schema: EraSchema,
   softDelete: true,
+  restEnabled: true,
+  publicFields: ["id", "name", "years", "color"],
 });
 
 export const timelineDdl = [timelineEventModel.ddl, timelineEraModel.ddl].join(";\n");

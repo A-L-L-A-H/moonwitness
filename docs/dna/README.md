@@ -18,12 +18,10 @@ These are not color themes. Each Master DNA defines a world model, visual gramma
 
 - **Creative direction:** APPROVED.
 - **Specification:** DOCUMENTED in this directory.
-- **Shared UI foundation:** EXISTS at `../packages/ui/`; inspect its actual source before extending it.
-- **Shared skin engine and semantic recipes:** IMPLEMENTED in `../packages/ui/` for all seven DNA IDs.
-- **Application root assignments:** Gate and Dock / Imperium Lumen, Headquarter / Nexus Paradox, ID / Lunar Chronicles, E-ISP / Simpul Nusantara, and WORLD OBSERVATORY / Mycelium.
-- **Route-specific world scopes:** ROCKSOUL and RIOT ANARCHY use `SkinScope` within WORLD OBSERVATORY; the app retains MYCELIUM as its root world.
-- **Seven runtime worlds:** shared vector artwork and world-specific component recipes are implemented; the full cross-app experience remains subject to visual and accessibility verification.
-- **Showcase / Skin Laboratory:** implemented in Headquarter at `/skin-lab`; visual, responsive, and interaction verification remains an explicit release gate.
+- **Shared UI foundation:** EXISTS at `packages/ui/` ([../../packages/ui/README.md](../../packages/ui/README.md)); inspect its actual source before extending it.
+- **Shared skin engine and semantic recipes:** IMPLEMENTED in `packages/ui/` for all seven DNA IDs.
+- **Current Three-App Consolidation (`ARCH-ADR-006` / `ARCH-ADR-007`):** The earlier multi-app web names (`Gate`, `Dock`, `Headquarter`, `ID`, `E-ISP`, `WORLD OBSERVATORY` in `engines/empire-origin/allah-com/`) have been consolidated into **one unified Next.js App Router runtime (`apps/web`)** serving both `a-l-l-a-h.com` and `moonwitness.biz.id`, alongside **ROCKSOUL (`apps/rocksoul`)** as the local-first Tauri desktop workbench. Historical DNA world assignments map onto route scopes and skins inside `apps/web` and `apps/rocksoul`.
+- **Showcase / Skin Laboratory:** implemented under `@moonwitness/ui` and `apps/web` (`/skin-lab`); visual, responsive, and interaction verification remains an explicit release gate.
 
 A documented direction must never be reported as a shipped feature.
 
@@ -67,7 +65,7 @@ A documented direction must never be reported as a shipped feature.
 
 ## Relationship to Moon UI
 
-The shared UI package is the functional foundation. The seven DNA specifications are the visual and experiential layer. Before implementation, inspect current component exports, tokens, Tailwind integration, and the native-first primitive layer in `../packages/ui/` ([D-012](../DECISIONS.md#d-012-native-first-primitives-and-one-token-source)). `@moonwitness/ui` uses native HTML semantics (`<select>`, `<dialog>`, `<table>`, `<form>`) first and adds a third-party primitive only where native elements cannot satisfy a documented requirement; do not migrate the primitive layer wholesale during skin or visual work.
+The shared UI package is the functional foundation. The seven DNA specifications are the visual and experiential layer. Before implementation, inspect current component exports, tokens, Tailwind integration, and the primitive layer in `packages/ui/` ([packages/ui/package.json](../../packages/ui/package.json)). While `D-012` (`engines/empire-origin/allah-com/docs/DECISIONS.md`) established a native-first goal (`<select>`, `<dialog>`, `<table>`, `<form>`), `@moonwitness/ui` currently ships with `20` `@radix-ui/react-*` primitive packages for accessible overlays, menus, selects, and tabs alongside Tailwind CSS v4 and `@moonwitness/tokens`/DNA presets; do not introduce an additional competing UI primitive framework without explicit architectural review.
 
 ## Delivery sequence
 
@@ -78,4 +76,4 @@ The shared UI package is the functional foundation. The seven DNA specifications
 5. Verify accessibility, responsive behavior, performance, reduced motion, and functional parity.
 6. Promote only evidence-backed capabilities from documented to implemented and verified.
 
-Gate and Dock intentionally share the IMPERIUM LUMEN root. The architecture lint baseline records this product-mapping exception; the remaining root skins stay distinct.
+Historical Note (`allah-com` Absorption): Pre-consolidation references to standalone Gate and Dock apps now live inside the unified `apps/web` Next.js application (`docs/architecture/adr-006-three-app-topology-and-trust-zones.md`).

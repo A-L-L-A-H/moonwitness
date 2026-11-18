@@ -1,14 +1,5 @@
 import { hashPassword, verifyPassword } from "./crypto";
-import {
-  createOidcClient,
-  createSsoSession,
-  deleteOidcClient,
-  findUserByLogin,
-  listOidcClients,
-  listRecentAuditEvents,
-  recordAuditEvent,
-  updateUserPasswordHash,
-} from "./db";
+import { createOidcClient, deleteOidcClient, listOidcClients, resolveIdentityStore } from "./db";
 import {
   buildSessionCookie,
   clientIpFromRequest,
@@ -35,12 +26,13 @@ export async function handlePortalPost(
   }
   const form = await readFormOrJson(request);
   const issuer = resolveIssuer(env);
+  const store = resolveIdentityStore(env);
 
   if (path === "/portal/login" || path === "/api/session/login") {
-    const user = await findUserByLogin(env.DB, form.identifier ?? "");
+    const user = await store.findUserByLogin(form.identifier ?? "");
     const valid = user ? await verifyPassword(form.password ?? "", user.passwordHash) : false;
     if (!user || !valid) {
-      await recordAuditEvent(env.DB, {
+      await store.recordAuditEvent({
         eventType: "auth.login.failed",
         actorUserId: user?.id ?? null,
         clientId: null,
@@ -60,9 +52,9 @@ export async function handlePortalPost(
       );
     }
     const sessionTtl = readTtl(env.SESSION_TTL_SEC, 604_800);
-    const sessionId = await createSsoSession(env.DB, user.id, sessionTtl);
+    const sessionId = await store.createSsoSession(user.id, sessionTtl);
     const setCookie = buildSessionCookie(sessionId, sessionTtl, requestUrl, env);
-    await recordAuditEvent(env.DB, {
+    await store.recordAuditEvent({
       eventType: "auth.login.succeeded",
       actorUserId: user.id,
       clientId: null,
@@ -90,7 +82,7 @@ export async function handlePortalPost(
   if (!sessionUser) return jsonResponse({ error: "Authentication required" }, 401);
 
   if (path === "/portal/password" || path === "/api/session/password") {
-    const user = await findUserByLogin(env.DB, sessionUser.username);
+    const user = await store.findUserByLogin(sessionUser.username);
     const currentValid = user
       ? await verifyPassword(form.current_password ?? "", user.passwordHash)
       : false;
@@ -101,7 +93,7 @@ export async function handlePortalPost(
       }
       const [clients, audits] = await Promise.all([
         listOidcClients(env.DB),
-        listRecentAuditEvents(env.DB, 20),
+        store.listRecentAuditEvents(20),
       ]);
       return htmlResponse(
         renderPortalPage({
@@ -114,8 +106,8 @@ export async function handlePortalPost(
         400,
       );
     }
-    await updateUserPasswordHash(env.DB, user.id, await hashPassword(newPassword));
-    await recordAuditEvent(env.DB, {
+    await store.updateUserPasswordHash(user.id, await hashPassword(newPassword));
+    await store.recordAuditEvent({
       eventType: "auth.password.rotated",
       actorUserId: user.id,
       clientId: null,
@@ -146,7 +138,7 @@ export async function handlePortalPost(
       allowedScopes: ["openid", "profile", "email", "offline_access"],
       clientType,
     });
-    await recordAuditEvent(env.DB, {
+    await store.recordAuditEvent({
       eventType: "oidc.client.created",
       actorUserId: sessionUser.id,
       clientId,
@@ -158,7 +150,7 @@ export async function handlePortalPost(
     }
     const [clients, audits] = await Promise.all([
       listOidcClients(env.DB),
-      listRecentAuditEvents(env.DB, 20),
+      store.listRecentAuditEvents(20),
     ]);
     return htmlResponse(
       renderPortalPage({

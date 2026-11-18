@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { CommandStrip, SideRail, TopRail } from "../primitives/hud-chrome";
 import type { HudLinkComponent, HudNavItem } from "../primitives/hud-chrome";
 import { cn } from "../lib/utils";
+import { useSkin } from "../skin";
 
 export interface ConsoleShellProps {
   title: string;
@@ -45,8 +46,13 @@ export function ConsoleShell({
   className,
   children,
 }: ConsoleShellProps) {
+  const { skin, dnaId } = useSkin();
   return (
-    <div className={cn("console-shell flex min-h-screen", className)}>
+    <div
+      data-skin={skin}
+      data-dna={dnaId}
+      className={cn("console-shell flex min-h-screen", className)}
+    >
       <div className="console-shell-rail">
         <SideRail
           items={items}

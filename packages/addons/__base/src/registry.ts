@@ -11,11 +11,15 @@ export const AddonManifestSchema = z.object({
     .regex(/^[a-z_][a-z0-9_-]*$/, "addon name must be lowercase alphanumeric with _ or -"),
   version: z.string().min(1),
   description: z.string().optional(),
+  category: z.string().optional(),
+  autoInstall: z.boolean().default(false),
+  defaultEnabled: z.boolean().default(true),
   depends: z.array(z.string().min(1)).default([]),
   provides: z
     .object({
       routes: z.array(z.string().min(1)).default([]),
       models: z.array(z.string().min(1)).default([]),
+      extends: z.array(z.string().min(1)).default([]),
       migrations: z.array(z.string().min(1)).default([]),
       seeds: z.array(z.string().min(1)).default([]),
       permissions: z.array(z.string().min(1)).default([]),
@@ -68,8 +72,8 @@ function emptyState(): RegistryState {
 /**
  * Deterministic addon registry: validates manifests, detects duplicate names,
  * missing dependencies and cycles, and loads addons in topological order.
- * Provided routes/models/migrations/seeds/permissions must not collide across
- * addons; a collision fails startup with an actionable error.
+ * Owned routes/models/migrations/seeds/permissions must not collide across addons;
+ * downstream addons may declare `provides.extends` on already-registered models.
  */
 export class AddonRegistry {
   private readonly addons = new Map<
@@ -84,6 +88,10 @@ export class AddonRegistry {
     }
     this.addons.set(parsed.name, { manifest: parsed, register: addon.register });
     return this;
+  }
+
+  getManifest(name: string): AddonManifest | undefined {
+    return this.addons.get(name)?.manifest;
   }
 
   /** Resolve load order via DFS; throws on missing dependency or cycle. */
@@ -114,7 +122,7 @@ export class AddonRegistry {
     return order;
   }
 
-  /** Validate the whole registry without registering: order + collisions. */
+  /** Validate the whole registry without registering: order + collisions + extends targets. */
   validate(): string[] {
     const order = this.resolveOrder();
     const state = emptyState();
@@ -141,6 +149,14 @@ export class AddonRegistry {
           );
         }
         state[group].add(item);
+      }
+    }
+
+    for (const targetModel of manifest.provides.extends) {
+      if (!state.models.has(targetModel)) {
+        throw new AddonRegistryError(
+          `Addon '${addonName}' declares extends '${targetModel}' which is not provided by any loaded dependency.`,
+        );
       }
     }
   }

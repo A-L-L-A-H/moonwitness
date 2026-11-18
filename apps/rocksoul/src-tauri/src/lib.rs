@@ -4,6 +4,7 @@ mod models;
 pub mod rocksoul_contracts;
 
 use crate::commands::repositories;
+use tauri::Manager;
 
 /// Chromium flags that keep WebView2 on the hardware GPU path (D3D11 via ANGLE)
 /// so the WebGL2 cinematic renderer is rasterized and composited on the GPU.
@@ -29,6 +30,7 @@ pub fn run() {
     enable_webview_gpu_acceleration();
     tauri::Builder::default()
         .manage(commands::s3_gateway::S3GatewayState::default())
+        .manage(commands::dev_control::DevServicesState::default())
         .setup(|app| {
             db::init(app.handle()).map_err(std::io::Error::other)?;
             let _ = repositories::ensure_default_workspace_repository(app.handle());
@@ -78,6 +80,9 @@ pub fn run() {
             commands::system::list_events,
             commands::monitor::get_monitor_snapshot,
             commands::monitor::open_ecosystem_url,
+            commands::dev_control::get_dev_services_status,
+            commands::dev_control::start_dev_service,
+            commands::dev_control::stop_dev_service,
             commands::issues::list_issues,
             commands::issues::create_issue,
             commands::issues::update_issue,
@@ -97,6 +102,13 @@ pub fn run() {
             commands::repositories::git_snapshot,
             commands::repositories::git_execute,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running ROCKSOUL - DX");
+        .build(tauri::generate_context!())
+        .expect("error while building ROCKSOUL - DX")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::Exit = event {
+                app_handle
+                    .state::<commands::dev_control::DevServicesState>()
+                    .stop_all_managed();
+            }
+        });
 }

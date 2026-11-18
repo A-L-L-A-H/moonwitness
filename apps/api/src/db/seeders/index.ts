@@ -4,7 +4,7 @@ import { getDb } from "@moonwitness/orm";
 async function identitySeeder(ran: string[]): Promise<void> {
   try {
     const db = getDb();
-    const existing = await db.get("SELECT COUNT(*) as count FROM users");
+    const existing = await db.get("SELECT COUNT(*) as count FROM auth_users");
     if ((existing as { count: number }).count > 0) return; // already seeded
 
     // Create default admin via the existing service (which has audit + identity dual-write)

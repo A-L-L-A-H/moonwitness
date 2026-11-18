@@ -19,7 +19,7 @@
 }
 
 .world-canvas.is-gpu {
-  background: #050508;
+  background: var(--color-black);
 }
 
 .world-canvas.is-gpu.is-subtle {
@@ -59,13 +59,13 @@
 
 .universe-brand-copy b {
   margin-left: 3px;
-  color: #e53e38;
+  color: var(--world-crimson);
 }
 
 .universe-brand-copy small {
   display: block;
   margin-top: 4px !important;
-  color: #cfc5b4 !important;
+  color: var(--color-text) !important;
   font: 8.5px/1 "IBM Plex Mono", monospace !important;
   letter-spacing: 0.16em !important;
 }
@@ -74,7 +74,7 @@
 .universe-copy {
   position: relative;
   border: 1px solid rgba(243, 235, 217, 0.18);
-  border-left: 3px solid #e53e38 !important;
+  border-left: 3px solid var(--world-crimson) !important;
   background: linear-gradient(135deg, rgba(8, 9, 14, 0.88) 0%, rgba(8, 9, 14, 0.64) 76%, rgba(8, 9, 14, 0.25) 100%) !important;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.62);
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
@@ -93,7 +93,7 @@
 .universe-manifesto .manifesto-climax {
   max-width: none !important;
   margin-top: 2px !important;
-  color: #ff6459 !important;
+  color: var(--world-crimson-soft) !important;
   font-size: clamp(12.5px, 1.02vw, 14.5px) !important;
   font-style: normal !important;
   font-weight: 800 !important;
@@ -122,12 +122,12 @@
 }
 
 .universe-destination em {
-  color: #ff8577 !important;
+  color: var(--world-crimson-soft) !important;
   font-size: 9px !important;
 }
 
 .universe-spray-sub {
-  color: #ff796b !important;
+  color: var(--world-crimson-soft) !important;
   font-size: 10px !important;
 }
 
@@ -137,7 +137,7 @@
   position: relative;
   display: flex;
   flex-direction: column !important;
-  background: #050508 !important;
+  background: var(--color-black) !important;
   isolation: isolate;
   padding: 8px 18px 8px !important;
   gap: 0 !important;
@@ -160,7 +160,7 @@
   gap: 14px !important;
   background: linear-gradient(90deg, rgba(10, 11, 16, 0.94) 0%, rgba(12, 13, 20, 0.84) 70%, rgba(229, 62, 56, 0.14) 100%) !important;
   border: 1px solid rgba(243, 235, 217, 0.18) !important;
-  border-left: 4px solid #e53e38 !important;
+  border-left: 4px solid var(--world-crimson) !important;
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
@@ -239,7 +239,7 @@
   border: 1px solid rgba(243, 235, 217, 0.2) !important;
   border-left: 3px solid rgba(229, 62, 56, 0.55) !important;
   background: rgba(8, 9, 14, 0.86) !important;
-  color: #cfc6b6 !important;
+  color: var(--color-text) !important;
   font-size: 12px !important;
   font-weight: 900 !important;
   letter-spacing: 0.08em !important;
@@ -254,16 +254,16 @@
 
 .katana-cut-shell .riot-rail .rail-item:hover {
   background: rgba(229, 62, 56, 0.22) !important;
-  border-color: #e53e38 !important;
-  color: #f4eee4 !important;
+  border-color: var(--world-crimson) !important;
+  color: var(--color-paper) !important;
   transform: translateY(-1px);
 }
 
 .katana-cut-shell .riot-rail .rail-item.active {
-  background: linear-gradient(90deg, #e53e38 0%, #b3221d 100%) !important;
-  border-color: #f4eee4 !important;
+  background: linear-gradient(90deg, var(--world-crimson) 0%, var(--world-crimson-deep) 100%) !important;
+  border-color: var(--color-paper) !important;
   border-left: 4px solid var(--color-lime) !important;
-  color: #f4eee4 !important;
+  color: var(--color-paper) !important;
   box-shadow: 0 6px 20px rgba(229, 62, 56, 0.42);
 }
 
@@ -321,7 +321,7 @@
   background: transparent !important;
   border: 0 !important;
   border-bottom: 1px solid rgba(229, 62, 56, 0.25) !important;
-  color: #bdb4a4 !important;
+  color: var(--color-paper-soft) !important;
 }
 
 .katana-cut-shell .page-content {
@@ -345,7 +345,7 @@
   padding: 5px 11px;
   border: 1px solid rgba(243, 235, 217, 0.2);
   background: rgba(7, 8, 12, 0.78);
-  color: #dfd6c7;
+  color: var(--color-text);
   font: 9.5px "IBM Plex Mono", monospace;
   letter-spacing: 0.06em;
   clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
@@ -356,11 +356,11 @@
   width: 6px;
   height: 6px;
   transform: rotate(45deg);
-  background: #e53e38;
+  background: var(--world-crimson);
 }
 
 .katana-reticle b {
-  color: #f4eee4;
+  color: var(--color-paper);
 }
 
 .katana-reticle.status-online {
@@ -383,7 +383,7 @@
   padding: 8px 14px 10px;
   margin-bottom: 10px;
   border: 1px solid rgba(229, 62, 56, 0.34);
-  border-left: 3px solid #e53e38;
+  border-left: 3px solid var(--world-crimson);
   background: radial-gradient(ellipse at 50% 45%, rgba(229, 62, 56, 0.12) 0%, rgba(7, 8, 12, 0.78) 70%);
   clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
 }
@@ -421,7 +421,7 @@
   text-align: left;
   border: 1px solid rgba(243, 235, 217, 0.22);
   background: rgba(8, 9, 14, 0.86);
-  color: #f4eee4;
+  color: var(--color-paper);
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%);
   transition: border-color 0.15s ease, transform 0.15s ease;
 }
@@ -440,7 +440,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #e53e38;
+  color: var(--world-crimson);
   font: 9px "IBM Plex Mono", monospace;
 }
 
@@ -458,7 +458,7 @@
 }
 
 .astrolabe-monolith small {
-  color: #a9a092;
+  color: var(--world-ash);
   font: 8.5px "IBM Plex Mono", monospace;
 }
 
@@ -471,7 +471,7 @@
   padding-top: 6px;
   border-top: 1px dashed rgba(243, 235, 217, 0.14);
   font: 9.5px "IBM Plex Mono", monospace;
-  color: #b8b0a2;
+  color: var(--color-paper-soft);
 }
 
 .astrolabe-meta-strip b {
@@ -492,7 +492,7 @@
   position: relative;
   background: linear-gradient(145deg, rgba(13, 14, 21, 0.84) 0%, rgba(7, 8, 12, 0.78) 100%) !important;
   border: 1px solid rgba(243, 235, 217, 0.16) !important;
-  border-left: 3px solid #e53e38 !important;
+  border-left: 3px solid var(--world-crimson) !important;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5) !important;
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
@@ -503,7 +503,7 @@
 .katana-cut-shell .panel-heading.purple-head {
   height: 32px !important;
   padding: 0 12px !important;
-  color: #f4eee4 !important;
+  color: var(--color-paper) !important;
   background: linear-gradient(90deg, rgba(229, 62, 56, 0.34) 0%, rgba(229, 62, 56, 0.06) 55%, rgba(8, 9, 14, 0.4) 100%) !important;
   border-bottom: 1px solid rgba(243, 235, 217, 0.14) !important;
   font-size: 12.5px !important;
@@ -532,7 +532,7 @@
   min-height: 176px;
   padding: 12px 16px;
   border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 4px solid #e53e38;
+  border-left: 4px solid var(--world-crimson);
   background: linear-gradient(110deg, rgba(8, 9, 14, 0.86) 0%, rgba(8, 9, 14, 0.38) 52%, rgba(8, 9, 14, 0.78) 100%);
   clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%);
 }
@@ -545,7 +545,7 @@
 .katana-cut-shell .hero-art {
   min-height: 156px;
   border: 1px solid rgba(229, 62, 56, 0.48);
-  background: #07080c;
+  background: var(--color-black);
   clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
 }
 
@@ -586,9 +586,9 @@
   width: 224px !important;
   height: 48px !important;
   transform: none !important;
-  background: linear-gradient(90deg, #e53e38 0%, #a4201c 100%) !important;
-  border: 1px solid #ff8b80 !important;
-  color: #f4eee4 !important;
+  background: linear-gradient(90deg, var(--world-crimson) 0%, var(--world-crimson-deep) 100%) !important;
+  border: 1px solid var(--world-crimson-soft) !important;
+  color: var(--color-paper) !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65) !important;
   clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%) !important;
 }
@@ -607,7 +607,7 @@
   padding: 10px 14px;
   margin-bottom: 14px;
   border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 4px solid #e53e38;
+  border-left: 4px solid var(--world-crimson);
   background: linear-gradient(90deg, rgba(8, 9, 14, 0.88) 0%, rgba(8, 9, 14, 0.46) 100%);
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
@@ -632,7 +632,7 @@
   min-height: 220px;
   background: linear-gradient(155deg, rgba(11, 12, 18, 0.82) 0%, rgba(7, 8, 12, 0.68) 100%) !important;
   border: 1px solid rgba(243, 235, 217, 0.16) !important;
-  border-left: 3px solid #e53e38 !important;
+  border-left: 3px solid var(--world-crimson) !important;
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
@@ -681,7 +681,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #f4eee4;
+  color: var(--color-paper);
   font: 10px "IBM Plex Mono", monospace;
   letter-spacing: 0.06em;
   white-space: nowrap;
@@ -690,7 +690,7 @@
 }
 
 .anime-subtitle-trace b {
-  color: #e53e38;
+  color: var(--world-crimson);
   font-weight: 700;
 }
 
@@ -718,27 +718,27 @@
 
 .world-wordmark-copy b {
   margin-left: 3px;
-  color: #e53e38;
+  color: var(--world-crimson);
 }
 
 .world-wordmark-copy small {
   display: block !important;
   margin-top: 4px !important;
-  color: #cfc5b4 !important;
+  color: var(--color-text) !important;
   font: 8.5px/1 "IBM Plex Mono", monospace !important;
   letter-spacing: 0.16em !important;
 }
 
 .preview-room-copy {
   border: 1px solid rgba(243, 235, 217, 0.16);
-  border-left: 3px solid #e53e38 !important;
+  border-left: 3px solid var(--world-crimson) !important;
   background: linear-gradient(135deg, rgba(8, 9, 14, 0.88) 0%, rgba(8, 9, 14, 0.54) 76%, transparent 100%) !important;
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 0 100%);
 }
 
 .preview-room-art {
   border: 1px solid rgba(229, 62, 56, 0.36) !important;
-  border-left: 3px solid #e53e38 !important;
+  border-left: 3px solid var(--world-crimson) !important;
   background: rgba(8, 9, 14, 0.88) !important;
   clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
 }
@@ -752,9 +752,9 @@
 /* === UNIFIED BUTTONS, FILTERS, INPUTS, WAR ROOM, NOISE, MODALS === */
 
 .katana-cut-shell .riot-button {
-  background: linear-gradient(90deg, #e53e38 0%, #a8221d 100%) !important;
-  border: 1px solid #ff8b80 !important;
-  color: #f4eee4 !important;
+  background: linear-gradient(90deg, var(--world-crimson) 0%, var(--world-crimson-deep) 100%) !important;
+  border: 1px solid var(--world-crimson-soft) !important;
+  color: var(--color-paper) !important;
   font-weight: 900 !important;
   letter-spacing: 0.08em !important;
   clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%) !important;
@@ -769,13 +769,13 @@
 .katana-cut-shell .riot-button:disabled {
   background: rgba(24, 24, 30, 0.85) !important;
   border-color: rgba(243, 235, 217, 0.16) !important;
-  color: #8f887d !important;
+  color: var(--color-text-muted) !important;
 }
 
 .katana-cut-shell .outline-button {
   background: rgba(8, 9, 14, 0.82) !important;
   border: 1px solid rgba(243, 235, 217, 0.22) !important;
-  color: #dfd6c7 !important;
+  color: var(--color-text) !important;
   clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
 }
 
@@ -790,14 +790,14 @@
 .katana-cut-shell .filter-strip select {
   background: rgba(8, 9, 14, 0.86) !important;
   border: 1px solid rgba(243, 235, 217, 0.2) !important;
-  color: #c8bfb0 !important;
+  color: var(--color-paper-soft) !important;
   clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
 }
 
 .katana-cut-shell .filter-strip button.selected {
-  background: linear-gradient(90deg, #e53e38 0%, #a8221d 100%) !important;
-  border-color: #ff8b80 !important;
-  color: #f4eee4 !important;
+  background: linear-gradient(90deg, var(--world-crimson) 0%, var(--world-crimson-deep) 100%) !important;
+  border-color: var(--world-crimson-soft) !important;
+  color: var(--color-paper) !important;
 }
 
 .katana-cut-shell .filter-strip button.selected b {
@@ -812,7 +812,7 @@
 .issue-dialog select {
   background: rgba(6, 7, 11, 0.88) !important;
   border-color: rgba(243, 235, 217, 0.2) !important;
-  color: #f4eee4 !important;
+  color: var(--color-paper) !important;
 }
 
 .katana-cut-shell input:focus,
@@ -821,12 +821,12 @@
 .issue-dialog input:focus,
 .issue-dialog textarea:focus,
 .issue-dialog select:focus {
-  border-color: #e53e38 !important;
+  border-color: var(--world-crimson) !important;
 }
 
 .katana-cut-shell .milestone-board-head {
   background: linear-gradient(90deg, rgba(229, 62, 56, 0.34) 0%, rgba(229, 62, 56, 0.06) 55%, rgba(8, 9, 14, 0.4) 100%) !important;
-  color: #f4eee4 !important;
+  color: var(--color-paper) !important;
   border-bottom: 1px solid rgba(243, 235, 217, 0.14) !important;
 }
 
@@ -847,7 +847,7 @@
 .command-panel {
   background: linear-gradient(155deg, rgba(13, 14, 21, 0.97) 0%, rgba(7, 8, 12, 0.96) 100%) !important;
   border: 1px solid rgba(243, 235, 217, 0.24) !important;
-  border-left: 4px solid #e53e38 !important;
+  border-left: 4px solid var(--world-crimson) !important;
   clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.78) !important;
 }
@@ -866,8 +866,8 @@
 }
 
 .issue-dialog .riot-button {
-  background: linear-gradient(90deg, #e53e38 0%, #a8221d 100%) !important;
-  color: #f4eee4 !important;
+  background: linear-gradient(90deg, var(--world-crimson) 0%, var(--world-crimson-deep) 100%) !important;
+  color: var(--color-paper) !important;
 }
 
 .katana-cut-shell .command-panel,
@@ -876,7 +876,7 @@
 .katana-cut-shell .git-confirm-dialog {
   background: rgba(9, 10, 15, 0.96);
   border: 1px solid rgba(243, 235, 217, 0.24);
-  border-left: 4px solid #e53e38;
+  border-left: 4px solid var(--world-crimson);
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.78);
 }
 

@@ -1,5 +1,9 @@
 # ATOMIC UI AUDIT — `packages/ui` & Consumer Applications (Phase Zero / PR 1)
 
+> [!NOTE]
+> **Historical Point-in-Time Audit (`EVIDENCE:HISTORICAL`, 2026-11-18):**
+> Preserved verbatim as the pre-remediation Phase Zero snapshot at commit `44b1a70`. Since this audit, standalone `apps/a-l-l-a-h` and legacy UI apps were consolidated under [ADR-006](../architecture/adr-006-three-app-topology-and-trust-zones.md). Consult [09-UI-ARCHITECTURE-STATUS.md](../dna/09-UI-ARCHITECTURE-STATUS.md) and [packages/ui/README.md](../../packages/ui/README.md) for current implementation status.
+
 - **Repository**: `A-L-L-A-H/moonwitness`
 - **Audit Branch / Base Commit**: `feat/ui-atomic-skin-engine` branched from `origin/dev` (`44b1a70 Merge pull request #233 from A-L-L-A-H/chore/sync-main-into-dev`)
 - **Audit Scope**: Read-only reconnaissance across `packages/ui`, `apps/a-l-l-a-h`, `apps/web`, `apps/rocksoul` (`rocksoul-dx`), and inactive/non-UI apps (`api`, `cli`, `igate`, `memory`, `mid`), plus CI workflows (`.github/workflows/ci.yml`, `playwright.yml`, `visual-regression.yml`).

@@ -1,12 +1,19 @@
 import type { FastifyInstance } from "fastify";
 import { TimelineController } from "../controllers/timeline.controller";
 import type { ListTimelineEventsRequest } from "../../domain/usecases/timeline/timeline.usecase";
-import { optionalAuth } from "../../middleware/auth";
+import type {
+  CreateTimelineEventInput,
+  UpdateTimelineEventInput,
+} from "../../domain/usecases/timeline/timeline.repository";
+import { optionalAuth, requireAuth, requireRole } from "../../middleware/auth";
 import {
+  createTimelineEventBodySchema,
   listTimelineQuerySchema,
+  timelineEventHistoryResponseSchema,
   timelineEventListResponseSchema,
   timelineEventResponseSchema,
   timelineStatsResponseSchema,
+  updateTimelineEventBodySchema,
   eraResponseSchema,
   errorResponseSchema,
   paramIdSchema,
@@ -81,5 +88,127 @@ export async function timelineRoutes(fastify: FastifyInstance) {
       },
     },
     (request, reply) => controller.getEras(request, reply),
+  );
+
+  fastify.post<{ Body: CreateTimelineEventInput }>(
+    "/events",
+    {
+      preHandler: [requireAuth(), requireRole("admin", "editor")],
+      schema: {
+        body: createTimelineEventBodySchema,
+        response: {
+          201: timelineEventResponseSchema,
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          409: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        tags: ["timeline"],
+        summary: "Create timeline event",
+      },
+    },
+    (request, reply) => controller.createEvent(request, reply),
+  );
+
+  fastify.patch<{ Params: { id: string }; Body: UpdateTimelineEventInput }>(
+    "/events/:id",
+    {
+      preHandler: [requireAuth(), requireRole("admin", "editor")],
+      schema: {
+        params: paramIdSchema,
+        body: updateTimelineEventBodySchema,
+        response: {
+          200: timelineEventResponseSchema,
+          400: errorResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+          409: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        tags: ["timeline"],
+        summary: "Update timeline event",
+      },
+    },
+    (request, reply) => controller.updateEvent(request, reply),
+  );
+
+  fastify.post<{ Params: { id: string } }>(
+    "/events/:id/archive",
+    {
+      preHandler: [requireAuth(), requireRole("admin", "editor")],
+      schema: {
+        params: paramIdSchema,
+        response: {
+          200: timelineEventResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        tags: ["timeline"],
+        summary: "Archive timeline event",
+      },
+    },
+    (request, reply) => controller.archiveEvent(request, reply),
+  );
+
+  fastify.post<{ Params: { id: string } }>(
+    "/events/:id/restore",
+    {
+      preHandler: [requireAuth(), requireRole("admin", "editor")],
+      schema: {
+        params: paramIdSchema,
+        response: {
+          200: timelineEventResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        tags: ["timeline"],
+        summary: "Restore archived or deleted timeline event",
+      },
+    },
+    (request, reply) => controller.restoreEvent(request, reply),
+  );
+
+  fastify.delete<{ Params: { id: string } }>(
+    "/events/:id",
+    {
+      preHandler: [requireAuth(), requireRole("admin")],
+      schema: {
+        params: paramIdSchema,
+        response: {
+          200: timelineEventResponseSchema,
+          401: errorResponseSchema,
+          403: errorResponseSchema,
+          404: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        tags: ["timeline"],
+        summary: "Soft-delete timeline event (admin only)",
+      },
+    },
+    (request, reply) => controller.deleteEvent(request, reply),
+  );
+
+  fastify.get<{ Params: { id: string } }>(
+    "/events/:id/history",
+    {
+      preHandler: requireAuth(),
+      schema: {
+        params: paramIdSchema,
+        response: {
+          200: timelineEventHistoryResponseSchema,
+          401: errorResponseSchema,
+          500: errorResponseSchema,
+        },
+        tags: ["timeline"],
+        summary: "Get audit history for timeline event",
+      },
+    },
+    (request, reply) => controller.getEventHistory(request, reply),
   );
 }

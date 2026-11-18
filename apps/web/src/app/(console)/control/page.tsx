@@ -10,7 +10,7 @@ export default function ControlPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--blue)]">
+        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--primary)]">
           CONNECTING ARSY CONTROL PLANE…
         </div>
       }

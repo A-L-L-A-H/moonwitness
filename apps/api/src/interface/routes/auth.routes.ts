@@ -7,7 +7,13 @@ import { timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import rateLimit from "@fastify/rate-limit";
 import { DEFAULT_MID_ISSUER_URL, normalizeIssuerUrl, type PublicEs256Jwk } from "@moonwitness/core";
-import { resolveRequestIdentity } from "../../middleware/auth";
+import { listAuditLogs } from "../../infrastructure/audit/audit-log";
+import {
+  requireAuth,
+  requireRole,
+  resolveRequestIdentity,
+  type AuthenticatedRequest,
+} from "../../middleware/auth";
 import {
   verifyMidBffExchangeClaims,
   type VerifiedMidProvisionClaims,
@@ -24,10 +30,13 @@ import {
 } from "../../services/session";
 import {
   createUser,
+  deleteUser,
   findUserByEmail,
   findUserById,
   findUserByUsername,
   getUserPublic,
+  listUsers,
+  updateUserRole,
   verifyUserPassword,
   type UserPublic,
 } from "../../services/user";
@@ -168,8 +177,8 @@ function parseBffExchangeBody(rawBody: unknown): BffExchangeRequestBody | null {
 }
 
 async function resolveOrProvisionMidUser(claims: VerifiedMidProvisionClaims): Promise<UserPublic> {
-  if (/^\d+$/.test(claims.sub)) {
-    const existingById = await findUserById(Number(claims.sub));
+  if (claims.sub.trim()) {
+    const existingById = await findUserById(claims.sub.trim());
     if (existingById) return getUserPublic(existingById);
   }
 
@@ -265,7 +274,10 @@ function createLocalMidJwkResolver(fastify: FastifyInstance) {
   };
 }
 
-export async function authRoutes(fastify: FastifyInstance) {
+export async function authRoutes(
+  fastify: FastifyInstance,
+  options: { mountAuditRoute?: boolean } = {},
+) {
   // Rate limiting for auth endpoints
   await fastify.register(async (authScope) => {
     await authScope.register(rateLimit, {
@@ -285,8 +297,20 @@ export async function authRoutes(fastify: FastifyInstance) {
 
     // POST /api/v1/auth/login
     authScope.post("/auth/login", async (request: FastifyRequest, reply: FastifyReply) => {
-      const body = request.body as { identifier?: unknown; password?: unknown } | null;
-      const identifier = body?.identifier;
+      const body = request.body as {
+        identifier?: unknown;
+        username?: unknown;
+        email?: unknown;
+        password?: unknown;
+      } | null;
+      const identifier =
+        typeof body?.identifier === "string" && body.identifier.trim()
+          ? body.identifier
+          : typeof body?.email === "string" && body.email.trim()
+            ? body.email
+            : typeof body?.username === "string" && body.username.trim()
+              ? body.username
+              : undefined;
       const password = body?.password;
 
       if (
@@ -303,8 +327,9 @@ export async function authRoutes(fastify: FastifyInstance) {
       }
 
       const identifierStr = identifier.trim().toLowerCase();
-      const user =
-        (await findUserByUsername(identifierStr)) || (await findUserByEmail(identifierStr));
+      const user = identifierStr.includes("@")
+        ? (await findUserByEmail(identifierStr)) || (await findUserByUsername(identifierStr))
+        : (await findUserByUsername(identifierStr)) || (await findUserByEmail(identifierStr));
 
       if (!user) {
         // Generic error to prevent user enumeration
@@ -507,4 +532,132 @@ export async function authRoutes(fastify: FastifyInstance) {
       return reply.send({ user });
     });
   });
+
+  // Admin crew & audit endpoints (protected by session/JWT + admin role, outside login brute-force cap)
+  const requireAdmin = [requireAuth(), requireRole("admin")];
+
+  fastify.get("/auth/users", { preHandler: requireAdmin }, async (_request, reply) => {
+    reply.header("cache-control", "no-store");
+    const users = await listUsers();
+    return reply.send({ users });
+  });
+
+  fastify.post("/auth/users", { preHandler: requireAdmin }, async (request, reply) => {
+    reply.header("cache-control", "no-store");
+    const body = request.body as {
+      username?: unknown;
+      email?: unknown;
+      password?: unknown;
+      role?: unknown;
+      displayName?: unknown;
+    } | null;
+
+    const rawUsername =
+      typeof body?.username === "string" ? body.username.trim().toLowerCase() : "";
+    const rawEmail = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+    const password = typeof body?.password === "string" ? body.password : "";
+    const role = typeof body?.role === "string" ? body.role : "viewer";
+    const displayName =
+      typeof body?.displayName === "string" ? body.displayName.trim() : rawUsername;
+
+    if (!/^[a-z0-9][a-z0-9._-]{1,78}$/.test(rawUsername)) {
+      return reply.code(400).send({ error: "Username must be 2-80 valid identifier characters" });
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(rawEmail)) {
+      return reply.code(400).send({ error: "Email must be valid" });
+    }
+    const pwdBytes = Buffer.byteLength(password, "utf8");
+    if (pwdBytes < 12 || pwdBytes > 72) {
+      return reply.code(400).send({ error: "Password must be between 12 and 72 UTF-8 bytes" });
+    }
+    if (!["admin", "editor", "viewer"].includes(role)) {
+      return reply.code(400).send({ error: "Role must be admin, editor, or viewer" });
+    }
+    if (displayName.length < 2 || displayName.length > 160) {
+      return reply.code(400).send({ error: "displayName must be 2-160 characters" });
+    }
+
+    if ((await findUserByUsername(rawUsername)) || (await findUserByEmail(rawEmail))) {
+      return reply.code(409).send({ error: "Username or email already exists" });
+    }
+
+    const user = await createUser({
+      username: rawUsername,
+      email: rawEmail,
+      password,
+      role: role as "admin" | "editor" | "viewer",
+      displayName,
+    });
+    return reply.code(201).send({ user });
+  });
+
+  fastify.patch<{ Params: { id: string } }>(
+    "/auth/users/:id/role",
+    { preHandler: requireAdmin },
+    async (request, reply) => {
+      reply.header("cache-control", "no-store");
+      const targetId = request.params.id.trim();
+      if (!targetId) {
+        return reply.code(400).send({ error: "Invalid user id" });
+      }
+      const body = request.body as { role?: unknown } | null;
+      const role = typeof body?.role === "string" ? body.role : "";
+      if (!["admin", "editor", "viewer"].includes(role)) {
+        return reply.code(400).send({ error: "Role must be admin, editor, or viewer" });
+      }
+      const actorId = (request as AuthenticatedRequest).user?.id;
+      const result = await updateUserRole(targetId, role as "admin" | "editor" | "viewer", actorId);
+      if (!result.ok) {
+        const status =
+          result.code === "NOT_FOUND"
+            ? 404
+            : result.code === "FORBIDDEN"
+              ? 403
+              : result.code === "CONFLICT"
+                ? 409
+                : 400;
+        return reply.code(status).send({ error: result.error });
+      }
+      return reply.send({ user: result.user });
+    },
+  );
+
+  fastify.delete<{ Params: { id: string } }>(
+    "/auth/users/:id",
+    { preHandler: requireAdmin },
+    async (request, reply) => {
+      reply.header("cache-control", "no-store");
+      const targetId = request.params.id.trim();
+      if (!targetId) {
+        return reply.code(400).send({ error: "Invalid user id" });
+      }
+      const actorId = (request as AuthenticatedRequest).user?.id;
+      const result = await deleteUser(targetId, actorId);
+      if (!result.ok) {
+        const status = result.code === "NOT_FOUND" ? 404 : result.code === "FORBIDDEN" ? 403 : 409;
+        return reply.code(status).send({ error: result.error });
+      }
+      return reply.send({ ok: true, user: result.user });
+    },
+  );
+
+  if (options.mountAuditRoute ?? true) {
+    fastify.get("/audit/logs", { preHandler: requireAdmin }, async (request, reply) => {
+      reply.header("cache-control", "no-store");
+      const query = request.query as {
+        domain?: string;
+        entity?: string;
+        actorId?: string;
+        limit?: string;
+      };
+      const parsedLimit = query.limit ? Number(query.limit) : undefined;
+      const logs = await listAuditLogs({
+        domain: query.domain,
+        entity: query.entity,
+        actorId: query.actorId,
+        limit: Number.isFinite(parsedLimit) ? parsedLimit : undefined,
+      });
+      return reply.send({ logs });
+    });
+  }
 }

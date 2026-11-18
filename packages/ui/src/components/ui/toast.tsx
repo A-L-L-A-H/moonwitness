@@ -131,8 +131,8 @@ ToastViewport.displayName = "ToastViewport";
 
 export interface ToastProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, VariantProps<typeof toastVariants> {
-  onDismiss?: () => void;
-  skin?: SkinName;
+  onDismiss?: (() => void) | undefined;
+  skin?: SkinName | undefined;
 }
 
 const Toast = React.forwardRef<HTMLDivElement, ToastProps>(

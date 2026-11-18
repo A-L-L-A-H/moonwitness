@@ -133,16 +133,17 @@ describe("control routes auth rate limiting", () => {
     const { controlRoutes } = await loadRoutes("5");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    await orm.applyMigrations(Array.from(authMigrations));
-    const db = orm.getDb();
-    await db.run(
-      "INSERT INTO users (username, email, password_hash, role, display_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      ["ctrladmin", "ctrl@example.com", "hash", "admin", "Ctrl Admin", "2026-01-01", "2026-01-01"],
-    );
-    await db.run(
-      "INSERT INTO sessions (id, user_id, created_at, expires_at, revoked) SELECT ?, id, ?, ?, 0 FROM users WHERE username = ?",
-      ["sess-ctrl-1", "2026-01-01T00:00:00.000Z", "2099-01-01T00:00:00.000Z", "ctrladmin"],
-    );
+    const userSvc = await import("../../services/user");
+    const sessSvc = await import("../../services/session");
+    await userSvc.ensureAuthSchema();
+    const created = await userSvc.createUser({
+      username: "ctrladmin",
+      email: "ctrl@example.com",
+      password: "PasswordLongEnough123!",
+      role: "admin",
+      displayName: "Ctrl Admin",
+    });
+    const sessToken = await sessSvc.createSession(created.id);
 
     const fastifyCookie = (await import("@fastify/cookie")).default;
     app = Fastify({ logger: false });
@@ -153,14 +154,14 @@ describe("control routes auth rate limiting", () => {
     const hostRes = await app.inject({
       method: "GET",
       url: "/control/host",
-      headers: { cookie: "mw_session=sess-ctrl-1" },
+      headers: { cookie: `mw_session=${sessToken}` },
     });
     expect(hostRes.statusCode).toBe(200);
 
     const statusRes = await app.inject({
       method: "GET",
       url: "/control/status",
-      headers: { cookie: "mw_session=sess-ctrl-1" },
+      headers: { cookie: `mw_session=${sessToken}` },
     });
     expect(statusRes.statusCode).toBe(200);
 
@@ -169,6 +170,86 @@ describe("control routes auth rate limiting", () => {
       expect(hdrs.authorization).toBe("Bearer ro-secret-token");
       expect(hdrs.cookie).toBeUndefined();
     }
+  });
+
+  it("rejects nonexistent per-kind proxy routes and V1-deferred plan/apply kinds before contacting arsy", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    process.env.ARSY_URL = "https://arsy-edge.example.com";
+    process.env.ARSY_TOKEN_ADMIN = "adm-secret-token";
+
+    const { controlRoutes } = await loadRoutes("5");
+    const orm = await import("@moonwitness/orm");
+    await orm.initDb("file::memory:?cache=shared");
+    const userSvc = await import("../../services/user");
+    const sessSvc = await import("../../services/session");
+    await userSvc.ensureAuthSchema();
+    const admin = await userSvc.createUser({
+      username: "ctrlv1admin",
+      email: "ctrlv1@example.com",
+      password: "PasswordLongEnough123!",
+      role: "admin",
+      displayName: "Ctrl V1 Admin",
+    });
+    const sessToken = await sessSvc.createSession(admin.id);
+
+    const fastifyCookie = (await import("@fastify/cookie")).default;
+    app = Fastify({ logger: false });
+    await app.register(fastifyCookie);
+    await app.register(controlRoutes);
+    await app.ready();
+
+    const blockedRead = await app.inject({
+      method: "GET",
+      url: "/control/network",
+      headers: { cookie: `mw_session=${sessToken}` },
+    });
+    expect(blockedRead.statusCode).toBe(404);
+
+    const blockedPlan = await app.inject({
+      method: "POST",
+      url: "/control/plan",
+      headers: { cookie: `mw_session=${sessToken}` },
+      payload: {
+        version: 1,
+        resources: [{ kind: "kubernetes", name: "k8s-main" }],
+      },
+    });
+    expect(blockedPlan.statusCode).toBe(400);
+    expect(blockedPlan.json().unsupportedKinds).toEqual(["kubernetes"]);
+
+    const blockedApply = await app.inject({
+      method: "POST",
+      url: "/control/apply",
+      headers: { cookie: `mw_session=${sessToken}` },
+      payload: {
+        confirm: "apply",
+        state: {
+          version: 1,
+          resources: [{ kind: "gitdeploy", name: "app-repo" }],
+        },
+      },
+    });
+    expect(blockedApply.statusCode).toBe(400);
+    expect(blockedApply.json().unsupportedKinds).toEqual(["gitdeploy"]);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    const allowedPlan = await app.inject({
+      method: "POST",
+      url: "/control/plan",
+      headers: { cookie: `mw_session=${sessToken}` },
+      payload: {
+        version: 1,
+        resources: [{ kind: "systemd", name: "caddy" }],
+      },
+    });
+    expect(allowedPlan.statusCode).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -182,10 +263,11 @@ describe("Native first-light onboarding & control auth (CONTROL_NATIVE_SETUP=1)"
     const { controlRoutes } = await loadRoutes("20");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    await orm.applyMigrations(Array.from(authMigrations));
+    const userSvc = await import("../../services/user");
+    await userSvc.ensureAuthSchema();
     const db = orm.getDb();
-    await db.run("DELETE FROM sessions");
-    await db.run("DELETE FROM users");
+    await db.run("DELETE FROM auth_sessions");
+    await db.run("DELETE FROM auth_users");
 
     const fastifyCookie = (await import("@fastify/cookie")).default;
     app = Fastify({ logger: false });

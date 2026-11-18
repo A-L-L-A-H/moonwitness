@@ -1,6 +1,17 @@
 import type { Prng, Style } from "@dicebear/core";
 
-export const PALETTES = ["street", "moon", "acid", "signal"] as const;
+export const PALETTES = [
+  "street",
+  "moon",
+  "acid",
+  "signal",
+  "imperium",
+  "lunar",
+  "rocksoul",
+  "nexus",
+  "mycelium",
+  "nusantara",
+] as const;
 export type PaletteName = (typeof PALETTES)[number];
 
 export interface WitnessPalette {
@@ -65,7 +76,94 @@ export const WITNESS_PALETTES: Record<PaletteName, WitnessPalette> = {
     jacket: "#2a2118",
     hair: "#a855f7",
   },
+  imperium: {
+    name: "imperium",
+    label: "Imperium Gold",
+    bg: "#12100b",
+    ink: "#090806",
+    face: "#f5efe0",
+    accent: "#f59e0b",
+    accent2: "#fbbf24",
+    crown: "#f59e0b",
+    jacket: "#262115",
+    hair: "#eab308",
+  },
+  lunar: {
+    name: "lunar",
+    label: "Lunar Cyan",
+    bg: "#090d16",
+    ink: "#05070c",
+    face: "#e2e8f0",
+    accent: "#38bdf8",
+    accent2: "#818cf8",
+    crown: "#38bdf8",
+    jacket: "#1e293b",
+    hair: "#0ea5e9",
+  },
+  rocksoul: {
+    name: "rocksoul",
+    label: "Rocksoul Crimson",
+    bg: "#140a0c",
+    ink: "#0a0506",
+    face: "#f3e8ea",
+    accent: "#f43f5e",
+    accent2: "#fb7185",
+    crown: "#f43f5e",
+    jacket: "#271419",
+    hair: "#e11d48",
+  },
+  nexus: {
+    name: "nexus",
+    label: "Nexus Paradox",
+    bg: "#0c0a18",
+    ink: "#06050d",
+    face: "#ede9fe",
+    accent: "#a855f7",
+    accent2: "#06b6d4",
+    crown: "#06b6d4",
+    jacket: "#1e1b4b",
+    hair: "#9333ea",
+  },
+  mycelium: {
+    name: "mycelium",
+    label: "Mycelium Spore",
+    bg: "#07140f",
+    ink: "#040b08",
+    face: "#ecfdf5",
+    accent: "#10b981",
+    accent2: "#84cc16",
+    crown: "#10b981",
+    jacket: "#064e3b",
+    hair: "#059669",
+  },
+  nusantara: {
+    name: "nusantara",
+    label: "Simpul Nusantara",
+    bg: "#17100c",
+    ink: "#0c0806",
+    face: "#fef3c7",
+    accent: "#d97706",
+    accent2: "#14b8a6",
+    crown: "#f59e0b",
+    jacket: "#291d14",
+    hair: "#b45309",
+  },
 };
+
+export const DNA_AVATAR_PALETTE_MAP: Record<string, PaletteName> = {
+  "01-imperium-lumen": "imperium",
+  "02-lunar-chronicles": "lunar",
+  "03-rocksoul": "rocksoul",
+  "04-nexus-paradox": "nexus",
+  "05-riot-anarchy": "street",
+  "06-mycelium": "mycelium",
+  "09-simpul-nusantara": "nusantara",
+};
+
+export function resolveDnaAvatarPalette(dnaId?: string): PaletteName {
+  if (!dnaId) return "street";
+  return DNA_AVATAR_PALETTE_MAP[dnaId] ?? "street";
+}
 
 export const WITNESS_BACKGROUNDS = ["ink", "paper", "transparent"] as const;
 export type BackgroundName = (typeof WITNESS_BACKGROUNDS)[number];

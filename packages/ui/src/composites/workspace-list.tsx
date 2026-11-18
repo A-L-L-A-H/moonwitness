@@ -1,6 +1,7 @@
 "use client";
 
 import { ZineCard } from "../primitives/zine-card";
+import { useSkin } from "../skin";
 import { StatusBadge } from "./status-badge";
 import { defaultKindColors } from "./kind-colors";
 
@@ -21,14 +22,15 @@ export function WorkspaceList<T extends WorkspaceItem>({
   items,
   onOpenItem,
 }: WorkspaceListProps<T>) {
+  const { skin } = useSkin();
   return (
-    <ZineCard className="divide-y-2 divide-[var(--line)] overflow-hidden">
+    <ZineCard data-skin={skin} className="divide-y divide-[var(--border)] overflow-hidden">
       {items.map((item) => (
         <button
           key={item.id}
           type="button"
           onClick={() => onOpenItem(item.id)}
-          className="flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--panel-2)] focus-visible:bg-[var(--panel-2)]"
+          className="flex min-h-11 w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-[var(--muted)] focus-visible:bg-[var(--muted)]"
         >
           <span
             aria-hidden
@@ -36,8 +38,8 @@ export function WorkspaceList<T extends WorkspaceItem>({
             style={{ background: defaultKindColors[item.kind] ?? "#9ca3af" }}
           />
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm text-zinc-200">{item.title}</span>
-            <span className="mt-0.5 block text-[10px] tracking-widest text-zinc-500">
+            <span className="block truncate text-sm text-[var(--foreground)]">{item.title}</span>
+            <span className="mt-0.5 block text-[10px] tracking-widest text-[var(--muted-foreground)]">
               {item.kind} · {item.updatedAt}
             </span>
           </span>

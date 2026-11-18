@@ -20,7 +20,7 @@ export function LandingStoryStrip() {
   return (
     <section
       aria-label="Explore the Moonwitness story world"
-      className="relative z-10 -mt-2 border-y-2 border-[var(--paper)] bg-black px-3 py-4 sm:px-6 sm:py-5"
+      className="relative z-10 -mt-2 border-y-2 border-[var(--border)] bg-[var(--muted)] px-3 py-4 sm:px-6 sm:py-5"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         {PANELS.map((panel, index) => (
