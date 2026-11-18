@@ -23,6 +23,7 @@ import {
   LoadingConstellation,
   ScrollArea,
   SkinBackdrop,
+  SkinMatrixCompare,
   SkinOrnament,
   SkinPlayground,
   SkinScope,
@@ -86,6 +87,7 @@ export function SkinLaboratory() {
     dnaId: globalDnaId,
     setDna,
     mode: activeTheme,
+    resolvedMode,
     setMode,
     density: activeDensity,
     setDensity,
@@ -94,7 +96,7 @@ export function SkinLaboratory() {
   const [searchFilter, setSearchFilter] = useState("");
   const [selectValue, setSelectValue] = useState("witness");
   const [sampleInput, setSampleInput] = useState("Witness frame verification");
-  const [labView, setLabView] = useState<"focus" | "compare" | "assets" | "dx">("focus");
+  const [labView, setLabView] = useState<"focus" | "compare" | "matrix" | "assets" | "dx">("focus");
 
   const activeWorld = getDnaWorld(selectedDnaId);
   const activeAudit = useMemo(() => auditDnaContrast(activeWorld), [activeWorld]);
@@ -145,6 +147,7 @@ export function SkinLaboratory() {
                 [
                   { id: "focus", label: "SINGLE WORLD" },
                   { id: "compare", label: "7-WORLD AUDIT GRID" },
+                  { id: "matrix", label: "6-SKIN MATRIX" },
                   { id: "assets", label: "LOGOS & CUTOUTS" },
                   { id: "dx", label: "TOKEN & PLAYGROUND" },
                 ] as const
@@ -560,6 +563,24 @@ export function SkinLaboratory() {
               );
             })}
           </div>
+        )}
+
+        {labView === "matrix" && (
+          <section className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border border-[var(--border)] bg-[var(--card)] px-4 py-3">
+              <div>
+                <h2 className="font-brush text-2xl text-[var(--foreground)]">
+                  6-SKIN LIVE MATRIX DIFF
+                </h2>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  Simultaneous comparison of Default, Riot, Editorial, Technical, Archive, and
+                  Transmission for {selectedDnaId} ({resolvedMode} · {activeDensity}).
+                </p>
+              </div>
+              <SkinOrnament slot="tag" label={`${selectedDnaId} · ${resolvedMode.toUpperCase()}`} />
+            </div>
+            <SkinMatrixCompare dnaId={selectedDnaId} mode={resolvedMode} density={activeDensity} />
+          </section>
         )}
 
         {labView === "assets" && (

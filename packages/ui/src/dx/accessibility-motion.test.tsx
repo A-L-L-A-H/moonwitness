@@ -62,6 +62,8 @@ describe("PR 7 Accessibility, Reduced Motion & Layout/Artwork Contracts", () => 
     const imperiumCss = readFileSync(resolve(import.meta.dirname, "../skins/imperium.css"), "utf8");
 
     expect(baseCss).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(baseCss).toContain(".mw-surface-enter");
+    expect(baseCss).toContain(".mw-interactive-lift");
     expect(dnaBaseCss).toContain("@media (prefers-reduced-motion: reduce)");
     expect(imperiumCss).toContain("@media (prefers-reduced-motion: reduce)");
 

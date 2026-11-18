@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { TimelineEvent } from "@moonwitness/types";
 import { Crown } from "@moonwitness/ui/icons";
@@ -41,20 +41,20 @@ function EventListInner({
     <section aria-label="Events">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="flex items-center gap-2 font-brush text-xl text-white">
-          <Crown className="h-5 w-8 text-[var(--yellow)]" /> EVENTS
-          <span className="ml-2 hidden text-[10px] font-normal tracking-widest text-zinc-500 sm:inline">
+          <Crown className="h-5 w-8 text-[var(--primary)]" /> EVENTS
+          <span className="ml-2 hidden text-[10px] font-normal tracking-widest text-[var(--muted-foreground)] sm:inline">
             KEY MOMENTS, PROJECTS, AND SIGNALS FROM ACROSS THE EMPIRE.
           </span>
         </h2>
-        <span className="text-[11px] text-zinc-500" aria-live="polite">
-          Showing {pageStart}–{pageEnd} of {total} events
+        <span className="text-[11px] text-[var(--muted-foreground)]" aria-live="polite">
+          Showing {pageStart}â€“{pageEnd} of {total} events
         </span>
       </div>
       {events.length === 0 ? (
         <div className="zine-card-rough p-10 text-center">
-          <p className="font-brush text-xl text-zinc-400">NO SIGNALS FOUND.</p>
-          <p className="mt-2 text-sm text-zinc-500">
-            Nothing matches “{query}” in this era. Try another frequency.
+          <p className="font-brush text-xl text-[var(--muted-foreground)]">NO SIGNALS FOUND.</p>
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+            Nothing matches â€œ{query}â€ in this era. Try another frequency.
           </p>
           <Button onClick={onReset} className="mt-4">
             RESET FILTERS
@@ -96,7 +96,7 @@ function EventListInner({
           >
             Previous
           </Button>
-          <span className="text-xs text-zinc-400" aria-current="page">
+          <span className="text-xs text-[var(--muted-foreground)]" aria-current="page">
             Page {page} of {totalPages}
           </span>
           <Button

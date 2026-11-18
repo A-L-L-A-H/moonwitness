@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -61,10 +61,10 @@ function slugify(seed: string): string {
 
 function Control({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
-    <div className="border-b border-dashed border-[var(--line)] px-4 py-3 last:border-b-0">
+    <div className="border-b border-dashed border-[var(--border)] px-4 py-3 last:border-b-0">
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="text-[10px] font-bold tracking-[0.2em] text-zinc-400">{label}</span>
-        {hint && <span className="font-hand text-sm text-[var(--yellow)]">{hint}</span>}
+        <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--muted-foreground)]">{label}</span>
+        {hint && <span className="font-hand text-sm text-[var(--primary)]">{hint}</span>}
       </div>
       {children}
     </div>
@@ -95,7 +95,7 @@ function Segmented<T extends string>({
           className={`min-h-9 border-2 px-2.5 text-[10px] font-bold tracking-wider transition-all ${
             value === opt
               ? "border-[var(--yellow)] bg-[var(--yellow)] text-black"
-              : "border-[var(--line)] bg-[var(--panel-2)] text-zinc-300 hover:border-[var(--pink)] hover:text-white"
+              : "border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)] hover:border-[var(--pink)] hover:text-[var(--foreground)]"
           }`}
         >
           {render ? render(opt) : opt.toUpperCase()}
@@ -120,14 +120,14 @@ function LabSwitchToggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex min-h-9 w-full items-center justify-between gap-2 border-2 border-[var(--line)] bg-[var(--panel-2)] px-3 py-1.5 text-left transition-colors hover:border-[var(--pink)]"
+      className="flex min-h-9 w-full items-center justify-between gap-2 border-2 border-[var(--border)] bg-[var(--muted)] px-3 py-1.5 text-left transition-colors hover:border-[var(--pink)]"
     >
-      <span className="text-[10px] font-bold tracking-wider text-zinc-300">{label}</span>
+      <span className="text-[10px] font-bold tracking-wider text-[var(--foreground)]">{label}</span>
       <span
         className={`relative h-4 w-8 shrink-0 rounded-full border transition-colors ${
           checked
             ? "border-[var(--yellow)] bg-[var(--yellow)]"
-            : "border-zinc-600 bg-[var(--panel-2)]"
+            : "border-zinc-600 bg-[var(--muted)]"
         }`}
       >
         <span
@@ -291,7 +291,7 @@ export function IdLab() {
       canvas.toBlob((blob) => {
         if (!blob) return;
         download(blob, `witness-${slugify(effectiveSeed)}.png`);
-        flash("PNG EXPORTED — 1024px");
+        flash("PNG EXPORTED â€” 1024px");
       }, "image/png");
     };
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -302,27 +302,27 @@ export function IdLab() {
       await navigator.clipboard.writeText(svg);
       flash("SVG COPIED TO CLIPBOARD");
     } catch {
-      flash("CLIPBOARD BLOCKED — USE DOWNLOAD");
+      flash("CLIPBOARD BLOCKED â€” USE DOWNLOAD");
     }
   }
 
   return (
     <EmpireShell
       breadcrumb="ID Lab"
-      search={{ value: query, onChange: setQuery, placeholder: "Search the lab notes…" }}
+      search={{ value: query, onChange: setQuery, placeholder: "Search the lab notesâ€¦" }}
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-brush text-3xl text-white sm:text-4xl">
-              ID <span className="text-[var(--pink)]">LAB</span>
+              ID <span className="text-[var(--primary)]">LAB</span>
             </h1>
-            <p className="mt-1 max-w-xl font-hand text-xl text-zinc-400">
-              Every witness gets a face. Same seed, same face — printed in our own ink.
+            <p className="mt-1 max-w-xl font-hand text-xl text-[var(--muted-foreground)]">
+              Every witness gets a face. Same seed, same face â€” printed in our own ink.
             </p>
           </div>
           <Sticker tone="yellow" className="-rotate-2 px-3 py-1 font-brush text-xs">
-            DICEBEAR ENGINE × MOONWITNESS DNA
+            DICEBEAR ENGINE Ã— MOONWITNESS DNA
           </Sticker>
         </header>
 
@@ -354,8 +354,8 @@ export function IdLab() {
                 <span className="sticker sticker-pink absolute bottom-3 left-3 -rotate-2 px-3 py-1 font-hand text-base font-bold">
                   {effectiveSeed.toUpperCase()}
                 </span>
-                <span className="absolute right-3 top-3 border border-[var(--line)] bg-black/60 px-2 py-1 text-[10px] tracking-widest text-zinc-400">
-                  {size}×{size}
+                <span className="absolute right-3 top-3 border border-[var(--border)] bg-black/60 px-2 py-1 text-[10px] tracking-widest text-[var(--muted-foreground)]">
+                  {size}Ã—{size}
                 </span>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -368,8 +368,8 @@ export function IdLab() {
                 <ZineButton tone="paper" onClick={copySvg} className="min-h-11 px-4 text-sm">
                   COPY SVG
                 </ZineButton>
-                <span className="ml-auto hidden items-center gap-1.5 text-[10px] tracking-wider text-zinc-500 sm:flex">
-                  <Crown className="h-3 w-5 text-[var(--yellow)]" />
+                <span className="ml-auto hidden items-center gap-1.5 text-[10px] tracking-wider text-[var(--muted-foreground)] sm:flex">
+                  <Crown className="h-3 w-5 text-[var(--primary)]" />
                   DETERMINISTIC BY SEED
                 </span>
               </div>
@@ -378,11 +378,11 @@ export function IdLab() {
             {/* ---- in-context preview ---- */}
             <ZineCard className="p-5">
               <h2 className="mb-3 font-brush text-lg text-white">
-                IN THE <span className="text-[var(--blue)]">WILD</span>
+                IN THE <span className="text-[var(--primary)]">WILD</span>
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="border border-[var(--line)] bg-[var(--panel-2)] p-3">
-                  <p className="mb-2 text-[9px] tracking-[0.2em] text-zinc-500">TOPBAR</p>
+                <div className="border border-[var(--border)] bg-[var(--muted)] p-3">
+                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">TOPBAR</p>
                   <div className="flex items-center gap-2">
                     <WitnessAvatar
                       seed={effectiveSeed}
@@ -392,12 +392,12 @@ export function IdLab() {
                     />
                     <div className="min-w-0">
                       <p className="truncate text-xs font-bold text-white">{effectiveSeed}</p>
-                      <p className="text-[10px] text-zinc-500">Authorized crew</p>
+                      <p className="text-[10px] text-[var(--muted-foreground)]">Authorized crew</p>
                     </div>
                   </div>
                 </div>
-                <div className="border border-[var(--line)] bg-[var(--panel-2)] p-3">
-                  <p className="mb-2 text-[9px] tracking-[0.2em] text-zinc-500">CREW CARD</p>
+                <div className="border border-[var(--border)] bg-[var(--muted)] p-3">
+                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">CREW CARD</p>
                   <div className="flex items-center gap-2">
                     <WitnessAvatar
                       seed={effectiveSeed}
@@ -407,12 +407,12 @@ export function IdLab() {
                     />
                     <div className="min-w-0">
                       <p className="truncate font-brush text-sm text-white">{effectiveSeed}</p>
-                      <p className="text-[10px] text-zinc-500">Same sky</p>
+                      <p className="text-[10px] text-[var(--muted-foreground)]">Same sky</p>
                     </div>
                   </div>
                 </div>
-                <div className="border border-[var(--line)] bg-[var(--panel-2)] p-3">
-                  <p className="mb-2 text-[9px] tracking-[0.2em] text-zinc-500">SIZES</p>
+                <div className="border border-[var(--border)] bg-[var(--muted)] p-3">
+                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">SIZES</p>
                   <div className="flex items-end gap-2">
                     {[20, 32, 48].map((s) => (
                       <WitnessAvatar
@@ -431,8 +431,8 @@ export function IdLab() {
             {/* ---- crew roll ---- */}
             <ZineCard className="p-5">
               <h2 className="mb-3 font-brush text-lg text-white">
-                CREW <span className="text-[var(--pink)]">ROLL</span>
-                <span className="ml-2 font-hand text-base text-zinc-500">
+                CREW <span className="text-[var(--primary)]">ROLL</span>
+                <span className="ml-2 font-hand text-base text-[var(--muted-foreground)]">
                   tap a face to wear it
                 </span>
               </h2>
@@ -445,8 +445,8 @@ export function IdLab() {
                     aria-pressed={seed === name}
                     className={`group flex flex-col items-center gap-1 border-2 p-2 transition-all ${
                       seed === name
-                        ? "border-[var(--yellow)] bg-[var(--panel)]"
-                        : "border-transparent hover:border-[var(--pink)] hover:bg-[var(--panel-2)]"
+                        ? "border-[var(--yellow)] bg-[var(--card)]"
+                        : "border-transparent hover:border-[var(--pink)] hover:bg-[var(--muted)]"
                     }`}
                   >
                     <WitnessAvatar
@@ -455,7 +455,7 @@ export function IdLab() {
                       options={{ radius: 50 }}
                       className="rounded-full transition-transform group-hover:scale-110"
                     />
-                    <span className="w-full truncate text-center text-[9px] tracking-wider text-zinc-400 group-hover:text-white">
+                    <span className="w-full truncate text-center text-[9px] tracking-wider text-[var(--muted-foreground)] group-hover:text-[var(--foreground)]">
                       {name.toUpperCase()}
                     </span>
                   </button>
@@ -467,11 +467,11 @@ export function IdLab() {
           {/* ---- control deck (always visible) ---- */}
           <div className="lg:sticky lg:top-20 lg:self-start">
             <ZineCardRough className="relative">
-              <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
+              <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
                 <h2 className="font-brush text-base text-white">
-                  CONTROL <span className="text-[var(--yellow)]">DECK</span>
+                  CONTROL <span className="text-[var(--primary)]">DECK</span>
                 </h2>
-                <span className="text-[9px] tracking-[0.2em] text-zinc-500">LIVE</span>
+                <span className="text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">LIVE</span>
               </div>
 
               <Control label="SEED" hint="same seed = same face">
@@ -479,7 +479,7 @@ export function IdLab() {
                   <ZineInput
                     value={seed}
                     onChange={(e) => setSeed(e.target.value)}
-                    placeholder="Type any name…"
+                    placeholder="Type any nameâ€¦"
                     aria-label="Avatar seed"
                     className="min-h-10 flex-1"
                   />
@@ -489,7 +489,7 @@ export function IdLab() {
                     className="min-h-10 px-3 text-xs"
                     aria-label="Random seed"
                   >
-                    ⤳
+                    â¤³
                   </ZineButton>
                 </div>
               </Control>
@@ -506,8 +506,8 @@ export function IdLab() {
                         aria-pressed={palette === name}
                         className={`flex min-h-10 items-center gap-2 border-2 px-2 text-[9px] font-bold tracking-wider transition-all ${
                           palette === name
-                            ? "border-[var(--yellow)] bg-[var(--panel)] text-white"
-                            : "border-[var(--line)] bg-[var(--panel-2)] text-zinc-400 hover:border-[var(--pink)]"
+                            ? "border-[var(--yellow)] bg-[var(--card)] text-white"
+                            : "border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)] hover:border-[var(--pink)]"
                         }`}
                       >
                         <span className="flex shrink-0 -space-x-1">
@@ -604,13 +604,13 @@ export function IdLab() {
                 </ZineButton>
               </div>
 
-              <div className="border-t-2 border-[var(--line)] px-4 py-3">
+              <div className="border-t-2 border-[var(--border)] px-4 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold tracking-wider ${
                       applied
-                        ? "border-[var(--yellow)] bg-[var(--yellow)]/10 text-[var(--yellow)]"
-                        : "border-[var(--line)] bg-[var(--panel-2)] text-zinc-500"
+                        ? "border-[var(--yellow)] bg-[var(--yellow)]/10 text-[var(--primary)]"
+                        : "border-[var(--border)] bg-[var(--muted)] text-[var(--muted-foreground)]"
                     }`}
                   >
                     <span
@@ -618,25 +618,25 @@ export function IdLab() {
                     />
                     {applied ? "TERPASANG" : "DRAFT"}
                   </span>
-                  <span className="text-[9px] tracking-[0.2em] text-zinc-600">
+                  <span className="text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
                     LOKAL DI BROWSER
                   </span>
                 </div>
-                <p className="mt-2 font-hand text-base leading-snug text-zinc-500">
+                <p className="mt-2 font-hand text-base leading-snug text-[var(--muted-foreground)]">
                   {applied
                     ? "Wajah ini yang tampil di topbar profilmu."
-                    : "Eksperimen di sini belum mengubah profilmu — tekan Gunakan Avatar untuk memasangnya."}
+                    : "Eksperimen di sini belum mengubah profilmu â€” tekan Gunakan Avatar untuk memasangnya."}
                 </p>
                 {!storageAvailable && (
-                  <p className="mt-2 border border-[var(--pink)]/60 bg-[var(--pink)]/10 px-3 py-2 text-xs text-[var(--pink)]">
-                    Penyimpanan lokal tidak tersedia — avatar tidak bisa disimpan di browser ini.
+                  <p className="mt-2 border border-[var(--pink)]/60 bg-[var(--pink)]/10 px-3 py-2 text-xs text-[var(--primary)]">
+                    Penyimpanan lokal tidak tersedia â€” avatar tidak bisa disimpan di browser ini.
                   </p>
                 )}
               </div>
             </ZineCardRough>
-            <p className="mt-3 px-1 font-hand text-lg leading-snug text-zinc-500">
+            <p className="mt-3 px-1 font-hand text-lg leading-snug text-[var(--muted-foreground)]">
               Built on the DiceBear engine, redrawn in MoonWitness ink: halftone, torn edges, crowns
-              and the big blue moon. One seed, one witness — everywhere in the empire.
+              and the big blue moon. One seed, one witness â€” everywhere in the empire.
             </p>
           </div>
         </div>

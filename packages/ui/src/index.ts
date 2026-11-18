@@ -402,11 +402,19 @@ export { DataTable, type DataTableColumn, type DataTableProps } from "./componen
 export {
   ChartContainer,
   BarChart,
+  Sparkline,
+  LineChart,
+  AreaChart,
+  RadialGauge,
   ChartLegend,
   ChartTooltip,
   type ChartDataPoint,
   type ChartContainerProps,
   type BarChartProps,
+  type SparklineProps,
+  type LineChartProps,
+  type AreaChartProps,
+  type RadialGaugeProps,
 } from "./components/ui/chart";
 
 export { cva, type VariantProps } from "./lib/utils";
@@ -666,9 +674,26 @@ export * from "./artwork/logos";
 export * from "./artwork/cutouts";
 export * from "./artwork/backdrop";
 
+/* Schema-Driven Composite View */
+export {
+  AutoModelView,
+  type AutoModelFieldType,
+  type AutoModelFieldSpec,
+  type AutoModelAcl,
+  type AutoModelViewDescriptor,
+  type AutoModelRow,
+  type AutoModelViewProps,
+} from "./composites/auto-model-view";
+
 /* DX Layer */
 export { TokenInspector, type TokenInspectorProps } from "./dx/inspector";
 export { SkinPlayground, type SkinPlaygroundProps } from "./dx/playground";
+export {
+  SkinMatrixCompare,
+  formatSkinTokensAsCss,
+  formatSkinTokensAsJson,
+  type SkinMatrixCompareProps,
+} from "./dx/matrix-compare";
 export {
   measureContrastRatio,
   auditPaletteContrast,

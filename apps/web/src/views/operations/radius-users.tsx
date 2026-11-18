@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import {
@@ -59,7 +59,7 @@ function RadiusFormField({
   autoComplete?: string;
 }) {
   return (
-    <label className="block text-xs text-zinc-400">
+    <label className="block text-xs text-[var(--muted-foreground)]">
       {label}
       <input
         type={type}
@@ -69,7 +69,7 @@ function RadiusFormField({
         required={required}
         disabled={disabled}
         autoComplete={autoComplete}
-        className="mt-1 min-h-11 w-full border-2 border-[var(--line)] bg-black/30 px-3 text-sm text-zinc-100 outline-none focus:border-[var(--blue)] disabled:opacity-50"
+        className="mt-1 min-h-11 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)] disabled:opacity-50"
       />
     </label>
   );
@@ -148,7 +148,7 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
         type="button"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="min-h-11 px-4 text-sm text-zinc-100 bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Add user
       </button>
@@ -159,9 +159,9 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
     <form
       onSubmit={handleSubmit}
       aria-label="Create RADIUS user"
-      className="space-y-3 border-2 border-[var(--blue)]/40 bg-[var(--panel)] p-4"
+      className="space-y-3 border-2 border-[var(--blue)]/40 bg-[var(--card)] p-4"
     >
-      <h4 className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+      <h4 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
         New RADIUS user
       </h4>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -184,7 +184,7 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
         />
       </div>
       <ProfileFields draft={draft} onChange={setDraft} disabled={createUser.isPending} />
-      <label className="flex items-center gap-2 text-xs text-zinc-400">
+      <label className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
         <input
           type="checkbox"
           checked={enabled}
@@ -198,9 +198,9 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
         <button
           type="submit"
           disabled={createUser.isPending || !username.trim() || !password}
-          className="min-h-11 px-4 text-sm text-zinc-100 bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createUser.isPending ? "Creating…" : "Create user"}
+          {createUser.isPending ? "Creatingâ€¦" : "Create user"}
         </button>
         <button
           type="button"
@@ -210,17 +210,17 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
             createUser.reset();
           }}
           disabled={createUser.isPending}
-          className="min-h-11 text-xs text-zinc-400 underline"
+          className="min-h-11 text-xs text-[var(--muted-foreground)] underline"
         >
           Cancel
         </button>
         {createUser.isSuccess && (
-          <span className="text-xs text-[var(--blue)]" role="status">
+          <span className="text-xs text-[var(--primary)]" role="status">
             User created.
           </span>
         )}
         {createUser.isError && (
-          <span className="text-xs text-[var(--yellow)]" role="alert">
+          <span className="text-xs text-[var(--primary)]" role="alert">
             {(createUser.error as Error).message}
           </span>
         )}
@@ -269,15 +269,15 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
     <li className="space-y-3 py-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-sm text-zinc-100">{user.username}</p>
-          <p className="mt-1 font-mono text-xs text-zinc-500">
+          <p className="text-sm text-[var(--foreground)]">{user.username}</p>
+          <p className="mt-1 font-mono text-xs text-[var(--muted-foreground)]">
             {user.enabled ? "enabled" : "disabled"}
-            {user.framed_ip ? ` · framed ${user.framed_ip}` : ""}
-            {user.vlan_id === null || user.vlan_id === undefined ? "" : ` · vlan ${user.vlan_id}`}
+            {user.framed_ip ? ` Â· framed ${user.framed_ip}` : ""}
+            {user.vlan_id === null || user.vlan_id === undefined ? "" : ` Â· vlan ${user.vlan_id}`}
             {user.session_timeout === null || user.session_timeout === undefined
               ? ""
-              : ` · timeout ${user.session_timeout}s`}
-            {user.mac_address ? ` · mac ${user.mac_address}` : ""}
+              : ` Â· timeout ${user.session_timeout}s`}
+            {user.mac_address ? ` Â· mac ${user.mac_address}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -285,7 +285,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
             <button
               type="button"
               onClick={startEditing}
-              className="min-h-9 px-3 py-2 text-xs text-[var(--blue)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10"
+              className="min-h-9 px-3 py-2 text-xs text-[var(--primary)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10"
             >
               Edit
             </button>
@@ -300,7 +300,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
                   })
                 }
                 disabled={deleteUser.isPending}
-                className="min-h-9 px-3 py-2 text-xs text-zinc-100 bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+                className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
               >
                 Confirm delete
               </button>
@@ -308,7 +308,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
                 type="button"
                 onClick={() => setConfirmDelete(false)}
                 disabled={deleteUser.isPending}
-                className="min-h-9 text-xs text-zinc-400 underline"
+                className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
               >
                 Cancel
               </button>
@@ -318,7 +318,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
               type="button"
               onClick={() => setConfirmDelete(true)}
               disabled={deleteUser.isPending}
-              className="min-h-9 text-xs text-[var(--yellow)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+              className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
             >
               Delete
             </button>
@@ -330,7 +330,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
         <form
           onSubmit={handleSave}
           aria-label={`Edit ${user.username}`}
-          className="space-y-3 border-2 border-[var(--line)] bg-black/20 p-4"
+          className="space-y-3 border-2 border-[var(--border)] bg-black/20 p-4"
         >
           <div className="grid gap-3 sm:grid-cols-2">
             <RadiusFormField
@@ -341,7 +341,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
               disabled={updateUser.isPending}
               autoComplete="new-password"
             />
-            <label className="flex items-end gap-2 pb-2 text-xs text-zinc-400">
+            <label className="flex items-end gap-2 pb-2 text-xs text-[var(--muted-foreground)]">
               <input
                 type="checkbox"
                 checked={enabled}
@@ -357,9 +357,9 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
             <button
               type="submit"
               disabled={updateUser.isPending}
-              className="min-h-11 px-4 text-sm text-zinc-100 bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {updateUser.isPending ? "Saving…" : "Save changes"}
+              {updateUser.isPending ? "Savingâ€¦" : "Save changes"}
             </button>
             <button
               type="button"
@@ -369,17 +369,17 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
                 updateUser.reset();
               }}
               disabled={updateUser.isPending}
-              className="min-h-11 text-xs text-zinc-400 underline"
+              className="min-h-11 text-xs text-[var(--muted-foreground)] underline"
             >
               Cancel
             </button>
             {updateUser.isSuccess && (
-              <span className="text-xs text-[var(--blue)]" role="status">
+              <span className="text-xs text-[var(--primary)]" role="status">
                 Saved.
               </span>
             )}
             {updateUser.isError && (
-              <span className="text-xs text-[var(--yellow)]" role="alert">
+              <span className="text-xs text-[var(--primary)]" role="alert">
                 {(updateUser.error as Error).message}
               </span>
             )}
@@ -387,7 +387,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
         </form>
       )}
       {deleteUser.isError && (
-        <p className="text-xs text-[var(--yellow)]" role="alert">
+        <p className="text-xs text-[var(--primary)]" role="alert">
           {(deleteUser.error as Error).message}
         </p>
       )}
@@ -410,24 +410,24 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
   return (
     <section aria-label="RADIUS users" className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-mono text-[10px] uppercase tracking-widest text-zinc-500">Users</h2>
+        <h2 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">Users</h2>
         <div className="flex flex-wrap items-center gap-3">
-          <label className="text-xs text-zinc-400">
+          <label className="text-xs text-[var(--muted-foreground)]">
             <span className="sr-only">Filter users</span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter users…"
-              className="min-h-10 w-48 border-2 border-[var(--line)] bg-black/30 px-3 text-sm text-zinc-100 outline-none focus:border-[var(--blue)]"
+              placeholder="Filter usersâ€¦"
+              className="min-h-10 w-48 border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)]"
             />
           </label>
-          {users.data && <span className="text-xs text-zinc-500">{visible.length} shown</span>}
+          {users.data && <span className="text-xs text-[var(--muted-foreground)]">{visible.length} shown</span>}
         </div>
       </div>
 
       {!canWrite && (
         <p
-          className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+          className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
           role="status"
         >
           Your role cannot manage RADIUS users. Ask an administrator for write access.
@@ -435,7 +435,7 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
       )}
 
       {notice && (
-        <p className="text-xs text-[var(--blue)]" role="status">
+        <p className="text-xs text-[var(--primary)]" role="status">
           {notice}
         </p>
       )}
@@ -444,31 +444,31 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
 
       {users.isLoading ? (
         <p
-          className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+          className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
           role="status"
         >
-          Loading users…
+          Loading usersâ€¦
         </p>
       ) : users.isError ? (
-        <div role="alert" className="border-2 border-[var(--yellow)]/50 bg-[var(--panel)] p-4">
-          <p className="text-sm text-zinc-300">{(users.error as Error).message}</p>
+        <div role="alert" className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-4">
+          <p className="text-sm text-[var(--foreground)]">{(users.error as Error).message}</p>
           <button
             type="button"
             onClick={() => void users.refetch()}
-            className="mt-2 min-h-11 text-xs text-[var(--blue)] underline"
+            className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
           >
             Retry users
           </button>
         </div>
       ) : visible.length === 0 ? (
         <p
-          className="border-2 border-[var(--line)] bg-[var(--panel)] p-4 text-sm text-zinc-400"
+          className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
           role="status"
         >
           {users.data?.length ? "No users match this filter." : "No RADIUS users are configured."}
         </p>
       ) : (
-        <div className="overflow-x-auto border-2 border-[var(--line)] bg-[var(--panel)] px-4">
+        <div className="overflow-x-auto border-2 border-[var(--border)] bg-[var(--card)] px-4">
           <ul className="divide-y divide-[var(--line)]">
             {visible.map((user) => (
               <UserRow key={user.id || user.username} user={user} onDeleted={setNotice} />

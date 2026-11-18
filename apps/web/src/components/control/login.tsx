@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Tape, ZineCardRough, Input } from "@moonwitness/ui";
@@ -34,15 +34,15 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
         <ZineCardRough className="relative p-7 sm:p-9">
           <Tape className="-top-3 left-10 -rotate-6" />
           <Tape className="-top-2 right-8 rotate-3" />
-          <Crown className="absolute right-6 top-6 h-6 w-9 rotate-12 text-[var(--yellow)]" />
+          <Crown className="absolute right-6 top-6 h-6 w-9 rotate-12 text-[var(--primary)]" />
 
-          <p className="text-[10px] tracking-[0.3em] text-zinc-500">
+          <p className="text-[10px] tracking-[0.3em] text-[var(--muted-foreground)]">
             {(instanceName ?? "CONTROL PLANE").toUpperCase()}
           </p>
           <h1 className="mt-1 font-brush text-4xl leading-tight text-white sm:text-5xl">
-            ENTER <span className="text-[var(--pink)]">THE SHADOW</span>
+            ENTER <span className="text-[var(--primary)]">THE SHADOW</span>
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+          <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
             Masuk dengan akun arsy untuk melihat host, resource, dan audit trail.
           </p>
 
@@ -50,7 +50,7 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
             <div>
               <Label
                 htmlFor="control-email"
-                className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300"
+                className="mb-1.5 block text-xs font-bold tracking-wider text-[var(--foreground)]"
               >
                 EMAIL
               </Label>
@@ -61,13 +61,13 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
+                className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--border)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
               />
             </div>
             <div>
               <Label
                 htmlFor="control-password"
-                className="mb-1.5 block text-xs font-bold tracking-wider text-zinc-300"
+                className="mb-1.5 block text-xs font-bold tracking-wider text-[var(--foreground)]"
               >
                 PASSWORD
               </Label>
@@ -77,8 +77,8 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••"
-                className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
+                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--border)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
               />
             </div>
 
@@ -97,7 +97,7 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
               className="btn-zine w-full px-6 py-4 text-xl"
             >
               {login.isPending ? (
-                "MASUK…"
+                "MASUKâ€¦"
               ) : (
                 <>
                   MASUK <ArrowRight className="h-5 w-5" />

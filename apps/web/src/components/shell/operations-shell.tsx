@@ -26,9 +26,9 @@ export function OperationsShell({
       rootHref="/control"
       accentColor="blue"
       sidebarFooter={
-        <div className="border-2 border-[var(--line)] bg-[var(--panel-2)] px-3 py-2 font-mono text-[10px] leading-relaxed text-zinc-400">
-          <div className="font-bold tracking-widest text-[var(--blue)]">OPERATIONS CONSOLE</div>
-          <div className="mt-1 text-zinc-500">WEB → API → ARSY PLANE</div>
+        <div className="border-2 border-[var(--border)] bg-[var(--muted)] px-3 py-2 font-mono text-[10px] leading-relaxed text-[var(--muted-foreground)]">
+          <div className="font-bold tracking-widest text-[var(--primary)]">OPERATIONS CONSOLE</div>
+          <div className="mt-1 text-[var(--muted-foreground)]">WEB → API → ARSY PLANE</div>
         </div>
       }
       footerLeft="MOONWITNESS OPERATIONS /// HOST, NETWORK & STORAGE PLANE"

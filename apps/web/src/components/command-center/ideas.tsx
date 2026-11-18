@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import { ScenePanel } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";
@@ -21,10 +21,10 @@ export function IdeasInMotion() {
       >
         <div className="flex min-h-[300px] flex-col justify-end gap-6 p-5">
           <div className="max-w-[20rem]">
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--blue)]">
+            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--primary)]">
               REAL STORIES. REAL ANOTHER TOMORROW.
             </p>
-            <p className="mt-2 text-[11px] leading-relaxed text-zinc-300">
+            <p className="mt-2 text-[11px] leading-relaxed text-[var(--foreground)]">
               Every episode starts as a scribbled idea on a rooftop. This board is where those
               scribbles wait to be picked up.
             </p>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { Badge, ZineCardRough } from "@moonwitness/ui";
@@ -66,7 +66,7 @@ export function NocProbesPanel() {
       <ZineCardRough className="flex flex-col p-5">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black/10 pb-4 dark:border-white/10">
           <div>
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--yellow)]">
+            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--primary)]">
               SOVEREIGN GATEWAY PROBE MATRIX
             </p>
             <p className="text-xs text-muted-foreground">
@@ -79,7 +79,7 @@ export function NocProbesPanel() {
             onClick={() => handleRunProbes()}
             className="border-2 border-black bg-[var(--yellow)] px-4 py-2 font-mono text-xs font-bold text-black shadow-[3px_3px_0px_#000] transition-transform active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50"
           >
-            {probing ? "PROBING ALL NODES…" : "PROBE ALL NODES"}
+            {probing ? "PROBING ALL NODESâ€¦" : "PROBE ALL NODES"}
           </button>
         </div>
 
@@ -125,7 +125,7 @@ export function NocProbesPanel() {
                         </Badge>
                       )}
                     </td>
-                    <td className="py-2.5 pr-4">{latest ? `${latest.latencyMs} ms` : "—"}</td>
+                    <td className="py-2.5 pr-4">{latest ? `${latest.latencyMs} ms` : "â€”"}</td>
                     <td className="py-2.5 text-right">
                       <button
                         type="button"

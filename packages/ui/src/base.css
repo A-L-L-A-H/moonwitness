@@ -1069,6 +1069,46 @@
     pointer-events: none;
     white-space: nowrap;
   }
+
+  /* ---- skin-paced motion primitives ---- */
+  @keyframes mwSurfaceEnter {
+    from {
+      opacity: 0.9;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes mwPulseSignal {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+
+  .mw-surface-enter {
+    animation: mwSurfaceEnter var(--mw-motion-duration, 180ms) ease-out both;
+  }
+
+  .mw-interactive-lift {
+    transition:
+      transform var(--mw-motion-duration, 180ms) ease,
+      border-color var(--mw-motion-duration, 180ms) ease,
+      box-shadow var(--mw-motion-duration, 180ms) ease;
+  }
+
+  .mw-interactive-lift:hover {
+    transform: translateY(-2px);
+  }
+
+  .mw-pulse-signal {
+    animation: mwPulseSignal calc(var(--mw-motion-duration, 180ms) * 8) ease-in-out infinite;
+  }
 }
 
 /* Unlayered dengan sengaja: harus menang atas utility supaya animasi bisa dimatikan. */
@@ -1077,12 +1117,16 @@
   .pulse-dot,
   .neon-flicker,
   .float-y,
-  .rise-in {
+  .rise-in,
+  .mw-surface-enter,
+  .mw-pulse-signal {
     animation: none;
   }
   .zine-card,
   .zine-card-rough,
-  .cmyk-slip {
+  .cmyk-slip,
+  .mw-interactive-lift,
+  .mw-interactive-lift:hover {
     transition: none;
     transform: none;
   }

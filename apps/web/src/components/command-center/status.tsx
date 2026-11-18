@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import { StatBlock, Badge, ZineCardRough } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";
@@ -10,25 +10,25 @@ function statBlocks(stats: CommandCenterStats | null) {
   return [
     {
       label: "WORKFLOWS",
-      value: stats ? String(stats.workflows) : "—",
+      value: stats ? String(stats.workflows) : "â€”",
       tone: "blue" as const,
       trend: "",
     },
     {
       label: "RUNNING",
-      value: stats ? String(stats.running) : "—",
+      value: stats ? String(stats.running) : "â€”",
       tone: "green" as const,
       trend: "",
     },
     {
       label: "QUEUED",
-      value: stats ? String(stats.queued) : "—",
+      value: stats ? String(stats.queued) : "â€”",
       tone: "yellow" as const,
       trend: "",
     },
     {
       label: "ALERTS",
-      value: stats ? String(stats.alerts) : "—",
+      value: stats ? String(stats.alerts) : "â€”",
       tone: "pink" as const,
       trend: "",
     },
@@ -72,7 +72,7 @@ export function UniverseStatus({
         />
         <div className="relative z-10 flex h-full min-h-[220px] flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--yellow)]">
+            <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--primary)]">
               EMPIRE TELEMETRY
             </p>
             <Badge variant="default" className={badge.className}>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -20,7 +20,7 @@ function Labeled({
 }) {
   return (
     <label
-      className={wide ? "block text-xs text-zinc-400 sm:col-span-2" : "block text-xs text-zinc-400"}
+      className={wide ? "block text-xs text-[var(--muted-foreground)] sm:col-span-2" : "block text-xs text-[var(--muted-foreground)]"}
     >
       {label}
       {children}
@@ -29,7 +29,7 @@ function Labeled({
 }
 
 const inputClass =
-  "mt-1 min-h-11 w-full border-2 border-[var(--line)] bg-black/30 px-3 text-sm text-zinc-100 outline-none focus:border-[var(--blue)] disabled:opacity-50";
+  "mt-1 min-h-11 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)] disabled:opacity-50";
 
 function CreateDevicePanel({ disabled }: { disabled: boolean }) {
   const [open, setOpen] = useState(false);
@@ -54,7 +54,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
         type="button"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="min-h-11 px-4 text-sm text-zinc-100 bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Add device
       </button>
@@ -81,9 +81,9 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
     <form
       onSubmit={handleSubmit}
       aria-label="Create SNMP device"
-      className="space-y-3 border-2 border-[var(--blue)]/40 bg-[var(--panel)] p-4"
+      className="space-y-3 border-2 border-[var(--blue)]/40 bg-[var(--card)] p-4"
     >
-      <h4 className="font-mono text-[10px] uppercase tracking-widest text-zinc-400">
+      <h4 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
         New SNMP device
       </h4>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -140,9 +140,9 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
         <button
           type="submit"
           disabled={createDevice.isPending || !name.trim() || !host.trim()}
-          className="min-h-11 px-4 text-sm text-zinc-100 bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createDevice.isPending ? "Creating…" : "Create device"}
+          {createDevice.isPending ? "Creatingâ€¦" : "Create device"}
         </button>
         <button
           type="button"
@@ -152,17 +152,17 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
             createDevice.reset();
           }}
           disabled={createDevice.isPending}
-          className="min-h-11 text-xs text-zinc-400 underline"
+          className="min-h-11 text-xs text-[var(--muted-foreground)] underline"
         >
           Cancel
         </button>
         {createDevice.isSuccess && (
-          <span className="text-xs text-[var(--blue)]" role="status">
+          <span className="text-xs text-[var(--primary)]" role="status">
             Device created.
           </span>
         )}
         {createDevice.isError && (
-          <span className="text-xs text-[var(--yellow)]" role="alert">
+          <span className="text-xs text-[var(--primary)]" role="alert">
             {(createDevice.error as Error).message}
           </span>
         )}
@@ -184,7 +184,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
         type="button"
         onClick={() => setOpen(true)}
         disabled={createTarget.isPending}
-        className="min-h-9 px-3 py-2 text-xs text-[var(--blue)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10 disabled:opacity-50"
+        className="min-h-9 px-3 py-2 text-xs text-[var(--primary)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10 disabled:opacity-50"
       >
         Add target
       </button>
@@ -218,7 +218,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
     <form
       onSubmit={handleSubmit}
       aria-label={`Create target for ${deviceId}`}
-      className="mt-3 space-y-3 border-2 border-[var(--line)] bg-black/20 p-3"
+      className="mt-3 space-y-3 border-2 border-[var(--border)] bg-black/20 p-3"
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <Labeled label="Target name">
@@ -254,20 +254,20 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
         <button
           type="submit"
           disabled={createTarget.isPending || !name.trim() || !oid.trim()}
-          className="min-h-9 px-3 py-2 text-xs text-zinc-100 bg-[var(--blue)] border border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--blue)] border border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createTarget.isPending ? "Creating…" : "Create target"}
+          {createTarget.isPending ? "Creatingâ€¦" : "Create target"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
           disabled={createTarget.isPending}
-          className="min-h-9 text-xs text-zinc-400 underline"
+          className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
         >
           Cancel
         </button>
         {createTarget.isError && (
-          <span className="text-xs text-[var(--yellow)]" role="alert">
+          <span className="text-xs text-[var(--primary)]" role="alert">
             {(createTarget.error as Error).message}
           </span>
         )}
@@ -297,7 +297,7 @@ function DeviceManagementActions({
             void deleteDevice.mutateAsync(device.id, { onSuccess: () => setConfirming(false) })
           }
           disabled={deleteDevice.isPending}
-          className="min-h-9 px-3 py-2 text-xs text-zinc-100 bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+          className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
         >
           Confirm delete device
         </button>
@@ -305,7 +305,7 @@ function DeviceManagementActions({
           type="button"
           onClick={() => setConfirming(false)}
           disabled={deleteDevice.isPending}
-          className="min-h-9 text-xs text-zinc-400 underline"
+          className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
         >
           Cancel
         </button>
@@ -319,12 +319,12 @@ function DeviceManagementActions({
         type="button"
         onClick={() => setConfirming(true)}
         disabled={deleteDevice.isPending}
-        className="min-h-9 text-xs text-[var(--yellow)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+        className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
       >
         Delete
       </button>
       {deleteDevice.isError && (
-        <span className="text-[10px] text-[var(--yellow)]" role="alert">
+        <span className="text-[10px] text-[var(--primary)]" role="alert">
           {(deleteDevice.error as Error).message}
         </span>
       )}
@@ -355,7 +355,7 @@ function TargetManagementActions({
             void deleteTarget.mutateAsync(targetId, { onSuccess: () => setConfirming(false) })
           }
           disabled={deleteTarget.isPending}
-          className="min-h-8 px-2 py-1 text-[11px] text-zinc-100 bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+          className="min-h-8 px-2 py-1 text-[11px] text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
         >
           Confirm delete {targetName}
         </button>
@@ -363,7 +363,7 @@ function TargetManagementActions({
           type="button"
           onClick={() => setConfirming(false)}
           disabled={deleteTarget.isPending}
-          className="text-[11px] text-zinc-400 underline"
+          className="text-[11px] text-[var(--muted-foreground)] underline"
         >
           Cancel
         </button>
@@ -377,12 +377,12 @@ function TargetManagementActions({
         type="button"
         onClick={() => setConfirming(true)}
         disabled={deleteTarget.isPending}
-        className="min-h-8 text-[11px] text-[var(--yellow)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+        className="min-h-8 text-[11px] text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
       >
         Delete
       </button>
       {deleteTarget.isError && (
-        <span className="text-[10px] text-[var(--yellow)]" role="alert">
+        <span className="text-[10px] text-[var(--primary)]" role="alert">
           {(deleteTarget.error as Error).message}
         </span>
       )}

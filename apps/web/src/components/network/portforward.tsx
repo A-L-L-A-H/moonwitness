@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Input, Card, Badge } from "@moonwitness/ui";
@@ -53,12 +53,12 @@ function PortForwardPanelInner() {
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
+      <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
         <div>
           <h2 className="font-brush text-lg text-white">
-            PORT <span className="text-[var(--blue)]">FORWARDING</span>
+            PORT <span className="text-[var(--primary)]">FORWARDING</span>
           </h2>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-[11px] text-[var(--muted-foreground)]">
             Teruskan port publik host ke layanan di balik VPN (DNAT via nftables).
           </p>
         </div>
@@ -67,7 +67,7 @@ function PortForwardPanelInner() {
         </Badge>
       </div>
 
-      <form onSubmit={submit} className="border-b border-[var(--line)] bg-[var(--panel-2)] p-4">
+      <form onSubmit={submit} className="border-b border-[var(--border)] bg-[var(--muted)] p-4">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-[100px_80px_1fr_1fr_auto]">
           <Input
             value={port}
@@ -85,8 +85,8 @@ function PortForwardPanelInner() {
                 aria-pressed={proto === p}
                 className={`flex-1 border text-[10px] tracking-widest ${
                   proto === p
-                    ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--pink)]"
-                    : "border-[var(--line)] text-zinc-500"
+                    ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--primary)]"
+                    : "border-[var(--border)] text-[var(--muted-foreground)]"
                 }`}
               >
                 {p.toUpperCase()}
@@ -110,9 +110,9 @@ function PortForwardPanelInner() {
           <button
             type="submit"
             disabled={create.isPending}
-            className="btn-zine border border-[var(--line)] px-4 py-2 text-xs"
+            className="btn-zine border border-[var(--border)] px-4 py-2 text-xs"
           >
-            {create.isPending ? "MEMASANG…" : "TERUSKAN"}
+            {create.isPending ? "MEMASANGâ€¦" : "TERUSKAN"}
           </button>
         </div>
         {error && (
@@ -123,7 +123,7 @@ function PortForwardPanelInner() {
       </form>
 
       {forwards.length === 0 ? (
-        <p className="px-4 py-6 text-sm text-zinc-500">
+        <p className="px-4 py-6 text-sm text-[var(--muted-foreground)]">
           Belum ada port forwarding. Tambahkan aturan di atas untuk membuka akses ke layanan
           internal.
         </p>
@@ -131,7 +131,7 @@ function PortForwardPanelInner() {
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-[var(--line)] text-left text-[9px] tracking-[0.2em] text-zinc-500">
+              <tr className="border-b border-[var(--border)] text-left text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
                 <th className="px-3 py-2 font-normal">PORT PUBLIK</th>
                 <th className="px-3 py-2 font-normal">TUJUAN</th>
                 <th className="px-3 py-2 font-normal">SUMBER</th>
@@ -141,12 +141,12 @@ function PortForwardPanelInner() {
             </thead>
             <tbody>
               {forwards.map((f) => (
-                <tr key={f.key} className="border-b border-[var(--line)]/60 last:border-b-0">
-                  <td className="px-3 py-2 font-mono text-xs text-zinc-200">
+                <tr key={f.key} className="border-b border-[var(--border)]/60 last:border-b-0">
+                  <td className="px-3 py-2 font-mono text-xs text-[var(--foreground)]">
                     {f.proto.toUpperCase()}/{f.port}
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-[var(--yellow)]">{f.to}</td>
-                  <td className="px-3 py-2 font-mono text-[11px] text-zinc-400">
+                  <td className="px-3 py-2 font-mono text-xs text-[var(--primary)]">{f.to}</td>
+                  <td className="px-3 py-2 font-mono text-[11px] text-[var(--muted-foreground)]">
                     {f.from || "any"}
                   </td>
                   <td className="px-3 py-2">
@@ -154,7 +154,7 @@ function PortForwardPanelInner() {
                       className={`inline-block border px-2 py-0.5 text-[10px] tracking-widest ${
                         f.active
                           ? "border-[var(--green)]/50 bg-[var(--green)]/10 text-[var(--green)]"
-                          : "border-[var(--line)] text-zinc-600"
+                          : "border-[var(--border)] text-[var(--muted-foreground)]"
                       }`}
                     >
                       {f.active ? "AKTIF" : "TERCATAT"}
@@ -165,7 +165,7 @@ function PortForwardPanelInner() {
                       type="button"
                       onClick={() => deleteRule(f.key)}
                       disabled={remove.isPending}
-                      className="btn-zine border border-[var(--line)] px-2.5 py-1.5 text-[10px]"
+                      className="btn-zine border border-[var(--border)] px-2.5 py-1.5 text-[10px]"
                     >
                       HAPUS
                     </button>

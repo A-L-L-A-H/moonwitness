@@ -8,6 +8,7 @@ import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { useSkin } from "@moonwitness/ui";
 import { Crown } from "@moonwitness/ui/icons";
+import { ConsoleCommandPalette } from "@/components/console-command-palette";
 import { activeByPath, type NavItem } from "./nav-items";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
@@ -145,7 +146,6 @@ export function WorkspaceShell({
               role={role}
               onExit={exitShadow}
               avatarSeed={avatarSeed}
-              dnaId={dnaId}
             />
           }
         />
@@ -157,10 +157,14 @@ export function WorkspaceShell({
         <footer className="flex flex-wrap items-center justify-between gap-2 border-t-2 border-[var(--border)] px-4 py-3 text-[10px] tracking-wider text-[var(--muted-foreground)]">
           <span>{footerLeft}</span>
           <span className="flex items-center gap-2">
+            <kbd className="rounded border border-[var(--border)] bg-[var(--card)] px-1.5 py-0.5 font-mono text-[9px]">
+              Ctrl+K
+            </kbd>
             <Crown className="h-3 w-5 text-[var(--primary)]" /> {footerRight}
           </span>
         </footer>
       </div>
+      <ConsoleCommandPalette plane={accentColor === "blue" ? "operations" : "creator"} />
     </div>
   );
 }

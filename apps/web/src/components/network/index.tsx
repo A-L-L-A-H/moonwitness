@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Tape, ZineBadge, ZineCard, ZineCardRough, ZineInput } from "@moonwitness/ui";
@@ -18,7 +18,7 @@ import {
 } from "@/lib/api/vpn";
 
 function formatTraffic(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "—";
+  if (!Number.isFinite(bytes) || bytes <= 0) return "â€”";
   const units = ["B", "KiB", "MiB", "GiB", "TiB"];
   const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   const value = bytes / 1024 ** i;
@@ -94,10 +94,10 @@ function ConfigPanel({
           </button>
         </div>
       </div>
-      <p className="mt-2 text-[11px] text-[var(--yellow)]">
+      <p className="mt-2 text-[11px] text-[var(--primary)]">
         Private key hanya ditampilkan sekarang. Salin sebelum menutup panel ini.
       </p>
-      <pre className="mt-3 max-h-80 overflow-auto border border-[var(--line)] bg-black/50 p-3 font-mono text-[11px] leading-relaxed text-zinc-300">
+      <pre className="mt-3 max-h-80 overflow-auto border border-[var(--border)] bg-black/50 p-3 font-mono text-[11px] leading-relaxed text-[var(--foreground)]">
         {config}
       </pre>
     </ZineCardRough>
@@ -122,10 +122,10 @@ function PeerRow({
   const quota = peer.quota_bytes ?? 0;
   const pct = quota > 0 ? Math.min(100, Math.round((total / quota) * 100)) : 0;
   return (
-    <tr className="border-b border-[var(--line)]/60 last:border-b-0">
+    <tr className="border-b border-[var(--border)]/60 last:border-b-0">
       <td className="px-3 py-2">
-        <span className="font-mono text-xs text-zinc-200">{peer.name}</span>
-        <span className="ml-2 text-[10px] tracking-widest text-zinc-600">
+        <span className="font-mono text-xs text-[var(--foreground)]">{peer.name}</span>
+        <span className="ml-2 text-[10px] tracking-widest text-[var(--muted-foreground)]">
           {peer.mode.toUpperCase()}
         </span>
         {peer.subnet && (
@@ -139,29 +139,29 @@ function PeerRow({
           </span>
         )}
         {peer.extra_cidrs && peer.extra_cidrs.length > 0 && (
-          <p className="mt-0.5 font-mono text-[10px] text-zinc-500">
+          <p className="mt-0.5 font-mono text-[10px] text-[var(--muted-foreground)]">
             {peer.extra_cidrs.join(", ")}
           </p>
         )}
       </td>
-      <td className="px-3 py-2 font-mono text-[11px] text-zinc-400">{peer.address}</td>
+      <td className="px-3 py-2 font-mono text-[11px] text-[var(--muted-foreground)]">{peer.address}</td>
       <td className="px-3 py-2">
         <span
           className={`inline-block border px-2 py-0.5 text-[10px] tracking-widest ${
             hs.live
               ? "border-[var(--green)]/50 bg-[var(--green)]/10 text-[var(--green)]"
-              : "border-[var(--line)] text-zinc-500"
+              : "border-[var(--border)] text-[var(--muted-foreground)]"
           }`}
         >
           {hs.text.toUpperCase()}
         </span>
       </td>
-      <td className="px-3 py-2 font-mono text-[10px] text-zinc-500">
+      <td className="px-3 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">
         <div>
-          ↓{formatTraffic(peer.rx_bytes)} ↑{formatTraffic(peer.tx_bytes)}
+          â†“{formatTraffic(peer.rx_bytes)} â†‘{formatTraffic(peer.tx_bytes)}
         </div>
         {quota > 0 && (
-          <div className="mt-0.5 text-[10px] text-zinc-600">
+          <div className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">
             {formatTraffic(total)} / {formatTraffic(quota)} ({pct}%)
           </div>
         )}
@@ -302,15 +302,15 @@ function NetworkDashboard() {
   return (
     <OperationsShell
       breadcrumb="Network"
-      search={{ value: query, onChange: setQuery, placeholder: "Filter peer…" }}
+      search={{ value: query, onChange: setQuery, placeholder: "Filter peerâ€¦" }}
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="font-brush text-3xl text-white sm:text-4xl">
-              VPN <span className="text-[var(--pink)]">TUNNEL</span>
+              VPN <span className="text-[var(--primary)]">TUNNEL</span>
             </h1>
-            <p className="mt-1 max-w-xl font-hand text-xl text-zinc-400">
+            <p className="mt-1 max-w-xl font-hand text-xl text-[var(--muted-foreground)]">
               WireGuard di host ini. Tambah perangkat, unduh config, langsung tersambung.
             </p>
           </div>
@@ -322,14 +322,14 @@ function NetworkDashboard() {
         {status.isError && (
           <ZineCardRough className="p-6">
             <h2 className="font-brush text-2xl text-[var(--red)]">ARSY TIDAK TERJANGKAU</h2>
-            <p className="mt-2 text-sm text-zinc-400">{(status.error as Error).message}</p>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">{(status.error as Error).message}</p>
           </ZineCardRough>
         )}
 
         {data && !data.available && (
           <ZineCardRough className="p-5">
-            <h2 className="font-brush text-xl text-[var(--yellow)]">TOOL BELUM ADA</h2>
-            <p className="mt-2 text-sm text-zinc-400">
+            <h2 className="font-brush text-xl text-[var(--primary)]">TOOL BELUM ADA</h2>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
               Host ini belum punya <code>{data.missing_tools?.join(", ")}</code>. Pasang dengan{" "}
               <code>apt install wireguard-tools iproute2 nftables</code> lalu muat ulang halaman.
             </p>
@@ -340,40 +340,40 @@ function NetworkDashboard() {
           <>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <ZineCard className="p-4">
-                <p className="text-[10px] tracking-[0.2em] text-zinc-500">INTERFACE</p>
+                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">INTERFACE</p>
                 <p className="mt-1 font-brush text-2xl text-white">{data.interface}</p>
-                <p className="mt-1 font-mono text-[11px] text-zinc-400">{data.address}</p>
-                <p className="mt-1 font-mono text-[11px] text-zinc-500">udp/{data.listen_port}</p>
+                <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">{data.address}</p>
+                <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">udp/{data.listen_port}</p>
                 {data.subnets && data.subnets.length > 0 && (
-                  <p className="mt-1 font-mono text-[10px] text-zinc-500">
+                  <p className="mt-1 font-mono text-[10px] text-[var(--muted-foreground)]">
                     subnets: {data.subnets.map((s) => `${s.name}(${s.cidr})`).join(", ")}
                   </p>
                 )}
               </ZineCard>
               <ZineCard className="p-4">
-                <p className="text-[10px] tracking-[0.2em] text-zinc-500">ENDPOINT</p>
-                <p className="mt-1 truncate font-mono text-sm text-zinc-200">
-                  {data.endpoint || "—"}
+                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">ENDPOINT</p>
+                <p className="mt-1 truncate font-mono text-sm text-[var(--foreground)]">
+                  {data.endpoint || "â€”"}
                 </p>
-                <p className="mt-2 text-[11px] text-zinc-500">
+                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
                   Alamat yang dipakai PC untuk menyambung.
                 </p>
               </ZineCard>
               <ZineCard className="p-4">
-                <p className="text-[10px] tracking-[0.2em] text-zinc-500">PUBLIC KEY</p>
-                <p className="mt-1 truncate font-mono text-[11px] text-zinc-300">
+                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">PUBLIC KEY</p>
+                <p className="mt-1 truncate font-mono text-[11px] text-[var(--foreground)]">
                   {data.public_key || "belum dibuat"}
                 </p>
-                <p className="mt-2 text-[11px] text-zinc-500">{data.peer_count} peer terdaftar</p>
+                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">{data.peer_count} peer terdaftar</p>
               </ZineCard>
             </div>
 
             {!data.enabled && (
               <ZineCard className="p-5">
                 <h2 className="font-brush text-xl text-white">
-                  AKTIFKAN <span className="text-[var(--pink)]">TUNNEL</span>
+                  AKTIFKAN <span className="text-[var(--primary)]">TUNNEL</span>
                 </h2>
-                <p className="mt-1 text-sm text-zinc-400">
+                <p className="mt-1 text-sm text-[var(--muted-foreground)]">
                   Isi domain/IP publik VPS agar config PC bisa dibuat. Port default 51820/udp.
                 </p>
                 <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -397,10 +397,10 @@ function NetworkDashboard() {
                     disabled={up.isPending}
                     className="btn-zine shrink-0 px-5 py-2.5 text-sm"
                   >
-                    {up.isPending ? "MENYALAKAN…" : "AKTIFKAN"}
+                    {up.isPending ? "MENYALAKANâ€¦" : "AKTIFKAN"}
                   </button>
                 </div>
-                <p className="mt-2 text-[11px] text-zinc-500">
+                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
                   Port <code>udp/{data.listen_port}</code> dibuka otomatis di firewall host
                   {data.manage_firewall ? "" : " (manajemen firewall dimatikan)"}.
                 </p>
@@ -411,7 +411,7 @@ function NetworkDashboard() {
               <>
                 <ZineCard className="p-5">
                   <h2 className="font-brush text-xl text-white">
-                    TAMBAH <span className="text-[var(--blue)]">PERANGKAT</span>
+                    TAMBAH <span className="text-[var(--primary)]">PERANGKAT</span>
                   </h2>
                   <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_auto_auto]">
                     <ZineInput
@@ -445,8 +445,8 @@ function NetworkDashboard() {
                           aria-pressed={peerMode === mode}
                           className={`border px-3 py-2 text-[10px] tracking-widest ${
                             peerMode === mode
-                              ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--pink)]"
-                              : "border-[var(--line)] text-zinc-500"
+                              ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--primary)]"
+                              : "border-[var(--border)] text-[var(--muted-foreground)]"
                           }`}
                         >
                           {mode.toUpperCase()}
@@ -459,7 +459,7 @@ function NetworkDashboard() {
                       disabled={create.isPending}
                       className="btn-zine px-5 py-2.5 text-sm"
                     >
-                      {create.isPending ? "MEMBUAT…" : "TAMBAH"}
+                      {create.isPending ? "MEMBUATâ€¦" : "TAMBAH"}
                     </button>
                   </div>
                   {peerMode === "site" && (
@@ -473,18 +473,18 @@ function NetworkDashboard() {
                       />
                     </div>
                   )}
-                  <p className="mt-2 text-[11px] text-zinc-500">
-                    <strong className="text-zinc-300">SPLIT</strong> hanya subnet VPN — internet
-                    tetap lewat ISP. <strong className="text-zinc-300">FULL</strong> semua trafik
-                    lewat VPS. <strong className="text-zinc-300">SITE</strong> untuk router kantor:
+                  <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
+                    <strong className="text-[var(--foreground)]">SPLIT</strong> hanya subnet VPN â€” internet
+                    tetap lewat ISP. <strong className="text-[var(--foreground)]">FULL</strong> semua trafik
+                    lewat VPS. <strong className="text-[var(--foreground)]">SITE</strong> untuk router kantor:
                     LAN di balik router ikut terhubung.
                   </p>
                 </ZineCard>
 
                 <ZineCard className="overflow-hidden p-0">
-                  <div className="flex items-center justify-between border-b-2 border-[var(--line)] px-4 py-3">
+                  <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
                     <h2 className="font-brush text-lg text-white">
-                      PERANGKAT <span className="text-[var(--pink)]">TERDAFTAR</span>
+                      PERANGKAT <span className="text-[var(--primary)]">TERDAFTAR</span>
                     </h2>
                     <button
                       type="button"
@@ -498,14 +498,14 @@ function NetworkDashboard() {
                     </button>
                   </div>
                   {data.peers.length === 0 ? (
-                    <p className="px-4 py-6 text-sm text-zinc-500">
+                    <p className="px-4 py-6 text-sm text-[var(--muted-foreground)]">
                       Belum ada perangkat. Tambahkan PC Anda di atas.
                     </p>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse">
                         <thead>
-                          <tr className="border-b border-[var(--line)] text-left text-[9px] tracking-[0.2em] text-zinc-500">
+                          <tr className="border-b border-[var(--border)] text-left text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
                             <th className="px-3 py-2 font-normal">NAMA</th>
                             <th className="px-3 py-2 font-normal">ALAMAT</th>
                             <th className="px-3 py-2 font-normal">HANDSHAKE</th>
@@ -553,24 +553,24 @@ function NetworkDashboard() {
 
             <ZineCardRough className="p-5">
               <h2 className="font-brush text-lg text-white">
-                CARA <span className="text-[var(--yellow)]">SAMBUNG</span>
+                CARA <span className="text-[var(--primary)]">SAMBUNG</span>
               </h2>
-              <ol className="mt-2 space-y-1.5 text-[11px] leading-relaxed text-zinc-400">
+              <ol className="mt-2 space-y-1.5 text-[11px] leading-relaxed text-[var(--muted-foreground)]">
                 <li>
                   1. Unduh file <code>.conf</code> di atas.
                 </li>
                 <li>2. Pasang aplikasi WireGuard resmi di PC (Windows/macOS/Linux/Android/iOS).</li>
                 <li>3. Impor file tersebut, lalu aktifkan tunnel.</li>
                 <li>
-                  4. Cek dari PC: <code>ping {data.address.split("/")[0]}</code> — balasan berarti
+                  4. Cek dari PC: <code>ping {data.address.split("/")[0]}</code> â€” balasan berarti
                   tunnel hidup.
                 </li>
                 <li>
                   5. Pastikan port <code>udp/{data.listen_port}</code> terbuka di firewall VPS.
                 </li>
               </ol>
-              <p className="mt-3 flex items-center gap-1.5 text-[10px] tracking-wider text-zinc-600">
-                <Crown className="h-3 w-5 text-[var(--yellow)]" />
+              <p className="mt-3 flex items-center gap-1.5 text-[10px] tracking-wider text-[var(--muted-foreground)]">
+                <Crown className="h-3 w-5 text-[var(--primary)]" />
                 PRIVATE KEY TIDAK PERNAH DISIMPAN DI BROWSER
               </p>
             </ZineCardRough>
