@@ -361,11 +361,12 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
     expect(appsWithTsx).toEqual(["rocksoul", "web"]);
   });
 
-  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui and @moonwitness/web", () => {
+  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui, @moonwitness/web, and rocksoul-dx", () => {
     const bannedDeps = ["lucide-react", "@heroicons/react", "react-icons", "@tabler/icons-react"];
     for (const manifestPath of [
       join(UI_ROOT, "package.json"),
       join(APPS_ROOT, "web/package.json"),
+      join(APPS_ROOT, "rocksoul/package.json"),
     ]) {
       const pkg = JSON.parse(readFileSync(manifestPath, "utf8")) as {
         dependencies?: Record<string, string>;
@@ -384,6 +385,7 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
     const filesToScan = [
       ...walk(join(UI_ROOT, "src"), [".ts", ".tsx"]),
       ...walk(join(APPS_ROOT, "web/src"), [".ts", ".tsx"]),
+      ...walk(join(APPS_ROOT, "rocksoul/src"), [".ts", ".tsx"]),
     ].filter((file) => !/\.test\.(ts|tsx)$/.test(file));
     const offenders: string[] = [];
     for (const file of filesToScan) {
@@ -536,5 +538,23 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
       "utf8",
     );
     expect(src).not.toMatch(/headerStart=\{[\s\S]{0,200}<Crown\b/);
+  });
+
+  it("GATE-12: forbids solid chromatic surfaces paired with fixed black, ink, or foreground text", () => {
+    const offenders: string[] = [];
+    const files = [...appSources("web", [".tsx"]), ...walk(join(UI_ROOT, "src"), [".tsx"])].filter(
+      (file) => !/\.test\.tsx$/.test(file),
+    );
+    const unsafeCombo =
+      /\bbg-\[var\(--(?:blue|yellow|green)\)\](?!\/)[^\n"'`]*\b(?:text-black|text-\[var\(--(?:foreground|ink)\)\])|\b(?:text-black|text-\[var\(--(?:foreground|ink)\)\])[^\n"'`]*\bbg-\[var\(--(?:blue|yellow|green)\)\](?!\/)/;
+    for (const file of files) {
+      const lines = stripJsComments(readFileSync(file, "utf8")).split(/\r?\n/);
+      lines.forEach((line, idx) => {
+        if (unsafeCombo.test(line)) {
+          offenders.push(`${relative(REPO_ROOT, file).replace(/\\/g, "/")}:${idx + 1}`);
+        }
+      });
+    }
+    expect(offenders).toEqual([]);
   });
 });

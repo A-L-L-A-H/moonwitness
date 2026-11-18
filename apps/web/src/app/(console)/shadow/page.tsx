@@ -109,7 +109,7 @@ export default function ShadowPage() {
           <Link
             href="/dock"
             aria-label="Follow the signal to the archive"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center border-2 border-[var(--yellow)] bg-[var(--yellow)] text-black sm:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center border-2 border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)] sm:hidden"
           >
             <ArrowRight className="h-5 w-5" />
           </Link>

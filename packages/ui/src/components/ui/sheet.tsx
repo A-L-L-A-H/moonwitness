@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
+import { X } from "../../icons";
 import { cn } from "../../lib/utils";
 import type { SkinName } from "../../skin/compositions";
 import { useComponentSkin } from "./skin-adapter";
@@ -66,19 +67,7 @@ const SheetContent = React.forwardRef<
             aria-label="Close"
             className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-sm opacity-75 ring-offset-[var(--background)] transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-[var(--muted)] data-[state=open]:text-[var(--foreground)]"
           >
-            <svg
-              aria-hidden="true"
-              className="h-4 w-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
+            <X className="h-4 w-4" aria-hidden="true" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}

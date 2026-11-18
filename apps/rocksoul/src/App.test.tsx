@@ -137,16 +137,17 @@ describe("App MoonWitness ID integration", () => {
     vi.mocked(isDesktop).mockReturnValue(true);
     let nonce = "";
 
-    vi.mocked(call).mockImplementation(async (command, args: unknown) => {
+    const callMock = vi.mocked(call as unknown as (command: string, args?: unknown) => Promise<unknown>);
+    callMock.mockImplementation(async (command, args: unknown) => {
       if (command === "get_dashboard") {
         return {
           stats: { active: 0, blocked: 0, completed: 0 },
           issues: [],
           repositories: [],
           events: [],
-        } as any;
+        };
       }
-      if (command === "list_projects" || command === "list_milestones") return [] as any;
+      if (command === "list_projects" || command === "list_milestones") return [];
       if (command === "get_monitor_snapshot") {
         return {
           generated_at: "2026-11-17T00:00:00Z",
@@ -155,7 +156,7 @@ describe("App MoonWitness ID integration", () => {
           agent_sessions: [],
           repositories: [],
           plans: [],
-        } as any;
+        };
       }
       if (command === "await_mid_loopback_callback") {
         const authorizeUrl = new URL((args as { authorizeUrl: string }).authorizeUrl);
@@ -164,9 +165,9 @@ describe("App MoonWitness ID integration", () => {
           code: "mwc_desk",
           state: authorizeUrl.searchParams.get("state") ?? "",
           redirect_uri: "http://127.0.0.1:52000/callback",
-        } as any;
+        };
       }
-      return undefined as any;
+      return undefined;
     });
 
     vi.stubGlobal(

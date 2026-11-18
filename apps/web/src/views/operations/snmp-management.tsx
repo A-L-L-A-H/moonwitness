@@ -60,7 +60,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
         variant="outline"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
+        className="min-h-11 px-4 text-sm text-[var(--accent-foreground)] bg-[var(--accent)] border-2 border-[var(--accent)] hover:bg-[var(--accent)]/90"
       >
         Add device
       </Button>
@@ -147,7 +147,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
           type="submit"
           variant="outline"
           disabled={createDevice.isPending || !name.trim() || !host.trim()}
-          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
+          className="min-h-11 px-4 text-sm text-[var(--accent-foreground)] bg-[var(--accent)] border-2 border-[var(--accent)] hover:bg-[var(--accent)]/90"
         >
           {createDevice.isPending ? "Creating…" : "Create device"}
         </Button>
@@ -266,7 +266,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
           variant="outline"
           size="sm"
           disabled={createTarget.isPending || !name.trim() || !oid.trim()}
-          className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--blue)] border border-[var(--blue)] hover:bg-[var(--blue)]/90"
+          className="min-h-9 px-3 py-2 text-xs text-[var(--accent-foreground)] bg-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent)]/90"
         >
           {createTarget.isPending ? "Creating…" : "Create target"}
         </Button>

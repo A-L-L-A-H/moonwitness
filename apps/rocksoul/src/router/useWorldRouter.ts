@@ -14,8 +14,16 @@ function isWorldDestination(path: string): path is WorldDestination {
   return validWorldRoutes.has(path);
 }
 
-function isPageRoute(path: string): path is PageRoute {
+export function isPageRoute(path: string): path is PageRoute {
   return validPageRoutes.has(path);
+}
+
+export function toWorldRoute(path: string): WorldRoute {
+  const normalized = path.replace(/^\/+|\/+$/g, "");
+  if (normalized === "" || normalized === "awakening") return "awakening";
+  if (normalized === "threshold") return "threshold";
+  if (isWorldDestination(normalized) || isPageRoute(normalized)) return normalized;
+  return "awakening";
 }
 
 export function useWorldRouter() {

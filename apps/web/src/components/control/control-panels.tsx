@@ -136,7 +136,7 @@ export function ResourcePanel({ kind }: { kind: ControlResourceKind }) {
             {kind === "systemd" || kind === "docker" ? "UNITS" : "RESOURCES"}
           </span>
         </h2>
-        <Badge variant="default" className="bg-[var(--blue)] text-black">
+        <Badge variant="blue">
           {isLoading ? "SYNCING" : error || kindError ? "UNAVAILABLE" : `${rows.length} SEEN`}
         </Badge>
       </div>

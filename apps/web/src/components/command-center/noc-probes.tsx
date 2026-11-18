@@ -119,7 +119,10 @@ export function NocProbesPanel() {
                       {isOk === null ? (
                         <span className="text-[var(--muted-foreground)]">UNPROBED</span>
                       ) : isOk ? (
-                        <Badge variant="default" className="bg-[var(--green)] text-[var(--ink)]">
+                        <Badge
+                          variant="default"
+                          className="border-[var(--green)] bg-[var(--green)]/15 text-[var(--green)]"
+                        >
                           ONLINE ({latest?.statusCode})
                         </Badge>
                       ) : (

@@ -4,7 +4,8 @@ import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
 import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
-import type { ActivityEvent, DevServiceEntry, DevServiceTarget, Issue, MonitorSnapshot, Repository } from "../lib/contracts";
+import type { ActivityEvent, DevServiceEntry, DevServiceTarget, Issue, IssueStatus, MonitorSnapshot, Repository } from "../lib/contracts";
+import type { PageRoute } from "../router/useWorldRouter";
 
 export interface DeckProps {
   issues: Issue[];
@@ -17,8 +18,8 @@ export interface DeckProps {
   dataReady: boolean;
   loading: boolean;
   onCreate: () => void;
-  onStatusChange: (issueId: string, status: any) => void;
-  onNavigate: (page: any) => void;
+  onStatusChange: (issueId: string, status: IssueStatus) => void;
+  onNavigate: (page: PageRoute) => void;
   onInspectRepo?: ((repositoryId: string) => void) | undefined;
   onOpenUrl?: ((url: string) => void) | undefined;
   onStartDev?: ((target: DevServiceTarget) => void) | undefined;

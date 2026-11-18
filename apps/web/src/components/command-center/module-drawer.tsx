@@ -44,8 +44,12 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
               background: module.color,
               color:
                 module.color.toLowerCase().includes("ffd21f") || module.color === "var(--yellow)"
-                  ? "#111"
-                  : "#fff",
+                  ? "var(--secondary-foreground)"
+                  : module.color === "var(--blue)"
+                    ? "var(--accent-foreground)"
+                    : module.color === "var(--pink)" || module.color === "var(--primary)"
+                      ? "var(--primary-foreground)"
+                      : "var(--paper)",
             }}
           >
             <ModuleGlyph icon={module.icon} className="h-7 w-7" />

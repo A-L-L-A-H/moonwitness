@@ -1,25 +1,26 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Command, Search, X } from "@moonwitness/ui/icons";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { CreateIssueDialog, EditIssueDialog, RiotRail, SettingsDialog, Topbar } from "./components";
-import { IllustratedStage } from "./components/ui/IllustratedStage";
-import { KatanaAgentSubtitle } from "./components/ui/KatanaSkyHud";
-import { Deck, Git, Monitor, Noise, Pit, WarRoom } from "./features";
-import { isDesktop } from "./lib";
+import AppWorkspace from "./AppWorkspace";
+import {
+  CommandSwitchboardModal,
+  CreateIssueDialog,
+  EditIssueDialog,
+  OidcCallbackScreen,
+  SettingsDialog,
+} from "./components";
+import { Awakening, PreviewRoom, Threshold } from "./features/World";
+import useMotionPreference from "./features/useMotionPreference";
+import type { Issue, IssueStatus, MilestoneStatus, UpdateIssueArgs } from "./lib/contracts";
 import {
   ROCKSOUL_MID_AUTH_EVENT,
-  completeBrowserOidcCallback,
   getStoredRocksoulOidcSession,
   resolveValidRocksoulOidcSession,
   signInWithMoonWitnessId,
   signOutRocksoulOidc,
   type RocksoulOidcSession,
 } from "./lib/mid-oidc";
+import { isPageRoute, toWorldRoute, useWorldRouter } from "./router/useWorldRouter";
 import { useAppStore } from "./store";
-import { Awakening, PreviewRoom, RoomReturnButton, Threshold } from "./features/World";
-import useMotionPreference from "./features/useMotionPreference";
-import { pageRoutes, useWorldRouter } from "./router/useWorldRouter";
-import type { Issue, IssueStatus, MilestoneStatus, UpdateIssueArgs } from "./lib/contracts";
 
 const pageTitles: Record<string, string> = {
   deck: "WORKBENCH",
@@ -109,7 +110,7 @@ export default function App() {
 
   useEffect(() => {
     if (!autoMonitor) return;
-    if (destination !== "riot-deck" && !pageRoutes.includes(destination as any)) return;
+    if (destination !== "riot-deck" && !isPageRoute(destination)) return;
     const interval = window.setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return;
       void refreshMonitor();
@@ -128,8 +129,8 @@ export default function App() {
   }, [isOidcCallbackRoute]);
 
   useEffect(() => {
-    if (pageRoutes.includes(destination as any)) {
-      setPage(destination as any);
+    if (isPageRoute(destination)) {
+      setPage(destination);
     }
   }, [destination, setPage]);
 
@@ -148,6 +149,15 @@ export default function App() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  const navigateDestination = (dest: string) => {
+    if (dest === "riot-deck") {
+      setPage("deck");
+    } else if (isPageRoute(dest)) {
+      setPage(dest);
+    }
+    navigateWorld(toWorldRoute(dest));
+  };
 
   const runCommand = (item: string) => {
     setCommandOpen(false);
@@ -189,13 +199,6 @@ export default function App() {
   const saveIssue = async (payload: UpdateIssueArgs) => {
     await editIssue(payload);
     setEditingIssue(null);
-  };
-
-  const navigateDestination = (dest: string) => {
-    if (dest === "riot-deck" || pageRoutes.includes(dest as any)) {
-      setPage(dest === "riot-deck" ? "deck" : (dest as any));
-    }
-    navigateWorld(dest as any);
   };
 
   const inspectRepoFromOverseer = (repositoryId: string, view: "status" | "patch" = "patch") => {
@@ -265,7 +268,7 @@ export default function App() {
     );
   }
 
-  if (destination === "awakening")
+  if (destination === "awakening") {
     return (
       <Awakening
         onEnter={() => navigateWorld("threshold")}
@@ -274,8 +277,9 @@ export default function App() {
         onQuickMonitor={() => navigateDestination("monitor")}
       />
     );
+  }
 
-  if (destination === "threshold")
+  if (destination === "threshold") {
     return (
       <>
         <Threshold
@@ -291,8 +295,9 @@ export default function App() {
         {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
       </>
     );
+  }
 
-  if (destination !== "riot-deck" && !pageRoutes.includes(destination as any))
+  if (destination !== "riot-deck" && !isPageRoute(destination)) {
     return (
       <PreviewRoom
         roomId={destination}
@@ -303,169 +308,71 @@ export default function App() {
         onToggleMotion={toggleMotion}
       />
     );
-
-  const sectorScene =
-    page === "monitor" || page === "noise"
-      ? "signal-room"
-      : page === "git"
-        ? "archive"
-        : page === "war-room"
-          ? "studio"
-          : "riot-deck";
+  }
 
   return (
-    <div className="app-shell riot-room-shell katana-cut-shell" data-reduced-motion={reducedMotion} data-sector={page}>
-      <IllustratedStage scene={sectorScene} destination={sectorScene} reducedMotion={reducedMotion} subtle />
-      <div className="app-main">
-        <Topbar
-          repositories={repositories}
-          selectedRepository={selectedRepository}
-          onRepositoryChange={setSelectedRepository}
-          onCommand={() => setCommandOpen(true)}
-          onSettings={() => setSettingsOpen(true)}
-          onOpenMonitor={() => navigateDestination("monitor")}
-          onRefresh={() => {
-            void refreshAll();
-          }}
-          monitorSummary={topbarMonitorSummary}
-          identity={
-            oidcSession
-              ? {
-                  username: oidcSession.user.preferred_username,
-                  displayName: oidcSession.user.name,
-                  role: oidcSession.user.role,
-                }
-              : null
-          }
-          identityBusy={oidcBusy}
-          onSignIn={() => {
-            void handleOidcSignIn();
-          }}
-          onSignOut={() => {
-            void handleOidcSignOut();
-          }}
-        />
-        <div className="katana-hud-bar">
-          <RiotRail page={page} onNavigate={navigateDestination} onSwitchboard={() => setCommandOpen(true)} />
-          <RoomReturnButton
-            onReturn={returnToThreshold}
-            reducedMotion={reducedMotion}
-            systemReducedMotion={systemReducedMotion}
-            onToggleMotion={toggleMotion}
-          />
-        </div>
-        <div className="screen-heading">
-          <span>
-            THE RIOT DECK / <b>{pageTitles[page]}</b>
-          </span>
-          <span className="screen-clock">
-            {isDesktop() ? "NATIVE DESKTOP / PRIVATE" : "BROWSER PREVIEW / LOCAL DATA"}
-          </span>
-        </div>
-        {(error || oidcError) && <div className="global-error">{error || oidcError}</div>}
-        {page === "deck" && (
-          <Deck
-            issues={issues}
-            repositories={repositories}
-            events={events}
-            monitor={monitor}
-            devServices={devServices}
-            devActionTarget={devActionTarget}
-            desktop={isDesktop()}
-            dataReady={hasLoaded && !loading && !error}
-            loading={loading || !hasLoaded}
-            onCreate={() => setCreateOpen(true)}
-            onStatusChange={setIssueStatus}
-            onNavigate={navigateDestination}
-            onInspectRepo={(repoId) => inspectRepoFromOverseer(repoId, "status")}
-            onOpenUrl={(url) => {
-              void openEcosystemUrl(url);
-            }}
-            onStartDev={(target) => {
-              void startDevService(target);
-            }}
-            onStopDev={(target) => {
-              void stopDevService(target);
-            }}
-          />
-        )}
-        {page === "monitor" && (
-          <Monitor
-            snapshot={monitor}
-            devServices={devServices}
-            devActionTarget={devActionTarget}
-            devActionError={devActionError}
-            loading={monitorLoading}
-            error={monitorError}
-            autoMonitor={autoMonitor}
-            desktop={isDesktop()}
-            onToggleAuto={setAutoMonitor}
-            onRefresh={() => {
-              void refreshMonitor();
-            }}
-            onInspectRepoPatch={(repoId) => inspectRepoFromOverseer(repoId, "patch")}
-            onOpenUrl={(url) => {
-              void openEcosystemUrl(url);
-            }}
-            onStartDev={(target) => {
-              void startDevService(target);
-            }}
-            onStopDev={(target) => {
-              void stopDevService(target);
-            }}
-          />
-        )}
-        {page === "pit" && (
-          <Pit
-            issues={issues}
-            projects={projects}
-            projectFilter={projectFilter}
-            onProjectFilter={setProjectFilter}
-            onCreate={() => setCreateOpen(true)}
-            onStatusChange={setIssueStatus}
-            onEdit={setEditingIssue}
-            onDelete={removeIssue}
-          />
-        )}
-        {page === "git" && (
-          <Git
-            repositories={repositories}
-            initialSelectedId={selectedRepository}
-            initialView={gitPresetView ?? undefined}
-            onAddRepository={addRepository}
-            onRefresh={refreshAll}
-          />
-        )}
-        {page === "war-room" && (
-          <WarRoom
-            projects={projects}
-            milestones={milestones}
-            issues={issues}
-            onCreateProject={createProject}
-            onUpdateProject={editProject}
-            onDeleteProject={deleteProject}
-            onCreateMilestone={createMilestone}
-            onUpdateMilestone={editMilestone}
-            onDeleteMilestone={deleteMilestone}
-            onMilestoneStatus={setMilestoneStatus}
-            onProjectIssues={showProjectIssues}
-          />
-        )}
-        {page === "noise" && <Noise events={events} />}
-        <footer className="app-footer">
-          <span>
-            ROCKSOUL - DX <b>0.1.0</b>
-          </span>
-          <KatanaAgentSubtitle
-            monitor={monitor}
-            branch={repositories.find((repo) => repo.id === selectedRepository)?.branch || repositories[0]?.branch}
-            pageTitle={pageTitles[page] || "WORKBENCH"}
-          />
-          <span>
-            YOUR MACHINE · LOCAL FIRST <i />
-          </span>
-        </footer>
-      </div>
+    <>
+      <AppWorkspace
+        page={page}
+        pageTitle={pageTitles[page] || "WORKBENCH"}
+        reducedMotion={reducedMotion}
+        systemReducedMotion={systemReducedMotion}
+        onToggleMotion={toggleMotion}
+        onReturnToThreshold={returnToThreshold}
+        repositories={repositories}
+        selectedRepository={selectedRepository}
+        onRepositoryChange={setSelectedRepository}
+        onOpenCommand={() => setCommandOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
+        onNavigate={navigateDestination}
+        onRefreshAll={refreshAll}
+        topbarMonitorSummary={topbarMonitorSummary}
+        oidcSession={oidcSession}
+        oidcBusy={oidcBusy}
+        onOidcSignIn={() => {
+          void handleOidcSignIn();
+        }}
+        onOidcSignOut={() => {
+          void handleOidcSignOut();
+        }}
+        error={error}
+        oidcError={oidcError}
+        issues={issues}
+        projects={projects}
+        milestones={milestones}
+        events={events}
+        monitor={monitor}
+        devServices={devServices}
+        devActionTarget={devActionTarget}
+        devActionError={devActionError}
+        monitorLoading={monitorLoading}
+        monitorError={monitorError}
+        autoMonitor={autoMonitor}
+        gitPresetView={gitPresetView}
+        projectFilter={projectFilter}
+        hasLoaded={hasLoaded}
+        loading={loading}
+        onToggleAutoMonitor={setAutoMonitor}
+        onRefreshMonitor={refreshMonitor}
+        onInspectRepoFromOverseer={inspectRepoFromOverseer}
+        onOpenEcosystemUrl={openEcosystemUrl}
+        onStartDevService={startDevService}
+        onStopDevService={stopDevService}
+        onOpenCreate={() => setCreateOpen(true)}
+        onIssueStatusChange={setIssueStatus}
+        onEditIssue={setEditingIssue}
+        onDeleteIssue={removeIssue}
+        onProjectFilter={setProjectFilter}
+        onAddRepository={addRepository}
+        onCreateProject={createProject}
+        onUpdateProject={editProject}
+        onDeleteProject={deleteProject}
+        onCreateMilestone={createMilestone}
+        onUpdateMilestone={editMilestone}
+        onDeleteMilestone={deleteMilestone}
+        onMilestoneStatus={setMilestoneStatus}
+        onProjectIssues={showProjectIssues}
+      />
       {createOpen && (
         <CreateIssueDialog
           onClose={() => setCreateOpen(false)}
@@ -485,95 +392,14 @@ export default function App() {
       )}
       {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
       {commandOpen && (
-        <div
-          className="command-backdrop"
-          onMouseDown={(e) => e.target === e.currentTarget && setCommandOpen(false)}
-        >
-          <div className="command-panel">
-            <div className="command-search">
-              <Search />
-              <input
-                autoFocus
-                value={commandQuery}
-                onChange={(e) => setCommandQuery(e.target.value)}
-                placeholder="WHERE TO, TROUBLEMAKER?"
-              />
-              <kbd>ESC</kbd>
-              <button className="icon-button" onClick={() => setCommandOpen(false)}>
-                <X size={17} />
-              </button>
-            </div>
-            {filtered.map(([key, title]) => (
-              <button className="command-option" key={key} onClick={() => runCommand(key)}>
-                <span>{title}</span>
-                <kbd>↵</kbd>
-              </button>
-            ))}
-            <button className="command-option create-option" onClick={() => runCommand("create")}>
-              <span>+ CREATE NEW CHAOS</span>
-              <kbd>
-                <Command size={12} /> N
-              </kbd>
-            </button>
-            <div className="command-hint">COMMAND DECK / LOCAL ACTIONS ONLY</div>
-          </div>
-        </div>
+        <CommandSwitchboardModal
+          query={commandQuery}
+          options={filtered}
+          onQueryChange={setCommandQuery}
+          onSelect={runCommand}
+          onClose={() => setCommandOpen(false)}
+        />
       )}
-    </div>
-  );
-}
-
-interface OidcCallbackScreenProps {
-  search: string;
-  onComplete: (session: RocksoulOidcSession, returnHash: string) => void;
-  onReturnWorkbench: () => void;
-}
-
-function OidcCallbackScreen({ search, onComplete, onReturnWorkbench }: OidcCallbackScreenProps) {
-  const [callbackError, setCallbackError] = useState("");
-  const onCompleteRef = useRef(onComplete);
-  onCompleteRef.current = onComplete;
-
-  useEffect(() => {
-    let active = true;
-    completeBrowserOidcCallback(new URLSearchParams(search))
-      .then(({ session, returnHash }) => {
-        if (active) onCompleteRef.current(session, returnHash);
-      })
-      .catch((authError: unknown) => {
-        if (active) {
-          setCallbackError(authError instanceof Error ? authError.message : String(authError));
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [search]);
-
-  return (
-    <main className="app-shell riot-room-shell" style={{ display: "grid", placeItems: "center", padding: "24px" }}>
-      <section className="issue-dialog" aria-live="polite">
-        <header className="dialog-head">
-          <div>
-            <span className="eyebrow">MOONWITNESS ID // PKCE CALLBACK</span>
-            <h2>{callbackError ? "SIGN-IN FAILED" : "VERIFYING IDENTITY"}</h2>
-          </div>
-        </header>
-        {callbackError ? (
-          <>
-            <p className="global-error" role="alert" style={{ margin: "0 0 18px" }}>
-              {callbackError}
-            </p>
-            <button type="button" className="riot-button" onClick={onReturnWorkbench}>
-              RETURN TO WORKBENCH
-            </button>
-          </>
-        ) : (
-          <p style={{ font: "11px var(--mono)", color: "var(--color-paper-soft)", margin: 0 }}>
-            Exchanging PKCE authorization code with MoonWitness ID…
-          </p>
-        )}
-      </section>
-    </main>
+    </>
   );
 }

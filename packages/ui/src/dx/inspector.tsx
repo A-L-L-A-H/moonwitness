@@ -8,6 +8,7 @@ import {
   type CanonicalThemeMode,
 } from "../dna/canonical";
 import { MASTER_DNA_IDS, MASTER_DNA_WORLDS, type MasterDnaId } from "../skin/dna-worlds";
+import { NativeSelect } from "../components/ui/native-select";
 import { listPresets, skinPresets, type SkinName } from "../skin";
 
 export interface TokenInspectorProps {
@@ -75,60 +76,64 @@ export function TokenInspector({ initialTheme = "default", onThemeChange }: Toke
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-1.5 text-xs">
           <span>DNA:</span>
-          <select
+          <NativeSelect
+            skin={skin}
             aria-label="Inspector DNA"
             value={dnaId}
             onChange={(e) => setDnaId(e.target.value as MasterDnaId)}
-            className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+            className="h-9 min-h-9 w-auto px-2 py-0 text-xs"
           >
             {MASTER_DNA_IDS.map((id) => (
               <option key={id} value={id}>
                 {MASTER_DNA_WORLDS[id].name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="flex items-center gap-1.5 text-xs">
           <span>Mode:</span>
-          <select
+          <NativeSelect
+            skin={skin}
             aria-label="Inspector Mode"
             value={mode}
             onChange={(e) => setMode(e.target.value as CanonicalThemeMode)}
-            className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+            className="h-9 min-h-9 w-auto px-2 py-0 text-xs"
           >
             <option value="dark">dark</option>
             <option value="light">light</option>
-          </select>
+          </NativeSelect>
         </label>
         <label className="flex items-center gap-1.5 text-xs">
           <span>Preset:</span>
-          <select
+          <NativeSelect
+            skin={skin}
             aria-label="Inspector Theme"
             value={theme}
             onChange={(e) => handleThemeChange(e.target.value as ThemeName)}
-            className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+            className="h-9 min-h-9 w-auto px-2 py-0 text-xs"
           >
             {THEMES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="flex items-center gap-1.5 text-xs">
           <span>Skin:</span>
-          <select
+          <NativeSelect
+            skin={skin}
             aria-label="Inspector Skin"
             value={skin}
             onChange={(e) => setSkin(e.target.value as SkinName)}
-            className="min-h-9 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+            className="h-9 min-h-9 w-auto px-2 py-0 text-xs"
           >
             {SKINS.map((s) => (
               <option key={s} value={s}>
                 {skinPresets[s].label} — {skinPresets[s].description}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <button
           type="button"

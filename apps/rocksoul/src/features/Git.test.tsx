@@ -9,11 +9,12 @@ import type { Repository } from "../lib/contracts";
 
 describe("Git write confirmation", () => {
   it("previews repository state and runs an operation only after explicit confirmation", async () => {
-    vi.mocked(call).mockImplementation(async (_command, args: any) => ({
+    const callMock = vi.mocked(call as unknown as (command: string, args?: { view?: string }) => Promise<unknown>);
+    callMock.mockImplementation(async (_command, args) => ({
       name: "test-repository",
       branch: "main",
-      view: args.view,
-      output: args.view === "status" ? "## main" : "README.md | 1 +",
+      view: args?.view ?? "status",
+      output: args?.view === "status" ? "## main" : "README.md | 1 +",
     }));
     const repository: Repository = {
       id: "repository-1",

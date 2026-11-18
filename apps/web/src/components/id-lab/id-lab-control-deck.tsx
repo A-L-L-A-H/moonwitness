@@ -54,7 +54,7 @@ function Segmented<T extends string>({
           aria-pressed={value === opt}
           className={`min-h-9 border-2 px-2.5 text-[10px] font-bold tracking-wider transition-all ${
             value === opt
-              ? "border-[var(--yellow)] bg-[var(--yellow)] text-black"
+              ? "border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)]"
               : "border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)] hover:border-[var(--pink)] hover:text-[var(--foreground)]"
           }`}
         >

@@ -51,7 +51,8 @@ export function KatanaSkyHud({ monitor, mode = "compact", onOpenUrl }: KatanaSky
               rx="410"
               ry="56"
               fill="none"
-              stroke="rgba(229, 62, 56, 0.38)"
+              stroke="var(--world-crimson)"
+              strokeOpacity="0.38"
               strokeWidth="1"
               strokeDasharray="6 6"
             />
@@ -61,12 +62,13 @@ export function KatanaSkyHud({ monitor, mode = "compact", onOpenUrl }: KatanaSky
               rx="290"
               ry="38"
               fill="none"
-              stroke="rgba(243, 235, 217, 0.2)"
+              stroke="var(--color-paper)"
+              strokeOpacity="0.2"
               strokeWidth="0.9"
             />
-            <circle cx="460" cy="75" r="24" fill="rgba(229, 62, 56, 0.12)" stroke="var(--world-crimson)" strokeWidth="1.4" />
+            <circle cx="460" cy="75" r="24" fill="var(--world-crimson)" fillOpacity="0.12" stroke="var(--world-crimson)" strokeWidth="1.4" />
             <circle cx="460" cy="75" r="5" fill="var(--color-lime)" />
-            <line x1="50" y1="75" x2="870" y2="75" stroke="rgba(229, 62, 56, 0.2)" strokeDasharray="3 5" />
+            <line x1="50" y1="75" x2="870" y2="75" stroke="var(--world-crimson)" strokeOpacity="0.2" strokeDasharray="3 5" />
           </svg>
           <div className="astrolabe-nodes">
             {services.map((svc, idx) => {

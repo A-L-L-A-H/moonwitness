@@ -5,15 +5,9 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import type { EraId, EventKind, TimelineEvent } from "@moonwitness/types";
 import { ConsoleShellAdapter } from "../shell/console-shell-adapter";
 import { Star4 } from "@moonwitness/ui/icons";
-import {
-  Button,
-  EraBand,
-  Input,
-  NativeSelect,
-  Textarea,
-  ZineButton,
-  ZineCardRough,
-} from "@moonwitness/ui";
+import { EraBand } from "@moonwitness/ui";
+import { DockCreateEventForm } from "./create-event-form";
+import { DockArchiveStats, DockChronicleError, DockModeTabs } from "./dock-panels";
 import { DockHero } from "./hero";
 import { FilterBar, type SortKey } from "./filter-bar";
 import { EventList } from "./event-list";
@@ -265,46 +259,13 @@ export function Dock() {
       <DockHero visibleCount={timelineEvents.length} total={total} />
 
       <div className="space-y-5 px-4 py-6 sm:px-8">
-        <div role="tablist" aria-label="Dock view mode" className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="plain"
-            role="tab"
-            aria-selected={dockTab === "chronicle"}
-            onClick={() => setDockTab("chronicle")}
-            className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
-              dockTab === "chronicle"
-                ? "border-[var(--pink)] bg-[var(--pink)]/15 text-[var(--foreground)]"
-                : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-            }`}
-          >
-            CHRONICLE EVENTS
-          </Button>
-          <Button
-            type="button"
-            variant="plain"
-            role="tab"
-            aria-selected={dockTab === "canon"}
-            onClick={() => setDockTab("canon")}
-            className={`min-h-11 border-2 px-4 py-2 font-mono text-xs tracking-wider transition-colors ${
-              dockTab === "canon"
-                ? "border-[var(--blue)] bg-[var(--blue)]/15 text-[var(--foreground)]"
-                : "border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-            }`}
-          >
-            CANON LORE ARCHIVE
-          </Button>
-          {canEditTimeline && dockTab === "chronicle" && (
-            <ZineButton
-              type="button"
-              tone="pink"
-              onClick={() => setCreateOpen((open) => !open)}
-              className="ml-auto min-h-11 px-4 py-2 font-mono text-xs tracking-wider"
-            >
-              {createOpen ? "CLOSE FORM" : "+ NEW EVENT"}
-            </ZineButton>
-          )}
-        </div>
+        <DockModeTabs
+          dockTab={dockTab}
+          canEditTimeline={canEditTimeline}
+          createOpen={createOpen}
+          onSelectTab={setDockTab}
+          onToggleCreate={() => setCreateOpen((open) => !open)}
+        />
 
         {mutationNotice && (
           <p
@@ -316,135 +277,32 @@ export function Dock() {
         )}
 
         {canEditTimeline && createOpen && dockTab === "chronicle" && (
-          <ZineCardRough asChild className="space-y-4 p-5">
-            <form onSubmit={handleCreateEvent} aria-label="Create timeline event">
-              <div className="flex items-center justify-between">
-                <h2 className="font-brush text-2xl text-[var(--foreground)]">
-                  NEW <span className="text-[var(--primary)]">TIMELINE EVENT</span>
-                </h2>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <label className="text-xs text-[var(--foreground)]">
-                  <span className="mb-1 block font-mono text-[10px] tracking-widest">TITLE *</span>
-                  <Input
-                    type="text"
-                    required
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="Relay Node Activated"
-                    className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                  />
-                </label>
-                <label className="text-xs text-[var(--foreground)]">
-                  <span className="mb-1 block font-mono text-[10px] tracking-widest">KIND *</span>
-                  <NativeSelect
-                    value={newKind}
-                    onChange={(e) => setNewKind(e.target.value as EventKind)}
-                    className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                  >
-                    <option value="PROJECT">PROJECT</option>
-                    <option value="STORY">STORY</option>
-                    <option value="SIGNAL">SIGNAL</option>
-                    <option value="WORLD">WORLD</option>
-                    <option value="PEOPLE">PEOPLE</option>
-                    <option value="RESEARCH">RESEARCH</option>
-                  </NativeSelect>
-                </label>
-                <label className="text-xs text-[var(--foreground)]">
-                  <span className="mb-1 block font-mono text-[10px] tracking-widest">ERA *</span>
-                  <NativeSelect
-                    value={newEra}
-                    onChange={(e) => setNewEra(e.target.value as EraId)}
-                    className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                  >
-                    <option value="origins">origins</option>
-                    <option value="neon">neon</option>
-                    <option value="fracture">fracture</option>
-                    <option value="rebuilding">rebuilding</option>
-                    <option value="expansions">expansions</option>
-                  </NativeSelect>
-                </label>
-                <label className="text-xs text-[var(--foreground)]">
-                  <span className="mb-1 block font-mono text-[10px] tracking-widest">DATE *</span>
-                  <Input
-                    type="date"
-                    required
-                    value={newDate}
-                    onChange={(e) => setNewDate(e.target.value)}
-                    className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                  />
-                </label>
-              </div>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="text-xs text-[var(--foreground)]">
-                  <span className="mb-1 block font-mono text-[10px] tracking-widest">LOCATION</span>
-                  <Input
-                    type="text"
-                    value={newLocation}
-                    onChange={(e) => setNewLocation(e.target.value)}
-                    placeholder="Jakarta / Relay Sector 4"
-                    className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                  />
-                </label>
-                <label className="text-xs text-[var(--foreground)]">
-                  <span className="mb-1 block font-mono text-[10px] tracking-widest">
-                    TAGS (comma separated)
-                  </span>
-                  <Input
-                    type="text"
-                    value={newTags}
-                    onChange={(e) => setNewTags(e.target.value)}
-                    placeholder="signal, archive, release"
-                    className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                  />
-                </label>
-              </div>
-              <label className="block text-xs text-[var(--foreground)]">
-                <span className="mb-1 block font-mono text-[10px] tracking-widest">EXCERPT</span>
-                <Input
-                  type="text"
-                  value={newExcerpt}
-                  onChange={(e) => setNewExcerpt(e.target.value)}
-                  placeholder="Short one-line summary for card view"
-                  className="min-h-10 w-full border-2 border-[var(--border)] bg-[var(--background)] px-3 text-xs text-[var(--foreground)]"
-                />
-              </label>
-              <label className="block text-xs text-[var(--foreground)]">
-                <span className="mb-1 block font-mono text-[10px] tracking-widest">BODY</span>
-                <Textarea
-                  rows={3}
-                  value={newBody}
-                  onChange={(e) => setNewBody(e.target.value)}
-                  placeholder="Full chronicle details…"
-                  className="min-h-0 w-full border-2 border-[var(--border)] bg-[var(--background)] p-3 text-xs text-[var(--foreground)]"
-                />
-              </label>
-              <div className="flex justify-end gap-2">
-                <ZineButton
-                  type="submit"
-                  tone="pink"
-                  disabled={createEventMutation.isPending}
-                  className="min-h-10 px-5 py-2 text-xs"
-                >
-                  {createEventMutation.isPending ? "SAVING…" : "PUBLISH EVENT"}
-                </ZineButton>
-              </div>
-            </form>
-          </ZineCardRough>
+          <DockCreateEventForm
+            title={newTitle}
+            kind={newKind}
+            era={newEra}
+            date={newDate}
+            location={newLocation}
+            tags={newTags}
+            excerpt={newExcerpt}
+            body={newBody}
+            pending={createEventMutation.isPending}
+            onTitleChange={setNewTitle}
+            onKindChange={setNewKind}
+            onEraChange={setNewEra}
+            onDateChange={setNewDate}
+            onLocationChange={setNewLocation}
+            onTagsChange={setNewTags}
+            onExcerptChange={setNewExcerpt}
+            onBodyChange={setNewBody}
+            onSubmit={handleCreateEvent}
+          />
         )}
 
         {dockTab === "canon" ? (
           <CanonLorePanel />
         ) : chronicleError ? (
-          <div className="flex h-[45vh] flex-col items-center justify-center gap-4 text-center">
-            <p className="font-brush text-xl text-[var(--primary)]">THE ARCHIVE SIGNAL WAS LOST…</p>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              We couldn&apos;t load the timeline. Check your connection and try again.
-            </p>
-            <ZineButton type="button" tone="blue" onClick={retryAll} className="px-5 py-2 text-sm">
-              Retry
-            </ZineButton>
-          </div>
+          <DockChronicleError onRetry={retryAll} />
         ) : chronicleLoading ? (
           <div
             className="flex h-[45vh] items-center justify-center font-brush text-xl text-[var(--primary)]"
@@ -455,27 +313,11 @@ export function Dock() {
           </div>
         ) : (
           <>
-            <section
-              aria-label="Timeline archive statistics"
-              className="grid grid-cols-3 gap-3 text-center"
-            >
-              <ZineCardRough className="p-3">
-                <p className="font-brush text-2xl text-[var(--primary)]">{stats?.total ?? "—"}</p>
-                <p className="text-[11px] tracking-widest text-[var(--foreground)]">
-                  ARCHIVE EVENTS
-                </p>
-              </ZineCardRough>
-              <ZineCardRough className="p-3">
-                <p className="font-brush text-2xl text-[var(--primary)]">{eras.length}</p>
-                <p className="text-[11px] tracking-widest text-[var(--foreground)]">ERAS</p>
-              </ZineCardRough>
-              <ZineCardRough className="p-3">
-                <p className="font-brush text-2xl text-[var(--primary)]">
-                  {Object.keys(stats?.byKind ?? {}).length}
-                </p>
-                <p className="text-[11px] tracking-widest text-[var(--foreground)]">EVENT TYPES</p>
-              </ZineCardRough>
-            </section>
+            <DockArchiveStats
+              total={stats?.total ?? "—"}
+              erasCount={eras.length}
+              kindCount={Object.keys(stats?.byKind ?? {}).length}
+            />
 
             <FilterBar
               eras={eras}
