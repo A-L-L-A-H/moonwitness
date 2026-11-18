@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb, initDb } from "@moonwitness/orm";
-import { createUser, ensureAuthSchema } from "../../services/user";
+import { createUser, ensureAuthSchema } from "@moonwitness/addons/auth";
 import { resetMidJwksCacheForTests } from "../../middleware/mid-jwt";
 
 const API_PREFIX = "/api/v1";

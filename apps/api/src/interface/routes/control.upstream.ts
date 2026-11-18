@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { createActorContext } from "@moonwitness/orm";
-import { controlCommandModel } from "../../infrastructure/persistence/domain";
+import { controlCommandModel } from "@moonwitness/addons/control";
 import { type AuthenticatedRequest } from "../../middleware/auth";
 import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
 

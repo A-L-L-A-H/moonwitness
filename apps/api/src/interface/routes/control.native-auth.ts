@@ -3,17 +3,15 @@ import { getDb } from "@moonwitness/orm";
 import { resolveRequestIdentity } from "../../middleware/auth";
 import {
   createSession,
-  getSessionCookieOptions,
-  revokeSession,
-  SESSION_COOKIE_NAME,
-} from "../../services/session";
-import {
   createUser,
   findUserByEmail,
   findUserById,
   findUserByUsername,
+  getSessionCookieOptions,
+  revokeSession,
+  SESSION_COOKIE_NAME,
   verifyUserPassword,
-} from "../../services/user";
+} from "@moonwitness/addons/auth";
 import { getEdgeLoopbackErrorPayload } from "../../shared/upstream";
 import { getArsyUrl } from "./control.upstream";
 

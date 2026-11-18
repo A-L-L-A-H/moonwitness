@@ -6,14 +6,16 @@ import {
   consumeBffOAuthTokens,
   createSession,
   CSRF_COOKIE_NAME,
+  findUserByEmail,
+  findUserByUsername,
+  generateToken,
   getCsrfCookieOptions,
   getSessionCookieOptions,
   revokeSession,
   SESSION_COOKIE_NAME,
   storeBffOAuthTokens,
-} from "../../services/session";
-import { findUserByEmail, findUserByUsername, verifyUserPassword } from "../../services/user";
-import { generateToken } from "../../shared/auth";
+  verifyUserPassword,
+} from "@moonwitness/addons/auth";
 import { registerAuthAdminRoutes } from "./auth.admin";
 import {
   createLocalMidJwkResolver,

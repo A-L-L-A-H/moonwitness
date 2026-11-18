@@ -25,29 +25,26 @@ import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { ensureProbesSchema } from "../../interface/routes/probes.persistence";
 import { probesRoutes } from "../../interface/routes/probes.routes";
 import { applyMigrations, createD1DatabaseFromOrm, getDb, syncModels } from "@moonwitness/orm";
+import { riotAiMigrations } from "../../interface/routes/riot-ai.persistence";
+import { workflowModel, alertModel } from "@moonwitness/addons/command-center";
+import { controlCommandModel } from "@moonwitness/addons/control";
+import { memoryRecordModel } from "@moonwitness/addons/ai";
+import { opsEventModel, probeEventModel, probeNodeModel } from "@moonwitness/addons/probes";
+import { radiusClientModel, radiusSessionModel } from "@moonwitness/addons/radius";
+import { snmpDeviceModel, snmpSampleModel, snmpTargetModel } from "@moonwitness/addons/snmp";
 import {
-  domainMigrations,
-  alertModel,
-  controlCommandModel,
-  memoryRecordModel,
-  opsEventModel,
-  probeEventModel,
-  probeNodeModel,
-  radiusClientModel,
-  radiusSessionModel,
-  snmpDeviceModel,
-  snmpSampleModel,
-  snmpTargetModel,
   storageBucketModel,
   storageObjectModel,
   storageUploadSessionModel,
-  syslogEntryModel,
-  workflowModel,
-} from "../persistence/domain";
+} from "@moonwitness/addons/storage";
+import { syslogEntryModel } from "@moonwitness/addons/syslog";
 import { TimelineUseCase } from "../../domain/usecases/timeline/timeline.usecase";
 import { TimelineRepository } from "@moonwitness/addons/timeline";
-import { seedBootstrapAdmin, ensureAuthSchema } from "../../services/user";
-import { createAuthMidIdentityStore } from "@moonwitness/addons/auth";
+import {
+  createAuthMidIdentityStore,
+  ensureAuthSchema,
+  seedBootstrapAdmin,
+} from "@moonwitness/addons/auth";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
 export interface BootstrapOptions {
@@ -178,7 +175,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   }
 
   // Ensure remaining domain schemas exist before serving routes.
-  await applyMigrations(domainMigrations);
+  await applyMigrations(riotAiMigrations);
   if (!options.authExternallyMounted) {
     await ensureAuthSchema();
     await seedBootstrapAdmin();

@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createActorContext } from "@moonwitness/orm";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
-import { storageBucketModel, storageObjectModel } from "../../infrastructure/persistence/domain";
+import { storageBucketModel, storageObjectModel } from "@moonwitness/addons/storage";
 import {
   encodeStoragePath,
   getStorageSigningCredentials,

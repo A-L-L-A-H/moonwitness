@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { listAuditLogs } from "../../infrastructure/audit/audit-log";
+import { listAuditLogs } from "@moonwitness/addons/audit";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import {
   createUser,
@@ -8,7 +8,7 @@ import {
   findUserByUsername,
   listUsers,
   updateUserRole,
-} from "../../services/user";
+} from "@moonwitness/addons/auth";
 
 export function registerAuthAdminRoutes(fastify: FastifyInstance, mountAuditRoute: boolean): void {
   const requireAdmin = [requireAuth(), requireRole("admin")];

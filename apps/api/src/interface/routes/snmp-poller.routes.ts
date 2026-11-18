@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createActorContext } from "@moonwitness/orm";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
-import { snmpDeviceModel, snmpTargetModel } from "../../infrastructure/persistence/domain";
+import { snmpDeviceModel, snmpTargetModel } from "@moonwitness/addons/snmp";
 import {
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,

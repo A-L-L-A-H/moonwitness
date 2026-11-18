@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createActorContext } from "@moonwitness/orm";
-import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+import { tryRecordAuditLog } from "@moonwitness/addons/audit";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import {
   getEdgeLoopbackErrorPayload,

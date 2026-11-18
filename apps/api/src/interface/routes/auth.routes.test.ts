@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { initDb, closeDb, getDb } from "@moonwitness/orm";
-import { createUser, ensureAuthSchema } from "../../services/user";
-import { getSessionCookieOptions } from "../../services/session";
+import { createUser, ensureAuthSchema, getSessionCookieOptions } from "@moonwitness/addons/auth";
 
 const API_PREFIX = "/api/v1";
 const ADMIN_USERNAME = "test-admin";

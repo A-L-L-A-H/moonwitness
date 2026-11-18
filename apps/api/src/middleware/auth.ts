@@ -5,7 +5,7 @@
 
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { DEFAULT_TENANT_ID, normalizeTenantId } from "@moonwitness/orm";
-import { getSessionWithUser, SESSION_COOKIE_NAME } from "../services/session";
+import { getSessionWithUser, SESSION_COOKIE_NAME } from "@moonwitness/addons/auth";
 import { verifyMidBearerToken } from "./mid-jwt";
 
 export interface AuthenticatedRequest extends FastifyRequest {

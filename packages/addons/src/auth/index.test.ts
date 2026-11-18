@@ -5,7 +5,16 @@ import { tmpdir } from "node:os";
 import { closeDb, getDb, initDb, modelRegistry } from "@moonwitness/orm";
 import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
 import { auditAddon, listAuditLogs } from "../audit";
-import { authAddon, createAuthMidIdentityStore, createUser, getSessionWithUser } from "./index.js";
+import {
+  authAddon,
+  createAuthMidIdentityStore,
+  createUser,
+  generateToken,
+  getSessionWithUser,
+  hashAuthPassword,
+  hashPasswordPbkdf2,
+  verifyAuthPassword,
+} from "./index.js";
 
 describe("../auth", () => {
   const dirs: string[] = [];
@@ -99,5 +108,21 @@ describe("../auth", () => {
       displayName: "UUID Pilot",
     });
     expect(freshUser.id).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  it("hashes and verifies PBKDF2-SHA256 and bcrypt digests and generates random hex tokens", async () => {
+    const pbkdf2 = await hashPasswordPbkdf2("moonwitness-secret-2026");
+    expect(pbkdf2.startsWith("$pbkdf2-sha256$100000$")).toBe(true);
+    await expect(verifyAuthPassword("moonwitness-secret-2026", pbkdf2)).resolves.toBe(true);
+    await expect(verifyAuthPassword("wrong-secret", pbkdf2)).resolves.toBe(false);
+
+    const hash = await hashAuthPassword("moonwitness-secret-2026");
+    await expect(verifyAuthPassword("moonwitness-secret-2026", hash)).resolves.toBe(true);
+    await expect(verifyAuthPassword("wrong-secret", hash)).resolves.toBe(false);
+
+    const tampered = pbkdf2.slice(0, -2) + (pbkdf2.endsWith("00") ? "ff" : "00");
+    await expect(verifyAuthPassword("moonwitness-secret-2026", tampered)).resolves.toBe(false);
+
+    expect(generateToken(24)).toMatch(/^[0-9a-f]{48}$/);
   });
 });

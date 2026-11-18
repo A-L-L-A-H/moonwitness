@@ -4,8 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app";
-import { createUser } from "./services/user";
-import { createSession, SESSION_COOKIE_NAME } from "./services/session";
+import { createSession, createUser, SESSION_COOKIE_NAME } from "@moonwitness/addons/auth";
 
 const dirs: string[] = [];
 

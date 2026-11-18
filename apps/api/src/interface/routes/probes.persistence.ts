@@ -1,7 +1,6 @@
-import { createActorContext, getDb, syncModels, type Migration } from "@moonwitness/orm";
-import { importLegacyProbes } from "@moonwitness/addons/probes";
-import { probeNodeModel, probeEventModel } from "../../infrastructure/persistence/domain/probes";
-import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+import { createActorContext, getDb, syncModels } from "@moonwitness/orm";
+import { importLegacyProbes, probeEventModel, probeNodeModel } from "@moonwitness/addons/probes";
+import { tryRecordAuditLog } from "@moonwitness/addons/audit";
 import { isBlockedRuntimeHost } from "../../shared/env";
 
 export interface ProbeNode {
@@ -55,9 +54,6 @@ export const DEFAULT_PROBE_NODES = [
     category: "governance",
   },
 ] as const;
-
-/** Retired: Probe node and event tables are auto-synced by `@moonwitness/addon-probes`. */
-export const probesMigrations: Migration[] = [];
 
 export async function ensureProbesSchema(): Promise<void> {
   await syncModels([probeNodeModel, probeEventModel]);

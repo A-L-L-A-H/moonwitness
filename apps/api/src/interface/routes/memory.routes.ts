@@ -6,7 +6,7 @@ import {
   MemorySyncBatchPayloadSchema,
   type MemorySyncRecordPayload,
 } from "@moonwitness/contracts/continuity";
-import { memoryRecordModel } from "../../infrastructure/persistence/domain";
+import { memoryRecordModel } from "@moonwitness/addons/ai";
 import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import { env, validateMemoryRuntimeConfig } from "../../shared/env";
 import { getUpstreamBridgeHeaders } from "../../shared/upstream";

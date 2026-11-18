@@ -11,7 +11,7 @@ import type { Result } from "@moonwitness/core";
 import type { ApiError } from "@moonwitness/contracts";
 import { createActorContext, SYSTEM_ACTOR } from "@moonwitness/orm";
 import type { ActorContext } from "@moonwitness/orm";
-import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+import { tryRecordAuditLog } from "@moonwitness/addons/audit";
 
 /**
  * Timeline endpoints.

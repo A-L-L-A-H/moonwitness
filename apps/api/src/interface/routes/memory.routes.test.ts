@@ -73,9 +73,9 @@ async function loadMemoryApp(
   vi.resetModules();
   if (options?.dbPath) {
     const orm = await import("@moonwitness/orm");
-    const domain = await import("../../infrastructure/persistence/domain");
+    const aiAddon = await import("@moonwitness/addons/ai");
     await orm.initDb(options.dbPath);
-    await orm.syncModels([domain.memoryRecordModel]);
+    await orm.syncModels([aiAddon.memoryRecordModel]);
     activeCloseDb = () => orm.closeDb();
   }
   const { memoryRoutes } = await import("./memory.routes");

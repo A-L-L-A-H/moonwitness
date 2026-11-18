@@ -2,16 +2,16 @@ import { timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { DEFAULT_MID_ISSUER_URL, normalizeIssuerUrl, type PublicEs256Jwk } from "@moonwitness/core";
 import { type VerifiedMidProvisionClaims } from "../../middleware/mid-jwt";
-import { CSRF_COOKIE_NAME } from "../../services/session";
 import {
+  CSRF_COOKIE_NAME,
   createUser,
   findUserByEmail,
   findUserById,
   findUserByUsername,
+  generateToken,
   getUserPublic,
-  type UserPublic,
-} from "../../services/user";
-import { generateToken } from "../../shared/auth";
+  type AuthUserPublic as UserPublic,
+} from "@moonwitness/addons/auth";
 import { parseCorsOrigins } from "../../shared/env";
 
 const DEV_DEFAULT_ALLOWED_ORIGINS = new Set(["http://localhost:3000", "http://127.0.0.1:3000"]);

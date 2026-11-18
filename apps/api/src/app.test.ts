@@ -9,8 +9,7 @@ import { buildApp } from "./app";
 import { events, seedTimeline } from "@moonwitness/addons/timeline";
 import { SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
 import { ok } from "@moonwitness/core";
-import { createUser } from "./services/user";
-import { createSession } from "./services/session";
+import { createSession, createUser } from "@moonwitness/addons/auth";
 import type { ITimelineUseCase } from "./domain/usecases/timeline/timeline.usecase";
 import { timelineRoutes } from "./interface/routes/timeline.routes";
 

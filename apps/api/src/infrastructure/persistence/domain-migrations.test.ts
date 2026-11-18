@@ -2,27 +2,21 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
-import { closeDb, createActorContext, getDb, initDb, syncModels } from "@moonwitness/orm";
+import { closeDb, createActorContext, getDb, initDb, modelRegistry, syncModels } from "@moonwitness/orm";
+import { generateToken, ensureAuthSchema } from "@moonwitness/addons/auth";
+import { recordAuditLog } from "@moonwitness/addons/audit";
+import { alertModel, workflowModel } from "@moonwitness/addons/command-center";
+import { controlCommandModel } from "@moonwitness/addons/control";
+import { memoryRecordModel } from "@moonwitness/addons/ai";
+import { opsEventModel, probeEventModel, probeNodeModel } from "@moonwitness/addons/probes";
+import { radiusClientModel, radiusSessionModel } from "@moonwitness/addons/radius";
+import { snmpDeviceModel, snmpSampleModel, snmpTargetModel } from "@moonwitness/addons/snmp";
 import {
-  alertModel,
-  controlCommandModel,
-  memoryRecordModel,
-  opsEventModel,
-  probeEventModel,
-  probeNodeModel,
-  radiusClientModel,
-  radiusSessionModel,
-  snmpDeviceModel,
-  snmpSampleModel,
-  snmpTargetModel,
   storageBucketModel,
   storageObjectModel,
   storageUploadSessionModel,
-  syslogEntryModel,
-  workflowModel,
-} from "./domain";
-import { ensureAuthSchema } from "../../services/user";
-import { recordAuditLog } from "../audit/audit-log";
+} from "@moonwitness/addons/storage";
+import { syslogEntryModel } from "@moonwitness/addons/syslog";
 
 const tempDirs: string[] = [];
 
@@ -146,5 +140,19 @@ describe("zero-migration domain auto-sync (Odoo++)", () => {
     const ops = await opsEventModel.repository.find({ event_key: "evt-smoke-1" });
     expect(ops).toHaveLength(1);
     expect(ops[0]?.title).toBe("Smoke event");
+  });
+
+  it("does not pollute modelRegistry with ghost identity.* models and exports generateToken from @moonwitness/addons/auth", () => {
+    const names = modelRegistry.list().map((m) => m.name);
+    for (const ghost of [
+      "identity.user_profile",
+      "identity.session",
+      "identity.oauth_token",
+      "identity.auth_event",
+    ]) {
+      expect(names).not.toContain(ghost);
+    }
+
+    expect(generateToken(24)).toMatch(/^[0-9a-f]{48}$/);
   });
 });

@@ -6,7 +6,7 @@ import {
   type PublicEs256Jwk,
 } from "@moonwitness/core";
 import { getDb } from "@moonwitness/orm";
-import { findUserById, getUserPublic } from "../services/user";
+import { findUserById, getUserPublic } from "@moonwitness/addons/auth";
 
 export const DEFAULT_API_ALLOWED_AUDIENCES = [
   "moonwitness-web",

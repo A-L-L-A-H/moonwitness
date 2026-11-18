@@ -122,3 +122,8 @@ export async function verifyAuthPassword(plaintext: string, hash: string): Promi
   }
   return verifyMidPassword(plaintext, hash);
 }
+
+export function generateToken(length = 32): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(length));
+  return bytesToHex(bytes);
+}

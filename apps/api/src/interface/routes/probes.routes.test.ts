@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
-import { applyMigrations, closeDb, initDb } from "@moonwitness/orm";
-import { ensureProbesSchema, probesMigrations } from "./probes.persistence";
+import { closeDb, initDb } from "@moonwitness/orm";
+import { ensureProbesSchema } from "./probes.persistence";
 import { registerHealthRoutes } from "./health.routes";
 
 vi.mock("../../middleware/auth", () => ({
@@ -38,7 +38,6 @@ describe("probes routes & NOC consolidation", () => {
 
   beforeEach(async () => {
     await initDb("file::memory:?cache=shared");
-    await applyMigrations(probesMigrations);
     await ensureProbesSchema();
 
     const { probesRoutes } = await import("./probes.routes");

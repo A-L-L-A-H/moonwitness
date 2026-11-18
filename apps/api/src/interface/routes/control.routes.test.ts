@@ -131,17 +131,16 @@ describe("control routes auth rate limiting", () => {
     const { controlRoutes } = await loadRoutes("5");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    const userSvc = await import("../../services/user");
-    const sessSvc = await import("../../services/session");
-    await userSvc.ensureAuthSchema();
-    const created = await userSvc.createUser({
+    const authSvc = await import("@moonwitness/addons/auth");
+    await authSvc.ensureAuthSchema();
+    const created = await authSvc.createUser({
       username: "ctrladmin",
       email: "ctrl@example.com",
       password: "PasswordLongEnough123!",
       role: "admin",
       displayName: "Ctrl Admin",
     });
-    const sessToken = await sessSvc.createSession(created.id);
+    const sessToken = await authSvc.createSession(created.id);
 
     const fastifyCookie = (await import("@fastify/cookie")).default;
     app = Fastify({ logger: false });
@@ -184,17 +183,16 @@ describe("control routes auth rate limiting", () => {
     const { controlRoutes } = await loadRoutes("5");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    const userSvc = await import("../../services/user");
-    const sessSvc = await import("../../services/session");
-    await userSvc.ensureAuthSchema();
-    const admin = await userSvc.createUser({
+    const authSvc = await import("@moonwitness/addons/auth");
+    await authSvc.ensureAuthSchema();
+    const admin = await authSvc.createUser({
       username: "ctrlv1admin",
       email: "ctrlv1@example.com",
       password: "PasswordLongEnough123!",
       role: "admin",
       displayName: "Ctrl V1 Admin",
     });
-    const sessToken = await sessSvc.createSession(admin.id);
+    const sessToken = await authSvc.createSession(admin.id);
 
     const fastifyCookie = (await import("@fastify/cookie")).default;
     app = Fastify({ logger: false });
@@ -261,8 +259,8 @@ describe("Native first-light onboarding & control auth (CONTROL_NATIVE_SETUP=1)"
     const { controlRoutes } = await loadRoutes("20");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    const userSvc = await import("../../services/user");
-    await userSvc.ensureAuthSchema();
+    const authSvc = await import("@moonwitness/addons/auth");
+    await authSvc.ensureAuthSchema();
     const db = orm.getDb();
     await db.run("DELETE FROM auth_sessions");
     await db.run("DELETE FROM auth_users");

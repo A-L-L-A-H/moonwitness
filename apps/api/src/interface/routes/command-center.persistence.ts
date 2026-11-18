@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { createActorContext, syncModels, type Migration } from "@moonwitness/orm";
-import { importLegacyCommandCenter } from "@moonwitness/addons/command-center";
-import { workflowModel, alertModel } from "../../infrastructure/persistence/domain/command-control";
-import { listAuditLogs, tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+import { createActorContext, syncModels } from "@moonwitness/orm";
+import {
+  alertModel,
+  importLegacyCommandCenter,
+  workflowModel,
+} from "@moonwitness/addons/command-center";
+import { listAuditLogs, tryRecordAuditLog } from "@moonwitness/addons/audit";
 
 export interface CommandCenterFeedItem {
   time: string;
@@ -63,9 +66,6 @@ export type CreateWorkflowInput = z.infer<typeof createWorkflowInputSchema>;
 export const commandCenterIdParamSchema = z.object({
   id: z.string().trim().min(1).max(120),
 });
-
-/** Retired: Command Center tables are auto-synced by `@moonwitness/addon-command-center`. */
-export const commandCenterMigrations: Migration[] = [];
 
 const INITIAL_WORKFLOWS: readonly PersistedWorkflow[] = [
   {
