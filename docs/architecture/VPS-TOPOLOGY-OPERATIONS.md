@@ -111,3 +111,9 @@ docker compose down
 
 # CAUTION: Never pass -v / --volumes unless performing a deliberate total purge
 ```
+
+---
+
+## Wave 0 Reconciliation Note (`MW-0006`)
+
+- **Classification:** Current baseline VPS topology, pending Wave 5 Compose core/ops profile separation and `STORAGE_URL` / `RADIUS_BIND_IP` / `DATABASE_URL` remediation tracked in [WORK_PLAN.md](../../WORK_PLAN.md) (`MW-0501`–`MW-0512`). See [ADR-006](adr-006-three-app-topology-and-trust-zones.md) and [RUNTIME-SERVICE-INVENTORY.md](RUNTIME-SERVICE-INVENTORY.md) for verified upstream state.

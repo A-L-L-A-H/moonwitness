@@ -1,5 +1,8 @@
 # REPOSITORY INTELLIGENCE & EVOLUTION AUDIT — MoonWitness Monorepo
 
+> **Document Status:** Historical Baseline Snapshot (Superseded on `dev` @ `acdc72a`)
+> **Current Authority:** [ADR-006: Three-App Topology & Trust Zones](docs/architecture/adr-006-three-app-topology-and-trust-zones.md), [RUNTIME-SERVICE-INVENTORY.md](docs/architecture/RUNTIME-SERVICE-INVENTORY.md), [WORK_PLAN.md](WORK_PLAN.md)
+> **Note:** Captured against earlier 8-app snapshot (`v0.6.1`); later consolidated to 3 target apps (`web`, `api`, `rocksoul`) with `v0.8.1` synced across `main` and `dev`.
 > **Tanggal audit:** 18 November 2026
 > **Repository:** `Z:\repo\isrockfeel\moonwitness` (branch `dev`, remote `A-L-L-A-H/moonwitness`, versi 0.6.1)
 > **Mode:** Read-only research & audit (Execution Mode: Read-only)
