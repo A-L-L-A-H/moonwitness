@@ -29,8 +29,8 @@ export interface MonitorProps {
 }
 
 const SERVICE_FALLBACKS = [
-  { id: "allah", name: "A-L-L-A-H Sanctuary", url: "http://127.0.0.1:3003" },
-  { id: "web", name: "MoonWitness Web", url: "http://127.0.0.1:3000" },
+  { id: "allah", name: "A-L-L-A-H Sanctuary", url: "http://127.0.0.1:3000" },
+  { id: "web", name: "MoonWitness Web", url: "http://127.0.0.1:3000/moonwitness" },
   { id: "api", name: "Core API", url: "http://127.0.0.1:3002" },
   { id: "arsy", name: "ARSY Control Plane", url: "http://127.0.0.1:8787" },
   { id: "memory", name: "Memory Engine", url: "http://127.0.0.1:8000" },

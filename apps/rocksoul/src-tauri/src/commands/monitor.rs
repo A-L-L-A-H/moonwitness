@@ -25,13 +25,11 @@ const MAX_AGENT_SESSIONS: usize = 5;
 const MAX_CHANGED_FILES: usize = 25;
 const SERVICE_TIMEOUT_MS: u64 = 150;
 
-const ALLOWLISTED_ORIGINS: [&str; 10] = [
+const ALLOWLISTED_ORIGINS: [&str; 8] = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "http://127.0.0.1:3002",
     "http://localhost:3002",
-    "http://127.0.0.1:3003",
-    "http://localhost:3003",
     "http://127.0.0.1:8000",
     "http://localhost:8000",
     "http://127.0.0.1:8787",
@@ -50,16 +48,16 @@ const SERVICE_PROBES: [ProbeSpec; 5] = [
     ProbeSpec {
         id: "allah",
         name: "A-L-L-A-H Sanctuary",
-        addr: "127.0.0.1:3003",
-        display_url: "http://127.0.0.1:3003",
+        addr: "127.0.0.1:3000",
+        display_url: "http://127.0.0.1:3000",
         path: "/",
     },
     ProbeSpec {
         id: "web",
         name: "MoonWitness Web",
         addr: "127.0.0.1:3000",
-        display_url: "http://127.0.0.1:3000",
-        path: "/",
+        display_url: "http://127.0.0.1:3000/moonwitness",
+        path: "/moonwitness",
     },
     ProbeSpec {
         id: "api",
@@ -649,10 +647,7 @@ pub fn validate_ecosystem_url(raw: &str) -> Result<String, String> {
             }
         }
     }
-    Err(
-        "Only local MoonWitness endpoints on ports 3000, 3002, 3003, 8000, or 8787 may be opened."
-            .into(),
-    )
+    Err("Only local MoonWitness endpoints on ports 3000, 3002, 8000, or 8787 may be opened.".into())
 }
 
 fn collect_monitor_snapshot(repositories: Vec<Repository>) -> MonitorSnapshot {
@@ -701,11 +696,13 @@ mod tests {
 
     #[test]
     fn validates_loopback_ecosystem_urls_strictly() {
-        assert!(validate_ecosystem_url("http://127.0.0.1:3003").is_ok());
+        assert!(validate_ecosystem_url("http://127.0.0.1:3000").is_ok());
+        assert!(validate_ecosystem_url("http://127.0.0.1:3000/moonwitness").is_ok());
         assert!(validate_ecosystem_url("http://localhost:3000/dock").is_ok());
         assert!(validate_ecosystem_url("http://127.0.0.1:3002/api/v1/healthz").is_ok());
+        assert!(validate_ecosystem_url("http://127.0.0.1:3003").is_err());
         assert!(validate_ecosystem_url("https://example.com").is_err());
-        assert!(validate_ecosystem_url("http://127.0.0.1:3003.attacker.tld").is_err());
+        assert!(validate_ecosystem_url("http://127.0.0.1:3000.attacker.tld").is_err());
         assert!(validate_ecosystem_url("file:///C:/Windows/System32/cmd.exe").is_err());
         assert!(validate_ecosystem_url("http://localhost:3000/\ncmd").is_err());
     }

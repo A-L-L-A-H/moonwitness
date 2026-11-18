@@ -65,9 +65,9 @@ export default function Deck({
               <button
                 type="button"
                 className="outline-button"
-                onClick={() => onOpenUrl("http://127.0.0.1:3003")}
+                onClick={() => onOpenUrl("http://127.0.0.1:3000")}
               >
-                A-L-L-A-H :3003 <ArrowUpRight size={13} />
+                A-L-L-A-H :3000 <ArrowUpRight size={13} />
               </button>
             )}
             <button type="button" className="outline-button" onClick={() => onNavigate("monitor")}>

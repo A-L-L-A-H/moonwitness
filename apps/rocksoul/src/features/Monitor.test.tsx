@@ -29,7 +29,7 @@ const SAMPLE_SNAPSHOT: MonitorSnapshot = {
     {
       id: "allah",
       name: "A-L-L-A-H Sanctuary",
-      url: "http://127.0.0.1:3003",
+      url: "http://127.0.0.1:3000",
       status: "online",
       http_status: 200,
       latency_ms: 14,
@@ -115,7 +115,7 @@ describe("Monitor (OVERSEER)", () => {
     expect(onInspectRepoPatch).toHaveBeenCalledWith("repo-mw");
 
     fireEvent.click(screen.getAllByRole("button", { name: /LAUNCH/i })[0]!);
-    expect(onOpenUrl).toHaveBeenCalledWith("http://127.0.0.1:3003");
+    expect(onOpenUrl).toHaveBeenCalledWith("http://127.0.0.1:3000");
 
     fireEvent.click(screen.getByRole("button", { name: /AUTO 10S ON/i }));
     expect(onToggleAuto).toHaveBeenCalledWith(false);
