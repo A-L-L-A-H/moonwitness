@@ -46,6 +46,14 @@ jobs:
           pnpm docs:test
           pnpm docs:check
 
+      - name: Compose Configuration
+        env:
+          POSTGRES_PASSWORD: ci-compose-postgres-password
+          MID_KEY_ENCRYPTION_SECRET: ci-compose-mid-key-encryption-secret
+          STORAGE_ACCESS_KEY: ci-compose-storage-access-key
+          STORAGE_SECRET_KEY: ci-compose-storage-secret-key
+        run: docker compose --profile ops config -q
+
       - name: Format
         run: pnpm format:check
 
@@ -192,3 +200,49 @@ jobs:
       - name: Test
         working-directory: services/radius
         run: cargo test
+
+  rocksoul-tauri:
+    name: Verify RockSoul Desktop (Rust)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Tauri Linux Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libssl-dev pkg-config
+
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable --profile minimal --component rustfmt,clippy
+          rustup default stable
+
+      - name: Check & Test
+        working-directory: apps/rocksoul/src-tauri
+        run: |
+          cargo check --tests
+          cargo test --lib
+
+  memory:
+    name: Verify Memory Service (Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c394e4332b0a87c0ff # v5.6.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/memory/backend/requirements.txt
+
+      - name: Install & Test
+        working-directory: services/memory/backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          python -m pytest -q

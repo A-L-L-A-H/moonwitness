@@ -60,18 +60,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  async rewrites() {
-    const apiUrl = process.env.API_INTERNAL_URL?.trim();
-    if (!apiUrl) {
-      return [];
-    }
-    return [
-      {
-        source: "/api/v1/:path*",
-        destination: apiUrl.replace(/\/+$/, "") + "/api/v1/:path*",
-      },
-    ];
-  },
 };
 
 export default nextConfig;

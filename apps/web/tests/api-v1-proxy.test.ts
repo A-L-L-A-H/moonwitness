@@ -1,8 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import nextConfig from "../next.config";
 import { DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT } from "../src/app/api/v1/[...path]/route";
 
 describe("/api/v1/[...path] reverse proxy route handler", () => {
   const originalApiInternalUrl = process.env.API_INTERNAL_URL;
+
+  it("keeps Next.js config free of duplicate /api/v1 rewrites in favor of this single BFF handler", () => {
+    expect("rewrites" in nextConfig).toBe(false);
+  });
 
   afterEach(() => {
     vi.unstubAllGlobals();

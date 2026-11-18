@@ -72,9 +72,46 @@ export const transmissionPreset: SkinPreset = {
   hudPanel: { skin: 'transmission' }, scenePanel: { skin: 'transmission' }, atlasStage: { skin: 'transmission' }, effects: 'halftone grain scanlines',
 };
 
+export const sanctuaryPreset: SkinPreset = {
+  name: 'sanctuary', label: 'Sanctuary', description: 'Astrolabe sacred symmetry',
+  button: { variant: 'sanctuary', skin: 'sanctuary', size: 'default' }, card: { variant: 'outline', skin: 'sanctuary' },
+  input: { skin: 'sanctuary' }, badge: { variant: 'outline', skin: 'sanctuary' },
+  eventCard: { skin: 'sanctuary', density: 'spacious' }, kanbanColumn: { skin: 'sanctuary', compact: false },
+  moduleCard: { skin: 'sanctuary', size: 'lg', elevated: false },
+  hudPanel: { skin: 'sanctuary' }, scenePanel: { skin: 'sanctuary' }, atlasStage: { skin: 'sanctuary' }, effects: 'duotone',
+};
+
+export const brutalistPreset: SkinPreset = {
+  name: 'brutalist', label: 'Brutalist', description: 'Raw concrete slab',
+  button: { variant: 'brutalist', skin: 'brutalist', size: 'default' }, card: { variant: 'default', skin: 'brutalist' },
+  input: { skin: 'brutalist' }, badge: { variant: 'default', skin: 'brutalist' },
+  eventCard: { skin: 'brutalist', density: 'compact' }, kanbanColumn: { skin: 'brutalist', compact: true },
+  moduleCard: { skin: 'brutalist', size: 'md', elevated: true },
+  hudPanel: { skin: 'brutalist' }, scenePanel: { skin: 'brutalist' }, atlasStage: { skin: 'brutalist' }, effects: '',
+};
+
+export const noirPreset: SkinPreset = {
+  name: 'noir', label: 'Noir', description: 'Silver gelatin darkroom',
+  button: { variant: 'noir', skin: 'noir', size: 'default' }, card: { variant: 'default', skin: 'noir' },
+  input: { skin: 'noir' }, badge: { variant: 'default', skin: 'noir' },
+  eventCard: { skin: 'noir', density: 'comfortable' }, kanbanColumn: { skin: 'noir', compact: false },
+  moduleCard: { skin: 'noir', size: 'md', elevated: true },
+  hudPanel: { skin: 'noir' }, scenePanel: { skin: 'noir' }, atlasStage: { skin: 'noir' }, effects: 'grain',
+};
+
+export const kineticPreset: SkinPreset = {
+  name: 'kinetic', label: 'Kinetic', description: 'Isometric vector arcade',
+  button: { variant: 'kinetic', skin: 'kinetic', size: 'default' }, card: { variant: 'default', skin: 'kinetic' },
+  input: { skin: 'kinetic' }, badge: { variant: 'default', skin: 'kinetic' },
+  eventCard: { skin: 'kinetic', density: 'comfortable' }, kanbanColumn: { skin: 'kinetic', compact: false },
+  moduleCard: { skin: 'kinetic', size: 'md', elevated: true },
+  hudPanel: { skin: 'kinetic' }, scenePanel: { skin: 'kinetic' }, atlasStage: { skin: 'kinetic' }, effects: 'cmyk-slip',
+};
+
 export const skinPresets: Record<SkinName, SkinPreset> = {
   default: defaultPreset, riot: riotPreset, editorial: editorialPreset,
   technical: technicalPreset, archive: archivePreset, transmission: transmissionPreset,
+  sanctuary: sanctuaryPreset, brutalist: brutalistPreset, noir: noirPreset, kinetic: kineticPreset,
 };
 
 export function getPreset(name: SkinName): SkinPreset { return skinPresets[name]; }

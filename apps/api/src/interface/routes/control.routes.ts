@@ -643,6 +643,36 @@ export async function controlRoutes(fastify: FastifyInstance) {
         if (!WRITE_PATHS.has(path)) {
           return reply.code(404).send({ error: `path control tidak dikenal: ${path}` });
         }
+        if (path === "plan" || path === "apply") {
+          const body = request.body as
+            { resources?: unknown; state?: { resources?: unknown } } | undefined;
+          const rawResources = Array.isArray(body?.resources)
+            ? body.resources
+            : Array.isArray(body?.state?.resources)
+              ? body.state.resources
+              : [];
+          const unsupportedKinds = Array.from(
+            new Set(
+              rawResources
+                .map((item) =>
+                  item && typeof item === "object" ? (item as { kind?: unknown }).kind : undefined,
+                )
+                .filter(
+                  (kind): kind is string =>
+                    typeof kind === "string" &&
+                    (ARSY_V1_DEFERRED_RESOURCE_KINDS.has(kind) ||
+                      !ARSY_V1_SUPPORTED_RESOURCE_KINDS.has(kind)),
+                ),
+            ),
+          );
+          if (unsupportedKinds.length > 0) {
+            return reply.code(400).send({
+              error: `Unsupported arsy V1 resource kind(s): ${unsupportedKinds.join(", ")}`,
+              unsupportedKinds,
+              supportedKinds: Array.from(ARSY_V1_SUPPORTED_RESOURCE_KINDS),
+            });
+          }
+        }
         return forward(request, reply, path);
       },
     );

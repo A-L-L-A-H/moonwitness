@@ -171,6 +171,86 @@ describe("control routes auth rate limiting", () => {
       expect(hdrs.cookie).toBeUndefined();
     }
   });
+
+  it("rejects nonexistent per-kind proxy routes and V1-deferred plan/apply kinds before contacting arsy", async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    process.env.ARSY_URL = "https://arsy-edge.example.com";
+    process.env.ARSY_TOKEN_ADMIN = "adm-secret-token";
+
+    const { controlRoutes } = await loadRoutes("5");
+    const orm = await import("@moonwitness/orm");
+    await orm.initDb("file::memory:?cache=shared");
+    const userSvc = await import("../../services/user");
+    const sessSvc = await import("../../services/session");
+    await userSvc.ensureAuthSchema();
+    const admin = await userSvc.createUser({
+      username: "ctrlv1admin",
+      email: "ctrlv1@example.com",
+      password: "PasswordLongEnough123!",
+      role: "admin",
+      displayName: "Ctrl V1 Admin",
+    });
+    const sessToken = await sessSvc.createSession(admin.id);
+
+    const fastifyCookie = (await import("@fastify/cookie")).default;
+    app = Fastify({ logger: false });
+    await app.register(fastifyCookie);
+    await app.register(controlRoutes);
+    await app.ready();
+
+    const blockedRead = await app.inject({
+      method: "GET",
+      url: "/control/network",
+      headers: { cookie: `mw_session=${sessToken}` },
+    });
+    expect(blockedRead.statusCode).toBe(404);
+
+    const blockedPlan = await app.inject({
+      method: "POST",
+      url: "/control/plan",
+      headers: { cookie: `mw_session=${sessToken}` },
+      payload: {
+        version: 1,
+        resources: [{ kind: "kubernetes", name: "k8s-main" }],
+      },
+    });
+    expect(blockedPlan.statusCode).toBe(400);
+    expect(blockedPlan.json().unsupportedKinds).toEqual(["kubernetes"]);
+
+    const blockedApply = await app.inject({
+      method: "POST",
+      url: "/control/apply",
+      headers: { cookie: `mw_session=${sessToken}` },
+      payload: {
+        confirm: "apply",
+        state: {
+          version: 1,
+          resources: [{ kind: "gitdeploy", name: "app-repo" }],
+        },
+      },
+    });
+    expect(blockedApply.statusCode).toBe(400);
+    expect(blockedApply.json().unsupportedKinds).toEqual(["gitdeploy"]);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    const allowedPlan = await app.inject({
+      method: "POST",
+      url: "/control/plan",
+      headers: { cookie: `mw_session=${sessToken}` },
+      payload: {
+        version: 1,
+        resources: [{ kind: "systemd", name: "caddy" }],
+      },
+    });
+    expect(allowedPlan.statusCode).toBe(200);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("Native first-light onboarding & control auth (CONTROL_NATIVE_SETUP=1)", () => {
