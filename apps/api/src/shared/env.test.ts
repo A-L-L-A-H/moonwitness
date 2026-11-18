@@ -13,7 +13,7 @@ const base = {
   HOST: "127.0.0.1",
   API_PREFIX: "/api/v1",
   NODE_ENV: "production" as const,
-  DATABASE_URL: "file:/var/lib/moonwitness/app.db",
+  DATABASE_URL: "postgresql://moonwitness:secret@localhost:5432/moonwitness",
   CORS_ORIGINS: "https://moonwitness.example",
   LOG_LEVEL: undefined,
   RATE_LIMIT_MAX: "120",
@@ -112,12 +112,17 @@ describe("validateProductionEnv", () => {
     ).toEqual([]);
   });
 
-  it("rejects a missing or in-memory database", () => {
+  it("rejects a missing, in-memory, or non-PostgreSQL database", () => {
     expect(validateProductionEnv({ ...base, DATABASE_URL: undefined })).toContain(
       "DATABASE_URL must be set to a persistent database in production.",
     );
     expect(validateProductionEnv({ ...base, DATABASE_URL: ":memory:" })).toContain(
       "DATABASE_URL must not be an in-memory database in production.",
+    );
+    expect(
+      validateProductionEnv({ ...base, DATABASE_URL: "file:/var/lib/moonwitness/app.db" }),
+    ).toContain(
+      "DATABASE_URL must be a PostgreSQL connection string (postgresql:// or postgres://) in production.",
     );
   });
 

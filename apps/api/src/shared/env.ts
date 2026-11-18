@@ -265,9 +265,12 @@ export function validateProductionEnv(config: typeof env): string[] {
 
   if (!config.DATABASE_URL || config.DATABASE_URL.trim() === "") {
     problems.push("DATABASE_URL must be set to a persistent database in production.");
-  }
-  if (config.DATABASE_URL === ":memory:") {
+  } else if (config.DATABASE_URL === ":memory:") {
     problems.push("DATABASE_URL must not be an in-memory database in production.");
+  } else if (!/^postgres(ql)?:\/\//i.test(config.DATABASE_URL.trim())) {
+    problems.push(
+      "DATABASE_URL must be a PostgreSQL connection string (postgresql:// or postgres://) in production.",
+    );
   }
   if (!config.CORS_ORIGINS || parseCorsOrigins(config.CORS_ORIGINS).length === 0) {
     problems.push("CORS_ORIGINS must list explicit allowed origins in production.");

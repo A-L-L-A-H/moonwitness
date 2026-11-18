@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -53,6 +53,14 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(existsSync(envExamplePath)).toBe(true);
   });
 
+  it("enforces three-app workspace topology under apps/ (MW-0101)", () => {
+    const appDirs = readdirSync(resolve(repoRoot, "apps"), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+      .map((entry) => entry.name)
+      .sort();
+    expect(appDirs).toEqual(["api", "rocksoul", "web"]);
+  });
+
   it("validates Caddy reverse proxy routing and security headers", () => {
     const caddyContent = readFileSync(caddyfilePath, "utf-8");
 
@@ -73,10 +81,11 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
   });
 
   it("validates canonical Compose topology via docker compose config", () => {
-    let parsedConfig: ComposeConfig;
+    let coreConfig: ComposeConfig;
+    let opsConfig: ComposeConfig;
 
     try {
-      const output = execFileSync(
+      const coreOutput = execFileSync(
         "docker",
         ["compose", "-f", composePath, "config", "--format", "json"],
         {
@@ -84,7 +93,17 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
           encoding: "utf-8",
         },
       );
-      parsedConfig = JSON.parse(output) as ComposeConfig;
+      coreConfig = JSON.parse(coreOutput) as ComposeConfig;
+
+      const opsOutput = execFileSync(
+        "docker",
+        ["compose", "-f", composePath, "--profile", "ops", "config", "--format", "json"],
+        {
+          cwd: repoRoot,
+          encoding: "utf-8",
+        },
+      );
+      opsConfig = JSON.parse(opsOutput) as ComposeConfig;
     } catch {
       // In environments where Docker daemon is unreachable, verify via direct file inspection
       const rawCompose = readFileSync(composePath, "utf-8");
@@ -95,13 +114,33 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
       expect(rawCompose).toContain("radius:");
       expect(rawCompose).toContain("snmp-poller:");
       expect(rawCompose).toContain("syslog:");
+      expect(rawCompose).toContain("storage:");
       return;
     }
 
-    const { services, networks, volumes } = parsedConfig;
+    // 1. Core stack validation (default profile)
+    const coreServices = ["caddy", "web", "api", "postgres"];
+    for (const service of coreServices) {
+      expect(coreConfig.services).toHaveProperty(service);
+    }
+    expect(coreConfig.services).not.toHaveProperty("radius");
+    expect(coreConfig.services).not.toHaveProperty("snmp-poller");
+    expect(coreConfig.services).not.toHaveProperty("syslog");
+    expect(coreConfig.services).not.toHaveProperty("storage");
 
-    // 1. Service Set validation
-    const expectedServices = ["caddy", "web", "api", "postgres", "radius", "snmp-poller", "syslog"];
+    const { services, networks, volumes } = opsConfig;
+
+    // 2. Ops profile Service Set validation
+    const expectedServices = [
+      "caddy",
+      "web",
+      "api",
+      "postgres",
+      "radius",
+      "snmp-poller",
+      "syslog",
+      "storage",
+    ];
     for (const service of expectedServices) {
       expect(services).toHaveProperty(service);
     }
@@ -117,6 +156,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     const radius = services.radius;
     const snmp = services["snmp-poller"];
     const syslog = services.syslog;
+    const storage = services.storage;
     const netInternal = networks["moonwitness-internal"];
 
     expect(caddy).toBeDefined();
@@ -126,9 +166,20 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(radius).toBeDefined();
     expect(snmp).toBeDefined();
     expect(syslog).toBeDefined();
+    expect(storage).toBeDefined();
     expect(netInternal).toBeDefined();
 
-    if (!caddy || !web || !api || !postgres || !radius || !snmp || !syslog || !netInternal) {
+    if (
+      !caddy ||
+      !web ||
+      !api ||
+      !postgres ||
+      !radius ||
+      !snmp ||
+      !syslog ||
+      !storage ||
+      !netInternal
+    ) {
       throw new Error("Missing expected services or networks in configuration");
     }
 
@@ -144,14 +195,16 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(api.ports).toBeUndefined();
     expect(postgres.ports).toBeUndefined();
     expect(snmp.ports).toBeUndefined();
+    expect(storage.ports).toBeUndefined();
 
-    // RADIUS publishes only UDP auth/acct ports
+    // RADIUS publishes only UDP auth/acct ports bound to 127.0.0.1 by default
     const radiusPorts =
       radius.ports?.map((p: ComposePort) => `${p.published}:${p.target}/${p.protocol}`) ?? [];
     expect(radiusPorts).toContain("1812:1812/udp");
     expect(radiusPorts).toContain("1813:1813/udp");
     for (const p of radius.ports ?? []) {
       expect(p.protocol).toBe("udp");
+      expect(p.host_ip).toBe("127.0.0.1");
     }
 
     // Syslog publishes ingest ports bound to 127.0.0.1 by default
@@ -173,6 +226,8 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(snmp.networks).not.toHaveProperty("moonwitness-public");
     expect(syslog.networks).toHaveProperty("moonwitness-internal");
     expect(syslog.networks).not.toHaveProperty("moonwitness-public");
+    expect(storage.networks).toHaveProperty("moonwitness-internal");
+    expect(storage.networks).not.toHaveProperty("moonwitness-public");
 
     // Frontends on moonwitness-public
     expect(web.networks).toHaveProperty("moonwitness-public");
@@ -183,6 +238,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
 
     // 4. Service-to-Service DNS Resolution
     expect(api.environment?.RADIUS_URL).toBe("http://radius:8090");
+    expect(api.environment?.STORAGE_URL).toBe("http://storage:8091");
     expect(api.environment?.SNMP_POLLER_URL).toBe("http://snmp-poller:8094");
     expect(api.environment?.SYSLOG_URL).toBe("http://syslog:8093");
     expect(web.environment?.API_INTERNAL_URL).toBe("http://api:3002");
@@ -193,6 +249,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(volumes).toHaveProperty("radius-data");
     expect(volumes).toHaveProperty("snmp-data");
     expect(volumes).toHaveProperty("syslog-data");
+    expect(volumes).toHaveProperty("storage-data");
     expect(volumes).toHaveProperty("caddy_data");
     expect(volumes).toHaveProperty("caddy_config");
 

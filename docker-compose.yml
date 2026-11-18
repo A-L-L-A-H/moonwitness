@@ -79,6 +79,7 @@ services:
       CORS_ORIGINS: ${CORS_ORIGINS:-https://moonwitness.biz.id,https://a-l-l-a-h.com,https://id.moonwitness.biz.id}
       TRUSTED_PROXY_COUNT: ${TRUSTED_PROXY_COUNT:-1}
       RADIUS_URL: http://radius:8090
+      STORAGE_URL: http://storage:8091
       SNMP_POLLER_URL: http://snmp-poller:8094
       SYSLOG_URL: http://syslog:8093
       MID_ISSUER_URL: ${MID_ISSUER_URL:-https://id.moonwitness.biz.id}
@@ -99,12 +100,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      radius:
-        condition: service_healthy
-      snmp-poller:
-        condition: service_healthy
-      syslog:
-        condition: service_healthy
     healthcheck:
       test:
         [
@@ -124,6 +119,7 @@ services:
         max-file: "3"
 
   radius:
+    profiles: ["ops"]
     build:
       context: ./services/radius
       dockerfile: Dockerfile
@@ -142,8 +138,8 @@ services:
     networks:
       - moonwitness-internal
     ports:
-      - "${RADIUS_BIND_IP:-0.0.0.0}:1812:1812/udp"
-      - "${RADIUS_BIND_IP:-0.0.0.0}:1813:1813/udp"
+      - "${RADIUS_BIND_IP:-127.0.0.1}:1812:1812/udp"
+      - "${RADIUS_BIND_IP:-127.0.0.1}:1813:1813/udp"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8090/health"]
       interval: 15s
@@ -157,6 +153,7 @@ services:
         max-file: "3"
 
   snmp-poller:
+    profiles: ["ops"]
     build:
       context: ./services/snmp-poller
       dockerfile: Dockerfile
@@ -186,6 +183,7 @@ services:
         max-file: "3"
 
   syslog:
+    profiles: ["ops"]
     build:
       context: ./services/syslog
       dockerfile: Dockerfile
@@ -207,6 +205,35 @@ services:
       - "${SYSLOG_BIND_IP:-127.0.0.1}:5514:5514/tcp"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8093/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  storage:
+    profiles: ["ops"]
+    build:
+      context: ./services/storage
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      HOST: 0.0.0.0
+      ALLOW_PUBLIC_BIND: "1"
+      HTTP_PORT: 8091
+      DATABASE_URL: sqlite:/data/storage.db?mode=rwc
+      STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-}
+      STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-}
+    volumes:
+      - storage-data:/data
+    networks:
+      - moonwitness-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8091/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -261,6 +288,8 @@ volumes:
     name: snmp-data
   syslog-data:
     name: syslog-data
+  storage-data:
+    name: storage-data
   caddy_data:
     name: caddy_data
   caddy_config:

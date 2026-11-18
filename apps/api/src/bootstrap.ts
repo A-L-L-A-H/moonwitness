@@ -1,16 +1,11 @@
-import { getDb } from "@moonwitness/orm";
+import { applyMigrations } from "@moonwitness/orm";
 import { env } from "./shared/env";
 import { AddonRegistry } from "@moonwitness/addon-base/registry";
 import { registerBaseAddon } from "@moonwitness/addon-base";
-import {
-  registerTimelineAddon,
-  seedTimeline,
-  timelineDdl,
-  timelineManifest,
-  timelineRoutesPrefix,
-} from "@moonwitness/addon-timeline";
+import { seedTimeline, timelineManifest, timelineMigrations } from "@moonwitness/addon-timeline";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
+import { timelineRoutes } from "./interface/routes/timeline.routes";
 
 export interface CoreAppOptions {
   prefix?: string;
@@ -28,8 +23,7 @@ const BASE_MANIFEST = {
 };
 
 async function migrateAndSeed(seed: boolean): Promise<void> {
-  const db = getDb();
-  await db.exec(timelineDdl);
+  await applyMigrations(timelineMigrations);
   // Migrations are applied in fastify.adapter.ts (buildFastify) — avoid duplicate.
   if (seed) {
     await seedTimeline();
@@ -47,7 +41,7 @@ async function registerAddonTree(target: FastifyInstance, prefix: string): Promi
   registry.add({
     manifest: timelineManifest,
     register: async () => {
-      await registerTimelineAddon(target, { prefix: prefix + timelineRoutesPrefix });
+      await target.register(timelineRoutes, { prefix: prefix + "/timeline" });
     },
   });
   // riot-ai, command-center, memory routes are registered in fastify.adapter.ts

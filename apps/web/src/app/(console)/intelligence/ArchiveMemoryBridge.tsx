@@ -96,8 +96,8 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
             knowledge search from this console.
           </p>
           <p className="font-mono text-[11px] text-zinc-500">
-            Vault ingest: launch <span className="text-zinc-300">apps/memory</span> stack (port 3005
-            / API 8000) and upload{" "}
+            Vault ingest: launch <span className="text-zinc-300">services/memory</span> stack (port
+            3005 / API 8000) and upload{" "}
             <span className="text-zinc-300">chatgpt_mohrezzafahlevi.zip</span>.
           </p>
         </div>
