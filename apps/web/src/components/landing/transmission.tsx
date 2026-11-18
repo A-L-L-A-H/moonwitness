@@ -10,7 +10,7 @@ export function Transmission() {
   return (
     <section
       id="transmission"
-      className="relative scroll-mt-20 overflow-hidden border-y-2 border-[var(--line)] bg-[var(--ink)] py-16 md:py-20"
+      className="relative scroll-mt-20 overflow-hidden border-y-2 border-[var(--border)] bg-[var(--ink)] py-16 md:py-20"
     >
       <Grain />
       <div
@@ -20,7 +20,7 @@ export function Transmission() {
       />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <header className="mb-8 flex flex-wrap items-end gap-x-6 gap-y-3 border-b-2 border-[var(--line)] pb-4">
+        <header className="mb-8 flex flex-wrap items-end gap-x-6 gap-y-3 border-b-2 border-[var(--border)] pb-4">
           <span
             data-transmission-id
             className="ink-tick font-brush text-5xl leading-none text-[var(--yellow)] sm:text-6xl"
@@ -28,7 +28,7 @@ export function Transmission() {
             001
           </span>
           <div>
-            <p className="flex items-center gap-2 font-mono text-[11px] tracking-widest text-zinc-300">
+            <p className="flex items-center gap-2 font-mono text-[11px] tracking-widest text-[var(--foreground)]">
               <CassetteTape aria-hidden className="h-3 w-4" />
               TRANSMISSION / STORY FILE
             </p>
@@ -45,7 +45,7 @@ export function Transmission() {
         </header>
 
         <div className="grid gap-6 md:grid-cols-[1.3fr_1fr] md:items-start">
-          <figure className="relative border-2 border-[var(--line)] bg-[var(--panel)]">
+          <figure className="relative border-2 border-[var(--border)] bg-[var(--card)]">
             <Staple className="-top-1 left-6 -rotate-12" />
             <TactileTape
               variant="yellow"
@@ -63,7 +63,7 @@ export function Transmission() {
               />
               <div className="absolute inset-0 bg-[var(--pink)] opacity-25 mix-blend-color" />
             </div>
-            <figcaption className="border-t-2 border-[var(--line)] px-4 py-2 font-mono text-[11px] text-zinc-400">
+            <figcaption className="border-t-2 border-[var(--border)] px-4 py-2 font-mono text-[11px] text-[var(--muted-foreground)]">
               TRANSMISSION ARCHIVE // RECOVERED TAPE 001 · FICTIONAL STORY FILE
             </figcaption>
           </figure>
@@ -72,20 +72,20 @@ export function Transmission() {
             <p className="font-mono text-xs tracking-widest text-[var(--blue)]">
               FICTIONAL NARRATIVE · DEMO STORY
             </p>
-            <p className="font-mono text-sm leading-relaxed text-zinc-300">
+            <p className="font-mono text-sm leading-relaxed text-[var(--foreground)]">
               In this story, three characters in the old textile district each hear the same
               frequency rise, fall, and rise again, like a signal being answered. None of them can
               say where it comes from.
             </p>
-            <blockquote className="border-l-2 border-[var(--pink)] pl-4 font-hand text-lg italic text-zinc-100">
+            <blockquote className="border-l-2 border-[var(--pink)] pl-4 font-hand text-lg italic text-[var(--foreground)]">
               &ldquo;It wasn&rsquo;t coming from any tower I recognised. It was in the walls.&rdquo;
-              <footer className="mt-1 font-mono text-[11px] not-italic text-zinc-400">
+              <footer className="mt-1 font-mono text-[11px] not-italic text-[var(--muted-foreground)]">
                 Character dialogue, not a real account
               </footer>
             </blockquote>
             <Link
               href="/dock"
-              className="group mt-2 flex min-h-11 items-center justify-between gap-4 border-2 border-[var(--pink)] bg-[var(--panel)] px-5 py-3 transition-colors hover:bg-[var(--pink)] hover:text-[var(--ink)]"
+              className="group mt-2 flex min-h-11 items-center justify-between gap-4 border-2 border-[var(--pink)] bg-[var(--card)] px-5 py-3 transition-colors hover:bg-[var(--pink)] hover:text-[var(--ink)]"
             >
               <span className="font-brush text-lg font-black">READ THE FULL TRANSMISSION</span>
               <ArrowRight

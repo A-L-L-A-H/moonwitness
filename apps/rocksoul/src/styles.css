@@ -403,3 +403,33 @@
   width: 26px;
   height: 26px;
 }
+
+[data-skin="technical"] .riot-panel,
+[data-skin="technical"] .roster-card,
+[data-skin="technical"] .project-card {
+  border-color: var(--dna-accent, var(--color-accent-primary));
+  box-shadow: none;
+  background: var(--dna-surface, var(--color-surface));
+}
+
+[data-skin="editorial"] .riot-panel,
+[data-skin="editorial"] .roster-card,
+[data-skin="editorial"] .project-card {
+  border-color: var(--dna-border, var(--color-border));
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--dna-canvas, var(--color-bg)) 45%, transparent);
+}
+
+[data-skin="technical"] .create-chaos,
+[data-skin="technical"] .riot-button {
+  clip-path: none;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

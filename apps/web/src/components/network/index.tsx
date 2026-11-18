@@ -1,8 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
-import { Tape, ZineBadge, ZineCard, ZineCardRough, ZineInput } from "@moonwitness/ui";
-import { Crown } from "@moonwitness/ui/icons";
+import { CableCoilArt, Tape, ZineBadge, ZineCard, ZineCardRough, ZineInput } from "@moonwitness/ui";
+import { Crown, VpnTunnel } from "@moonwitness/ui/icons";
 import { OperationsShell } from "@/components/shell";
 import { ControlGate } from "@/components/control/gate";
 import { PortForwardPanel } from "./portforward";
@@ -18,7 +18,7 @@ import {
 } from "@/lib/api/vpn";
 
 function formatTraffic(bytes: number): string {
-  if (!Number.isFinite(bytes) || bytes <= 0) return "â€”";
+  if (!Number.isFinite(bytes) || bytes <= 0) return "—";
   const units = ["B", "KiB", "MiB", "GiB", "TiB"];
   const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
   const value = bytes / 1024 ** i;
@@ -71,8 +71,11 @@ function ConfigPanel({
     <ZineCardRough className="relative p-5">
       <Tape className="-top-3 left-8 -rotate-3" />
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="font-brush text-xl text-white">
-          CONFIG <span className="text-[var(--green)]">{name.toUpperCase()}</span>
+        <h3 className="inline-flex items-center gap-2 font-brush text-xl text-[var(--foreground)]">
+          <VpnTunnel className="h-5 w-5 text-[var(--primary)]" />
+          <span>
+            CONFIG <span className="text-[var(--green)]">{name.toUpperCase()}</span>
+          </span>
         </h3>
         <div className="flex gap-2">
           <button type="button" onClick={copy} className="btn-zine btn-blue px-3 py-2 text-[11px]">
@@ -158,7 +161,7 @@ function PeerRow({
       </td>
       <td className="px-3 py-2 font-mono text-[10px] text-[var(--muted-foreground)]">
         <div>
-          â†“{formatTraffic(peer.rx_bytes)} â†‘{formatTraffic(peer.tx_bytes)}
+          ↓{formatTraffic(peer.rx_bytes)} ↑{formatTraffic(peer.tx_bytes)}
         </div>
         {quota > 0 && (
           <div className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">
@@ -302,7 +305,7 @@ function NetworkDashboard() {
   return (
     <OperationsShell
       breadcrumb="Network"
-      search={{ value: query, onChange: setQuery, placeholder: "Filter peerâ€¦" }}
+      search={{ value: query, onChange: setQuery, placeholder: "Filter peer…" }}
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
@@ -353,7 +356,7 @@ function NetworkDashboard() {
               <ZineCard className="p-4">
                 <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">ENDPOINT</p>
                 <p className="mt-1 truncate font-mono text-sm text-[var(--foreground)]">
-                  {data.endpoint || "â€”"}
+                  {data.endpoint || "—"}
                 </p>
                 <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
                   Alamat yang dipakai PC untuk menyambung.
@@ -397,7 +400,7 @@ function NetworkDashboard() {
                     disabled={up.isPending}
                     className="btn-zine shrink-0 px-5 py-2.5 text-sm"
                   >
-                    {up.isPending ? "MENYALAKANâ€¦" : "AKTIFKAN"}
+                    {up.isPending ? "MENYALAKAN…" : "AKTIFKAN"}
                   </button>
                 </div>
                 <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
@@ -459,7 +462,7 @@ function NetworkDashboard() {
                       disabled={create.isPending}
                       className="btn-zine px-5 py-2.5 text-sm"
                     >
-                      {create.isPending ? "MEMBUATâ€¦" : "TAMBAH"}
+                      {create.isPending ? "MEMBUAT…" : "TAMBAH"}
                     </button>
                   </div>
                   {peerMode === "site" && (
@@ -474,7 +477,7 @@ function NetworkDashboard() {
                     </div>
                   )}
                   <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
-                    <strong className="text-[var(--foreground)]">SPLIT</strong> hanya subnet VPN â€” internet
+                    <strong className="text-[var(--foreground)]">SPLIT</strong> hanya subnet VPN — internet
                     tetap lewat ISP. <strong className="text-[var(--foreground)]">FULL</strong> semua trafik
                     lewat VPS. <strong className="text-[var(--foreground)]">SITE</strong> untuk router kantor:
                     LAN di balik router ikut terhubung.
@@ -483,8 +486,11 @@ function NetworkDashboard() {
 
                 <ZineCard className="overflow-hidden p-0">
                   <div className="flex items-center justify-between border-b-2 border-[var(--border)] px-4 py-3">
-                    <h2 className="font-brush text-lg text-white">
-                      PERANGKAT <span className="text-[var(--primary)]">TERDAFTAR</span>
+                    <h2 className="inline-flex items-center gap-2 font-brush text-lg text-[var(--foreground)]">
+                      <VpnTunnel className="h-4 w-4 text-[var(--primary)]" />
+                      <span>
+                        PERANGKAT <span className="text-[var(--primary)]">TERDAFTAR</span>
+                      </span>
                     </h2>
                     <button
                       type="button"
@@ -498,9 +504,10 @@ function NetworkDashboard() {
                     </button>
                   </div>
                   {data.peers.length === 0 ? (
-                    <p className="px-4 py-6 text-sm text-[var(--muted-foreground)]">
-                      Belum ada perangkat. Tambahkan PC Anda di atas.
-                    </p>
+                    <div className="flex flex-col items-center gap-3 px-4 py-6 text-center text-sm text-[var(--muted-foreground)]">
+                      <CableCoilArt className="h-16 w-16 opacity-85" decorative />
+                      <p>Belum ada perangkat. Tambahkan PC Anda di atas.</p>
+                    </div>
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full border-collapse">
@@ -562,7 +569,7 @@ function NetworkDashboard() {
                 <li>2. Pasang aplikasi WireGuard resmi di PC (Windows/macOS/Linux/Android/iOS).</li>
                 <li>3. Impor file tersebut, lalu aktifkan tunnel.</li>
                 <li>
-                  4. Cek dari PC: <code>ping {data.address.split("/")[0]}</code> â€” balasan berarti
+                  4. Cek dari PC: <code>ping {data.address.split("/")[0]}</code> — balasan berarti
                   tunnel hidup.
                 </li>
                 <li>

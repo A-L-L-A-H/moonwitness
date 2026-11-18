@@ -41,7 +41,7 @@ export function Landing() {
         <Hero />
 
         <main id="main">
-          <Marquee className="border-y-2 border-[var(--line)] bg-[var(--pink)] py-2.5 font-brush text-lg text-white">
+          <Marquee className="border-y-2 border-[var(--border)] bg-[var(--pink)] py-2.5 font-brush text-lg text-white">
             {MARQUEE_ITEMS.map((t) => (
               <span key={t} className="flex items-center gap-8">
                 {t} <Star4 className="h-4 w-4 text-[var(--yellow)]" />

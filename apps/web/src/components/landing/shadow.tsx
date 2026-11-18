@@ -110,7 +110,7 @@ export function Shadow() {
 
         <h2
           ref={titleRef}
-          className="cmyk-slip font-brush text-5xl leading-none text-zinc-100 drop-shadow-[6px_6px_0_rgba(255,59,59,0.3)] sm:text-7xl md:text-8xl opacity-0"
+          className="cmyk-slip font-brush text-5xl leading-none text-[var(--foreground)] drop-shadow-[6px_6px_0_rgba(255,59,59,0.3)] sm:text-7xl md:text-8xl opacity-0"
           style={{ transform: "translateY(50px) scale(0.95)" }}
         >
           NOT EVERYTHING
@@ -121,7 +121,7 @@ export function Shadow() {
 
         <p
           ref={paraRef}
-          className="mt-8 max-w-2xl font-hand text-xl leading-relaxed text-zinc-400 opacity-0"
+          className="mt-8 max-w-2xl font-hand text-xl leading-relaxed text-[var(--muted-foreground)] opacity-0"
           style={{ transform: "translateX(-30px)" }}
         >
           Beneath the signals we publish lies a deeper stratum — transmissions that don&rsquo;t fit
@@ -137,12 +137,12 @@ export function Shadow() {
               SIGNAL ARCHIVE PREVIEW
             </div>
             {isPending ? (
-              <p role="status" className="p-5 font-mono text-sm text-zinc-400">
+              <p role="status" className="p-5 font-mono text-sm text-[var(--muted-foreground)]">
                 Loading archive preview…
               </p>
             ) : isError ? (
               <div className="p-5">
-                <p role="alert" className="font-mono text-sm text-zinc-400">
+                <p role="alert" className="font-mono text-sm text-[var(--muted-foreground)]">
                   Archive preview unavailable.
                 </p>
                 <Button
@@ -168,15 +168,15 @@ export function Shadow() {
                     sizes="(max-width: 768px) 100vw, 720px"
                   />
                 </div>
-                <div className="border-t border-[var(--red)]/30 bg-[var(--panel-2)] p-5">
-                  <span className="font-mono text-xs text-zinc-400">
+                <div className="border-t border-[var(--red)]/30 bg-[var(--muted)] p-5">
+                  <span className="font-mono text-xs text-[var(--muted-foreground)]">
                     {event.kind} // {event.date}
                   </span>
                   <h3 className="mt-2 font-brush text-2xl text-white">{event.title}</h3>
                 </div>
               </Link>
             ) : (
-              <p role="status" className="p-5 font-mono text-sm text-zinc-400">
+              <p role="status" className="p-5 font-mono text-sm text-[var(--muted-foreground)]">
                 No timeline events available.
               </p>
             )}

@@ -26,7 +26,7 @@ export function Crew() {
             <h2 className="cmyk-slip font-brush text-4xl text-white sm:text-5xl">
               A GLOBAL MAP OF <span className="text-[var(--blue)]">WITNESSES.</span>
             </h2>
-            <p className="mt-2 max-w-xl font-mono text-xs text-zinc-300">
+            <p className="mt-2 max-w-xl font-mono text-xs text-[var(--foreground)]">
               Same moon, different story coordinates. Select a fictional demo profile on the map or
               in the list to read their story quote.
             </p>

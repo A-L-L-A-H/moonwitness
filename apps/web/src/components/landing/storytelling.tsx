@@ -109,7 +109,7 @@ export function Storytelling() {
               <a
                 key={story.id}
                 href={`#story-${story.id}`}
-                className="group block border border-[var(--line)] bg-[var(--panel)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)]"
+                className="group block border border-[var(--border)] bg-[var(--card)] focus-visible:outline-2 focus-visible:outline-[var(--yellow)]"
               >
                 <div className="relative aspect-video overflow-hidden">
                   <Image

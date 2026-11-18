@@ -56,34 +56,34 @@ export function ProfileMenu({
       <DropdownMenuContent className="w-56 p-2 min-w-[12rem]" side="top" align="end" sideOffset={8}>
         <div className="border-b border-[var(--border)] px-3 py-2">
           <p className="truncate text-xs font-bold text-[var(--foreground)]">{identity}</p>
-          <p className="text-[10px] text-zinc-500">Authorized crew</p>
+          <p className="text-[10px] text-[var(--muted-foreground)]">Authorized crew</p>
         </div>
         <DropdownMenuSeparator />
         <Link
           href="/dock"
-          className="block min-h-11 rounded px-3 py-2 text-xs text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white"
+          className="block min-h-11 rounded px-3 py-2 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
         >
           Project Universe
         </Link>
         <Link
           href="/id-lab"
-          className="block min-h-11 rounded px-3 py-2 text-xs text-[var(--yellow)] hover:bg-[var(--panel-2)] hover:text-white"
+          className="block min-h-11 rounded px-3 py-2 text-xs text-[var(--yellow)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
         >
           ID Lab — your witness face
         </Link>
         <Link
           href="/moonwitness"
-          className="block min-h-11 rounded px-3 py-2 text-xs text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white"
+          className="block min-h-11 rounded px-3 py-2 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
         >
           Moonwitness landing
         </Link>
-        <SanctuaryGateLink className="block min-h-11 rounded px-3 py-2 text-xs text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white">
+        <SanctuaryGateLink className="block min-h-11 rounded px-3 py-2 text-xs text-[var(--foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]">
           Public site
         </SanctuaryGateLink>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={onExit}
-          className="text-[var(--pink)] hover:bg-[var(--panel-2)]"
+          className="text-[var(--pink)] hover:bg-[var(--muted)]"
         >
           Exit the shadow →
         </DropdownMenuItem>

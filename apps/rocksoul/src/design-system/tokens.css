@@ -27,27 +27,27 @@
   --color-purple: #6555ff;
   --color-moonlight: #e9d4b5;
 
-  /* Semantic aliases */
-  --color-bg: var(--color-black);
-  --color-bg-soft: var(--color-black-soft);
-  --color-surface: var(--color-panel);
-  --color-surface-2: var(--color-panel-2);
-  --color-text: var(--color-dirty-white);
-  --color-text-muted: var(--color-muted);
-  --color-border: var(--color-line);
-  --color-border-soft: var(--color-line-soft);
-  --color-accent-primary: var(--color-lime);
+  /* Semantic aliases (bridged with @moonwitness/ui 8-axis skin & DNA vars) */
+  --color-bg: var(--dna-canvas, var(--color-black));
+  --color-bg-soft: var(--dna-surface, var(--color-black-soft));
+  --color-surface: var(--dna-surface, var(--color-panel));
+  --color-surface-2: var(--dna-surface-elevated, var(--color-panel-2));
+  --color-text: var(--dna-text, var(--color-dirty-white));
+  --color-text-muted: var(--dna-muted, var(--color-muted));
+  --color-border: var(--dna-border, var(--color-line));
+  --color-border-soft: var(--dna-border, var(--color-line-soft));
+  --color-accent-primary: var(--dna-world-accent, var(--color-lime));
   --color-accent-danger: var(--color-orange);
   --color-accent-warm: var(--color-rust);
   --color-accent-cool: var(--color-purple);
   --color-accent-highlight: var(--color-pink);
-  --color-focus: var(--color-lime);
-  --color-focus-ring: var(--color-lime);
+  --color-focus: var(--dna-focus, var(--color-lime));
+  --color-focus-ring: var(--dna-focus, var(--color-lime));
 
   /* === TYPOGRAPHY === */
-  --font-display: "Barlow Condensed", sans-serif;
-  --font-mono: "IBM Plex Mono", monospace;
-  --font-body: var(--font-display);
+  --font-display: var(--mw-font-display, "Barlow Condensed", sans-serif);
+  --font-mono: var(--mw-font-mono, "IBM Plex Mono", monospace);
+  --font-body: var(--mw-font-body, var(--font-display));
 
   --text-xs: clamp(10px, 0.625rem, 11px);
   --text-sm: clamp(11px, 0.6875rem, 12px);

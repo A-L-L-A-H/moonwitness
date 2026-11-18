@@ -30,7 +30,7 @@ export function About() {
     <section
       ref={ref}
       id="about"
-      className="relative scroll-mt-20 overflow-hidden border-t-2 border-[var(--line)]"
+      className="relative scroll-mt-20 overflow-hidden border-t-2 border-[var(--border)]"
     >
       <div
         data-join-layer="paper"
@@ -58,7 +58,7 @@ export function About() {
           <h2 className="font-brush text-5xl leading-tight text-[var(--pink)] drop-shadow-[3px_3px_0_rgba(0,0,0,0.9)] sm:text-7xl">
             JOIN THE CREW
           </h2>
-          <p className="mx-auto mt-4 max-w-xl font-hand text-2xl text-zinc-200">
+          <p className="mx-auto mt-4 max-w-xl font-hand text-2xl text-[var(--foreground)]">
             More stories. More places. More perspectives. A brighter world.
           </p>
         </div>

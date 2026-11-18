@@ -56,25 +56,25 @@ function ArchiveStrip() {
   return (
     <div className="relative">
       {isPending ? (
-        <p role="status" className="min-h-44 py-8 text-sm text-zinc-300">
+        <p role="status" className="min-h-44 py-8 text-sm text-[var(--foreground)]">
           Loading archive…
         </p>
       ) : isError ? (
         <div className="min-h-44 py-8">
-          <p role="alert" className="text-sm text-zinc-300">
+          <p role="alert" className="text-sm text-[var(--foreground)]">
             Archive unavailable.
           </p>
           <button
             type="button"
             onClick={() => void refetch()}
             disabled={isFetching}
-            className="archive-control mt-4 min-h-11 border-2 border-zinc-400 px-4 py-2 text-sm text-zinc-100"
+            className="archive-control mt-4 min-h-11 border-2 border-zinc-400 px-4 py-2 text-sm text-[var(--foreground)]"
           >
             {isFetching ? "Retrying archive…" : "Retry archive"}
           </button>
         </div>
       ) : !items.length ? (
-        <p role="status" className="min-h-44 py-8 text-sm text-zinc-300">
+        <p role="status" className="min-h-44 py-8 text-sm text-[var(--foreground)]">
           No timeline events available.
         </p>
       ) : null}
@@ -125,7 +125,7 @@ function ArchiveStrip() {
             </Link>
           ))}
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--line)] pt-4">
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
         <Link href="/dock">
           <Button className="min-h-11 px-4 py-3 text-sm">
             BROWSE FULL ARCHIVE <ArrowRight className="h-4 w-4" />
@@ -137,7 +137,7 @@ function ArchiveStrip() {
             disabled={unavailable || edges.left}
             onClick={() => scroll(-1)}
             aria-label="Scroll archive left"
-            className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-zinc-300"
+            className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-[var(--foreground)]"
           >
             ←
           </button>
@@ -146,7 +146,7 @@ function ArchiveStrip() {
             disabled={unavailable || edges.right}
             onClick={() => scroll(1)}
             aria-label="Scroll archive right"
-            className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-zinc-300"
+            className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-[var(--foreground)]"
           >
             →
           </button>
@@ -165,7 +165,7 @@ export function Archive() {
           <h2 className="cmyk-slip font-brush text-4xl text-white sm:text-5xl">
             A TIMELINE OF <span className="text-[var(--yellow)]">SIGNALS.</span>
           </h2>
-          <p className="mt-2 font-mono text-xs text-zinc-400">
+          <p className="mt-2 font-mono text-xs text-[var(--muted-foreground)]">
             Past transmissions, underground sightings, and leaked police scanner recordings.
           </p>
         </div>

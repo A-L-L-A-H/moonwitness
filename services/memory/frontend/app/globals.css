@@ -3172,6 +3172,31 @@ a {
   }
 }
 
+:root[data-skin="technical"] {
+  --accent: var(--dna-accent, #38bdf8);
+  --focus: var(--dna-focus, #38bdf8);
+  --line: var(--dna-border, #2a475e);
+}
+
+:root[data-skin="editorial"] {
+  --accent: var(--dna-accent, #c89b3c);
+  --focus: var(--dna-focus, #e7c66b);
+  --line: var(--dna-border, #5c4b2b);
+}
+
+:root[data-skin="riot"] {
+  --accent: var(--dna-accent, #ffd21f);
+  --signal: #ff4d7d;
+  --focus: var(--dna-focus, #ffd21f);
+  --line: var(--dna-border, #5a3446);
+}
+
+:root[data-skin="technical"] .memory-deck,
+:root[data-skin="technical"] .panel,
+:root[data-skin="technical"] .crt-frame {
+  border-radius: 2px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

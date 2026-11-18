@@ -1,10 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
 
 export type DeckMode = "overview" | "vault" | "queue" | "knowledge";
 type Theme = "dark" | "light";
+type MemorySkin = "archive" | "technical" | "editorial" | "riot";
+const MEMORY_SKINS: readonly MemorySkin[] = ["archive", "technical", "editorial", "riot"];
+const MEMORY_SKIN_STORAGE_KEY = "mw-memory-skin";
 
 type Props = {
   activeMode: DeckMode;
@@ -43,6 +46,33 @@ export function MemoryDeckShell({
   transport,
   children,
 }: Props) {
+  const [skin, setSkin] = useState<MemorySkin>("archive");
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(MEMORY_SKIN_STORAGE_KEY) as MemorySkin | null;
+      if (saved && MEMORY_SKINS.includes(saved)) {
+        setSkin(saved);
+        document.documentElement.dataset.skin = saved;
+      } else {
+        document.documentElement.dataset.skin = "archive";
+      }
+    } catch {
+      document.documentElement.dataset.skin = "archive";
+    }
+  }, []);
+
+  function cycleSkin() {
+    const next = MEMORY_SKINS[(MEMORY_SKINS.indexOf(skin) + 1) % MEMORY_SKINS.length] ?? "archive";
+    setSkin(next);
+    try {
+      document.documentElement.dataset.skin = next;
+      window.localStorage.setItem(MEMORY_SKIN_STORAGE_KEY, next);
+    } catch {
+      // ignore storage errors in restricted environments
+    }
+  }
+
   return (
     <div className="memory-deck">
       <a className="skip-link" href="#active-workspace">
@@ -51,7 +81,12 @@ export function MemoryDeckShell({
       <header className="deck-fascia">
         <div className="deck-brand">
           <span className="deck-brand__mark" aria-hidden="true">
-            MW
+            <svg viewBox="0 0 32 32" width="22" height="22" fill="none">
+              <rect x="2" y="6" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
+              <circle cx="11" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+              <circle cx="21" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
+              <line x1="14" y1="16" x2="18" y2="16" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
           </span>
           <span className="deck-brand__type">
             <strong>MOONWITNESS</strong>
@@ -76,6 +111,17 @@ export function MemoryDeckShell({
         <div className="deck-fascia__actions">
           {authControl}
           {loadControl}
+          <button
+            className="deck-icon-button"
+            type="button"
+            onClick={cycleSkin}
+            aria-label={`Memory skin preset (${skin})`}
+            title={`Skin: ${skin} — click to cycle`}
+          >
+            <span style={{ fontSize: "10px", fontFamily: "var(--mono-type)", fontWeight: 700 }}>
+              {skin.slice(0, 4).toUpperCase()}
+            </span>
+          </button>
           <button
             className="deck-icon-button"
             type="button"

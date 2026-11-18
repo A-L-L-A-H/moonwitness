@@ -1,7 +1,10 @@
 import React from "react";
-import { Activity, ChevronDown, Command, FolderGit2, LogIn, LogOut, RefreshCw, Settings2 } from "lucide-react";
+import { Activity, ChevronDown, Command, FolderGit2, LogIn, LogOut, Palette, RefreshCw, Settings2 } from "lucide-react";
+import { DnaBrandLogo, useSkin, type SkinName } from "@moonwitness/ui";
 import { CrimsonCrownSvg } from "./ui/RocksoulVectors";
 import type { Repository } from "../lib/contracts";
+
+const ROCKSOUL_SKIN_CYCLE: readonly SkinName[] = ["riot", "technical", "editorial"];
 
 export interface TopbarIdentity {
   username: string;
@@ -38,9 +41,14 @@ export default function Topbar({
   onSignIn,
   onSignOut,
 }: TopbarProps) {
+  const { skin, setSkin } = useSkin();
+  const nextSkin =
+    ROCKSOUL_SKIN_CYCLE[(ROCKSOUL_SKIN_CYCLE.indexOf(skin) + 1) % ROCKSOUL_SKIN_CYCLE.length] ?? "riot";
+
   return (
     <header className="topbar">
       <div className="topbar-brand">
+        <DnaBrandLogo id="03-rocksoul" variant="mark" size={24} decorative />
         <CrimsonCrownSvg className="brand-crown-img" />
         <span>
           ROCKSOUL <b>- DX</b>
@@ -96,6 +104,15 @@ export default function Topbar({
         )}
         <button className="shortcut" onClick={onCommand}>
           <Command size={14} /> CTRL + K
+        </button>
+        <button
+          type="button"
+          className="shortcut"
+          aria-label={`Switch skin (${skin})`}
+          title={`Skin: ${skin} → click for ${nextSkin}`}
+          onClick={() => setSkin(nextSkin)}
+        >
+          <Palette size={13} /> {skin.toUpperCase()}
         </button>
         <button className="icon-button" aria-label="Settings" onClick={onSettings}>
           <Settings2 size={19} />

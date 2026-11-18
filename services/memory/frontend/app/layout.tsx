@@ -35,7 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html:
-              'try { const saved = localStorage.getItem("mw-memory-theme"); document.documentElement.dataset.theme = saved === "light" ? "light" : "dark"; } catch { document.documentElement.dataset.theme = "dark"; }',
+              'try { const saved = localStorage.getItem("mw-memory-theme"); document.documentElement.dataset.theme = saved === "light" ? "light" : "dark"; const savedSkin = localStorage.getItem("mw-memory-skin"); if (savedSkin) document.documentElement.dataset.skin = savedSkin; } catch { document.documentElement.dataset.theme = "dark"; }',
           }}
         />
         {children}

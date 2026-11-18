@@ -1,6 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState, type FormEvent } from "react";
+import { CassetteRecorderArt, SkinOrnament } from "@moonwitness/ui";
+import { MemoryTapeNode } from "@moonwitness/ui/icons";
 import {
   formatMemoryContextPrompt,
   getMemoryExportUrl,
@@ -40,19 +42,23 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
       : !bridgeConfigured
         ? "OPTIONAL / NOT CONFIGURED"
         : bridgeReachable
-          ? `ONLINE Â· ${status.data?.counts?.knowledge ?? 0} RECORDS`
+          ? `ONLINE · ${status.data?.counts?.knowledge ?? 0} RECORDS`
           : "CONFIGURED / OFFLINE";
 
   return (
     <section
       aria-label="Archive memory bridge"
-      className="border-2 border-[var(--border)] bg-[var(--card)] p-5"
+      className="relative overflow-hidden border-2 border-[var(--border)] bg-[var(--card)] p-5"
     >
       <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border)] pb-4">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
-            SOVEREIGN KNOWLEDGE BRIDGE Â· PORT 8000 / 3005
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <MemoryTapeNode className="h-4 w-4 text-[var(--primary)]" />
+            <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
+              SOVEREIGN KNOWLEDGE BRIDGE · PORT 8000 / 3005
+            </p>
+            <SkinOrnament slot="tag" label="MEMORY BRIDGE" />
+          </div>
           <h2 className="mt-1 font-brush text-2xl text-[var(--foreground)]">Archive Memory</h2>
           <p className="mt-1 text-xs text-[var(--muted-foreground)]">
             Search distilled knowledge from local ChatGPT archives and attach verified context into
@@ -88,18 +94,21 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           available.
         </p>
       ) : !bridgeConfigured ? (
-        <div className="mt-4 space-y-2 text-xs text-[var(--muted-foreground)]">
-          <p>
-            Set <code className="font-mono text-[var(--foreground)]">MEMORY_API_URL</code> (for example{" "}
-            <code className="font-mono text-[var(--foreground)]">http://127.0.0.1:8000</code>) on{" "}
-            <code className="font-mono text-[var(--foreground)]">@moonwitness/api</code> to enable archive
-            knowledge search from this console.
-          </p>
-          <p className="font-mono text-[11px] text-[var(--muted-foreground)]">
-            Vault ingest: launch <span className="text-[var(--foreground)]">services/memory</span> stack (port
-            3005 / API 8000) and upload{" "}
-            <span className="text-[var(--foreground)]">chatgpt_mohrezzafahlevi.zip</span>.
-          </p>
+        <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-[var(--muted-foreground)]">
+          <CassetteRecorderArt className="h-16 w-16 shrink-0 opacity-85" decorative />
+          <div className="min-w-0 flex-1 space-y-2">
+            <p>
+              Set <code className="font-mono text-[var(--foreground)]">MEMORY_API_URL</code> (for example{" "}
+              <code className="font-mono text-[var(--foreground)]">http://127.0.0.1:8000</code>) on{" "}
+              <code className="font-mono text-[var(--foreground)]">@moonwitness/api</code> to enable archive
+              knowledge search from this console.
+            </p>
+            <p className="font-mono text-[11px] text-[var(--muted-foreground)]">
+              Vault ingest: launch <span className="text-[var(--foreground)]">services/memory</span> stack (port
+              3005 / API 8000) and upload{" "}
+              <span className="text-[var(--foreground)]">chatgpt_mohrezzafahlevi.zip</span>.
+            </p>
+          </div>
         </div>
       ) : !bridgeReachable ? (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
