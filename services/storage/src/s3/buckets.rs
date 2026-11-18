@@ -4,9 +4,9 @@ use axum::extract::State;
 use axum::http::{HeaderMap, HeaderValue, StatusCode};
 use axum::response::Response;
 
+use crate::config::StorageBackend;
 use crate::models::Bucket;
 use crate::s3::errors::{request_id_header, try_header_value, S3Error, S3Result};
-use crate::config::StorageBackend;
 use crate::s3::state::{parse_range, validate_bucket_name, AppState, Principal, DEFAULT_REGION};
 use crate::xml::{self, Element};
 
