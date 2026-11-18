@@ -15,7 +15,7 @@ export function Crew() {
     >
       <Halftone tone="pink" className="pointer-events-none absolute inset-0 opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b-2 border-dashed border-zinc-800 pb-6">
+        <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b-2 border-dashed border-[var(--border)] pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
               <SkullCrossbonesFunky className="h-5 w-5 text-[var(--yellow)]" />

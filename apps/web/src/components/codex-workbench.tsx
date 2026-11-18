@@ -10,6 +10,8 @@ import {
   tokenizeAndParseAqel,
   type SrgblCriterionWeight,
 } from "@moonwitness/canon";
+import { RadialGauge, SkinOrnament } from "@moonwitness/ui";
+import { ScriptureFolio } from "@moonwitness/ui/icons";
 import { DnaButton, DnaChamber, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 
@@ -122,8 +124,10 @@ export function CodexWorkbench() {
       <SacredCornerBrackets />
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--dna-accent)]/25 pb-4">
         <div>
-          <div className="font-mono text-[10px] tracking-[0.22em] text-[var(--dna-accent)] uppercase">
-            @MOONWITNESS/CANON · DETERMINISTIC CLIENT ENGINE WORKBENCH
+          <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] tracking-[0.22em] text-[var(--dna-accent)] uppercase">
+            <ScriptureFolio className="h-4 w-4" />
+            <span>@MOONWITNESS/CANON · DETERMINISTIC CLIENT ENGINE WORKBENCH</span>
+            <SkinOrnament slot="tag" label="EPISTEMIC KERNEL" />
           </div>
           <h3 className="mt-1 font-monument text-base sm:text-lg tracking-[0.14em] text-[var(--dna-text)] uppercase">
             {locale === "id"
@@ -204,9 +208,19 @@ export function CodexWorkbench() {
 
           <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5">
-              <span className="font-mono text-[10.5px] text-[var(--dna-accent)]">
-                P18 AUDIT VERDICT
-              </span>
+              <div className="flex items-center gap-3">
+                <RadialGauge
+                  value={wsiDepth}
+                  max={3}
+                  size={52}
+                  label="HOP"
+                  unit="/3"
+                  colorVar="var(--dna-accent)"
+                />
+                <span className="font-mono text-[10.5px] text-[var(--dna-accent)]">
+                  P18 AUDIT VERDICT
+                </span>
+              </div>
               <span
                 className={`border px-2.5 py-0.5 font-mono text-[11px] font-bold ${
                   wsiResult.frameStatus === "ONSIDE"

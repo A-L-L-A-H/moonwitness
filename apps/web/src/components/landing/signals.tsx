@@ -9,7 +9,7 @@ import { DistressedSticker, Staple, TactileTape, Button } from "@moonwitness/ui"
 export function Signals() {
   return (
     <section id="signals" className="relative mx-auto max-w-7xl scroll-mt-20 px-4 py-24 sm:px-6">
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b-2 border-dashed border-zinc-800 pb-6">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-4 border-b-2 border-dashed border-[var(--border)] pb-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <SprayCan className="h-5 w-5 text-[var(--pink)]" />

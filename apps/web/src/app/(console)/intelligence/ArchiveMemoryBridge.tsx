@@ -183,7 +183,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
                   setSearchInput("");
                   setSubmittedQuery("");
                 }}
-                className="min-h-11 border border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-wider text-[var(--foreground)] hover:border-zinc-400"
+                className="min-h-11 border border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-wider text-[var(--foreground)] hover:border-[var(--primary)]"
               >
                 CLEAR
               </button>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
@@ -11,6 +11,8 @@ import {
   type PaletteName,
 } from "@moonwitness/avatars";
 import {
+  SkinBackdrop,
+  SkinOrnament,
   Sticker,
   Tape,
   WitnessAvatar,
@@ -123,19 +125,19 @@ function LabSwitchToggle({
       className="flex min-h-9 w-full items-center justify-between gap-2 border-2 border-[var(--border)] bg-[var(--muted)] px-3 py-1.5 text-left transition-colors hover:border-[var(--pink)]"
     >
       <span className="text-[10px] font-bold tracking-wider text-[var(--foreground)]">{label}</span>
-      <span
-        className={`relative h-4 w-8 shrink-0 rounded-full border transition-colors ${
-          checked
-            ? "border-[var(--yellow)] bg-[var(--yellow)]"
-            : "border-zinc-600 bg-[var(--muted)]"
-        }`}
-      >
         <span
-          className={`absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full transition-all ${
-            checked ? "left-[18px] bg-black" : "left-[3px] bg-zinc-500"
+          className={`relative h-4 w-8 shrink-0 rounded-full border transition-colors ${
+            checked
+              ? "border-[var(--primary)] bg-[var(--primary)]"
+              : "border-[var(--border)] bg-[var(--muted)]"
           }`}
-        />
-      </span>
+        >
+          <span
+            className={`absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full transition-all ${
+              checked ? "left-[18px] bg-[var(--primary-foreground)]" : "left-[3px] bg-[var(--muted-foreground)]"
+            }`}
+          />
+        </span>
     </button>
   );
 }
@@ -291,7 +293,7 @@ export function IdLab() {
       canvas.toBlob((blob) => {
         if (!blob) return;
         download(blob, `witness-${slugify(effectiveSeed)}.png`);
-        flash("PNG EXPORTED â€” 1024px");
+        flash("PNG EXPORTED — 1024px");
       }, "image/png");
     };
     img.src = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
@@ -302,28 +304,31 @@ export function IdLab() {
       await navigator.clipboard.writeText(svg);
       flash("SVG COPIED TO CLIPBOARD");
     } catch {
-      flash("CLIPBOARD BLOCKED â€” USE DOWNLOAD");
+      flash("CLIPBOARD BLOCKED — USE DOWNLOAD");
     }
   }
 
   return (
     <EmpireShell
       breadcrumb="ID Lab"
-      search={{ value: query, onChange: setQuery, placeholder: "Search the lab notesâ€¦" }}
+      search={{ value: query, onChange: setQuery, placeholder: "Search the lab notes…" }}
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-brush text-3xl text-white sm:text-4xl">
+            <h1 className="font-brush text-3xl text-[var(--foreground)] sm:text-4xl">
               ID <span className="text-[var(--primary)]">LAB</span>
             </h1>
             <p className="mt-1 max-w-xl font-hand text-xl text-[var(--muted-foreground)]">
-              Every witness gets a face. Same seed, same face â€” printed in our own ink.
+              Every witness gets a face. Same seed, same face — printed in our own ink.
             </p>
           </div>
-          <Sticker tone="yellow" className="-rotate-2 px-3 py-1 font-brush text-xs">
-            DICEBEAR ENGINE Ã— MOONWITNESS DNA
-          </Sticker>
+          <div className="flex items-center gap-2">
+            <SkinOrnament slot="tag" label={`${PALETTES.length} PALETTES`} />
+            <Sticker tone="yellow" className="-rotate-2 px-3 py-1 font-brush text-xs">
+              DICEBEAR ENGINE × MOONWITNESS DNA
+            </Sticker>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -332,6 +337,7 @@ export function IdLab() {
             <ZineCardRough className="relative overflow-hidden p-6">
               <Tape className="-top-3 left-10 -rotate-3" />
               <div className="halftone relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-md bg-[var(--ink)] p-8">
+                <SkinBackdrop seed={effectiveSeed.length} />
                 <div
                   className="pointer-events-none absolute inset-0 opacity-40"
                   style={{
@@ -355,7 +361,7 @@ export function IdLab() {
                   {effectiveSeed.toUpperCase()}
                 </span>
                 <span className="absolute right-3 top-3 border border-[var(--border)] bg-black/60 px-2 py-1 text-[10px] tracking-widest text-[var(--muted-foreground)]">
-                  {size}Ã—{size}
+                  {size}×{size}
                 </span>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -479,7 +485,7 @@ export function IdLab() {
                   <ZineInput
                     value={seed}
                     onChange={(e) => setSeed(e.target.value)}
-                    placeholder="Type any nameâ€¦"
+                    placeholder="Type any name…"
                     aria-label="Avatar seed"
                     className="min-h-10 flex-1"
                   />
@@ -489,7 +495,7 @@ export function IdLab() {
                     className="min-h-10 px-3 text-xs"
                     aria-label="Random seed"
                   >
-                    â¤³
+                    ⤳
                   </ZineButton>
                 </div>
               </Control>
@@ -614,7 +620,7 @@ export function IdLab() {
                     }`}
                   >
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${applied ? "bg-[var(--yellow)]" : "bg-zinc-600"}`}
+                      className={`h-1.5 w-1.5 rounded-full ${applied ? "bg-[var(--primary)]" : "bg-[var(--muted-foreground)]"}`}
                     />
                     {applied ? "TERPASANG" : "DRAFT"}
                   </span>
@@ -625,18 +631,18 @@ export function IdLab() {
                 <p className="mt-2 font-hand text-base leading-snug text-[var(--muted-foreground)]">
                   {applied
                     ? "Wajah ini yang tampil di topbar profilmu."
-                    : "Eksperimen di sini belum mengubah profilmu â€” tekan Gunakan Avatar untuk memasangnya."}
+                    : "Eksperimen di sini belum mengubah profilmu — tekan Gunakan Avatar untuk memasangnya."}
                 </p>
                 {!storageAvailable && (
                   <p className="mt-2 border border-[var(--pink)]/60 bg-[var(--pink)]/10 px-3 py-2 text-xs text-[var(--primary)]">
-                    Penyimpanan lokal tidak tersedia â€” avatar tidak bisa disimpan di browser ini.
+                    Penyimpanan lokal tidak tersedia — avatar tidak bisa disimpan di browser ini.
                   </p>
                 )}
               </div>
             </ZineCardRough>
             <p className="mt-3 px-1 font-hand text-lg leading-snug text-[var(--muted-foreground)]">
               Built on the DiceBear engine, redrawn in MoonWitness ink: halftone, torn edges, crowns
-              and the big blue moon. One seed, one witness â€” everywhere in the empire.
+              and the big blue moon. One seed, one witness — everywhere in the empire.
             </p>
           </div>
         </div>

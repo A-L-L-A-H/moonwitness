@@ -51,11 +51,18 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
   );
 
   return (
-    <div className={`relative ${className ?? ""}`}>
+    <div
+      className={`relative ${className ?? ""}`}
+      onKeyDown={(e) => {
+        if (e.key === "Escape" && isOpen) setIsOpen(false);
+      }}
+    >
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-transparent p-2 text-[var(--foreground)] transition-colors hover:border-[var(--border)] hover:bg-[var(--card)]"
+        className={`relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-transparent p-2 text-[var(--foreground)] transition-colors hover:border-[var(--border)] hover:bg-[var(--card)] ${
+          isOpen ? "z-50" : ""
+        }`}
         aria-label="Change skin"
         aria-expanded={isOpen}
         title="Appearance: Skin, DNA World, Mode & Density"

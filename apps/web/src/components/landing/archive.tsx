@@ -68,7 +68,7 @@ function ArchiveStrip() {
             type="button"
             onClick={() => void refetch()}
             disabled={isFetching}
-            className="archive-control mt-4 min-h-11 border-2 border-zinc-400 px-4 py-2 text-sm text-[var(--foreground)]"
+            className="archive-control mt-4 min-h-11 border-2 border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)]"
           >
             {isFetching ? "Retrying archive…" : "Retry archive"}
           </button>
