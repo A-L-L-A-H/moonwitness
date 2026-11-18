@@ -104,6 +104,9 @@ describe("Monitor (OVERSEER)", () => {
 
     expect(screen.getByRole("heading", { name: "OVERSEER" })).toBeInTheDocument();
     expect(screen.getByLabelText("Orbital Ecosystem Sanctuary")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Stack services online ratio" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Primary disk capacity used" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Overseer telemetry counters" })).toBeInTheDocument();
     expect(screen.getByText("8.40 GB")).toBeInTheDocument();
     expect(screen.getByText(/below 10 GB calm buffer/)).toBeInTheDocument();
     expect(screen.getByText("3 CHANGED")).toBeInTheDocument();

@@ -1,10 +1,10 @@
 export const MEMORY_SKINS = [
-  "archive",
-  "technical",
+  "default",
   "editorial",
+  "technical",
   "riot",
-  "cinema",
-  "console",
+  "archive",
+  "transmission",
   "sanctuary",
   "brutalist",
   "noir",
@@ -15,6 +15,11 @@ export type MemorySkin = (typeof MEMORY_SKINS)[number];
 
 export const MEMORY_SKIN_STORAGE_KEY = "mw-memory-skin";
 
+const LEGACY_SKIN_ALIASES: Readonly<Record<string, MemorySkin>> = {
+  cinema: "default",
+  console: "transmission",
+};
+
 export interface MemorySkinMeta {
   readonly label: string;
   readonly grammar: string;
@@ -22,12 +27,12 @@ export interface MemorySkinMeta {
 }
 
 export const MEMORY_SKIN_META: Readonly<Record<MemorySkin, MemorySkinMeta>> = {
-  archive: { label: "Archive Deck", grammar: "Analog cassette deck hardware", reducedMotionSafe: true },
-  technical: { label: "Technical Grid", grammar: "Precision telemetry blueprint", reducedMotionSafe: true },
+  default: { label: "Moonwitness", grammar: "Analog darkroom zine deck", reducedMotionSafe: true },
   editorial: { label: "Editorial Folio", grammar: "Archival journal broadsheet", reducedMotionSafe: true },
+  technical: { label: "Technical Grid", grammar: "Precision telemetry blueprint", reducedMotionSafe: true },
   riot: { label: "Riot Zine", grammar: "Underground stencil tape deck", reducedMotionSafe: true },
-  cinema: { label: "Cinema Darkroom", grammar: "Projector tungsten darkroom", reducedMotionSafe: true },
-  console: { label: "Console Terminal", grammar: "Command strip phosphor HUD", reducedMotionSafe: true },
+  archive: { label: "Archive Deck", grammar: "Analog cassette deck hardware", reducedMotionSafe: true },
+  transmission: { label: "Transmission", grammar: "Command strip phosphor HUD", reducedMotionSafe: true },
   sanctuary: { label: "Sanctuary Brass", grammar: "Aniconic geometric sanctuary", reducedMotionSafe: true },
   brutalist: { label: "Brutalist Concrete", grammar: "Raw sharp slab offset shadow", reducedMotionSafe: true },
   noir: { label: "Noir Detective", grammar: "High-contrast silver dossier", reducedMotionSafe: true },
@@ -35,15 +40,18 @@ export const MEMORY_SKIN_META: Readonly<Record<MemorySkin, MemorySkinMeta>> = {
 };
 
 export function resolveMemorySkin(candidate: string | null | undefined): MemorySkin {
-  if (!candidate) return "archive";
+  if (!candidate) return "default";
+  if (candidate in LEGACY_SKIN_ALIASES) {
+    return LEGACY_SKIN_ALIASES[candidate]!;
+  }
   return (MEMORY_SKINS as readonly string[]).includes(candidate)
     ? (candidate as MemorySkin)
-    : "archive";
+    : "default";
 }
 
 export function nextMemorySkin(current: MemorySkin): MemorySkin {
   const idx = MEMORY_SKINS.indexOf(current);
-  return MEMORY_SKINS[(idx + 1) % MEMORY_SKINS.length] ?? "archive";
+  return MEMORY_SKINS[(idx + 1) % MEMORY_SKINS.length] ?? "default";
 }
 
 export function applyMemorySkin(nextSkin: MemorySkin): void {

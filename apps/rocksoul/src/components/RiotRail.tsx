@@ -1,5 +1,6 @@
 import React from "react";
-import { Activity, GitBranch, Home, ListChecks, RadioTower, Swords } from "lucide-react";
+import { Activity, GitBranch, ListChecks, RadioTower, Swords } from "lucide-react";
+import { Home } from "@moonwitness/ui/icons";
 import { AnarchyStarSigil } from "./ui/RocksoulVectors";
 
 export interface RiotRailProps {
