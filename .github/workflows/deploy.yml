@@ -91,7 +91,7 @@ jobs:
           VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
           TAG: ${{ steps.release.outputs.tag }}
         run: |
-          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<'REMOTE'
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" env VPS_DEPLOY_PATH="$VPS_DEPLOY_PATH" bash -s <<'REMOTE'
             set -euo pipefail
             echo "=== pre-flight: docker ==="
             docker info --format '{{.ServerVersion}}' || { echo "ERROR: docker not running"; exit 1; }
@@ -187,7 +187,7 @@ jobs:
           VPS_DEPLOY_PATH: ${{ vars.VPS_DEPLOY_PATH }}
         run: |
           echo "::warning::Deployment failed. Attempting rollback to previous release."
-          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" bash -s <<'REMOTE' || true
+          ssh -o BatchMode=yes "$VPS_USER@$VPS_HOST" env VPS_DEPLOY_PATH="$VPS_DEPLOY_PATH" bash -s <<'REMOTE' || true
             set -euo pipefail
             cd "${VPS_DEPLOY_PATH}"
             prev_tag=$(git describe --abbrev=0 --tags HEAD^ 2>/dev/null || git rev-parse --short HEAD^)
