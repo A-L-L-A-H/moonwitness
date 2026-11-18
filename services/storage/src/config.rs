@@ -14,7 +14,7 @@ impl StorageBackend {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct GoogleDriveConfig {
     pub client_id: String,
     pub client_secret: String,
@@ -22,7 +22,7 @@ pub struct GoogleDriveConfig {
     pub folder_id: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Config {
     pub host: String,
     pub http_port: u16,
@@ -34,6 +34,36 @@ pub struct Config {
     pub max_object_size: u64,
     pub storage_backend: StorageBackend,
     pub google_drive: Option<GoogleDriveConfig>,
+}
+
+impl std::fmt::Debug for GoogleDriveConfig {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("GoogleDriveConfig")
+            .field("client_id", &self.client_id)
+            .field("client_secret", &"[REDACTED]")
+            .field("refresh_token", &"[REDACTED]")
+            .field("folder_id", &self.folder_id)
+            .finish()
+    }
+}
+
+impl std::fmt::Debug for Config {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("Config")
+            .field("host", &self.host)
+            .field("http_port", &self.http_port)
+            .field("storage_root", &self.storage_root)
+            .field("database_url", &self.database_url)
+            .field("access_key", &"[REDACTED]")
+            .field("secret_key", &"[REDACTED]")
+            .field("allow_anonymous", &self.allow_anonymous)
+            .field("max_object_size", &self.max_object_size)
+            .field("storage_backend", &self.storage_backend)
+            .field("google_drive", &self.google_drive)
+            .finish()
+    }
 }
 
 impl Config {
@@ -132,6 +162,38 @@ fn is_private_or_loopback(host: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn debug_output_redacts_storage_credentials() {
+        let config = Config {
+            host: "127.0.0.1".to_string(),
+            http_port: 8091,
+            storage_root: "./data".to_string(),
+            database_url: "sqlite::memory:".to_string(),
+            access_key: "s3-access-secret".to_string(),
+            secret_key: "s3-secret-secret".to_string(),
+            allow_anonymous: false,
+            max_object_size: 1024,
+            storage_backend: StorageBackend::GoogleDrive,
+            google_drive: Some(GoogleDriveConfig {
+                client_id: "client-id".to_string(),
+                client_secret: "oauth-client-secret".to_string(),
+                refresh_token: "oauth-refresh-secret".to_string(),
+                folder_id: "folder-id".to_string(),
+            }),
+        };
+
+        let rendered = format!("{config:?}");
+        for secret in [
+            "s3-access-secret",
+            "s3-secret-secret",
+            "oauth-client-secret",
+            "oauth-refresh-secret",
+        ] {
+            assert!(!rendered.contains(secret));
+        }
+        assert!(rendered.contains("[REDACTED]"));
+    }
 
     #[test]
     fn storage_backend_has_stable_names() {
