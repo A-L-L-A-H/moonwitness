@@ -15,7 +15,7 @@ import { AtmosphereField } from "@/components/atmosphere";
 
 export function CommandHero({ project }: { project: Project }) {
   return (
-    <div className="grain relative overflow-hidden border-b-2 border-black bg-black">
+    <div className="grain relative overflow-hidden border-b-2 border-[var(--border)] bg-[var(--ink)]">
       <Image
         src={artSrc("shadow-command-hero")}
         alt=""
@@ -62,13 +62,13 @@ export function CommandHero({ project }: { project: Project }) {
             <span className="block">SHADOW</span>
             <span className="block text-[var(--primary)]">COMMAND CENTER</span>
           </h1>
-          <p className="mt-4 font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--foreground)]">
+          <p className="mt-4 font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--paper)]/90">
             MOONWITNESS // PRIVATE // CREATE · CURATE · DEPLOY
           </p>
         </div>
 
         <CornerBrackets className="min-w-0">
-          <aside className="relative min-w-0 border-2 border-[var(--yellow)] bg-[color-mix(in_srgb,var(--ink)_90%,transparent)] p-4 shadow-[5px_5px_0_rgba(0,0,0,0.7)]">
+          <aside className="relative min-w-0 border-2 border-[var(--primary)] bg-[color-mix(in_srgb,var(--card)_94%,transparent)] p-4 text-[var(--card-foreground)] shadow-[var(--mw-card-shadow)]">
             <TactileTape
               variant="black"
               label="FEATURED PROJECT"
@@ -80,13 +80,13 @@ export function CommandHero({ project }: { project: Project }) {
                 <p className="font-mono text-[11px] font-bold tracking-widest text-[var(--primary)]">
                   THE BATTERIES
                 </p>
-                <p className="mt-1 font-brush text-2xl leading-tight text-white">
+                <p className="mt-1 font-brush text-2xl leading-tight text-[var(--card-foreground)]">
                   {project.title.toUpperCase()}
                 </p>
               </div>
               <Crown className="h-5 w-8 shrink-0 -rotate-12 text-[var(--primary)]" />
             </div>
-            <p className="mt-2 font-mono text-[11px] tracking-widest text-[var(--foreground)]">
+            <p className="mt-2 font-mono text-[11px] tracking-widest text-[var(--muted-foreground)]">
               {project.status.toUpperCase()} // STORY WORLD
             </p>
             <Gauge

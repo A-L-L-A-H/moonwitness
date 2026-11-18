@@ -4,7 +4,6 @@ import { ZineImage } from "../primitives/zine-image";
 import { cn } from "../lib/utils";
 import { useSkin } from "../skin";
 import { kanbanColumnVariants } from "../skin/compositions";
-import { defaultKindColors } from "./kind-colors";
 
 export interface KanbanCard {
   id: string;
@@ -27,17 +26,26 @@ export interface KanbanColumnProps<C extends KanbanCard = KanbanCard> {
 }
 
 const DEFAULT_STAGE_COLOR: Record<string, string> = {
-  DRAFT: "#9ca3af",
-  "IN REVIEW": "#ff2d78",
-  APPROVED: "#ffd21f",
-  PUBLISHED: "#3b82f6",
+  DRAFT: "var(--muted-foreground)",
+  "IN REVIEW": "var(--primary)",
+  APPROVED: "var(--secondary)",
+  PUBLISHED: "var(--accent)",
+};
+
+const KIND_TEXT_TOKEN: Record<string, string> = {
+  PROJECT: "var(--primary)",
+  STORY: "var(--accent)",
+  SIGNAL: "var(--secondary)",
+  WORLD: "var(--primary)",
+  PEOPLE: "var(--primary)",
+  RESEARCH: "var(--accent)",
 };
 
 export const STAGE_COLOR = DEFAULT_STAGE_COLOR;
 
 export function KanbanColumn<C extends KanbanCard>({ column, onOpenItem }: KanbanColumnProps<C>) {
   const { skin, density } = useSkin();
-  const color = column.color ?? DEFAULT_STAGE_COLOR[column.stage] ?? "#9ca3af";
+  const color = column.color ?? DEFAULT_STAGE_COLOR[column.stage] ?? "var(--muted-foreground)";
   return (
     <section
       aria-label={`${column.stage}, ${column.count} item`}
@@ -68,8 +76,8 @@ export function KanbanColumn<C extends KanbanCard>({ column, onOpenItem }: Kanba
             <span className="min-w-0 flex-1">
               <span className="block truncate text-xs text-[var(--foreground)]">{card.title}</span>
               <span
-                className="mt-1 block text-[10px] tracking-widest"
-                style={{ color: defaultKindColors[card.type] ?? "#9ca3af" }}
+                className="mt-1 block text-[10px] font-semibold tracking-widest"
+                style={{ color: KIND_TEXT_TOKEN[card.type] ?? "var(--muted-foreground)" }}
               >
                 {card.type}
               </span>

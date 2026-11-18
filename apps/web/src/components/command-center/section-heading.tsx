@@ -10,7 +10,7 @@ export interface SectionHeadingProps {
 export function CommandSectionHeading({ id, title, accent, note }: SectionHeadingProps) {
   return (
     <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
-      <h2 id={id} className="font-brush text-2xl text-white sm:text-3xl">
+      <h2 id={id} className="font-brush text-2xl text-[var(--foreground)] sm:text-3xl">
         {title}
         {accent && <span className="text-[var(--primary)]"> {accent}</span>}
       </h2>

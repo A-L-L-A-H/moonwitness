@@ -4,12 +4,12 @@ import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 
 export function LandingFooter() {
   return (
-    <footer className="border-t-2 border-[var(--border)] bg-[var(--ink)]">
+    <footer className="border-t-2 border-[var(--border)] bg-[var(--card)] text-[var(--card-foreground)]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-6 sm:px-6">
         <div className="flex items-center gap-2">
-          <Crown className="h-4 w-6 text-[var(--yellow)]" />
-          <span className="font-brush text-sm text-white">
-            MOON<span className="text-[var(--pink)]">WITNESS</span>
+          <Crown className="h-4 w-6 text-[var(--secondary)]" />
+          <span className="font-brush text-sm text-[var(--card-foreground)]">
+            MOON<span className="text-[var(--primary)]">WITNESS</span>
           </span>
           <span className="text-xs text-[var(--muted-foreground)]">
             // Create · Curate · Publish

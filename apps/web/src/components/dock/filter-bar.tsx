@@ -28,7 +28,9 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <div className="flex flex-col gap-3 border-2 border-[var(--border)] bg-[var(--card)] p-3 lg:flex-row lg:flex-nowrap lg:items-center">
-      <span className="shrink-0 font-brush text-sm text-white">FILTER BY ERA</span>
+      <span className="shrink-0 font-brush text-sm text-[var(--card-foreground)]">
+        FILTER BY ERA
+      </span>
 
       <div
         className="flex flex-wrap gap-1.5 lg:flex-nowrap lg:overflow-x-auto"
@@ -42,8 +44,8 @@ export function FilterBar({
           className={cn(
             "rounded-full border px-3 py-1 text-[11px] transition-colors max-lg:min-h-11",
             era === "all"
-              ? "border-[var(--pink)] bg-[var(--pink)] font-bold text-white"
-              : "border-[var(--border)] text-[var(--foreground)] hover:border-[var(--muted-foreground)]",
+              ? "border-[var(--primary)] bg-[var(--primary)] font-bold text-[var(--primary-foreground)]"
+              : "border-[var(--border)] text-[var(--card-foreground)] hover:border-[var(--muted-foreground)]",
           )}
         >
           All Eras
@@ -57,8 +59,8 @@ export function FilterBar({
             className={cn(
               "flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] transition-colors max-lg:min-h-11",
               era === e.id
-                ? "font-bold text-white"
-                : "border-[var(--border)] text-[var(--foreground)] hover:border-[var(--muted-foreground)]",
+                ? "font-bold text-[var(--card-foreground)]"
+                : "border-[var(--border)] text-[var(--card-foreground)] hover:border-[var(--muted-foreground)]",
             )}
             style={era === e.id ? { borderColor: e.color, background: `${e.color}33` } : undefined}
           >
@@ -95,8 +97,8 @@ export function FilterBar({
             className={cn(
               "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
               view === "grid"
-                ? "bg-[var(--pink)] text-white"
-                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+                ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+                : "text-[var(--muted-foreground)] hover:text-[var(--card-foreground)]",
             )}
           >
             <Grid className="h-4 w-4" />
@@ -109,8 +111,8 @@ export function FilterBar({
             className={cn(
               "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
               view === "list"
-                ? "bg-[var(--pink)] text-white"
-                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+                ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
+                : "text-[var(--muted-foreground)] hover:text-[var(--card-foreground)]",
             )}
           >
             <List className="h-4 w-4" />

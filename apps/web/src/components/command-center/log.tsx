@@ -33,7 +33,7 @@ export function MissionLog({
       <SectionHeading id="cc-log" title="MISSION" accent="LOG" note={`${running} running`} />
       <div className="grid grid-cols-1 gap-4 @[36rem]:grid-cols-2 @[62rem]:grid-cols-3">
         <Card className="min-w-0 p-4">
-          <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
+          <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-[var(--card-foreground)]">
             ACTIVE WORKFLOWS <Crown className="h-4 w-6 text-[var(--primary)]" />
           </h3>
           <div className="divide-y divide-[var(--line)]">
@@ -81,7 +81,7 @@ export function MissionLog({
         </Card>
 
         <Card className="min-w-0 p-4">
-          <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
+          <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-[var(--card-foreground)]">
             COMMAND FEED <Crown className="h-4 w-6 text-[var(--primary)]" />
           </h3>
           <div className="divide-y divide-[var(--line)]">
@@ -104,7 +104,7 @@ export function MissionLog({
         </Card>
 
         <Card className="min-w-0 p-4">
-          <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-white">
+          <h3 className="mb-3 flex items-center gap-2 font-brush text-lg text-[var(--card-foreground)]">
             MISSION ALERTS <Crown className="h-4 w-6 text-[var(--primary)]" />
           </h3>
           <div className="space-y-2">

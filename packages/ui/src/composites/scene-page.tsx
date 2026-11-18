@@ -100,9 +100,11 @@ export function ChapterBanner({
       </span>
       <div className="min-w-0 flex-1 basis-64 relative">
         {meta && (
-          <div className="mb-2 font-mono text-xs tracking-widest text-[var(--paper)]">{meta}</div>
+          <div className="mb-2 font-mono text-xs tracking-widest text-[var(--muted-foreground)]">
+            {meta}
+          </div>
         )}
-        <Heading className="font-brush text-4xl leading-tight text-[var(--paper)] @[40rem]:text-6xl brush-underline">
+        <Heading className="font-brush text-4xl leading-tight text-[var(--foreground)] @[40rem]:text-6xl brush-underline">
           {title}
         </Heading>
         <div className="absolute -bottom-2 left-0 w-24 h-1 bg-gradient-to-r from-[var(--pink)] via-[var(--yellow)] to-[var(--blue)] opacity-60" />

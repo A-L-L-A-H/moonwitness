@@ -66,9 +66,6 @@
     var(--mw-font-component, var(--font-mono), ui-monospace, monospace)
   );
   overflow-x: hidden;
-  transition:
-    background-color var(--mw-motion-duration, 200ms) ease,
-    color var(--mw-motion-duration, 200ms) ease;
 }
 
 :where(html[data-skin="riot"]:not([data-dna="01-imperium-lumen"])) body {
@@ -231,16 +228,16 @@
     );
   }
   .sticker-pink {
-    --sticker-bg: var(--pink);
-    --sticker-fg: #fff;
+    --sticker-bg: var(--primary, var(--pink));
+    --sticker-fg: var(--primary-foreground, #fff);
   }
   .sticker-yellow {
-    --sticker-bg: var(--yellow);
-    --sticker-fg: #111;
+    --sticker-bg: var(--secondary, var(--yellow));
+    --sticker-fg: var(--secondary-foreground, #111);
   }
   .sticker-blue {
-    --sticker-bg: var(--blue);
-    --sticker-fg: #06121f;
+    --sticker-bg: var(--accent, var(--blue));
+    --sticker-fg: var(--accent-foreground, #06121f);
   }
   .sticker-black {
     --sticker-bg: #15151d;

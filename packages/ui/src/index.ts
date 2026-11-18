@@ -707,9 +707,17 @@ export {
 export {
   generateTokenDocs,
   generateSkinDocs,
+  generateSkinAtmosphereDocs,
+  generateArtworkDocs,
+  generateBrandCatalogDocs,
+  generateTelemetryDocs,
   generateThemeCSSDocs,
   generateEffectsDocs,
   generateDocsMarkdown,
   type TokenDoc,
   type SkinDoc,
+  type ArtworkDoc,
+  type SkinAtmosphereDoc,
+  type BrandCatalogDoc,
+  type TelemetryComponentDoc,
 } from "./dx/docs";

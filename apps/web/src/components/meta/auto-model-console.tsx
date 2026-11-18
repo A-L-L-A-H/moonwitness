@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import {
   AutoModelView,
   Badge,
@@ -10,10 +10,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CutoutArtwork,
   Input,
+  SkinOrnament,
   type AutoModelCustomAction,
   type CutoutArtworkId,
 } from "@moonwitness/ui";
+import { SkinPalette } from "@moonwitness/ui/icons";
 import { useCurrentIdentity } from "@/lib/session";
 import {
   executeModelMutation,
@@ -30,6 +33,7 @@ export interface AutoModelConsoleProps {
   description?: string;
   domainIcon?: string;
   cutoutId?: CutoutArtworkId;
+  searchQuery?: string;
 }
 
 export function AutoModelConsole({
@@ -38,6 +42,7 @@ export function AutoModelConsole({
   description,
   domainIcon,
   cutoutId,
+  searchQuery = "",
 }: AutoModelConsoleProps) {
   const session = useCurrentIdentity();
   const isAdmin = session?.role === "admin";
@@ -60,6 +65,21 @@ export function AutoModelConsole({
   const [studioError, setStudioError] = useState<string | null>(null);
   const [savingField, setSavingField] = useState(false);
 
+  const visibleRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((row) =>
+      Object.values(row).some((value) => {
+        if (value && typeof value === "object") {
+          return JSON.stringify(value).toLowerCase().includes(q);
+        }
+        return String(value ?? "")
+          .toLowerCase()
+          .includes(q);
+      }),
+    );
+  }, [rows, searchQuery]);
+
   if (viewLoading) {
     return (
       <Card>
@@ -72,10 +92,16 @@ export function AutoModelConsole({
 
   if (viewError || !view) {
     return (
-      <Card>
-        <CardHeader>
+      <Card className="relative overflow-hidden">
+        <SkinOrnament slot="corner" className="right-2 top-2" />
+        <CardHeader className="flex flex-col items-center py-8 text-center">
+          <CutoutArtwork
+            id={cutoutId ?? "rooftop-antenna"}
+            decorative
+            className="mb-2 h-20 w-20 opacity-80"
+          />
           <CardTitle>{title ?? model}</CardTitle>
-          <CardDescription>
+          <CardDescription className="max-w-md">
             {viewError ?? `No active view descriptor for '${model}'.`}
           </CardDescription>
         </CardHeader>
@@ -141,6 +167,7 @@ export function AutoModelConsole({
       {isAdmin && view.extensible ? (
         <div className="flex flex-wrap items-center justify-between gap-2 border border-[var(--border)] bg-[var(--card)] px-4 py-2.5">
           <div className="flex items-center gap-2 font-mono text-xs text-[var(--muted-foreground)]">
+            <SkinPalette className="h-4 w-4 text-[var(--primary)]" />
             <Badge variant="outline">EXTENSIBLE _attrs</Badge>
             <span>Add live custom fields without SQL migrations or restarts.</span>
           </div>
@@ -248,7 +275,7 @@ export function AutoModelConsole({
 
       <AutoModelView
         descriptor={descriptor}
-        rows={rows}
+        rows={visibleRows}
         loading={rowsLoading}
         error={rowsError}
         onCreate={

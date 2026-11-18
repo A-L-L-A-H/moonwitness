@@ -34,7 +34,9 @@ export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
             <p className="text-[10px] tracking-wider text-[var(--muted-foreground)]">
               {detail.subtitle.toUpperCase()}
             </p>
-            <h2 className="font-brush mt-1 text-3xl leading-tight text-white">{detail.title}</h2>
+            <h2 className="font-brush mt-1 text-3xl leading-tight text-[var(--card-foreground)]">
+              {detail.title}
+            </h2>
           </div>
           <Button
             type="button"

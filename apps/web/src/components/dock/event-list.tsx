@@ -40,7 +40,7 @@ function EventListInner({
   return (
     <section aria-label="Events">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 font-brush text-xl text-white">
+        <h2 className="flex items-center gap-2 font-brush text-xl text-[var(--foreground)]">
           <Crown className="h-5 w-8 text-[var(--primary)]" /> EVENTS
           <span className="ml-2 hidden text-[10px] font-normal tracking-widest text-[var(--muted-foreground)] sm:inline">
             KEY MOMENTS, PROJECTS, AND SIGNALS FROM ACROSS THE EMPIRE.

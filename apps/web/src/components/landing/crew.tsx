@@ -11,20 +11,20 @@ export function Crew() {
   return (
     <section
       id="crew"
-      className="relative scroll-mt-20 border-y-2 border-black bg-[var(--ink)] py-24"
+      className="relative scroll-mt-20 border-y-2 border-[var(--border)] bg-[var(--muted)]/35 py-24"
     >
       <Halftone tone="pink" className="pointer-events-none absolute inset-0 opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b-2 border-dashed border-[var(--border)] pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <SkullCrossbonesFunky className="h-5 w-5 text-[var(--yellow)]" />
-              <span className="font-mono text-xs font-black tracking-widest text-[var(--pink)]">
+              <SkullCrossbonesFunky className="h-5 w-5 text-[var(--primary)]" />
+              <span className="font-mono text-xs font-black tracking-widest text-[var(--primary)]">
                 SUBVERSIVE NETWORK // GLOBAL FREQUENCIES
               </span>
             </div>
-            <h2 className="cmyk-slip font-brush text-4xl text-white sm:text-5xl">
-              A GLOBAL MAP OF <span className="text-[var(--blue)]">WITNESSES.</span>
+            <h2 className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
+              A GLOBAL MAP OF <span className="text-[var(--accent)]">WITNESSES.</span>
             </h2>
             <p className="mt-2 max-w-xl font-mono text-xs text-[var(--foreground)]">
               Same moon, different story coordinates. Select a fictional demo profile on the map or

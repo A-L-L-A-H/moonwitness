@@ -49,7 +49,9 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
             ✕
           </Button>
         </div>
-        <h2 className="font-brush mt-4 text-3xl text-white">{module.name.toUpperCase()}</h2>
+        <h2 className="font-brush mt-4 text-3xl text-[var(--card-foreground)]">
+          {module.name.toUpperCase()}
+        </h2>
         <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
           {module.description}
         </p>

@@ -64,7 +64,7 @@ export function Shadow() {
     <section
       ref={sectionRef}
       id="shadow"
-      className="relative scroll-mt-20 overflow-hidden bg-[var(--ink)] py-28"
+      className="relative scroll-mt-20 overflow-hidden bg-[var(--background)] py-28"
     >
       <Grain />
       <Image
@@ -76,7 +76,7 @@ export function Shadow() {
         loading="lazy"
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--ink)] via-[rgba(5,5,8,0.7)] to-[var(--ink)]" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--background)] via-[color-mix(in_srgb,var(--background)_78%,transparent)] to-[var(--background)]" />
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         {[...Array(6)].map((_, i) => (
@@ -168,11 +168,13 @@ export function Shadow() {
                     sizes="(max-width: 768px) 100vw, 720px"
                   />
                 </div>
-                <div className="border-t border-[var(--red)]/30 bg-[var(--muted)] p-5">
+                <div className="border-t border-[var(--red)]/30 bg-[var(--card)] p-5 text-[var(--card-foreground)]">
                   <span className="font-mono text-xs text-[var(--muted-foreground)]">
                     {event.kind} // {event.date}
                   </span>
-                  <h3 className="mt-2 font-brush text-2xl text-white">{event.title}</h3>
+                  <h3 className="mt-2 font-brush text-2xl text-[var(--card-foreground)]">
+                    {event.title}
+                  </h3>
                 </div>
               </Link>
             ) : (

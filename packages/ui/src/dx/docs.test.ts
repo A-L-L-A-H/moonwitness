@@ -3,6 +3,10 @@ import { describe, it, expect } from "vitest";
 import {
   generateTokenDocs,
   generateSkinDocs,
+  generateSkinAtmosphereDocs,
+  generateArtworkDocs,
+  generateBrandCatalogDocs,
+  generateTelemetryDocs,
   generateThemeCSSDocs,
   generateEffectsDocs,
   generateDocsMarkdown,
@@ -197,6 +201,32 @@ describe("DX Docs Generator", () => {
       expect(md).toContain("Technical");
       expect(md).toContain("Archive");
       expect(md).toContain("Transmission");
+    });
+
+    it("documents 8-axis skin atmosphere, brand logos, cutouts, and telemetry primitives", () => {
+      const atmosphere = generateSkinAtmosphereDocs();
+      expect(atmosphere).toHaveLength(6);
+
+      const icons = generateArtworkDocs();
+      expect(icons).toHaveLength(12);
+
+      const catalog = generateBrandCatalogDocs();
+      expect(catalog.logos).toHaveLength(10);
+      expect(catalog.cutouts).toHaveLength(12);
+
+      const telemetry = generateTelemetryDocs();
+      const symbols = telemetry.map((c) => c.symbol);
+      expect(symbols).toContain("Sparkline");
+      expect(symbols).toContain("RadialGauge");
+      expect(symbols).toContain("AutoModelView");
+      expect(symbols).toContain("SkinBackdrop");
+      expect(symbols).toContain("SkinOrnament");
+
+      const md = generateDocsMarkdown();
+      expect(md).toContain("## 8-Axis Skin Atmosphere");
+      expect(md).toContain("## Brand Logos, Cutouts & Domain Icons");
+      expect(md).toContain("## Telemetry & Composite Components");
+      expect(md).toContain("AutoModelView");
     });
   });
 });

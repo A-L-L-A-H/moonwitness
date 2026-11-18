@@ -46,7 +46,7 @@ export function About() {
           className="object-cover object-[50%_35%] opacity-60"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--ink)] via-[rgba(11,11,16,0.6)] to-[rgba(11,11,16,0.8)]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--background)] via-[color-mix(in_srgb,var(--background)_75%,transparent)] to-[color-mix(in_srgb,var(--background)_92%,transparent)]" />
       </div>
       <div className="relative z-10 mx-auto max-w-5xl px-4 py-24 text-center sm:px-6">
         <div

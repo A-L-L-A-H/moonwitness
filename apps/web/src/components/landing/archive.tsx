@@ -114,11 +114,11 @@ function ArchiveStrip() {
                   {ev.date}
                 </span>
               </div>
-              <div className="p-3.5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
-                <div className="font-mono text-[10px] text-[var(--yellow)] flex items-center gap-1">
-                  <CassetteTape className="h-3 w-4 text-[var(--yellow)]" /> EVIDENCE #{index + 101}
+              <div className="bg-[var(--card)] p-3.5 text-[var(--card-foreground)]">
+                <div className="font-mono text-[10px] text-[var(--primary)] flex items-center gap-1">
+                  <CassetteTape className="h-3 w-4 text-[var(--primary)]" /> EVIDENCE #{index + 101}
                 </div>
-                <div className="cmyk-slip mt-1 font-brush text-base leading-snug text-white group-hover:text-[var(--pink)]">
+                <div className="cmyk-slip mt-1 font-brush text-base leading-snug text-[var(--card-foreground)] group-hover:text-[var(--primary)]">
                   {ev.title.toUpperCase()}
                 </div>
               </div>
@@ -162,8 +162,8 @@ export function Archive() {
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <DistressedSticker variant="hazard" text="REDACTED DOSSIER ARCHIVE" className="mb-3" />
-          <h2 className="cmyk-slip font-brush text-4xl text-white sm:text-5xl">
-            A TIMELINE OF <span className="text-[var(--yellow)]">SIGNALS.</span>
+          <h2 className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
+            A TIMELINE OF <span className="text-[var(--secondary)]">SIGNALS.</span>
           </h2>
           <p className="mt-2 font-mono text-xs text-[var(--muted-foreground)]">
             Past transmissions, underground sightings, and leaked police scanner recordings.

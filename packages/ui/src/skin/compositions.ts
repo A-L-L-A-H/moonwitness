@@ -45,8 +45,8 @@ export const kanbanColumnVariants = cva(
         default: 'bg-[var(--panel)] border border-[var(--line)]',
         riot: composeEffects(grain({ opacity: 0.2 }), 'bg-[var(--panel-2)] border-2 border-[var(--pink)] shadow-[var(--shadow-cmyk)]'),
         editorial: 'bg-[var(--paper)]/10 border-2 border-[var(--pink)] font-brush',
-        technical: 'bg-[var(--ink)] border border-[var(--blue)] font-mono',
-        archive: 'bg-[var(--paper)] border-2 border-[var(--ink)] font-hand',
+        technical: 'bg-[var(--card)] text-[var(--card-foreground)] border border-[var(--accent)] font-mono',
+        archive: 'bg-[var(--card)] text-[var(--card-foreground)] border-2 border-[var(--border)] font-hand',
         transmission: 'bg-[var(--panel)] border border-[var(--blue)] bg-gradient-to-b from-[var(--blue)]/5 to-transparent',
       },
       compact: {
@@ -147,11 +147,11 @@ export const buttonSkinCompositions = {
  * Input skin compositions
  */
 export const inputSkinCompositions = {
-  riot: 'zine-input border-[var(--pink)] focus:ring-[var(--pink)] focus:ring-2',
-  editorial: 'zine-input border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)] font-brush',
-  technical: 'zine-input border-[var(--blue)] focus:border-[var(--blue)] focus:ring-[var(--blue)] font-mono bg-[var(--ink)]',
-  archive: 'zine-input border-[var(--ink)] focus:border-[var(--yellow)] focus:ring-[var(--yellow)] font-hand bg-[var(--paper)] text-[var(--ink)]',
-  transmission: 'zine-input border-[var(--blue)] focus:border-[var(--blue)] focus:ring-[var(--blue)] font-mono bg-[var(--panel)]',
+  riot: 'zine-input border-[var(--primary)] focus:ring-[var(--primary)] focus:ring-2',
+  editorial: 'zine-input border-[var(--line)] focus:border-[var(--primary)] focus:ring-[var(--primary)] font-brush',
+  technical: 'zine-input border-[var(--accent)] focus:border-[var(--accent)] focus:ring-[var(--accent)] font-mono bg-[var(--background)] text-[var(--foreground)]',
+  archive: 'zine-input border-[var(--border)] focus:border-[var(--secondary)] focus:ring-[var(--secondary)] font-hand bg-[var(--card)] text-[var(--card-foreground)]',
+  transmission: 'zine-input border-[var(--accent)] focus:border-[var(--accent)] focus:ring-[var(--accent)] font-mono bg-[var(--card)] text-[var(--card-foreground)]',
 };
 
 /**
@@ -178,11 +178,11 @@ export const cardSkinCompositions = {
     'border-2 border-[var(--pink)] bg-transparent',
     'hover:bg-[var(--pink)]/5'
   ),
-  technical: 'bg-[var(--panel)] border border-[var(--blue)] hover:border-[var(--blue)] hover:shadow-[0_0_20px_rgba(46,168,255,0.2)]',
+  technical: 'bg-[var(--card)] text-[var(--card-foreground)] border border-[var(--accent)] hover:border-[var(--accent)] hover:shadow-[0_0_20px_rgba(46,168,255,0.2)]',
   archive: composeEffects(
-    'bg-[var(--paper)] border-2 border-[var(--ink)]',
+    'bg-[var(--card)] text-[var(--card-foreground)] border-2 border-[var(--border)]',
     grain({ opacity: 0.25 }),
-    'hover:border-[var(--yellow)]'
+    'hover:border-[var(--secondary)]'
   ),
   transmission: composeEffects(
     'bg-[var(--panel)] border border-[var(--blue)]',

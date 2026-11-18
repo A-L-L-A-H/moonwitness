@@ -45,7 +45,7 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
           />
         </div>
         <Card className="flex min-w-0 flex-wrap items-center justify-between gap-4 p-4">
-          <h3 className="flex items-center gap-2 font-brush text-lg text-white">
+          <h3 className="flex items-center gap-2 font-brush text-lg text-[var(--card-foreground)]">
             <GlobeIcon className="h-4 w-4 text-[var(--primary)]" />
             CITY DETAIL
           </h3>

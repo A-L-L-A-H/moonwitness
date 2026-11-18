@@ -24,7 +24,7 @@ export function IdeasInMotion() {
             <p className="font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--primary)]">
               REAL STORIES. REAL ANOTHER TOMORROW.
             </p>
-            <p className="mt-2 text-[11px] leading-relaxed text-[var(--foreground)]">
+            <p className="mt-2 text-[11px] leading-relaxed text-[var(--paper)]/90">
               Every episode starts as a scribbled idea on a rooftop. This board is where those
               scribbles wait to be picked up.
             </p>

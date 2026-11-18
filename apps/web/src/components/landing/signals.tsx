@@ -13,12 +13,12 @@ export function Signals() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <SprayCan className="h-5 w-5 text-[var(--pink)]" />
-            <span className="font-mono text-xs font-black tracking-widest text-[var(--yellow)]">
+            <span className="font-mono text-xs font-black tracking-widest text-[var(--secondary)]">
               FREQUENCY LOGS // PIRATE FEED
             </span>
           </div>
-          <h2 className="cmyk-slip font-brush text-4xl text-white sm:text-5xl">
-            THE <span className="brush-underline text-[var(--pink)]">SIGNALS</span>
+          <h2 className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
+            THE <span className="brush-underline text-[var(--primary)]">SIGNALS</span>
           </h2>
         </div>
         <div className="flex items-center gap-3">
@@ -49,11 +49,11 @@ export function Signals() {
               FICTIONAL SIGNAL
             </span>
           </div>
-          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
-            <h3 className="cmyk-slip font-brush text-2xl leading-tight text-white tracking-wide">
+          <div className="flex flex-1 flex-col bg-[var(--card)] p-5 text-[var(--card-foreground)]">
+            <h3 className="cmyk-slip font-brush text-2xl leading-tight text-[var(--card-foreground)] tracking-wide">
               A SIGNAL FROM BELOW
             </h3>
-            <p className="mt-2 flex-1 font-mono text-xs leading-relaxed text-[var(--foreground)]">
+            <p className="mt-2 flex-1 font-mono text-xs leading-relaxed text-[var(--muted-foreground)]">
               A story from the Moonwitness storyworld. Strange sounds. A deeper current. What are we
               really hearing?
             </p>
@@ -87,11 +87,11 @@ export function Signals() {
             </span>
             <SafetyPin className="absolute bottom-2 right-2 h-7 w-7 text-white/40 rotate-45" />
           </div>
-          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
-            <h3 className="cmyk-slip font-brush text-2xl leading-tight text-white">
+          <div className="flex flex-1 flex-col bg-[var(--card)] p-5 text-[var(--card-foreground)]">
+            <h3 className="cmyk-slip font-brush text-2xl leading-tight text-[var(--card-foreground)]">
               STORIES. BIGGER HORIZONS.
             </h3>
-            <p className="mt-2 flex-1 font-mono text-xs leading-relaxed text-[var(--foreground)]">
+            <p className="mt-2 flex-1 font-mono text-xs leading-relaxed text-[var(--muted-foreground)]">
               Fictional story fragments from the Moonwitness storyworld.
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3">
@@ -128,11 +128,11 @@ export function Signals() {
               THE SHADOW
             </span>
           </div>
-          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
-            <h3 className="cmyk-slip font-brush text-2xl leading-tight text-white">
+          <div className="flex flex-1 flex-col bg-[var(--card)] p-5 text-[var(--card-foreground)]">
+            <h3 className="cmyk-slip font-brush text-2xl leading-tight text-[var(--card-foreground)]">
               NOT EVERYTHING IS VISIBLE.
             </h3>
-            <p className="mt-2 flex-1 font-mono text-xs leading-relaxed text-[var(--foreground)]">
+            <p className="mt-2 flex-1 font-mono text-xs leading-relaxed text-[var(--muted-foreground)]">
               Fictional signals, invented connections, and scenes from the Moonwitness storyworld.
             </p>
             <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-3">
