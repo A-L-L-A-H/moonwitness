@@ -2,6 +2,9 @@ import { generateEs256SigningKey, generateOpaqueToken, sha256Hex } from "./crypt
 import type {
   AuditEventRecord,
   D1DatabaseLike,
+  MidEnv,
+  MidIdentityStore,
+  MidUserId,
   OidcClient,
   PublicEs256Jwk,
   PublicUser,
@@ -12,7 +15,7 @@ import type {
 
 const INITIALIZED_DBS = new WeakMap<D1DatabaseLike, Promise<void>>();
 
-const SCHEMA_STATEMENTS = [
+const PROTOCOL_SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS mid_signing_keys (
     kid TEXT PRIMARY KEY,
     public_jwk_json TEXT NOT NULL,
@@ -33,7 +36,7 @@ const SCHEMA_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS mid_auth_codes (
     code_hash TEXT PRIMARY KEY,
     client_id TEXT NOT NULL,
-    user_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
     redirect_uri TEXT NOT NULL,
     scope TEXT NOT NULL,
     code_challenge TEXT NOT NULL,
@@ -48,7 +51,7 @@ const SCHEMA_STATEMENTS = [
     token_hash TEXT PRIMARY KEY,
     family_id TEXT NOT NULL,
     client_id TEXT NOT NULL,
-    user_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
     scope TEXT NOT NULL,
     resource TEXT,
     expires_at TEXT NOT NULL,
@@ -56,16 +59,19 @@ const SCHEMA_STATEMENTS = [
     replaced_by TEXT,
     created_at TEXT NOT NULL
   )`,
+  `CREATE INDEX IF NOT EXISTS idx_mid_refresh_family ON mid_refresh_tokens (family_id)`,
+];
+
+const LEGACY_AUDIT_STATEMENTS = [
   `CREATE TABLE IF NOT EXISTS mid_audit_logs (
     id TEXT PRIMARY KEY,
     event_type TEXT NOT NULL,
-    actor_user_id INTEGER,
+    actor_user_id TEXT,
     client_id TEXT,
     detail_json TEXT NOT NULL,
     ip_address TEXT NOT NULL,
     created_at TEXT NOT NULL
   )`,
-  `CREATE INDEX IF NOT EXISTS idx_mid_refresh_family ON mid_refresh_tokens (family_id)`,
   `CREATE INDEX IF NOT EXISTS idx_mid_audit_created ON mid_audit_logs (created_at)`,
 ];
 
@@ -140,14 +146,21 @@ async function ensureOptionalTextColumn(
 }
 
 /** Initialize MoonWitness ID schema tables and first-party OIDC clients once per DB binding. */
-export async function ensureMidSchema(db: D1DatabaseLike): Promise<void> {
+export async function ensureMidSchema(
+  db: D1DatabaseLike,
+  options: { skipLegacyAuditTable?: boolean } = {},
+): Promise<void> {
   const existing = INITIALIZED_DBS.get(db);
   if (existing) return existing;
+
+  const schemaStatements = options.skipLegacyAuditTable
+    ? PROTOCOL_SCHEMA_STATEMENTS
+    : [...PROTOCOL_SCHEMA_STATEMENTS, ...LEGACY_AUDIT_STATEMENTS];
 
   const initPromise = (async () => {
     const nowIso = new Date().toISOString();
     const statements = [
-      ...SCHEMA_STATEMENTS.map((sql) => db.prepare(sql)),
+      ...schemaStatements.map((sql) => db.prepare(sql)),
       ...FIRST_PARTY_CLIENTS.map((client) =>
         db
           .prepare(
@@ -270,16 +283,16 @@ export async function findUserByLogin(
   };
 }
 
-/** Fetch sanitized user record by numeric ID. */
+/** Fetch sanitized user record by ID. */
 export async function findPublicUserById(
   db: D1DatabaseLike,
-  userId: number,
+  userId: MidUserId,
 ): Promise<PublicUser | null> {
   const result = await db
     .prepare(`SELECT id, username, email, role, display_name FROM users WHERE id = ? LIMIT 1`)
     .bind(userId)
     .all<{
-      id: number;
+      id: MidUserId;
       username: string;
       email: string;
       role: UserRole;
@@ -299,7 +312,7 @@ export async function findPublicUserById(
 /** Update user password hash atomically and stamp updated_at. */
 export async function updateUserPasswordHash(
   db: D1DatabaseLike,
-  userId: number,
+  userId: MidUserId,
   newPasswordHash: string,
 ): Promise<void> {
   await db
@@ -311,7 +324,7 @@ export async function updateUserPasswordHash(
 /** Create shared SSO session row compatible with apps/api `sessions` schema. */
 export async function createSsoSession(
   db: D1DatabaseLike,
-  userId: number,
+  userId: MidUserId,
   ttlSeconds: number,
 ): Promise<string> {
   const sessionId = crypto.randomUUID();
@@ -500,7 +513,7 @@ export async function storeAuthorizationCode(
   db: D1DatabaseLike,
   params: {
     clientId: string;
-    userId: number;
+    userId: MidUserId;
     redirectUri: string;
     scope: string;
     codeChallenge: string;
@@ -522,7 +535,7 @@ export async function storeAuthorizationCode(
     .bind(
       codeHash,
       params.clientId,
-      params.userId,
+      String(params.userId),
       params.redirectUri,
       params.scope,
       params.codeChallenge,
@@ -542,7 +555,7 @@ export async function consumeAuthorizationCode(
   plainCode: string,
 ): Promise<{
   clientId: string;
-  userId: number;
+  userId: MidUserId;
   redirectUri: string;
   scope: string;
   codeChallenge: string;
@@ -569,7 +582,7 @@ export async function consumeAuthorizationCode(
     .bind(codeHash)
     .all<{
       client_id: string;
-      user_id: number;
+      user_id: MidUserId;
       redirect_uri: string;
       scope: string;
       code_challenge: string;
@@ -596,7 +609,7 @@ export async function issueRefreshToken(
   db: D1DatabaseLike,
   params: {
     clientId: string;
-    userId: number;
+    userId: MidUserId;
     scope: string;
     ttlSec: number;
     familyId?: string;
@@ -618,7 +631,7 @@ export async function issueRefreshToken(
       tokenHash,
       familyId,
       params.clientId,
-      params.userId,
+      String(params.userId),
       params.scope,
       params.resource ?? null,
       expiresAt.toISOString(),
@@ -638,7 +651,7 @@ export async function rotateRefreshToken(
 ): Promise<{
   status: "rotated" | "invalid" | "reused" | "invalid_target";
   nextRefreshToken?: string;
-  userId?: number;
+  userId?: MidUserId;
   scope?: string;
   resource?: string | null;
 }> {
@@ -653,7 +666,7 @@ export async function rotateRefreshToken(
       token_hash: string;
       family_id: string;
       client_id: string;
-      user_id: number;
+      user_id: MidUserId;
       scope: string;
       resource: string | null;
       expires_at: string;
@@ -738,7 +751,7 @@ export async function recordAuditEvent(
   db: D1DatabaseLike,
   entry: {
     eventType: string;
-    actorUserId: number | null;
+    actorUserId: MidUserId | null;
     clientId: string | null;
     detail: Record<string, unknown>;
     ipAddress: string;
@@ -752,7 +765,7 @@ export async function recordAuditEvent(
     .bind(
       crypto.randomUUID(),
       entry.eventType,
-      entry.actorUserId,
+      entry.actorUserId === null ? null : String(entry.actorUserId),
       entry.clientId,
       JSON.stringify(entry.detail),
       entry.ipAddress,
@@ -775,7 +788,7 @@ export async function listRecentAuditEvents(
     .all<{
       id: string;
       event_type: string;
-      actor_user_id: number | null;
+      actor_user_id: MidUserId | null;
       client_id: string | null;
       detail_json: string;
       ip_address: string;
@@ -790,4 +803,23 @@ export async function listRecentAuditEvents(
     ipAddress: row.ip_address,
     createdAt: row.created_at,
   }));
+}
+
+/** Default SQL-backed identity store targeting legacy `users` / `sessions` / `mid_audit_logs`. */
+export function createLegacySqlIdentityStore(db: D1DatabaseLike): MidIdentityStore {
+  return {
+    findUserByLogin: (login) => findUserByLogin(db, login),
+    findPublicUserById: (userId) => findPublicUserById(db, userId),
+    updateUserPasswordHash: (userId, nextHash) => updateUserPasswordHash(db, userId, nextHash),
+    createSsoSession: (userId, ttlSeconds) => createSsoSession(db, userId, ttlSeconds),
+    findActiveSsoSession: (sessionId) => findActiveSsoSession(db, sessionId),
+    revokeSsoSession: (sessionId) => revokeSsoSession(db, sessionId),
+    recordAuditEvent: (entry) => recordAuditEvent(db, entry),
+    listRecentAuditEvents: (limit = 40) => listRecentAuditEvents(db, limit),
+  };
+}
+
+/** Resolve active identity store from `env.IDENTITY_STORE` or legacy SQL fallback. */
+export function resolveIdentityStore(env: MidEnv): MidIdentityStore {
+  return env.IDENTITY_STORE ?? createLegacySqlIdentityStore(env.DB);
 }

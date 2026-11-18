@@ -17,7 +17,7 @@ export const DEFAULT_API_ALLOWED_AUDIENCES = [
 ] as const;
 
 export interface VerifiedMidUser {
-  id: number;
+  id: string;
   username: string;
   email: string;
   role: "admin" | "editor" | "viewer";
@@ -121,8 +121,8 @@ export async function verifyMidBearerToken(
   });
   if (!claims) return null;
 
-  const userId = Number(claims.sub);
-  if (!Number.isInteger(userId) || userId <= 0) return null;
+  const userId = claims.sub?.trim();
+  if (!userId) return null;
 
   const user = await findUserById(userId);
   return user ? getUserPublic(user) : null;

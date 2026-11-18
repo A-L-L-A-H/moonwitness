@@ -13,7 +13,7 @@ vi.mock("../../middleware/auth", () => ({
     }
     const role = (request.headers["x-test-role"] as string) ?? "editor";
     request.user = {
-      id: 1,
+      id: "1",
       username: "test-operator",
       email: "operator@moonwitness.local",
       role: role as "admin" | "editor" | "viewer",

@@ -202,12 +202,54 @@ importers:
       '@libsql/client':
         specifier: ^0.18.0
         version: 0.18.0
+      '@moonwitness/addon-ai':
+        specifier: workspace:*
+        version: link:../../packages/addons/ai
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../../packages/addons/audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../../packages/addons/auth
       '@moonwitness/addon-base':
         specifier: workspace:*
         version: link:../../packages/addons/__base
+      '@moonwitness/addon-canon-lore':
+        specifier: workspace:*
+        version: link:../../packages/addons/canon-lore
+      '@moonwitness/addon-command-center':
+        specifier: workspace:*
+        version: link:../../packages/addons/command-center
+      '@moonwitness/addon-control':
+        specifier: workspace:*
+        version: link:../../packages/addons/control
+      '@moonwitness/addon-epistemic':
+        specifier: workspace:*
+        version: link:../../packages/addons/epistemic
+      '@moonwitness/addon-i18n':
+        specifier: workspace:*
+        version: link:../../packages/addons/i18n
+      '@moonwitness/addon-probes':
+        specifier: workspace:*
+        version: link:../../packages/addons/probes
+      '@moonwitness/addon-radius':
+        specifier: workspace:*
+        version: link:../../packages/addons/radius
+      '@moonwitness/addon-snmp':
+        specifier: workspace:*
+        version: link:../../packages/addons/snmp
+      '@moonwitness/addon-storage':
+        specifier: workspace:*
+        version: link:../../packages/addons/storage
+      '@moonwitness/addon-syslog':
+        specifier: workspace:*
+        version: link:../../packages/addons/syslog
       '@moonwitness/addon-timeline':
         specifier: workspace:*
         version: link:../../packages/addons/timeline
+      '@moonwitness/addon-witness-research':
+        specifier: workspace:*
+        version: link:../../packages/addons/witness-research
       '@moonwitness/ai':
         specifier: workspace:*
         version: link:../../packages/ai
@@ -531,8 +573,474 @@ importers:
         specifier: ^4.1.12
         version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
 
+  packages/addons/ai:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/audit:
+    dependencies:
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/auth:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/mid':
+        specifier: workspace:*
+        version: link:../../mid
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/canon-lore:
+    dependencies:
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/addon-timeline':
+        specifier: workspace:*
+        version: link:../timeline
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/command-center:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/control:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/epistemic:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/i18n:
+    dependencies:
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/probes:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/radius:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/snmp:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/storage:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/syslog:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
   packages/addons/timeline:
     dependencies:
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
       '@moonwitness/orm':
         specifier: workspace:*
         version: link:../../orm
@@ -552,6 +1060,46 @@ importers:
       eslint:
         specifier: ^10.14.0
         version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.1.12
+        version: 4.1.12(@opentelemetry/api@1.10.0)(@types/node@24.19.2)(@vitest/coverage-v8@4.1.12)(jsdom@26.1.0(supports-color@7.2.0))(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/addons/witness-research:
+    dependencies:
+      '@moonwitness/addon-audit':
+        specifier: workspace:*
+        version: link:../audit
+      '@moonwitness/addon-auth':
+        specifier: workspace:*
+        version: link:../auth
+      '@moonwitness/addon-base':
+        specifier: workspace:*
+        version: link:../__base
+      '@moonwitness/orm':
+        specifier: workspace:*
+        version: link:../../orm
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@moonwitness/eslint-config':
+        specifier: workspace:*
+        version: link:../../eslint-config
+      '@moonwitness/typescript-config':
+        specifier: workspace:*
+        version: link:../../typescript-config
+      eslint:
+        specifier: ^10.14.0
+        version: 10.15.0(jiti@2.7.0)(supports-color@7.2.0)
+      fastify:
+        specifier: ^5.1.0
+        version: 5.12.8
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

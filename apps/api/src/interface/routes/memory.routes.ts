@@ -1,6 +1,8 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import { createActorContext } from "@moonwitness/orm";
 import { z } from "@moonwitness/core";
-import { requireAuth } from "../../middleware/auth";
+import { memoryRecordModel } from "../../infrastructure/persistence/domain";
+import { requireAuth, type AuthenticatedRequest } from "../../middleware/auth";
 import { env, validateMemoryRuntimeConfig } from "../../shared/env";
 import { getUpstreamBridgeHeaders } from "../../shared/upstream";
 
@@ -99,6 +101,43 @@ async function fetchMemoryJson<T>(url: URL, schema: z.ZodType<T>, timeoutMs: num
   return parsed.data;
 }
 
+async function mirrorMemoryRecords(
+  request: FastifyRequest,
+  records: z.infer<typeof memoryKnowledgeListSchema>,
+): Promise<void> {
+  try {
+    const authUser = (request as AuthenticatedRequest).user;
+    const actor = createActorContext(authUser ? String(authUser.id) : null, "api", request.id);
+    for (const item of records.slice(0, 25)) {
+      const recordKey = item.id.slice(0, 200);
+      if (!recordKey) continue;
+      await memoryRecordModel.repository.upsert(
+        { record_key: recordKey },
+        {
+          record_key: recordKey,
+          owner_id: authUser ? String(authUser.id) : null,
+          scope: item.archive_id ? "archive" : "global",
+          kind: (item.kind || "note").slice(0, 80),
+          title: (item.title || recordKey).slice(0, 300),
+          summary: item.summary ? item.summary.slice(0, 4000) : null,
+          content: item.content || null,
+          tags_json: JSON.stringify(item.tags ?? []),
+          metadata_json: JSON.stringify({
+            archive_id: item.archive_id ?? null,
+            conversation_id: item.conversation_id ?? null,
+            confidence: item.confidence,
+          }),
+          retention_days: null,
+          expires_at: null,
+        },
+        actor,
+      );
+    }
+  } catch {
+    // Best-effort ORM mirror for memory knowledge search results
+  }
+}
+
 export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
   const authenticate = requireAuth();
 
@@ -180,6 +219,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
           memoryKnowledgeListSchema,
           env.MEMORY_API_TIMEOUT_MS,
         );
+        await mirrorMemoryRecords(request, records);
         return reply.code(200).send({
           configured: true,
           query: trimmedQuery,

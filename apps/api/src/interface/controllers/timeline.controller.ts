@@ -3,16 +3,20 @@ import type {
   ITimelineUseCase,
   ListTimelineEventsRequest,
 } from "../../domain/usecases/timeline/timeline.usecase";
+import type {
+  CreateTimelineEventInput,
+  UpdateTimelineEventInput,
+} from "../../domain/usecases/timeline/timeline.repository";
 import type { Result } from "@moonwitness/core";
 import { createActorContext, SYSTEM_ACTOR } from "@moonwitness/orm";
 import type { ActorContext } from "@moonwitness/orm";
+import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 
 /**
- * Public read-only timeline endpoints.
+ * Timeline endpoints.
  *
- * Actor identity is not derived from the untrusted `x-actor-id` header.
- * Reads are anonymous; the actor context is informational only and is
- * never used to grant privileges.
+ * Actor identity is resolved from verified session/JWT auth only — never from
+ * untrusted headers like `x-actor-id`.
  */
 export class TimelineController {
   constructor(private readonly _timelineUseCase: ITimelineUseCase) {}
@@ -47,17 +51,133 @@ export class TimelineController {
     return this.handleResult(result, reply);
   }
 
-  private handleResult<T>(result: Result<T, Error>, reply: FastifyReply): FastifyReply {
+  async createEvent(
+    request: FastifyRequest<{ Body: CreateTimelineEventInput }>,
+    reply: FastifyReply,
+  ) {
+    const actor = this.actor(request);
+    const result = await this._timelineUseCase.createEvent(request.body, actor);
     if (result.ok) {
-      return reply.code(200).send(result.value);
+      await tryRecordAuditLog({
+        domain: "timeline",
+        entity: "timeline.event",
+        entityId: result.value.data.id,
+        action: "CREATE",
+        actor,
+        actorRole: request.user?.role ?? null,
+        requestPath: request.url,
+        outcome: "success",
+        after: result.value.data,
+      });
+    }
+    return this.handleResult(result, reply, 201);
+  }
+
+  async updateEvent(
+    request: FastifyRequest<{ Params: { id: string }; Body: UpdateTimelineEventInput }>,
+    reply: FastifyReply,
+  ) {
+    const actor = this.actor(request);
+    const result = await this._timelineUseCase.updateEvent(request.params.id, request.body, actor);
+    if (result.ok) {
+      await tryRecordAuditLog({
+        domain: "timeline",
+        entity: "timeline.event",
+        entityId: result.value.data.id,
+        action: "UPDATE",
+        actor,
+        actorRole: request.user?.role ?? null,
+        requestPath: request.url,
+        outcome: "success",
+        after: result.value.data,
+      });
+    }
+    return this.handleResult(result, reply);
+  }
+
+  async archiveEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+    const actor = this.actor(request);
+    const result = await this._timelineUseCase.archiveEvent(request.params.id, actor);
+    if (result.ok) {
+      await tryRecordAuditLog({
+        domain: "timeline",
+        entity: "timeline.event",
+        entityId: result.value.data.id,
+        action: "ARCHIVE",
+        actor,
+        actorRole: request.user?.role ?? null,
+        requestPath: request.url,
+        outcome: "success",
+        after: result.value.data,
+      });
+    }
+    return this.handleResult(result, reply);
+  }
+
+  async restoreEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+    const actor = this.actor(request);
+    const result = await this._timelineUseCase.restoreEvent(request.params.id, actor);
+    if (result.ok) {
+      await tryRecordAuditLog({
+        domain: "timeline",
+        entity: "timeline.event",
+        entityId: result.value.data.id,
+        action: "RESTORE",
+        actor,
+        actorRole: request.user?.role ?? null,
+        requestPath: request.url,
+        outcome: "success",
+        after: result.value.data,
+      });
+    }
+    return this.handleResult(result, reply);
+  }
+
+  async deleteEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+    const actor = this.actor(request);
+    const result = await this._timelineUseCase.deleteEvent(request.params.id, actor);
+    if (result.ok) {
+      await tryRecordAuditLog({
+        domain: "timeline",
+        entity: "timeline.event",
+        entityId: result.value.data.id,
+        action: "DELETE",
+        actor,
+        actorRole: request.user?.role ?? null,
+        requestPath: request.url,
+        outcome: "success",
+        before: result.value.data,
+      });
+    }
+    return this.handleResult(result, reply);
+  }
+
+  async getEventHistory(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
+    const result = await this._timelineUseCase.getEventHistory(
+      request.params.id,
+      this.actor(request),
+    );
+    return this.handleResult(result, reply);
+  }
+
+  private handleResult<T>(
+    result: Result<T, Error>,
+    reply: FastifyReply,
+    successCode = 200,
+  ): FastifyReply {
+    if (result.ok) {
+      return reply.code(successCode).send(result.value);
     }
 
+    const errObj = result.error as Error & { code?: string; name?: string };
     const status =
-      result.error instanceof Error &&
-      "code" in result.error &&
-      (result.error as { code: string }).code === "NOT_FOUND_ERROR"
+      errObj.code === "NOT_FOUND_ERROR"
         ? 404
-        : 500;
+        : errObj.name === "ConflictError" || errObj.code === "CONFLICT"
+          ? 409
+          : errObj.name === "ZodError" || errObj.name === "ValidationError"
+            ? 400
+            : 500;
 
     return reply.code(status).send({ error: result.error.message });
   }

@@ -133,16 +133,17 @@ describe("control routes auth rate limiting", () => {
     const { controlRoutes } = await loadRoutes("5");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    await orm.applyMigrations(Array.from(authMigrations));
-    const db = orm.getDb();
-    await db.run(
-      "INSERT INTO users (username, email, password_hash, role, display_name, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      ["ctrladmin", "ctrl@example.com", "hash", "admin", "Ctrl Admin", "2026-01-01", "2026-01-01"],
-    );
-    await db.run(
-      "INSERT INTO sessions (id, user_id, created_at, expires_at, revoked) SELECT ?, id, ?, ?, 0 FROM users WHERE username = ?",
-      ["sess-ctrl-1", "2026-01-01T00:00:00.000Z", "2099-01-01T00:00:00.000Z", "ctrladmin"],
-    );
+    const userSvc = await import("../../services/user");
+    const sessSvc = await import("../../services/session");
+    await userSvc.ensureAuthSchema();
+    const created = await userSvc.createUser({
+      username: "ctrladmin",
+      email: "ctrl@example.com",
+      password: "PasswordLongEnough123!",
+      role: "admin",
+      displayName: "Ctrl Admin",
+    });
+    const sessToken = await sessSvc.createSession(created.id);
 
     const fastifyCookie = (await import("@fastify/cookie")).default;
     app = Fastify({ logger: false });
@@ -153,14 +154,14 @@ describe("control routes auth rate limiting", () => {
     const hostRes = await app.inject({
       method: "GET",
       url: "/control/host",
-      headers: { cookie: "mw_session=sess-ctrl-1" },
+      headers: { cookie: `mw_session=${sessToken}` },
     });
     expect(hostRes.statusCode).toBe(200);
 
     const statusRes = await app.inject({
       method: "GET",
       url: "/control/status",
-      headers: { cookie: "mw_session=sess-ctrl-1" },
+      headers: { cookie: `mw_session=${sessToken}` },
     });
     expect(statusRes.statusCode).toBe(200);
 
@@ -182,10 +183,11 @@ describe("Native first-light onboarding & control auth (CONTROL_NATIVE_SETUP=1)"
     const { controlRoutes } = await loadRoutes("20");
     const orm = await import("@moonwitness/orm");
     await orm.initDb("file::memory:?cache=shared");
-    await orm.applyMigrations(Array.from(authMigrations));
+    const userSvc = await import("../../services/user");
+    await userSvc.ensureAuthSchema();
     const db = orm.getDb();
-    await db.run("DELETE FROM sessions");
-    await db.run("DELETE FROM users");
+    await db.run("DELETE FROM auth_sessions");
+    await db.run("DELETE FROM auth_users");
 
     const fastifyCookie = (await import("@fastify/cookie")).default;
     app = Fastify({ logger: false });

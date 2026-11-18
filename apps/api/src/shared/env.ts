@@ -1,5 +1,8 @@
 import { parseEnv, z } from "@moonwitness/core";
+import { existsSync, readFileSync } from "node:fs";
 import { isIP } from "node:net";
+import { resolve } from "node:path";
+import { parseEnv as parseDotEnv } from "node:util";
 
 const envSchema = {
   PORT: z.string().default("3002"),
@@ -50,7 +53,31 @@ const envSchema = {
   MID_COOKIE_DOMAIN: z.string().optional(),
 };
 
-export const env = parseEnv(envSchema);
+function readLocalApiEnvOverrides(): Record<string, string | undefined> {
+  if (process.env.NODE_ENV === "test") return {};
+  const localEnvPath = resolve(process.cwd(), ".env");
+  const rootEnvPath = resolve(process.cwd(), "../../.env");
+  if (localEnvPath === rootEnvPath || !existsSync(localEnvPath)) return {};
+  return parseDotEnv(readFileSync(localEnvPath, "utf8"));
+}
+
+/** `API_PORT`/`API_HOST` take precedence so a shared root `.env` never collides with web's `PORT`. */
+export function resolveApiEnvSource(
+  source: Record<string, string | undefined>,
+): Record<string, string | undefined> {
+  const apiPort = source.API_PORT?.trim();
+  const apiHost = source.API_HOST?.trim();
+  return {
+    ...source,
+    PORT: apiPort || source.PORT?.trim() || undefined,
+    HOST: apiHost || source.HOST?.trim() || undefined,
+  };
+}
+
+export const env = parseEnv(
+  envSchema,
+  resolveApiEnvSource({ ...process.env, ...readLocalApiEnvOverrides() }),
+);
 export type Env = typeof env;
 
 interface IpRange {

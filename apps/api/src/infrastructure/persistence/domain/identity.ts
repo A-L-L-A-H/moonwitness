@@ -79,9 +79,5 @@ export const authEventModel = defineModel({
   indexes: [{ fields: ["event_type", "occurred_at"] }, { fields: ["actor_user_ref"] }],
 });
 
-export const identityMigrations: Migration[] = [
-  { id: "020_create_identity_user_profiles", up: userProfileModel.ddl },
-  { id: "021_create_identity_sessions", up: identitySessionModel.ddl },
-  { id: "022_create_identity_oauth_tokens", up: oauthTokenModel.ddl },
-  { id: "023_create_identity_auth_events", up: authEventModel.ddl },
-];
+/** Retired: identity tables are consolidated in `@moonwitness/addon-auth` (`auth_users`, `auth_sessions`, `auth_oauth_tokens`). */
+export const identityMigrations: Migration[] = [];

@@ -1,10 +1,9 @@
 import { webcrypto } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { applyMigrations, closeDb, getDb, initDb } from "@moonwitness/orm";
+import { closeDb, getDb, initDb } from "@moonwitness/orm";
 import { encodeBase64Url, type PublicEs256Jwk } from "@moonwitness/core";
-import { authMigrations } from "../../db/migrations";
-import { createUser } from "../../services/user";
+import { createUser, ensureAuthSchema } from "../../services/user";
 import { resetMidJwksCacheForTests } from "../../middleware/mid-jwt";
 
 const API_PREFIX = "/api/v1";
@@ -81,7 +80,7 @@ describe("BFF OAuth exchange and logout routes", () => {
     delete process.env.CORS_ORIGINS;
     resetMidJwksCacheForTests();
     await initDb("file::memory:?cache=shared");
-    await applyMigrations(Array.from(authMigrations));
+    await ensureAuthSchema();
   });
 
   afterEach(async () => {
@@ -221,7 +220,7 @@ describe("BFF OAuth exchange and logout routes", () => {
 
     const sessionId = sessionCookie.slice("mw_session=".length);
     const tokenRow = await getDb().get<{ access_token: string; refresh_token: string }>(
-      "SELECT access_token, refresh_token FROM bff_oauth_tokens WHERE session_id = ?",
+      "SELECT access_token, refresh_token FROM auth_oauth_tokens WHERE session_token = ?",
       [sessionId],
     );
     expect(tokenRow?.access_token).toBe(accessToken);
@@ -257,8 +256,8 @@ describe("BFF OAuth exchange and logout routes", () => {
       },
     ]);
 
-    const remainingTokenRow = await getDb().get<{ session_id: string }>(
-      "SELECT session_id FROM bff_oauth_tokens WHERE session_id = ?",
+    const remainingTokenRow = await getDb().get<{ session_token: string }>(
+      "SELECT session_token FROM auth_oauth_tokens WHERE session_token = ?",
       [sessionId],
     );
     expect(remainingTokenRow).toBeUndefined();
@@ -523,7 +522,7 @@ describe("BFF OAuth exchange and logout routes", () => {
     const { sessionCookie } = extractCookies(bffRes);
     const sessionId = sessionCookie.slice("mw_session=".length);
     const stored = await getDb().get<{ refresh_token: string | null }>(
-      "SELECT refresh_token FROM bff_oauth_tokens WHERE session_id = ?",
+      "SELECT refresh_token FROM auth_oauth_tokens WHERE session_token = ?",
       [sessionId],
     );
     expect(stored?.refresh_token).toBeTruthy();

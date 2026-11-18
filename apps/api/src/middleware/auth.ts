@@ -9,7 +9,7 @@ import { verifyMidBearerToken } from "./mid-jwt";
 
 export interface AuthenticatedRequest extends FastifyRequest {
   user?: {
-    id: number;
+    id: string;
     username: string;
     email: string;
     role: "admin" | "editor" | "viewer";

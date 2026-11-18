@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { initDb, closeDb, applyMigrations, getDb } from "@moonwitness/orm";
-import { authMigrations } from "../../db/migrations";
-import { createUser } from "../../services/user";
+import { initDb, closeDb, getDb } from "@moonwitness/orm";
+import { createUser, ensureAuthSchema } from "../../services/user";
 import { getSessionCookieOptions } from "../../services/session";
 
 const API_PREFIX = "/api/v1";
@@ -57,7 +56,7 @@ describe("auth routes", () => {
     process.env.MW_BOOTSTRAP_ADMIN_EMAIL = ADMIN_EMAIL;
     process.env.MW_BOOTSTRAP_ADMIN_PASSWORD = ADMIN_PASSWORD;
     await initDb("file::memory:?cache=shared");
-    await applyMigrations(Array.from(authMigrations));
+    await ensureAuthSchema();
   });
 
   afterEach(async () => {
@@ -101,7 +100,7 @@ describe("auth routes", () => {
     });
 
     const row = await getDb().get<{ password_hash: string }>(
-      "SELECT password_hash FROM users WHERE username = ?",
+      "SELECT password_hash FROM auth_users WHERE username = ?",
       [ADMIN_USERNAME],
     );
     expect(row?.password_hash).not.toBe(ADMIN_PASSWORD);
@@ -170,7 +169,7 @@ describe("auth routes", () => {
     const cookie = await login(app, ADMIN_USERNAME, ADMIN_PASSWORD);
     const sessionId = cookie.slice("mw_session=".length);
 
-    await getDb().run("UPDATE sessions SET expires_at = ? WHERE id = ?", [
+    await getDb().run("UPDATE auth_sessions SET expires_at = ? WHERE session_token = ?", [
       new Date(0).toISOString(),
       sessionId,
     ]);
@@ -418,5 +417,105 @@ describe("auth routes", () => {
     expect(fetch).toHaveBeenCalledTimes(readPaths.length + 1 + writeRequests.length);
     const upstreamHeaders = new Headers(fetch.mock.calls[readPaths.length + 2]?.[1]?.headers);
     expect(upstreamHeaders.get("authorization")).toMatch(/^AWS4-HMAC-SHA256 /);
+  });
+
+  it("supports email/username login payloads and enforces admin RBAC on crew & audit endpoints", async () => {
+    app = await loadApp();
+
+    const byEmail = await app.inject({
+      method: "POST",
+      url: `${API_PREFIX}/auth/login`,
+      payload: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
+    });
+    expect(byEmail.statusCode).toBe(200);
+    const adminCookie = getSessionCookie(byEmail);
+
+    const byUsername = await app.inject({
+      method: "POST",
+      url: `${API_PREFIX}/auth/login`,
+      payload: { username: ADMIN_USERNAME, password: ADMIN_PASSWORD },
+    });
+    expect(byUsername.statusCode).toBe(200);
+
+    const createdRes = await app.inject({
+      method: "POST",
+      url: `${API_PREFIX}/auth/users`,
+      headers: { cookie: adminCookie },
+      payload: {
+        username: "crew-one",
+        email: "crew-one@moon.world",
+        password: "crew-one-password-2026",
+        role: "editor",
+        displayName: "Crew One",
+      },
+    });
+    expect(createdRes.statusCode).toBe(201);
+    const createdUser = (createdRes.json() as { user: { id: number; role: string } }).user;
+    expect(createdUser.role).toBe("editor");
+
+    const crewCookie = await login(app, "crew-one", "crew-one-password-2026");
+    const nonAdminList = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/auth/users`,
+      headers: { cookie: crewCookie },
+    });
+    expect(nonAdminList.statusCode).toBe(403);
+
+    const listRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/auth/users`,
+      headers: { cookie: adminCookie },
+    });
+    expect(listRes.statusCode).toBe(200);
+    const users = (listRes.json() as { users: Array<{ id: number; username: string }> }).users;
+    expect(users.some((u) => u.username === "crew-one")).toBe(true);
+
+    const meRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/auth/me`,
+      headers: { cookie: adminCookie },
+    });
+    const adminId = (meRes.json() as { user: { id: number } }).user.id;
+
+    const selfDemote = await app.inject({
+      method: "PATCH",
+      url: `${API_PREFIX}/auth/users/${adminId}/role`,
+      headers: { cookie: adminCookie },
+      payload: { role: "viewer" },
+    });
+    expect(selfDemote.statusCode).toBe(403);
+
+    const selfDelete = await app.inject({
+      method: "DELETE",
+      url: `${API_PREFIX}/auth/users/${adminId}`,
+      headers: { cookie: adminCookie },
+    });
+    expect(selfDelete.statusCode).toBe(403);
+
+    const promoted = await app.inject({
+      method: "PATCH",
+      url: `${API_PREFIX}/auth/users/${createdUser.id}/role`,
+      headers: { cookie: adminCookie },
+      payload: { role: "viewer" },
+    });
+    expect(promoted.statusCode).toBe(200);
+    expect((promoted.json() as { user: { role: string } }).user.role).toBe("viewer");
+
+    const auditRes = await app.inject({
+      method: "GET",
+      url: `${API_PREFIX}/audit/logs?limit=10`,
+      headers: { cookie: adminCookie },
+    });
+    expect(auditRes.statusCode).toBe(200);
+    expect(
+      (auditRes.json() as { logs: Array<{ domain: string; action: string }> }).logs.length,
+    ).toBeGreaterThan(0);
+
+    const deleted = await app.inject({
+      method: "DELETE",
+      url: `${API_PREFIX}/auth/users/${createdUser.id}`,
+      headers: { cookie: adminCookie },
+    });
+    expect(deleted.statusCode).toBe(200);
   });
 });

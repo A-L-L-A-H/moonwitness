@@ -1,70 +1,13 @@
-import { z } from "zod";
-import { defineModel, type Migration } from "@moonwitness/orm";
+import type { Migration } from "@moonwitness/orm";
 
-export const storageBucketSchema = z.object({
-  name: z.string().min(1).max(255),
-  region: z.string().max(64).nullable(),
-  owner_id: z.string().max(200).nullable(),
-  versioning: z.boolean().default(false),
-  is_public: z.boolean().default(false),
-  metadata_json: z.string().nullable(),
-});
+export {
+  storageBucketModel,
+  storageBucketSchema,
+  storageObjectModel,
+  storageObjectSchema,
+  storageUploadSessionModel,
+  storageUploadSessionSchema,
+} from "@moonwitness/addon-storage";
 
-export const storageObjectSchema = z.object({
-  bucket: z.string().min(1).max(255),
-  object_key: z.string().min(1).max(1024),
-  etag: z.string().max(200).nullable(),
-  content_type: z.string().max(255).nullable(),
-  size_bytes: z.number().int().nonnegative().nullable(),
-  checksum_sha256: z.string().max(128).nullable(),
-  storage_class: z.string().max(64).nullable(),
-  metadata_json: z.string().nullable(),
-  last_modified_at: z.string().datetime().nullable(),
-});
-
-export const storageUploadSessionSchema = z.object({
-  bucket: z.string().min(1).max(255),
-  object_key: z.string().min(1).max(1024),
-  upload_id: z.string().min(1).max(255),
-  upload_type: z.enum(["single", "multipart"]).default("multipart"),
-  state: z.enum(["initiated", "uploading", "completed", "aborted", "failed"]).default("initiated"),
-  initiated_by: z.string().max(200).nullable(),
-  part_count: z.number().int().nonnegative().default(0),
-  expires_at: z.string().datetime().nullable(),
-  metadata_json: z.string().nullable(),
-});
-
-export const storageBucketModel = defineModel({
-  name: "storage.bucket",
-  table: "storage_buckets",
-  schema: storageBucketSchema,
-  indexes: [{ fields: ["name"], unique: true }, { fields: ["owner_id"] }],
-});
-
-export const storageObjectModel = defineModel({
-  name: "storage.object",
-  table: "storage_objects",
-  schema: storageObjectSchema,
-  indexes: [
-    { fields: ["bucket", "object_key"], unique: true },
-    { fields: ["bucket"] },
-    { fields: ["last_modified_at"] },
-  ],
-});
-
-export const storageUploadSessionModel = defineModel({
-  name: "storage.upload_session",
-  table: "storage_upload_sessions",
-  schema: storageUploadSessionSchema,
-  indexes: [
-    { fields: ["upload_id"], unique: true },
-    { fields: ["bucket", "object_key"] },
-    { fields: ["state"] },
-  ],
-});
-
-export const storageMigrations: Migration[] = [
-  { id: "030_create_storage_buckets", up: storageBucketModel.ddl },
-  { id: "031_create_storage_objects", up: storageObjectModel.ddl },
-  { id: "032_create_storage_upload_sessions", up: storageUploadSessionModel.ddl },
-];
+/** Retired: synced automatically by `@moonwitness/addon-storage`. */
+export const storageMigrations: Migration[] = [];

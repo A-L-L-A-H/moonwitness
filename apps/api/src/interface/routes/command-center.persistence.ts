@@ -2,7 +2,13 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { applyMigrations, createActorContext, getDb, type Migration } from "@moonwitness/orm";
 import { workflowModel, alertModel } from "../../infrastructure/persistence/domain/command-control";
-import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+import { listAuditLogs, tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
+
+export interface CommandCenterFeedItem {
+  time: string;
+  tag: string;
+  msg: string;
+}
 
 export const workflowStatusSchema = z.enum([
   "Queued",
@@ -192,6 +198,7 @@ function mapAlert(row: Record<string, unknown>): PersistedAlert {
 export async function getCommandCenterState(actorId: string): Promise<{
   workflows: PersistedWorkflow[];
   alerts: PersistedAlert[];
+  feed: CommandCenterFeedItem[];
 }> {
   await seedActorDefaultsIfEmpty(actorId);
   const sortedWf = await getDb().all<Record<string, unknown>>(
@@ -210,9 +217,35 @@ export async function getCommandCenterState(actorId: string): Promise<{
     [actorId],
   );
 
+  const feed: CommandCenterFeedItem[] = [];
+  try {
+    const recentLogs = await listAuditLogs({ limit: 8 });
+    for (const log of recentLogs) {
+      const parsedTime = Date.parse(log.occurredAt);
+      const time = Number.isFinite(parsedTime)
+        ? `${new Date(parsedTime).toISOString().slice(11, 16)}Z`
+        : "UTC";
+      feed.push({
+        time,
+        tag: log.domain.toUpperCase(),
+        msg: `${log.action} ${log.entity} · ${log.entityId}`,
+      });
+    }
+  } catch {
+    // ops_audit_logs may not be migrated in isolated unit test suites
+  }
+  if (feed.length === 0) {
+    feed.push({
+      time: `${new Date().toISOString().slice(11, 16)}Z`,
+      tag: "SYSTEM",
+      msg: "Command Center online — telemetry nominal",
+    });
+  }
+
   return {
     workflows: sortedWf.map(mapWorkflow),
     alerts: alertRows.map(mapAlert),
+    feed,
   };
 }
 

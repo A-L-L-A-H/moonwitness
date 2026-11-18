@@ -13,20 +13,14 @@ import {
 } from "./crypto";
 import {
   consumeAuthorizationCode,
-  createSsoSession,
   deleteOidcClient,
   ensureMidSchema,
-  findActiveSsoSession,
   findOidcClient,
-  findPublicUserById,
-  findUserByLogin,
   getOrProvisionSigningKeys,
   issueRefreshToken,
   listOidcClients,
-  listRecentAuditEvents,
-  recordAuditEvent,
+  resolveIdentityStore,
   revokeRefreshToken,
-  revokeSsoSession,
   rotateRefreshToken,
   storeAuthorizationCode,
 } from "./db";
@@ -336,6 +330,7 @@ async function handleAuthorizeGet(
   }
 
   if (sessionUser && client.firstParty && promptParam !== "login" && promptParam !== "consent") {
+    const store = resolveIdentityStore(env);
     const code = await storeAuthorizationCode(env.DB, {
       clientId: client.clientId,
       userId: sessionUser.id,
@@ -346,7 +341,7 @@ async function handleAuthorizeGet(
       nonce: nonce || null,
       resource: targetResolution.resource,
     });
-    await recordAuditEvent(env.DB, {
+    await store.recordAuditEvent({
       eventType: "oauth.code.sso_issued",
       actorUserId: sessionUser.id,
       clientId: client.clientId,
@@ -417,13 +412,14 @@ async function handleAuthorizePost(
     );
   }
 
+  const store = resolveIdentityStore(env);
   let activeUser = sessionUser;
   const extraHeaders: Record<string, string> = {};
   if (!activeUser || body.identifier) {
-    const user = await findUserByLogin(env.DB, body.identifier ?? "");
+    const user = await store.findUserByLogin(body.identifier ?? "");
     const valid = user ? await verifyPassword(body.password ?? "", user.passwordHash) : false;
     if (!user || !valid) {
-      await recordAuditEvent(env.DB, {
+      await store.recordAuditEvent({
         eventType: "auth.login.failed",
         actorUserId: user?.id ?? null,
         clientId: client.clientId,
@@ -447,7 +443,7 @@ async function handleAuthorizePost(
       );
     }
     const sessionTtl = readTtl(env.SESSION_TTL_SEC, 604_800);
-    const newSessionId = await createSsoSession(env.DB, user.id, sessionTtl);
+    const newSessionId = await store.createSsoSession(user.id, sessionTtl);
     extraHeaders["set-cookie"] = buildSessionCookie(newSessionId, sessionTtl, requestUrl, env);
     activeUser = {
       id: user.id,
@@ -468,7 +464,7 @@ async function handleAuthorizePost(
     nonce: nonce || null,
     resource: targetResolution.resource,
   });
-  await recordAuditEvent(env.DB, {
+  await store.recordAuditEvent({
     eventType: "oauth.code.issued",
     actorUserId: activeUser.id,
     clientId: client.clientId,
@@ -530,7 +526,8 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
     if (!pkceValid) {
       return oauthError("invalid_grant", "PKCE verification failed");
     }
-    const user = await findPublicUserById(env.DB, authCode.userId);
+    const store = resolveIdentityStore(env);
+    const user = await store.findPublicUserById(authCode.userId);
     if (!user) return oauthError("invalid_grant", "User account no longer active");
 
     const effectiveResource = targetResolution.resource ?? authCode.resource;
@@ -542,7 +539,7 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
       nonce: authCode.nonce,
       resource: effectiveResource,
     });
-    await recordAuditEvent(env.DB, {
+    await store.recordAuditEvent({
       eventType: "oauth.token.issued",
       actorUserId: user.id,
       clientId: client.clientId,
@@ -577,8 +574,9 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
     if (rotated.status === "invalid_target") {
       return oauthError("invalid_target", "Requested resource exceeds refresh token grant", 400);
     }
+    const store = resolveIdentityStore(env);
     if (rotated.status === "reused") {
-      await recordAuditEvent(env.DB, {
+      await store.recordAuditEvent({
         eventType: "oauth.refresh.reuse_detected",
         actorUserId: null,
         clientId: client.clientId,
@@ -595,7 +593,7 @@ async function handleTokenPost(request: Request, env: MidEnv): Promise<Response>
     ) {
       return oauthError("invalid_grant", "Refresh token is invalid or expired");
     }
-    const user = await findPublicUserById(env.DB, rotated.userId);
+    const user = await store.findPublicUserById(rotated.userId);
     if (!user) return oauthError("invalid_grant", "User account no longer active");
 
     const tokenResponse = await issueClientTokens({
@@ -631,7 +629,8 @@ export function createMidHandler() {
       return new Response(null, { status: 204, headers: cors });
     }
 
-    await ensureMidSchema(env.DB);
+    await ensureMidSchema(env.DB, { skipLegacyAuditTable: Boolean(env.IDENTITY_STORE) });
+    const store = resolveIdentityStore(env);
     const issuer = resolveIssuer(env);
     const path = requestUrl.pathname;
 
@@ -657,7 +656,7 @@ export function createMidHandler() {
 
     const cookies = parseCookies(request.headers.get("cookie"));
     const activeSession = cookies[SESSION_COOKIE_NAME]
-      ? await findActiveSsoSession(env.DB, cookies[SESSION_COOKIE_NAME])
+      ? await store.findActiveSsoSession(cookies[SESSION_COOKIE_NAME])
       : null;
     const sessionUser = activeSession?.user ?? null;
 
@@ -665,7 +664,7 @@ export function createMidHandler() {
       const [clients, audits] = sessionUser
         ? await Promise.all([
             listOidcClients(env.DB),
-            sessionUser.role === "admin" ? listRecentAuditEvents(env.DB, 20) : Promise.resolve([]),
+            sessionUser.role === "admin" ? store.listRecentAuditEvents(20) : Promise.resolve([]),
           ])
         : [[], []];
       const notice =
@@ -756,8 +755,8 @@ export function createMidHandler() {
       (path === "/oauth/logout" && request.method === "POST")
     ) {
       if (activeSession) {
-        await revokeSsoSession(env.DB, activeSession.sessionId);
-        await recordAuditEvent(env.DB, {
+        await store.revokeSsoSession(activeSession.sessionId);
+        await store.recordAuditEvent({
           eventType: "auth.logout",
           actorUserId: activeSession.user.id,
           clientId: null,
@@ -794,7 +793,7 @@ export function createMidHandler() {
           cors,
         );
       }
-      return withCors(jsonResponse({ events: await listRecentAuditEvents(env.DB, 50) }), cors);
+      return withCors(jsonResponse({ events: await store.listRecentAuditEvents(50) }), cors);
     }
 
     if (path.startsWith("/api/clients/") && request.method === "DELETE") {

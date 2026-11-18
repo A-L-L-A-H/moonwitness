@@ -1,10 +1,11 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import { createMidHandler } from "./app";
 import { ensureMidSchema, getOrProvisionSigningKeys } from "./db";
-import type { D1DatabaseLike, MidEnv } from "./types";
+import type { D1DatabaseLike, MidEnv, MidIdentityStore } from "./types";
 
 export interface MidFastifyPluginOptions {
   db: D1DatabaseLike;
+  identityStore?: MidIdentityStore;
   keyEncryptionSecret: string;
   issuerUrl?: string;
   accessTokenTtlSec?: number;
@@ -31,8 +32,10 @@ export const midFastifyPlugin: FastifyPluginAsync<MidFastifyPluginOptions> = asy
     throw new Error("MidFastifyPlugin requires keyEncryptionSecret >= 16 chars");
   }
 
-  // Idempotently ensure schema and first-party clients exist
-  await ensureMidSchema(options.db);
+  // Idempotently ensure protocol schema and first-party clients exist
+  await ensureMidSchema(options.db, {
+    skipLegacyAuditTable: Boolean(options.identityStore),
+  });
   // Ensure active signing keys exist or provision fresh keypair
   await getOrProvisionSigningKeys(options.db, options.keyEncryptionSecret);
 
@@ -42,6 +45,7 @@ export const midFastifyPlugin: FastifyPluginAsync<MidFastifyPluginOptions> = asy
 
   const midEnv: MidEnv = {
     DB: options.db,
+    IDENTITY_STORE: options.identityStore,
     MID_KEY_ENCRYPTION_SECRET: options.keyEncryptionSecret,
     ISSUER_URL: issuerUrl,
     ACCESS_TOKEN_TTL_SEC: options.accessTokenTtlSec ? String(options.accessTokenTtlSec) : undefined,
