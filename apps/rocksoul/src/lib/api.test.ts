@@ -244,11 +244,15 @@ describe("ROCKSOUL browser-preview workflow", () => {
 
     const openSpy = vi.fn();
     vi.stubGlobal("open", openSpy);
-    await call("open_ecosystem_url", { url: "http://127.0.0.1:3003" });
-    expect(openSpy).toHaveBeenCalledWith("http://127.0.0.1:3003", "_blank", "noopener,noreferrer");
+    await call("open_ecosystem_url", { url: "http://127.0.0.1:3000" });
+    expect(openSpy).toHaveBeenCalledWith("http://127.0.0.1:3000", "_blank", "noopener,noreferrer");
+
+    await expect(call("open_ecosystem_url", { url: "http://127.0.0.1:3003" })).rejects.toMatchObject({
+      message: expect.stringContaining("3000, 3002, 8000, or 8787"),
+    });
 
     await expect(call("open_ecosystem_url", { url: "https://example.com" })).rejects.toMatchObject({
-      message: expect.stringContaining("3000, 3002, 3003, 8000, or 8787"),
+      message: expect.stringContaining("3000, 3002, 8000, or 8787"),
     });
 
     await expect(

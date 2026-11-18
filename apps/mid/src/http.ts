@@ -128,21 +128,26 @@ export function oauthError(errorCode: string, description: string, status = 400)
   return jsonResponse({ error: errorCode, error_description: description }, status);
 }
 
-/** Construct CSP-hardened HTML page response. */
+/** Construct CSP-hardened HTML page response with per-response style nonce. */
 export function htmlResponse(
   markup: string,
   status = 200,
   extraHeaders: Record<string, string> = {},
 ): Response {
-  return new Response(markup, {
+  const nonceBytes = crypto.getRandomValues(new Uint8Array(16));
+  const nonce = Array.from(nonceBytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const hasInlineStyle = markup.includes("<style>");
+  const body = hasInlineStyle ? markup.replace("<style>", `<style nonce="${nonce}">`) : markup;
+  const styleSrc = hasInlineStyle ? `'nonce-${nonce}'` : "'none'";
+
+  return new Response(body, {
     status,
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "no-store",
       "x-content-type-options": "nosniff",
       "x-frame-options": "DENY",
-      "content-security-policy":
-        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' https: http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'self'",
+      "content-security-policy": `default-src 'none'; style-src ${styleSrc}; form-action 'self' https: http://127.0.0.1:*; frame-ancestors 'none'; base-uri 'self'`,
       ...extraHeaders,
     },
   });

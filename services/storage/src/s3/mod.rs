@@ -41,9 +41,10 @@ async fn health() -> Response {
         serde_json::json!({ "status": "ok", "service": "storage" }).to_string(),
     )
         .into_response();
-    response
-        .headers_mut()
-        .insert("content-type", "application/json".parse().unwrap());
+    response.headers_mut().insert(
+        "content-type",
+        axum::http::HeaderValue::from_static("application/json"),
+    );
     response
 }
 

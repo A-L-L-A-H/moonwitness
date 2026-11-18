@@ -17,8 +17,8 @@ import (
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/audit"
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/auth"
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/config"
-	"github.com/isrockfeel/moonwitness/cp/arsy/internal/host"
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/dns"
+	"github.com/isrockfeel/moonwitness/cp/arsy/internal/host"
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/metrics"
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/ops"
 	"github.com/isrockfeel/moonwitness/cp/arsy/internal/reconcile"
@@ -222,8 +222,10 @@ func cmdServe(args []string) error {
 	}
 
 	// DNS internal: jawab nama peer VPN dan forward ke upstream.
+	var dnsServer *dns.Server
+	var dnsDone chan struct{}
 	if a.dns != nil && cfg.DNSListen != "" {
-		dnsServer := dns.NewServer(a.dns, cfg.DNSListen)
+		dnsServer = dns.NewServer(a.dns, cfg.DNSListen)
 		dnsServer.SetUpstream(cfg.DNSUpstream)
 		syncDNS(a)
 		if a.vpn != nil {
@@ -231,12 +233,23 @@ func cmdServe(args []string) error {
 				syncDNSPeers(a.dns, peers)
 			})
 		}
-		go func() {
-			if err := dnsServer.ListenAndServe(ctx); err != nil {
+		dnsDone = make(chan struct{})
+		go func(srv *dns.Server, done chan struct{}) {
+			defer close(done)
+			if err := srv.ListenAndServe(ctx); err != nil {
 				fmt.Fprintf(os.Stderr, "arsy: dns berhenti: %v\n", err)
 			}
-		}()
+		}(dnsServer, dnsDone)
 		fmt.Printf("dns listening on udp://%s (upstream %s)\n", cfg.DNSListen, nonEmpty(cfg.DNSUpstream, "-"))
+	}
+
+	waitDNS := func() {
+		if dnsServer != nil {
+			_ = dnsServer.Stop()
+		}
+		if dnsDone != nil {
+			<-dnsDone
+		}
 	}
 
 	errCh := make(chan error, 1)
@@ -247,6 +260,8 @@ func cmdServe(args []string) error {
 
 	select {
 	case err := <-errCh:
+		stop()
+		waitDNS()
 		if errors.Is(err, http.ErrServerClosed) {
 			return nil
 		}
@@ -254,7 +269,9 @@ func cmdServe(args []string) error {
 	case <-ctx.Done():
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
-		return httpServer.Shutdown(shutdownCtx)
+		httpErr := httpServer.Shutdown(shutdownCtx)
+		waitDNS()
+		return httpErr
 	}
 }
 

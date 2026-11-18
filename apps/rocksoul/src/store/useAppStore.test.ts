@@ -137,7 +137,7 @@ describe("useAppStore actions", () => {
     expect(useAppStore.getState().autoMonitor).toBe(false);
     expect(useAppStore.getState().gitPresetView).toBe("patch");
 
-    await useAppStore.getState().openEcosystemUrl("http://127.0.0.1:3003");
-    expect(mockedCall).toHaveBeenCalledWith("open_ecosystem_url", { url: "http://127.0.0.1:3003" });
+    await useAppStore.getState().openEcosystemUrl("http://127.0.0.1:3000");
+    expect(mockedCall).toHaveBeenCalledWith("open_ecosystem_url", { url: "http://127.0.0.1:3000" });
   });
 });

@@ -128,8 +128,19 @@ describe("@moonwitness/igate worker", () => {
       env,
     );
     expect(htmlConsole.status).toBe(200);
-    expect(htmlConsole.headers.get("content-security-policy")).toContain("script-src 'self'");
+    const htmlCsp = htmlConsole.headers.get("content-security-policy") ?? "";
+    expect(htmlCsp).toContain("script-src 'self'");
+    expect(htmlCsp).toContain("style-src 'self'");
+    expect(htmlCsp).not.toContain("'unsafe-inline'");
     expect(await htmlConsole.text()).toContain("igate-console");
+
+    const cssRes = await handler(
+      new Request("https://igate.moonwitness.biz.id/assets/igate.css"),
+      env,
+    );
+    expect(cssRes.status).toBe(200);
+    expect(cssRes.headers.get("content-type")).toContain("text/css");
+    expect(await cssRes.text()).toContain("--bg:");
 
     const scriptRes = await handler(
       new Request("https://igate.moonwitness.biz.id/assets/igate.js"),

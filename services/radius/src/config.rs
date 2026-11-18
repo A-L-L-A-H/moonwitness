@@ -13,6 +13,13 @@ pub struct CidrNet {
 }
 
 impl CidrNet {
+    pub fn ipv4_any() -> Self {
+        Self {
+            addr: IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED),
+            prefix: 0,
+        }
+    }
+
     pub fn contains(&self, ip: &IpAddr) -> bool {
         match (self.addr, *ip) {
             (IpAddr::V4(net), IpAddr::V4(target)) => {
@@ -151,7 +158,7 @@ impl Config {
             // Legacy single-secret compatibility: map to 0.0.0.0/0 when explicitly configured.
             nas_clients.push(NasClient {
                 id: "default-nas".to_string(),
-                cidr: "0.0.0.0/0".parse().expect("valid v4 any cidr"),
+                cidr: CidrNet::ipv4_any(),
                 secret: radius_secret.clone(),
                 previous_secret: None,
             });

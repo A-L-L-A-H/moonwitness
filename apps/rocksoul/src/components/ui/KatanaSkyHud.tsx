@@ -3,12 +3,21 @@ import { Crosshair, Radio } from "lucide-react";
 import type { EcosystemServiceStatus, MonitorSnapshot } from "../../lib/contracts";
 
 const PORT_FALLBACKS: EcosystemServiceStatus[] = [
-  { id: "allah", name: "A-L-L-A-H", url: "http://127.0.0.1:3003", status: "offline", http_status: null, latency_ms: null },
-  { id: "web", name: "WEB", url: "http://127.0.0.1:3000", status: "offline", http_status: null, latency_ms: null },
+  { id: "allah", name: "A-L-L-A-H", url: "http://127.0.0.1:3000", status: "offline", http_status: null, latency_ms: null },
+  { id: "web", name: "WEB", url: "http://127.0.0.1:3000/moonwitness", status: "offline", http_status: null, latency_ms: null },
   { id: "api", name: "CORE API", url: "http://127.0.0.1:3002", status: "offline", http_status: null, latency_ms: null },
   { id: "arsy", name: "ARSY", url: "http://127.0.0.1:8787", status: "offline", http_status: null, latency_ms: null },
   { id: "memory", name: "MEMORY", url: "http://127.0.0.1:8000", status: "offline", http_status: null, latency_ms: null },
 ];
+
+export function extractPort(url: string): string {
+  try {
+    const parsed = new URL(url);
+    return parsed.port || (parsed.protocol === "https:" ? "443" : "80");
+  } catch {
+    return "—";
+  }
+}
 
 export interface KatanaSkyHudProps {
   monitor?: MonitorSnapshot | null | undefined;
@@ -61,7 +70,7 @@ export function KatanaSkyHud({ monitor, mode = "compact", onOpenUrl }: KatanaSky
           </svg>
           <div className="astrolabe-nodes">
             {services.map((svc, idx) => {
-              const port = svc.url.replace("http://127.0.0.1:", "");
+              const port = extractPort(svc.url);
               return (
                 <button
                   key={svc.id}
@@ -105,7 +114,7 @@ export function KatanaSkyHud({ monitor, mode = "compact", onOpenUrl }: KatanaSky
   return (
     <div className="katana-sky-beacons" aria-label="Citadel Sky Sniper Reticles">
       {services.slice(0, 5).map((svc) => {
-        const port = svc.url.replace("http://127.0.0.1:", "");
+        const port = extractPort(svc.url);
         return (
           <button
             key={svc.id}
