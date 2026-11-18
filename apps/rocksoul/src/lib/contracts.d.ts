@@ -353,6 +353,38 @@ export interface CreateExperienceArgs {
   artifactId?: string | null;
 }
 
+export interface SaveStudioDraftArgs {
+  draftId?: string;
+  title: string;
+  content: string;
+  kind: string;
+  projectId?: string;
+}
+
+export interface RecordResearchClaimArgs {
+  question: string;
+  claim: string;
+  sourceCitation: string;
+  confidence: string;
+}
+
+export interface CreateOrchestrationPlanArgs {
+  objective: string;
+  mode: string;
+  concurrencyLimit: number;
+  budgetSeconds: number;
+}
+
+export interface AddOrchestrationTasksArgs {
+  planId: string;
+  tasksJson: string;
+}
+
+export interface UpdateOrchestrationPlanStatusArgs {
+  planId: string;
+  status: string;
+}
+
 export interface StartSupervisedAgentRunArgs {
   agentId: string;
   repositoryId: string;
@@ -435,6 +467,17 @@ export interface NativeCommands {
     args: { worktreePath: string };
     result: AgentRunExecutionResult;
   };
+  create_orchestration_plan: { args: CreateOrchestrationPlanArgs; result: OrchestrationPlanRecord };
+  add_orchestration_tasks: { args: AddOrchestrationTasksArgs; result: OrchestrationTaskRecord[] };
+  get_orchestration_tasks: { args: { planId: string }; result: OrchestrationTaskRecord[] };
+  update_orchestration_plan_status: { args: UpdateOrchestrationPlanStatusArgs; result: OrchestrationPlanRecord };
+  step_orchestration_cycle: { args: { planId: string }; result: OrchestrationTaskRecord[] };
+  save_studio_draft: { args: SaveStudioDraftArgs; result: StudioDraftRecord };
+  list_studio_drafts: { args: { projectId?: string }; result: StudioDraftRecord[] };
+  record_research_claim: { args: RecordResearchClaimArgs; result: ResearchClaimRecord };
+  list_research_claims: { args: Record<string, never>; result: ResearchClaimRecord[] };
+  get_companion_profile: { args: Record<string, never>; result: CompanionProfileRecord };
+  update_companion_state: { args: { companionState: string }; result: CompanionProfileRecord };
 }
 
 export type NativeCommand = keyof NativeCommands;
@@ -552,4 +595,63 @@ export interface AgentRunExecutionResult {
   changedFiles: string[];
   diffStat: string;
 }
+
+export interface OrchestrationPlanRecord {
+  id: string;
+  objective: string;
+  mode: string;
+  status: string;
+  concurrencyLimit: number;
+  budgetSeconds: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrchestrationTaskRecord {
+  id: string;
+  planId: string;
+  taskIndex: number;
+  title: string;
+  specialistRole: string;
+  dependsOnTaskId?: string | null;
+  agentRunId?: string | null;
+  worktreePath: string;
+  status: string;
+  retryCount: number;
+  maxRetries: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StudioDraftRecord {
+  id: string;
+  title: string;
+  content: string;
+  kind: string;
+  version: number;
+  projectId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResearchClaimRecord {
+  id: string;
+  question: string;
+  claim: string;
+  sourceCitation: string;
+  confidence: string;
+  createdAt: string;
+}
+
+export interface CompanionProfileRecord {
+  id: string;
+  name: string;
+  personality: string;
+  state: string;
+  dailyBriefing: string;
+  eveningRecap: string;
+  updatedAt: string;
+}
+
+
 

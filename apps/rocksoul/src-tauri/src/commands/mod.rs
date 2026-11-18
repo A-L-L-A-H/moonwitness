@@ -4,6 +4,8 @@ pub mod continuity;
 pub mod issues;
 pub mod milestones;
 pub mod monitor;
+pub mod orchestration;
+pub mod pen_and_companion;
 pub mod projects;
 pub mod repositories;
 pub mod s3_gateway;
