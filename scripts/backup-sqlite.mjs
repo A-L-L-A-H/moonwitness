@@ -2,8 +2,25 @@
 import { createCipheriv, createHash, randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { basename, join, resolve } from "node:path";
-import { createClient } from "@libsql/client";
+import { pathToFileURL } from "node:url";
+
+/**
+ * Lazily resolve `@libsql/client` across hoisted installs and strict pnpm workspaces.
+ */
+export async function createLibsqlClient(url) {
+  let mod;
+  try {
+    mod = await import("@libsql/client");
+  } catch {
+    const ormRequire = createRequire(new URL("../packages/orm/package.json", import.meta.url));
+    const resolvedPath = ormRequire.resolve("@libsql/client");
+    mod = await import(pathToFileURL(resolvedPath).href);
+  }
+  const createClient = mod.createClient ?? mod.default?.createClient;
+  return createClient({ url });
+}
 
 /**
  * MoonWitness Canonical SQLite Backup Utility
@@ -12,14 +29,23 @@ import { createClient } from "@libsql/client";
  * and generates a signed metadata manifest.
  */
 
-function deriveKey(keyInput) {
+export function deriveBackupKey(keyInput) {
   if (!keyInput) {
     throw new Error("Backup encryption key required. Set MW_BACKUP_ENCRYPTION_KEY or pass --key.");
   }
   return createHash("sha256").update(keyInput).digest();
 }
 
-async function safeRemove(filePath, retries = 10, delayMs = 100) {
+export function encryptBackupBytes(plaintextBytes, encryptionKey) {
+  const key = deriveBackupKey(encryptionKey);
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const encrypted = Buffer.concat([cipher.update(plaintextBytes), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return Buffer.concat([iv, authTag, encrypted]);
+}
+
+export async function safeRemove(filePath, retries = 10, delayMs = 100) {
   for (let i = 0; i < retries; i++) {
     try {
       await rm(filePath, { force: true });
@@ -45,9 +71,7 @@ export async function backupDatabaseFile({ sourceDbPath, outputDir, encryptionKe
   let tables = [];
 
   // 1. Verify integrity & foreign keys on source, extract tables, then VACUUM INTO snapshot
-  const client = createClient({
-    url: `file:${resolve(sourceDbPath).replace(/\\/g, "/")}`,
-  });
+  const client = await createLibsqlClient(`file:${resolve(sourceDbPath).replace(/\\/g, "/")}`);
   try {
     const integrityResult = await client.execute("PRAGMA integrity_check");
     const integrityValue = integrityResult.rows[0]?.integrity_check ?? integrityResult.rows[0]?.[0];
@@ -76,12 +100,7 @@ export async function backupDatabaseFile({ sourceDbPath, outputDir, encryptionKe
   const plaintextHash = createHash("sha256").update(plaintextBytes).digest("hex");
   const sizeBytes = plaintextBytes.length;
 
-  const key = deriveKey(encryptionKey);
-  const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([cipher.update(plaintextBytes), cipher.final()]);
-  const authTag = cipher.getAuthTag();
-  const payload = Buffer.concat([iv, authTag, encrypted]);
+  const payload = encryptBackupBytes(plaintextBytes, encryptionKey);
 
   await writeFile(finalEncrypted, payload);
   await safeRemove(tempSnapshot);

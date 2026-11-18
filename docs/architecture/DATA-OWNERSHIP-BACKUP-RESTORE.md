@@ -74,18 +74,18 @@ PRAGMA foreign_keys = ON;
 
 ### PostgreSQL (Production Core API & MID) & SQLite Workers
 
-- **Production Core DB (`postgres`)**: Use `pg_dump --format=custom` / `pg_restore` against `postgres-data` inside the Compose stack, encrypted before off-host transfer.
-- **SQLite Workers (`services/*`) & Local libSQL Mode**: Standard filesystem copy of active SQLite databases causes corrupted snapshot states when WAL files are active. MoonWitness uses SQLite's official `VACUUM INTO`:
+- **PostgreSQL (`postgres:16-alpine` production Core API & MID):** `backupDatabase` / `restoreDatabase` / `verifyIntegrity` in `packages/orm/src/backup.ts` dispatch `pg_dump --format=custom --no-owner --no-acl`, `pg_restore --clean --if-exists --no-owner --no-acl`, and `pg_index` / `pg_constraint` system-catalog integrity checks against `POSTGRES_TEST_URL` (tested in CI `postgres-integration` job) or live Compose `postgres-data`.
+- **SQLite Workers (`services/*`) & Local libSQL Mode:** Standard filesystem copy of active SQLite databases causes corrupted snapshot states when WAL files are active. MoonWitness uses SQLite's official `VACUUM INTO`:
   - Generates a fully consolidated, compacted, transactionally consistent single-file database.
   - Does not block live readers or writers.
   - Eliminates reliance on `-wal` and `-shm` sidecars in backup storage.
 
-### SQLite Security, Integrity & CLI Utilities
+### Encryption, Integrity Validation & CLI Utilities
 
-- **Integrity Validation**: Runs `PRAGMA integrity_check` and `PRAGMA foreign_key_check` on SQLite snapshots before encryption.
-- **Encryption**: SQLite backups are encrypted with AES-256-GCM using `MW_BACKUP_ENCRYPTION_KEY`.
-- **Signed Manifest**: Backup runs record timestamp, database names, table lists, and SHA-256 checksums.
-- **Tooling on `dev`:** Use [scripts/backup-sqlite.mjs](../../scripts/backup-sqlite.mjs) (`--out`, `--key`) and [scripts/restore-sqlite.mjs](../../scripts/restore-sqlite.mjs) (`--backup`, `--target`, `--key`), or the `@moonwitness/orm` helpers `backupDatabase` / `restoreDatabase` for SQLite/libSQL (`--profile ops` services & local dev) and `pg_dump` / `pg_restore` for Compose PostgreSQL.
+- **Integrity Validation:** `verifyIntegrity()` runs `pg_index` (`indisvalid`/`indisready`) & `pg_constraint` (`convalidated`) validation on PostgreSQL handles and `PRAGMA integrity_check` / `PRAGMA foreign_key_check` on SQLite handles; `listDatabaseTables()` abstracts table enumeration across both dialects.
+- **Encryption:** Both PostgreSQL custom dumps (`.pgdump.enc`) and SQLite snapshots (`.bak.enc`) are encrypted with AES-256-GCM using `MW_BACKUP_ENCRYPTION_KEY`.
+- **Signed Manifest:** Backup runs record timestamp, dialect, database names, table lists, and SHA-256 checksums.
+- **Tooling on `dev`:** Use dialect-aware [scripts/backup-db.mjs](../../scripts/backup-db.mjs) / [scripts/restore-db.mjs](../../scripts/restore-db.mjs) (handling both `postgres://` URLs and SQLite file targets) alongside SQLite suite utilities [scripts/backup-sqlite.mjs](../../scripts/backup-sqlite.mjs) (`--out`, `--key`) and [scripts/restore-sqlite.mjs](../../scripts/restore-sqlite.mjs) (`--backup`, `--target`, `--key`), backed by `@moonwitness/orm` helpers.
 
 ---
 

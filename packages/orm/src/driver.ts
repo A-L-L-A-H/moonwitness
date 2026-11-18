@@ -1,8 +1,10 @@
 import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
-import { isPostgresUrl } from "./drivers/postgres.driver.js";
+import { isPostgresUrl, type PostgresDriver, type PoolLike } from "./drivers/postgres.driver.js";
 import { D1Driver, type D1DatabaseLike } from "./drivers/d1.driver.js";
 
 export interface OrmDriverHandle extends LibSqlExecutor {
+  readonly dialect?: "sqlite" | "postgres" | "d1";
+  getConnectionString?(): string | null;
   close(): void;
   transaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T>;
 }
@@ -24,6 +26,21 @@ export async function initDb(dbPathOrUrl: string): Promise<OrmDriverHandle> {
   const { LibSqlDriver } = await import("./drivers/sqlite.driver.js");
   const driver = new LibSqlDriver();
   await driver.init(dbPathOrUrl);
+  db = driver;
+  return driver;
+}
+
+/** Initialize the active ORM handle using an explicit or overridden PostgreSQL pool. */
+export async function initPostgresDb(
+  connectionString: string,
+  poolOverride?: PoolLike,
+): Promise<PostgresDriver> {
+  if (db) {
+    throw new Error("Database already initialized. Call closeDb() first.");
+  }
+  const { PostgresDriver: PgDriver } = await import("./drivers/postgres.driver.js");
+  const driver = new PgDriver();
+  await driver.init(connectionString, poolOverride);
   db = driver;
   return driver;
 }

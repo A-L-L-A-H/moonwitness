@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { createDecipheriv, createHash } from "node:crypto";
 import { existsSync } from "node:fs";
-import { copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { createClient } from "@libsql/client";
+import { createLibsqlClient, deriveBackupKey, safeRemove } from "./backup-sqlite.mjs";
 
 /**
  * MoonWitness Canonical SQLite Restore Utility
@@ -12,23 +12,34 @@ import { createClient } from "@libsql/client";
  * and safely replaces the target database.
  */
 
-function deriveKey(keyInput) {
-  if (!keyInput) {
-    throw new Error("Restore decryption key required. Set MW_BACKUP_ENCRYPTION_KEY or pass --key.");
+export function decryptBackupBytes(payload, decryptionKey, expectedPlaintextHash) {
+  if (payload.length < 28) {
+    throw new Error("Invalid backup payload (too short for IV + AuthTag)");
   }
-  return createHash("sha256").update(keyInput).digest();
-}
 
-async function safeRemove(filePath, retries = 10, delayMs = 100) {
-  for (let i = 0; i < retries; i++) {
-    try {
-      await rm(filePath, { force: true });
-      return;
-    } catch (err) {
-      if (i === retries - 1) return;
-      await new Promise((r) => setTimeout(r, delayMs));
-    }
+  const iv = payload.subarray(0, 12);
+  const authTag = payload.subarray(12, 28);
+  const ciphertext = payload.subarray(28);
+
+  const key = deriveBackupKey(decryptionKey);
+  const decipher = createDecipheriv("aes-256-gcm", key, iv);
+  decipher.setAuthTag(authTag);
+
+  let decryptedBytes;
+  try {
+    decryptedBytes = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+  } catch (err) {
+    throw new Error(`Decryption failed: bad key or tampered ciphertext: ${err}`);
   }
+
+  const plaintextHash = createHash("sha256").update(decryptedBytes).digest("hex");
+  if (expectedPlaintextHash && plaintextHash !== expectedPlaintextHash) {
+    throw new Error(
+      `Plaintext hash mismatch: expected ${expectedPlaintextHash}, got ${plaintextHash}`,
+    );
+  }
+
+  return { decryptedBytes, plaintextHash };
 }
 
 export async function restoreDatabaseFile({
@@ -42,32 +53,11 @@ export async function restoreDatabaseFile({
   }
 
   const payload = await readFile(encryptedBackupPath);
-  if (payload.length < 28) {
-    throw new Error("Invalid backup payload (too short for IV + AuthTag)");
-  }
-
-  const iv = payload.subarray(0, 12);
-  const authTag = payload.subarray(12, 28);
-  const ciphertext = payload.subarray(28);
-
-  const key = deriveKey(decryptionKey);
-  const decipher = createDecipheriv("aes-256-gcm", key, iv);
-  decipher.setAuthTag(authTag);
-
-  let decryptedBytes;
-  try {
-    decryptedBytes = Buffer.concat([decipher.update(ciphertext), decipher.final()]);
-  } catch (err) {
-    throw new Error(`Decryption failed: bad key or tampered ciphertext: ${err}`);
-  }
-
-  // Verify expected plaintext hash if provided
-  const computedHash = createHash("sha256").update(decryptedBytes).digest("hex");
-  if (expectedPlaintextHash && computedHash !== expectedPlaintextHash) {
-    throw new Error(
-      `Plaintext hash mismatch: expected ${expectedPlaintextHash}, got ${computedHash}`,
-    );
-  }
+  const { decryptedBytes, plaintextHash: computedHash } = decryptBackupBytes(
+    payload,
+    decryptionKey,
+    expectedPlaintextHash,
+  );
 
   await mkdir(dirname(resolve(targetDbPath)), { recursive: true });
 
@@ -85,9 +75,7 @@ export async function restoreDatabaseFile({
   await writeFile(targetDbPath, decryptedBytes);
 
   // Run SQLite integrity checks on the restored file
-  const testClient = createClient({
-    url: `file:${resolve(targetDbPath).replace(/\\/g, "/")}`,
-  });
+  const testClient = await createLibsqlClient(`file:${resolve(targetDbPath).replace(/\\/g, "/")}`);
   try {
     const integrityRows = await testClient.execute("PRAGMA integrity_check");
     const integrityValue = integrityRows.rows[0]?.integrity_check ?? integrityRows.rows[0]?.[0];
@@ -142,7 +130,7 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
 
   restoreDatabaseFile({
     encryptedBackupPath: backupFile,
-    targetDbPath,
+    targetDbPath: targetPath,
     decryptionKey: key,
   })
     .then((result) => {
