@@ -238,3 +238,12 @@ The following items are source/configuration findings and must be verified again
 | `SYSLOG_URL`      | `http://127.0.0.1:8093`                     | `http://syslog:8093`       | Active in Compose; move to optional `ops` profile in `MW-0502`                                                                                   |
 | `STORAGE_URL`     | `http://127.0.0.1:8091`                     | _Not configured_           | **MISMATCH (`MW-0501`):** Compose lacks `storage` service and `STORAGE_URL` override; container requests currently hit loopback `127.0.0.1:8091` |
 | `DATABASE_URL`    | PostgreSQL expected in prod                 | PostgreSQL service present | **MISMATCH (`MW-0505`):** `Dockerfile` `api` stage sets `ENV DATABASE_URL=/data/moonwitness.db`                                                  |
+
+### IGate Parity & Retirement Matrix (`MW-0104` / `MW-0105`)
+
+| Legacy `apps/igate` Endpoint                   | Replacement in `apps/api`                                           | Parity Status                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `GET /health`, `/health/live`, `/health/ready` | `GET /health`, `/health/live`, `/health/ready`                      | Covered by `health.routes.ts`                                   |
+| `GET /api/status`                              | `GET /api/v1/igate/status` & `GET /api/v1/probes/nodes` + `/events` | Covered by `probes.routes.ts` (`requireAuth`)                   |
+| `POST /api/probe`                              | `POST /api/v1/igate/probe` & `POST /api/v1/probes/run`              | Covered by `probes.routes.ts` (`requireRole("admin","editor")`) |
+| Standalone Cloudflare D1 + UI HTML             | Retired (`apps/web` hosts authenticated console)                    | Standalone worker decommissioned across PR W1-B & W1-C          |
