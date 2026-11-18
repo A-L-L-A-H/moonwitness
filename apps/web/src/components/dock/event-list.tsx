@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { TimelineEvent } from "@moonwitness/types";
 import { Crown } from "@moonwitness/ui/icons";
@@ -47,14 +47,14 @@ function EventListInner({
           </span>
         </h2>
         <span className="text-[11px] text-[var(--muted-foreground)]" aria-live="polite">
-          Showing {pageStart}â€“{pageEnd} of {total} events
+          Showing {pageStart}–{pageEnd} of {total} events
         </span>
       </div>
       {events.length === 0 ? (
         <div className="zine-card-rough p-10 text-center">
           <p className="font-brush text-xl text-[var(--muted-foreground)]">NO SIGNALS FOUND.</p>
           <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-            Nothing matches â€œ{query}â€ in this era. Try another frequency.
+            Nothing matches “{query}” in this era. Try another frequency.
           </p>
           <Button onClick={onReset} className="mt-4">
             RESET FILTERS

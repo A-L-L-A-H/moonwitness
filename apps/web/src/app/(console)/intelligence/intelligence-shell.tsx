@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ControlGate } from "@/components/control/gate";
 import { EmpireShell } from "@/components/shell";
+import { useCurrentUser } from "@/lib/api/auth";
 import {
   useRiotAiConfig,
   useRiotAiModels,
@@ -15,11 +16,16 @@ import { IntelligenceDashboard } from "./IntelligenceDashboard";
 export function IntelligenceShell() {
   const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
+  const currentUser = useCurrentUser();
   const models = useRiotAiModels();
   const config = useRiotAiConfig();
   const usage = useRiotAiUsage();
   const history = useRiotAiConfigHistory();
   useEffect(() => setMounted(true), []);
+
+  const canEditConfig = config.data?.config.canEditConfig ?? false;
+  const userRole = currentUser.data?.user.role;
+  const canChat = Boolean(canEditConfig || userRole === "admin" || userRole === "editor");
 
   return (
     <ControlGate>
@@ -40,7 +46,8 @@ export function IntelligenceShell() {
             query={query}
             config={config.data?.config ?? null}
             configError={config.isError ? (config.error as Error).message : null}
-            canEditConfig={config.data?.config.canEditConfig ?? false}
+            canEditConfig={canEditConfig}
+            canChat={canChat}
             usage={usage.data?.summary ?? null}
             usageError={usage.isError ? (usage.error as Error).message : null}
             usageEntries={usage.data?.entries ?? []}
@@ -57,7 +64,7 @@ export function IntelligenceShell() {
             onSaveConfig={saveRiotAiConfig}
           />
         ) : (
-          <div className="flex min-h-[60vh] items-center justify-center font-brush text-2xl text-[var(--pink)]">
+          <div className="flex min-h-[60vh] items-center justify-center font-brush text-2xl text-[var(--primary)]">
             INITIALIZING RIOT INTELLIGENCE…
           </div>
         )}

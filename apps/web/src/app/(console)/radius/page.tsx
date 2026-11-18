@@ -144,7 +144,11 @@ function RadiusConsole() {
             <h2 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
               Service logs
             </h2>
-            {logs.data && <span className="text-xs text-[var(--muted-foreground)]">{visibleLogs.length} shown</span>}
+            {logs.data && (
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {visibleLogs.length} shown
+              </span>
+            )}
           </div>
           {logs.isLoading ? (
             <p
@@ -165,7 +169,9 @@ function RadiusConsole() {
             >
               <SignalRadioArt className="h-20 w-20 opacity-85" decorative />
               <p>
-                {logs.data?.length ? "No logs match this search." : "No service logs are available."}
+                {logs.data?.length
+                  ? "No logs match this search."
+                  : "No service logs are available."}
               </p>
             </div>
           ) : (

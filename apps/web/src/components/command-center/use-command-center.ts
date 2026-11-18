@@ -67,12 +67,21 @@ export interface CommandCenterState {
   setPreviousFocus: (el: HTMLElement | null) => void;
 }
 
+const LIVE_FEED_COLORS: Record<string, string> = {
+  TIMELINE: "#ff4ecd",
+  IDENTITY: "#38bdf8",
+  "COMMAND-CENTER": "#facc15",
+  RADIUS: "#34d399",
+  CONTROL: "#f97316",
+};
+
 export function useCommandCenter(): CommandCenterState {
   const params = useSearchParams();
   const [query, setQuery] = useState("");
   const [openModule, setOpenModule] = useState<Module | null>(null);
   const [workflows, setWorkflows] = useState<Workflow[]>(initialWorkflows);
   const [alerts, setAlerts] = useState<MissionAlert[]>(initialAlerts);
+  const [feed, setFeed] = useState<FeedItem[]>(feedItems);
   const [stats, setStats] = useState<CommandCenterStats | null>(null);
   const [statsStatus, setStatsStatus] = useState<"loading" | "live" | "offline">("loading");
   const [toast, setToast] = useState<string | null>(null);
@@ -94,6 +103,16 @@ export function useCommandCenter(): CommandCenterState {
       .then(([snapshot, statsSnapshot]) => {
         setWorkflows(snapshot.workflows);
         setAlerts(snapshot.alerts);
+        if (Array.isArray(snapshot.feed) && snapshot.feed.length > 0) {
+          setFeed(
+            snapshot.feed.map((entry, idx) => ({
+              id: `live-feed-${idx}-${entry.tag}`,
+              text: `[${entry.tag}] ${entry.msg}`,
+              ago: entry.time,
+              color: LIVE_FEED_COLORS[entry.tag] ?? "#38bdf8",
+            })),
+          );
+        }
         setStats(statsSnapshot);
         setStatsStatus("live");
       })
@@ -147,12 +166,12 @@ export function useCommandCenter(): CommandCenterState {
         : pipeline,
       collections: q ? collections.filter((c) => c.name.toLowerCase().includes(q)) : collections,
       projects: q ? projects.filter((p) => p.title.toLowerCase().includes(q)) : projects,
-      feed: q ? feedItems.filter((f) => f.text.toLowerCase().includes(q)) : feedItems,
+      feed: q ? feed.filter((f) => f.text.toLowerCase().includes(q)) : feed,
       workflows: q
         ? workflows.filter((w) => `${w.name} ${w.detail}`.toLowerCase().includes(q))
         : workflows,
     }),
-    [q, workflows],
+    [feed, q, workflows],
   );
 
   function onAction(a: QuickAction) {

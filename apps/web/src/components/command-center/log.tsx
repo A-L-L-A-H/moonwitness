@@ -1,4 +1,4 @@
-﻿import type { FeedItem, MissionAlert, Workflow } from "@moonwitness/types";
+import type { FeedItem, MissionAlert, Workflow } from "@moonwitness/types";
 import { Card, Button } from "@moonwitness/ui";
 import { Bolt, Crown } from "@moonwitness/ui/icons";
 import { SectionHeading } from "./section-heading";
@@ -91,7 +91,9 @@ export function MissionLog({
                   className="mt-1 h-2 w-2 shrink-0 rounded-full"
                   style={{ background: f.color }}
                 />
-                <p className="min-w-0 flex-1 text-xs leading-snug text-[var(--foreground)]">{f.text}</p>
+                <p className="min-w-0 flex-1 text-xs leading-snug text-[var(--foreground)]">
+                  {f.text}
+                </p>
                 <span className="shrink-0 text-[11px] text-[var(--muted-foreground)]">{f.ago}</span>
               </div>
             ))}
@@ -126,12 +128,14 @@ export function MissionLog({
                   aria-label={`Dismiss alert: ${a.text}`}
                   className="min-h-11 min-w-11 text-[var(--muted-foreground)]"
                 >
-                  âœ•
+                  ✕
                 </Button>
               </div>
             ))}
             {alerts.length === 0 && (
-              <p className="py-2 text-xs text-[var(--muted-foreground)]">All clear. The sky is quiet.</p>
+              <p className="py-2 text-xs text-[var(--muted-foreground)]">
+                All clear. The sky is quiet.
+              </p>
             )}
           </div>
         </Card>

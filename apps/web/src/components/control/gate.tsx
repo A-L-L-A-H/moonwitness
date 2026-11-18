@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
@@ -19,25 +19,27 @@ function RedirectToSetup() {
   useEffect(() => {
     router.replace("/setup");
   }, [router]);
-  return <FullScreen>MEMBUKA SETUPâ€¦</FullScreen>;
+  return <FullScreen>MEMBUKA SETUP…</FullScreen>;
 }
 
 /**
  * ControlGate memastikan urutan yang sama untuk semua halaman control:
- * belum initialized â†’ /setup, belum login â†’ form login, sudah login â†’ isi.
+ * belum initialized → /setup, belum login → form login, sudah login → isi.
  */
 export function ControlGate({ children }: { children: ReactNode }) {
   const setup = useSetupStatus();
   const me = useCurrentUser();
 
-  if (setup.isLoading) return <FullScreen>MEMERIKSA INSTANCEâ€¦</FullScreen>;
+  if (setup.isLoading) return <FullScreen>MEMERIKSA INSTANCE…</FullScreen>;
 
   if (setup.isError) {
     return (
       <div className="flex min-h-screen items-center justify-center px-4">
         <ZineCardRough className="max-w-lg p-6">
           <h1 className="font-brush text-2xl text-[var(--red)]">ARSY TIDAK TERJANGKAU</h1>
-          <p className="mt-2 text-sm text-[var(--muted-foreground)]">{(setup.error as Error).message}</p>
+          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+            {(setup.error as Error).message}
+          </p>
           <p className="mt-3 text-xs text-[var(--muted-foreground)]">
             Pastikan <code>arsy serve</code> berjalan dan <code>ARSY_URL</code> di apps/api benar.
           </p>
@@ -48,7 +50,7 @@ export function ControlGate({ children }: { children: ReactNode }) {
 
   if (!setup.data?.initialized) return <RedirectToSetup />;
 
-  if (me.isLoading) return <FullScreen>MEMBUKA SESIâ€¦</FullScreen>;
+  if (me.isLoading) return <FullScreen>MEMBUKA SESI…</FullScreen>;
 
   if (me.isError) return <ControlLogin instanceName={setup.data.instance?.name} />;
 

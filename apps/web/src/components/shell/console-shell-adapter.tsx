@@ -5,7 +5,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ConsoleShell, Input, type HudNavItem } from "@moonwitness/ui";
 import { Crown, SearchIcon } from "@moonwitness/ui/icons";
+import { ConsoleCommandPalette } from "@/components/console-command-palette";
 import { useSavedAvatar } from "@/lib/avatar-store";
+import { buildCsrfLogoutInit } from "@/lib/api/auth";
+import { useMetaNavigation } from "@/lib/api/meta-views";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { SkinSwitcher } from "@/components/skin-switcher";
@@ -32,7 +35,9 @@ export function ConsoleShellAdapter({
   children: ReactNode;
 }) {
   const operations = plane === "operations";
-  const items = operations ? operationsNavItems : navItems;
+  const staticItems = operations ? operationsNavItems : navItems;
+  const session = useCurrentIdentity();
+  const items = useMetaNavigation(plane, staticItems, Boolean(session));
   const rootHref = operations ? "/control" : "/";
   const router = useRouter();
   const pathname = usePathname();
@@ -41,7 +46,6 @@ export function ConsoleShellAdapter({
   const [profileOpen, setProfileOpen] = useState(false);
   const popRef = useRef<HTMLDivElement>(null);
   const activeSection = useActiveSection(items, pathname);
-  const session = useCurrentIdentity();
   const identity = session?.identity ?? "Creator // Empire";
   const role = session?.role ?? "Empire crew";
   const { seed: avatarSeed } = useSavedAvatar(identity);
@@ -59,7 +63,7 @@ export function ConsoleShellAdapter({
 
   function exitShadow() {
     clearStoredMidSession();
-    fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
+    fetch("/api/v1/auth/logout", buildCsrfLogoutInit()).catch(() => {});
     router.push("/");
   }
 
@@ -132,19 +136,19 @@ export function ConsoleShellAdapter({
       }
       railFooter={
         operations ? (
-          <div className="font-mono text-[10px] leading-relaxed text-[var(--paper)]">
-            <strong className="text-[var(--blue)]">OPERATIONS CONSOLE</strong>
+          <div className="font-mono text-[10px] leading-relaxed text-[var(--muted-foreground)]">
+            <strong className="text-[var(--primary)]">OPERATIONS CONSOLE</strong>
             <div>WEB → API → ARSY PLANE</div>
           </div>
         ) : (
           <div className="flex flex-col gap-1.5 font-mono text-[10px] tracking-wider">
-            <SanctuaryGateLink className="flex min-h-9 items-center justify-between border border-[var(--line)] px-2.5 py-1 text-[var(--yellow)] transition-colors hover:border-[var(--yellow)] hover:text-white">
+            <SanctuaryGateLink className="flex min-h-9 items-center justify-between border border-[var(--border)] px-2.5 py-1 text-[var(--primary)] transition-colors hover:border-[var(--primary)] hover:text-[var(--foreground)]">
               <span>IMPERIUM GATE</span>
               <span aria-hidden="true">↗</span>
             </SanctuaryGateLink>
             <Link
               href="/moonwitness"
-              className="flex min-h-9 items-center justify-between border border-[var(--line)] px-2.5 py-1 text-[var(--paper)] transition-colors hover:border-[var(--pink)] hover:text-white"
+              className="flex min-h-9 items-center justify-between border border-[var(--border)] px-2.5 py-1 text-[var(--foreground)] transition-colors hover:border-[var(--primary)]"
             >
               <span>MOONWITNESS</span>
               <span aria-hidden="true">↗</span>
@@ -157,11 +161,12 @@ export function ConsoleShellAdapter({
       }
       commandRight={
         <>
-          <Crown className="h-3 w-5 text-[var(--yellow)]" />{" "}
+          <Crown className="h-3 w-5 text-[var(--primary)]" />{" "}
           {operations ? "ARSY CONTROL PLANE" : FOOTER_RIGHT}
         </>
       }
     >
+      <ConsoleCommandPalette plane={plane} />
       {children}
     </ConsoleShell>
   );

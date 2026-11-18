@@ -1,18 +1,71 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
-import type { TimelineEvent, Era, TimelineFilters, TimelineStats } from "@moonwitness/types";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type {
+  ArtKey,
+  Era,
+  EraId,
+  EventKind,
+  TimelineEvent,
+  TimelineFilters,
+  TimelineStats,
+} from "@moonwitness/types";
 
 const API_BASE = "/api/v1";
 const MAX_TIMELINE_PAGE_SIZE = 100;
 
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await fetch(url, { credentials: "include", cache: "no-store", signal });
+export interface CreateTimelineEventInput {
+  id?: string;
+  kind: EventKind;
+  date: string;
+  era: EraId;
+  title: string;
+  excerpt?: string;
+  body?: string;
+  location?: string;
+  tags?: string[];
+  sources?: number;
+  notes?: number;
+  image?: ArtKey;
+  imagePosition?: string;
+  related?: string[];
+}
+
+export type UpdateTimelineEventInput = Partial<Omit<TimelineEvent, "id">> & {
+  version?: number;
+};
+
+export interface TimelineEventAuditEntry {
+  id: string;
+  model: string;
+  entity_id: string;
+  action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE";
+  changed_by: string | null;
+  changed_at: string;
+  diff: string;
+  entity_version: number;
+  source: "seed" | "api" | "import" | "migration";
+  request_id: string | null;
+}
+
+async function requestTimelineJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(url, {
+    credentials: "include",
+    cache: "no-store",
+    headers: init?.body
+      ? { "content-type": "application/json", ...(init.headers ?? {}) }
+      : init?.headers,
+    ...init,
+  });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error ?? `HTTP ${res.status}`);
+    throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
   }
-  return res.json();
+  return res.json() as Promise<T>;
+}
+
+async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  return requestTimelineJson<T>(url, { signal });
 }
 
 export async function fetchTimelineEvents(
@@ -117,5 +170,130 @@ export function useTimelineEras() {
     queryKey: ["timeline", "eras"],
     queryFn: ({ signal }) => fetchJson<{ data: Era[] }>(`${API_BASE}/timeline/eras`, signal),
     staleTime: 60_000,
+  });
+}
+
+export async function createTimelineEvent(
+  input: CreateTimelineEventInput,
+  apiBase = API_BASE,
+): Promise<{ data: TimelineEvent }> {
+  return requestTimelineJson<{ data: TimelineEvent }>(`${apiBase}/timeline/events`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updateTimelineEvent(
+  id: string,
+  patch: UpdateTimelineEventInput,
+  apiBase = API_BASE,
+): Promise<{ data: TimelineEvent }> {
+  return requestTimelineJson<{ data: TimelineEvent }>(
+    `${apiBase}/timeline/events/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(patch),
+    },
+  );
+}
+
+export async function archiveTimelineEvent(
+  id: string,
+  apiBase = API_BASE,
+): Promise<{ data: TimelineEvent }> {
+  return requestTimelineJson<{ data: TimelineEvent }>(
+    `${apiBase}/timeline/events/${encodeURIComponent(id)}/archive`,
+    { method: "POST" },
+  );
+}
+
+export async function restoreTimelineEvent(
+  id: string,
+  apiBase = API_BASE,
+): Promise<{ data: TimelineEvent }> {
+  return requestTimelineJson<{ data: TimelineEvent }>(
+    `${apiBase}/timeline/events/${encodeURIComponent(id)}/restore`,
+    { method: "POST" },
+  );
+}
+
+export async function deleteTimelineEvent(
+  id: string,
+  apiBase = API_BASE,
+): Promise<{ data: TimelineEvent }> {
+  return requestTimelineJson<{ data: TimelineEvent }>(
+    `${apiBase}/timeline/events/${encodeURIComponent(id)}`,
+    { method: "DELETE" },
+  );
+}
+
+export async function fetchTimelineEventHistory(
+  id: string,
+  signal?: AbortSignal,
+  apiBase = API_BASE,
+): Promise<{ data: TimelineEventAuditEntry[] }> {
+  return requestTimelineJson<{ data: TimelineEventAuditEntry[] }>(
+    `${apiBase}/timeline/events/${encodeURIComponent(id)}/history`,
+    { signal },
+  );
+}
+
+export function useTimelineEventHistory(id: string | null, enabled = false) {
+  return useQuery({
+    queryKey: ["timeline", "history", id],
+    queryFn: ({ signal }) => fetchTimelineEventHistory(id!, signal),
+    enabled: Boolean(id && enabled),
+    staleTime: 15_000,
+  });
+}
+
+export function useCreateTimelineEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateTimelineEventInput) => createTimelineEvent(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] });
+    },
+  });
+}
+
+export function useUpdateTimelineEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: UpdateTimelineEventInput }) =>
+      updateTimelineEvent(id, patch),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] });
+    },
+  });
+}
+
+export function useArchiveTimelineEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => archiveTimelineEvent(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] });
+    },
+  });
+}
+
+export function useRestoreTimelineEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => restoreTimelineEvent(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] });
+    },
+  });
+}
+
+export function useDeleteTimelineEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteTimelineEvent(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timeline"] });
+    },
   });
 }

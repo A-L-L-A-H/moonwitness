@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import { Crown, Splatter, Star4 } from "@moonwitness/ui/icons";
 import {
@@ -63,7 +63,7 @@ export function CommandHero({ project }: { project: Project }) {
             <span className="block text-[var(--primary)]">COMMAND CENTER</span>
           </h1>
           <p className="mt-4 font-mono text-[11px] font-bold tracking-[0.18em] text-[var(--foreground)]">
-            MOONWITNESS // PRIVATE // CREATE Â· CURATE Â· DEPLOY
+            MOONWITNESS // PRIVATE // CREATE · CURATE · DEPLOY
           </p>
         </div>
 
@@ -100,7 +100,7 @@ export function CommandHero({ project }: { project: Project }) {
               className="mt-4 min-h-11 w-full justify-between gap-2 px-4 py-2.5 text-sm"
             >
               <Link href={`/dock?q=${encodeURIComponent(project.title)}`}>
-                OPEN PROJECT <span aria-hidden="true">â†’</span>
+                OPEN PROJECT <span aria-hidden="true">→</span>
               </Link>
             </Button>
           </aside>

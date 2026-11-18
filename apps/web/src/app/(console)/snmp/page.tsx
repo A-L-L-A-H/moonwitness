@@ -75,12 +75,11 @@ function SnmpMonitor() {
             Loading SNMP statistics…
           </p>
         ) : stats.isError ? (
-          <section
-            className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5"
-            role="alert"
-          >
+          <section className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5" role="alert">
             <h2 className="font-brush text-xl text-[var(--primary)]">SNMP SERVICE UNAVAILABLE</h2>
-            <p className="mt-2 text-sm text-[var(--foreground)]">{(stats.error as Error).message}</p>
+            <p className="mt-2 text-sm text-[var(--foreground)]">
+              {(stats.error as Error).message}
+            </p>
             <button
               type="button"
               onClick={() => void stats.refetch()}
@@ -109,12 +108,11 @@ function SnmpMonitor() {
             Loading devices…
           </p>
         ) : devices.isError ? (
-          <section
-            className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5"
-            role="alert"
-          >
+          <section className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-5" role="alert">
             <h2 className="font-brush text-xl text-[var(--primary)]">DEVICES UNAVAILABLE</h2>
-            <p className="mt-2 text-sm text-[var(--foreground)]">{(devices.error as Error).message}</p>
+            <p className="mt-2 text-sm text-[var(--foreground)]">
+              {(devices.error as Error).message}
+            </p>
             <button
               type="button"
               onClick={() => void devices.refetch()}
@@ -155,7 +153,9 @@ function SnmpMonitor() {
 function Stat({ label, value }: { label: string; value?: number }) {
   return (
     <div className="border-2 border-[var(--border)] bg-[var(--card)] p-4">
-      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">{label}</p>
+      <p className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+        {label}
+      </p>
       <p className="mt-2 font-brush text-3xl text-[var(--foreground)]">{value ?? "—"}</p>
     </div>
   );
@@ -174,7 +174,9 @@ function DeviceCard({ device, canWrite }: { device: SafeSnmpDevice; canWrite: bo
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-[var(--muted-foreground)]">{enabled ? "Enabled" : "Disabled"}</span>
+          <span className="text-xs text-[var(--muted-foreground)]">
+            {enabled ? "Enabled" : "Disabled"}
+          </span>
           <DeviceManagementActions device={device} canWrite={canWrite} />
         </div>
       </header>
@@ -191,7 +193,9 @@ function DeviceCard({ device, canWrite }: { device: SafeSnmpDevice; canWrite: bo
           </p>
         ) : targets.isError ? (
           <div className="mt-3" role="alert">
-            <p className="text-sm text-[var(--muted-foreground)]">{(targets.error as Error).message}</p>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              {(targets.error as Error).message}
+            </p>
             <button
               type="button"
               onClick={() => void targets.refetch()}

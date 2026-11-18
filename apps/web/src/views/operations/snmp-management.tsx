@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import {
@@ -20,7 +20,11 @@ function Labeled({
 }) {
   return (
     <label
-      className={wide ? "block text-xs text-[var(--muted-foreground)] sm:col-span-2" : "block text-xs text-[var(--muted-foreground)]"}
+      className={
+        wide
+          ? "block text-xs text-[var(--muted-foreground)] sm:col-span-2"
+          : "block text-xs text-[var(--muted-foreground)]"
+      }
     >
       {label}
       {children}
@@ -142,7 +146,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
           disabled={createDevice.isPending || !name.trim() || !host.trim()}
           className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createDevice.isPending ? "Creatingâ€¦" : "Create device"}
+          {createDevice.isPending ? "Creating…" : "Create device"}
         </button>
         <button
           type="button"
@@ -256,7 +260,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
           disabled={createTarget.isPending || !name.trim() || !oid.trim()}
           className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--blue)] border border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createTarget.isPending ? "Creatingâ€¦" : "Create target"}
+          {createTarget.isPending ? "Creating…" : "Create target"}
         </button>
         <button
           type="button"

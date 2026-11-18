@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import { ScenePanel } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";

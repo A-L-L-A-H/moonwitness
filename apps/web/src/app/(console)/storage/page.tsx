@@ -344,7 +344,9 @@ function ObjectList({
                     {object.key}
                   </td>
                   <td className="whitespace-nowrap p-3">{formatBytes(object.size)}</td>
-                  <td className="p-3 font-mono text-[var(--muted-foreground)]">{object.etag.slice(0, 12)}</td>
+                  <td className="p-3 font-mono text-[var(--muted-foreground)]">
+                    {object.etag.slice(0, 12)}
+                  </td>
                   <td className="whitespace-nowrap p-3">
                     {object.lastModified ? new Date(object.lastModified).toLocaleString() : "—"}
                   </td>
@@ -510,7 +512,9 @@ function StorageBrowser() {
               Buckets
             </h2>
             {buckets.data && (
-              <span className="text-xs text-[var(--muted-foreground)]">{buckets.data.length} total</span>
+              <span className="text-xs text-[var(--muted-foreground)]">
+                {buckets.data.length} total
+              </span>
             )}
           </div>
           {buckets.isLoading ? (
@@ -544,7 +548,9 @@ function StorageBrowser() {
               </h2>
               <div className="flex items-center gap-3">
                 {objects.data && (
-                  <span className="text-xs text-[var(--muted-foreground)]">{objects.data.length} listed</span>
+                  <span className="text-xs text-[var(--muted-foreground)]">
+                    {objects.data.length} listed
+                  </span>
                 )}
                 <button
                   type="button"

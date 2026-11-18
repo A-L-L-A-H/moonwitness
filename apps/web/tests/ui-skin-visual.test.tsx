@@ -96,13 +96,20 @@ describe("Multi-skin Visual & Component Surface Suite", () => {
     });
     expect(container.querySelectorAll("svg[data-mw-brand-logo]").length).toBeGreaterThanOrEqual(10);
     expect(container.querySelectorAll("svg[data-mw-cutout]").length).toBeGreaterThanOrEqual(12);
-    expect(container.querySelectorAll('svg[data-mw-icon="true"]').length).toBeGreaterThanOrEqual(12);
+    expect(container.querySelectorAll('svg[data-mw-icon="true"]').length).toBeGreaterThanOrEqual(
+      12,
+    );
   });
 
   it("renders MTimeInteractiveEngine and CodexWorkbench with gauges, cutouts, and ornaments", async () => {
     await act(async () => {
       root.render(
-        <SkinProvider defaultSkin="editorial" defaultDna="01-imperium-lumen" defaultTheme="light" persist={false}>
+        <SkinProvider
+          defaultSkin="editorial"
+          defaultDna="01-imperium-lumen"
+          defaultTheme="light"
+          persist={false}
+        >
           <SanctuaryLocaleProvider>
             <div>
               <MTimeInteractiveEngine compact />
@@ -114,7 +121,9 @@ describe("Multi-skin Visual & Component Surface Suite", () => {
     });
 
     expect(document.documentElement.getAttribute("data-theme")).toBe("light");
-    expect(container.querySelectorAll('svg[data-mw-chart="radial-gauge"]').length).toBeGreaterThanOrEqual(2);
+    expect(
+      container.querySelectorAll('svg[data-mw-chart="radial-gauge"]').length,
+    ).toBeGreaterThanOrEqual(2);
     expect(container.querySelector('[data-mw-cutout="lunar-disc"]')).not.toBeNull();
     expect(container.querySelector('[data-mw-ornament="editorial"]')).not.toBeNull();
   });

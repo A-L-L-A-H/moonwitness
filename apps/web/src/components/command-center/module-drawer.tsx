@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { Module, Project } from "@moonwitness/types";
 import { ModuleGlyph, Card, Button } from "@moonwitness/ui";
@@ -46,11 +46,13 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
             aria-label="Close module console"
             className="min-h-11 min-w-11 p-2"
           >
-            âœ•
+            ✕
           </Button>
         </div>
         <h2 className="font-brush mt-4 text-3xl text-white">{module.name.toUpperCase()}</h2>
-        <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">{module.description}</p>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+          {module.description}
+        </p>
         <div className="mt-5 grid grid-cols-2 gap-3">
           {module.stats.map((s) => (
             <div
@@ -74,7 +76,9 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
               className="flex items-center gap-3 border border-[var(--border)] px-3 py-2"
             >
               <span className="h-2 w-2 rounded-full" style={{ background: p.color }} />
-              <span className="flex-1 min-w-0 truncate text-xs text-[var(--foreground)]">{p.title}</span>
+              <span className="flex-1 min-w-0 truncate text-xs text-[var(--foreground)]">
+                {p.title}
+              </span>
               <span className="text-[10px] text-[var(--muted-foreground)]">{p.progress}%</span>
             </div>
           ))}

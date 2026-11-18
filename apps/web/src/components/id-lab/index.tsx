@@ -65,7 +65,9 @@ function Control({ label, hint, children }: { label: string; hint?: string; chil
   return (
     <div className="border-b border-dashed border-[var(--border)] px-4 py-3 last:border-b-0">
       <div className="mb-2 flex items-baseline justify-between gap-2">
-        <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--muted-foreground)]">{label}</span>
+        <span className="text-[10px] font-bold tracking-[0.2em] text-[var(--muted-foreground)]">
+          {label}
+        </span>
         {hint && <span className="font-hand text-sm text-[var(--primary)]">{hint}</span>}
       </div>
       {children}
@@ -125,19 +127,21 @@ function LabSwitchToggle({
       className="flex min-h-9 w-full items-center justify-between gap-2 border-2 border-[var(--border)] bg-[var(--muted)] px-3 py-1.5 text-left transition-colors hover:border-[var(--pink)]"
     >
       <span className="text-[10px] font-bold tracking-wider text-[var(--foreground)]">{label}</span>
+      <span
+        className={`relative h-4 w-8 shrink-0 rounded-full border transition-colors ${
+          checked
+            ? "border-[var(--primary)] bg-[var(--primary)]"
+            : "border-[var(--border)] bg-[var(--muted)]"
+        }`}
+      >
         <span
-          className={`relative h-4 w-8 shrink-0 rounded-full border transition-colors ${
+          className={`absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full transition-all ${
             checked
-              ? "border-[var(--primary)] bg-[var(--primary)]"
-              : "border-[var(--border)] bg-[var(--muted)]"
+              ? "left-[18px] bg-[var(--primary-foreground)]"
+              : "left-[3px] bg-[var(--muted-foreground)]"
           }`}
-        >
-          <span
-            className={`absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full transition-all ${
-              checked ? "left-[18px] bg-[var(--primary-foreground)]" : "left-[3px] bg-[var(--muted-foreground)]"
-            }`}
-          />
-        </span>
+        />
+      </span>
     </button>
   );
 }
@@ -388,7 +392,9 @@ export function IdLab() {
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="border border-[var(--border)] bg-[var(--muted)] p-3">
-                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">TOPBAR</p>
+                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                    TOPBAR
+                  </p>
                   <div className="flex items-center gap-2">
                     <WitnessAvatar
                       seed={effectiveSeed}
@@ -403,7 +409,9 @@ export function IdLab() {
                   </div>
                 </div>
                 <div className="border border-[var(--border)] bg-[var(--muted)] p-3">
-                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">CREW CARD</p>
+                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                    CREW CARD
+                  </p>
                   <div className="flex items-center gap-2">
                     <WitnessAvatar
                       seed={effectiveSeed}
@@ -418,7 +426,9 @@ export function IdLab() {
                   </div>
                 </div>
                 <div className="border border-[var(--border)] bg-[var(--muted)] p-3">
-                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">SIZES</p>
+                  <p className="mb-2 text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                    SIZES
+                  </p>
                   <div className="flex items-end gap-2">
                     {[20, 32, 48].map((s) => (
                       <WitnessAvatar
@@ -477,7 +487,9 @@ export function IdLab() {
                 <h2 className="font-brush text-base text-white">
                   CONTROL <span className="text-[var(--primary)]">DECK</span>
                 </h2>
-                <span className="text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">LIVE</span>
+                <span className="text-[9px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                  LIVE
+                </span>
               </div>
 
               <Control label="SEED" hint="same seed = same face">

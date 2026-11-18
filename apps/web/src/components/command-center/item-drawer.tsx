@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import type { ArtKey } from "@moonwitness/types";
 import { ZineImage, Card, Button } from "@moonwitness/ui";
@@ -44,7 +44,7 @@ export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
             aria-label="Close detail"
             className="min-h-11 min-w-11 shrink-0 p-2"
           >
-            âœ•
+            ✕
           </Button>
         </div>
         {detail.art && (
@@ -58,7 +58,9 @@ export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
               <dt className="text-[10px] tracking-wider text-[var(--muted-foreground)]">
                 {row.label.toUpperCase()}
               </dt>
-              <dd className="min-w-0 truncate text-right text-xs text-[var(--foreground)]">{row.value}</dd>
+              <dd className="min-w-0 truncate text-right text-xs text-[var(--foreground)]">
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>

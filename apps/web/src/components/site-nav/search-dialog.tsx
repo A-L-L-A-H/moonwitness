@@ -85,7 +85,9 @@ export function SearchDialog({ query, onQueryChange, onSubmit, onClose }: Search
             GO
           </Button>
         </div>
-        <p className="mt-3 text-xs text-[var(--muted-foreground)]">Searches the Dock timeline chronicle.</p>
+        <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+          Searches the Dock timeline chronicle.
+        </p>
       </form>
     </div>
   );

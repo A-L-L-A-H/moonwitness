@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Input, Card, Badge } from "@moonwitness/ui";
@@ -112,7 +112,7 @@ function PortForwardPanelInner() {
             disabled={create.isPending}
             className="btn-zine border border-[var(--border)] px-4 py-2 text-xs"
           >
-            {create.isPending ? "MEMASANGâ€¦" : "TERUSKAN"}
+            {create.isPending ? "MEMASANG…" : "TERUSKAN"}
           </button>
         </div>
         {error && (

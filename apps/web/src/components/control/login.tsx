@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { Tape, ZineCardRough, Input } from "@moonwitness/ui";
@@ -77,7 +77,7 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                placeholder="••••••••••"
                 className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--border)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
               />
             </div>
@@ -97,7 +97,7 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
               className="btn-zine w-full px-6 py-4 text-xl"
             >
               {login.isPending ? (
-                "MASUKâ€¦"
+                "MASUK…"
               ) : (
                 <>
                   MASUK <ArrowRight className="h-5 w-5" />

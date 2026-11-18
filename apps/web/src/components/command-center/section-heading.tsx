@@ -1,4 +1,4 @@
-﻿import { Star4 } from "@moonwitness/ui/icons";
+import { Star4 } from "@moonwitness/ui/icons";
 
 export interface SectionHeadingProps {
   id?: string;

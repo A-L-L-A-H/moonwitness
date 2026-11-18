@@ -91,12 +91,15 @@ export function Sidebar({
     <div className="flex h-full flex-col text-[var(--foreground)]">
       <Link href={brandHref} className="block border-b-2 border-[var(--border)] px-5 py-5">
         <div className="flex items-center gap-2.5">
-          <DnaBrandLogo id={(dnaId as BrandLogoId) ?? "moonwitness"} variant="mark" size={30} decorative />
+          <DnaBrandLogo
+            id={(dnaId as BrandLogoId) ?? "moonwitness"}
+            variant="mark"
+            size={30}
+            decorative
+          />
           <span className="font-brush text-2xl leading-none text-[var(--foreground)]">
             MOON
-            <span className="text-[var(--primary)]">
-              WITNESS
-            </span>
+            <span className="text-[var(--primary)]">WITNESS</span>
           </span>
         </div>
         <div className="mt-2 font-hand text-base text-[var(--muted-foreground)]">{subtitle}</div>

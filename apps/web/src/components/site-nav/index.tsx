@@ -65,7 +65,12 @@ export function SiteNav() {
             className="flex items-center gap-2.5 max-lg:min-h-11"
             aria-label="Moonwitness home"
           >
-            <DnaBrandLogo id={(dnaId as BrandLogoId) ?? "moonwitness"} variant="mark" size={28} decorative />
+            <DnaBrandLogo
+              id={(dnaId as BrandLogoId) ?? "moonwitness"}
+              variant="mark"
+              size={28}
+              decorative
+            />
             <Crown className="hidden h-5 w-8 text-[var(--primary)] sm:inline-block" />
             <span className="font-brush text-xl tracking-wide text-[var(--foreground)] sm:text-2xl">
               MOON<span className="text-[var(--primary)]">WITNESS</span>

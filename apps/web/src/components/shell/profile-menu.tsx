@@ -81,10 +81,7 @@ export function ProfileMenu({
           Public site
         </SanctuaryGateLink>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={onExit}
-          className="text-[var(--pink)] hover:bg-[var(--muted)]"
-        >
+        <DropdownMenuItem onSelect={onExit} className="text-[var(--pink)] hover:bg-[var(--muted)]">
           Exit the shadow →
         </DropdownMenuItem>
       </DropdownMenuContent>

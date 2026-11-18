@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import type { MapCity } from "@moonwitness/types";
 import { WorldMap, Card } from "@moonwitness/ui";
 import { GlobeIcon } from "@moonwitness/ui/icons";
@@ -56,7 +56,9 @@ export function UniverseMap({ cities, selectedId, onSelect }: UniverseMapProps) 
                 <dd className="font-brush text-2xl text-[var(--primary)]">{selected.city}</dd>
               </div>
               <div>
-                <dt className="text-[11px] tracking-wider text-[var(--muted-foreground)]">SIGNALS</dt>
+                <dt className="text-[11px] tracking-wider text-[var(--muted-foreground)]">
+                  SIGNALS
+                </dt>
                 <dd className="text-sm text-[var(--foreground)]">{selected.signals}</dd>
               </div>
             </dl>

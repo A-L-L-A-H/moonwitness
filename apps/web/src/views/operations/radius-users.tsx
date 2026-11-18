@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import {
@@ -200,7 +200,7 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
           disabled={createUser.isPending || !username.trim() || !password}
           className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {createUser.isPending ? "Creatingâ€¦" : "Create user"}
+          {createUser.isPending ? "Creating…" : "Create user"}
         </button>
         <button
           type="button"
@@ -272,12 +272,12 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
           <p className="text-sm text-[var(--foreground)]">{user.username}</p>
           <p className="mt-1 font-mono text-xs text-[var(--muted-foreground)]">
             {user.enabled ? "enabled" : "disabled"}
-            {user.framed_ip ? ` Â· framed ${user.framed_ip}` : ""}
-            {user.vlan_id === null || user.vlan_id === undefined ? "" : ` Â· vlan ${user.vlan_id}`}
+            {user.framed_ip ? ` · framed ${user.framed_ip}` : ""}
+            {user.vlan_id === null || user.vlan_id === undefined ? "" : ` · vlan ${user.vlan_id}`}
             {user.session_timeout === null || user.session_timeout === undefined
               ? ""
-              : ` Â· timeout ${user.session_timeout}s`}
-            {user.mac_address ? ` Â· mac ${user.mac_address}` : ""}
+              : ` · timeout ${user.session_timeout}s`}
+            {user.mac_address ? ` · mac ${user.mac_address}` : ""}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -359,7 +359,7 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
               disabled={updateUser.isPending}
               className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {updateUser.isPending ? "Savingâ€¦" : "Save changes"}
+              {updateUser.isPending ? "Saving…" : "Save changes"}
             </button>
             <button
               type="button"
@@ -410,18 +410,22 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
   return (
     <section aria-label="RADIUS users" className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">Users</h2>
+        <h2 className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+          Users
+        </h2>
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs text-[var(--muted-foreground)]">
             <span className="sr-only">Filter users</span>
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter usersâ€¦"
+              placeholder="Filter users…"
               className="min-h-10 w-48 border-2 border-[var(--border)] bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--blue)]"
             />
           </label>
-          {users.data && <span className="text-xs text-[var(--muted-foreground)]">{visible.length} shown</span>}
+          {users.data && (
+            <span className="text-xs text-[var(--muted-foreground)]">{visible.length} shown</span>
+          )}
         </div>
       </div>
 
@@ -447,7 +451,7 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
           className="border-2 border-[var(--border)] bg-[var(--card)] p-4 text-sm text-[var(--muted-foreground)]"
           role="status"
         >
-          Loading usersâ€¦
+          Loading users…
         </p>
       ) : users.isError ? (
         <div role="alert" className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-4">

@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import { StatBlock, Badge, ZineCardRough } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";
@@ -10,25 +10,25 @@ function statBlocks(stats: CommandCenterStats | null) {
   return [
     {
       label: "WORKFLOWS",
-      value: stats ? String(stats.workflows) : "â€”",
+      value: stats ? String(stats.workflows) : "—",
       tone: "blue" as const,
       trend: "",
     },
     {
       label: "RUNNING",
-      value: stats ? String(stats.running) : "â€”",
+      value: stats ? String(stats.running) : "—",
       tone: "green" as const,
       trend: "",
     },
     {
       label: "QUEUED",
-      value: stats ? String(stats.queued) : "â€”",
+      value: stats ? String(stats.queued) : "—",
       tone: "yellow" as const,
       trend: "",
     },
     {
       label: "ALERTS",
-      value: stats ? String(stats.alerts) : "â€”",
+      value: stats ? String(stats.alerts) : "—",
       tone: "pink" as const,
       trend: "",
     },

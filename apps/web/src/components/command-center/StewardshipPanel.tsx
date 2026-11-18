@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import {
@@ -19,10 +19,10 @@ export function StewardshipPanel() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-mono text-[10px] tracking-[0.25em] text-[var(--primary)]">
-            @MOONWITNESS/CANON Â· GOVERNANCE TAXONOMY (PROPOSED_NOT_ASSIGNED)
+            @MOONWITNESS/CANON · GOVERNANCE TAXONOMY (PROPOSED_NOT_ASSIGNED)
           </p>
           <h2 className="mt-1 font-brush text-2xl text-[var(--foreground)]">
-            WINGS 10 Â· PRIME CODE (PC01â€“PC09) Â· 100CENTER Â· DHGS
+            WINGS 10 · PRIME CODE (PC01–PC09) · 100CENTER · DHGS
           </h2>
         </div>
         <button
@@ -45,7 +45,7 @@ export function StewardshipPanel() {
                 className="min-w-0 overflow-hidden border border-[var(--border)] bg-black/25 p-3"
               >
                 <div className="font-mono text-[10px] text-[var(--primary)] break-words">
-                  {wing.code} Â· {wing.callsign}
+                  {wing.code} · {wing.callsign}
                 </div>
                 <div className="mt-1 text-xs font-semibold text-[var(--foreground)] break-words">
                   {wing.domainRole}
@@ -60,16 +60,18 @@ export function StewardshipPanel() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="border border-[var(--border)] bg-black/20 p-4 space-y-2">
               <div className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
-                PRIME CODE PC01â€“PC09 &amp; 100CENTER ({CENTER_100_STEWARDSHIP_CLUSTERS.length}{" "}
+                PRIME CODE PC01–PC09 &amp; 100CENTER ({CENTER_100_STEWARDSHIP_CLUSTERS.length}{" "}
                 CLUSTERS)
               </div>
               <div className="grid gap-1.5 sm:grid-cols-3">
                 {PRIME_CODE_AXIOMS.map((ax) => (
                   <div key={ax.code} className="border border-[var(--border)] bg-[var(--card)] p-2">
                     <div className="font-mono text-[10px] text-[var(--primary)]">
-                      {ax.code} Â· {ax.title}
+                      {ax.code} · {ax.title}
                     </div>
-                    <div className="mt-0.5 text-[11px] text-[var(--muted-foreground)]">{ax.statement}</div>
+                    <div className="mt-0.5 text-[11px] text-[var(--muted-foreground)]">
+                      {ax.statement}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -77,7 +79,7 @@ export function StewardshipPanel() {
 
             <div className="border border-[var(--border)] bg-black/20 p-4 space-y-2">
               <div className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
-                DHGS 13-STEP ASSURANCE LOOP (RECEIVE â†’ LEARN)
+                DHGS 13-STEP ASSURANCE LOOP (RECEIVE → LEARN)
               </div>
               <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
                 {DHGS_13_STEPS.map((step) => (
@@ -88,7 +90,9 @@ export function StewardshipPanel() {
                     <div className="font-mono text-[10px] text-[var(--primary)]">
                       {String(step.stepNumber).padStart(2, "0")} {step.code}
                     </div>
-                    <div className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">{step.action}</div>
+                    <div className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">
+                      {step.action}
+                    </div>
                   </div>
                 ))}
               </div>

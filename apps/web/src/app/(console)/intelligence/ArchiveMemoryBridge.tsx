@@ -98,14 +98,15 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           <CassetteRecorderArt className="h-16 w-16 shrink-0 opacity-85" decorative />
           <div className="min-w-0 flex-1 space-y-2">
             <p>
-              Set <code className="font-mono text-[var(--foreground)]">MEMORY_API_URL</code> (for example{" "}
+              Set <code className="font-mono text-[var(--foreground)]">MEMORY_API_URL</code> (for
+              example{" "}
               <code className="font-mono text-[var(--foreground)]">http://127.0.0.1:8000</code>) on{" "}
-              <code className="font-mono text-[var(--foreground)]">@moonwitness/api</code> to enable archive
-              knowledge search from this console.
+              <code className="font-mono text-[var(--foreground)]">@moonwitness/api</code> to enable
+              archive knowledge search from this console.
             </p>
             <p className="font-mono text-[11px] text-[var(--muted-foreground)]">
-              Vault ingest: launch <span className="text-[var(--foreground)]">services/memory</span> stack (port
-              3005 / API 8000) and upload{" "}
+              Vault ingest: launch <span className="text-[var(--foreground)]">services/memory</span>{" "}
+              stack (port 3005 / API 8000) and upload{" "}
               <span className="text-[var(--foreground)]">chatgpt_mohrezzafahlevi.zip</span>.
             </p>
           </div>
@@ -128,25 +129,33 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           {status.data?.counts && (
             <dl className="grid gap-3 sm:grid-cols-4">
               <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
-                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">ARCHIVES</dt>
+                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
+                  ARCHIVES
+                </dt>
                 <dd className="mt-1 font-brush text-lg text-[var(--foreground)]">
                   {status.data.counts.archives}
                 </dd>
               </div>
               <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
-                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">MESSAGES</dt>
+                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
+                  MESSAGES
+                </dt>
                 <dd className="mt-1 font-brush text-lg text-[var(--foreground)]">
                   {status.data.counts.messages}
                 </dd>
               </div>
               <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
-                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">KNOWLEDGE</dt>
+                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
+                  KNOWLEDGE
+                </dt>
                 <dd className="mt-1 font-brush text-lg text-[var(--foreground)]">
                   {status.data.counts.knowledge}
                 </dd>
               </div>
               <div className="border border-[var(--border)] bg-black/20 px-3 py-2">
-                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">EMBEDDINGS</dt>
+                <dt className="font-mono text-[9px] tracking-widest text-[var(--muted-foreground)]">
+                  EMBEDDINGS
+                </dt>
                 <dd className="mt-1 font-mono text-xs text-[var(--foreground)]">
                   {status.data.system?.embeddings_enabled
                     ? status.data.system.embedding_model

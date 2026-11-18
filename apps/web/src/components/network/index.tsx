@@ -147,7 +147,9 @@ function PeerRow({
           </p>
         )}
       </td>
-      <td className="px-3 py-2 font-mono text-[11px] text-[var(--muted-foreground)]">{peer.address}</td>
+      <td className="px-3 py-2 font-mono text-[11px] text-[var(--muted-foreground)]">
+        {peer.address}
+      </td>
       <td className="px-3 py-2">
         <span
           className={`inline-block border px-2 py-0.5 text-[10px] tracking-widest ${
@@ -325,7 +327,9 @@ function NetworkDashboard() {
         {status.isError && (
           <ZineCardRough className="p-6">
             <h2 className="font-brush text-2xl text-[var(--red)]">ARSY TIDAK TERJANGKAU</h2>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">{(status.error as Error).message}</p>
+            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+              {(status.error as Error).message}
+            </p>
           </ZineCardRough>
         )}
 
@@ -343,10 +347,16 @@ function NetworkDashboard() {
           <>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <ZineCard className="p-4">
-                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">INTERFACE</p>
+                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                  INTERFACE
+                </p>
                 <p className="mt-1 font-brush text-2xl text-white">{data.interface}</p>
-                <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">{data.address}</p>
-                <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">udp/{data.listen_port}</p>
+                <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">
+                  {data.address}
+                </p>
+                <p className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">
+                  udp/{data.listen_port}
+                </p>
                 {data.subnets && data.subnets.length > 0 && (
                   <p className="mt-1 font-mono text-[10px] text-[var(--muted-foreground)]">
                     subnets: {data.subnets.map((s) => `${s.name}(${s.cidr})`).join(", ")}
@@ -354,7 +364,9 @@ function NetworkDashboard() {
                 )}
               </ZineCard>
               <ZineCard className="p-4">
-                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">ENDPOINT</p>
+                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                  ENDPOINT
+                </p>
                 <p className="mt-1 truncate font-mono text-sm text-[var(--foreground)]">
                   {data.endpoint || "—"}
                 </p>
@@ -363,11 +375,15 @@ function NetworkDashboard() {
                 </p>
               </ZineCard>
               <ZineCard className="p-4">
-                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">PUBLIC KEY</p>
+                <p className="text-[10px] tracking-[0.2em] text-[var(--muted-foreground)]">
+                  PUBLIC KEY
+                </p>
                 <p className="mt-1 truncate font-mono text-[11px] text-[var(--foreground)]">
                   {data.public_key || "belum dibuat"}
                 </p>
-                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">{data.peer_count} peer terdaftar</p>
+                <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
+                  {data.peer_count} peer terdaftar
+                </p>
               </ZineCard>
             </div>
 
@@ -477,10 +493,11 @@ function NetworkDashboard() {
                     </div>
                   )}
                   <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
-                    <strong className="text-[var(--foreground)]">SPLIT</strong> hanya subnet VPN — internet
-                    tetap lewat ISP. <strong className="text-[var(--foreground)]">FULL</strong> semua trafik
-                    lewat VPS. <strong className="text-[var(--foreground)]">SITE</strong> untuk router kantor:
-                    LAN di balik router ikut terhubung.
+                    <strong className="text-[var(--foreground)]">SPLIT</strong> hanya subnet VPN —
+                    internet tetap lewat ISP.{" "}
+                    <strong className="text-[var(--foreground)]">FULL</strong> semua trafik lewat
+                    VPS. <strong className="text-[var(--foreground)]">SITE</strong> untuk router
+                    kantor: LAN di balik router ikut terhubung.
                   </p>
                 </ZineCard>
 

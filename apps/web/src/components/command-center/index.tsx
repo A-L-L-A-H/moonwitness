@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Star4 } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
@@ -35,7 +35,7 @@ export function CommandCenter() {
       search={{
         value: cc.query,
         onChange: cc.setQuery,
-        placeholder: "Search projects, stories, research, or peopleâ€¦",
+        placeholder: "Search projects, stories, research, or people…",
       }}
     >
       <CommandHero project={featuredProject} />

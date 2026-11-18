@@ -1,4 +1,4 @@
-﻿import Image from "next/image";
+import Image from "next/image";
 import Link from "next/link";
 import type { Project } from "@moonwitness/types";
 import { artSrc } from "@/lib/art";
@@ -43,7 +43,9 @@ export function ProjectUniverse({ projects }: { projects: Project[] }) {
               <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-[var(--line)]">
                 <div className="h-full" style={{ width: `${p.progress}%`, background: p.color }} />
               </div>
-              <div className="mt-1 text-right text-[9px] text-[var(--muted-foreground)]">{p.progress}%</div>
+              <div className="mt-1 text-right text-[9px] text-[var(--muted-foreground)]">
+                {p.progress}%
+              </div>
             </div>
           </Link>
         ))}

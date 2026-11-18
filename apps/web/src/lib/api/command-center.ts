@@ -15,9 +15,16 @@ export interface CommandCenterStats {
   alerts: number;
 }
 
+export interface CommandCenterFeedItem {
+  time: string;
+  tag: string;
+  msg: string;
+}
+
 export interface CommandCenterSnapshot {
   workflows: Workflow[];
   alerts: MissionAlert[];
+  feed?: CommandCenterFeedItem[];
 }
 
 export class CommandCenterApiError extends Error {

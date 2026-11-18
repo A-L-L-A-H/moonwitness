@@ -100,7 +100,9 @@ export function Signals() {
                   EXPLORE STORIES <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <span className="font-mono text-[10px] text-[var(--muted-foreground)]">TAG: #ROOFTOP</span>
+              <span className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                TAG: #ROOFTOP
+              </span>
             </div>
           </div>
         </article>

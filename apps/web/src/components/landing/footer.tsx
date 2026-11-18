@@ -11,9 +11,14 @@ export function LandingFooter() {
           <span className="font-brush text-sm text-white">
             MOON<span className="text-[var(--pink)]">WITNESS</span>
           </span>
-          <span className="text-xs text-[var(--muted-foreground)]">// Create · Curate · Publish</span>
+          <span className="text-xs text-[var(--muted-foreground)]">
+            // Create · Curate · Publish
+          </span>
         </div>
-        <nav className="flex flex-wrap gap-5 text-xs text-[var(--muted-foreground)]" aria-label="Footer">
+        <nav
+          className="flex flex-wrap gap-5 text-xs text-[var(--muted-foreground)]"
+          aria-label="Footer"
+        >
           <SanctuaryGateLink className="hover:text-[var(--yellow)] max-lg:min-h-11">
             A-L-L-A-H
           </SanctuaryGateLink>

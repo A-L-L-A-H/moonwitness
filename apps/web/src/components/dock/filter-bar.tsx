@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Grid, List } from "@moonwitness/ui/icons";
 
@@ -94,7 +94,9 @@ export function FilterBar({
             aria-label="Grid view"
             className={cn(
               "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
-              view === "grid" ? "bg-[var(--pink)] text-white" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+              view === "grid"
+                ? "bg-[var(--pink)] text-white"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
             )}
           >
             <Grid className="h-4 w-4" />
@@ -106,7 +108,9 @@ export function FilterBar({
             aria-label="List view"
             className={cn(
               "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
-              view === "list" ? "bg-[var(--pink)] text-white" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
+              view === "list"
+                ? "bg-[var(--pink)] text-white"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]",
             )}
           >
             <List className="h-4 w-4" />
