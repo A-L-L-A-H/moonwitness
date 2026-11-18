@@ -40,7 +40,7 @@ export {
 } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
 export { ConflictError } from "./errors.js";
-export { initDb, initD1Db, closeDb, getDb } from "./driver.js";
+export { initDb, initD1Db, initPostgresDb, closeDb, getDb } from "./driver.js";
 export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
 export type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
@@ -58,6 +58,8 @@ export {
   backupDatabase,
   restoreDatabase,
   verifyIntegrity,
+  listDatabaseTables,
   encryptBackupFile,
   decryptBackupFile,
 } from "./backup.js";
+export type { BackupCommandOptions, ExternalCommandRunner } from "./backup.js";

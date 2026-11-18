@@ -248,3 +248,50 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           python -m pytest -q
+
+  postgres-integration:
+    name: Verify PostgreSQL ORM & Backup Integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: moonwitness
+          POSTGRES_PASSWORD: moonwitness
+          POSTGRES_DB: moonwitness
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U moonwitness -d moonwitness"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Enable pnpm (corepack)
+        run: |
+          corepack enable
+          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Install postgresql-client for pg_dump verification
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-client
+
+      - name: Run Live PostgreSQL ORM & Backup Integration Tests
+        env:
+          POSTGRES_TEST_URL: postgresql://moonwitness:moonwitness@127.0.0.1:5432/moonwitness
+        run: |
+          pnpm --filter @moonwitness/orm test
+          node --test scripts/backup-db.test.mjs
