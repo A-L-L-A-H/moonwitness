@@ -10,6 +10,7 @@ import {
   type ScriptureCorpusFilter,
   type UnifiedScriptureHit,
 } from "@moonwitness/canon";
+import { CutoutArtwork, DnaBrandLogo } from "@moonwitness/ui";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   DnaBadge,
@@ -196,8 +197,16 @@ export function ScripturesStudio() {
     <div className="min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] bg-girih-filigree">
       <SiteSubpageHeader activeRoute="scriptures" />
 
-      <main id="main" className="mx-auto max-w-7xl px-4 py-12 sm:px-8 space-y-10">
+      <main id="main" className="relative mx-auto max-w-7xl px-4 py-12 sm:px-8 space-y-10">
+        <CutoutArtwork
+          id="codex-scroll"
+          decorative
+          className="pointer-events-none absolute right-6 top-8 hidden h-24 w-24 text-[var(--dna-accent)] opacity-20 md:block"
+        />
         <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <DnaBrandLogo id="scriptures-codex" variant="stamp" size={32} decorative />
+          </div>
           <div className="font-mono text-[11px] tracking-[0.26em] text-[var(--dna-accent)] uppercase">
             {locale === "id"
               ? "PUSAT KAJIAN EMPAT KITAB · NETRAL & TERBUKA"

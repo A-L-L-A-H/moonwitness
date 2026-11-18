@@ -336,7 +336,7 @@ export function DockMatrixSection({
                           type="button"
                           onClick={telemetry.refresh}
                           disabled={telemetry.refreshing}
-                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] hover:text-white disabled:opacity-50 cursor-pointer"
+                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] hover:text-[var(--dna-text)] disabled:opacity-50 cursor-pointer"
                         >
                           {telemetry.refreshing ? "PROBING…" : "REFRESH"}
                         </button>

@@ -63,7 +63,7 @@ export default function AddonsManagerPage() {
         <Card className="relative overflow-hidden">
           <SkinOrnament slot="corner" className="left-2 top-2" />
           <CutoutArtwork
-            id="industrial-battery"
+            id="mixing-console"
             decorative
             className="pointer-events-none absolute -right-4 -top-3 hidden h-28 w-28 opacity-15 sm:block"
           />
@@ -74,6 +74,7 @@ export default function AddonsManagerPage() {
               </span>
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
+                  <DnaBrandLogo id="addon-studio" variant="lockup" size={22} decorative />
                   <DnaBrandLogo id="09-simpul-nusantara" variant="mark" size={20} decorative />
                   <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[var(--primary)]">
                     RUNTIME MODULE REGISTRY

@@ -31,7 +31,7 @@ export function Crew() {
               in the list to read their story quote.
             </p>
           </div>
-          <div className="relative hidden h-32 w-64 overflow-hidden border-2 border-black bg-black shadow-[6px_6px_0_rgba(0,0,0,0.8)] md:block rotate-1">
+          <div className="relative hidden h-32 w-64 overflow-hidden border-2 border-[var(--border)] bg-[var(--card)] shadow-[6px_6px_0_rgba(0,0,0,0.8)] md:block rotate-1">
             <Image
               src={artSrc("crew-wall")}
               alt="Fictional demo crew collage"

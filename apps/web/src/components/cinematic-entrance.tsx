@@ -194,7 +194,7 @@ export function CinematicEntrance({
         type="button"
         onClick={dismissEntrance}
         aria-label="Skip cinematic entrance sequence"
-        className="relative z-20 mt-12 inline-flex min-h-[44px] min-w-[44px] items-center gap-2.5 border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)]/85 px-6 py-2.5 font-serif text-xs tracking-[0.22em] text-[var(--dna-text)] uppercase transition-colors hover:border-[var(--dna-text)] hover:bg-[var(--dna-accent)]/15 hover:text-white cursor-pointer"
+        className="relative z-20 mt-12 inline-flex min-h-[44px] min-w-[44px] items-center gap-2.5 border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)]/85 px-6 py-2.5 font-serif text-xs tracking-[0.22em] text-[var(--dna-text)] uppercase transition-colors hover:border-[var(--dna-text)] hover:bg-[var(--dna-accent)]/15 cursor-pointer"
       >
         <span>SKIP ENTRANCE</span>
         <span className="border-l border-[var(--dna-accent)]/35 pl-2.5 font-mono text-[10px] text-[var(--dna-accent)]">

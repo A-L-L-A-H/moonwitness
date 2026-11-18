@@ -546,7 +546,7 @@ function CrewAndPlatformAuditSection() {
             <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
               OPS_AUDIT_LOGS
             </p>
-            <h2 className="font-brush text-2xl text-white">PLATFORM AUDIT LOG</h2>
+            <h2 className="font-brush text-2xl text-[var(--foreground)]">PLATFORM AUDIT LOG</h2>
           </div>
           <button
             type="button"

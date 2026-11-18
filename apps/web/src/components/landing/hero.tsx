@@ -12,7 +12,7 @@ import {
   Splatter,
   Star4,
 } from "@moonwitness/ui/icons";
-import { DistressedSticker, Grain } from "@moonwitness/ui";
+import { DistressedSticker, Grain, SkinArtworkFrame, useSkin } from "@moonwitness/ui";
 import { AtmosphereField } from "@/components/atmosphere";
 import { useParallax } from "@/lib/motion/use-parallax";
 import { useHeroIntro } from "@/lib/motion/use-hero-intro";
@@ -20,6 +20,7 @@ import { artSrc } from "@/lib/art";
 
 export function Hero() {
   const root = useHeroIntro();
+  const { skin } = useSkin();
   const characterParallax = useParallax(0.12);
   const moonParallax = useParallax(0.08);
   return (
@@ -27,7 +28,7 @@ export function Hero() {
       <link
         rel="preload"
         as="image"
-        href="/_next/image?url=%2Fart%2Fcrowd-moon.png&w=1440&q=75"
+        href="/_next/image?url=%2Fart%2Fcrowd-moon-1440.webp&w=1440&q=75"
         media="(min-width: 768px)"
       />
       <link
@@ -39,6 +40,15 @@ export function Hero() {
       <div className="hero-city" aria-hidden="true">
         <Image data-hero-layer="city" src={artSrc("crowd-moon")} fill alt="" sizes="100vw" />
       </div>
+      {skin !== "default" && (
+        <SkinArtworkFrame
+          skin={skin}
+          showCutout={false}
+          className="pointer-events-none absolute inset-0 z-[1]"
+          plateClassName="opacity-65"
+          sizes="100vw"
+        />
+      )}
       <div className="hero-shade" />
       <Grain />
       <Star4
@@ -62,14 +72,14 @@ export function Hero() {
       />
       <SafetyPin
         aria-hidden="true"
-        className="pointer-events-none absolute left-[38%] top-28 z-[4] h-10 w-10 -rotate-45 text-white/50"
+        className="pointer-events-none absolute left-[38%] top-28 z-[4] h-10 w-10 -rotate-45 text-[var(--foreground)]/45"
       />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute bottom-0 left-0 right-0 z-[4] flex overflow-hidden opacity-30"
       >
         {[...Array(6)].map((_, i) => (
-          <BarbedWire key={i} className="h-6 w-60 shrink-0 text-white" />
+          <BarbedWire key={i} className="h-6 w-60 shrink-0 text-[var(--foreground)]" />
         ))}
       </div>
       <div className="hero-layout">

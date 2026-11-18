@@ -10,7 +10,13 @@ import {
   type MTimeElongationBasis,
   type MTimeProfileId,
 } from "@moonwitness/canon";
-import { LunarDiscArt, RadialGauge, SkinOrnament } from "@moonwitness/ui";
+import {
+  CutoutArtwork,
+  DnaBrandLogo,
+  LunarDiscArt,
+  RadialGauge,
+  SkinOrnament,
+} from "@moonwitness/ui";
 import { MtimeHorizon } from "@moonwitness/ui/icons";
 import { DnaBadge, DnaButton, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
@@ -359,8 +365,21 @@ export function MTimeObservatory() {
   return (
     <div className="min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] bg-girih-filigree">
       <SiteSubpageHeader activeRoute="mtime" />
-      <main id="main" className="mx-auto max-w-7xl px-4 py-12 sm:px-8 space-y-8">
+      <main id="main" className="relative mx-auto max-w-7xl px-4 py-12 sm:px-8 space-y-8">
+        <CutoutArtwork
+          id="horizon-sextant"
+          decorative
+          className="pointer-events-none absolute right-6 top-8 hidden h-24 w-24 text-[var(--dna-accent)] opacity-20 md:block"
+        />
+        <CutoutArtwork
+          id="astrolabe-disc"
+          decorative
+          className="pointer-events-none absolute left-6 top-8 hidden h-24 w-24 text-[var(--dna-accent)] opacity-20 md:block"
+        />
         <div className="text-center space-y-3">
+          <div className="flex justify-center">
+            <DnaBrandLogo id="mtime-horizon" variant="lockup" size={26} decorative />
+          </div>
           <div className="font-mono text-[11px] tracking-[0.26em] text-[var(--dna-accent)] uppercase">
             ANTIKYTHERA M-TIME · MĪQĀT TEMPORAL PROTOCOL
           </div>

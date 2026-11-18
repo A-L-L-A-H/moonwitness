@@ -165,7 +165,7 @@ export function CanonLorePanel() {
           />
         </div>
 
-        <div className="border-2 border-[var(--yellow)]/50 bg-black/25 p-3">
+        <div className="border-2 border-[var(--yellow)]/50 bg-[var(--muted)]/55 p-3">
           <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
             DISCLOSED #014 NUMBER CONFLICT — PRESERVED SIDE BY SIDE
           </p>

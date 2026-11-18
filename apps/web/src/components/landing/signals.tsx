@@ -37,7 +37,7 @@ export function Signals() {
             width={90}
             className="-top-1 -right-4 rotate-12 text-[9px]"
           />
-          <div className="relative h-48 overflow-hidden bg-black/60">
+          <div className="relative h-48 overflow-hidden bg-[var(--muted)]">
             <Image
               src={artSrc("signal-tunnel")}
               alt="Illustrated tunnel scene from a fictional Moonwitness story"
@@ -74,7 +74,7 @@ export function Signals() {
             className="-top-1 -right-3 rotate-12 text-[9px]"
           />
 
-          <div className="relative h-48 overflow-hidden bg-black/60">
+          <div className="relative h-48 overflow-hidden bg-[var(--muted)]">
             <Image
               src={artSrc("crew-rooftop")}
               alt="Three friends on a rooftop under the same moon"
@@ -85,7 +85,7 @@ export function Signals() {
             <span className="sticker sticker-yellow absolute left-3 top-3 px-3 py-1 font-brush text-xs rotate-[-3deg] shadow-[2px_2px_0_rgba(0,0,0,0.8)]">
               STORYTELLING
             </span>
-            <SafetyPin className="absolute bottom-2 right-2 h-7 w-7 text-white/40 rotate-45" />
+            <SafetyPin className="absolute bottom-2 right-2 h-7 w-7 text-[var(--foreground)]/45 rotate-45" />
           </div>
           <div className="flex flex-1 flex-col bg-[var(--card)] p-5 text-[var(--card-foreground)]">
             <h3 className="cmyk-slip font-brush text-2xl leading-tight text-[var(--card-foreground)]">
@@ -116,7 +116,7 @@ export function Signals() {
             className="-top-1 left-2 -rotate-12 text-[9px]"
           />
 
-          <div className="relative h-48 overflow-hidden bg-black/60">
+          <div className="relative h-48 overflow-hidden bg-[var(--muted)]">
             <Image
               src={artSrc("city-shadow")}
               alt="A hooded witness overlooking the city at night"

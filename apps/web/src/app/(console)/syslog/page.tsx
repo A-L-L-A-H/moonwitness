@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { RooftopAntennaArt, SkinOrnament } from "@moonwitness/ui";
+import { CutoutArtwork, RooftopAntennaArt, SkinOrnament } from "@moonwitness/ui";
 import { SyslogStream } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
@@ -63,7 +63,12 @@ function SyslogExplorer() {
       }}
     >
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-8">
-        <header className="border-b-2 border-[var(--border)] pb-5">
+        <header className="relative overflow-hidden border-b-2 border-[var(--border)] pb-5">
+          <CutoutArtwork
+            id="microfilm-strip"
+            decorative
+            className="pointer-events-none absolute right-2 top-1 hidden h-24 w-24 text-[var(--primary)]/15 sm:block"
+          />
           <div className="flex flex-wrap items-center gap-2">
             <SyslogStream className="h-4 w-4 text-[var(--primary)]" />
             <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--primary)]">

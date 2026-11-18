@@ -1,5 +1,6 @@
 "use client";
 
+import { CutoutArtwork, DnaBrandLogo } from "@moonwitness/ui";
 import { DiamondStarOrnament } from "@moonwitness/ui/imperium";
 import { FOUR_ENTRY_DOORS, SUPREME_IDENTITY, type EntryDoorId } from "@/data/empire-canon-codex";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
@@ -46,10 +47,22 @@ export function CanonCodexSanctum({
       aria-labelledby="codex-heading"
       className="scroll-mt-16 relative bg-gradient-to-b from-[var(--dna-canvas)]/95 via-[var(--dna-canvas)]/90 to-[var(--dna-canvas)]/95 py-24 px-4 sm:px-8 lg:px-16"
     >
+      <CutoutArtwork
+        id="codex-scroll"
+        decorative
+        className="pointer-events-none absolute right-6 top-8 hidden h-28 w-28 text-[var(--dna-accent)] opacity-20 md:block"
+      />
       <div className="wrap mx-auto max-w-7xl">
         {/* Section Header */}
         <ScrollChapterReveal quietMode={quietMode}>
           <div className="flex flex-col items-center text-center">
+            <DnaBrandLogo
+              id="scriptures-codex"
+              variant="lockup"
+              size={26}
+              className="mb-3"
+              decorative
+            />
             <div className="font-monument flex items-center gap-4 text-xs tracking-[0.35em] text-[var(--dna-accent)] uppercase">
               <span className="h-px w-12 bg-gradient-to-r from-transparent to-[var(--dna-accent)]" />
               <span>A-L-L-A-H · {SUPREME_IDENTITY.fullExpansion}</span>
