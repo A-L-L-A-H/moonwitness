@@ -6,6 +6,14 @@ A reliable personal-use desktop app for Windows 11 x64, with local work manageme
 
 ## Milestones
 
+### M0 — Baseline reconciliation
+- [x] Branch, HEAD and active-PR overlap verified
+- [x] Tauri commands, routes, rooms and SQLite usage inventoried
+- [x] Legacy agent tables classified as dormant compatibility schema
+- [x] Optional OIDC, Drive backup and loopback S3 behavior documented
+- [x] Fresh baseline frontend/Rust evidence recorded
+- [ ] Dependency advisory remediation and native Windows release smoke tests remain separate follow-ups
+
 ### M1 — Local application shell
 - [x] Tauri 2, React, and Vite application shell
 - [x] DECK, PIT, GIT, WAR ROOM, and NOISE areas
@@ -43,6 +51,14 @@ A reliable personal-use desktop app for Windows 11 x64, with local work manageme
 - [x] Per-session bearer/SigV4 auth, body-hash and freshness validation, object key validation, 16 MiB ceiling
 - [x] Bounded, expiring multipart uploads with manifest, ETag, and part-size validation
 - [x] Guided restore from an encrypted backup
+
+### M2 — Continuity and Memory (WP-02)
+- [x] Quick capture from any room
+- [x] Project work sessions and resume points
+- [x] Curated memory types with FTS5 search
+- [x] Memory correction, deletion and retention
+- [x] Experience records and lesson proposals
+- [x] Soul Journal timeline projection
 
 ## Definition of done
 

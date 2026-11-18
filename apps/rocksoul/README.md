@@ -4,6 +4,8 @@
 
 ROCKSOUL - DX is a personal-use Windows desktop app whose v0.1 visual foundation opens with THE AWAKENING. Its ENTER THE UNKNOWN action reaches THE THRESHOLD; the final Awakening artwork is pending an approved generated asset. From there, enter the private world for creative, research, and bounded execution work. Existing local project, issue, milestone, repository, and confirmed Git workflows remain inside THE RIOT DECK.
 
+The reconciled v2 product baseline, actual-vs-target matrix and risk register are recorded in [the reconciliation evidence](docs/reconciliation-v2/BASELINE-EVIDENCE.md). THE AWAKENING -> THE THRESHOLD entry remains the checked-out behavior; changing it requires a separate product decision.
+
 THE AWAKENING and THE THRESHOLD combine a Three.js / React Three Fiber world with React HTML overlays for navigation and work. The visual foundation is a navigable prototype, not a production release. THE ARCHIVE, THE STUDIO, and THE SIGNAL ROOM are labelled previews; only workflows already present in the app are presented as functional.
 
 ## Workspace
