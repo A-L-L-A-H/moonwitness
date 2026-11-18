@@ -568,4 +568,38 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  it("GATE-13: quarantines engines/* from runtime imports across apps, packages, services, and cp", () => {
+    const importRoots = ["apps", "packages", "services", "cp"];
+    const runtimeImportRe =
+      /^(?:import\b|export\b[^\n]*\bfrom\b|const\b[^\n]*require\(|let\b[^\n]*require\(|from\s+\S+\s+import\b|use\s+)/;
+    const offenders: string[] = [];
+
+    for (const root of importRoots) {
+      const rootDir = join(REPO_ROOT, root);
+      for (const file of walk(rootDir, [".ts", ".tsx", ".js", ".mjs", ".cjs"])) {
+        if (/\.test\.(ts|tsx|js|mjs)$/.test(file)) continue;
+        const lines = stripJsComments(readFileSync(file, "utf8")).split(/\r?\n/);
+        lines.forEach((line, idx) => {
+          const trimmed = line.trim();
+          if (runtimeImportRe.test(trimmed) && /\bengines\//.test(trimmed)) {
+            offenders.push(`${relative(REPO_ROOT, file).replace(/\\/g, "/")}:${idx + 1}`);
+          }
+        });
+      }
+      for (const file of walk(rootDir, [".py", ".rs", ".go"])) {
+        const lines = readFileSync(file, "utf8").split(/\r?\n/);
+        lines.forEach((line, idx) => {
+          const trimmed = line.trim();
+          if (/^(?:from\s+|import\s+|use\s+)/.test(trimmed) && /\bengines\//.test(trimmed)) {
+            offenders.push(`${relative(REPO_ROOT, file).replace(/\\/g, "/")}:${idx + 1}`);
+          }
+        });
+      }
+    }
+
+    const workspaceYaml = readFileSync(join(REPO_ROOT, "pnpm-workspace.yaml"), "utf8");
+    expect(workspaceYaml).not.toMatch(/["']?engines\//);
+    expect(offenders).toEqual([]);
+  });
 });
