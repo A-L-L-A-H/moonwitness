@@ -10,6 +10,8 @@ export function HeroIllustration({
   title = "Cosmic Horizon Sanctuary",
   className = "",
 }: HeroIllustrationProps) {
+  const { surface, border, accent, text } = getDnaWorld("01-imperium-lumen").palette;
+  const lunarAccent = getDnaWorld("02-lunar-chronicles").palette.accent;
   return (
     <svg
       viewBox="0 0 320 140"
@@ -18,13 +20,13 @@ export function HeroIllustration({
       className={`w-full h-auto ${className}`}
       fill="none"
     >
-      <rect width="320" height="140" rx="8" fill="#080b14" stroke="#2a354d" strokeWidth="1.5" />
-      <circle cx="160" cy="54" r="32" stroke="#d6b46c" strokeWidth="1.5" opacity="0.85" />
-      <circle cx="160" cy="54" r="18" stroke="#5ab8ff" strokeWidth="1.2" opacity="0.7" />
-      <line x1="160" y1="10" x2="160" y2="128" stroke="#f5efe2" strokeWidth="1" opacity="0.45" />
-      <line x1="24" y1="96" x2="296" y2="96" stroke="#d6b46c" strokeWidth="1.2" opacity="0.7" />
-      <path d="M96 96 C115 68 205 68 224 96" stroke="#fff4d2" strokeWidth="1.5" />
-      <polygon points="160,36 165,49 178,54 165,59 160,72 155,59 142,54 155,49" fill="#d6b46c" opacity="0.7" />
+      <rect width="320" height="140" rx="8" fill={surface} stroke={border} strokeWidth="1.5" />
+      <circle cx="160" cy="54" r="32" stroke={accent} strokeWidth="1.5" opacity="0.85" />
+      <circle cx="160" cy="54" r="18" stroke={lunarAccent} strokeWidth="1.2" opacity="0.7" />
+      <line x1="160" y1="10" x2="160" y2="128" stroke={text} strokeWidth="1" opacity="0.45" />
+      <line x1="24" y1="96" x2="296" y2="96" stroke={accent} strokeWidth="1.2" opacity="0.7" />
+      <path d="M96 96 C115 68 205 68 224 96" stroke={text} strokeWidth="1.5" />
+      <polygon points="160,36 165,49 178,54 165,59 160,72 155,59 142,54 155,49" fill={accent} opacity="0.7" />
     </svg>
   );
 }

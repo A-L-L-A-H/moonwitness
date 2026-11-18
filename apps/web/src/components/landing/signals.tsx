@@ -49,7 +49,7 @@ export function Signals() {
               FICTIONAL SIGNAL
             </span>
           </div>
-          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[#0e0e15]">
+          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
             <h3 className="cmyk-slip font-brush text-2xl leading-tight text-white tracking-wide">
               A SIGNAL FROM BELOW
             </h3>
@@ -87,7 +87,7 @@ export function Signals() {
             </span>
             <SafetyPin className="absolute bottom-2 right-2 h-7 w-7 text-white/40 rotate-45" />
           </div>
-          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[#0c0c14]">
+          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
             <h3 className="cmyk-slip font-brush text-2xl leading-tight text-white">
               STORIES. BIGGER HORIZONS.
             </h3>
@@ -126,7 +126,7 @@ export function Signals() {
               THE SHADOW
             </span>
           </div>
-          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[#0c0c14]">
+          <div className="flex flex-1 flex-col p-5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
             <h3 className="cmyk-slip font-brush text-2xl leading-tight text-white">
               NOT EVERYTHING IS VISIBLE.
             </h3>

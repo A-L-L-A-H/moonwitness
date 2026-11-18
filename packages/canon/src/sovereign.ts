@@ -467,9 +467,9 @@ export const ECOSYSTEM_RUNTIME_CATALOG = {
   ] as readonly EcosystemEdgeNode[],
   workspaceNodes: [
     {
-      workspacePath: "apps/a-l-l-a-h",
-      name: "@moonwitness/a-l-l-a-h",
-      stack: "Next 15.5 · vinext · WebGL2 GLSL · Cloudflare Worker",
+      workspacePath: "apps/web/(sanctuary)",
+      name: "@moonwitness/web (sanctuary)",
+      stack: "Next 16 · @moonwitness/ui · Imperium Lumen · Playwright Verified",
       dnaWorld: "01 Imperium Lumen",
       responsibility:
         "Monocentric Sanctuary Frontier, Four Scriptural Witnesses, Contemplation & 4-Door Canon Codex.",
@@ -524,7 +524,7 @@ export const MASTER_DNA_WORLDS_META: readonly MasterDnaMeta[] = [
     title: "IMPERIUM LUMEN",
     metaphor: "Monumental empire of light and impossible architecture",
     ecosystemIdentity: "A-L-L-A-H.COM / Empire of the Light",
-    rootAssignment: "Gate & Dock (`apps/a-l-l-a-h`)",
+    rootAssignment: "Gate & Dock (`apps/web/(sanctuary)`)",
   },
   {
     id: "02-lunar-chronicles",

@@ -114,7 +114,7 @@ function ArchiveStrip() {
                   {ev.date}
                 </span>
               </div>
-              <div className="p-3.5 bg-gradient-to-b from-[var(--panel)] to-[#09090f]">
+              <div className="p-3.5 bg-gradient-to-b from-[var(--panel)] to-[var(--ink)]">
                 <div className="font-mono text-[10px] text-[var(--yellow)] flex items-center gap-1">
                   <CassetteTape className="h-3 w-4 text-[var(--yellow)]" /> EVIDENCE #{index + 101}
                 </div>

@@ -24,7 +24,7 @@
 {$DOMAIN_ALLAH:a-l-l-a-h.com} {
 	import security_headers
 	encode zstd gzip
-	reverse_proxy allah:3003
+	reverse_proxy web:3000
 }
 
 {$DOMAIN_API:api.moonwitness.biz.id} {

@@ -1,21 +1,30 @@
+"use client";
+
 import * as React from "react";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cn } from "../../lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "../../icons";
+import type { SkinName } from "../../skin/compositions";
+import { useComponentSkin } from "./skin-adapter";
 
 const NavigationMenu = React.forwardRef<
   React.ElementRef<typeof NavigationMenuPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Root
-    ref={ref}
-    className={cn("relative z-10 flex max-w-max flex-1 items-center justify-center", className)}
-    {...props}
-  >
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-));
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root> & { skin?: SkinName }
+>(({ className, children, skin, ...props }, ref) => {
+  const { skin: resolvedSkin, dnaId } = useComponentSkin(skin);
+  return (
+    <NavigationMenuPrimitive.Root
+      ref={ref}
+      data-skin={resolvedSkin}
+      data-dna={dnaId}
+      className={cn("relative z-10 flex max-w-max flex-1 items-center justify-center", className)}
+      {...props}
+    >
+      {children}
+      <NavigationMenuViewport />
+    </NavigationMenuPrimitive.Root>
+  );
+});
 NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName;
 
 const NavigationMenuList = React.forwardRef<
@@ -39,7 +48,7 @@ const NavigationMenuTrigger = React.forwardRef<
   <NavigationMenuPrimitive.Trigger
     ref={ref}
     className={cn(
-      "group inline-flex h-10 w-max items-center justify-center rounded-md bg-[var(--background)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus:bg-[var(--muted)] focus:text-[var(--foreground)] focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-[var(--muted)]/50 data-[state=open]:bg-[var(--muted)]/50",
+      "group inline-flex min-h-11 w-max items-center justify-center rounded-[var(--mw-btn-radius,0.375rem)] bg-[var(--background)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--muted)] hover:text-[var(--foreground)] focus:bg-[var(--muted)] focus:text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-[var(--muted)]/50 data-[state=open]:bg-[var(--muted)]/50",
       className,
     )}
     {...props}
@@ -82,7 +91,7 @@ const NavigationMenuViewport = React.forwardRef<
     )}
     {...props}
   >
-    <div className="flex rounded-md border border-[var(--line)] bg-[var(--background)] shadow-lg" />
+    <div className="flex rounded-[var(--mw-dialog-radius,0.5rem)] border border-[var(--border)] bg-[var(--popover)] shadow-lg" />
   </NavigationMenuPrimitive.Viewport>
 ));
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName;
@@ -94,12 +103,12 @@ const NavigationMenuIndicator = React.forwardRef<
   <NavigationMenuPrimitive.Indicator
     ref={ref}
     className={cn(
-      "flex h-1.5 items-center justify-center overflow-hidden bg-[var(--pink)] data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
+      "flex h-1.5 items-center justify-center overflow-hidden bg-[var(--primary)] data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in",
       className,
     )}
     {...props}
   >
-    <div className="h-full w-[2px] bg-[var(--pink)]" />
+    <div className="h-full w-[2px] bg-[var(--primary)]" />
   </NavigationMenuPrimitive.Indicator>
 ));
 NavigationMenuIndicator.displayName = NavigationMenuPrimitive.Indicator.displayName;

@@ -61,7 +61,7 @@ export function DistressedSticker({
     return (
       <div
         className={cn(
-          "inline-block bg-[var(--yellow)] text-black px-3 py-1 font-mono text-xs font-black tracking-wider uppercase rotate-[3deg] shadow-[3px_3px_0_#000] border-2 border-black select-none",
+          "inline-block bg-[var(--yellow)] text-[var(--ink)] px-3 py-1 font-mono text-xs font-black tracking-wider uppercase rotate-[3deg] shadow-[3px_3px_0_var(--ink)] border-2 border-[var(--ink)] select-none",
           className,
         )}
         {...props}

@@ -397,7 +397,7 @@ for (const viewport of viewports) {
 test("landing Storytelling renders existing stories through ScenePanel and FilmStrip", async ({
   page,
 }, info) => {
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const storytelling = page.locator("#storytelling");
   await storytelling.getByRole("heading", { level: 2 }).scrollIntoViewIfNeeded();
   await screenshot(page, info, "storytelling-1672");
@@ -434,7 +434,7 @@ test("normal motion preserves Atlas selection and reveals story panels", async (
   const atlas = page.getByRole("region", { name: /universe\s*map/i });
   await atlas.getByRole("button", { name: "Select TOKYO", exact: true }).click();
   await expect(atlas.locator("dl dd")).toHaveText(["TOKYO", "501"]);
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const storytelling = page.locator("#storytelling");
   await storytelling.locator("[data-story-unit]").first().scrollIntoViewIfNeeded();
   await expect(storytelling.locator("[data-story-unit]")).toHaveCount(4);
@@ -447,7 +447,7 @@ test("normal motion preserves Atlas selection and reveals story panels", async (
 for (const viewport of viewports) {
   test(`story panels preserve manga composition at ${viewport.width}`, async ({ page }, info) => {
     await page.setViewportSize(viewport);
-    await page.goto("/");
+    await page.goto("/moonwitness");
     const section = page.locator("#storytelling");
     await section.getByRole("heading", { level: 2 }).scrollIntoViewIfNeeded();
     const scenes = section.locator("[data-scene-panel]");

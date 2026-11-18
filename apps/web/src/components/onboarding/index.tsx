@@ -43,7 +43,7 @@ function StepRail({ current }: { current: Step }) {
   );
 }
 
-function Field({
+function OnboardingField({
   id,
   label,
   hint,
@@ -210,7 +210,7 @@ export function Onboarding() {
 
           {step === "instance" && (
             <div className="space-y-5">
-              <Field
+              <OnboardingField
                 id="instance"
                 label="NAMA INSTANCE"
                 hint="Tampil di header dashboard. Bisa diubah nanti."
@@ -222,7 +222,7 @@ export function Onboarding() {
                   placeholder="Moonwitness"
                   className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
-              </Field>
+              </OnboardingField>
               <div className="border border-[var(--line)] bg-black/30 p-3 text-[11px] text-zinc-500">
                 Versi arsy <span className="text-zinc-300">{status.data?.version ?? "—"}</span> ·
                 Instance ID{" "}
@@ -246,7 +246,7 @@ export function Onboarding() {
                 setStep("review");
               }}
             >
-              <Field id="name" label="NAMA" error={errors.name}>
+              <OnboardingField id="name" label="NAMA" error={errors.name}>
                 <Input
                   id="name"
                   value={name}
@@ -256,8 +256,8 @@ export function Onboarding() {
                   aria-invalid={!!errors.name}
                   className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
-              </Field>
-              <Field id="email" label="EMAIL" error={errors.email}>
+              </OnboardingField>
+              <OnboardingField id="email" label="EMAIL" error={errors.email}>
                 <Input
                   id="email"
                   type="email"
@@ -268,8 +268,13 @@ export function Onboarding() {
                   aria-invalid={!!errors.email}
                   className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
-              </Field>
-              <Field id="password" label="PASSWORD" hint={passwordHint} error={errors.password}>
+              </OnboardingField>
+              <OnboardingField
+                id="password"
+                label="PASSWORD"
+                hint={passwordHint}
+                error={errors.password}
+              >
                 <Input
                   id="password"
                   type="password"
@@ -280,8 +285,8 @@ export function Onboarding() {
                   aria-invalid={!!errors.password}
                   className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
-              </Field>
-              <Field id="confirm" label="ULANGI PASSWORD" error={errors.confirm}>
+              </OnboardingField>
+              <OnboardingField id="confirm" label="ULANGI PASSWORD" error={errors.confirm}>
                 <Input
                   id="confirm"
                   type="password"
@@ -292,7 +297,7 @@ export function Onboarding() {
                   aria-invalid={!!errors.confirm}
                   className="rounded-md px-4 py-3 text-sm bg-[var(--background)] border-[var(--line)] focus:border-[var(--pink)] focus:ring-[var(--pink)]"
                 />
-              </Field>
+              </OnboardingField>
               <div className="flex items-center justify-between">
                 <Button
                   type="button"
