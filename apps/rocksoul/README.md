@@ -23,7 +23,9 @@ AI agent CLI execution, cloud sync, and collaboration are outside this release. 
 
 ## Optional Google Drive storage
 
-Settings can connect a Google account (OAuth client configured at build time) for encrypted database backups and an S3-compatible loopback gateway. The gateway exposes a single `rocksoul` bucket backed by Drive app-data files, binds to `127.0.0.1` on an OS-assigned port, and requires the per-session bearer secret shown in Settings. Objects are limited to 16 MiB; there is no multipart upload or request signing.
+Settings can connect a Google account (OAuth client configured at build time) for encrypted database backups and an S3-compatible loopback gateway. The gateway exposes a single `rocksoul` bucket backed by Drive app-data files and binds to `127.0.0.1` on an OS-assigned port. Use the per-session bearer secret shown in Settings or AWS Signature Version 4; SigV4 requests must include the correct SHA-256 body hash and a timestamp within 15 minutes.
+
+This is a personal-use storage surface, not a general-purpose or multi-tenant S3 service. Objects are limited to 16 MiB. Multipart uploads allow at most two active uploads and 32 MiB of retained part data, expire after 30 minutes, and follow S3's 10,000-part and 5 MiB non-final-part limits. There is no per-key ACL or versioning support.
 
 ## Requirements
 

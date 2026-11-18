@@ -44,3 +44,14 @@ Artifacts listed above were rebuilt on 2026-11-16 via `pnpm tauri build`. Automa
 The database is stored in Tauri's per-user application data directory, outside the application installation directory. The user reports installation/uninstallation works safely on their machine. Upgrade data retention has not been tested. Back up app data before manual cleanup.
 
 Do not treat packaging success as proof of successful installation, runtime operation, or data retention.
+
+## Storage hardening verification update
+
+**Date:** 2026-11-18
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Rocksoul Rust library tests | `cargo test --manifest-path apps\rocksoul\src-tauri\Cargo.toml --locked --lib -j 1` | PASS, 47 tests (0 failed), including SQLite WAL backup/integrity, multipart manifest/resource limits, and SigV4 body/timestamp checks |
+| Rust formatting | `cargo fmt --manifest-path apps\rocksoul\src-tauri\Cargo.toml -- --check --style-edition 2021` | PASS |
+| Rust lint | `cargo clippy --manifest-path apps\rocksoul\src-tauri\Cargo.toml --locked --all-targets --all-features -j 1 -- -D warnings` | PASS |
+| Google Drive restore smoke test | Requires a configured OAuth build and user account | NOT RUN |

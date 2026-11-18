@@ -8,8 +8,14 @@ use reqwest::blocking::Client;
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::Deserialize;
 use sha2::Digest;
-use std::{fs, path::PathBuf, thread, time::Duration};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+    thread,
+    time::Duration,
+};
 use tauri::{AppHandle, Manager};
+use uuid::Uuid;
 
 use crate::{db, models::CloudBackupStatus};
 
@@ -340,22 +346,69 @@ fn access_token(client: &Client, refresh_token: &str) -> Result<String, String> 
 }
 
 fn encrypted_database_snapshot(app: &AppHandle, key: &[u8; 32]) -> Result<String, String> {
+    with_temporary_database(app, "backup-snapshot", |path| {
+        db::backup_to_file(app, path)?;
+        let bytes = fs::read(path).map_err(|error| error.to_string())?;
+        let cipher = XChaCha20Poly1305::new(key.into());
+        let mut nonce = [0_u8; 24];
+        rand::rngs::OsRng.fill_bytes(&mut nonce);
+        let encrypted = cipher
+            .encrypt(XNonce::from_slice(&nonce), bytes.as_ref())
+            .map_err(|_| "Could not encrypt the local database backup.".to_string())?;
+        let mut envelope = nonce.to_vec();
+        envelope.extend(encrypted);
+        Ok(STANDARD.encode(envelope))
+    })
+}
+
+fn temporary_database_path(app: &AppHandle, purpose: &str) -> Result<PathBuf, String> {
     let path = db::db_path(app)?;
-    let connection = db::connect(app)?;
-    connection
-        .execute_batch("PRAGMA wal_checkpoint(FULL);")
-        .map_err(|error| error.to_string())?;
-    drop(connection);
-    let bytes = fs::read(path).map_err(|error| error.to_string())?;
-    let cipher = XChaCha20Poly1305::new(key.into());
-    let mut nonce = [0_u8; 24];
-    rand::rngs::OsRng.fill_bytes(&mut nonce);
-    let encrypted = cipher
-        .encrypt(XNonce::from_slice(&nonce), bytes.as_ref())
-        .map_err(|_| "Could not encrypt the local database backup.".to_string())?;
-    let mut envelope = nonce.to_vec();
-    envelope.extend(encrypted);
-    Ok(STANDARD.encode(envelope))
+    let name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("rocksoul.sqlite3");
+    Ok(path.with_file_name(format!("{name}.{purpose}-{}.sqlite3", Uuid::new_v4())))
+}
+
+fn remove_temporary_database(path: &Path) -> Result<(), String> {
+    for suffix in ["", "-wal", "-shm"] {
+        let candidate = if suffix.is_empty() {
+            path.to_path_buf()
+        } else {
+            let mut name = path.as_os_str().to_os_string();
+            name.push(suffix);
+            PathBuf::from(name)
+        };
+        match fs::remove_file(&candidate) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => {
+                return Err(format!(
+                    "Could not remove temporary database file {}: {error}",
+                    candidate.display()
+                ))
+            }
+        }
+    }
+    Ok(())
+}
+
+fn with_temporary_database<T>(
+    app: &AppHandle,
+    purpose: &str,
+    operation: impl FnOnce(&Path) -> Result<T, String>,
+) -> Result<T, String> {
+    let path = temporary_database_path(app, purpose)?;
+    let result = operation(&path);
+    let cleanup = remove_temporary_database(&path);
+    match (result, cleanup) {
+        (Ok(value), Ok(())) => Ok(value),
+        (Err(error), Ok(())) => Err(error),
+        (Ok(_), Err(error)) => Err(error),
+        (Err(error), Err(cleanup_error)) => Err(format!(
+            "{error}; temporary database cleanup failed: {cleanup_error}"
+        )),
+    }
 }
 
 fn decrypt_database_snapshot(key: &[u8; 32], encoded: &str) -> Result<Vec<u8>, String> {
@@ -413,6 +466,7 @@ pub fn backup_to_google_drive(app: AppHandle) -> Result<CloudBackupStatus, Strin
             |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?)),
         )
         .map_err(|_| "Connect a Google account before creating a backup.".to_string())?;
+    drop(connection);
     let key = backup_key(&app)?;
     let refresh_token = decrypt_secret(&key, &encrypted_refresh)?;
     let client = Client::builder()
@@ -434,6 +488,7 @@ pub fn backup_to_google_drive(app: AppHandle) -> Result<CloudBackupStatus, Strin
         remote_file_id.as_deref(),
     )?;
     let now = chrono::Utc::now().to_rfc3339();
+    let connection = db::connect(&app)?;
     connection.execute(
         "UPDATE cloud_backup_settings SET last_backup_at = ?1, remote_file_id = ?2 WHERE id = 1",
         params![now, remote_file_id],
@@ -447,7 +502,7 @@ pub fn backup_to_google_drive(app: AppHandle) -> Result<CloudBackupStatus, Strin
 #[tauri::command]
 pub fn restore_from_google_drive(app: AppHandle) -> Result<CloudBackupStatus, String> {
     let connection = db::connect(&app)?;
-    let (account, encrypted_refresh, file_id): (String, String, Option<String>) = connection
+    let (_account, encrypted_refresh, file_id): (String, String, Option<String>) = connection
         .query_row(
             "SELECT google_account, refresh_token_encrypted, remote_file_id
              FROM cloud_backup_settings WHERE id = 1",
@@ -480,19 +535,13 @@ pub fn restore_from_google_drive(app: AppHandle) -> Result<CloudBackupStatus, St
         .map_err(|error| format!("Could not download Google Drive backup: {error}"))?;
 
     let sqlite_bytes = decrypt_database_snapshot(&key, &encoded)?;
-    let target_path = db::db_path(&app)?;
-    let temp_path = target_path.with_extension("db.restore.tmp");
-    fs::write(&temp_path, &sqlite_bytes).map_err(|error| error.to_string())?;
-    let _ = fs::remove_file(target_path.with_extension("db-wal"));
-    let _ = fs::remove_file(target_path.with_extension("db-shm"));
-    fs::rename(&temp_path, &target_path).map_err(|error| error.to_string())?;
-    db::init(&app)?;
+    with_temporary_database(&app, "restore-source", |path| {
+        fs::write(path, &sqlite_bytes).map_err(|error| error.to_string())?;
+        db::restore_from_file(&app, path)
+    })?;
 
     let connection = db::connect(&app)?;
-    status_from_connection(&connection, true).map(|mut status| {
-        status.account = Some(account);
-        status
-    })
+    status_from_connection(&connection, true)
 }
 
 fn drive_credentials(app: &AppHandle) -> Result<(Client, String), String> {
