@@ -14,7 +14,7 @@ Reusable PostgreSQL, libSQL/SQLite, and Cloudflare D1 ORM layer for MoonWitness 
 ## Models and repository
 
 - `defineModel({ name, table, schema, softDelete?, indexes? })` builds DDL, typed repository, and audit hook.
-- Framework-owned metadata columns: `id`, `create_uid`, `create_date`, `write_uid`, `write_date`, `status`, `deleted_uid`, `deleted_date`, `version`, `source`, `source_ref`.
+- Framework-owned metadata columns: `id`, `create_uid`, `create_date`, `write_uid`, `write_date`, `status`, `deleted_uid`, `deleted_date`, `version`, `source`, `source_ref`, `tenant_id` (defaults to `'default'`, automatically backfilled on `syncModels()` and scoped via `FindOptions.tenantId` / `ActorContext.tenantId`).
 - Business updates cannot overwrite protected metadata; `update/archive/restore/delete` enforce consistent actor/timestamps/version/status transitions and optimistic locking (`ConflictError` on stale/missing version match).
 - Soft-delete (`status='deleted'`) is filtered by default in `find/findOne/list/count`; pass `{ includeDeleted: true }` to include.
 - Query columns are validated (identifier-safe, known columns only).
@@ -31,4 +31,4 @@ Reusable PostgreSQL, libSQL/SQLite, and Cloudflare D1 ORM layer for MoonWitness 
 
 ## Exports
 
-Public API is exported from `src/index.ts`: `defineModel`, `BaseRepository`, `AUDIT_DDL`, `ormAuditMigrations`, `initDb`, `initD1Db`, `closeDb`, `getDb`, `PostgresDriver`, `isPostgresUrl`, `translateSqlForPostgres`, `LibSqlDriver`, `D1Driver`, `splitSqlStatements`, `createD1DatabaseFromOrm`, `applyMigrations`, `listAppliedMigrations`, `backupDatabase`, `restoreDatabase`, `verifyIntegrity`, `encryptBackupFile`, `decryptBackupFile`, actor/context/types, and `ConflictError`. Keep exports aligned with implementation; avoid parallel persistence abstractions.
+Public API is exported from `src/index.ts`: `defineModel`, `BaseRepository`, `syncModels`, `modelRegistry`, `extendModel`, `onModelWrite`, `AUDIT_DDL`, `ormAuditMigrations`, `initDb`, `initD1Db`, `closeDb`, `getDb`, `PostgresDriver`, `isPostgresUrl`, `translateSqlForPostgres`, `LibSqlDriver`, `D1Driver`, `splitSqlStatements`, `createD1DatabaseFromOrm`, `applyMigrations`, `listAppliedMigrations`, `backupDatabase`, `restoreDatabase`, `verifyIntegrity`, `encryptBackupFile`, `decryptBackupFile`, `createActorContext`, `DEFAULT_TENANT_ID`, `normalizeTenantId`, `SYSTEM_ACTOR`, types, and `ConflictError`. Keep exports aligned with implementation; avoid parallel persistence abstractions.

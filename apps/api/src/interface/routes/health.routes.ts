@@ -33,7 +33,6 @@ export async function registerMetricsRoute(
   fastify: FastifyInstance,
   metrics: ApiMetricsCollector = createApiMetricsCollector(),
 ): Promise<void> {
-  if (fastify.hasRoute({ method: "GET", url: "/metrics" })) return;
   fastify.get("/metrics", async (_request, reply) => {
     const addonSummary = await readAddonMetricSummary();
     return reply

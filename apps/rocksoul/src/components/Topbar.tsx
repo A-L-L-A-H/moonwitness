@@ -1,10 +1,14 @@
 import React from "react";
 import { Activity, ChevronDown, Command, FolderGit2, LogIn, LogOut, Palette, RefreshCw, Settings2 } from "lucide-react";
-import { DnaBrandLogo, useSkin, type SkinName } from "@moonwitness/ui";
+import { DnaBrandLogo, listPresets, useSkin, type SkinName } from "@moonwitness/ui";
 import { CrimsonCrownSvg } from "./ui/RocksoulVectors";
 import type { Repository } from "../lib/contracts";
 
-const ROCKSOUL_SKIN_CYCLE: readonly SkinName[] = ["riot", "technical", "editorial"];
+const ROCKSOUL_PRIORITY_SKINS: readonly SkinName[] = ["riot", "technical", "editorial"];
+const ROCKSOUL_SKIN_CYCLE: readonly SkinName[] = [
+  ...ROCKSOUL_PRIORITY_SKINS,
+  ...listPresets().filter((preset) => !ROCKSOUL_PRIORITY_SKINS.includes(preset)),
+];
 
 export interface TopbarIdentity {
   username: string;

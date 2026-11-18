@@ -11,24 +11,37 @@
   --color-charcoal-2: #202020;
   --color-panel: #171717;
   --color-panel-2: #202020;
+  --color-surface-3: #141414;
+  --color-surface-hover: #252718;
   --color-paper: #f3ebd9;
+  --color-paper-soft: #d8d0c3;
   --color-dirty-white: #eee8dd;
   --color-muted: #8f8a80;
   --color-line: #48443c;
   --color-line-soft: #3b3730;
+  --color-border-strong: #5c5649;
 
   /* Accents — Signal colors */
   --color-lime: #d7ff36;
   --color-lime-dim: #c4e830;
+  --color-lime-bright: #e9ff79;
   --color-orange: #ff6339;
   --color-orange-dim: #e85a33;
+  --color-orange-soft: #ff8b6e;
   --color-rust: #bf8350;
   --color-pink: #ff5ac8;
   --color-purple: #6555ff;
   --color-moonlight: #e9d4b5;
+  --color-watch: #f6c453;
+  --color-critical: #ff4747;
+  --color-clean: #77d99a;
   --world-crimson: #e53e38;
   --world-crimson-soft: #ff8b80;
   --world-crimson-deep: #a8221d;
+  --world-ash: #9a9488;
+  --world-dim: #67645c;
+  --world-signal: #d65a3b;
+  --world-glow: #f1d8a1;
 
   /* Semantic aliases (bridged with @moonwitness/ui 8-axis skin & DNA vars) */
   --color-bg: var(--dna-canvas, var(--color-black));

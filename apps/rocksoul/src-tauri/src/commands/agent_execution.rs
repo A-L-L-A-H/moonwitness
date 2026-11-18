@@ -398,3 +398,79 @@ pub async fn evaluate_agent_worktree_evidence(
         diff_stat,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        kill_supervised_process, poll_supervised_process, resolve_command_executable,
+        spawn_supervised_process, validate_command_args,
+    };
+    use std::{env, path::Path, thread::sleep, time::Duration};
+    use uuid::Uuid;
+
+    #[test]
+    fn rejects_non_allowlisted_shells_and_control_characters() {
+        assert!(resolve_command_executable("bash").is_err());
+        assert!(resolve_command_executable("cmd").is_err());
+        assert!(resolve_command_executable("powershell").is_err());
+        assert!(resolve_command_executable("sh").is_err());
+        assert!(resolve_command_executable("").is_err());
+        assert_eq!(resolve_command_executable("git").as_deref(), Ok("git"));
+
+        assert!(validate_command_args(&["-e".to_string(), "ok".to_string()]).is_ok());
+        assert!(validate_command_args(&["bad\narg".to_string()]).is_err());
+        assert!(validate_command_args(&["bad\0arg".to_string()]).is_err());
+    }
+
+    #[test]
+    fn rejects_missing_worktree_directory() {
+        let bogus = Path::new("/nonexistent-rocksoul-worktree-dir-12345");
+        let err = spawn_supervised_process("run-missing", bogus, "git", &[])
+            .expect_err("expected missing worktree error");
+        assert!(err.contains("Worktree path must exist"));
+    }
+
+    #[test]
+    fn spawns_polls_and_kills_real_os_child_process() {
+        let run_id = format!("test-run-{}", Uuid::new_v4());
+        let worktree_dir = env::temp_dir();
+
+        // Spawn short-lived allowlisted command first and observe real OS PID + completion.
+        let done_id = format!("{run_id}-quick");
+        let quick_pid = spawn_supervised_process(
+            &done_id,
+            &worktree_dir,
+            "git",
+            &["--version".to_string()],
+        )
+        .expect("git --version should spawn cleanly");
+        assert!(quick_pid > 0);
+        let mut exited = None;
+        for _ in 0..40 {
+            if let Some(code) = poll_supervised_process(&done_id).expect("poll") {
+                exited = Some(code);
+                break;
+            }
+            sleep(Duration::from_millis(25));
+        }
+        assert_eq!(exited, Some(0));
+
+        // Spawn long-running node child and verify real OS kill cleanup.
+        let live_id = format!("{run_id}-live");
+        let args = vec![
+            "-e".to_string(),
+            "setTimeout(() => {}, 15000)".to_string(),
+        ];
+        let live_pid = spawn_supervised_process(&live_id, &worktree_dir, "node", &args)
+            .expect("node sleep child should spawn cleanly");
+        assert!(live_pid > 0);
+        assert_eq!(
+            poll_supervised_process(&live_id).expect("live poll"),
+            None
+        );
+
+        let killed = kill_supervised_process(&live_id).expect("kill child");
+        assert_eq!(killed, Some(live_pid));
+        assert_eq!(kill_supervised_process(&live_id).expect("idempotent kill"), None);
+    }
+}

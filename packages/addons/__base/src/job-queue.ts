@@ -58,6 +58,14 @@ export type JobHandler = (payload: unknown, job: OpsJobRecord) => Promise<unknow
 
 const DEFAULT_LOCK_TTL_MS = 60_000;
 
+function isRetryableContentionError(error: unknown): boolean {
+  if (error instanceof ConflictError) return true;
+  const code = (error as { code?: string } | null)?.code;
+  if (code === "SQLITE_BUSY" || code === "SQLITE_LOCKED") return true;
+  const msg = error instanceof Error ? error.message : String(error);
+  return /SQLITE_BUSY|database is locked/i.test(msg);
+}
+
 /** Ensures the durable `ops_jobs` table and indexes exist cleanly. */
 export async function ensureJobQueueSchema(): Promise<void> {
   await syncModels([opsJobModel]);
@@ -161,8 +169,9 @@ export async function claimNextJob(
         );
         if (claimed) return claimed;
       } catch (error) {
-        if (error instanceof ConflictError) {
+        if (isRetryableContentionError(error)) {
           contended = true;
+          await new Promise((resolve) => setTimeout(resolve, 10));
           continue;
         }
         throw error;
@@ -270,7 +279,13 @@ export async function processNextJob(
     const done = await completeJob(claimed.id, options.workerId, result, scopedActor);
     return { processed: true, job: done ?? claimed };
   } catch (error) {
-    const failed = await failJob(claimed.id, options.workerId, error, {}, scopedActor);
+    const failed = await failJob(
+      claimed.id,
+      options.workerId,
+      error,
+      { now: options.now },
+      scopedActor,
+    );
     return { processed: true, job: failed ?? claimed };
   }
 }
