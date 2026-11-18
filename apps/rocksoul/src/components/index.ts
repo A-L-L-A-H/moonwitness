@@ -4,3 +4,4 @@ export { default as IssueRow } from "./IssueRow";
 export { default as RiotRail } from "./RiotRail";
 export { default as SettingsDialog } from "./SettingsDialog";
 export { default as Topbar } from "./Topbar";
+export { default as CaptureDialog } from "./CaptureDialog";
