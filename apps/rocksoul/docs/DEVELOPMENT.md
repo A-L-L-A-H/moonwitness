@@ -61,10 +61,10 @@ The SQLite database is created under Tauri's OS-specific app-data directory. Sch
 
 1. Open Settings and connect a Google account. The build must be compiled with `ROCKSOUL_GOOGLE_CLIENT_ID` and `ROCKSOUL_GOOGLE_CLIENT_SECRET` for the OAuth flow to be available.
 2. Start the S3 gateway. Settings shows a loopback endpoint plus a per-session access key and secret key.
-3. Point any S3 client at the endpoint, use bucket `rocksoul`, and send the secret as `Authorization: Bearer <secret>`.
-4. Supported operations: create bucket, list objects (`GET /rocksoul?list-type=2`), put/get/head/delete object. Objects are Drive app-data files named by their S3 key.
+3. Point an S3 client at the endpoint and use bucket `rocksoul`. Authenticate with the secret as `Authorization: Bearer <secret>` or configure AWS Signature Version 4 with the per-session access and secret keys from Settings.
+4. Supported operations: create bucket, list objects (`GET /rocksoul?list-type=2`), put/get/head/delete object, and multipart initiate/upload/complete/abort. Objects are Drive app-data files named by their S3 key.
 
-The gateway is a local experiment surface: single node, single bucket, no multipart upload, no request signing, and a 16 MiB object ceiling. The Drive OAuth client must be configured at build time and is never shipped in the binary.
+The gateway is a personal-use local surface, not a general-purpose S3 service: one bucket, a 16 MiB object ceiling, no per-key ACLs or versioning, at most two active multipart uploads and 32 MiB of retained parts, and a 30-minute upload expiry. SigV4 requires an accurate SHA-256 body hash and a timestamp within 15 minutes. Keep the listener loopback-only. Google OAuth values are configured at build time; `option_env!` embeds configured values in the binary, so do not include a confidential client secret in a distributable build.
 
 ## Local data
 

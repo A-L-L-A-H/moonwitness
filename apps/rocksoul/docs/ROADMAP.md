@@ -38,10 +38,11 @@ A reliable personal-use desktop app for Windows 11 x64, with local work manageme
 
 ### M5 — Optional Drive storage experiment
 - [x] Encrypted Google Drive database backup
+- [x] WAL-consistent SQLite snapshots and integrity-checked restore with rollback
 - [x] Loopback S3-compatible gateway backed by Drive app-data objects
-- [x] Per-session bearer auth, object key validation, 16 MiB ceiling
+- [x] Per-session bearer/SigV4 auth, body-hash and freshness validation, object key validation, 16 MiB ceiling
+- [x] Bounded, expiring multipart uploads with manifest, ETag, and part-size validation
 - [x] Guided restore from an encrypted backup
-- [x] Resumable/multipart uploads and request signing
 
 ## Definition of done
 

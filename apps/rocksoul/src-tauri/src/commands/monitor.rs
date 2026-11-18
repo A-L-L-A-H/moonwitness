@@ -676,8 +676,10 @@ fn collect_monitor_snapshot(repositories: Vec<Repository>) -> MonitorSnapshot {
 
 #[tauri::command]
 pub async fn get_monitor_snapshot(app: AppHandle) -> Result<MonitorSnapshot, String> {
-    let connection = db::connect(&app)?;
-    let repositories = query_repositories(&connection)?;
+    let repositories = {
+        let connection = db::connect(&app)?;
+        query_repositories(&connection)?
+    };
     tauri::async_runtime::spawn_blocking(move || collect_monitor_snapshot(repositories))
         .await
         .map_err(|error| format!("Monitor worker failed: {error}"))

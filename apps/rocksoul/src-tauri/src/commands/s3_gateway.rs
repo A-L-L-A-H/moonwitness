@@ -7,9 +7,11 @@ use std::{
         Mutex,
     },
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 
+use chrono::{DateTime, NaiveDateTime, Utc};
+use quick_xml::{events::Event, Reader};
 use sha2::{Digest, Sha256};
 use tauri::{AppHandle, Manager, State};
 
@@ -18,12 +20,28 @@ use crate::models::S3GatewayStatus;
 
 const MAX_OBJECT_BYTES: usize = 16 * 1024 * 1024;
 const MAX_HEADER_BYTES: usize = 64 * 1024;
+const MAX_ACTIVE_UPLOADS: usize = 2;
+const MAX_PENDING_UPLOAD_BYTES: usize = MAX_OBJECT_BYTES * MAX_ACTIVE_UPLOADS;
+const MAX_MULTIPART_PARTS: u32 = 10_000;
+const MULTIPART_UPLOAD_TTL: Duration = Duration::from_secs(30 * 60);
 
-#[derive(Default)]
 struct MultipartUpload {
     key: String,
     content_type: Option<String>,
-    parts: HashMap<u32, Vec<u8>>,
+    created_at: Instant,
+    size_bytes: usize,
+    completing: bool,
+    parts: HashMap<u32, MultipartPart>,
+}
+
+struct MultipartPart {
+    body: Vec<u8>,
+    etag: String,
+}
+
+struct CompletedPart {
+    number: u32,
+    etag: String,
 }
 
 #[derive(Default)]
@@ -33,6 +51,7 @@ struct Runtime {
     access_key: Option<String>,
     secret_key: Option<String>,
     uploads: HashMap<String, MultipartUpload>,
+    pending_upload_bytes: usize,
 }
 
 #[derive(Default)]
@@ -112,6 +131,8 @@ pub fn stop_s3_gateway(state: State<'_, S3GatewayState>) -> Result<S3GatewayStat
     runtime.endpoint = None;
     runtime.access_key = None;
     runtime.secret_key = None;
+    runtime.uploads.clear();
+    runtime.pending_upload_bytes = 0;
     Ok(status(&runtime))
 }
 
@@ -220,7 +241,10 @@ fn read_request(stream: &mut TcpStream) -> Result<Request, (u16, &'static str, &
 fn handle_request(request: Request, app: &AppHandle) -> Vec<u8> {
     let credentials = app.state::<S3GatewayState>();
     let (expected_access, expected_secret) = match credentials.0.lock() {
-        Ok(runtime) => (runtime.access_key.clone(), runtime.secret_key.clone()),
+        Ok(mut runtime) => {
+            expire_uploads(&mut runtime);
+            (runtime.access_key.clone(), runtime.secret_key.clone())
+        }
         Err(_) => return xml_error(503, "ServiceUnavailable", "Gateway state unavailable"),
     };
     if !authorized(
@@ -261,18 +285,32 @@ fn handle_request(request: Request, app: &AppHandle) -> Vec<u8> {
         return xml_error(400, "InvalidArgument", &message);
     }
     let query = request.path.split_once('?').map(|(_, q)| q).unwrap_or("");
-    if request.method == "POST" && query.split('&').any(|p| p == "uploads") {
-        let upload_id = random_credential(16);
+    if request.method == "POST"
+        && query
+            .split('&')
+            .any(|parameter| parameter == "uploads" || parameter == "uploads=")
+    {
         let content_type = request.headers.get("content-type").cloned();
         let state = app.state::<S3GatewayState>();
         let Ok(mut runtime) = state.0.lock() else {
             return xml_error(503, "ServiceUnavailable", "Gateway state unavailable");
         };
+        if runtime.uploads.len() >= MAX_ACTIVE_UPLOADS {
+            return xml_error(
+                409,
+                "TooManyUploads",
+                "Too many multipart uploads are active",
+            );
+        }
+        let upload_id = random_credential(16);
         runtime.uploads.insert(
             upload_id.clone(),
             MultipartUpload {
                 key: key.clone(),
                 content_type,
+                created_at: Instant::now(),
+                size_bytes: 0,
+                completing: false,
                 parts: HashMap::new(),
             },
         );
@@ -296,75 +334,97 @@ fn handle_request(request: Request, app: &AppHandle) -> Vec<u8> {
                 .split('&')
                 .find_map(|p| p.strip_prefix("partNumber="))
                 .and_then(|n| n.parse::<u32>().ok())
-                .filter(|&n| n >= 1)
+                .filter(|&n| (1..=MAX_MULTIPART_PARTS).contains(&n))
             else {
-                return xml_error(400, "InvalidArgument", "Missing or invalid partNumber");
+                return xml_error(
+                    400,
+                    "InvalidArgument",
+                    "Missing or invalid partNumber; expected 1 through 10000",
+                );
             };
             let state = app.state::<S3GatewayState>();
             let Ok(mut runtime) = state.0.lock() else {
                 return xml_error(503, "ServiceUnavailable", "Gateway state unavailable");
             };
-            let Some(upload) = runtime.uploads.get_mut(upload_id) else {
-                return xml_error(404, "NoSuchUpload", "Multipart upload not found");
-            };
-            if upload.key != key {
-                return xml_error(400, "InvalidArgument", "Upload key mismatch");
-            }
-            let etag = format!("\"{}\"", hex_encode(&Sha256::digest(&request.body)));
-            upload.parts.insert(part_num, request.body);
+            let etag =
+                match store_upload_part(&mut runtime, upload_id, &key, part_num, request.body) {
+                    Ok(etag) => etag,
+                    Err((status, code, message)) => return xml_error(status, code, message),
+                };
             return response(200, b"", &[("ETag", &etag)]);
         }
         if request.method == "POST" {
-            let (assembled, content_type) = {
+            let completed_parts = match parse_completion_manifest(&request.body) {
+                Ok(parts) => parts,
+                Err(message) => return xml_error(400, "InvalidRequest", &message),
+            };
+            let assembled = {
                 let state = app.state::<S3GatewayState>();
                 let Ok(mut runtime) = state.0.lock() else {
                     return xml_error(503, "ServiceUnavailable", "Gateway state unavailable");
                 };
-                let Some(upload) = runtime.uploads.remove(upload_id) else {
+                let Some(upload) = runtime.uploads.get_mut(upload_id) else {
                     return xml_error(404, "NoSuchUpload", "Multipart upload not found");
                 };
                 if upload.key != key {
                     return xml_error(400, "InvalidArgument", "Upload key mismatch");
                 }
-                let mut part_nums: Vec<u32> = upload.parts.keys().copied().collect();
-                part_nums.sort_unstable();
-                let mut combined = Vec::new();
-                for n in part_nums {
-                    if let Some(chunk) = upload.parts.get(&n) {
-                        combined.extend_from_slice(chunk);
-                    }
+                if upload.completing {
+                    return xml_error(409, "OperationAborted", "Multipart upload is completing");
                 }
-                (combined, upload.content_type)
+                let combined = match assemble_parts(upload, &completed_parts) {
+                    Ok(combined) => combined,
+                    Err((code, message)) => return xml_error(400, code, message),
+                };
+                upload.completing = true;
+                (combined, upload.content_type.clone())
             };
-            if assembled.len() > MAX_OBJECT_BYTES {
-                return xml_error(
-                    400,
-                    "EntityTooLarge",
-                    "Assembled object exceeds 16 MiB limit",
-                );
-            }
-            return match cloud_backup::s3_put_object(
-                app,
-                &key,
-                &assembled,
-                content_type.as_deref(),
-            ) {
-                Ok(etag) => xml_response(
-                    200,
-                    &format!(
-                        "<CompleteMultipartUploadResult><Bucket>{}</Bucket><Key>{}</Key><ETag>{}</ETag></CompleteMultipartUploadResult>",
-                        cloud_backup::S3_BUCKET,
-                        xml_escape(&key),
-                        xml_escape(&etag)
-                    ),
-                ),
-                Err(_) => storage_unavailable(),
+            let (assembled, content_type) = assembled;
+            return match cloud_backup::s3_put_object(app, &key, &assembled, content_type.as_deref())
+            {
+                Ok(etag) => {
+                    if let Ok(mut runtime) = app.state::<S3GatewayState>().0.lock() {
+                        if let Some(upload) = runtime.uploads.remove(upload_id) {
+                            runtime.pending_upload_bytes = runtime
+                                .pending_upload_bytes
+                                .saturating_sub(upload.size_bytes);
+                        }
+                    }
+                    xml_response(
+                        200,
+                        &format!(
+                            "<CompleteMultipartUploadResult><Bucket>{}</Bucket><Key>{}</Key><ETag>{}</ETag></CompleteMultipartUploadResult>",
+                            cloud_backup::S3_BUCKET,
+                            xml_escape(&key),
+                            xml_escape(&etag)
+                        ),
+                    )
+                }
+                Err(_) => {
+                    if let Ok(mut runtime) = app.state::<S3GatewayState>().0.lock() {
+                        if let Some(upload) = runtime.uploads.get_mut(upload_id) {
+                            upload.completing = false;
+                        }
+                    }
+                    storage_unavailable()
+                }
             };
         }
         if request.method == "DELETE" {
             let state = app.state::<S3GatewayState>();
-            if let Ok(mut runtime) = state.0.lock() {
-                runtime.uploads.remove(upload_id);
+            let Ok(mut runtime) = state.0.lock() else {
+                return xml_error(503, "ServiceUnavailable", "Gateway state unavailable");
+            };
+            let Some(upload) = runtime.uploads.get(upload_id) else {
+                return xml_error(404, "NoSuchUpload", "Multipart upload not found");
+            };
+            if upload.completing {
+                return xml_error(409, "OperationAborted", "Multipart upload is completing");
+            }
+            if let Some(upload) = runtime.uploads.remove(upload_id) {
+                runtime.pending_upload_bytes = runtime
+                    .pending_upload_bytes
+                    .saturating_sub(upload.size_bytes);
             }
             return response(204, b"", &[]);
         }
@@ -402,6 +462,264 @@ fn handle_request(request: Request, app: &AppHandle) -> Vec<u8> {
         },
         _ => xml_error(405, "MethodNotAllowed", "Unsupported object operation"),
     }
+}
+
+fn assemble_parts(
+    upload: &MultipartUpload,
+    completed_parts: &[CompletedPart],
+) -> Result<Vec<u8>, (&'static str, &'static str)> {
+    let mut previous_number = 0;
+    for completed in completed_parts {
+        if completed.number <= previous_number {
+            return Err((
+                "InvalidPartOrder",
+                "Parts must be listed once in ascending order",
+            ));
+        }
+        previous_number = completed.number;
+    }
+    if completed_parts.len() > upload.parts.len() {
+        return Err(("InvalidPart", "A requested part is missing"));
+    }
+    let last_number = completed_parts.last().map_or(0, |part| part.number);
+    let mut combined = Vec::new();
+    for completed in completed_parts {
+        let Some(part) = upload.parts.get(&completed.number) else {
+            return Err(("InvalidPart", "A requested part is missing"));
+        };
+        if part.etag != completed.etag {
+            return Err(("InvalidPart", "A requested part ETag does not match"));
+        }
+        if completed.number != last_number && part.body.len() < 5 * 1024 * 1024 {
+            return Err((
+                "EntityTooSmall",
+                "Every multipart part except the last must be at least 5 MiB",
+            ));
+        }
+        if combined.len().saturating_add(part.body.len()) > MAX_OBJECT_BYTES {
+            return Err(("EntityTooLarge", "Assembled object exceeds 16 MiB limit"));
+        }
+        combined.extend_from_slice(&part.body);
+    }
+    Ok(combined)
+}
+
+fn store_upload_part(
+    runtime: &mut Runtime,
+    upload_id: &str,
+    key: &str,
+    part_number: u32,
+    body: Vec<u8>,
+) -> Result<String, (u16, &'static str, &'static str)> {
+    let Some(upload) = runtime.uploads.get(upload_id) else {
+        return Err((404, "NoSuchUpload", "Multipart upload not found"));
+    };
+    if upload.key != key {
+        return Err((400, "InvalidArgument", "Upload key mismatch"));
+    }
+    if upload.completing {
+        return Err((409, "OperationAborted", "Multipart upload is completing"));
+    }
+    if !(1..=MAX_MULTIPART_PARTS).contains(&part_number) {
+        return Err((400, "InvalidArgument", "Multipart part number is invalid"));
+    }
+    if !upload.parts.contains_key(&part_number)
+        && upload.parts.len() >= MAX_MULTIPART_PARTS as usize
+    {
+        return Err((
+            400,
+            "InvalidArgument",
+            "Multipart upload has too many parts",
+        ));
+    }
+    let old_size = upload
+        .parts
+        .get(&part_number)
+        .map_or(0, |part| part.body.len());
+    let Some(new_upload_size) = upload
+        .size_bytes
+        .checked_sub(old_size)
+        .and_then(|size| size.checked_add(body.len()))
+    else {
+        return Err((503, "ServiceUnavailable", "Multipart accounting failed"));
+    };
+    if new_upload_size > MAX_OBJECT_BYTES {
+        return Err((
+            413,
+            "EntityTooLarge",
+            "Multipart object exceeds the 16 MiB limit",
+        ));
+    }
+    let Some(new_pending_size) = runtime
+        .pending_upload_bytes
+        .checked_sub(old_size)
+        .and_then(|size| size.checked_add(body.len()))
+    else {
+        return Err((503, "ServiceUnavailable", "Multipart accounting failed"));
+    };
+    if new_pending_size > MAX_PENDING_UPLOAD_BYTES {
+        return Err((
+            413,
+            "EntityTooLarge",
+            "Active multipart data exceeds the 32 MiB gateway limit",
+        ));
+    }
+    let etag = format!("\"{}\"", hex_encode(&Sha256::digest(&body)));
+    let upload = match runtime.uploads.get_mut(upload_id) {
+        Some(upload) => upload,
+        None => return Err((404, "NoSuchUpload", "Multipart upload not found")),
+    };
+    upload.size_bytes = new_upload_size;
+    upload.parts.insert(
+        part_number,
+        MultipartPart {
+            body,
+            etag: etag.clone(),
+        },
+    );
+    runtime.pending_upload_bytes = new_pending_size;
+    Ok(etag)
+}
+
+fn expire_uploads(runtime: &mut Runtime) {
+    let now = Instant::now();
+    let expired: Vec<String> = runtime
+        .uploads
+        .iter()
+        .filter(|(_, upload)| {
+            now.saturating_duration_since(upload.created_at) >= MULTIPART_UPLOAD_TTL
+        })
+        .map(|(id, _)| id.clone())
+        .collect();
+    for id in expired {
+        if let Some(upload) = runtime.uploads.remove(&id) {
+            runtime.pending_upload_bytes = runtime
+                .pending_upload_bytes
+                .saturating_sub(upload.size_bytes);
+        }
+    }
+}
+
+fn parse_completion_manifest(body: &[u8]) -> Result<Vec<CompletedPart>, String> {
+    let xml = std::str::from_utf8(body).map_err(|error| error.to_string())?;
+    let mut reader = Reader::from_str(xml);
+    reader.config_mut().trim_text(true);
+    let mut root_seen = false;
+    let mut root_open = false;
+    let mut root_closed = false;
+    let mut in_part = false;
+    let mut part_number = None;
+    let mut etag = None;
+    let mut capture: Option<&str> = None;
+    let mut text = String::new();
+    let mut parts = Vec::new();
+
+    loop {
+        match reader.read_event().map_err(|error| error.to_string())? {
+            Event::Start(element) => match element.name().as_ref() {
+                "CompleteMultipartUpload" if !root_seen && !root_closed => {
+                    root_seen = true;
+                    root_open = true;
+                }
+                "Part" if root_open && !in_part => {
+                    in_part = true;
+                    part_number = None;
+                    etag = None;
+                }
+                "PartNumber" if in_part && capture.is_none() && part_number.is_none() => {
+                    capture = Some("PartNumber");
+                    text.clear();
+                }
+                "ETag" if in_part && capture.is_none() && etag.is_none() => {
+                    capture = Some("ETag");
+                    text.clear();
+                }
+                _ => return Err("Multipart manifest contains an unexpected element.".into()),
+            },
+            Event::Text(value) => {
+                let decoded = value.xml10_content();
+                if capture.is_some() {
+                    let decoded =
+                        quick_xml::escape::unescape(&decoded).map_err(|error| error.to_string())?;
+                    text.push_str(&decoded);
+                } else if !decoded.trim().is_empty() {
+                    return Err("Multipart manifest contains unexpected text.".into());
+                }
+            }
+            Event::GeneralRef(reference) => {
+                let character = xml_reference_char(reference.as_ref())?;
+                if capture.is_some() {
+                    text.push(character);
+                } else if !character.is_whitespace() {
+                    return Err("Multipart manifest contains unexpected text.".into());
+                }
+            }
+            Event::End(element) => match element.name().as_ref() {
+                "PartNumber" if capture == Some("PartNumber") => {
+                    let number = text
+                        .trim()
+                        .parse::<u32>()
+                        .map_err(|_| "Multipart part number is invalid.".to_string())?;
+                    if !(1..=MAX_MULTIPART_PARTS).contains(&number) {
+                        return Err("Multipart part number is outside the allowed range.".into());
+                    }
+                    part_number = Some(number);
+                    capture = None;
+                }
+                "ETag" if capture == Some("ETag") => {
+                    let value = text.trim();
+                    if value.is_empty() || value.len() > 256 {
+                        return Err("Multipart part ETag is invalid.".into());
+                    }
+                    etag = Some(value.to_string());
+                    capture = None;
+                }
+                "Part" if in_part && capture.is_none() => {
+                    let (Some(number), Some(etag)) = (part_number.take(), etag.take()) else {
+                        return Err("Each multipart part needs a number and ETag.".into());
+                    };
+                    parts.push(CompletedPart { number, etag });
+                    if parts.len() > MAX_MULTIPART_PARTS as usize {
+                        return Err("Multipart manifest contains too many parts.".into());
+                    }
+                    in_part = false;
+                }
+                "CompleteMultipartUpload" if root_open && !in_part && capture.is_none() => {
+                    root_open = false;
+                    root_closed = true;
+                }
+                _ => return Err("Multipart manifest structure is invalid.".into()),
+            },
+            Event::DocType(_) => {
+                return Err("Multipart manifest document types are not supported.".into())
+            }
+            Event::Empty(_) | Event::CData(_) => {
+                return Err("Multipart manifest contains unsupported XML content.".into())
+            }
+            Event::Eof => break,
+            _ => {}
+        }
+    }
+
+    if !root_seen || !root_closed || in_part || parts.is_empty() {
+        return Err("Multipart completion manifest is incomplete.".into());
+    }
+    Ok(parts)
+}
+
+fn xml_reference_char(reference: &str) -> Result<char, String> {
+    let value = match reference {
+        "amp" => return Ok('&'),
+        "lt" => return Ok('<'),
+        "gt" => return Ok('>'),
+        "apos" => return Ok('\''),
+        "quot" => return Ok('"'),
+        reference if reference.starts_with("#x") => u32::from_str_radix(&reference[2..], 16),
+        reference if reference.starts_with('#') => reference[1..].parse::<u32>(),
+        _ => return Err("Multipart manifest contains an unsupported entity.".into()),
+    }
+    .map_err(|error| error.to_string())?;
+    char::from_u32(value).ok_or_else(|| "Multipart manifest contains an invalid character.".into())
 }
 
 fn parse_path(path: &str) -> Result<(Option<String>, Option<String>), String> {
@@ -529,6 +847,7 @@ fn reason(status: u16) -> &'static str {
     match status {
         200 => "OK",
         204 => "No Content",
+        409 => "Conflict",
         403 => "Forbidden",
         400 => "Bad Request",
         404 => "Not Found",
@@ -550,6 +869,15 @@ fn random_credential(length: usize) -> String {
 }
 
 fn authorized(request: &Request, access_key: &str, secret_key: &str) -> bool {
+    authorized_at(request, access_key, secret_key, Utc::now())
+}
+
+fn authorized_at(
+    request: &Request,
+    access_key: &str,
+    secret_key: &str,
+    now: DateTime<Utc>,
+) -> bool {
     if access_key.is_empty() || secret_key.is_empty() || request.path.is_empty() {
         return false;
     }
@@ -561,7 +889,7 @@ fn authorized(request: &Request, access_key: &str, secret_key: &str) -> bool {
         return true;
     }
     if header.starts_with("AWS4-HMAC-SHA256 ") {
-        return verify_sigv4(request, access_key, secret_key, header);
+        return verify_sigv4(request, access_key, secret_key, header, now);
     }
     false
 }
@@ -594,7 +922,46 @@ fn hex_encode(bytes: &[u8]) -> String {
     bytes.iter().map(|b| format!("{b:02x}")).collect()
 }
 
-fn verify_sigv4(request: &Request, access_key: &str, secret_key: &str, header: &str) -> bool {
+fn canonical_query(raw_query: &str) -> Option<String> {
+    if raw_query.is_empty() {
+        return Some(String::new());
+    }
+    let mut pairs = Vec::new();
+    for pair in raw_query.split('&') {
+        let (key, value) = pair.split_once('=').unwrap_or((pair, ""));
+        let key = aws_encode(&percent_decode(key).ok()?);
+        let value = aws_encode(&percent_decode(value).ok()?);
+        pairs.push((key, value));
+    }
+    pairs.sort();
+    Some(
+        pairs
+            .into_iter()
+            .map(|(key, value)| format!("{key}={value}"))
+            .collect::<Vec<_>>()
+            .join("&"),
+    )
+}
+
+fn aws_encode(value: &str) -> String {
+    let mut encoded = String::new();
+    for byte in value.bytes() {
+        if byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'~') {
+            encoded.push(byte as char);
+        } else {
+            encoded.push_str(&format!("%{byte:02X}"));
+        }
+    }
+    encoded
+}
+
+fn verify_sigv4(
+    request: &Request,
+    access_key: &str,
+    secret_key: &str,
+    header: &str,
+    now: DateTime<Utc>,
+) -> bool {
     let rest = header.trim_start_matches("AWS4-HMAC-SHA256 ").trim();
     let mut credential = None;
     let mut signed_headers = None;
@@ -617,44 +984,62 @@ fn verify_sigv4(request: &Request, access_key: &str, secret_key: &str, header: &
         return false;
     }
     let (date_stamp, region, service) = (cred_parts[1], cred_parts[2], cred_parts[3]);
+    if date_stamp.len() != 8 || region.is_empty() || service != "s3" {
+        return false;
+    }
     let amz_date = match request.headers.get("x-amz-date") {
         Some(d) => d.as_str(),
         None => return false,
     };
+    let parsed_date = match NaiveDateTime::parse_from_str(amz_date, "%Y%m%dT%H%M%SZ") {
+        Ok(date) => date.and_utc(),
+        Err(_) => return false,
+    };
+    if parsed_date.format("%Y%m%d").to_string() != date_stamp
+        || !(-900..=900).contains(&now.signed_duration_since(parsed_date).num_seconds())
+    {
+        return false;
+    }
+
+    let header_names: Vec<&str> = signed_hdrs.split(';').collect();
+    if header_names.is_empty()
+        || header_names
+            .iter()
+            .any(|name| name.is_empty() || name.to_ascii_lowercase() != *name)
+        || header_names.windows(2).any(|pair| pair[0] >= pair[1])
+        || !header_names.contains(&"host")
+        || !header_names.contains(&"x-amz-date")
+    {
+        return false;
+    }
 
     let (raw_path, raw_query) = request
         .path
         .split_once('?')
         .unwrap_or((request.path.as_str(), ""));
-    let mut query_pairs: Vec<(&str, &str)> = if raw_query.is_empty() {
-        Vec::new()
-    } else {
-        raw_query
-            .split('&')
-            .map(|p| p.split_once('=').unwrap_or((p, "")))
-            .collect()
+    if !raw_path.starts_with('/') {
+        return false;
+    }
+    let Some(canonical_query) = canonical_query(raw_query) else {
+        return false;
     };
-    query_pairs.sort();
-    let canonical_query = query_pairs
-        .iter()
-        .map(|(k, v)| format!("{k}={v}"))
-        .collect::<Vec<_>>()
-        .join("&");
 
     let mut canonical_headers = String::new();
-    for h in signed_hdrs.split(';') {
-        let val = request
-            .headers
-            .get(&h.to_ascii_lowercase())
-            .map(|v| v.trim())
-            .unwrap_or("");
-        canonical_headers.push_str(&format!("{}:{val}\n", h.to_ascii_lowercase()));
+    for name in &header_names {
+        let Some(value) = request.headers.get(*name) else {
+            return false;
+        };
+        let normalized_value = value.split_whitespace().collect::<Vec<_>>().join(" ");
+        canonical_headers.push_str(&format!("{name}:{normalized_value}\n"));
     }
-    let payload_hash = request
+    let payload_hash = hex_encode(&Sha256::digest(&request.body));
+    if request
         .headers
         .get("x-amz-content-sha256")
-        .cloned()
-        .unwrap_or_else(|| hex_encode(&Sha256::digest(&request.body)));
+        .is_some_and(|header_hash| header_hash != &payload_hash)
+    {
+        return false;
+    }
     let canonical_request = format!(
         "{}\n{raw_path}\n{canonical_query}\n{canonical_headers}\n{signed_hdrs}\n{payload_hash}",
         request.method
@@ -689,7 +1074,14 @@ fn constant_time_eq(a: &[u8], b: &[u8]) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{constant_time_eq, parse_path, percent_decode, xml_error, xml_escape, Request};
+    use super::{
+        assemble_parts, constant_time_eq, expire_uploads, parse_completion_manifest, parse_path,
+        percent_decode, store_upload_part, xml_error, xml_escape, CompletedPart, MultipartPart,
+        MultipartUpload, Request, Runtime, MAX_OBJECT_BYTES, MAX_PENDING_UPLOAD_BYTES,
+        MULTIPART_UPLOAD_TTL,
+    };
+    use std::collections::HashMap;
+    use std::time::{Duration, Instant};
 
     #[test]
     fn parses_nested_object_paths_and_bucket_paths() {
@@ -749,8 +1141,169 @@ mod tests {
     }
 
     #[test]
-    fn sigv4_accepts_valid_signature_and_rejects_tampered_request() {
+    fn multipart_manifest_requires_complete_valid_xml() {
+        let parts = parse_completion_manifest(
+            br#"<CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>"one"</ETag></Part><Part><PartNumber>2</PartNumber><ETag>"two"</ETag></Part></CompleteMultipartUpload>"#,
+        )
+        .expect("valid manifest should parse");
+        assert_eq!(parts.len(), 2);
+        assert_eq!(parts[0].number, 1);
+        assert_eq!(parts[1].etag, "\"two\"");
+        assert!(parse_completion_manifest(
+            b"<CompleteMultipartUpload><Part><PartNumber>1</PartNumber></Part></CompleteMultipartUpload>"
+        )
+        .is_err());
+        assert!(parse_completion_manifest(
+            b"<!DOCTYPE x><CompleteMultipartUpload><Part><PartNumber>1</PartNumber><ETag>x</ETag></Part></CompleteMultipartUpload>"
+        )
+        .is_err());
+        let escaped = parse_completion_manifest(
+            br#"<CompleteMultipartUpload><Part><PartNumber>1&#x31;</PartNumber><ETag>&quot;one&quot;</ETag></Part></CompleteMultipartUpload>"#,
+        )
+        .expect("escaped manifest values should decode");
+        assert_eq!(escaped[0].number, 11);
+        assert_eq!(escaped[0].etag, "\"one\"");
+    }
+
+    #[test]
+    fn multipart_completion_checks_order_etags_and_expiration_releases_memory() {
+        let upload = MultipartUpload {
+            key: "object".into(),
+            content_type: None,
+            created_at: Instant::now(),
+            size_bytes: 9,
+            completing: false,
+            parts: [
+                (
+                    1,
+                    MultipartPart {
+                        body: b"first".to_vec(),
+                        etag: "\"etag-1\"".into(),
+                    },
+                ),
+                (
+                    2,
+                    MultipartPart {
+                        body: b"last".to_vec(),
+                        etag: "\"etag-2\"".into(),
+                    },
+                ),
+            ]
+            .into_iter()
+            .collect(),
+        };
+        assert_eq!(
+            assemble_parts(
+                &upload,
+                &[CompletedPart {
+                    number: 2,
+                    etag: "\"etag-2\"".into(),
+                }]
+            )
+            .expect("single last part should assemble"),
+            b"last"
+        );
+        assert_eq!(
+            assemble_parts(
+                &upload,
+                &[
+                    CompletedPart {
+                        number: 2,
+                        etag: "\"etag-2\"".into(),
+                    },
+                    CompletedPart {
+                        number: 1,
+                        etag: "\"etag-1\"".into(),
+                    },
+                ]
+            )
+            .unwrap_err()
+            .0,
+            "InvalidPartOrder"
+        );
+        assert_eq!(
+            assemble_parts(
+                &upload,
+                &[CompletedPart {
+                    number: 1,
+                    etag: "\"tampered\"".into(),
+                }]
+            )
+            .unwrap_err()
+            .0,
+            "InvalidPart"
+        );
+
+        let mut runtime = Runtime {
+            pending_upload_bytes: 4,
+            ..Runtime::default()
+        };
+        runtime.uploads.insert(
+            "expired".into(),
+            MultipartUpload {
+                key: "object".into(),
+                content_type: None,
+                created_at: Instant::now() - MULTIPART_UPLOAD_TTL - Duration::from_secs(1),
+                size_bytes: 4,
+                completing: false,
+                parts: HashMap::new(),
+            },
+        );
+        expire_uploads(&mut runtime);
+        assert!(runtime.uploads.is_empty());
+        assert_eq!(runtime.pending_upload_bytes, 0);
+    }
+
+    #[test]
+    fn multipart_part_replacement_updates_accounting_and_enforces_global_limit() {
+        let mut runtime = Runtime::default();
+        runtime.uploads.insert(
+            "upload".into(),
+            MultipartUpload {
+                key: "object".into(),
+                content_type: None,
+                created_at: Instant::now(),
+                size_bytes: 0,
+                completing: false,
+                parts: HashMap::new(),
+            },
+        );
+        let first_etag = store_upload_part(&mut runtime, "upload", "object", 1, b"first".to_vec())
+            .expect("first part should be stored");
+        assert_eq!(runtime.pending_upload_bytes, 5);
+        let replacement_etag =
+            store_upload_part(&mut runtime, "upload", "object", 1, b"next".to_vec())
+                .expect("replacement should be stored");
+        assert_ne!(first_etag, replacement_etag);
+        assert_eq!(runtime.pending_upload_bytes, 4);
+        assert_eq!(runtime.uploads["upload"].size_bytes, 4);
+
+        runtime.pending_upload_bytes = MAX_PENDING_UPLOAD_BYTES;
+        assert_eq!(
+            store_upload_part(&mut runtime, "upload", "object", 2, vec![1])
+                .unwrap_err()
+                .0,
+            413
+        );
+        assert_eq!(runtime.pending_upload_bytes, MAX_PENDING_UPLOAD_BYTES);
+        assert_eq!(runtime.uploads["upload"].parts.len(), 1);
+
+        runtime.pending_upload_bytes = MAX_OBJECT_BYTES;
+        runtime.uploads.get_mut("upload").unwrap().size_bytes = MAX_OBJECT_BYTES;
+        assert_eq!(
+            store_upload_part(&mut runtime, "upload", "object", 2, vec![1])
+                .unwrap_err()
+                .2,
+            "Multipart object exceeds the 16 MiB limit"
+        );
+        assert_eq!(runtime.pending_upload_bytes, MAX_OBJECT_BYTES);
+    }
+
+    #[test]
+    fn sigv4_validates_body_hash_and_timestamp_freshness() {
+        use chrono::{TimeZone, Utc};
         use sha2::{Digest, Sha256};
+
         let access_key = "AKIAIOSFODNN7EXAMPLE";
         let secret_key = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY";
         let date_stamp = "20261116";
@@ -787,7 +1340,29 @@ mod tests {
             headers,
             body,
         };
-        assert!(super::authorized(&req, access_key, secret_key));
-        assert!(!super::authorized(&req, access_key, "wrong-secret"));
+        let now = Utc
+            .with_ymd_and_hms(2026, 11, 16, 1, 0, 0)
+            .single()
+            .expect("test timestamp should be valid");
+        assert!(super::authorized_at(&req, access_key, secret_key, now));
+        assert!(!super::authorized_at(&req, access_key, "wrong-secret", now));
+
+        let mut tampered_body = Request {
+            body: b"tampered".to_vec(),
+            ..req
+        };
+        assert!(!super::authorized_at(
+            &tampered_body,
+            access_key,
+            secret_key,
+            now
+        ));
+        tampered_body.body = b"hello-s3".to_vec();
+        assert!(!super::authorized_at(
+            &tampered_body,
+            access_key,
+            secret_key,
+            now + chrono::Duration::hours(1)
+        ));
     }
 }

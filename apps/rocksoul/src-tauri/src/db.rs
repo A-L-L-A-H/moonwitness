@@ -1,7 +1,38 @@
-use rusqlite::{params, Connection};
-use std::{fs, path::PathBuf};
+use rusqlite::{backup::Backup, params, Connection};
+use std::{
+    fs,
+    ops::{Deref, DerefMut},
+    path::{Path, PathBuf},
+    sync::{OnceLock, RwLock, RwLockReadGuard, RwLockWriteGuard},
+    time::Duration,
+};
 use tauri::{AppHandle, Manager};
 use uuid::Uuid;
+
+static DATABASE_ACCESS: OnceLock<RwLock<()>> = OnceLock::new();
+
+pub struct DbConnection {
+    connection: Connection,
+    _access: RwLockReadGuard<'static, ()>,
+}
+
+impl Deref for DbConnection {
+    type Target = Connection;
+
+    fn deref(&self) -> &Self::Target {
+        &self.connection
+    }
+}
+
+impl DerefMut for DbConnection {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.connection
+    }
+}
+
+fn database_access() -> &'static RwLock<()> {
+    DATABASE_ACCESS.get_or_init(|| RwLock::new(()))
+}
 
 pub fn db_path(app: &AppHandle) -> Result<PathBuf, String> {
     let directory = app
@@ -12,7 +43,7 @@ pub fn db_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(directory.join("rocksoul.sqlite3"))
 }
 
-pub fn connect(app: &AppHandle) -> Result<Connection, String> {
+fn connect_unlocked(app: &AppHandle) -> Result<Connection, String> {
     let path = db_path(app)?;
     let connection = Connection::open(path).map_err(|error| error.to_string())?;
     connection
@@ -24,12 +55,27 @@ pub fn connect(app: &AppHandle) -> Result<Connection, String> {
     Ok(connection)
 }
 
+pub fn connect(app: &AppHandle) -> Result<DbConnection, String> {
+    let access = database_access()
+        .read()
+        .map_err(|error| format!("Database access lock is unavailable: {error}"))?;
+    let connection = connect_unlocked(app)?;
+    Ok(DbConnection {
+        connection,
+        _access: access,
+    })
+}
+
 pub fn init(app: &AppHandle) -> Result<(), String> {
     let connection = connect(app)?;
+    initialize_connection(&connection)
+}
+
+fn initialize_connection(connection: &Connection) -> Result<(), String> {
     connection
         .pragma_update(None, "journal_mode", "WAL")
         .map_err(|error| error.to_string())?;
-    migrate(&connection)?;
+    migrate(connection)?;
 
     connection.execute(
         "INSERT OR IGNORE INTO workspaces (id, name, root_path) VALUES ('local', 'LOCAL WORKSPACE', NULL)",
@@ -37,6 +83,132 @@ pub fn init(app: &AppHandle) -> Result<(), String> {
     ).map_err(|error| error.to_string())?;
 
     Ok(())
+}
+
+fn acquire_exclusive_access() -> Result<RwLockWriteGuard<'static, ()>, String> {
+    database_access()
+        .write()
+        .map_err(|error| format!("Database access lock is unavailable: {error}"))
+}
+
+fn backup_connection(from: &Connection, to: &mut Connection) -> Result<(), String> {
+    let backup = Backup::new(from, to).map_err(|error| error.to_string())?;
+    backup
+        .run_to_completion(128, Duration::from_millis(20), None)
+        .map_err(|error| error.to_string())
+}
+
+fn verify_integrity(connection: &Connection) -> Result<(), String> {
+    let result: String = connection
+        .query_row("PRAGMA integrity_check", [], |row| row.get(0))
+        .map_err(|error| error.to_string())?;
+    if result == "ok" {
+        Ok(())
+    } else {
+        Err(format!("SQLite integrity check failed: {result}"))
+    }
+}
+
+fn finish_standalone_backup(connection: &Connection) -> Result<(), String> {
+    connection
+        .pragma_update(None, "journal_mode", "DELETE")
+        .map_err(|error| error.to_string())?;
+    verify_integrity(connection)
+}
+
+fn temporary_database_path(path: &Path, purpose: &str) -> PathBuf {
+    let name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("rocksoul.sqlite3");
+    path.with_file_name(format!("{name}.{purpose}-{}.sqlite3", Uuid::new_v4()))
+}
+
+fn remove_database_files(path: &Path) -> Result<(), String> {
+    for suffix in ["", "-wal", "-shm"] {
+        let candidate = if suffix.is_empty() {
+            path.to_path_buf()
+        } else {
+            let mut name = path.as_os_str().to_os_string();
+            name.push(suffix);
+            PathBuf::from(name)
+        };
+        match fs::remove_file(&candidate) {
+            Ok(()) => {}
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+            Err(error) => {
+                return Err(format!(
+                    "Could not remove temporary SQLite file {}: {error}",
+                    candidate.display()
+                ))
+            }
+        }
+    }
+    Ok(())
+}
+
+pub fn backup_to_file(app: &AppHandle, target_path: &Path) -> Result<(), String> {
+    let _access = acquire_exclusive_access()?;
+    let source = connect_unlocked(app)?;
+    let mut target = Connection::open(target_path).map_err(|error| error.to_string())?;
+    target
+        .busy_timeout(Duration::from_secs(5))
+        .map_err(|error| error.to_string())?;
+    backup_connection(&source, &mut target)?;
+    finish_standalone_backup(&target)
+}
+
+fn restore_file_unlocked(app: &AppHandle, source_path: &Path) -> Result<(), String> {
+    let source = Connection::open(source_path).map_err(|error| error.to_string())?;
+    verify_integrity(&source)?;
+    let mut target = connect_unlocked(app)?;
+    backup_connection(&source, &mut target)?;
+    initialize_connection(&target)?;
+    verify_integrity(&target)
+}
+
+pub fn restore_from_file(app: &AppHandle, source_path: &Path) -> Result<(), String> {
+    let _access = acquire_exclusive_access()?;
+    let target_path = db_path(app)?;
+    let rollback_path = temporary_database_path(&target_path, "restore-rollback");
+
+    let backup_result = (|| {
+        let current = connect_unlocked(app)?;
+        let mut rollback = Connection::open(&rollback_path).map_err(|error| error.to_string())?;
+        backup_connection(&current, &mut rollback)?;
+        finish_standalone_backup(&rollback)
+    })();
+    if let Err(error) = backup_result {
+        return match remove_database_files(&rollback_path) {
+            Ok(()) => Err(format!("Could not preserve the current database: {error}")),
+            Err(cleanup_error) => Err(format!(
+                "Could not preserve the current database: {error}. Rollback cleanup failed: {cleanup_error}"
+            )),
+        };
+    }
+
+    let restore_result = restore_file_unlocked(app, source_path);
+    if let Err(error) = restore_result {
+        let rollback_result = restore_file_unlocked(app, &rollback_path);
+        if let Err(rollback_error) = rollback_result {
+            return Err(format!(
+                "Database restore failed: {error}. Restoring the safety copy also failed: {rollback_error}. Safety copy retained at {}.",
+                rollback_path.display()
+            ));
+        }
+        return match remove_database_files(&rollback_path) {
+            Ok(()) => Err(format!(
+                "Database restore failed; the previous database was restored: {error}"
+            )),
+            Err(cleanup_error) => Err(format!(
+                "Database restore failed; the previous database was restored: {error}. Safety copy cleanup failed: {cleanup_error}"
+            )),
+        };
+    }
+
+    remove_database_files(&rollback_path).map_err(|error| {
+        format!("Database restore succeeded, but safety copy cleanup failed: {error}")
+    })
 }
 
 fn migrate(connection: &Connection) -> Result<(), String> {
@@ -98,8 +270,59 @@ pub fn record_event(
 
 #[cfg(test)]
 mod tests {
-    use super::migrate;
+    use super::{backup_connection, migrate, remove_database_files, verify_integrity};
     use rusqlite::Connection;
+    use std::{fs, path::PathBuf};
+    use uuid::Uuid;
+
+    #[test]
+    fn online_backup_captures_wal_data_and_replaces_existing_database() {
+        let directory = std::env::temp_dir();
+        let source_path =
+            directory.join(format!("rocksoul-backup-source-{}.sqlite3", Uuid::new_v4()));
+        let target_path =
+            directory.join(format!("rocksoul-backup-target-{}.sqlite3", Uuid::new_v4()));
+
+        {
+            let source = Connection::open(&source_path).expect("source database should open");
+            source
+                .pragma_update(None, "journal_mode", "WAL")
+                .expect("source should enable WAL");
+            source
+                .execute_batch(
+                    "CREATE TABLE sample (value TEXT); INSERT INTO sample VALUES ('wal value');",
+                )
+                .expect("source row should be written");
+
+            let mut target = Connection::open(&target_path).expect("target database should open");
+            target
+                .execute_batch(
+                    "CREATE TABLE sample (value TEXT); INSERT INTO sample VALUES ('old value');",
+                )
+                .expect("old target row should be written");
+            backup_connection(&source, &mut target).expect("online backup should complete");
+            verify_integrity(&target).expect("target database should be integral");
+
+            let value: String = target
+                .query_row("SELECT value FROM sample", [], |row| row.get(0))
+                .expect("backed-up row should be readable");
+            assert_eq!(value, "wal value");
+        }
+
+        remove_database_files(&source_path).expect("source files should be removed");
+        remove_database_files(&target_path).expect("target files should be removed");
+    }
+
+    #[test]
+    fn corrupt_restore_source_is_rejected_by_integrity_check() {
+        let path: PathBuf =
+            std::env::temp_dir().join(format!("rocksoul-corrupt-{}.sqlite3", Uuid::new_v4()));
+        fs::write(&path, b"not a sqlite database").expect("test source should be written");
+        let source = Connection::open(&path).expect("SQLite should open the file handle");
+        assert!(verify_integrity(&source).is_err());
+        drop(source);
+        remove_database_files(&path).expect("test source should be removed");
+    }
 
     #[test]
     fn initial_schema_creates_the_local_workflow_tables() {
