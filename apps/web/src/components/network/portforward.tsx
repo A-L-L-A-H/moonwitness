@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Input, Card, Badge } from "@moonwitness/ui";
+import { Badge, Button, Card, Input, ZineButton } from "@moonwitness/ui";
 import { useCreatePortForward, useDeletePortForward, usePortForwards } from "@/lib/api/portforward";
 
 export function PortForwardPanel() {
@@ -78,9 +78,10 @@ function PortForwardPanelInner() {
           />
           <div className="flex gap-1">
             {(["tcp", "udp"] as const).map((p) => (
-              <button
+              <Button
                 key={p}
                 type="button"
+                variant="plain"
                 onClick={() => setProto(p)}
                 aria-pressed={proto === p}
                 className={`flex-1 border text-[10px] tracking-widest ${
@@ -90,7 +91,7 @@ function PortForwardPanelInner() {
                 }`}
               >
                 {p.toUpperCase()}
-              </button>
+              </Button>
             ))}
           </div>
           <Input
@@ -107,13 +108,14 @@ function PortForwardPanelInner() {
             className="rounded-md px-3 py-2 text-xs"
             aria-label="Sumber CIDR opsional"
           />
-          <button
+          <ZineButton
             type="submit"
+            tone="pink"
             disabled={create.isPending}
-            className="btn-zine border border-[var(--border)] px-4 py-2 text-xs"
+            className="border border-[var(--border)] px-4 py-2 text-xs"
           >
             {create.isPending ? "MEMASANG…" : "TERUSKAN"}
-          </button>
+          </ZineButton>
         </div>
         {error && (
           <p role="alert" className="mt-2 text-xs text-[var(--red)]">
@@ -161,14 +163,15 @@ function PortForwardPanelInner() {
                     </span>
                   </td>
                   <td className="px-3 py-2 text-right">
-                    <button
+                    <ZineButton
                       type="button"
+                      tone="pink"
                       onClick={() => deleteRule(f.key)}
                       disabled={remove.isPending}
-                      className="btn-zine border border-[var(--border)] px-2.5 py-1.5 text-[10px]"
+                      className="border border-[var(--border)] px-2.5 py-1.5 text-[10px]"
                     >
                       HAPUS
-                    </button>
+                    </ZineButton>
                   </td>
                 </tr>
               ))}

@@ -6,11 +6,14 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowRight, Crown, EyeIcon, Smiley, Splatter, Star4 } from "@moonwitness/ui/icons";
 import {
+  Button,
   CutoutArtwork,
   DnaBrandLogo,
   Grain,
   SkinArtworkFrame,
   Tape,
+  ZineButton,
+  ZineCardRough,
   ZineInput,
   useSkin,
 } from "@moonwitness/ui";
@@ -94,12 +97,15 @@ export default function ShadowPage() {
           <span className="hidden font-hand text-lg text-[var(--foreground)] sm:inline">
             Same moon. Different people.
           </span>
-          <Link
-            href="/dock"
-            className="btn-zine btn-yellow hidden items-center gap-2 px-4 py-2 text-sm sm:inline-flex"
+          <ZineButton
+            asChild
+            tone="yellow"
+            className="hidden items-center gap-2 px-4 py-2 text-sm sm:inline-flex"
           >
-            FOLLOW THE SIGNAL <ArrowRight className="h-4 w-4" />
-          </Link>
+            <Link href="/dock">
+              FOLLOW THE SIGNAL <ArrowRight className="h-4 w-4" />
+            </Link>
+          </ZineButton>
           <Link
             href="/dock"
             aria-label="Follow the signal to the archive"
@@ -115,7 +121,7 @@ export default function ShadowPage() {
         className="relative z-10 mx-auto flex min-h-[calc(100vh-8rem)] max-w-7xl items-center px-4 py-10 sm:px-8"
       >
         <div className="w-full max-w-md">
-          <div className="zine-card-rough relative p-7 sm:p-9">
+          <ZineCardRough className="relative p-7 sm:p-9">
             <Tape className="-top-3 left-10 -rotate-6" />
             <Tape className="-top-2 right-8 rotate-3" />
             <DnaBrandLogo
@@ -199,15 +205,16 @@ export default function ShadowPage() {
                     aria-describedby={errors.password ? "password-error" : undefined}
                     className="rounded-md px-4 py-3 pr-12 text-sm"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="plain"
                     onClick={() => setShowPassword((v) => !v)}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     aria-pressed={showPassword}
                     className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${showPassword ? "text-[var(--primary)]" : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"}`}
                   >
                     <EyeIcon className="h-5 w-5" />
-                  </button>
+                  </Button>
                 </div>
                 {errors.password && (
                   <p id="password-error" role="alert" className="mt-1.5 text-xs text-[var(--red)]">
@@ -220,23 +227,25 @@ export default function ShadowPage() {
                 <span className="text-xs text-[var(--muted-foreground)]">
                   Session expires automatically.
                 </span>
-                <button
+                <Button
                   type="button"
+                  variant="plain"
                   disabled
                   aria-describedby="recovery-unavailable"
                   className="cursor-not-allowed text-xs text-[var(--muted-foreground)]"
                 >
                   Forgot password?
-                </button>
+                </Button>
               </div>
               <p id="recovery-unavailable" className="text-xs text-[var(--muted-foreground)]">
                 Password recovery is unavailable. Contact an administrator.
               </p>
 
-              <button
+              <ZineButton
                 type="submit"
+                tone="pink"
                 disabled={status === "entering"}
-                className="btn-zine w-full px-6 py-4 text-xl"
+                className="w-full px-6 py-4 text-xl"
               >
                 {status === "entering" ? (
                   "ENTERING…"
@@ -245,15 +254,16 @@ export default function ShadowPage() {
                     ENTER THE SHADOW <ArrowRight className="h-5 w-5" />
                   </>
                 )}
-              </button>
+              </ZineButton>
 
-              <button
+              <ZineButton
                 type="button"
+                tone="yellow"
                 onClick={() => void startMidLogin("/mission-control")}
-                className="btn-zine btn-yellow w-full px-5 py-3 text-sm"
+                className="w-full px-5 py-3 text-sm"
               >
                 SIGN IN VIA MOONWITNESS ID <ArrowRight className="h-4 w-4" />
-              </button>
+              </ZineButton>
 
               <div className="flex items-center gap-3 pt-1 text-[11px] text-[var(--muted-foreground)]">
                 <span className="h-px flex-1 bg-[var(--line)]" />
@@ -262,7 +272,7 @@ export default function ShadowPage() {
                 <span className="h-px flex-1 bg-[var(--line)]" />
               </div>
             </form>
-          </div>
+          </ZineCardRough>
 
           <div className="sticker mt-6 inline-block -rotate-2 px-4 py-2 font-hand text-lg font-bold">
             WITNESS THE REAL.

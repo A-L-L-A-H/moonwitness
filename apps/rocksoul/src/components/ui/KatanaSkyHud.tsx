@@ -1,5 +1,5 @@
 import React from "react";
-import { Crosshair, Radio } from "lucide-react";
+import { Crosshair, Radio } from "@moonwitness/ui/icons";
 import type { EcosystemServiceStatus, MonitorSnapshot } from "../../lib/contracts";
 
 const PORT_FALLBACKS: EcosystemServiceStatus[] = [

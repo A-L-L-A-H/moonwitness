@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Button, Input } from "@moonwitness/ui";
 import { AMANAH_25_ATLAS, GOD_99_DEPARTMENTS, GOD_99_DIRECTORY } from "@/data/empire-canon-codex";
 
 export function God99DirectoryExplorer() {
@@ -36,8 +37,9 @@ export function God99DirectoryExplorer() {
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-1.5">
-          <button
+          <Button
             type="button"
+            variant="plain"
             aria-pressed={selectedDept === "ALL"}
             onClick={() => setSelectedDept("ALL")}
             className={`min-h-[44px] border px-2.5 py-1 font-mono text-[10px] cursor-pointer ${
@@ -47,13 +49,14 @@ export function God99DirectoryExplorer() {
             }`}
           >
             ALL (99)
-          </button>
+          </Button>
           {GOD_99_DEPARTMENTS.map((dept) => {
             const active = selectedDept === dept.code;
             return (
-              <button
+              <Button
                 key={dept.code}
                 type="button"
+                variant="plain"
                 aria-pressed={active}
                 onClick={() => setSelectedDept(dept.code)}
                 className={`min-h-[44px] border px-2.5 py-1 font-mono text-[10px] cursor-pointer ${
@@ -63,11 +66,11 @@ export function God99DirectoryExplorer() {
                 }`}
               >
                 {dept.code} {dept.name}
-              </button>
+              </Button>
             );
           })}
         </div>
-        <input
+        <Input
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -131,7 +134,7 @@ export function Amanah25AtlasPanel() {
             teaching metaphor, never infallibility claim)
           </div>
         </div>
-        <input
+        <Input
           type="search"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}

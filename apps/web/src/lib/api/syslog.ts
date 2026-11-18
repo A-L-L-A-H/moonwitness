@@ -1,6 +1,6 @@
 "use client";
 
-import { requestApiResponse } from "@moonwitness/contracts/sdk";
+import { requestApiJson } from "@moonwitness/contracts/sdk";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1";
@@ -29,16 +29,7 @@ export interface SyslogStats {
 }
 
 async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const res = await requestApiResponse(url, { credentials: "include", cache: "no-store", signal });
-  if (!res.ok) {
-    const body: unknown = await res.json().catch(() => null);
-    const message =
-      typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
-        ? body.error
-        : `HTTP ${res.status}`;
-    throw new Error(message);
-  }
-  return res.json();
+  return requestApiJson<T>(url, { signal });
 }
 
 export function useSyslogHealth() {

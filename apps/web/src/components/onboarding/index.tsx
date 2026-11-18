@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Grain, Tape, ZineCardRough, Input } from "@moonwitness/ui";
-import { Label } from "@moonwitness/ui";
-import { Button } from "@moonwitness/ui";
+import { Grain, Input, Label, Tape, ZineButton, ZineCardRough } from "@moonwitness/ui";
 import { ArrowRight, Crown, Star4 } from "@moonwitness/ui/icons";
 import { useCreateSuperuser, useSetupStatus } from "@/lib/api/onboarding";
 
@@ -130,9 +128,11 @@ export function Onboarding() {
             <strong className="text-[var(--foreground)]">{status.data.instance.name}</strong> sudah
             punya akun. Masuk lewat halaman control.
           </p>
-          <Link href="/control" className="btn-zine mt-5 inline-flex px-5 py-3 text-sm">
-            MASUK KE CONTROL PLANE <ArrowRight className="h-4 w-4" />
-          </Link>
+          <ZineButton asChild className="mt-5 inline-flex px-5 py-3 text-sm">
+            <Link href="/control">
+              MASUK KE CONTROL PLANE <ArrowRight className="h-4 w-4" />
+            </Link>
+          </ZineButton>
         </ZineCardRough>
       </div>
     );
@@ -240,10 +240,10 @@ export function Onboarding() {
                 </span>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => setStep("account")} className="btn-zine px-5 py-3 text-sm">
+                <ZineButton onClick={() => setStep("account")} className="px-5 py-3 text-sm">
                   {" "}
                   LANJUT <ArrowRight className="h-4 w-4" />{" "}
-                </Button>
+                </ZineButton>
               </div>
             </div>
           )}
@@ -310,19 +310,19 @@ export function Onboarding() {
                 />
               </OnboardingField>
               <div className="flex items-center justify-between">
-                <Button
+                <ZineButton
                   type="button"
+                  tone="paper"
                   onClick={() => setStep("instance")}
-                  variant="secondary"
-                  className="btn-zine btn-paper px-4 py-3 text-sm"
+                  className="px-4 py-3 text-sm"
                 >
                   {" "}
                   KEMBALI{" "}
-                </Button>
-                <Button type="submit" className="btn-zine px-5 py-3 text-sm">
+                </ZineButton>
+                <ZineButton type="submit" className="px-5 py-3 text-sm">
                   {" "}
                   REVIEW <ArrowRight className="h-4 w-4" />{" "}
-                </Button>
+                </ZineButton>
               </div>
             </form>
           )}
@@ -370,25 +370,25 @@ export function Onboarding() {
                 aman.{" "}
               </p>
               <div className="flex items-center justify-between">
-                <Button
+                <ZineButton
                   type="button"
+                  tone="paper"
                   onClick={() => setStep("account")}
-                  variant="secondary"
-                  className="btn-zine btn-paper px-4 py-3 text-sm"
+                  className="px-4 py-3 text-sm"
                   disabled={create.isPending}
                 >
                   {" "}
                   KEMBALI{" "}
-                </Button>
-                <Button
+                </ZineButton>
+                <ZineButton
                   type="button"
                   onClick={submit}
                   disabled={create.isPending}
-                  className="btn-zine px-5 py-3 text-sm"
+                  className="px-5 py-3 text-sm"
                 >
                   {" "}
                   {create.isPending ? "MEMBUAT…" : "BUAT SUPERUSER"}{" "}
-                </Button>
+                </ZineButton>
               </div>
             </div>
           )}

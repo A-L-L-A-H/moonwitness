@@ -56,10 +56,20 @@ export async function requestApiJson<T>(url: string, init?: RequestInit): Promis
   const body = (await res.json().catch(() => null)) as unknown;
   if (!res.ok) {
     const parsed = ApiErrorSchema.safeParse(body);
-    const loose = body as { message?: string; error?: string } | null;
+    const loose = body as { message?: unknown; error?: unknown } | null;
+    const nestedError =
+      loose?.error && typeof loose.error === "object" && "message" in loose.error
+        ? (loose.error as { message?: unknown }).message
+        : undefined;
     const message = parsed.success
       ? parsed.data.error
-      : (loose?.message ?? loose?.error ?? `HTTP ${res.status}`);
+      : typeof loose?.message === "string"
+        ? loose.message
+        : typeof loose?.error === "string"
+          ? loose.error
+          : typeof nestedError === "string"
+            ? nestedError
+            : `HTTP ${res.status}`;
     throw new MoonwitnessApiError(
       message,
       res.status,
@@ -68,6 +78,15 @@ export async function requestApiJson<T>(url: string, init?: RequestInit): Promis
     );
   }
   return body as T;
+}
+
+export interface ModelListOptions {
+  readonly listUrl?: string | undefined;
+  readonly q?: string | undefined;
+  readonly limit?: number | undefined;
+  readonly offset?: number | undefined;
+  readonly orderBy?: string | undefined;
+  readonly includeDeleted?: boolean | undefined;
 }
 
 export function createMoonwitnessClient(baseUrl = "/api/v1") {
@@ -115,10 +134,21 @@ export function createMoonwitnessClient(baseUrl = "/api/v1") {
         }),
     },
     model: (modelName: string) => ({
-      list: <T = unknown>(listUrl?: string) =>
-        requestApiJson<{ data?: T[]; items?: T[]; rows?: T[]; total?: number }>(
-          listUrl ?? modelBase(modelName),
-        ),
+      list: <T = unknown>(listUrlOrOpts?: string | ModelListOptions) => {
+        const opts: ModelListOptions =
+          typeof listUrlOrOpts === "string" ? { listUrl: listUrlOrOpts } : (listUrlOrOpts ?? {});
+        const target = opts.listUrl ?? modelBase(modelName);
+        const params = new URLSearchParams();
+        if (opts.q?.trim()) params.set("q", opts.q.trim());
+        if (opts.limit !== undefined) params.set("limit", String(opts.limit));
+        if (opts.offset !== undefined) params.set("offset", String(opts.offset));
+        if (opts.orderBy) params.set("orderBy", opts.orderBy);
+        if (opts.includeDeleted) params.set("includeDeleted", "true");
+        const suffix = params.size > 0 ? `${target.includes("?") ? "&" : "?"}${params}` : "";
+        return requestApiJson<{ data?: T[]; items?: T[]; rows?: T[]; total?: number }>(
+          `${target}${suffix}`,
+        );
+      },
       history: <T = unknown>(id: string, historyUrlTemplate?: string) =>
         requestApiJson<{ data?: T[] }>(
           (historyUrlTemplate ?? `${modelBase(modelName)}/{id}/history`).replace(

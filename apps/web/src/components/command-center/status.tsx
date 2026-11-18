@@ -41,7 +41,10 @@ const STATUS_UI: Record<CommandCenterSyncStatus, { label: string; className: str
     label: "SYNCING",
     className: "bg-[var(--secondary)] text-[var(--secondary-foreground)]",
   },
-  offline: { label: "OFFLINE", className: "bg-[var(--red)] text-white" },
+  offline: {
+    label: "OFFLINE",
+    className: "bg-[var(--destructive)] text-[var(--destructive-foreground)]",
+  },
 };
 
 export function UniverseStatus({

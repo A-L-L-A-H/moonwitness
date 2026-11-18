@@ -31,14 +31,16 @@ const SheetContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content> & {
     side?: "top" | "right" | "bottom" | "left";
     skin?: SkinName;
+    hideClose?: boolean;
   }
->(({ side = "right", className, children, skin, ...props }, ref) => {
+>(({ side = "right", className, children, skin, hideClose, ...props }, ref) => {
   const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
   return (
     <SheetPortal>
       <SheetOverlay />
       <SheetPrimitive.Content
         ref={ref}
+        aria-modal="true"
         data-skin={resolvedSkin}
         data-dna={dnaId}
         className={cn(
@@ -58,26 +60,28 @@ const SheetContent = React.forwardRef<
         {...props}
       >
         {children}
-        <SheetPrimitive.Close
-          type="button"
-          aria-label="Close"
-          className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-sm opacity-75 ring-offset-[var(--background)] transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-[var(--muted)] data-[state=open]:text-[var(--foreground)]"
-        >
-          <svg
-            aria-hidden="true"
-            className="h-4 w-4"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        {!hideClose && (
+          <SheetPrimitive.Close
+            type="button"
+            aria-label="Close"
+            className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-sm opacity-75 ring-offset-[var(--background)] transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-[var(--muted)] data-[state=open]:text-[var(--foreground)]"
           >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
+            <svg
+              aria-hidden="true"
+              className="h-4 w-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+        )}
       </SheetPrimitive.Content>
     </SheetPortal>
   );

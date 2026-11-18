@@ -3,9 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
   CrescentStarIcon,
   CrownEmblemIcon,
+  DnaButton,
   IllustratedHero,
   PrimaryAction,
   SearchLensIcon,
@@ -229,18 +231,20 @@ export function EmpireOfLightExperience() {
         ]}
         actions={
           <>
-            <button
+            <Button
               type="button"
+              variant="plain"
               onClick={() => setSearchModalOpen(true)}
               aria-label="Search the Empire of the Light"
               title="Search (Ctrl+K)"
               className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--dna-text)] hover:text-[var(--dna-accent)] transition-colors cursor-pointer"
             >
               <SearchLensIcon className="h-5 w-5" />
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
+              variant="plain"
               aria-pressed={sanctuaryRadianceActive}
               onClick={() => setSanctuaryRadianceActive((prev) => !prev)}
               aria-label="Toggle Sanctuary Radiance Mode"
@@ -252,7 +256,7 @@ export function EmpireOfLightExperience() {
               }`}
             >
               <CrescentStarIcon className="h-5 w-5" />
-            </button>
+            </Button>
 
             <SecondaryAction
               onClick={toggleLocale}
@@ -321,13 +325,15 @@ export function EmpireOfLightExperience() {
                   </SecondaryAction>
                 );
               })}
-              <Link
-                href="/moonwitness"
-                onClick={() => setMobileMenuOpen(false)}
-                className="mw-secondary-action btn-luxe-secondary inline-flex min-h-[44px] w-full items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase"
+              <DnaButton
+                asChild
+                tone="secondary"
+                className="mw-secondary-action inline-flex min-h-[44px] w-full items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase"
               >
-                MOONWITNESS
-              </Link>
+                <Link href="/moonwitness" onClick={() => setMobileMenuOpen(false)}>
+                  MOONWITNESS
+                </Link>
+              </DnaButton>
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--dna-accent)]/25 pt-3">
               <SecondaryAction
@@ -412,14 +418,15 @@ export function EmpireOfLightExperience() {
                 <li>CREATE</li>
                 <li>CONNECT</li>
               </ul>
-              <button
+              <Button
                 type="button"
+                variant="plain"
                 onClick={() => navigateToSection("the-worlds")}
-                className="mt-4 inline-flex min-h-[44px] items-center gap-2 border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] px-3.5 py-1.5 text-xs font-black text-[var(--dna-canvas)] shadow-[3px_3px_0_var(--dna-accent-secondary)] hover:bg-[var(--dna-text)] transition-colors cursor-pointer"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-none border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] px-3.5 py-1.5 text-xs font-black text-[var(--dna-canvas)] shadow-[3px_3px_0_var(--dna-accent-secondary)] hover:bg-[var(--dna-text)] transition-colors cursor-pointer"
               >
                 <span>{locale === "id" ? "MENUJU DUNIA" : "TO THE WORLDS"}</span>
                 <span aria-hidden="true">&rarr;</span>
-              </button>
+              </Button>
             </div>
           }
           shelf={

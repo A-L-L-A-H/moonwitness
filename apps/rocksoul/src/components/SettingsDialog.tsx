@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Cloud, Database, Server, ShieldCheck, X } from "lucide-react";
+import { Cloud, Database, Server, ShieldCheck, X } from "@moonwitness/ui/icons";
 import { call } from "../lib";
 import type { CloudBackupStatus, S3GatewayStatus } from "../lib/contracts";
 

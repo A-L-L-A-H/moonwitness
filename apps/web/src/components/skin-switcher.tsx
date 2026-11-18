@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import {
+  Button,
   useSkin,
   listPresets,
   skinPresets,
@@ -57,8 +58,9 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
         if (e.key === "Escape" && isOpen) setIsOpen(false);
       }}
     >
-      <button
+      <Button
         type="button"
+        variant="plain"
         onClick={() => setIsOpen((prev) => !prev)}
         className={`relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-transparent p-2 text-[var(--foreground)] transition-colors hover:border-[var(--border)] hover:bg-[var(--card)] ${
           isOpen ? "z-50" : ""
@@ -68,7 +70,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
         title="Appearance: Skin, DNA World, Mode & Density"
       >
         <Sun className="h-5 w-5" />
-      </button>
+      </Button>
 
       {isOpen && (
         <>
@@ -87,12 +89,13 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                 const preset = skinPresets[key];
                 const isActive = skin === key;
                 return (
-                  <button
+                  <Button
                     key={key}
                     type="button"
+                    variant="plain"
                     data-mw-skin-option={key}
                     onClick={() => handleSelectSkin(key)}
-                    className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-[var(--muted)] ${
+                    className={`flex w-full justify-start items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-[var(--muted)] ${
                       isActive
                         ? "bg-[var(--primary)]/15 font-bold text-[var(--primary)]"
                         : "text-[var(--foreground)]"
@@ -105,7 +108,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                         {preset.description}
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -119,9 +122,10 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
               {worlds.map((world) => {
                 const isActive = dnaId === world.id;
                 return (
-                  <button
+                  <Button
                     key={world.id}
                     type="button"
+                    variant="plain"
                     onClick={() => handleSelectDna(world.id)}
                     className={`flex w-full items-center justify-between rounded px-2 py-1 text-left text-[11px] transition-colors hover:bg-[var(--muted)] ${
                       isActive
@@ -133,7 +137,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                     <span className="text-[9px] uppercase text-[var(--muted-foreground)]">
                       {world.id.slice(0, 2)}
                     </span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -145,9 +149,10 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                 </div>
                 <div className="grid grid-cols-3 gap-1">
                   {THEME_MODES.map((m) => (
-                    <button
+                    <Button
                       key={m.value}
                       type="button"
+                      variant="plain"
                       onClick={() => setMode(m.value)}
                       className={`rounded border px-2 py-1 text-[10px] font-semibold transition-colors ${
                         mode === m.value
@@ -156,7 +161,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                       }`}
                     >
                       {m.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
@@ -167,9 +172,10 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                 </div>
                 <div className="grid grid-cols-3 gap-1">
                   {DENSITY_OPTIONS.map((d) => (
-                    <button
+                    <Button
                       key={d.value}
                       type="button"
+                      variant="plain"
                       onClick={() => setDensity(d.value)}
                       className={`rounded border px-2 py-1 text-[10px] font-semibold transition-colors ${
                         density === d.value
@@ -178,7 +184,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                       }`}
                     >
                       {d.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

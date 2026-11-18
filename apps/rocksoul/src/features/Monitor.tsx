@@ -8,7 +8,7 @@ import {
   RefreshCw,
   ShieldCheck,
   Square,
-} from "lucide-react";
+} from "@moonwitness/ui/icons";
 import { BarChart, RadialGauge } from "@moonwitness/ui";
 import { ArrowUpRight, ExternalLink, Server } from "@moonwitness/ui/icons";
 import { FOUR_ENTRY_DOORS, PRIME_CODE_AXIOMS, SUPREME_IDENTITY } from "@moonwitness/canon";

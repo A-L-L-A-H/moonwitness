@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@moonwitness/ui";
 import {
   NAVIGATION_TABS,
   WORLD_DOMAINS,
@@ -52,9 +53,10 @@ export function CelestialHudCapsule({
         {NAVIGATION_TABS.map((tab, idx) => {
           const isCurrent = activeNavTab === tab.id;
           return (
-            <button
+            <Button
               key={tab.id}
               type="button"
+              variant="plain"
               onClick={() => onNavigateSection(tab.id)}
               title={tab.label}
               aria-label={`Jump to ${tab.label}`}
@@ -66,7 +68,7 @@ export function CelestialHudCapsule({
               }`}
             >
               0{idx + 1}
-            </button>
+            </Button>
           );
         })}
       </nav>
@@ -74,26 +76,28 @@ export function CelestialHudCapsule({
       <span className="h-px w-4 bg-[var(--dna-accent)]/30" aria-hidden="true" />
 
       {/* Quick Contemplative Covenant Jump */}
-      <button
+      <Button
         type="button"
+        variant="plain"
         onClick={onJumpToRemembrance}
         title="Jump to Four Scriptures & Contemplation Sanctuary"
         aria-label="Jump to Four Scriptures & Contemplation Sanctuary"
         className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--dna-accent)]/35 bg-[var(--dna-accent)]/12 text-[var(--dna-text)] hover:border-[var(--dna-text)] hover:bg-[var(--dna-accent)]/28 transition-colors cursor-pointer"
       >
         <DiamondStarOrnament className="h-3.5 w-3.5" />
-      </button>
+      </Button>
 
       {/* Command Search Trigger */}
-      <button
+      <Button
         type="button"
+        variant="plain"
         onClick={onOpenSearch}
         title="Search Empire (Ctrl+K)"
         aria-label="Open Empire Command Search"
         className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--dna-accent)]/30 text-[var(--dna-accent)] hover:border-[var(--dna-text)] hover:text-[var(--dna-text)] transition-colors cursor-pointer"
       >
         <SearchLensIcon className="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </aside>
   );
 }

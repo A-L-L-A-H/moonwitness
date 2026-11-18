@@ -1,6 +1,6 @@
 "use client";
 
-import { requestApiResponse } from "@moonwitness/contracts/sdk";
+import { requestApiJson, requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/radius";
@@ -61,21 +61,8 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await requestApiResponse(url, {
-    credentials: "include",
-    cache: "no-store",
-    signal,
-  });
-  if (!response.ok) {
-    const body: unknown = await response.json().catch(() => null);
-    const message =
-      typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
-        ? body.error
-        : `HTTP ${response.status}`;
-    throw new Error(message);
-  }
-  return response.json() as Promise<T>;
+function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  return requestApiJson<T>(url, { signal });
 }
 
 async function mutateJson<T>(url: string, init: RequestInit): Promise<T> {

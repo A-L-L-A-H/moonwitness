@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpRight, Circle, Clock3, Pencil, Trash2 } from "lucide-react";
+import { ArrowUpRight, Circle, Clock3, Pencil, Trash2 } from "@moonwitness/ui/icons";
 import type { Issue } from "../lib/contracts";
 
 const priorityClass: Record<string, string> = { P0: "p0", P1: "p1", P2: "p2", P3: "p3" };

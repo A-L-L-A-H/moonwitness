@@ -14,7 +14,7 @@ import {
   Plus,
   Settings,
   Sparkles,
-} from "lucide-react";
+} from "@moonwitness/ui/icons";
 import { DISTRICT_THUMBNAILS, ROOM_SCENE_ART, thumbRiotUrl, type ArtworkDistrictId } from "../../assets/art";
 import { IllustratedStage } from "./IllustratedStage";
 import {

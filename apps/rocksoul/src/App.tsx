@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Command, Search, X } from "lucide-react";
+import { Command, Search, X } from "@moonwitness/ui/icons";
 import { useLocation } from "react-router-dom";
 import { CreateIssueDialog, EditIssueDialog, RiotRail, SettingsDialog, Topbar } from "./components";
 import { IllustratedStage } from "./components/ui/IllustratedStage";
@@ -569,7 +569,7 @@ function OidcCallbackScreen({ search, onComplete, onReturnWorkbench }: OidcCallb
             </button>
           </>
         ) : (
-          <p style={{ font: "11px var(--mono)", color: "#cfc7b8", margin: 0 }}>
+          <p style={{ font: "11px var(--mono)", color: "var(--color-paper-soft)", margin: 0 }}>
             Exchanging PKCE authorization code with MoonWitness ID…
           </p>
         )}

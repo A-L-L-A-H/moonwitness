@@ -1,6 +1,6 @@
 "use client";
 
-import { requestApiResponse } from "@moonwitness/contracts/sdk";
+import { requestApiJson, requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1";
@@ -69,13 +69,8 @@ export function sanitizeSnmpDevices(devices: SnmpDevice[]): SafeSnmpDevice[] {
   return devices.map(({ community: _community, ...device }) => device);
 }
 
-async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await requestApiResponse(url, { ...init, credentials: "include" });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error(err.error ?? `HTTP ${res.status}`);
-  }
-  return res.json();
+function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  return requestApiJson<T>(url, init);
 }
 
 export function useSnmpHealth() {

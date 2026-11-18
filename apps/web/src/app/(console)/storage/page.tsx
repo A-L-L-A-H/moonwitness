@@ -1,7 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IndustrialBatteryArt, SkinOrnament, NativeSelect } from "@moonwitness/ui";
+import {
+  Button,
+  Checkbox,
+  IndustrialBatteryArt,
+  Input,
+  NativeSelect,
+  SkinOrnament,
+} from "@moonwitness/ui";
 import { StorageBucket } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
@@ -45,13 +52,14 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   return (
     <div role="alert" className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-4">
       <p className="text-sm text-[var(--foreground)]">{message}</p>
-      <button
+      <Button
         type="button"
+        variant="link"
         onClick={onRetry}
-        className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
+        className="mt-2 min-h-11 h-auto p-0 text-xs"
       >
         Retry
-      </button>
+      </Button>
     </div>
   );
 }
@@ -72,7 +80,7 @@ function CreateBucketForm({ onCreate }: { onCreate: ReturnType<typeof useCreateB
     <form onSubmit={handleSubmit} className="space-y-3">
       <label className="block text-xs text-[var(--muted-foreground)]">
         New bucket name
-        <input
+        <Input
           value={name}
           onChange={(event) => setName(event.target.value)}
           maxLength={63}
@@ -82,23 +90,22 @@ function CreateBucketForm({ onCreate }: { onCreate: ReturnType<typeof useCreateB
         />
       </label>
       <label className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={confirmed}
-          onChange={(event) => setConfirmed(event.target.checked)}
-          className="accent-[var(--blue)]"
+          onCheckedChange={(checked) => setConfirmed(checked === true)}
           disabled={onCreate.isPending}
         />
         Create this bucket
       </label>
       <div className="flex items-center gap-3">
-        <button
+        <Button
           type="submit"
+          variant="outline"
           disabled={!name.trim() || !confirmed || onCreate.isPending}
-          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
         >
           {onCreate.isPending ? "Creating…" : "Create bucket"}
-        </button>
+        </Button>
         {onCreate.isError && (
           <span className="text-xs text-[var(--primary)]" role="alert">
             {(onCreate.error as Error).message}
@@ -156,13 +163,14 @@ function BucketList({
                 return (
                   <tr key={bucket.name} className={isSelected ? "bg-[var(--blue)]/10" : ""}>
                     <td className="p-3 font-mono">
-                      <button
+                      <Button
                         type="button"
+                        variant="plain"
                         onClick={() => onSelect(isSelected ? null : bucket.name)}
-                        className="text-left w-full hover:text-[var(--primary)]"
+                        className="text-left justify-start w-full hover:text-[var(--primary)]"
                       >
                         {bucket.name}
-                      </button>
+                      </Button>
                     </td>
                     <td className="whitespace-nowrap p-3">
                       {bucket.creationDate ? new Date(bucket.creationDate).toLocaleString() : "—"}
@@ -171,34 +179,40 @@ function BucketList({
                       <div className="flex items-center gap-2">
                         {pendingDelete === bucket.name ? (
                           <>
-                            <button
+                            <Button
                               type="button"
+                              variant="outline"
+                              size="sm"
                               onClick={() => {
                                 void deleteBucket.mutateAsync(bucket.name);
                                 setPendingDelete(null);
                               }}
                               disabled={deleteBucket.isPending}
-                              className="min-h-9 px-3 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+                              className="min-h-9 px-3 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)]"
                             >
                               Confirm delete
-                            </button>
-                            <button
+                            </Button>
+                            <Button
                               type="button"
+                              variant="link"
+                              size="sm"
                               onClick={() => setPendingDelete(null)}
-                              className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
+                              className="min-h-9 h-auto p-0 text-xs text-[var(--muted-foreground)]"
                             >
                               Cancel
-                            </button>
+                            </Button>
                           </>
                         ) : (
-                          <button
+                          <Button
                             type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={() => setPendingDelete(bucket.name)}
                             disabled={deleteBucket.isPending}
-                            className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+                            className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10"
                           >
                             Delete
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </td>
@@ -240,7 +254,7 @@ function UploadObjectForm({ uploadObject }: { uploadObject: ReturnType<typeof us
     <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row sm:items-end">
       <label className="block flex-1 text-xs text-[var(--muted-foreground)]">
         File
-        <input
+        <Input
           type="file"
           onChange={(event) => {
             const chosen = event.target.files?.[0] ?? null;
@@ -253,7 +267,7 @@ function UploadObjectForm({ uploadObject }: { uploadObject: ReturnType<typeof us
       </label>
       <label className="block flex-1 text-xs text-[var(--muted-foreground)]">
         Object key
-        <input
+        <Input
           value={key}
           onChange={(event) => setKey(event.target.value)}
           maxLength={1024}
@@ -279,13 +293,14 @@ function UploadObjectForm({ uploadObject }: { uploadObject: ReturnType<typeof us
           ))}
         </NativeSelect>
       </label>
-      <button
+      <Button
         type="submit"
+        variant="outline"
         disabled={!file || !key.trim() || uploadObject.isPending}
-        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
       >
         {uploadObject.isPending ? "Uploading…" : "Upload"}
-      </button>
+      </Button>
       {uploadObject.isError && (
         <span className="text-xs text-[var(--primary)]" role="alert">
           {(uploadObject.error as Error).message}
@@ -360,34 +375,40 @@ function ObjectList({
                       </a>
                       {pendingDelete === object.key ? (
                         <>
-                          <button
+                          <Button
                             type="button"
+                            variant="outline"
+                            size="sm"
                             onClick={() => {
                               void deleteObject.mutateAsync(object.key);
                               setPendingDelete(null);
                             }}
                             disabled={deleteObject.isPending}
-                            className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+                            className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)]"
                           >
                             Confirm delete
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="button"
+                            variant="link"
+                            size="sm"
                             onClick={() => setPendingDelete(null)}
-                            className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
+                            className="min-h-9 h-auto p-0 text-xs text-[var(--muted-foreground)]"
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </>
                       ) : (
-                        <button
+                        <Button
                           type="button"
+                          variant="outline"
+                          size="sm"
                           onClick={() => setPendingDelete(object.key)}
                           disabled={deleteObject.isPending}
-                          className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+                          className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10"
                         >
                           Delete
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </td>
@@ -476,17 +497,18 @@ function StorageBrowser() {
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-brush text-xl text-[var(--foreground)]">SERVICE HEALTH</h2>
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => {
                 void health.refetch();
                 void buckets.refetch();
                 if (selectedBucket) void objects.refetch();
               }}
-              className="min-h-11 text-xs text-[var(--primary)] underline"
+              className="min-h-11 h-auto p-0 text-xs"
             >
               Refresh storage
-            </button>
+            </Button>
           </div>
           {health.isLoading ? (
             <p className="mt-3 text-sm text-[var(--muted-foreground)]" role="status">
@@ -553,13 +575,14 @@ function StorageBrowser() {
                     {objects.data.length} listed
                   </span>
                 )}
-                <button
+                <Button
                   type="button"
+                  variant="link"
                   onClick={() => setRefreshVersion((version) => version + 1)}
-                  className="min-h-11 text-xs text-[var(--primary)] underline"
+                  className="min-h-11 h-auto p-0 text-xs"
                 >
                   Refresh objects
-                </button>
+                </Button>
               </div>
             </div>
 

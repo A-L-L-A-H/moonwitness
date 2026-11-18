@@ -45,6 +45,7 @@ export const buttonVariants = cva(
           "btn-chamfer font-monument rounded-none text-[var(--brand-ink)] tracking-[0.2em] uppercase",
         imperiumSecondary:
           "btn-luxe-secondary font-mono rounded-none text-[var(--brand-white)] tracking-[0.16em] uppercase",
+        plain: "border-0 bg-transparent shadow-none p-0 min-h-0",
       },
       size: {
         default: "min-h-11 px-4 py-2",

@@ -2,7 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { CutoutArtwork, RooftopAntennaArt, SkinOrnament, NativeSelect } from "@moonwitness/ui";
+import {
+  Button,
+  CutoutArtwork,
+  Input,
+  NativeSelect,
+  RooftopAntennaArt,
+  SkinOrnament,
+} from "@moonwitness/ui";
 import { SyslogStream } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
@@ -89,7 +96,7 @@ function SyslogExplorer() {
         >
           <label className="block flex-1 text-xs text-[var(--muted-foreground)]">
             Message search
-            <input
+            <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               maxLength={200}
@@ -112,13 +119,14 @@ function SyslogExplorer() {
             </NativeSelect>
           </label>
         </section>
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={() => setRefreshVersion((version) => version + 1)}
-          className="min-h-11 text-xs text-[var(--primary)] underline"
+          className="min-h-11 h-auto p-0 text-xs"
         >
           Refresh messages
-        </button>
+        </Button>
 
         <OperatorSession>
           {(authorized) => (
@@ -175,13 +183,14 @@ function SyslogMessages({
         <p className="mt-2 text-sm text-[var(--foreground)]">
           {(messages.error as Error).message || "The Syslog service could not return messages."}
         </p>
-        <button
+        <Button
           type="button"
+          variant="link"
           onClick={() => void messages.refetch()}
-          className="mt-3 min-h-11 text-xs text-[var(--primary)] underline"
+          className="mt-3 min-h-11 h-auto p-0 text-xs"
         >
           Retry query
-        </button>
+        </Button>
       </section>
     );
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { requestApiResponse } from "@moonwitness/contracts/sdk";
+import { requestApiJson } from "@moonwitness/contracts/sdk";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/control";
@@ -81,13 +81,7 @@ export interface AuditEntry {
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await requestApiResponse(url, { credentials: "include", cache: "no-store" });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const message = (body as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
-    throw new Error(message);
-  }
-  return body as T;
+  return requestApiJson<T>(url);
 }
 
 export function useControlStatus() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Button, Input, Slider } from "@moonwitness/ui";
 import {
   AETHERION_100_LEVELS,
   AETHERION_READINESS_FORMULA,
@@ -63,11 +64,12 @@ export function AetherionParadiseAtlas({ quietMode }: { readonly quietMode: bool
         {AETHERION_REALMS.map((realm) => {
           const isSelected = realm.realmIndex === activeRealm.realmIndex;
           return (
-            <button
+            <Button
               key={realm.realmCode}
               type="button"
+              variant="plain"
               onClick={() => setSelectedRealmIdx(realm.realmIndex)}
-              className={`min-h-[44px] border p-2.5 text-left cursor-pointer ${transitionClass} ${
+              className={`min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 border p-2.5 text-left cursor-pointer ${transitionClass} ${
                 isSelected
                   ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20"
                   : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/50"
@@ -80,7 +82,7 @@ export function AetherionParadiseAtlas({ quietMode }: { readonly quietMode: bool
               <div className="font-monument mt-0.5 text-xs text-[var(--dna-text)]">
                 {realm.name}
               </div>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -166,15 +168,14 @@ export function AetherionParadiseAtlas({ quietMode }: { readonly quietMode: bool
                   <span>{item.label}</span>
                   <span className="text-[var(--dna-accent)]">{item.val.toFixed(2)}</span>
                 </div>
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.05"
-                  value={item.val}
-                  onChange={(e) => item.set(Number(e.target.value))}
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={[item.val]}
+                  onValueChange={([v]) => item.set(v ?? 0)}
                   aria-label={item.label}
-                  className="mt-1.5 w-full accent-[var(--dna-accent)]"
+                  className="mt-2"
                 />
               </label>
             ))}
@@ -285,9 +286,10 @@ export function WorldPatchesRegistryPanel({ quietMode }: { readonly quietMode: b
           {PATCH_FILTER_OPTIONS.map((opt) => {
             const active = statusFilter === opt.id;
             return (
-              <button
+              <Button
                 key={opt.id}
                 type="button"
+                variant="plain"
                 aria-pressed={active}
                 onClick={() => setStatusFilter(opt.id)}
                 className={`min-h-[44px] border px-2.5 py-1 font-mono text-[10px] cursor-pointer ${transitionClass} ${
@@ -297,11 +299,11 @@ export function WorldPatchesRegistryPanel({ quietMode }: { readonly quietMode: b
                 }`}
               >
                 {opt.label}
-              </button>
+              </Button>
             );
           })}
         </div>
-        <input
+        <Input
           type="search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}

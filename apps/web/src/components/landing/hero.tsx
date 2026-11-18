@@ -12,7 +12,7 @@ import {
   Splatter,
   Star4,
 } from "@moonwitness/ui/icons";
-import { DistressedSticker, Grain, SkinArtworkFrame, useSkin } from "@moonwitness/ui";
+import { DistressedSticker, Grain, SkinArtworkFrame, ZineButton, useSkin } from "@moonwitness/ui";
 import { AtmosphereField } from "@/components/atmosphere";
 import { useParallax } from "@/lib/motion/use-parallax";
 import { useHeroIntro } from "@/lib/motion/use-hero-intro";
@@ -133,9 +133,11 @@ export function Hero() {
               <strong>Bigger perspectives.</strong>
             </p>
           </div>
-          <Link data-hero-cta href="/dock" className="btn-zine hero-cta">
-            EXPLORE THE SIGNALS <ArrowRight aria-hidden="true" className="h-5 w-5" />
-          </Link>
+          <ZineButton asChild className="hero-cta">
+            <Link data-hero-cta href="/dock">
+              EXPLORE THE SIGNALS <ArrowRight aria-hidden="true" className="h-5 w-5" />
+            </Link>
+          </ZineButton>
         </div>
         <div className="hero-note-placement" aria-hidden="true">
           <div data-hero-annotations className="hero-notes font-hand">

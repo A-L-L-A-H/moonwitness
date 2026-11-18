@@ -39,7 +39,7 @@ const IGNORED_DIRS = new Set([
  * Every entry is tracked in the "Remaining duplication report".
  */
 const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
-  rocksoul: 59,
+  rocksoul: 0,
 };
 
 /** Apps whose CSS must not contain any palette literal (TSX is ratcheted separately). */
@@ -467,9 +467,10 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
     expect(rawControlOffenders).toEqual([]);
   });
 
-  it("GATE-08: ratchets legacy raw controls, dialogs, bespoke CSS classes, and inline SVGs in apps/web", () => {
+  it("GATE-08: bans legacy raw controls, dialogs, bespoke CSS classes, and inline SVGs in apps/web", () => {
     let rawButton = 0;
     let rawInput = 0;
+    let rawTextarea = 0;
     let rawDialog = 0;
     let legacyZineClasses = 0;
     let rawSvg = 0;
@@ -478,6 +479,7 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
       for (const line of lines) {
         if (/<button\b/.test(line)) rawButton += 1;
         if (/<input\b/.test(line)) rawInput += 1;
+        if (/<textarea\b/.test(line)) rawTextarea += 1;
         if (/role="dialog"|aria-modal="true"/.test(line)) rawDialog += 1;
         if (/className=.*\b(btn-zine|zine-card|btn-luxe-|btn-chamfer)\b/.test(line)) {
           legacyZineClasses += 1;
@@ -485,11 +487,12 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
         if (/<svg\b/.test(line)) rawSvg += 1;
       }
     }
-    expect(rawButton).toBeLessThanOrEqual(184);
-    expect(rawInput).toBeLessThanOrEqual(50);
-    expect(rawDialog).toBeLessThanOrEqual(13);
-    expect(legacyZineClasses).toBeLessThanOrEqual(80);
-    expect(rawSvg).toBeLessThanOrEqual(8);
+    expect(rawButton).toBe(0);
+    expect(rawInput).toBe(0);
+    expect(rawTextarea).toBe(0);
+    expect(rawDialog).toBe(0);
+    expect(legacyZineClasses).toBe(0);
+    expect(rawSvg).toBe(0);
   });
 
   it("GATE-09: enforces Odoo addon menu & icon parity across i18n, probes, and resolveNavIconPath", async () => {

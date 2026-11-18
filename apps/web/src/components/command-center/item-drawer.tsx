@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import type { ArtKey } from "@moonwitness/types";
-import { ZineImage, Card, Button } from "@moonwitness/ui";
-import { useFocusTrap } from "./use-focus-trap";
+import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, ZineImage } from "@moonwitness/ui";
 
 export interface ItemDrawerDetail {
   title: string;
@@ -17,38 +17,51 @@ export interface ItemDrawerProps {
 }
 
 export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
-  const dialogRef = useFocusTrap(true, onClose);
+  const [openerEl] = useState<HTMLElement | null>(() =>
+    typeof document !== "undefined" ? (document.activeElement as HTMLElement | null) : null,
+  );
+
+  function handleClose() {
+    onClose();
+    queueMicrotask(() => {
+      openerEl?.focus();
+    });
+  }
 
   return (
-    <div
-      ref={dialogRef}
-      className="fixed inset-0 z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${detail.title} detail`}
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <Card className="absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-6">
-        <div className="flex items-start justify-between gap-3">
+      <SheetContent
+        side="right"
+        hideClose
+        aria-describedby={undefined}
+        className="w-full max-w-md sm:max-w-md overflow-y-auto p-6"
+      >
+        <SheetHeader className="flex-row items-start justify-between gap-3 space-y-0">
           <div className="min-w-0">
             <p className="text-[10px] tracking-wider text-[var(--muted-foreground)]">
               {detail.subtitle.toUpperCase()}
             </p>
-            <h2 className="font-brush mt-1 text-3xl leading-tight text-[var(--card-foreground)]">
+            <SheetTitle className="font-brush mt-1 text-3xl leading-tight text-[var(--card-foreground)]">
               {detail.title}
-            </h2>
+              <span className="sr-only"> detail</span>
+            </SheetTitle>
           </div>
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close detail"
             className="min-h-11 min-w-11 shrink-0 p-2"
           >
             ✕
           </Button>
-        </div>
+        </SheetHeader>
         {detail.art && (
           <div className="relative mt-4 h-40 overflow-hidden rounded-md border-2 border-[var(--border)]">
             <ZineImage art={detail.art} sizes="(max-width: 768px) 100vw, 448px" />
@@ -66,7 +79,7 @@ export function ItemDrawer({ detail, onClose }: ItemDrawerProps) {
             </div>
           ))}
         </dl>
-      </Card>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

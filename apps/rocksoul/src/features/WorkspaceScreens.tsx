@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Activity, ArrowUpRight, GitBranch, Pencil, Plus, RefreshCw, Trash2, Workflow, X } from "lucide-react";
+import { Activity, ArrowUpRight, GitBranch, Pencil, Plus, RefreshCw, Trash2, Workflow, X } from "@moonwitness/ui/icons";
 import { thumbArchiveUrl, thumbRiotUrl, thumbSignalUrl, thumbStudioUrl } from "../assets/art";
 import { IssueRow } from "../components";
 import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";

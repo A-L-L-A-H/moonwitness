@@ -1,5 +1,5 @@
 import React from "react";
-import { Activity, Command, FolderGit2, LogIn, RefreshCw } from "lucide-react";
+import { Activity, Command, FolderGit2, LogIn, RefreshCw } from "@moonwitness/ui/icons";
 import { DnaBrandLogo, listPresets, useSkin, type SkinName } from "@moonwitness/ui";
 import { ChevronDown, LogOut, Settings, SkinPalette, Sun } from "@moonwitness/ui/icons";
 import type { Repository } from "../lib/contracts";

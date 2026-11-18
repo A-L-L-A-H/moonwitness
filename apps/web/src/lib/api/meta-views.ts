@@ -1,6 +1,11 @@
 "use client";
 
-import { requestApiResponse } from "@moonwitness/contracts/sdk";
+import {
+  MoonwitnessApiError,
+  moonwitnessSdk,
+  requestApiJson,
+  requestApiResponse,
+} from "@moonwitness/contracts/sdk";
 import { useCallback, useEffect, useState } from "react";
 import {
   resolveNavIconPath,
@@ -9,7 +14,6 @@ import {
   type AutoModelRow,
   type AutoModelViewDescriptor,
 } from "@moonwitness/ui";
-import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import { navHref, type NavItem } from "@/components/shell/nav-items";
 
 export interface RuntimeMetaAddon {
@@ -101,21 +105,20 @@ function getCsrfHeaders(): Record<string, string> {
 }
 
 async function fetchApiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const headers: Record<string, string> = {
-    ...getCsrfHeaders(),
-    ...(init?.body ? { "content-type": "application/json" } : {}),
-    ...(init?.headers as Record<string, string> | undefined),
-  };
-  const response = await requestApiResponse(url, {
-    credentials: "include",
-    ...init,
-    headers,
-  });
-  const body = (await response.json().catch(() => ({}))) as T & { error?: string };
-  if (!response.ok) {
-    throw new Error(body.error ?? `Request failed (${response.status})`);
+  try {
+    return await requestApiJson<T>(url, {
+      ...init,
+      headers: {
+        ...getCsrfHeaders(),
+        ...(init?.headers as Record<string, string> | undefined),
+      },
+    });
+  } catch (err) {
+    if (err instanceof MoonwitnessApiError && err.message === `HTTP ${err.status}`) {
+      throw new MoonwitnessApiError(`Request failed (${err.status})`, err.status);
+    }
+    throw err;
   }
-  return body;
 }
 
 export function resolveBindingUrl(template: string, id?: string): string {
@@ -357,7 +360,7 @@ export function useModelRows(model: string, listUrl?: string, restEnabled = true
     } finally {
       setLoading(false);
     }
-  }, [listUrl, targetUrl]);
+  }, [targetUrl]);
 
   useEffect(() => {
     void reload();

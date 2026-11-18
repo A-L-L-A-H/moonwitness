@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
   EPISTEMIC_FEDERATION_DOMAINS,
   JERUSALEM_70CE_CASE_001,
@@ -56,11 +57,12 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
             {SRGBL_V8_STAGES.map((stage) => {
               const selected = stage.letter === activeStage.letter;
               return (
-                <button
+                <Button
                   key={stage.stage}
                   type="button"
+                  variant="plain"
                   onClick={() => setActiveStageLetter(stage.letter)}
-                  className={`min-h-[44px] border p-3.5 text-left ${transitionClass} cursor-pointer ${
+                  className={`min-h-[44px] h-auto flex-col items-start justify-start gap-0 border p-3.5 text-left ${transitionClass} cursor-pointer ${
                     selected
                       ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20"
                       : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/50"
@@ -75,7 +77,7 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
                   <div className="mt-1 font-mono text-[10px] text-[var(--dna-accent)]">
                     {stage.symbolicLayer}
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -108,18 +110,19 @@ export function DoorEpistemicPanel({ quietMode }: { readonly quietMode: boolean 
               {SWING_SWING_KEY_ROTATIONS.map((rotationLabel, idx) => {
                 const isSelected = idx === activeRotationIdx;
                 return (
-                  <button
+                  <Button
                     key={rotationLabel}
                     type="button"
+                    variant="plain"
                     onClick={() => setActiveRotationIdx(idx)}
-                    className={`min-h-[44px] border px-3 py-2 text-left font-mono text-[11px] transition-colors cursor-pointer ${
+                    className={`min-h-[44px] justify-start border px-3 py-2 text-left font-mono text-[11px] transition-colors cursor-pointer ${
                       isSelected
                         ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
                         : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] text-[var(--dna-muted)] hover:border-[var(--dna-accent)]/45"
                     }`}
                   >
                     {rotationLabel}
-                  </button>
+                  </Button>
                 );
               })}
             </div>

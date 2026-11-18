@@ -202,13 +202,14 @@ export function DockMatrixSection({
                   const isSelected = node.nodeCode === activeNode.nodeCode;
                   const worldMeta = WORLD_DOMAINS.find((w) => w.id === node.worldId);
                   return (
-                    <button
+                    <DnaButton
                       key={node.nodeCode}
                       type="button"
+                      tone="secondary"
                       role="tab"
                       aria-selected={isSelected}
                       onClick={() => handleSelectNode(node.nodeCode)}
-                      className="btn-luxe-secondary min-h-[54px] px-3 py-2 text-left cursor-pointer"
+                      className="min-h-[54px] h-auto flex-col items-stretch justify-start gap-0 px-3 py-2 text-left"
                     >
                       <div className="flex items-center justify-between font-mono text-[9.5px] text-[var(--dna-accent)]">
                         <span>{node.nodeCode}</span>
@@ -221,7 +222,7 @@ export function DockMatrixSection({
                       <div className="font-monument mt-1 truncate text-[11px] tracking-[0.08em] text-[var(--dna-text)]">
                         {worldMeta?.name ?? node.designation}
                       </div>
-                    </button>
+                    </DnaButton>
                   );
                 })}
               </div>
@@ -302,14 +303,15 @@ export function DockMatrixSection({
                       {matchedWorld?.primaryDirective ??
                         "Enter calibrated sanctum chamber directly via Sovereign Matrix."}
                     </p>
-                    <button
+                    <DnaButton
                       type="button"
+                      tone="primary"
                       onClick={() => onLaunchWorld(activeNode.worldId)}
-                      className="btn-chamfer font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs font-bold tracking-[0.18em] text-[var(--dna-canvas)] uppercase cursor-pointer"
+                      className="font-monument group inline-flex items-center gap-2.5 px-7 py-2.5 text-xs font-bold tracking-[0.18em] text-[var(--dna-canvas)] uppercase cursor-pointer"
                     >
                       <DiamondStarOrnament className="h-2.5 w-2.5 text-[var(--dna-canvas)] transition-transform duration-500 group-hover:rotate-45" />
                       <span>ENTER {matchedWorld?.name ?? activeNode.designation} &rsaquo;</span>
-                    </button>
+                    </DnaButton>
                   </div>
 
                   {/* Live Multi-Node Observatory, Cloudflare Edges & Portal Bridges */}
@@ -332,14 +334,15 @@ export function DockMatrixSection({
                                 ? "CLOUDFLARE EDGE · ORIGIN API STANDBY"
                                 : "CANON SPEC MODE · LOCAL API STANDBY"}
                         </span>
-                        <button
+                        <DnaButton
                           type="button"
+                          tone="secondary"
                           onClick={telemetry.refresh}
                           disabled={telemetry.refreshing}
-                          className="btn-luxe-secondary min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] hover:text-[var(--dna-text)] disabled:opacity-50 cursor-pointer"
+                          className="min-h-[34px] px-3 py-0.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] hover:text-[var(--dna-text)] disabled:opacity-50"
                         >
                           {telemetry.refreshing ? "PROBING…" : "REFRESH"}
-                        </button>
+                        </DnaButton>
                       </div>
                     </div>
 
@@ -460,24 +463,27 @@ export function DockMatrixSection({
                     )}
 
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <Link
-                        href="/scriptures"
-                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-accent)] uppercase"
+                      <DnaButton
+                        asChild
+                        tone="secondary"
+                        className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-accent)] uppercase"
                       >
-                        4-SCRIPTURE STUDIO &rsaquo;
-                      </Link>
-                      <Link
-                        href="/mtime"
-                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-accent)] uppercase"
+                        <Link href="/scriptures">4-SCRIPTURE STUDIO &rsaquo;</Link>
+                      </DnaButton>
+                      <DnaButton
+                        asChild
+                        tone="secondary"
+                        className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-accent)] uppercase"
                       >
-                        M-TIME OBSERVATORY &rsaquo;
-                      </Link>
-                      <Link
-                        href="/codex"
-                        className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase"
+                        <Link href="/mtime">M-TIME OBSERVATORY &rsaquo;</Link>
+                      </DnaButton>
+                      <DnaButton
+                        asChild
+                        tone="secondary"
+                        className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase"
                       >
-                        CODEX DOORS &rsaquo;
-                      </Link>
+                        <Link href="/codex">CODEX DOORS &rsaquo;</Link>
+                      </DnaButton>
                     </div>
 
                     {(CONFIGURED_WEB_URL ||
@@ -490,15 +496,20 @@ export function DockMatrixSection({
                             "http://localhost:3000"
                           ).replace(/\/+$/, "");
                           return (
-                            <a
+                            <DnaButton
                               key={link.href}
-                              href={`${resolvedWebBase}${link.href}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase hover:text-[var(--dna-text)]"
+                              asChild
+                              tone="secondary"
+                              className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase hover:text-[var(--dna-text)]"
                             >
-                              {link.label} ↗
-                            </a>
+                              <a
+                                href={`${resolvedWebBase}${link.href}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {link.label} ↗
+                              </a>
+                            </DnaButton>
                           );
                         })}
                       </div>

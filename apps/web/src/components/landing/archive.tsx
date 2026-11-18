@@ -64,14 +64,15 @@ function ArchiveStrip() {
           <p role="alert" className="text-sm text-[var(--foreground)]">
             Archive unavailable.
           </p>
-          <button
+          <Button
             type="button"
+            variant="plain"
             onClick={() => void refetch()}
             disabled={isFetching}
             className="archive-control mt-4 min-h-11 border-2 border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)]"
           >
             {isFetching ? "Retrying archive…" : "Retry archive"}
-          </button>
+          </Button>
         </div>
       ) : !items.length ? (
         <p role="status" className="min-h-44 py-8 text-sm text-[var(--foreground)]">
@@ -129,24 +130,26 @@ function ArchiveStrip() {
           </Button>
         </Link>
         <div className="flex shrink-0 gap-2">
-          <button
+          <Button
             type="button"
+            variant="plain"
             disabled={unavailable || edges.left}
             onClick={() => scroll(-1)}
             aria-label="Scroll archive left"
             className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-[var(--foreground)]"
           >
             ←
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="plain"
             disabled={unavailable || edges.right}
             onClick={() => scroll(1)}
             aria-label="Scroll archive right"
             className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-[var(--foreground)]"
           >
             →
-          </button>
+          </Button>
         </div>
       </div>
     </div>

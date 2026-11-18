@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpRight, GitCommitHorizontal, Play, Plus, Radio, ShieldAlert, Square } from "lucide-react";
+import { ArrowUpRight, GitCommitHorizontal, Play, Plus, Radio, ShieldAlert, Square } from "@moonwitness/ui/icons";
 import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";

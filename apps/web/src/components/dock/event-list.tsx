@@ -2,7 +2,7 @@
 
 import type { TimelineEvent } from "@moonwitness/types";
 import { Crown } from "@moonwitness/ui/icons";
-import { EventCard, Button } from "@moonwitness/ui";
+import { Button, EventCard, ZineCardRough } from "@moonwitness/ui";
 
 interface EventListProps {
   events: TimelineEvent[];
@@ -51,7 +51,7 @@ function EventListInner({
         </span>
       </div>
       {events.length === 0 ? (
-        <div className="zine-card-rough p-10 text-center">
+        <ZineCardRough className="p-10 text-center">
           <p className="font-brush text-xl text-[var(--muted-foreground)]">NO SIGNALS FOUND.</p>
           <p className="mt-2 text-sm text-[var(--muted-foreground)]">
             Nothing matches “{query}” in this era. Try another frequency.
@@ -59,7 +59,7 @@ function EventListInner({
           <Button onClick={onReset} className="mt-4">
             RESET FILTERS
           </Button>
-        </div>
+        </ZineCardRough>
       ) : view === "grid" ? (
         <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-3">
           {events.map((ev) => (

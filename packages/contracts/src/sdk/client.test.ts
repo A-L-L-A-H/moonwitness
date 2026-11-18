@@ -43,10 +43,18 @@ describe("moonwitness sdk transport", () => {
     const fn = mockFetch({ data: [] });
     const sdk = createMoonwitnessClient("/api/v1");
     await sdk.meta.getViewDescriptor("timeline.event");
+    await sdk.model("timeline.event").list({
+      q: "lunar",
+      limit: 10,
+      offset: 20,
+      orderBy: "-id",
+      includeDeleted: true,
+    });
     await sdk.model("timeline.event").history("a b");
     const urls = fn.mock.calls.map((call) => (call as unknown as [string])[0]);
     expect(urls).toEqual([
       "/api/v1/_meta/views/timeline.event",
+      "/api/v1/m/timeline.event?q=lunar&limit=10&offset=20&orderBy=-id&includeDeleted=true",
       "/api/v1/m/timeline.event/a%20b/history",
     ]);
   });

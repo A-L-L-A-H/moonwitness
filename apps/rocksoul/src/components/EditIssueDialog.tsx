@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X } from "@moonwitness/ui/icons";
 import type { Issue, IssuePriority, Project, Repository, UpdateIssueArgs } from "../lib/contracts";
 
 export interface EditIssueDialogProps {

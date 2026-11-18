@@ -1,6 +1,6 @@
 "use client";
 
-import { requestApiResponse } from "@moonwitness/contracts/sdk";
+import { MoonwitnessApiError, requestApiJson } from "@moonwitness/contracts/sdk";
 import { useQuery } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/memory";
@@ -55,26 +55,14 @@ export interface MemoryKnowledgeResponse {
 }
 
 async function requestMemoryJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await requestApiResponse(url, {
-    credentials: "include",
-    cache: "no-store",
-    signal,
-  });
-  const payload: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    const serverError =
-      payload && typeof payload === "object" && "error" in payload
-        ? (payload as { error?: unknown }).error
-        : null;
-    const message =
-      typeof serverError === "string" && serverError.length > 0
-        ? serverError
-        : `Request failed with HTTP ${response.status}`;
-    const error = new Error(message) as Error & { status?: number };
-    error.status = response.status;
-    throw error;
+  try {
+    return await requestApiJson<T>(url, { signal });
+  } catch (err) {
+    if (err instanceof MoonwitnessApiError && err.message === `HTTP ${err.status}`) {
+      throw new MoonwitnessApiError(`Request failed with HTTP ${err.status}`, err.status);
+    }
+    throw err;
   }
-  return payload as T;
 }
 
 export function fetchMemoryStatus(signal?: AbortSignal): Promise<MemoryBridgeStatus> {

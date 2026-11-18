@@ -1,7 +1,13 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { Button } from "@moonwitness/ui";
 import { WORLD_ART_PLATES as ASSET_WORLD_PLATES, type WorldPlateKey } from "@moonwitness/assets";
-import { SacredCornerBrackets } from "@moonwitness/ui/imperium";
+import {
+  DoorPortalVector,
+  GatewayWaveformVector,
+  MeridianArcLines,
+  SacredCornerBrackets,
+} from "@moonwitness/ui/imperium";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import type { DockNodeTelemetry, WorldIdentifier } from "@/data/empire-registry";
 import { artPlateSrc } from "@/lib/art";
@@ -139,37 +145,16 @@ export function MeridianConstellationMapSvg({
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[var(--dna-canvas)]/50 via-[var(--dna-canvas)]/15 to-[var(--dna-canvas)]/82"
       />
-      <svg
-        viewBox="0 0 360 132"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-      >
-        {meridians.map((src, idx) => {
-          const dst = meridians[(idx + 1) % meridians.length];
-          if (!dst) return null;
-          const activeSeg = idx === activeIndex;
-          return (
-            <path
-              key={`${src.code}-${dst.code}`}
-              d={`M${src.x} ${src.y} Q180 24 ${dst.x} ${dst.y}`}
-              fill="none"
-              stroke={activeSeg ? "var(--dna-text)" : "var(--dna-accent)"}
-              strokeOpacity={activeSeg ? 0.8 : 0.28}
-              strokeWidth={activeSeg ? 1.3 : 0.75}
-              strokeDasharray={activeSeg ? undefined : "3 3"}
-            />
-          );
-        })}
-      </svg>
+      <MeridianArcLines meridians={meridians} activeIndex={activeIndex} />
 
       {meridians.map((node, idx) => {
         const selected = idx === activeIndex;
         const placePillAbove = node.y < 60;
         return (
-          <button
+          <Button
             key={node.code}
             type="button"
+            variant="plain"
             aria-label={`Select observatory ${node.city}`}
             aria-pressed={selected}
             onClick={() => onSelectMeridian(idx)}
@@ -201,7 +186,7 @@ export function MeridianConstellationMapSvg({
             >
               {node.city}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -212,32 +197,7 @@ export function MeridianConstellationMapSvg({
  * Compact harmonic waveform SVG badge for Dock gateway telemetry cards.
  */
 export function GatewayWaveformSvg({ variant = 0 }: { readonly variant?: number }) {
-  const phase = variant * 11;
-  return (
-    <svg viewBox="0 0 120 22" fill="none" aria-hidden="true" className="h-5 w-full opacity-80">
-      <line
-        x1="0"
-        y1="11"
-        x2="120"
-        y2="11"
-        stroke="var(--dna-accent)"
-        strokeOpacity="0.18"
-        strokeWidth="0.6"
-      />
-      <path
-        d={`M0 11 Q15 ${4 + (phase % 5)} 30 11 T60 11 T90 11 T120 11`}
-        stroke="var(--dna-accent)"
-        strokeWidth="1.15"
-        strokeOpacity="0.75"
-      />
-      <path
-        d={`M0 11 Q15 ${17 - (phase % 4)} 30 11 T60 11 T90 11 T120 11`}
-        stroke="var(--dna-accent)"
-        strokeWidth="0.7"
-        strokeOpacity="0.4"
-      />
-    </svg>
-  );
+  return <GatewayWaveformVector variant={variant} />;
 }
 
 export function SanctuarySectionBackdrop({ children }: { readonly children: ReactNode }) {
@@ -381,9 +341,10 @@ export function AstrolabeOrreryMap({
         const placePillAbove = spec.angleDeg === 180;
 
         return (
-          <button
+          <Button
             key={node.nodeCode}
             type="button"
+            variant="plain"
             aria-label={`Select ${spec.shortName} orbital gateway (${node.nodeCode})`}
             aria-pressed={isSelected}
             onClick={() => onSelectNode(node.nodeCode)}
@@ -416,7 +377,7 @@ export function AstrolabeOrreryMap({
             >
               {spec.shortName}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>
@@ -433,67 +394,7 @@ export function DoorPortalGlyph({
   readonly doorId: EntryDoorId;
   readonly active?: boolean;
 }) {
-  const stroke = active ? "var(--dna-text)" : "var(--dna-accent)";
-  if (doorId === "story-universe") {
-    return (
-      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
-        <path d="M8 30 V16 C8 9 18 5 18 5 C18 5 28 9 28 16 V30" stroke={stroke} strokeWidth="1.3" />
-        <circle cx="18" cy="18" r="4.5" stroke={stroke} strokeOpacity="0.75" strokeWidth="1" />
-        <path
-          d="M18 11 L19.2 16.8 L25 18 L19.2 19.2 L18 25 L16.8 19.2 L11 18 L16.8 16.8 Z"
-          fill={stroke}
-          fillOpacity="0.7"
-        />
-      </svg>
-    );
-  }
-  if (doorId === "epistemic-corpus") {
-    return (
-      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
-        <polygon points="18,4 30,18 18,32 6,18" stroke={stroke} strokeWidth="1.25" />
-        <polygon
-          points="18,9 25,18 18,27 11,18"
-          stroke={stroke}
-          strokeOpacity="0.6"
-          strokeWidth="0.9"
-        />
-        <circle cx="18" cy="18" r="2.2" fill={stroke} />
-      </svg>
-    );
-  }
-  if (doorId === "empire-organization") {
-    return (
-      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
-        <circle cx="18" cy="18" r="12" stroke={stroke} strokeWidth="1.15" strokeDasharray="3 2" />
-        <circle cx="18" cy="18" r="7" stroke={stroke} strokeWidth="1.2" />
-        <circle cx="18" cy="18" r="2.4" fill={stroke} />
-      </svg>
-    );
-  }
-  return (
-    <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
-      <circle cx="18" cy="18" r="12" stroke={stroke} strokeWidth="1" strokeOpacity="0.55" />
-      <ellipse
-        cx="18"
-        cy="18"
-        rx="13"
-        ry="5"
-        transform="rotate(-30 18 18)"
-        stroke={stroke}
-        strokeWidth="1.1"
-      />
-      <ellipse
-        cx="18"
-        cy="18"
-        rx="13"
-        ry="5"
-        transform="rotate(30 18 18)"
-        stroke={stroke}
-        strokeWidth="1.1"
-      />
-      <circle cx="18" cy="18" r="2.4" fill={stroke} />
-    </svg>
-  );
+  return <DoorPortalVector doorId={doorId} active={active} />;
 }
 
 const WORLD_ART_PLATES: Record<WorldIdentifier, string> = {

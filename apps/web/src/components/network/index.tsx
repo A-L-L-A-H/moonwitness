@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import {
+  Button,
   CableCoilArt,
   CutoutArtwork,
   Tape,
   ZineBadge,
+  ZineButton,
   ZineCard,
   ZineCardRough,
   ZineInput,
@@ -86,23 +88,25 @@ function ConfigPanel({
           </span>
         </h3>
         <div className="flex gap-2">
-          <button type="button" onClick={copy} className="btn-zine btn-blue px-3 py-2 text-[11px]">
+          <ZineButton type="button" tone="blue" onClick={copy} className="px-3 py-2 text-[11px]">
             {copied ? "TERSALIN" : "SALIN"}
-          </button>
-          <button
+          </ZineButton>
+          <ZineButton
             type="button"
+            tone="yellow"
             onClick={download}
-            className="btn-zine btn-yellow px-3 py-2 text-[11px]"
+            className="px-3 py-2 text-[11px]"
           >
             UNDUH .CONF
-          </button>
-          <button
+          </ZineButton>
+          <ZineButton
             type="button"
+            tone="paper"
             onClick={onClose}
-            className="btn-zine btn-paper px-3 py-2 text-[11px]"
+            className="px-3 py-2 text-[11px]"
           >
             TUTUP
-          </button>
+          </ZineButton>
         </div>
       </div>
       <p className="mt-2 text-[11px] text-[var(--primary)]">
@@ -180,29 +184,32 @@ function PeerRow({
         )}
       </td>
       <td className="px-3 py-2 text-right">
-        <button
+        <ZineButton
           type="button"
+          tone="paper"
           onClick={onSetQuota}
           disabled={busy}
-          className="btn-zine btn-paper mr-2 px-2.5 py-1.5 text-[10px]"
+          className="mr-2 px-2.5 py-1.5 text-[10px]"
         >
           KUOTA
-        </button>
-        <button
+        </ZineButton>
+        <ZineButton
           type="button"
+          tone="paper"
           onClick={onShowConfig}
-          className="btn-zine btn-paper mr-2 px-2.5 py-1.5 text-[10px]"
+          className="mr-2 px-2.5 py-1.5 text-[10px]"
         >
           CONFIG
-        </button>
-        <button
+        </ZineButton>
+        <ZineButton
           type="button"
+          tone="pink"
           onClick={onDelete}
           disabled={busy}
-          className="btn-zine px-2.5 py-1.5 text-[10px]"
+          className="px-2.5 py-1.5 text-[10px]"
         >
           HAPUS
-        </button>
+        </ZineButton>
       </td>
     </tr>
   );
@@ -426,14 +433,15 @@ function NetworkDashboard() {
                     className="rounded-md px-4 py-2.5 text-sm"
                     aria-label="CIDR LAN server"
                   />
-                  <button
+                  <ZineButton
                     type="button"
+                    tone="pink"
                     onClick={runEndpointUp}
                     disabled={up.isPending}
-                    className="btn-zine shrink-0 px-5 py-2.5 text-sm"
+                    className="shrink-0 px-5 py-2.5 text-sm"
                   >
                     {up.isPending ? "MENYALAKAN…" : "AKTIFKAN"}
-                  </button>
+                  </ZineButton>
                 </div>
                 <p className="mt-2 text-[11px] text-[var(--muted-foreground)]">
                   Port <code>udp/{data.listen_port}</code> dibuka otomatis di firewall host
@@ -473,9 +481,10 @@ function NetworkDashboard() {
                     </datalist>
                     <div className="flex gap-1">
                       {(["split", "full", "site"] as const).map((mode) => (
-                        <button
+                        <Button
                           key={mode}
                           type="button"
+                          variant="plain"
                           onClick={() => setPeerMode(mode)}
                           aria-pressed={peerMode === mode}
                           className={`border px-3 py-2 text-[10px] tracking-widest ${
@@ -485,17 +494,18 @@ function NetworkDashboard() {
                           }`}
                         >
                           {mode.toUpperCase()}
-                        </button>
+                        </Button>
                       ))}
                     </div>
-                    <button
+                    <ZineButton
                       type="button"
+                      tone="pink"
                       onClick={addPeer}
                       disabled={create.isPending}
-                      className="btn-zine px-5 py-2.5 text-sm"
+                      className="px-5 py-2.5 text-sm"
                     >
                       {create.isPending ? "MEMBUAT…" : "TAMBAH"}
-                    </button>
+                    </ZineButton>
                   </div>
                   {peerMode === "site" && (
                     <div className="mt-2">
@@ -525,16 +535,17 @@ function NetworkDashboard() {
                         PERANGKAT <span className="text-[var(--primary)]">TERDAFTAR</span>
                       </span>
                     </h2>
-                    <button
+                    <ZineButton
                       type="button"
+                      tone="paper"
                       onClick={() =>
                         down.mutate(undefined, { onError: (e: Error) => setError(e.message) })
                       }
                       disabled={down.isPending}
-                      className="btn-zine btn-paper px-3 py-2 text-[10px]"
+                      className="px-3 py-2 text-[10px]"
                     >
                       MATIKAN TUNNEL
-                    </button>
+                    </ZineButton>
                   </div>
                   {data.peers.length === 0 ? (
                     <div className="flex flex-col items-center gap-3 px-4 py-6 text-center text-sm text-[var(--muted-foreground)]">

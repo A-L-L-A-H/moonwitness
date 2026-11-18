@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Button, Checkbox, Input } from "@moonwitness/ui";
 import {
   useCreateRadiusUser,
   useDeleteRadiusUser,
@@ -61,7 +62,7 @@ function RadiusFormField({
   return (
     <label className="block text-xs text-[var(--muted-foreground)]">
       {label}
-      <input
+      <Input
         type={type}
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -144,14 +145,15 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
 
   if (!open) {
     return (
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
       >
         Add user
-      </button>
+      </Button>
     );
   }
 
@@ -185,35 +187,35 @@ function CreateUserPanel({ disabled }: { disabled: boolean }) {
       </div>
       <ProfileFields draft={draft} onChange={setDraft} disabled={createUser.isPending} />
       <label className="flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={enabled}
-          onChange={(event) => setEnabled(event.target.checked)}
+          onCheckedChange={(checked) => setEnabled(checked === true)}
           disabled={createUser.isPending}
-          className="accent-[var(--blue)]"
         />
         Enabled
       </label>
       <div className="flex items-center gap-3">
-        <button
+        <Button
           type="submit"
+          variant="outline"
           disabled={createUser.isPending || !username.trim() || !password}
-          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
         >
           {createUser.isPending ? "Creating…" : "Create user"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="link"
           onClick={() => {
             setOpen(false);
             reset();
             createUser.reset();
           }}
           disabled={createUser.isPending}
-          className="min-h-11 text-xs text-[var(--muted-foreground)] underline"
+          className="min-h-11 h-auto p-0 text-xs text-[var(--muted-foreground)]"
         >
           Cancel
-        </button>
+        </Button>
         {createUser.isSuccess && (
           <span className="text-xs text-[var(--primary)]" role="status">
             User created.
@@ -282,46 +284,54 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {editing ? null : (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={startEditing}
               className="min-h-9 px-3 py-2 text-xs text-[var(--primary)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10"
             >
               Edit
-            </button>
+            </Button>
           )}
           {confirmDelete ? (
             <>
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() =>
                   void deleteUser.mutateAsync(user.username, {
                     onSuccess: () => onDeleted(`Deleted ${user.username}.`),
                   })
                 }
                 disabled={deleteUser.isPending}
-                className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+                className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)]"
               >
                 Confirm delete
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="link"
+                size="sm"
                 onClick={() => setConfirmDelete(false)}
                 disabled={deleteUser.isPending}
-                className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
+                className="min-h-9 h-auto p-0 text-xs text-[var(--muted-foreground)]"
               >
                 Cancel
-              </button>
+              </Button>
             </>
           ) : (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={() => setConfirmDelete(true)}
               disabled={deleteUser.isPending}
-              className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+              className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10"
             >
               Delete
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -342,37 +352,37 @@ function UserRow({ user, onDeleted }: { user: RadiusUser; onDeleted: (message: s
               autoComplete="new-password"
             />
             <label className="flex items-end gap-2 pb-2 text-xs text-[var(--muted-foreground)]">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={enabled}
-                onChange={(event) => setEnabled(event.target.checked)}
+                onCheckedChange={(checked) => setEnabled(checked === true)}
                 disabled={updateUser.isPending}
-                className="accent-[var(--blue)]"
               />
               Enabled
             </label>
           </div>
           <ProfileFields draft={draft} onChange={setDraft} disabled={updateUser.isPending} />
           <div className="flex items-center gap-3">
-            <button
+            <Button
               type="submit"
+              variant="outline"
               disabled={updateUser.isPending}
-              className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90"
             >
               {updateUser.isPending ? "Saving…" : "Save changes"}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="link"
               onClick={() => {
                 setEditing(false);
                 setPassword("");
                 updateUser.reset();
               }}
               disabled={updateUser.isPending}
-              className="min-h-11 text-xs text-[var(--muted-foreground)] underline"
+              className="min-h-11 h-auto p-0 text-xs text-[var(--muted-foreground)]"
             >
               Cancel
-            </button>
+            </Button>
             {updateUser.isSuccess && (
               <span className="text-xs text-[var(--primary)]" role="status">
                 Saved.
@@ -416,7 +426,7 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
         <div className="flex flex-wrap items-center gap-3">
           <label className="text-xs text-[var(--muted-foreground)]">
             <span className="sr-only">Filter users</span>
-            <input
+            <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Filter users…"
@@ -456,13 +466,14 @@ export function RadiusUserManagement({ canWrite }: { canWrite: boolean }) {
       ) : users.isError ? (
         <div role="alert" className="border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-4">
           <p className="text-sm text-[var(--foreground)]">{(users.error as Error).message}</p>
-          <button
+          <Button
             type="button"
+            variant="link"
             onClick={() => void users.refetch()}
-            className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
+            className="mt-2 min-h-11 h-auto p-0 text-xs"
           >
             Retry users
-          </button>
+          </Button>
         </div>
       ) : visible.length === 0 ? (
         <p

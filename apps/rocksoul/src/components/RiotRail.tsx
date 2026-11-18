@@ -1,5 +1,5 @@
 import React from "react";
-import { Activity, GitBranch, ListChecks, RadioTower, Swords } from "lucide-react";
+import { Activity, GitBranch, ListChecks, RadioTower, Swords } from "@moonwitness/ui/icons";
 import { Home } from "@moonwitness/ui/icons";
 import { AnarchyStarSigil } from "./ui/RocksoulVectors";
 

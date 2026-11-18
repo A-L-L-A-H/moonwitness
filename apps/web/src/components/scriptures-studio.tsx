@@ -11,7 +11,7 @@ import {
   type ScriptureCorpusFilter,
   type UnifiedScriptureHit,
 } from "@moonwitness/canon";
-import { CutoutArtwork, DnaBrandLogo } from "@moonwitness/ui";
+import { Button, CutoutArtwork, DnaBrandLogo, Input } from "@moonwitness/ui";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   DnaBadge,
@@ -309,12 +309,13 @@ export function ScripturesStudio() {
                     ? "SALIN TAUTAN"
                     : "COPY DEEP LINK"}
               </DnaButton>
-              <Link
-                href="/codex?door=epistemic-corpus"
-                className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
+              <DnaButton
+                asChild
+                tone="secondary"
+                className="min-h-0 inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
               >
-                DOOR II EPISTEMIC SPINE &rsaquo;
-              </Link>
+                <Link href="/codex?door=epistemic-corpus">DOOR II EPISTEMIC SPINE &rsaquo;</Link>
+              </DnaButton>
             </div>
           </div>
 
@@ -324,20 +325,21 @@ export function ScripturesStudio() {
               const active = corpusFilter === tab.id;
               const num = counts ? counts[tab.countKey] : null;
               return (
-                <button
+                <DnaButton
                   key={tab.id}
                   type="button"
+                  tone="secondary"
                   aria-pressed={active}
                   onClick={() => setCorpusFilter(tab.id)}
-                  className={`px-3.5 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors cursor-pointer ${
+                  className={`min-h-0 px-3.5 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors ${
                     active
                       ? "border border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
-                      : "btn-luxe-secondary text-[var(--dna-muted)]"
+                      : "text-[var(--dna-muted)]"
                   }`}
                 >
                   {locale === "id" ? tab.labelId : tab.labelEn}
                   {num ? ` (${num.toLocaleString("en-US")})` : ""}
-                </button>
+                </DnaButton>
               );
             })}
           </div>
@@ -345,13 +347,13 @@ export function ScripturesStudio() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="flex flex-1 items-center gap-3 border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)] px-4 py-2.5">
               <SearchLensIcon className="h-4 w-4 text-[var(--dna-accent)]" />
-              <input
+              <Input
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 aria-label="Search across Taurat, Zabur, Injil, and Quran corpora"
                 placeholder="Gen 1:1, Ps 23:1, John 1:1, 2:256, الله, θεος..."
-                className="w-full bg-transparent font-mono text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none"
+                className="min-h-0 w-full border-0 bg-transparent px-0 py-0 font-mono text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </div>
@@ -397,15 +399,16 @@ export function ScripturesStudio() {
                       <DnaBadge className="font-mono text-[10px] text-[var(--dna-text)]">
                         {hit.reference}
                       </DnaBadge>
-                      <button
+                      <Button
                         type="button"
+                        variant="plain"
                         onClick={() =>
                           void copyShareUrl(hit.reference.replace(/^QS\s+/i, ""), hit.corpusCode)
                         }
                         className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] px-2 py-0.5 text-[10px] text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
                       >
                         {copiedLink === hit.reference.replace(/^QS\s+/i, "") ? "COPIED" : "SHARE"}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <p
@@ -446,15 +449,16 @@ export function ScripturesStudio() {
 
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
             {FOUR_CORPUS_CONCORDANCE.map((theme) => (
-              <button
+              <DnaButton
                 key={theme.id}
                 type="button"
+                tone="secondary"
                 aria-pressed={theme.id === activeTheme.id}
                 onClick={() => setActiveThemeId(theme.id)}
-                className="btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] text-[var(--dna-text)] uppercase cursor-pointer"
+                className="min-h-0 justify-start px-3.5 py-2 text-left font-mono text-[10.5px] text-[var(--dna-text)] uppercase"
               >
                 {theme.title}
-              </button>
+              </DnaButton>
             ))}
           </div>
 

@@ -3,7 +3,7 @@
 import { Grid, List } from "@moonwitness/ui/icons";
 
 import type { Era, EraId } from "@moonwitness/types";
-import { cn, NativeSelect } from "@moonwitness/ui";
+import { Button, cn, NativeSelect } from "@moonwitness/ui";
 
 export type SortKey = "newest" | "oldest";
 
@@ -37,8 +37,9 @@ export function FilterBar({
         role="group"
         aria-label="Filter by era"
       >
-        <button
+        <Button
           type="button"
+          variant="plain"
           onClick={() => onEraChange("all")}
           aria-pressed={era === "all"}
           className={cn(
@@ -49,11 +50,12 @@ export function FilterBar({
           )}
         >
           All Eras
-        </button>
+        </Button>
         {eras.map((e) => (
-          <button
+          <Button
             key={e.id}
             type="button"
+            variant="plain"
             onClick={() => onEraChange(era === e.id ? "all" : e.id)}
             aria-pressed={era === e.id}
             className={cn(
@@ -66,7 +68,7 @@ export function FilterBar({
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: e.color }} />
             {e.name}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -89,34 +91,36 @@ export function FilterBar({
           role="group"
           aria-label="View mode"
         >
-          <button
+          <Button
             type="button"
+            variant="plain"
             onClick={() => onViewChange("grid")}
             aria-pressed={view === "grid"}
             aria-label="Grid view"
             className={cn(
-              "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
+              "inline-flex items-center justify-center rounded-none px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
               view === "grid"
                 ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--card-foreground)]",
             )}
           >
             <Grid className="h-4 w-4" />
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="plain"
             onClick={() => onViewChange("list")}
             aria-pressed={view === "list"}
             aria-label="List view"
             className={cn(
-              "inline-flex items-center justify-center px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
+              "inline-flex items-center justify-center rounded-none px-2.5 py-1.5 max-lg:min-h-11 max-lg:min-w-11",
               view === "list"
                 ? "bg-[var(--primary)] text-[var(--primary-foreground)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--card-foreground)]",
             )}
           >
             <List className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

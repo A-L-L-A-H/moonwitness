@@ -1,0 +1,68 @@
+/* ROCKSOUL DX Canonical Color Palette Tokens
+   Strictly scoped under [data-dna="03-rocksoul"] so sibling DNAs and :root never collide. */
+
+[data-dna="03-rocksoul"] {
+  --color-black: #090a0d;
+  --color-black-soft: #101010;
+  --color-charcoal: #171717;
+  --color-charcoal-2: #202020;
+  --color-panel: #171717;
+  --color-panel-2: #202020;
+  --color-surface-3: #141414;
+  --color-surface-hover: #252718;
+  --color-paper: #f3ebd9;
+  --color-paper-soft: #d8d0c3;
+  --color-dirty-white: #eee8dd;
+  --color-muted: #8f8a80;
+  --color-line: #48443c;
+  --color-line-soft: #3b3730;
+  --color-border-strong: #5c5649;
+
+  --color-lime: #d7ff36;
+  --color-lime-dim: #c4e830;
+  --color-lime-bright: #e9ff79;
+  --color-orange: #ff6339;
+  --color-orange-dim: #e85a33;
+  --color-orange-soft: #ff8b6e;
+  --color-rust: #bf8350;
+  --color-pink: #ff5ac8;
+  --color-purple: #6555ff;
+  --color-moonlight: #e9d4b5;
+  --color-watch: #f6c453;
+  --color-critical: #ff4747;
+  --color-clean: #77d99a;
+  --world-crimson: #e53e38;
+  --world-crimson-soft: #ff8b80;
+  --world-crimson-deep: #a8221d;
+  --world-ash: #9a9488;
+  --world-dim: #67645c;
+  --world-signal: #d65a3b;
+  --world-glow: #f1d8a1;
+}
+
+[data-dna="03-rocksoul"][data-theme="light"] {
+  --color-black: #ede7d8;
+  --color-black-soft: #f6f1e4;
+  --color-charcoal: #ffffff;
+  --color-charcoal-2: #e7dfd0;
+  --color-panel: #f7f3e8;
+  --color-panel-2: #ebe4d5;
+  --color-surface-3: #e3dbca;
+  --color-surface-hover: #dcd4c2;
+  --color-paper: #171614;
+  --color-paper-soft: #3a362f;
+  --color-dirty-white: #171614;
+  --color-muted: #5c574d;
+  --color-line: #b9b09c;
+  --color-line-soft: #cfc6b2;
+  --color-border-strong: #8d8471;
+  --color-lime: #4f6400;
+  --color-lime-dim: #415200;
+  --color-lime-bright: #5e7700;
+  --color-orange: #b8330d;
+  --color-orange-dim: #9e2908;
+  --color-pink: #b0217b;
+  --color-purple: #4d3fd8;
+  --color-clean: #18794e;
+  --color-critical: #c81e1e;
+}
