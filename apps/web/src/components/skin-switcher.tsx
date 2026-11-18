@@ -90,6 +90,7 @@ export function SkinSwitcher({ className }: SkinSwitcherProps) {
                   <button
                     key={key}
                     type="button"
+                    data-mw-skin-option={key}
                     onClick={() => handleSelectSkin(key)}
                     className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs transition-colors hover:bg-[var(--muted)] ${
                       isActive
