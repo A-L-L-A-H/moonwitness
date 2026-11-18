@@ -1,5 +1,6 @@
 "use client";
 
+import { MoonwitnessApiError, requestApiJson } from "@moonwitness/contracts/sdk";
 import type { MissionAlert, Workflow } from "@moonwitness/types";
 
 const API_BASE = "/api/v1";
@@ -38,29 +39,12 @@ export class CommandCenterApiError extends Error {
 }
 
 async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    credentials: "include",
-    cache: "no-store",
-    headers: {
-      ...(init?.body ? { "Content-Type": "application/json" } : {}),
-      ...(init?.headers ?? {}),
-    },
-  });
-
-  if (!response.ok) {
-    const payload: unknown = await response.json().catch(() => null);
-    const message =
-      typeof payload === "object" &&
-      payload !== null &&
-      "error" in payload &&
-      typeof payload.error === "string"
-        ? payload.error
-        : `HTTP ${response.status}`;
-    throw new CommandCenterApiError(message, response.status);
+  try {
+    return await requestApiJson<T>(`${API_BASE}${path}`, init);
+  } catch (err) {
+    const status = err instanceof MoonwitnessApiError ? err.status : 500;
+    throw new CommandCenterApiError(err instanceof Error ? err.message : `HTTP ${status}`, status);
   }
-
-  return response.json() as Promise<T>;
 }
 
 export function fetchCommandCenterState(signal?: AbortSignal): Promise<CommandCenterSnapshot> {

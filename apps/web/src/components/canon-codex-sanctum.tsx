@@ -1,7 +1,7 @@
 "use client";
 
 import { CutoutArtwork, DnaBrandLogo } from "@moonwitness/ui";
-import { DiamondStarOrnament } from "@moonwitness/ui/imperium";
+import { DiamondStarOrnament, DnaPortalArch } from "@moonwitness/ui/imperium";
 import { FOUR_ENTRY_DOORS, SUPREME_IDENTITY, type EntryDoorId } from "@/data/empire-canon-codex";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { DoorEpistemicPanel } from "./canon-doors/door-epistemic-panel";
@@ -95,13 +95,13 @@ export function CanonCodexSanctum({
             const isSelected = door.id === activeDoor.id;
             return (
               <SpatialTiltCard key={door.id} disabled={quietMode} maxTiltDeg={4}>
-                <button
+                <DnaPortalArch
                   type="button"
                   role="tab"
                   aria-selected={isSelected}
                   onKeyDown={(event) => handleDoorKeyDown(event, doorIdx)}
                   onClick={() => onSelectDoor(door.id)}
-                  className={`portal-arch-card relative flex h-full w-full min-h-[44px] flex-col justify-between border px-5 pt-7 pb-5 text-left transition-all duration-300 cursor-pointer ${
+                  className={`flex h-full w-full min-h-[44px] flex-col justify-between px-5 pt-7 pb-5 text-left transition-all duration-300 ${
                     isSelected
                       ? "border-[var(--dna-text)] bg-gradient-to-b from-[var(--dna-accent)]/22 via-[var(--dna-surface)]/90 to-[var(--dna-canvas)] shadow-[0_0_32px_rgba(223,192,123,0.22)]"
                       : "border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/85 hover:border-[var(--dna-accent)]/60 hover:bg-[var(--dna-accent)]/10"
@@ -135,7 +135,7 @@ export function CanonCodexSanctum({
                       className="pointer-events-none absolute -bottom-4 left-1/2 h-4 w-px -translate-x-1/2 bg-gradient-to-b from-[var(--dna-text)] to-transparent"
                     />
                   )}
-                </button>
+                </DnaPortalArch>
               </SpatialTiltCard>
             );
           })}

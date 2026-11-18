@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Tape, ZineCardRough, Input } from "@moonwitness/ui";
-import { Label } from "@moonwitness/ui";
+import { Input, Label, Tape, ZineButton, ZineCardRough } from "@moonwitness/ui";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
 import { useLogin } from "@/lib/api/onboarding";
 
@@ -91,10 +90,10 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
               </p>
             )}
 
-            <button
+            <ZineButton
               type="submit"
               disabled={login.isPending}
-              className="btn-zine w-full px-6 py-4 text-xl"
+              className="w-full px-6 py-4 text-xl"
             >
               {login.isPending ? (
                 "MASUK…"
@@ -103,7 +102,7 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
                   MASUK <ArrowRight className="h-5 w-5" />
                 </>
               )}
-            </button>
+            </ZineButton>
           </form>
         </ZineCardRough>
       </div>

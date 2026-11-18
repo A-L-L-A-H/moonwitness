@@ -1,14 +1,18 @@
 import React from "react";
-import { ArrowUpRight, Circle, Clock3, Pencil, Trash2 } from "lucide-react";
-import type { Issue } from "../lib/contracts";
+import { ArrowUpRight, Circle, Clock3, Pencil, Trash2 } from "@moonwitness/ui/icons";
+import type { Issue, IssueStatus } from "../lib/contracts";
 
 const priorityClass: Record<string, string> = { P0: "p0", P1: "p1", P2: "p2", P3: "p3" };
-const statusLabel: Record<string, string> = { open: "OPEN", blocked: "BLOCKED", done: "DONE", closed: "CLOSED" };
+const statusLabel: Record<IssueStatus, string> = { open: "OPEN", blocked: "BLOCKED", done: "DONE", closed: "CLOSED" };
+
+function isIssueStatus(value: string): value is IssueStatus {
+  return value in statusLabel;
+}
 
 export interface IssueRowProps {
   issue: Issue;
   compact?: boolean;
-  onStatusChange?: (issueId: string, status: any) => void;
+  onStatusChange?: (issueId: string, status: IssueStatus) => void;
   onEdit?: (issue: Issue) => void;
   onDelete?: (issue: Issue) => void;
 }
@@ -36,7 +40,11 @@ export default function IssueRow({
         <select
           aria-label={`Status for ${issue.issue_key}`}
           value={issue.status}
-          onChange={(e) => onStatusChange?.(issue.id, e.target.value)}
+          onChange={(e) => {
+            if (isIssueStatus(e.target.value)) {
+              onStatusChange?.(issue.id, e.target.value);
+            }
+          }}
         >
           {issue.status in statusLabel ? null : <option value={issue.status}>{issue.status.toUpperCase()} (LEGACY)</option>}
           {Object.entries(statusLabel).map(([value, label]) => (

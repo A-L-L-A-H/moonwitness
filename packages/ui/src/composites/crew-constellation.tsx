@@ -130,7 +130,7 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
                 style={{ left: `${w.x}%`, top: `${w.y}%` }}
               >
                 {selected.id === w.id && (
-                  <span className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[var(--yellow)] px-1 text-[9px] font-bold leading-tight text-black">
+                  <span className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[var(--secondary)] px-1 text-[9px] font-bold leading-tight text-[var(--secondary-foreground)]">
                     Selected
                   </span>
                 )}

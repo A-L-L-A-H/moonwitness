@@ -6,6 +6,7 @@ export * from "./chronicle";
 export * from "./research";
 export * from "./sidra";
 export * from "./publication";
+export * from "./sdk";
 
 /**
  * Deferred Write Models (MW-0411):

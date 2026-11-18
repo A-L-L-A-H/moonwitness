@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DnaButton } from "@moonwitness/ui/imperium";
 import {
   SANCTUARY_MID_AUTH_EVENT,
   clearSanctuaryMidSession,
@@ -31,24 +32,26 @@ export function SanctuaryIdentityControl({ compact = false }: { readonly compact
         >
           @{session.username}
         </span>
-        <button
+        <DnaButton
           type="button"
+          tone="secondary"
           onClick={() => {
             setBusy(true);
             void clearSanctuaryMidSession().finally(() => setBusy(false));
           }}
           disabled={busy}
-          className="btn-luxe-secondary px-2.5 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[var(--dna-muted)] hover:text-[var(--dna-text)] uppercase cursor-pointer"
+          className="min-h-0 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.16em] text-[var(--dna-muted)] hover:text-[var(--dna-text)] uppercase"
         >
           {locale === "id" ? "KELUAR" : "SIGN OUT"}
-        </button>
+        </DnaButton>
       </div>
     );
   }
 
   return (
-    <button
+    <DnaButton
       type="button"
+      tone="secondary"
       disabled={busy}
       onClick={() => {
         setBusy(true);
@@ -58,7 +61,7 @@ export function SanctuaryIdentityControl({ compact = false }: { readonly compact
             : "/";
         void startSanctuaryMidLogin(currentPath).catch(() => setBusy(false));
       }}
-      className={`btn-luxe-secondary inline-flex items-center font-mono tracking-[0.16em] text-[var(--dna-accent)] uppercase cursor-pointer ${
+      className={`min-h-0 inline-flex items-center font-mono tracking-[0.16em] text-[var(--dna-accent)] uppercase ${
         compact ? "px-3 py-2 text-[11px]" : "px-3 py-1.5 text-[10px]"
       }`}
     >
@@ -69,6 +72,6 @@ export function SanctuaryIdentityControl({ compact = false }: { readonly compact
         : locale === "id"
           ? "MASUK · ID"
           : "SIGN IN · ID"}
-    </button>
+    </DnaButton>
   );
 }

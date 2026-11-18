@@ -99,14 +99,16 @@ export function SiteNav() {
 
           <div className="ml-auto flex items-center gap-2">
             <SkinSwitcher />
-            <button
+            <Button
+              type="button"
+              variant="plain"
               onClick={() => setSearchOpen(true)}
               ref={searchTriggerRef}
               aria-label="Search the archive"
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
             >
               <SearchIcon className="h-5 w-5" />
-            </button>
+            </Button>
             <Link
               href="/mission-control"
               aria-label="Open Mission Control"
@@ -119,7 +121,9 @@ export function SiteNav() {
                 JOIN THE CREW →
               </Button>
             </Link>
-            <button
+            <Button
+              type="button"
+              variant="plain"
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               ref={menuToggleRef}
@@ -127,7 +131,7 @@ export function SiteNav() {
               aria-expanded={menuOpen}
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
+            </Button>
           </div>
         </div>
 

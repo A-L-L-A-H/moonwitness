@@ -373,3 +373,33 @@ export function Clock(props: DnaIconProps) {
     </svg>
   );
 }
+
+export function Clock3(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="12,2.5 19.5,7 21.5,12 19.5,17 12,21.5 4.5,17 2.5,12 4.5,7"
+        stroke="currentColor"
+        strokeWidth="1.9"
+      />
+      <path d="M12 6.5 V12 H17" stroke={accentColor} strokeWidth="2" strokeLinecap="square" />
+      <circle cx="12" cy="12" r="1.4" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function Pencil(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="16.5,3.5 20.5,7.5 8,20 3.5,20.5 4,16"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinejoin="miter"
+      />
+      <path d="M13.5 6.5 L17.5 10.5" stroke={accentColor} strokeWidth="2" />
+    </svg>
+  );
+}

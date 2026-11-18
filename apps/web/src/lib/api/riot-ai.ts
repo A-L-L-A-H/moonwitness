@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  MoonwitnessApiError,
+  requestApiJson,
+  requestApiResponse,
+} from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/riot-ai";
@@ -105,16 +110,17 @@ export interface RiotAiMessage {
 }
 
 async function requestJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    signal,
-  });
-  const body: unknown = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(getResponseError(body, response.status));
+  try {
+    return await requestApiJson<T>(url, { signal });
+  } catch (err) {
+    if (err instanceof MoonwitnessApiError) {
+      if (err.message === `HTTP ${err.status}`) {
+        throw new MoonwitnessApiError(`Request failed (${err.status})`, err.status);
+      }
+      throw err;
+    }
+    throw err;
   }
-  return body as T;
 }
 
 export function useRiotAiHealth() {
@@ -178,7 +184,7 @@ export async function saveRiotAiConfig(config: {
   enabled: boolean;
   preferredModel: string | null;
 }): Promise<void> {
-  const response = await fetch(`${API_BASE}/config`, {
+  const response = await requestApiResponse(`${API_BASE}/config`, {
     method: "PUT",
     credentials: "include",
     cache: "no-store",
@@ -206,7 +212,7 @@ export async function streamRiotAiChat(input: {
   ) {
     throw new Error("Inference request exceeds the supported conversation limits.");
   }
-  const response = await fetch(`${API_BASE}/chat`, {
+  const response = await requestApiResponse(`${API_BASE}/chat`, {
     method: "POST",
     credentials: "include",
     cache: "no-store",

@@ -7,6 +7,7 @@ import { MemoryDeckShell, type DeckMode } from "../components/memory-deck-shell"
 import { MemoryTape } from "../components/memory-tape";
 import { SoundtrackPlayer } from "../components/soundtrack-player";
 import { EmptyState, MetricCard, Panel, SectionLabel, StatusBadge } from "../components/ui";
+import { memorySdkFetch } from "../lib/sdk";
 import {
   clearMemoryMidSession,
   getStoredMemoryAccessToken,
@@ -257,12 +258,8 @@ export default function Home() {
   }, []);
 
   const apiFetch = useCallback(async (path: string, init?: RequestInit): Promise<Response> => {
-    const headers = new Headers(init?.headers);
     const token = getStoredMemoryAccessToken();
-    if (token && !headers.has("Authorization")) {
-      headers.set("Authorization", "Bearer " + token);
-    }
-    const response = await fetch(API + path, { ...init, headers });
+    const response = await memorySdkFetch(path, { ...init, bearerToken: token });
     if (response.status === 401) {
       setAuthRequired(true);
       setAuthActor(null);

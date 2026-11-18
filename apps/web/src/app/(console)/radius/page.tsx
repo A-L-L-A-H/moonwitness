@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { SignalRadioArt, SkinOrnament } from "@moonwitness/ui";
+import { Button, SignalRadioArt, SkinOrnament } from "@moonwitness/ui";
 import { RadiusKey } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useRadiusHealth, useRadiusLogs, useRadiusStats, type RadiusLog } from "@/lib/api/radius";
@@ -72,17 +72,18 @@ function RadiusConsole() {
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-brush text-xl text-[var(--foreground)]">SERVICE HEALTH</h2>
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => {
                 void health.refetch();
                 void stats.refetch();
                 void logs.refetch();
               }}
-              className="min-h-11 text-xs text-[var(--primary)] underline"
+              className="min-h-11 h-auto p-0 text-xs"
             >
               Refresh console
-            </button>
+            </Button>
           </div>
           {health.isLoading ? (
             <p className="mt-3 text-sm text-[var(--muted-foreground)]" role="status">
@@ -190,13 +191,14 @@ function ErrorState({ message, onRetry }: { message: string; onRetry: () => void
   return (
     <div role="alert" className="mt-3 border-2 border-[var(--yellow)]/50 bg-[var(--card)] p-4">
       <p className="text-sm text-[var(--foreground)]">{message}</p>
-      <button
+      <Button
         type="button"
+        variant="link"
         onClick={onRetry}
-        className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
+        className="mt-2 min-h-11 h-auto p-0 text-xs"
       >
         Retry
-      </button>
+      </Button>
     </div>
   );
 }

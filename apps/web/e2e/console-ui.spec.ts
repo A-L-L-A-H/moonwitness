@@ -54,6 +54,7 @@ const readFixtures: Record<string, unknown> = {
     events: [],
     total: 0,
   },
+  "/api/v1/_meta/models": { models: [] },
 };
 
 // All browser API traffic stays local to fixtures; accidental mutations fail without reaching a server.

@@ -1,11 +1,12 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1";
 
 async function requestXml(url: string, init?: RequestInit): Promise<string> {
-  const res = await fetch(url, { ...init, credentials: "include" });
+  const res = await requestApiResponse(url, { ...init, credentials: "include" });
   const text = await res.text();
   if (!res.ok) {
     throw new Error(text || `HTTP ${res.status}`);
@@ -50,7 +51,9 @@ export function useStorageHealth() {
   return useQuery({
     queryKey: ["storage", "health"],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}/storage/health`, { credentials: "include" });
+      const res = await requestApiResponse(`${API_BASE}/storage/health`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json() as Promise<{ status: string; service: string; reachable?: boolean }>;
     },
@@ -89,10 +92,13 @@ export function useCreateBucket() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
-      const res = await fetch(`${API_BASE}/storage/buckets/${encodeURIComponent(name)}`, {
-        method: "PUT",
-        credentials: "include",
-      });
+      const res = await requestApiResponse(
+        `${API_BASE}/storage/buckets/${encodeURIComponent(name)}`,
+        {
+          method: "PUT",
+          credentials: "include",
+        },
+      );
       if (!res.ok) throw new Error(await res.text());
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["storage", "buckets"] }),
@@ -103,10 +109,13 @@ export function useDeleteBucket() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
-      const res = await fetch(`${API_BASE}/storage/buckets/${encodeURIComponent(name)}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const res = await requestApiResponse(
+        `${API_BASE}/storage/buckets/${encodeURIComponent(name)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
       if (!res.ok) throw new Error(await res.text());
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["storage", "buckets"] }),
@@ -126,7 +135,7 @@ export function useUploadObject(bucket: string | null) {
       contentType?: string;
     }) => {
       const encodedKey = key.split("/").map(encodeURIComponent).join("/");
-      const res = await fetch(
+      const res = await requestApiResponse(
         `${API_BASE}/storage/buckets/${encodeURIComponent(bucket!)}/${encodedKey}`,
         {
           method: "PUT",
@@ -146,7 +155,7 @@ export function useDeleteObject(bucket: string | null) {
   return useMutation({
     mutationFn: async (key: string) => {
       const encodedKey = key.split("/").map(encodeURIComponent).join("/");
-      const res = await fetch(
+      const res = await requestApiResponse(
         `${API_BASE}/storage/buckets/${encodeURIComponent(bucket!)}/${encodedKey}`,
         { method: "DELETE", credentials: "include" },
       );

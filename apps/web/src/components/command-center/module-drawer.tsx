@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import type { Module, Project } from "@moonwitness/types";
-import { ModuleGlyph, Card, Button } from "@moonwitness/ui";
+import { Button, ModuleGlyph, Sheet, SheetContent, SheetHeader, SheetTitle } from "@moonwitness/ui";
 import { ArrowRight } from "@moonwitness/ui/icons";
-import { useFocusTrap } from "./use-focus-trap";
 
 export interface ModuleDrawerProps {
   module: Module;
@@ -13,18 +13,30 @@ export interface ModuleDrawerProps {
 }
 
 export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawerProps) {
-  const dialogRef = useFocusTrap(true, onClose);
+  const [openerEl] = useState<HTMLElement | null>(() =>
+    typeof document !== "undefined" ? (document.activeElement as HTMLElement | null) : null,
+  );
+
+  function handleClose() {
+    onClose();
+    queueMicrotask(() => {
+      openerEl?.focus();
+    });
+  }
 
   return (
-    <div
-      ref={dialogRef}
-      className="fixed inset-0 z-50"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${module.name} console`}
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) handleClose();
+      }}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <Card className="absolute inset-y-0 right-0 w-full max-w-md overflow-y-auto p-6">
+      <SheetContent
+        side="right"
+        hideClose
+        aria-describedby={undefined}
+        className="w-full max-w-md sm:max-w-md overflow-y-auto p-6"
+      >
         <div className="flex items-start justify-between">
           <span
             className="flex h-14 w-14 items-center justify-center rounded-md"
@@ -32,8 +44,12 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
               background: module.color,
               color:
                 module.color.toLowerCase().includes("ffd21f") || module.color === "var(--yellow)"
-                  ? "#111"
-                  : "#fff",
+                  ? "var(--secondary-foreground)"
+                  : module.color === "var(--blue)"
+                    ? "var(--accent-foreground)"
+                    : module.color === "var(--pink)" || module.color === "var(--primary)"
+                      ? "var(--primary-foreground)"
+                      : "var(--paper)",
             }}
           >
             <ModuleGlyph icon={module.icon} className="h-7 w-7" />
@@ -42,16 +58,19 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
             type="button"
             variant="ghost"
             size="sm"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close module console"
             className="min-h-11 min-w-11 p-2"
           >
             ✕
           </Button>
         </div>
-        <h2 className="font-brush mt-4 text-3xl text-[var(--card-foreground)]">
-          {module.name.toUpperCase()}
-        </h2>
+        <SheetHeader>
+          <SheetTitle className="font-brush mt-4 text-3xl text-[var(--card-foreground)]">
+            {module.name.toUpperCase()}
+            <span className="sr-only"> console</span>
+          </SheetTitle>
+        </SheetHeader>
         <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
           {module.description}
         </p>
@@ -95,7 +114,7 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
         <p className="mt-3 text-center text-[10px] text-[var(--muted-foreground)]">
           Starts a workflow in the Automation Center immediately.
         </p>
-      </Card>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 }

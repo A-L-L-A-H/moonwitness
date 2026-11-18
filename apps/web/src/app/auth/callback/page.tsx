@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { ZineButton } from "@moonwitness/ui";
 import { OctagramMandalaIcon } from "@/components/sacred-icons";
 import { completeMidCallback, completeSanctuaryMidCallback } from "@/lib/mid-oidc";
 import { notifySessionChange } from "@/lib/session";
@@ -75,12 +76,11 @@ function AuthCallbackInner() {
             <p role="alert" className="mt-3 text-sm text-[var(--destructive)]">
               {errorMessage}
             </p>
-            <Link
-              href={isSanctuaryFlow ? "/" : "/shadow"}
-              className="btn-zine mt-6 inline-flex items-center px-4 py-2 text-sm"
-            >
-              {isSanctuaryFlow ? "RETURN TO GATE" : "RETURN TO SIGN IN"}
-            </Link>
+            <ZineButton asChild className="mt-6 inline-flex items-center px-4 py-2 text-sm">
+              <Link href={isSanctuaryFlow ? "/" : "/shadow"}>
+                {isSanctuaryFlow ? "RETURN TO GATE" : "RETURN TO SIGN IN"}
+              </Link>
+            </ZineButton>
           </>
         ) : (
           <p className="mt-3 font-mono text-xs text-[var(--muted-foreground)]">

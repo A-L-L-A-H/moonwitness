@@ -101,7 +101,7 @@ describe("useMotionPreference", () => {
       unmount();
     } finally {
       if (originalMatchMedia) Object.defineProperty(window, "matchMedia", originalMatchMedia);
-      else delete (window as any).matchMedia;
+      else Reflect.deleteProperty(window, "matchMedia");
     }
 
     const { result } = renderHook(() => useMotionPreference());

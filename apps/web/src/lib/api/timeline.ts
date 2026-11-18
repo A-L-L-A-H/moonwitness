@@ -1,8 +1,8 @@
 "use client";
 
+import { requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  ApiErrorSchema,
   type CreateEventBody,
   type TimelineErasResponse,
   type TimelineEventResponse,
@@ -52,20 +52,7 @@ export interface TimelineEventAuditEntry {
 }
 
 async function requestTimelineJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    headers: init?.body
-      ? { "content-type": "application/json", ...(init.headers ?? {}) }
-      : init?.headers,
-    ...init,
-  });
-  if (!res.ok) {
-    const raw = await res.json().catch(() => ({ error: res.statusText }));
-    const parsedErr = ApiErrorSchema.safeParse(raw);
-    throw new Error(parsedErr.success ? parsedErr.data.error : `HTTP ${res.status}`);
-  }
-  return res.json() as Promise<T>;
+  return requestApiJson<T>(url, init);
 }
 
 async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {

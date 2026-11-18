@@ -18,6 +18,7 @@ import {
   useSkin,
   type BrandLogoId,
 } from "@moonwitness/ui";
+import { useMetaModelsCatalog } from "@/lib/api/meta-views";
 import { navHref, navItems, operationsNavItems } from "./shell/nav-items";
 
 export interface ConsoleCommandPaletteProps {
@@ -39,6 +40,7 @@ export function ConsoleCommandPalette({
   const { skin, setSkin, dnaId, setDna, mode, setMode, density, setDensity } = useSkin();
   const presets = useMemo(() => listPresets(), []);
   const worlds = useMemo(() => listDnaWorlds(), []);
+  const catalog = useMetaModelsCatalog();
   const routes = useMemo(() => {
     if (plane === "creator") return navItems;
     if (plane === "operations") return operationsNavItems;
@@ -93,6 +95,27 @@ export function ConsoleCommandPalette({
 
         <CommandSeparator />
 
+        <CommandGroup heading="Live ORM Models">
+          {catalog.map((model) => {
+            const href = `/models/${encodeURIComponent(model)}`;
+            return (
+              <CommandItem
+                key={`model-${model}`}
+                value={`model ${model}`}
+                onSelect={() => {
+                  setOpen(false);
+                  router.push(href);
+                }}
+              >
+                <span>{model}</span>
+                <CommandShortcut>{href}</CommandShortcut>
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
+
+        <CommandSeparator />
+
         <CommandGroup heading="Surface Skin (8-Axis Engine)">
           {presets.map((key) => {
             const preset = skinPresets[key];
@@ -107,6 +130,27 @@ export function ConsoleCommandPalette({
               >
                 <span>{preset.label}</span>
                 <CommandShortcut>{skin === key ? "ACTIVE" : key.toUpperCase()}</CommandShortcut>
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Live ORM Models">
+          {catalog.map((model) => {
+            const href = `/models/${encodeURIComponent(model)}`;
+            return (
+              <CommandItem
+                key={`model-${model}`}
+                value={`model ${model}`}
+                onSelect={() => {
+                  setOpen(false);
+                  router.push(href);
+                }}
+              >
+                <span>{model}</span>
+                <CommandShortcut>{href}</CommandShortcut>
               </CommandItem>
             );
           })}
@@ -131,6 +175,27 @@ export function ConsoleCommandPalette({
               <CommandShortcut>{dnaId === world.id ? "ACTIVE" : world.numeral}</CommandShortcut>
             </CommandItem>
           ))}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Live ORM Models">
+          {catalog.map((model) => {
+            const href = `/models/${encodeURIComponent(model)}`;
+            return (
+              <CommandItem
+                key={`model-${model}`}
+                value={`model ${model}`}
+                onSelect={() => {
+                  setOpen(false);
+                  router.push(href);
+                }}
+              >
+                <span>{model}</span>
+                <CommandShortcut>{href}</CommandShortcut>
+              </CommandItem>
+            );
+          })}
         </CommandGroup>
 
         <CommandSeparator />

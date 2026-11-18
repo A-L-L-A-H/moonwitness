@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Button, Input, ZineButton } from "@moonwitness/ui";
 import {
   EIGHT_STORY_ERAS,
   FIFTEEN_STORY_EPISODES,
@@ -75,14 +76,11 @@ export function CanonLorePanel() {
             Promise Flow: {SEVEN_STEP_PROMISE.join(" → ")}
           </p>
         </div>
-        <SanctuaryGateLink
-          suffix="/#the-codex"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-zine btn-blue min-h-11 px-4 py-2 text-xs"
-        >
-          OPEN IN A-L-L-A-H CODEX ↗
-        </SanctuaryGateLink>
+        <ZineButton asChild tone="blue" className="min-h-11 px-4 py-2 text-xs">
+          <SanctuaryGateLink suffix="/#the-codex" target="_blank" rel="noopener noreferrer">
+            OPEN IN A-L-L-A-H CODEX ↗
+          </SanctuaryGateLink>
+        </ZineButton>
       </div>
 
       {/* 8 Canonical Story Eras */}
@@ -92,24 +90,26 @@ export function CanonLorePanel() {
             8 CANONICAL STORY ERAS (moonwitness-II)
           </h3>
           {selectedEraId !== "all" && (
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => setSelectedEraId("all")}
-              className="font-mono text-xs text-[var(--primary)] underline"
+              className="h-auto p-0 font-mono text-xs"
             >
               Show all eras
-            </button>
+            </Button>
           )}
         </div>
         <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4">
           {EIGHT_STORY_ERAS.map((eraItem) => {
             const active = selectedEraId === eraItem.id;
             return (
-              <button
+              <Button
                 key={eraItem.id}
                 type="button"
+                variant="plain"
                 onClick={() => setSelectedEraId(active ? "all" : eraItem.id)}
-                className={`min-h-24 border-2 p-3 text-left transition-colors ${
+                className={`min-h-24 h-auto flex-col items-start justify-start gap-0 border-2 p-3 text-left transition-colors ${
                   active
                     ? "border-[var(--pink)] bg-[var(--pink)]/10"
                     : "border-[var(--border)] bg-[var(--card)] hover:border-[var(--muted-foreground)]"
@@ -122,7 +122,7 @@ export function CanonLorePanel() {
                   {eraItem.title}
                 </div>
                 <p className="mt-1 text-xs text-[var(--muted-foreground)]">{eraItem.theme}</p>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -155,7 +155,7 @@ export function CanonLorePanel() {
           <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--primary)]">
             33 WORLD PATCHES REGISTRY (0 DIVINE APPROVALS)
           </h3>
-          <input
+          <Input
             type="search"
             value={patchSearch}
             onChange={(e) => setPatchSearch(e.target.value)}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode, RefObject } from "react";
 import { Crown, Menu, SearchIcon } from "@moonwitness/ui/icons";
-import { Input } from "@moonwitness/ui";
+import { Button, Input } from "@moonwitness/ui";
 import { SkinSwitcher } from "@/components/skin-switcher";
 
 interface TopbarProps {
@@ -29,13 +29,15 @@ export function Topbar({
 }: TopbarProps) {
   return (
     <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b-2 border-[var(--border)] bg-[var(--card)]/90 px-4 text-[var(--foreground)] backdrop-blur-md">
-      <button
+      <Button
+        type="button"
+        variant="plain"
         className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-1.5 text-[var(--foreground)] lg:hidden"
         onClick={onOpenSidebar}
         aria-label="Open sidebar"
       >
         <Menu className="h-6 w-6" />
-      </button>
+      </Button>
       <div className="hidden items-center gap-2 text-sm text-[var(--muted-foreground)] sm:flex">
         <Crown className="h-4 w-6 text-[var(--primary)]" />
         <Link href={rootHref} className="hover:text-[var(--foreground)]">

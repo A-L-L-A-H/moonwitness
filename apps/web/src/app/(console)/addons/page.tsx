@@ -42,6 +42,9 @@ export default function AddonsManagerPage() {
     setPendingName(name);
     try {
       await toggle(name, nextEnabled);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("mw:navigation-changed"));
+      }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : `Failed to toggle addon '${name}'`);
     } finally {

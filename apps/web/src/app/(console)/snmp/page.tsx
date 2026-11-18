@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CutoutArtwork, SatelliteDishArt, SkinOrnament } from "@moonwitness/ui";
+import { Button, CutoutArtwork, SatelliteDishArt, SkinOrnament } from "@moonwitness/ui";
 import { SnmpProbe } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
@@ -86,13 +86,14 @@ function SnmpMonitor() {
             <p className="mt-2 text-sm text-[var(--foreground)]">
               {(stats.error as Error).message}
             </p>
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => void stats.refetch()}
-              className="mt-3 min-h-11 text-xs text-[var(--primary)] underline"
+              className="mt-3 min-h-11 h-auto p-0 text-xs"
             >
               Retry statistics
-            </button>
+            </Button>
           </section>
         ) : (
           <section
@@ -119,13 +120,14 @@ function SnmpMonitor() {
             <p className="mt-2 text-sm text-[var(--foreground)]">
               {(devices.error as Error).message}
             </p>
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => void devices.refetch()}
-              className="mt-3 min-h-11 text-xs text-[var(--primary)] underline"
+              className="mt-3 min-h-11 h-auto p-0 text-xs"
             >
               Retry devices
-            </button>
+            </Button>
           </section>
         ) : visibleDevices.length === 0 ? (
           <div
@@ -202,13 +204,14 @@ function DeviceCard({ device, canWrite }: { device: SafeSnmpDevice; canWrite: bo
             <p className="text-sm text-[var(--muted-foreground)]">
               {(targets.error as Error).message}
             </p>
-            <button
+            <Button
               type="button"
+              variant="link"
               onClick={() => void targets.refetch()}
-              className="mt-2 min-h-11 text-xs text-[var(--primary)] underline"
+              className="mt-2 min-h-11 h-auto p-0 text-xs"
             >
               Retry targets
-            </button>
+            </Button>
           </div>
         ) : targets.data?.length ? (
           <ul className="mt-3 divide-y divide-[var(--line)]">

@@ -13,18 +13,12 @@ import {
 } from "@moonwitness/ui";
 import { AutoModelConsole } from "@/components/meta/auto-model-console";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
+import { useMetaModelsCatalog } from "@/lib/api/meta-views";
 
 interface ModelMetaProfile {
   domainIcon: string;
   cutoutId: CutoutArtworkId;
 }
-
-const KNOWN_MODELS: readonly { model: string; label: string }[] = [
-  { model: "timeline.event", label: "Timeline Events" },
-  { model: "witness.profile", label: "Witness Profiles" },
-  { model: "scripture.entry", label: "Scripture Entries" },
-  { model: "probe.node", label: "Probe Nodes" },
-];
 
 function resolveModelVisuals(model: string): ModelMetaProfile {
   const key = model.toLowerCase();
@@ -48,6 +42,7 @@ export default function DynamicModelPage() {
   const modelName = decodeURIComponent(params?.model ?? "");
   const [search, setSearch] = useState("");
   const visuals = resolveModelVisuals(modelName);
+  const catalog = useMetaModelsCatalog();
 
   return (
     <ConsoleShellAdapter
@@ -65,16 +60,11 @@ export default function DynamicModelPage() {
           <CardContent className="flex flex-wrap items-center justify-between gap-3 py-3">
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">MODEL EXPLORER</Badge>
-              {KNOWN_MODELS.map((item) => {
-                const active = item.model === modelName;
+              {catalog.slice(0, 12).map((item) => {
+                const active = item === modelName;
                 return (
-                  <Button
-                    key={item.model}
-                    asChild
-                    size="sm"
-                    variant={active ? "default" : "outline"}
-                  >
-                    <Link href={`/models/${encodeURIComponent(item.model)}`}>{item.label}</Link>
+                  <Button key={item} asChild size="sm" variant={active ? "default" : "outline"}>
+                    <Link href={`/models/${encodeURIComponent(item)}`}>{item}</Link>
                   </Button>
                 );
               })}

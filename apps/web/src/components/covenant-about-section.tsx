@@ -130,7 +130,7 @@ export function CovenantAboutSection({
               type="button"
               onClick={onReturnToGate}
               tone="primary"
-              className="btn-chamfer font-monument group inline-flex items-center gap-3 px-9 py-3 text-xs sm:text-sm tracking-[0.25em] text-[var(--dna-text)] uppercase hover:opacity-90 cursor-pointer"
+              className="font-monument group inline-flex items-center gap-3 px-9 py-3 text-xs sm:text-sm tracking-[0.25em] text-[var(--dna-text)] uppercase hover:opacity-90 cursor-pointer"
             >
               <DiamondStarOrnament className="h-3 w-3 text-[var(--dna-accent)] transition-transform duration-500 group-hover:rotate-45" />
               <span>ASCEND TO THE GATE &uarr;</span>
@@ -141,9 +141,10 @@ export function CovenantAboutSection({
             {onToggleQuietMode && (
               <DnaButton
                 type="button"
+                tone="secondary"
                 aria-pressed={quietMode}
                 onClick={onToggleQuietMode}
-                className="btn-luxe-secondary px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase hover:text-[var(--dna-text)] cursor-pointer"
+                className="px-6 py-2 font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase hover:text-[var(--dna-text)] cursor-pointer"
               >
                 {quietMode ? "ENABLE LIVING LIGHT SHADERS" : "QUIET CONTEMPLATIVE MODE"}
               </DnaButton>

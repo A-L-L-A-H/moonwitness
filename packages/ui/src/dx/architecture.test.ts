@@ -39,7 +39,7 @@ const IGNORED_DIRS = new Set([
  * Every entry is tracked in the "Remaining duplication report".
  */
 const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
-  rocksoul: 59,
+  rocksoul: 0,
 };
 
 /** Apps whose CSS must not contain any palette literal (TSX is ratcheted separately). */
@@ -361,11 +361,12 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
     expect(appsWithTsx).toEqual(["rocksoul", "web"]);
   });
 
-  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui and @moonwitness/web", () => {
+  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui, @moonwitness/web, and rocksoul-dx", () => {
     const bannedDeps = ["lucide-react", "@heroicons/react", "react-icons", "@tabler/icons-react"];
     for (const manifestPath of [
       join(UI_ROOT, "package.json"),
       join(APPS_ROOT, "web/package.json"),
+      join(APPS_ROOT, "rocksoul/package.json"),
     ]) {
       const pkg = JSON.parse(readFileSync(manifestPath, "utf8")) as {
         dependencies?: Record<string, string>;
@@ -384,6 +385,7 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
     const filesToScan = [
       ...walk(join(UI_ROOT, "src"), [".ts", ".tsx"]),
       ...walk(join(APPS_ROOT, "web/src"), [".ts", ".tsx"]),
+      ...walk(join(APPS_ROOT, "rocksoul/src"), [".ts", ".tsx"]),
     ].filter((file) => !/\.test\.(ts|tsx)$/.test(file));
     const offenders: string[] = [];
     for (const file of filesToScan) {
@@ -424,5 +426,135 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
     expect(existsSync(join(APPS_ROOT, "web/src/app/(sanctuary)/page.tsx"))).toBe(true);
     expect(existsSync(join(APPS_ROOT, "web/src/app/(console)/layout.tsx"))).toBe(true);
     expect(existsSync(join(APPS_ROOT, "web/src/app/(console)/moonwitness/page.tsx"))).toBe(true);
+  });
+});
+
+describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
+  it("GATE-06: enforces single-door @moonwitness/contracts/sdk transport in apps/web/src", () => {
+    const offenders: string[] = [];
+    for (const file of appSources("web", [".ts", ".tsx"])) {
+      const rel = relative(REPO_ROOT, file).replace(/\\/g, "/");
+      if (rel.startsWith("apps/web/src/app/api/") || rel.endsWith("/lib/ecosystem-probe.ts")) {
+        continue;
+      }
+      const source = stripJsComments(readFileSync(file, "utf8"));
+      if (/(^|[^.\w])fetch\s*\(/m.test(source)) {
+        offenders.push(rel);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("GATE-07: enforces zero raw <select> in apps/web and zero raw controls in composites/meta", () => {
+    const selectOffenders: string[] = [];
+    for (const file of appSources("web", [".tsx"])) {
+      const source = stripJsComments(readFileSync(file, "utf8"));
+      if (/<select\b/.test(source)) {
+        selectOffenders.push(relative(REPO_ROOT, file).replace(/\\/g, "/"));
+      }
+    }
+    expect(selectOffenders).toEqual([]);
+
+    const metaAndCompositeFiles = [
+      join(UI_ROOT, "src/composites/auto-model-view.tsx"),
+      ...walk(join(APPS_ROOT, "web/src/components/meta"), [".tsx"]),
+    ].filter((file) => !/\.test\.tsx$/.test(file));
+    const rawControlOffenders: string[] = [];
+    for (const file of metaAndCompositeFiles) {
+      const source = stripJsComments(readFileSync(file, "utf8"));
+      if (/<(select|textarea|input|button)\b/.test(source)) {
+        rawControlOffenders.push(relative(REPO_ROOT, file).replace(/\\/g, "/"));
+      }
+    }
+    expect(rawControlOffenders).toEqual([]);
+  });
+
+  it("GATE-08: bans legacy raw controls, dialogs, bespoke CSS classes, and inline SVGs in apps/web", () => {
+    let rawButton = 0;
+    let rawInput = 0;
+    let rawTextarea = 0;
+    let rawDialog = 0;
+    let legacyZineClasses = 0;
+    let rawSvg = 0;
+    for (const file of appSources("web", [".tsx"])) {
+      const lines = stripJsComments(readFileSync(file, "utf8")).split(/\r?\n/);
+      for (const line of lines) {
+        if (/<button\b/.test(line)) rawButton += 1;
+        if (/<input\b/.test(line)) rawInput += 1;
+        if (/<textarea\b/.test(line)) rawTextarea += 1;
+        if (/role="dialog"|aria-modal="true"/.test(line)) rawDialog += 1;
+        if (/className=.*\b(btn-zine|zine-card|btn-luxe-|btn-chamfer)\b/.test(line)) {
+          legacyZineClasses += 1;
+        }
+        if (/<svg\b/.test(line)) rawSvg += 1;
+      }
+    }
+    expect(rawButton).toBe(0);
+    expect(rawInput).toBe(0);
+    expect(rawTextarea).toBe(0);
+    expect(rawDialog).toBe(0);
+    expect(legacyZineClasses).toBe(0);
+    expect(rawSvg).toBe(0);
+  });
+
+  it("GATE-09: enforces Odoo addon menu & icon parity across i18n, probes, and resolveNavIconPath", async () => {
+    const { resolveNavIconPath } = await import("../lib/nav-icons");
+    for (const key of [
+      "snmp",
+      "vpn",
+      "syslog",
+      "storage",
+      "radius",
+      "scripture",
+      "mtime",
+      "memory",
+      "ai",
+      "probes",
+      "i18n",
+      "dot",
+    ]) {
+      expect(resolveNavIconPath(key)).toMatch(/^M/);
+    }
+    const i18nSrc = readFileSync(join(REPO_ROOT, "packages/addons/i18n/src/index.ts"), "utf8");
+    const probesSrc = readFileSync(join(REPO_ROOT, "packages/addons/probes/src/index.ts"), "utf8");
+    expect(i18nSrc).toMatch(/\bmenus:\s*i18nMenus\b/);
+    expect(probesSrc).toMatch(/\bmenus:\s*probesMenus\b/);
+  });
+
+  it("GATE-10: forbids raw /art/*.{png,webp} literals in apps/web/src", () => {
+    const offenders: string[] = [];
+    for (const file of appSources("web", [".ts", ".tsx"])) {
+      const source = stripJsComments(readFileSync(file, "utf8"));
+      if (/["']\/art\/[^"']+\.(?:png|webp)["']/.test(source)) {
+        offenders.push(relative(REPO_ROOT, file).replace(/\\/g, "/"));
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("GATE-11: enforces single brand mark in console-shell-adapter headerStart without duplicate Crown", () => {
+    const src = readFileSync(
+      join(APPS_ROOT, "web/src/components/shell/console-shell-adapter.tsx"),
+      "utf8",
+    );
+    expect(src).not.toMatch(/headerStart=\{[\s\S]{0,200}<Crown\b/);
+  });
+
+  it("GATE-12: forbids solid chromatic surfaces paired with fixed black, ink, or foreground text", () => {
+    const offenders: string[] = [];
+    const files = [...appSources("web", [".tsx"]), ...walk(join(UI_ROOT, "src"), [".tsx"])].filter(
+      (file) => !/\.test\.tsx$/.test(file),
+    );
+    const unsafeCombo =
+      /\bbg-\[var\(--(?:blue|yellow|green)\)\](?!\/)[^\n"'`]*\b(?:text-black|text-\[var\(--(?:foreground|ink)\)\])|\b(?:text-black|text-\[var\(--(?:foreground|ink)\)\])[^\n"'`]*\bbg-\[var\(--(?:blue|yellow|green)\)\](?!\/)/;
+    for (const file of files) {
+      const lines = stripJsComments(readFileSync(file, "utf8")).split(/\r?\n/);
+      lines.forEach((line, idx) => {
+        if (unsafeCombo.test(line)) {
+          offenders.push(`${relative(REPO_ROOT, file).replace(/\\/g, "/")}:${idx + 1}`);
+        }
+      });
+    }
+    expect(offenders).toEqual([]);
   });
 });

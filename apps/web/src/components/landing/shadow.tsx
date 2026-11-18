@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { ArrowRight, SkullCrossbonesFunky, SprayCan } from "@moonwitness/ui/icons";
-import { DistressedSticker, Grain, Staple, Button } from "@moonwitness/ui";
+import { Button, DistressedSticker, Grain, Staple, ZineCardRough } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { useTimelineEvents } from "@/lib/api/timeline";
 
@@ -132,7 +132,7 @@ export function Shadow() {
 
         <div className="mt-12 relative w-full max-w-2xl">
           <Staple className="-top-1 left-10 -rotate-12" />
-          <div className="zine-card-rough relative overflow-hidden border-[var(--red)]/40">
+          <ZineCardRough className="relative overflow-hidden border-[var(--red)]/40">
             <div className="p-5 font-mono text-xs tracking-widest text-[var(--red)]">
               SIGNAL ARCHIVE PREVIEW
             </div>
@@ -182,7 +182,7 @@ export function Shadow() {
                 No timeline events available.
               </p>
             )}
-          </div>
+          </ZineCardRough>
         </div>
 
         <div className="mt-12 flex flex-wrap items-center gap-5">
