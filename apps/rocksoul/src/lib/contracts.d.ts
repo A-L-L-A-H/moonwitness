@@ -353,6 +353,13 @@ export interface CreateExperienceArgs {
   artifactId?: string | null;
 }
 
+export interface StartSupervisedAgentRunArgs {
+  agentId: string;
+  repositoryId: string;
+  worktreePath: string;
+  prompt: string;
+}
+
 export interface NativeCommands {
   await_mid_loopback_callback: { args: { authorizeUrl: string }; result: MidLoopbackCallback };
   get_dashboard: { args: Record<string, never>; result: Dashboard };
@@ -414,6 +421,20 @@ export interface NativeCommands {
     result: LessonRecord;
   };
   list_soul_journal: { args: Record<string, never>; result: SoulJournalEntry[] };
+  discover_local_providers: { args: Record<string, never>; result: string[] };
+  start_supervised_agent_run: { args: StartSupervisedAgentRunArgs; result: AgentSupervisorStatus };
+  cancel_supervised_agent_run: {
+    args: { runId: string };
+    result: AgentSupervisorStatus;
+  };
+  get_agent_execution_steps: {
+    args: { runId: string };
+    result: AgentExecutionStep[];
+  };
+  evaluate_agent_worktree_evidence: {
+    args: { worktreePath: string };
+    result: AgentRunExecutionResult;
+  };
 }
 
 export type NativeCommand = keyof NativeCommands;
@@ -497,3 +518,38 @@ export interface RocksoulApproval {
   status: RocksoulApprovalStatus;
   expiresAt: string;
 }
+
+export interface AgentExecutionStep {
+  id: string;
+  runId: string;
+  stepIndex: number;
+  kind: string;
+  summary: string;
+  status: string;
+  payloadJson: string;
+  outputText: string;
+  errorText: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AgentSupervisorStatus {
+  runId: string;
+  pid?: number | null;
+  status: string;
+  worktreePath: string;
+  timeoutSeconds: number;
+  heartbeatAt: string;
+  startedAt: string;
+  endedAt?: string | null;
+}
+
+export interface AgentRunExecutionResult {
+  runId: string;
+  status: string;
+  exitCode?: number | null;
+  summary: string;
+  changedFiles: string[];
+  diffStat: string;
+}
+

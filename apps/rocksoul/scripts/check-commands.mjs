@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 
 const commandFiles = [
+  "src-tauri/src/commands/agent_execution.rs",
   "src-tauri/src/commands/cloud_backup.rs",
   "src-tauri/src/commands/continuity.rs",
   "src-tauri/src/commands/issues.rs",
@@ -45,7 +46,7 @@ const registeredCommands = new Set(
   [...registration.matchAll(/commands::[a-z][a-z0-9_]*::([a-z][a-z0-9_]*)/g)].map((match) => match[1]),
 );
 const implementedCommands = new Set(
-  [...source.matchAll(/#\[tauri::command\]\s*pub (?:async )?fn ([a-z][a-z0-9_]*)/g)].map((match) => match[1]),
+  [...source.matchAll(/#\[tauri::command\](?:[\s\S]*?)pub (?:async )?fn ([a-z][a-z0-9_]*)/g)].map((match) => match[1]),
 );
 const violations = [];
 
@@ -107,6 +108,11 @@ const commandArgs = {
   create_lesson: ["experience_id", "proposal"],
   resolve_lesson: ["lesson_id", "status"],
   list_soul_journal: [],
+  discover_local_providers: [],
+  start_supervised_agent_run: ["agent_id", "repository_id", "worktree_path", "prompt"],
+  cancel_supervised_agent_run: ["run_id"],
+  get_agent_execution_steps: ["run_id"],
+  evaluate_agent_worktree_evidence: ["worktree_path"],
 };
 const argumentInterfaces = new Map();
 for (const [, name, body] of contracts.matchAll(/export interface ([A-Za-z][A-Za-z0-9]*) \{([\s\S]*?)\n\}/g)) {
