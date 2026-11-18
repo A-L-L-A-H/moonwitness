@@ -206,3 +206,35 @@ The following items are source/configuration findings and must be verified again
 2. **Host Firewall & Port Ingress:** Verify that UFW/nftables on the VPS permits incoming TCP 80/443 (Caddy) and UDP 1812/1813 (RADIUS from allowed MikroTik subnet), while blocking public access to internal ports (3000, 3002, 3003, 8090, 8091, 8092, 8093, 8094).
 3. **Docker Engine & Storage Drivers:** Verify that Docker Engine on `apps.mycocolink.com` supports Compose V2 and persistent volume mounts at `/var/lib/moonwitness/data`.
 4. **Self-Hosted Runner Isolation:** Ensure that untrusted PR runners run in ephemeral sandboxes without host Docker socket mounts or production credentials (MW-0017 / #165).
+
+---
+
+## Wave 0 Verified Workspace & Upstream Inventory (`dev` @ `acdc72a`)
+
+> Audited for `MW-0003` & `MW-0004`. Governs alongside [ADR-006](adr-006-three-app-topology-and-trust-zones.md).
+
+### Verified Workspace Inventory (`apps`, `packages`, `services`, `cp`)
+
+- **`apps/` (7 current -> 3 target per ADR-006):**
+  - `@moonwitness/api` (`apps/api`) — **Retain.** Depends on `@moonwitness/addon-base`, `@moonwitness/addon-timeline`, `@moonwitness/ai`, `@moonwitness/core`, `@moonwitness/errors`, `@moonwitness/mid`, `@moonwitness/orm`, `@moonwitness/schema`, `@moonwitness/types`.
+  - `@moonwitness/web` (`apps/web`) — **Retain.** Depends on `@moonwitness/assets`, `@moonwitness/avatars`, `@moonwitness/canon`, `@moonwitness/core`, `@moonwitness/types`, `@moonwitness/ui`.
+  - `rocksoul-dx` (`apps/rocksoul` + `apps/rocksoul/src-tauri`) — **Retain.** Depends on `@moonwitness/canon`, `@moonwitness/core`, `@moonwitness/ui`.
+  - `@moonwitness/cli` (`apps/cli`) — **Move to `packages/cli` (`MW-0103`).** Depends on `@moonwitness/core`.
+  - `@moonwitness/igate` (`apps/igate`) — **Retire (`MW-0105`).** Depends on `@moonwitness/core`.
+  - `@moonwitness/mid` (`apps/mid`) — **Consolidate into API-owned identity (`MW-0108`).** Consumed internally by `@moonwitness/api`.
+  - `apps/memory` (`moonwitness-memory-web` + `apps/memory/backend`) — **Relocate to private `services/memory` (`MW-0110`–`MW-0112`).**
+- **`packages/` (12 shared + 5 addon directories):**
+  - Shared: `@moonwitness/ai`, `@moonwitness/assets`, `@moonwitness/avatars`, `@moonwitness/canon`, `@moonwitness/contracts`, `@moonwitness/core`, `@moonwitness/errors`, `@moonwitness/eslint-config`, `@moonwitness/orm`, `@moonwitness/schema`, `@moonwitness/types`, `@moonwitness/typescript-config`, `@moonwitness/ui`.
+  - Addons (`packages/addons/*`): `@moonwitness/addon-base` (`__base`), `@moonwitness/addon-timeline` (`timeline`), plus non-package directories `ai`, `auth`, `i18n`.
+- **`services/` (4 Rust Cargo crates):** `radius`, `snmp-poller`, `storage`, `syslog`.
+- **`cp/`:** `cp/arsy` (Go control plane, `cp/arsy/go.mod`).
+
+### Verified API Upstream URLs & Open Runtime Gaps (`MW-0004`)
+
+| Env / Upstream    | Code Default (`apps/api/src/shared/env.ts`) | `docker-compose.yml` Value | Status & Wave Target                                                                                                                             |
+| ----------------- | ------------------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `RADIUS_URL`      | `http://127.0.0.1:8090`                     | `http://radius:8090`       | Active in Compose; UDP bind defaults `${RADIUS_BIND_IP:-0.0.0.0}:1812/1813` (tighten in `MW-0504`)                                               |
+| `SNMP_POLLER_URL` | `http://127.0.0.1:8094`                     | `http://snmp-poller:8094`  | Active in Compose; move to optional `ops` profile in `MW-0502`                                                                                   |
+| `SYSLOG_URL`      | `http://127.0.0.1:8093`                     | `http://syslog:8093`       | Active in Compose; move to optional `ops` profile in `MW-0502`                                                                                   |
+| `STORAGE_URL`     | `http://127.0.0.1:8091`                     | _Not configured_           | **MISMATCH (`MW-0501`):** Compose lacks `storage` service and `STORAGE_URL` override; container requests currently hit loopback `127.0.0.1:8091` |
+| `DATABASE_URL`    | PostgreSQL expected in prod                 | PostgreSQL service present | **MISMATCH (`MW-0505`):** `Dockerfile` `api` stage sets `ENV DATABASE_URL=/data/moonwitness.db`                                                  |

@@ -95,3 +95,9 @@ Adopt a **frozen `/api/v1` strategy** with the following rules:
 - `spec.md` — UR-ARCH-001: No API contract versioning strategy
 - `task.md` — UR-ARCH-001 task: Document API versioning strategy
 - `.github/workflows/ci.yml` — Verify API changes don't break existing contracts
+
+---
+
+## Wave 0 Reconciliation Note (`MW-0006`)
+
+- **Classification:** Current for `/api/v1` API versioning prefix; supplementary runtime & identity boundaries are governed by [ADR-006: Three-App Topology & Trust Zones](adr-006-three-app-topology-and-trust-zones.md) and [RUNTIME-SERVICE-INVENTORY.md](RUNTIME-SERVICE-INVENTORY.md).

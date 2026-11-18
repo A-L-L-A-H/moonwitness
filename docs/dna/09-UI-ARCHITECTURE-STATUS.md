@@ -35,3 +35,12 @@ Status vocabulary: SPECIFIED (documented intent) · IMPLEMENTED (code exists) ·
 
 format, ui lint, ui typecheck, ui tests, `ui:contrast`, a-l-l-a-h typecheck/lint/tests, web tests, builds of a-l-l-a-h, web, rocksoul-dx, and `gate:push` (16/16 checks): all exit 0.
 Not executed: Playwright E2E (`@playwright/test` is not installed in the workspace, so `apps/a-l-l-a-h/e2e` is unrun and excluded from tsconfig).
+
+
+---
+
+## Wave 0 Document Classification (`MW-0006`)
+
+- **Classification:** Partially Superseded Historical UI Snapshot (`dev` @ `acdc72a`).
+- **Superseded Parts:** Any implication that individual Nine Worlds require separate app workspaces outside `apps/web`.
+- **Current Authority:** [ADR-006: Three-App Topology & Trust Zones](../architecture/adr-006-three-app-topology-and-trust-zones.md) (`apps/web`, `apps/api`, `apps/rocksoul` only).
