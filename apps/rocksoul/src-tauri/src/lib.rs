@@ -1,6 +1,7 @@
 mod commands;
 mod db;
 mod models;
+pub mod rocksoul_contracts;
 
 use crate::commands::repositories;
 
@@ -39,6 +40,20 @@ pub fn run() {
             commands::cloud_backup::disconnect_google_drive,
             commands::cloud_backup::backup_to_google_drive,
             commands::cloud_backup::restore_from_google_drive,
+            commands::continuity::capture_memory,
+            commands::continuity::create_memory,
+            commands::continuity::search_memories,
+            commands::continuity::update_memory,
+            commands::continuity::delete_memory,
+            commands::continuity::create_work_session,
+            commands::continuity::list_work_sessions,
+            commands::continuity::close_work_session,
+            commands::continuity::create_resume_point,
+            commands::continuity::list_resume_points,
+            commands::continuity::create_experience,
+            commands::continuity::create_lesson,
+            commands::continuity::resolve_lesson,
+            commands::continuity::list_soul_journal,
             commands::s3_gateway::s3_gateway_status,
             commands::s3_gateway::start_s3_gateway,
             commands::s3_gateway::stop_s3_gateway,

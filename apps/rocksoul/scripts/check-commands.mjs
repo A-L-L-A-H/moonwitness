@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 const commandFiles = [
   "src-tauri/src/commands/cloud_backup.rs",
+  "src-tauri/src/commands/continuity.rs",
   "src-tauri/src/commands/issues.rs",
   "src-tauri/src/commands/milestones.rs",
   "src-tauri/src/commands/monitor.rs",
@@ -92,6 +93,20 @@ const commandArgs = {
   s3_gateway_status: [],
   start_s3_gateway: [],
   stop_s3_gateway: [],
+  capture_memory: ["title", "content", "category", "source_ref", "project_id"],
+  create_memory: ["category", "title", "content", "source_type", "source_ref", "confidence", "retention", "project_id", "repository_id", "issue_id"],
+  search_memories: ["query", "category"],
+  update_memory: ["memory_id", "title", "content", "category", "status", "retention", "source_ref"],
+  delete_memory: ["memory_id"],
+  create_work_session: ["name", "project_id", "repository_id", "issue_id", "context_json"],
+  list_work_sessions: [],
+  close_work_session: ["session_id"],
+  create_resume_point: ["work_session_id", "title", "summary", "context_json"],
+  list_resume_points: [],
+  create_experience: ["title", "summary", "evidence_json", "task_id", "run_id", "artifact_id"],
+  create_lesson: ["experience_id", "proposal"],
+  resolve_lesson: ["lesson_id", "status"],
+  list_soul_journal: [],
 };
 const argumentInterfaces = new Map();
 for (const [, name, body] of contracts.matchAll(/export interface ([A-Za-z][A-Za-z0-9]*) \{([\s\S]*?)\n\}/g)) {
