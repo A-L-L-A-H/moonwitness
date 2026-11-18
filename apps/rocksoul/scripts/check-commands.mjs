@@ -8,6 +8,7 @@ const commandFiles = [
   "src-tauri/src/commands/milestones.rs",
   "src-tauri/src/commands/monitor.rs",
   "src-tauri/src/commands/orchestration.rs",
+  "src-tauri/src/commands/pen_and_companion.rs",
   "src-tauri/src/commands/projects.rs",
   "src-tauri/src/commands/repositories.rs",
   "src-tauri/src/commands/s3_gateway.rs",
@@ -119,6 +120,12 @@ const commandArgs = {
   get_orchestration_tasks: ["plan_id"],
   update_orchestration_plan_status: ["plan_id", "status"],
   step_orchestration_cycle: ["plan_id"],
+  save_studio_draft: ["draft_id", "title", "content", "kind", "project_id"],
+  list_studio_drafts: ["project_id"],
+  record_research_claim: ["question", "claim", "source_citation", "confidence"],
+  list_research_claims: [],
+  get_companion_profile: [],
+  update_companion_state: ["companion_state"],
 };
 const argumentInterfaces = new Map();
 for (const [, name, body] of contracts.matchAll(/export interface ([A-Za-z][A-Za-z0-9]*) \{([\s\S]*?)\n\}/g)) {
