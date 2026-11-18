@@ -96,8 +96,8 @@ describe("BFF OAuth exchange and logout routes", () => {
   });
 
   async function loadApp(): Promise<FastifyInstance> {
-    const { buildFastify } = await import("../../infrastructure/adapters/fastify.adapter");
-    const built = await buildFastify({ prefix: API_PREFIX });
+    const { buildCoreApp } = await import("../../bootstrap");
+    const built = await buildCoreApp({ prefix: API_PREFIX });
     await built.ready();
     return built;
   }

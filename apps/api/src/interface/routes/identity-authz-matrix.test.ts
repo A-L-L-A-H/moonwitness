@@ -71,8 +71,8 @@ describe("API identity & deny-by-default authorization matrix", () => {
       displayName: "Matrix Viewer",
     });
 
-    const { buildFastify } = await import("../../infrastructure/adapters/fastify.adapter");
-    app = await buildFastify({ prefix: API_PREFIX });
+    const { buildCoreApp } = await import("../../bootstrap");
+    app = await buildCoreApp({ prefix: API_PREFIX });
     await app.ready();
   });
 

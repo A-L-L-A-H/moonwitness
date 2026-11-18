@@ -1,21 +1,25 @@
-import { env } from "./shared/env";
-import { createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
+import type { FastifyError, FastifyInstance } from "fastify";
+import Fastify from "fastify";
+import FastifyCookie from "@fastify/cookie";
+import FastifyCors from "@fastify/cors";
+import { createActorContext, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import {
   AddonRuntimeController,
   baseManifest,
+  getEdgeLoopbackErrorPayload,
+  getUpstreamBridgeHeaders,
   registerBaseAddon,
+  resolveTraceContext,
+  resolveUpstreamServiceUrl,
   type AddonDefinition,
+  type AddonHostContext,
   type BaseAddonAuthBridge,
-  type RegisteredModel,
+  type HostRateLimitFactory,
 } from "@moonwitness/addon-runtime";
-import { createI18nAddon, seedI18n } from "@moonwitness/addons/i18n";
+import { createI18nAddon } from "@moonwitness/addons/i18n";
 import { createAuditAddon } from "@moonwitness/addons/audit";
-import {
-  createAuthAddon,
-  createAuthMidIdentityStore,
-  seedBootstrapAdmin,
-} from "@moonwitness/addons/auth";
-import { seedTimeline, timelineAddon } from "@moonwitness/addons/timeline";
+import { createAuthAddon, createAuthMidIdentityStore } from "@moonwitness/addons/auth";
+import { seedTimeline, timelineAddon, TimelineRepository } from "@moonwitness/addons/timeline";
 import { createControlAddon } from "@moonwitness/addons/control";
 import { createCommandCenterAddon } from "@moonwitness/addons/command-center";
 import { createProbesAddon } from "@moonwitness/addons/probes";
@@ -28,12 +32,22 @@ import { createCanonLoreAddon } from "@moonwitness/addons/canon-lore";
 import { createWitnessResearchAddon } from "@moonwitness/addons/witness-research";
 import { createEpistemicAddon } from "@moonwitness/addons/epistemic";
 import { midFastifyPlugin } from "@moonwitness/mid";
-import type { FastifyInstance } from "fastify";
+import { env, parseCorsOrigins } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
+import {
+  createAsyncRateLimiter,
+  createOrmRateLimitStore,
+  createRateLimiter,
+  resolveRateLimitKey,
+} from "./infrastructure/rate-limit";
+import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
+import { createApiMetricsCollector } from "./interface/routes/metrics";
+import { TimelineUseCase } from "./domain/usecases/timeline/timeline.usecase";
 import { authRoutes } from "./interface/routes/auth.routes";
 import { commandCenterRoutes } from "./interface/routes/command-center.routes";
 import { controlRoutes } from "./interface/routes/control.routes";
 import { memoryRoutes } from "./interface/routes/memory.routes";
+import { ensureProbesSchema } from "./interface/routes/probes.persistence";
 import { probesRoutes } from "./interface/routes/probes.routes";
 import { radiusRoutes } from "./interface/routes/radius.routes";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
@@ -42,6 +56,7 @@ import { storageRoutes } from "./interface/routes/storage.routes";
 import { syslogRoutes } from "./interface/routes/syslog.routes";
 import { timelineRoutes } from "./interface/routes/timeline.routes";
 import {
+  optionalAuth,
   requireAuth,
   requireRole,
   resolveRequestTenant,
@@ -56,144 +71,58 @@ export interface CoreAppOptions {
   disableDocs?: boolean;
 }
 
-const domainMetadataModels: RegisteredModel[] = [
-  {
-    name: "identity.user_profile",
-    description: "Crew user identity profile (public-safe fields only).",
-    publicFields: [
-      { name: "id", type: "string" },
-      { name: "username", type: "string" },
-      { name: "role", type: "string" },
-      { name: "display_name", type: "string" },
-      { name: "is_active", type: "boolean" },
-    ],
-  },
-  {
-    name: "ops.audit_log",
-    description: "Platform mutation & access audit record.",
-    publicFields: [
-      { name: "id", type: "string" },
-      { name: "domain", type: "string" },
-      { name: "entity", type: "string" },
-      { name: "entity_id", type: "string" },
-      { name: "action", type: "string" },
-      { name: "outcome", type: "string" },
-      { name: "occurred_at", type: "string" },
-    ],
-  },
-  {
-    name: "command.workflow",
-    description: "Command Center workflow execution state.",
-    publicFields: [
-      { name: "workflow_key", type: "string" },
-      { name: "name", type: "string" },
-      { name: "detail", type: "string" },
-      { name: "workflow_status", type: "string" },
-    ],
-  },
-  {
-    name: "command.alert",
-    description: "Command Center operational alert.",
-    publicFields: [
-      { name: "alert_key", type: "string" },
-      { name: "text", type: "string" },
-      { name: "level", type: "string" },
-      { name: "dismissed", type: "boolean" },
-    ],
-  },
-  {
-    name: "probe.target",
-    description: "Registered telemetry probe target.",
-    publicFields: [
-      { name: "target_key", type: "string" },
-      { name: "name", type: "string" },
-      { name: "url", type: "string" },
-      { name: "kind", type: "string" },
-      { name: "enabled", type: "boolean" },
-    ],
-  },
-  {
-    name: "storage.bucket",
-    description: "Indexed S3-compatible bucket metadata.",
-    publicFields: [
-      { name: "name", type: "string" },
-      { name: "region", type: "string" },
-      { name: "is_public", type: "boolean" },
-    ],
-  },
-  {
-    name: "storage.object",
-    description: "Indexed S3-compatible object metadata.",
-    publicFields: [
-      { name: "bucket", type: "string" },
-      { name: "object_key", type: "string" },
-      { name: "content_type", type: "string" },
-      { name: "size_bytes", type: "number" },
-    ],
-  },
-  {
-    name: "memory.record",
-    description: "Mirrored archive memory knowledge entry.",
-    publicFields: [
-      { name: "record_key", type: "string" },
-      { name: "kind", type: "string" },
-      { name: "title", type: "string" },
-      { name: "scope", type: "string" },
-    ],
-  },
-  {
-    name: "syslog.entry",
-    description: "Structured syslog event metadata.",
-    publicFields: [
-      { name: "source_host", type: "string" },
-      { name: "app_name", type: "string" },
-      { name: "severity", type: "string" },
-      { name: "received_at", type: "string" },
-    ],
-  },
-  {
-    name: "snmp.device",
-    description: "Monitored SNMP network device.",
-    publicFields: [
-      { name: "device_key", type: "string" },
-      { name: "name", type: "string" },
-      { name: "host", type: "string" },
-      { name: "enabled", type: "boolean" },
-    ],
-  },
-  {
-    name: "snmp.target",
-    description: "SNMP OID polling target.",
-    publicFields: [
-      { name: "target_key", type: "string" },
-      { name: "device_key", type: "string" },
-      { name: "oid", type: "string" },
-      { name: "enabled", type: "boolean" },
-    ],
-  },
-  {
-    name: "radius.client",
-    description: "RADIUS NAS client configuration.",
-    publicFields: [
-      { name: "client_key", type: "string" },
-      { name: "name", type: "string" },
-      { name: "enabled", type: "boolean" },
-    ],
-  },
-  {
-    name: "radius.session",
-    description: "RADIUS accounting session record.",
-    publicFields: [
-      { name: "session_key", type: "string" },
-      { name: "username", type: "string" },
-      { name: "acct_status", type: "string" },
-      { name: "started_at", type: "string" },
-    ],
-  },
-];
+function corsOrigin(): string[] | false {
+  const configured = parseCorsOrigins(env.CORS_ORIGINS);
+  if (configured.length > 0) return configured;
+  if (env.NODE_ENV === "production") return false;
+  return ["http://localhost:3000"];
+}
+
+export function createHostRateLimitPreHandler(options: {
+  max: number;
+  windowMs: number;
+  scope: string;
+  message?: string;
+}) {
+  const useOrmStore = env.RATE_LIMIT_STORE === "orm";
+  const syncLimiter = useOrmStore
+    ? null
+    : createRateLimiter({ max: options.max, windowMs: options.windowMs });
+  const asyncLimiter = useOrmStore
+    ? createAsyncRateLimiter({
+        max: options.max,
+        windowMs: options.windowMs,
+        store: createOrmRateLimitStore(),
+      })
+    : null;
+
+  return async (
+    request: Parameters<ReturnType<HostRateLimitFactory>>[0],
+    reply: Parameters<ReturnType<HostRateLimitFactory>>[1],
+  ) => {
+    const clientKey = resolveRateLimitKey(
+      request.ip,
+      request.headers["x-forwarded-for"],
+      env.TRUSTED_PROXY_COUNT,
+    );
+    const result = asyncLimiter
+      ? await asyncLimiter.check(`${options.scope}:${clientKey}`)
+      : syncLimiter!.check(`${options.scope}:${clientKey}`);
+    reply.header("x-ratelimit-limit", options.max);
+    reply.header("x-ratelimit-remaining", result.remaining);
+    if (!result.allowed) {
+      reply.header("retry-after", Math.ceil(result.retryAfterMs / 1000));
+      return reply
+        .code(429)
+        .send({ error: options.message ?? "too many requests", code: "RATE_LIMITED" });
+    }
+    return undefined;
+  };
+}
 
 const authBridge: BaseAddonAuthBridge = {
   authenticate: requireAuth(),
+  optionalAuthenticate: optionalAuth(),
   requireRole,
   getActorRole: (request) => {
     const role = (request as AuthenticatedRequest).user?.role;
@@ -204,16 +133,47 @@ const authBridge: BaseAddonAuthBridge = {
     return id !== undefined && id !== null ? String(id) : null;
   },
   getActorTenant: resolveRequestTenant,
+  resolveActorContext: (request, source = "api") =>
+    createActorContext(
+      authBridge.getActorId(request),
+      source,
+      request.id,
+      resolveRequestTenant(request),
+    ),
 };
+
+export function createAddonHostContext(prefix: string, seedDemo: boolean): AddonHostContext {
+  const normalizedPrefix = prefix.replace(/\/+$/, "");
+  return {
+    prefix: normalizedPrefix,
+    auth: authBridge,
+    rateLimit: (opts) => createHostRateLimitPreHandler(opts),
+    proxy: {
+      resolveServiceUrl: (envVar, defaultLocalUrl) =>
+        resolveUpstreamServiceUrl(envVar, defaultLocalUrl),
+      buildHeaders: (request, baseHeaders) => getUpstreamBridgeHeaders(baseHeaders ?? {}, request),
+      checkEdgeLoopback: (serviceName, envVar, urlString) =>
+        getEdgeLoopbackErrorPayload(serviceName, envVar, urlString),
+    },
+    mid: {
+      keyEncryptionSecret:
+        process.env.MID_KEY_ENCRYPTION_SECRET?.trim() || env.MID_KEY_ENCRYPTION_SECRET,
+      issuerUrl:
+        process.env.MID_ISSUER_URL?.trim() || env.MID_ISSUER_URL || "https://id.moonwitness.biz.id",
+      cookieDomain: process.env.MID_COOKIE_DOMAIN?.trim() || env.MID_COOKIE_DOMAIN,
+      corsOrigins: process.env.CORS_ORIGINS ?? env.CORS_ORIGINS,
+    },
+    seedDemo,
+  };
+}
 
 async function registerAddonTree(
   target: FastifyInstance,
-  prefix: string,
-  seed: boolean,
+  host: AddonHostContext,
 ): Promise<void> {
   const runtime = new AddonRuntimeController();
-  const midKeyEncryptionSecret =
-    process.env.MID_KEY_ENCRYPTION_SECRET?.trim() || env.MID_KEY_ENCRYPTION_SECRET;
+  const prefix = host.prefix;
+  const midKeyEncryptionSecret = host.mid?.keyEncryptionSecret;
 
   const addons: AddonDefinition[] = [
     {
@@ -231,29 +191,24 @@ async function registerAddonTree(
       ],
       register: async () => {
         await registerBaseAddon(target, {
-          extraModels: domainMetadataModels,
           runtime,
-          auth: authBridge,
+          auth: host.auth,
           apiPrefix: prefix,
         });
       },
     },
-    createI18nAddon({ prefix, auth: authBridge }),
-    createAuditAddon({ prefix, auth: authBridge }),
+    createI18nAddon({ prefix, auth: host.auth }),
+    createAuditAddon({ prefix, auth: host.auth }),
     createAuthAddon({
-      runBootstrapSeed: false,
       registerRoutes: async (scope) => {
-        if (midKeyEncryptionSecret) {
+        if (midKeyEncryptionSecret && host.mid) {
           await scope.register(midFastifyPlugin, {
             db: createD1DatabaseFromOrm(getDb()),
             identityStore: createAuthMidIdentityStore(),
             keyEncryptionSecret: midKeyEncryptionSecret,
-            issuerUrl:
-              process.env.MID_ISSUER_URL?.trim() ||
-              env.MID_ISSUER_URL ||
-              "https://id.moonwitness.biz.id",
-            cookieDomain: process.env.MID_COOKIE_DOMAIN?.trim() || env.MID_COOKIE_DOMAIN,
-            corsOrigins: process.env.CORS_ORIGINS ?? env.CORS_ORIGINS,
+            issuerUrl: host.mid.issuerUrl,
+            cookieDomain: host.mid.cookieDomain,
+            corsOrigins: host.mid.corsOrigins,
           });
           if (!target.hasDecorator("midMounted")) {
             target.decorate("midMounted", true);
@@ -313,15 +268,17 @@ async function registerAddonTree(
         await scope.register(radiusRoutes, prefix ? { prefix } : {});
       },
     }),
-    createCanonLoreAddon({ prefix }),
-    createWitnessResearchAddon({ prefix, auth: authBridge }),
-    createEpistemicAddon({ prefix, auth: authBridge }),
+    createCanonLoreAddon({ prefix, auth: host.auth }),
+    createWitnessResearchAddon({ prefix, auth: host.auth }),
+    createEpistemicAddon({ prefix, auth: host.auth }),
   ];
 
-  await runtime.syncAll(addons, target, { runSeeds: false });
-  await seedI18n();
-  await seedBootstrapAdmin();
-  if (seed) {
+  await runtime.syncAll(addons, target, {
+    runSeeds: true,
+    signingPolicy: { mode: env.ADDON_SIGNING_MODE },
+  });
+  await ensureProbesSchema();
+  if (host.seedDemo) {
     await seedTimeline();
   }
 }
@@ -339,14 +296,145 @@ export async function buildCoreApp(options: CoreAppOptions = {}): Promise<Fastif
     });
   }
 
-  const { buildFastify } = await import("./infrastructure/adapters/fastify.adapter");
-  const fastify = await buildFastify({
-    prefix,
-    disableDocs: options.disableDocs,
-    authExternallyMounted: true,
-    externallyMountedAddons: true,
+  const fastify: FastifyInstance = Fastify({
+    logger: {
+      level: env.LOG_LEVEL ?? (env.NODE_ENV === "production" ? "info" : "debug"),
+    },
+    disableRequestLogging: false,
+    genReqId: (request) => {
+      const inbound = request.headers["x-request-id"];
+      if (typeof inbound === "string" && inbound.length > 0 && inbound.length <= 200) {
+        return inbound;
+      }
+      return crypto.randomUUID();
+    },
   });
 
-  await registerAddonTree(fastify, prefix, seed);
+  const metrics = createApiMetricsCollector();
+  if (!fastify.hasDecorator("metricsCollector")) {
+    fastify.decorate("metricsCollector", metrics);
+  }
+
+  fastify.addHook("onRequest", async (request, reply) => {
+    const trace = resolveTraceContext(request.headers["traceparent"]);
+    reply.header("x-request-id", request.id);
+    reply.header("traceparent", trace.traceparent);
+    request.traceparent = trace.traceparent;
+  });
+
+  fastify.addHook("onResponse", async (request, reply) => {
+    metrics.observeRequest(request.method, reply.statusCode, reply.elapsedTime);
+  });
+
+  await fastify.register(FastifyCookie);
+  await fastify.register(FastifyCors, {
+    origin: corsOrigin(),
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true,
+  });
+
+  fastify.addHook("onSend", async (_request, reply, payload) => {
+    reply.header("x-content-type-options", "nosniff");
+    reply.header("x-frame-options", "DENY");
+    reply.header("referrer-policy", "no-referrer");
+    return payload;
+  });
+
+  const maxRequests = Number(env.RATE_LIMIT_MAX);
+  if (Number.isFinite(maxRequests) && maxRequests > 0) {
+    const windowMs = Number(env.RATE_LIMIT_WINDOW_MS);
+    fastify.addHook(
+      "onRequest",
+      createHostRateLimitPreHandler({ max: maxRequests, windowMs, scope: "global" }),
+    );
+  }
+
+  fastify.setErrorHandler((error: FastifyError, request, reply) => {
+    const status = error.statusCode ?? 500;
+    request.log.error({ err: error }, "request failed");
+    if (env.NODE_ENV === "production" && status >= 500) {
+      return reply.code(status).send({ error: "internal server error" });
+    }
+    return reply.code(status).send({ error: error.message });
+  });
+
+  if (env.NODE_ENV !== "production" && !options.disableDocs) {
+    const [{ default: FastifySwagger }, { default: FastifySwaggerUi }] = await Promise.all([
+      import("@fastify/swagger"),
+      import("@fastify/swagger-ui"),
+    ]);
+    await fastify.register(FastifySwagger, {
+      openapi: {
+        openapi: "3.0.0",
+        info: {
+          title: "Moonwitness API",
+          version: "1.0.0",
+          description: "Timeline and witness data API",
+        },
+        servers: [
+          {
+            url: `http://${env.HOST}:${env.PORT}`,
+            description: "Development server",
+          },
+        ],
+      },
+    });
+    await fastify.register(FastifySwaggerUi, {
+      routePrefix: "/docs",
+      uiConfig: {
+        docExpansion: "list",
+        deepLinking: false,
+      },
+    });
+  }
+
+  if (!fastify.hasDecorator("timelineUseCase")) {
+    const repo = new TimelineRepository();
+    fastify.decorate(
+      "timelineUseCase",
+      new TimelineUseCase({
+        listEvents: async (filters) => (await repo.listEvents(filters)).data,
+        countEvents: async (filters) => (await repo.listEvents(filters)).total,
+        getEvent: (id) => repo.getEvent(id),
+        getStats: () => repo.getStats(),
+        getEras: () => repo.getEras(),
+        createEvent: (input, actor) =>
+          repo.createEvent(
+            {
+              ...input,
+              excerpt: input.excerpt ?? "",
+              body: input.body ?? "",
+              location: input.location ?? "",
+              tags: input.tags ?? [],
+              sources: input.sources ?? 0,
+              notes: input.notes ?? 0,
+              image: input.image ?? "hero-witness",
+              related: input.related ?? [],
+            },
+            actor,
+          ),
+        updateEvent: (id, patch, actor) => repo.updateEvent(id, patch, actor),
+        archiveEvent: (id, actor) => repo.archiveEvent(id, actor),
+        restoreEvent: (id, actor) => repo.restoreEvent(id, actor),
+        deleteEvent: (id, actor) => repo.deleteEvent(id, actor),
+        getEventHistory: (id) => repo.getEventHistory(id),
+      }),
+    );
+  }
+
+  if (prefix) {
+    await registerMetricsRoute(fastify, metrics);
+    await fastify.register(
+      async (instance: FastifyInstance) => {
+        await registerHealthRoutes(instance, { metrics });
+      },
+      { prefix },
+    );
+  } else {
+    await registerHealthRoutes(fastify, { metrics });
+  }
+
+  const host = createAddonHostContext(prefix, seed);
+  await registerAddonTree(fastify, host);
   return fastify;
 }

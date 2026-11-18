@@ -112,7 +112,6 @@ export async function ensureCommandCenterSchema(): Promise<void> {
 }
 
 async function seedActorDefaultsIfEmpty(actorId: string): Promise<void> {
-  await ensureCommandCenterSchema();
   const actor = createActorContext(actorId, "api");
   const existingWf = await workflowModel.repository.find({ actor_id: actorId }, { limit: 1 });
   if (existingWf.length === 0) {

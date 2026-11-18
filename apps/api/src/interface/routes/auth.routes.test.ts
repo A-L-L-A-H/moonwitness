@@ -16,8 +16,8 @@ const ADMIN_PASSWORD = "test-admin-password-2026";
  * DB-schema initialization.
  */
 async function loadApp() {
-  const { buildFastify } = await import("../../infrastructure/adapters/fastify.adapter");
-  const app = await buildFastify({ prefix: API_PREFIX });
+  const { buildCoreApp } = await import("../../bootstrap");
+  const app = await buildCoreApp({ prefix: API_PREFIX });
   await app.ready();
   return app;
 }

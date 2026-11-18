@@ -55,6 +55,8 @@ const envSchema = {
   MID_KEY_ENCRYPTION_SECRET: z.string().min(16).optional(),
   /** Cookie domain for MID session cookies (e.g. ".moonwitness.biz.id"). */
   MID_COOKIE_DOMAIN: z.string().optional(),
+  /** Addon manifest signature verification policy at boot. */
+  ADDON_SIGNING_MODE: z.enum(["permissive", "strict"]).default("permissive"),
 };
 
 function readLocalApiEnvOverrides(): Record<string, string | undefined> {

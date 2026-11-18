@@ -5,7 +5,6 @@ import {
   createCommandCenterWorkflow,
   createWorkflowInputSchema,
   dismissCommandCenterAlert,
-  ensureCommandCenterSchema,
   getCommandCenterState,
   getCommandCenterStats,
   toggleCommandCenterWorkflow,
@@ -29,7 +28,6 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
     async (request: FastifyRequest, reply: FastifyReply) => {
       const actorId = actorIdFor(request);
       if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
-      await ensureCommandCenterSchema();
       const state = await getCommandCenterState(actorId);
       return reply.code(200).send(state);
     },
@@ -41,7 +39,6 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
     async (request: FastifyRequest, reply: FastifyReply) => {
       const actorId = actorIdFor(request);
       if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
-      await ensureCommandCenterSchema();
       const stats = await getCommandCenterStats(actorId);
       return reply.code(200).send(stats);
     },
@@ -59,7 +56,6 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
           error: parsed.error.issues[0]?.message ?? "Invalid workflow payload",
         });
       }
-      await ensureCommandCenterSchema();
       const workflow = await createCommandCenterWorkflow(actorId, parsed.data);
       return reply.code(201).send({ workflow });
     },
@@ -75,7 +71,6 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
       if (!params.success) {
         return reply.code(400).send({ error: "Invalid workflow identifier" });
       }
-      await ensureCommandCenterSchema();
       const workflow = await toggleCommandCenterWorkflow(actorId, params.data.id);
       if (!workflow) {
         return reply.code(404).send({ error: "Workflow not found" });
@@ -98,7 +93,6 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
       if (!parsedStatus.success) {
         return reply.code(400).send({ error: "Invalid workflow status" });
       }
-      await ensureCommandCenterSchema();
       try {
         const workflow = await transitionCommandCenterWorkflow(
           actorId,
@@ -131,7 +125,6 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
       if (!params.success) {
         return reply.code(400).send({ error: "Invalid alert identifier" });
       }
-      await ensureCommandCenterSchema();
       const dismissed = await dismissCommandCenterAlert(actorId, params.data.id);
       if (!dismissed) {
         return reply.code(404).send({ error: "Alert not found" });

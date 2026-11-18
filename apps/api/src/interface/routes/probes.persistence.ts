@@ -77,7 +77,6 @@ export async function ensureProbesSchema(): Promise<void> {
 }
 
 export async function listProbeNodes(): Promise<ProbeNode[]> {
-  await ensureProbesSchema();
   const rows = await probeNodeModel.repository.find(
     {},
     { orderBy: [{ field: "node_key", direction: "ASC" }] },
@@ -95,7 +94,6 @@ export async function listProbeNodes(): Promise<ProbeNode[]> {
 }
 
 export async function listRecentProbeEvents(limit = 25): Promise<ProbeEvent[]> {
-  await ensureProbesSchema();
   const boundedLimit = Math.max(1, Math.min(100, limit));
   const rows = await probeEventModel.repository.find(
     {},
@@ -138,7 +136,6 @@ export async function recordProbeEvent(params: {
   latencyMs: number;
   actorSub: string;
 }): Promise<ProbeEvent> {
-  await ensureProbesSchema();
   const checkedAt = new Date().toISOString();
   const actor = createActorContext(params.actorSub, "api");
 

@@ -36,6 +36,8 @@ describe("command center persistence routes", () => {
 
   beforeEach(async () => {
     await initDb("file::memory:?cache=shared");
+    const { ensureCommandCenterSchema } = await import("./command-center.persistence");
+    await ensureCommandCenterSchema();
     const { commandCenterRoutes } = await import("./command-center.routes");
     app = Fastify({ logger: false });
     await app.register(commandCenterRoutes, { prefix: "/api/v1" });
