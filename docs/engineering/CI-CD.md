@@ -4,19 +4,19 @@
 
 | File                 | Trigger                                  | Purpose                                                |
 | -------------------- | ---------------------------------------- | ------------------------------------------------------ |
-| `ci.yml`             | push → `dev`; PR → `dev`, `main`; manual | format, lint, typecheck, test, build                   |
+| `ci.yml`             | push → `dev`; PR → `dev`, `main`; manual | `docs:check`, format, lint, typecheck, test, build     |
 | `branch-policy.yml`  | PR → `dev`, `main`                       | target branch, promotion source, Conventional Commits  |
 | `codeql.yml`         | push/PR → `dev`, `main`; weekly          | static security analysis                               |
 | `auto-promote.yml`   | CI success on `dev`                      | open/refresh `dev`→`main` PR with auto-merge           |
 | `release-please.yml` | push → `main`; manual                    | version bump, CHANGELOG, release PR, tag               |
 | `deploy.yml`         | release published; manual                | tag-driven production deploy, health check, smoke test |
 
-`deploy.yml` is implemented but has never run: the repository has no hosting target or deployment
-credentials. It fails with an explicit list of the missing configuration instead of reporting a
-green deploy. See [DEPLOYMENT.md](DEPLOYMENT.md).
+`ci.yml` is the consolidated primary CI pipeline (`Verify` Node/Turbo suite plus Go `arsy` and Rust workspace checks). Nineteen specialized workflows under `.github/workflows/*.yml` handle policy, security, browser/visual suites, release automation, and deployment:
 
-There is exactly one CI workflow. Anything that used to be a separate lint/test workflow belongs
-inside `ci.yml`; duplicating gates is how they drift.
+- **Core workflows:** `ci.yml`, `branch-policy.yml`, `codeql.yml`, `auto-promote.yml`, `release-please.yml`, `deploy.yml`, `preview-deploy.yml`, `sync-main-to-dev.yml`, `branch-cleanup.yml`
+- **Quality, security & governance checks:** `security-scan.yml`, `release-sbom.yml`, `playwright.yml`, `visual-regression.yml`, `lighthouse.yml`, `bundle-budget.yml`, `pact.yml`, `pr-size-guard.yml`, `auto-label.yml`, `infracost.yml`, `slack-notify.yml`
+
+Anything that duplicates format/lint/typecheck/unit test gates belongs inside `ci.yml` so gates do not drift. `deploy.yml` requires configured `production` GitHub Environment secrets/vars and fails explicitly if any are absent. See [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Permissions
 
@@ -36,7 +36,7 @@ retagged under you.
 
 - `allow_auto_merge` is enabled on the repository.
 - Release Please enables auto-merge on the release PR it creates.
-- `promote.yml` opens a promotion PR with auto-merge enabled.
+- `auto-promote.yml` opens a promotion PR with auto-merge enabled.
 
 ### Limitation (GitHub rule)
 
@@ -70,7 +70,7 @@ before it can merge.
 ## What CI does not do
 
 CI does not run the local gate wrapper. It runs the same underlying commands
-(`pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) so that a green
+(`pnpm docs:check`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) so that a green
 local `gate:local` and a green CI run mean the same thing. The wrapper adds local-only checks
 (secret scan, branch policy, commit messages) that CI either does not need or does differently.
 

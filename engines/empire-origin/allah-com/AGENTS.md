@@ -8,6 +8,9 @@ last_verified: "2026-11-05"
 ---
 # AGENTS.md
 
+> [!IMPORTANT]
+> **Absorbed Engine Subordination Notice (`2026-11-18`):** This file belongs to the historical `allah-com` source absorbed under `engines/empire-origin/allah-com/`. Root [AGENTS.md](../../../AGENTS.md), [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md), and [ADR-006](../../../docs/architecture/adr-006-three-app-topology-and-trust-zones.md) supersede legacy standalone repo/branch/app rules (`gate`, `dock`, `headquarter`, `id`, `jizz` are consolidated into `apps/web`).
+
 Contracts: [AUTONOMOUS.md](AUTONOMOUS.md) · [DOCUMENTATION_CONTRACT.md](DOCUMENTATION_CONTRACT.md) · [PLATFORM_CONTRACT.md](docs/architecture/PLATFORM_CONTRACT.md) · [GOAL.md](GOAL.md) · [QUALITY.md](QUALITY.md) · [LEGACY_RECONCILIATION.md](LEGACY_RECONCILIATION.md) · [BLUEPRINT.md](BLUEPRINT.md)
 
 ## Exec

@@ -8,6 +8,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+> [!IMPORTANT]
+> **Absorbed Legacy App Notice (`2026-11-18`):** Standalone `allah-com/apps/headquarter` has been consolidated into active `apps/web` per [ADR-006](../../../../../docs/architecture/adr-006-three-app-topology-and-trust-zones.md). Obey root [AGENTS.md](../../../../../AGENTS.md) and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../../../../../docs/governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md).
+
 # Headquarter Agent Guidance
 
 Follow the repository-wide [AGENTS.md](../../AGENTS.md) and [documentation contract](../../DOCUMENTATION_CONTRACT.md). This file adds Next.js-specific guidance.

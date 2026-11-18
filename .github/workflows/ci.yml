@@ -41,6 +41,11 @@ jobs:
       - name: Install (frozen lockfile)
         run: pnpm install --frozen-lockfile
 
+      - name: Docs Governance
+        run: |
+          pnpm docs:test
+          pnpm docs:check
+
       - name: Format
         run: pnpm format:check
 

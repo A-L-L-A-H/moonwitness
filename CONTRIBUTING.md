@@ -9,11 +9,16 @@ pnpm hooks:install         # optional: pre-push branch guard + gate
 pnpm gate:doctor           # confirms toolchain, git identity, remote, branch
 ```
 
-Work happens via short-lived ephemeral branches off `dev` merged via PR. Only `dev` and `main`
-persist long-term — never leave merged work branches around and never commit directly to `main` or
-`master`. See [docs/engineering/BRANCHING.md](docs/engineering/BRANCHING.md).
+Work happens via short-lived ephemeral PR branches merged into `dev`. Only `dev` and `main` persist
+long-term — never leave merged work branches around and never commit directly to `main` or `master`.
+See [docs/engineering/BRANCHING.md](docs/engineering/BRANCHING.md).
 
-## The loop
+> **AI & Autonomous Agent Rule (Superseding Local Branch Creation):** All AI and autonomous coding
+> agents **MUST** obey [AGENTS.md](AGENTS.md) and stay checked out locally on `dev` at all times
+> (`git checkout -b` / `git switch -c` are forbidden for AI agents). Open PRs against `dev` via
+> `git push origin dev:refs/heads/<type>/<slug>` without leaving `dev`.
+
+## The loop (Human Contributors)
 
 ```sh
 git switch dev
@@ -31,6 +36,18 @@ git push -u origin feat/your-change
 gh pr create --base dev
 # after PR merges:
 pnpm branches:clean        # syncs dev and deletes merged local/remote tracking refs
+```
+
+## AI Agent Loop (`AGENTS.md` Mandatory)
+
+```sh
+# Stay on local dev — never create local feature/topic branches
+pnpm gate:quick
+git add <specific files>
+git commit -m "docs(scope): short lowercase summary"
+pnpm gate:push
+git push origin dev:refs/heads/<type>/<slug>
+gh pr create --base dev --head <type>/<slug>
 ```
 
 ## Commit messages

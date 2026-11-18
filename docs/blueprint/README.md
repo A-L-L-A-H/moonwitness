@@ -1,5 +1,9 @@
 # MoonWitness Blueprint
 
+> [!WARNING]
+> **Frozen / Superseded Gen2 Architecture Pack (`EVIDENCE:HISTORICAL`, 2026-11-18):**
+> This `docs/blueprint/` corpus is preserved in full as the frozen Gen2 reference blueprint (`status: HISTORICAL` / reference for historical intent). Active monorepo runtime architecture is governed by [ADR-006](../architecture/adr-006-three-app-topology-and-trust-zones.md), [engineering-foundation.md](../architecture/engineering-foundation.md), and [DOCUMENTATION_GOVERNANCE_CONTRACT.md](../governance/DOCUMENTATION_GOVERNANCE_CONTRACT.md). Catalog: [DOCUMENT-CATALOG.md](./DOCUMENT-CATALOG.md).
+
 Canonical architecture, engineering, product, UX, security, operations, and migration source of truth for the MoonWitness ecosystem.
 
 ## Status

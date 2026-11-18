@@ -1,5 +1,9 @@
 # AI Agents Specification & Status
 
+> [!NOTE]
+> **Absorbed Engine Historical Snapshot (`EVIDENCE:HISTORICAL`, 2026-11-18):**
+> Retained verbatim from the absorbed `engines/crayon/rocksoul-crayon` archive ([September 2026 audit](../../../../docs/CONSOLIDATION-CATALOG.md)). Implementation status claims (`IMPLEMENTED` / `FOUNDATION`) reflect that historical upstream archive and **must not** be cited as verified runtime behavior of active monorepo apps (`apps/web`, `apps/api`, `apps/rocksoul`) without current monorepo tests. Root [AGENTS.md](../../../../AGENTS.md) governs active repository agent execution.
+
 **Subsystem**: `@rocksoul/ai-agents`  
 **Status Audit Date**: September 2026
 

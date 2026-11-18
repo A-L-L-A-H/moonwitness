@@ -39,22 +39,35 @@ function getArsyTokens(): { readonlyToken: string; adminToken: string } {
 const AUTH_RATE_MAX = Number(process.env.ARSY_AUTH_RATE_MAX ?? "30");
 const AUTH_RATE_WINDOW_MS = Number(process.env.ARSY_AUTH_RATE_WINDOW_MS ?? "60000");
 
-// New resource kinds that need proxy support
-const NEW_RESOURCE_KINDS = new Set([
-  "network",
-  "ssh",
-  "cert",
-  "mount",
-  "alert",
-  "gitdeploy",
+/** Declarative resource kinds supported or capability-gated by cp/arsy V1. */
+export const ARSY_V1_SUPPORTED_RESOURCE_KINDS = new Set([
+  "files",
+  "dir",
+  "docker",
+  "systemd",
   "dockercompose",
-  "package",
   "backup",
-  "kubernetes",
+  "cert",
 ]);
 
-// Hanya endpoint arsy yang dikenal yang boleh diproxy. Ini mencegah web
-// menjadi open proxy ke apa pun yang kebetulan listen di ARSY_URL.
+/** Resource kinds explicitly rejected by cp/arsy internal/resources/unsupported.go in V1. */
+export const ARSY_V1_DEFERRED_RESOURCE_KINDS = new Set([
+  "kubernetes",
+  "gitdeploy",
+  "cron",
+  "user",
+  "firewall",
+  "portforward",
+  "network",
+  "ssh",
+  "mount",
+  "alert",
+  "webhook",
+  "package",
+]);
+
+// Hanya endpoint arsy yang dikenal di cp/arsy/internal/api/server.go yang boleh diproxy.
+// Ini mencegah web menjadi open proxy ke path arsy yang tidak eksis.
 const READ_PATHS = new Set([
   "health",
   "host",
@@ -70,7 +83,6 @@ const READ_PATHS = new Set([
   "vpn/status",
   "vpn/subnets",
   "vpn/peers",
-  ...NEW_RESOURCE_KINDS,
 ]);
 
 const WRITE_PATHS = new Set([
@@ -83,7 +95,6 @@ const WRITE_PATHS = new Set([
   "vpn/up",
   "vpn/down",
   "vpn/peers",
-  ...NEW_RESOURCE_KINDS,
 ]);
 
 // Endpoint onboarding/auth memakai cookie sesi, bukan token server-side.

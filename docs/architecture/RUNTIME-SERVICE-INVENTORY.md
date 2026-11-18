@@ -1,5 +1,9 @@
 # MoonWitness Runtime, Service Ownership & Cloudflare Dependency Inventory
 
+> [!IMPORTANT]
+> **Historical Baseline / Partially Superseded (`EVIDENCE:HISTORICAL`, 2026-11-18):**
+> This inventory captures the pre-consolidation `dev` snapshot at commit `1e22fb7` (2026-11-17) and is preserved verbatim for audit provenance. Several assumptions in §1–§4 have since been **superseded** by [ADR-006](./adr-006-three-app-topology-and-trust-zones.md), [ADR-007](./adr-007-rocksoul-local-execution-and-data-boundary.md), and the active [docker-compose.yml](../../docker-compose.yml) / [Caddyfile](../../Caddyfile): (1) `apps/a-l-l-a-h` was consolidated into unified `apps/web`; (2) `apps/memory` moved to Zone C `services/memory`; (3) production Compose `api` uses `postgres:16-alpine` (`PostgresDriver`), with SQLite/libSQL for local/dev and Rust workers; and (4) `services/storage` runs in `--profile ops` (`:8091`).
+
 **Status:** Canonical Architecture Inventory (MW-0032 / Master Issue #187)  
 **Baseline Date:** 2026-11-17  
 **Branch:** `dev` (Commit `1e22fb7`)  

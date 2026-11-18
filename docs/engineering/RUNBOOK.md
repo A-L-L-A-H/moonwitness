@@ -28,9 +28,10 @@ The server handles `SIGTERM`/`SIGINT` by closing the Fastify instance (which run
 
 Every response sets `x-content-type-options: nosniff`, `x-frame-options: DENY`, and `referrer-policy: no-referrer`. In production, 5xx responses return `{"error":"internal server error"}` instead of internal messages; details go to the structured log only.
 
-## Backup and restore (SQLite/libSQL)
+## Backup and restore
 
-Use the tested helpers from `@moonwitness/orm`:
+- **PostgreSQL (VPS Compose production):** `docker-compose.yml` provisions `postgres:16-alpine` on `postgres-data`. Take consistent backups with `pg_dump --format=custom` and restore with `pg_restore` against the stopped API container, then verify `GET /api/v1/readyz`.
+- **SQLite/libSQL (local dev / single-node SQLite mode):** Use the tested helpers from `@moonwitness/orm`:
 
 ```ts
 import { backupDatabase, restoreDatabase } from "@moonwitness/orm";
@@ -44,10 +45,10 @@ await restoreDatabase("/backups/app-2026-11-11.db", "/var/lib/moonwitness/app.db
 
 1. Snapshot with `backupDatabase` (or copy the file plus `-wal`/`-shm` sidecars after stopping writes).
 2. Move the backup to durable, off-host storage.
-3. To restore: close the database, `restoreDatabase(...)`, start the process, confirm `GET /readyz` returns `200`.
+3. To restore: close the database, `restoreDatabase(...)`, start the process, confirm `GET /api/v1/readyz` returns `200`.
 4. Verify data with a representative read (e.g. `GET /api/v1/timeline/events?limit=1`).
 
-Backup/restore is covered by `packages/orm/src/__tests__/orm.backup.test.ts` against a disposable temp database. Still exercise it against your real staging data before relying on it.
+SQLite backup/restore is covered by `packages/orm/src/__tests__/orm.backup.test.ts` against a disposable temp database. Still exercise against staging data before relying on it in operations.
 
 ## Migration recovery
 
