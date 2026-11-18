@@ -63,12 +63,17 @@ export default function App() {
     openEcosystemUrl,
     loading,
     monitor,
+    devServices,
+    devActionTarget,
+    devActionError,
     monitorLoading,
     monitorError,
     autoMonitor,
     gitPresetView,
     setAutoMonitor,
     setGitPresetView,
+    startDevService,
+    stopDevService,
     issues,
     repositories,
     projects,
@@ -364,6 +369,9 @@ export default function App() {
             repositories={repositories}
             events={events}
             monitor={monitor}
+            devServices={devServices}
+            devActionTarget={devActionTarget}
+            desktop={isDesktop()}
             dataReady={hasLoaded && !loading && !error}
             loading={loading || !hasLoaded}
             onCreate={() => setCreateOpen(true)}
@@ -373,11 +381,20 @@ export default function App() {
             onOpenUrl={(url) => {
               void openEcosystemUrl(url);
             }}
+            onStartDev={(target) => {
+              void startDevService(target);
+            }}
+            onStopDev={(target) => {
+              void stopDevService(target);
+            }}
           />
         )}
         {page === "monitor" && (
           <Monitor
             snapshot={monitor}
+            devServices={devServices}
+            devActionTarget={devActionTarget}
+            devActionError={devActionError}
             loading={monitorLoading}
             error={monitorError}
             autoMonitor={autoMonitor}
@@ -389,6 +406,12 @@ export default function App() {
             onInspectRepoPatch={(repoId) => inspectRepoFromOverseer(repoId, "patch")}
             onOpenUrl={(url) => {
               void openEcosystemUrl(url);
+            }}
+            onStartDev={(target) => {
+              void startDevService(target);
+            }}
+            onStopDev={(target) => {
+              void stopDevService(target);
             }}
           />
         )}

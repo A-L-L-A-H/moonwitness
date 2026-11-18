@@ -7,17 +7,22 @@ import {
   FolderGit2,
   GitBranch,
   HardDrive,
+  Play,
   RefreshCw,
   ShieldCheck,
+  Square,
 } from "lucide-react";
 import { FOUR_ENTRY_DOORS, PRIME_CODE_AXIOMS, SUPREME_IDENTITY } from "@moonwitness/canon";
 import { thumbSignalUrl } from "../assets/art";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
 import { AnarchyStarSigil } from "../components/ui/RocksoulVectors";
-import type { MonitorSnapshot } from "../lib/contracts";
+import type { DevServiceEntry, DevServiceTarget, MonitorSnapshot } from "../lib/contracts";
 
 export interface MonitorProps {
   snapshot: MonitorSnapshot | null;
+  devServices?: DevServiceEntry[];
+  devActionTarget?: string | null;
+  devActionError?: string;
   loading: boolean;
   error: string;
   autoMonitor: boolean;
@@ -26,6 +31,8 @@ export interface MonitorProps {
   onRefresh: () => void;
   onInspectRepoPatch: (repositoryId: string) => void;
   onOpenUrl: (url: string) => void;
+  onStartDev?: (target: DevServiceTarget) => void;
+  onStopDev?: (target: DevServiceTarget) => void;
 }
 
 const SERVICE_FALLBACKS = [
@@ -48,6 +55,9 @@ function formatTime(iso: string): string {
 
 export default function Monitor({
   snapshot,
+  devServices = [],
+  devActionTarget = null,
+  devActionError = "",
   loading,
   error,
   autoMonitor,
@@ -56,6 +66,8 @@ export default function Monitor({
   onRefresh,
   onInspectRepoPatch,
   onOpenUrl,
+  onStartDev,
+  onStopDev,
 }: MonitorProps) {
   const disks = snapshot?.disks ?? [];
   const primaryDisk = disks[0];
@@ -72,6 +84,19 @@ export default function Monitor({
   const totalDirty = (snapshot?.repositories ?? []).reduce((acc, repo) => acc + repo.dirty_count, 0);
   const sessions = snapshot?.agent_sessions ?? [];
   const plans = snapshot?.plans ?? [];
+  const devByTarget = new Map(devServices.map((entry) => [entry.id, entry]));
+  const anyDevRunning =
+    devServices.some((entry) => entry.managed || entry.listening) ||
+    services.some((svc) => (svc.id === "allah" || svc.id === "web" || svc.id === "api") && svc.status !== "offline");
+  const allDevRunning =
+    (devServices.length > 0 && devServices.every((entry) => entry.managed || entry.listening)) ||
+    (["web", "api"].every((id) => services.some((svc) => svc.id === id && svc.status !== "offline")));
+
+  const resolveDevTarget = (serviceId: string): "web" | "api" | null => {
+    if (serviceId === "allah" || serviceId === "web") return "web";
+    if (serviceId === "api") return "api";
+    return null;
+  };
 
   return (
     <section className="page-content workspace-page monitor-page">
@@ -333,25 +358,92 @@ export default function Monitor({
             <span>
               <FolderGit2 size={15} /> MOONWITNESS ECOSYSTEM NODES &amp; A-L-L-A-H CANON BRIDGE
             </span>
-            <span>{onlineServices} ACTIVE PORT(S)</span>
+            <div className="monitor-dev-controls">
+              {desktop && onStartDev && (
+                <button
+                  type="button"
+                  disabled={Boolean(devActionTarget) || allDevRunning}
+                  onClick={() => onStartDev("all")}
+                  title="Start Web (:3000) and Core API (:3002) dev servers"
+                >
+                  <Play size={11} /> {devActionTarget === "all" ? "WORKING…" : "START DEV"}
+                </button>
+              )}
+              {desktop && onStopDev && (
+                <button
+                  type="button"
+                  disabled={Boolean(devActionTarget) || !anyDevRunning}
+                  onClick={() => onStopDev("all")}
+                  title="Stop Web (:3000) and Core API (:3002) dev servers"
+                >
+                  <Square size={11} /> STOP DEV
+                </button>
+              )}
+              <span>{onlineServices} ACTIVE PORT(S)</span>
+            </div>
           </div>
           <div className="monitor-panel-body monitor-services-wrap">
+            {devActionError && <p className="inline-notice error-output">{devActionError}</p>}
             <div className="monitor-services-grid">
-              {services.map((svc) => (
-                <div className="monitor-service-card" key={svc.id}>
-                  <div className="monitor-service-top">
-                    <b>{svc.name}</b>
-                    <span className={`monitor-badge ${svc.status === "online" ? "clean" : svc.status === "degraded" ? "dirty" : ""}`}>
-                      {svc.status.toUpperCase()}
-                      {svc.latency_ms !== null ? ` · ${svc.latency_ms}ms` : ""}
-                    </span>
+              {services.map((svc) => {
+                const target = resolveDevTarget(svc.id);
+                const managedEntry = target ? devByTarget.get(target) : undefined;
+                const isRunning = Boolean(
+                  managedEntry?.managed || managedEntry?.listening || svc.status !== "offline",
+                );
+                const lastLog = managedEntry?.recent_logs?.[managedEntry.recent_logs.length - 1];
+                return (
+                  <div className="monitor-service-card" key={svc.id}>
+                    <div className="monitor-service-top">
+                      <b>{svc.name}</b>
+                      <span className={`monitor-badge ${svc.status === "online" ? "clean" : svc.status === "degraded" ? "dirty" : ""}`}>
+                        {svc.status === "offline" && managedEntry?.managed
+                          ? "BOOTING"
+                          : svc.status.toUpperCase()}
+                        {svc.latency_ms !== null ? ` · ${svc.latency_ms}ms` : ""}
+                      </span>
+                    </div>
+                    <small>{svc.url}</small>
+                    {managedEntry?.pid && (
+                      <small className="monitor-service-meta">PID {managedEntry.pid}</small>
+                    )}
+                    {managedEntry?.last_error && (
+                      <small className="error-output">{managedEntry.last_error}</small>
+                    )}
+                    {!managedEntry?.last_error && lastLog && (
+                      <small className="monitor-service-log" title={lastLog}>
+                        {lastLog}
+                      </small>
+                    )}
+                    <div className="monitor-service-actions">
+                      <button type="button" className="outline-button" onClick={() => onOpenUrl(svc.url)}>
+                        LAUNCH <ExternalLink size={12} />
+                      </button>
+                      {desktop && target && onStartDev && onStopDev && (
+                        isRunning ? (
+                          <button
+                            type="button"
+                            className="outline-button monitor-stop-btn"
+                            disabled={Boolean(devActionTarget)}
+                            onClick={() => onStopDev(target)}
+                          >
+                            <Square size={11} /> STOP
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="outline-button monitor-start-btn"
+                            disabled={Boolean(devActionTarget)}
+                            onClick={() => onStartDev(target)}
+                          >
+                            <Play size={11} /> START
+                          </button>
+                        )
+                      )}
+                    </div>
                   </div>
-                  <small>{svc.url}</small>
-                  <button type="button" className="outline-button" onClick={() => onOpenUrl(svc.url)}>
-                    LAUNCH <ExternalLink size={12} />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="monitor-canon-strip">
               <div className="monitor-canon-head">

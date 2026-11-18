@@ -142,4 +142,59 @@ describe("Monitor (OVERSEER)", () => {
     expect(screen.getByText(/BROWSER PREVIEW MODE/)).toBeInTheDocument();
     expect(screen.getByText("NO CHECKOUTS CONNECTED.")).toBeInTheDocument();
   });
+
+  it("triggers start and stop dev controls for stack and individual nodes in desktop mode", () => {
+    const onStartDev = vi.fn();
+    const onStopDev = vi.fn();
+
+    render(
+      <Monitor
+        snapshot={SAMPLE_SNAPSHOT}
+        devServices={[
+          {
+            id: "api",
+            name: "Core API",
+            port: 3002,
+            managed: false,
+            listening: false,
+            pid: null,
+            recent_logs: [],
+            last_error: null,
+          },
+          {
+            id: "web",
+            name: "MoonWitness Web",
+            port: 3000,
+            managed: true,
+            listening: true,
+            pid: 4242,
+            recent_logs: ["[out] Ready in 310ms"],
+            last_error: null,
+          },
+        ]}
+        loading={false}
+        error=""
+        autoMonitor={false}
+        desktop={true}
+        onToggleAuto={vi.fn()}
+        onRefresh={vi.fn()}
+        onInspectRepoPatch={vi.fn()}
+        onOpenUrl={vi.fn()}
+        onStartDev={onStartDev}
+        onStopDev={onStopDev}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: /^START DEV$/i }));
+    expect(onStartDev).toHaveBeenCalledWith("all");
+
+    fireEvent.click(screen.getByRole("button", { name: /^STOP DEV$/i }));
+    expect(onStopDev).toHaveBeenCalledWith("all");
+
+    fireEvent.click(screen.getByRole("button", { name: /^START$/i }));
+    expect(onStartDev).toHaveBeenCalledWith("api");
+
+    fireEvent.click(screen.getByRole("button", { name: /^STOP$/i }));
+    expect(onStopDev).toHaveBeenCalledWith("web");
+  });
 });
