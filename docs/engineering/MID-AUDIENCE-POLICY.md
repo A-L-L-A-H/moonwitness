@@ -6,18 +6,18 @@ Signature, issuer (`iss`), expiry (`exp`), and `token_use` checks prove who mint
 
 ---
 
-## 1. First-Party OIDC Clients (`apps/mid/src/db.ts`)
+## 1. First-Party OIDC Clients (`packages/mid/src/db.ts`)
 
 All first-party clients are registered in `FIRST_PARTY_CLIENTS` as `public` OAuth 2.1 PKCE (`S256`) clients with allowed scopes `openid profile email offline_access`.
 
-| Client ID            | Product / App                           | Registered Redirect URIs                                                                                                          | Default Minted `aud`   | Permitted RFC 8707 `resource` / `audience` Targets                            |
-| -------------------- | --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------- |
-| `moonwitness-web`    | MoonWitness Web Console (`apps/web`)    | `https://moonwitness.biz.id/auth/callback`, `https://www.moonwitness.biz.id/auth/callback`, `http://localhost:3000/auth/callback` | `"moonwitness-web"`    | `moonwitness-web`, `moonwitness-api` (`https://api.moonwitness.biz.id`)       |
-| `allah-sanctuary`    | ALLAH Sanctuary (`apps/a-l-l-a-h`)      | `https://a-l-l-a-h.com/auth/callback`, `http://localhost:3003/auth/callback`                                                      | `"allah-sanctuary"`    | `allah-sanctuary`, `moonwitness-api` (`https://api.moonwitness.biz.id`)       |
-| `igate-console`      | MoonWitness IGate NOC (`apps/igate`)    | `https://igate.moonwitness.biz.id/auth/callback`                                                                                  | `"igate-console"`      | `igate-console`, `rocksoul-igate-worker` (`https://igate.moonwitness.biz.id`) |
-| `moonwitness-cli`    | MoonWitness Desktop & CLI (`apps/cli`)  | `http://127.0.0.1/callback`, `http://127.0.0.1:8765/callback`                                                                     | `"moonwitness-cli"`    | `moonwitness-cli`, `moonwitness-api` (`https://api.moonwitness.biz.id`)       |
-| `rocksoul-dx`        | ROCKSOUL - DX (`apps/rocksoul`)         | `http://127.0.0.1/callback`, `http://localhost:1420/auth/callback`                                                                | `"rocksoul-dx"`        | `rocksoul-dx`, `moonwitness-api` (`https://api.moonwitness.biz.id`)           |
-| `moonwitness-memory` | MoonWitness Memory Deck (`apps/memory`) | `https://memory-edge.moonwitness.biz.id/auth/callback`, `http://localhost:3005/auth/callback`                                     | `"moonwitness-memory"` | `moonwitness-memory` (`https://memory-edge.moonwitness.biz.id`)               |
+| Client ID            | Product / App                                                | Registered Redirect URIs                                                                                                          | Default Minted `aud`   | Permitted RFC 8707 `resource` / `audience` Targets                                        |
+| -------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------- |
+| `moonwitness-web`    | MoonWitness Web Console (`apps/web`)                         | `https://moonwitness.biz.id/auth/callback`, `https://www.moonwitness.biz.id/auth/callback`, `http://localhost:3000/auth/callback` | `"moonwitness-web"`    | `moonwitness-web`, `moonwitness-api` (`https://api.moonwitness.biz.id`)                   |
+| `allah-sanctuary`    | ALLAH Sanctuary (unified in `apps/web`)                      | `https://a-l-l-a-h.com/auth/callback`, `http://localhost:3000/auth/callback`                                                      | `"allah-sanctuary"`    | `allah-sanctuary`, `moonwitness-api` (`https://api.moonwitness.biz.id`)                   |
+| `igate-console`      | Deprecated standalone IGate worker (retired into `apps/api`) | `https://igate.moonwitness.biz.id/auth/callback`                                                                                  | `"igate-console"`      | Deprecated; NOC traffic routes through `apps/api` (`/api/v1/probes/*`, `/api/v1/igate/*`) |
+| `moonwitness-cli`    | MoonWitness Desktop & CLI (`packages/cli`)                   | `http://127.0.0.1/callback`, `http://127.0.0.1:8765/callback`                                                                     | `"moonwitness-cli"`    | `moonwitness-cli`, `moonwitness-api` (`https://api.moonwitness.biz.id`)                   |
+| `rocksoul-dx`        | ROCKSOUL - DX (`apps/rocksoul`)                              | `http://127.0.0.1/callback`, `http://localhost:1420/auth/callback`                                                                | `"rocksoul-dx"`        | `rocksoul-dx`, `moonwitness-api` (`https://api.moonwitness.biz.id`)                       |
+| `moonwitness-memory` | MoonWitness Memory Deck (private local `services/memory`)    | `https://memory-edge.moonwitness.biz.id/auth/callback`, `http://localhost:3005/auth/callback`                                     | `"moonwitness-memory"` | `moonwitness-memory` (`https://memory-edge.moonwitness.biz.id`)                           |
 
 Custom third-party/partner clients registered via `/api/clients` may request only their own `client_id` as audience. Cross-boundary requests (for example `moonwitness-web` requesting `igate-console` or `moonwitness-memory`) are rejected with `invalid_target`.
 
@@ -28,10 +28,9 @@ Custom third-party/partner clients registered via `/api/clients` may request onl
 | Resource Server                         | Implementation                                             | Accepted `aud` Policy                                                                                                                    | Configuration Override                                                                              | Rejected Tokens (`401` / `active: false`)                                                                                                                       |
 | --------------------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `moonwitness-api`                       | `apps/api/src/middleware/mid-jwt.ts` (`@moonwitness/core`) | Reviewed interactive API client allowlist: `["moonwitness-web", "moonwitness-cli", "rocksoul-dx", "allah-sanctuary", "moonwitness-api"]` | `MID_ALLOWED_AUDIENCES` (comma-separated; empty fails closed)                                       | `igate-console`, `moonwitness-memory`, unknown clients, missing/empty `aud`, `token_use !== "access"`                                                           |
-| `rocksoul-igate-worker`                 | `apps/igate/src/app.ts` (`@moonwitness/core`)              | Dedicated NOC client audience `"igate-console"`                                                                                          | `IGATE_CLIENT_ID` (defaults to `"igate-console"`)                                                   | `moonwitness-web`, `allah-sanctuary`, `moonwitness-cli`, `rocksoul-dx`, `moonwitness-memory`, missing/empty `aud`, `token_use !== "access"`                     |
-| `moonwitness-memory`                    | `apps/memory/backend/app/auth.py` & `config.py`            | Dedicated Memory audience `"moonwitness-memory"`                                                                                         | `MID_AUDIENCE` (default `"moonwitness-memory"`), optional `MID_ALLOWED_AUDIENCES` (comma-separated) | `moonwitness-web`, `igate-console`, `rocksoul-dx`, `allah-sanctuary`, `moonwitness-cli`, missing/empty/malformed `aud`, `token_use !== "access"`                |
-| MID UserInfo (`/oauth/userinfo`)        | `apps/mid/src/app.ts`                                      | Any valid MID-issued access token with `openid` scope                                                                                    | —                                                                                                   | ID tokens (`token_use !== "access"`), expired/invalid tokens                                                                                                    |
-| MID Introspection (`/oauth/introspect`) | `apps/mid/src/app.ts`                                      | Caller-bound access-token verification (see Section 4)                                                                                   | `MID_ALLOWED_AUDIENCES` (for `moonwitness-api` caller)                                              | Unauthenticated or public callers (`401`), wrong-audience access tokens (`active: false`), ID tokens (`active: false`), expired/forged tokens (`active: false`) |
+| `moonwitness-memory`                    | `apps/memory/backend/app/auth.py` -> `services/memory`     | Dedicated Memory audience `"moonwitness-memory"`                                                                                         | `MID_AUDIENCE` (default `"moonwitness-memory"`), optional `MID_ALLOWED_AUDIENCES` (comma-separated) | `moonwitness-web`, `igate-console`, `rocksoul-dx`, `allah-sanctuary`, `moonwitness-cli`, missing/empty/malformed `aud`, `token_use !== "access"`                |
+| MID UserInfo (`/oauth/userinfo`)        | `packages/mid/src/app.ts` (mounted by `apps/api`)          | Any valid MID-issued access token with `openid` scope                                                                                    | —                                                                                                   | ID tokens (`token_use !== "access"`), expired/invalid tokens                                                                                                    |
+| MID Introspection (`/oauth/introspect`) | `packages/mid/src/app.ts` (mounted by `apps/api`)          | Caller-bound access-token verification (see Section 4)                                                                                   | `MID_ALLOWED_AUDIENCES` (for `moonwitness-api` caller)                                              | Unauthenticated or public callers (`401`), wrong-audience access tokens (`active: false`), ID tokens (`active: false`), expired/forged tokens (`active: false`) |
 
 ### Dedicated API Audience vs Allowlist Mode for `moonwitness-api`
 
@@ -52,12 +51,12 @@ Per RFC 7519 Section 4.1.3, the JWT `aud` claim may be either:
 - A single non-empty string (for example `"igate-console"`), or
 - A non-empty JSON array of non-empty strings (for example `["moonwitness-web", "moonwitness-api"]`).
 
-All verifiers (`verifyEs256Jwt` in `packages/core/src/oidc.ts`, `apps/mid/src/crypto.ts`, and `verify_es256_jwt` in `apps/memory/backend/app/auth.py`) enforce:
+All verifiers (`verifyEs256Jwt` in `packages/core/src/oidc.ts`, `packages/mid/src/crypto.ts`, and `verify_es256_jwt` in Memory backend) enforce:
 
 1. **Intersection semantics**: At least one valid audience string in `claims.aud` must appear in `expectedAudience` (`string | readonly string[]`).
 2. **Fail-closed empty config**: Passing an empty string `""` or empty array `[]` (or whitespace-only entries) as `expectedAudience` always rejects (`null` / `TokenVerificationError`).
 3. **Malformed claim rejection**: Missing `aud`, empty string `""`, empty array `[]`, non-string scalars, or arrays containing non-string / blank elements are always rejected.
-4. **Authorized Party (`azp`)**: When `apps/mid` mints a multi-audience access token (e.g. `["moonwitness-web", "moonwitness-api"]`), it sets `azp` to the requesting `client_id` (`"moonwitness-web"`).
+4. **Authorized Party (`azp`)**: When `@moonwitness/mid` mints a multi-audience access token (e.g. `["moonwitness-web", "moonwitness-api"]`), it sets `azp` to the requesting `client_id` (`"moonwitness-web"`).
 
 ---
 
@@ -112,3 +111,23 @@ All resource servers verify ES256 (`P-256`) signatures, normalized issuer (`iss`
 - JWKS endpoints (`/.well-known/jwks.json`) are cached with a bounded TTL (`300s`).
 - Encountering an unseen `kid` triggers an immediate JWKS refresh so zero-downtime key rotation works without waiting for TTL expiry, while repeated unknown `kid` lookups within the same cache epoch are suppressed to avoid upstream amplification.
 - JWKS fetch failures, malformed JWKs, missing `kid`s, and empty audience allowlists always fail closed (`401`).
+
+---
+
+## 8. Identity Schema Ownership & API Authorization Policy (`MW-0201` / `MW-0203` / `MW-0205`)
+
+Identity persistence and authorization are owned exclusively by `@moonwitness/api` (mounting `@moonwitness/mid` in `packages/mid` on the shared database):
+
+| Table Set                                                                                      | Defining Owner                                               | Purpose                                                                                                                       |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
+| `users`, `sessions`, `bff_oauth_tokens`                                                        | `apps/api/src/db/migrations.ts`                              | Canonical user accounts (`admin`/`editor`/`viewer`), active session cookies (`mw_session`), and BFF OAuth token bindings.     |
+| `identity_user_profiles`, `identity_sessions`, `identity_oauth_tokens`, `identity_auth_events` | `apps/api/src/infrastructure/persistence/domain/identity.ts` | ORM identity mirrors and structured login/session audit events.                                                               |
+| `mid_signing_keys`, `mid_clients`, `mid_auth_codes`, `mid_refresh_tokens`, `mid_audit_logs`    | `packages/mid/src/db.ts`                                     | Encrypted ES256 JWKS keys, first-party/partner OIDC clients, PKCE codes, refresh-token rotation families, and OIDC audit log. |
+
+### `id.moonwitness.biz.id` Host Routing & Deny-by-Default Enforcement
+
+1. **Host authority (`apps/api/src/infrastructure/adapters/fastify.adapter.ts`)**: When `MID_KEY_ENCRYPTION_SECRET` is configured, requests with `Host: id.moonwitness.biz.id` (or direct OIDC paths `/.well-known/openid-configuration`, `/.well-known/jwks.json`, `/authorize`, `/oauth/*`, `/api/v1/mid/*`) are dispatched directly to `@moonwitness/mid` backed by the single API database.
+2. **Deny-by-default protected routes (`apps/api/src/middleware/auth.ts`)**:
+   - Anonymous, expired, revoked, or malformed cookie/Bearer callers receive `401` with `no-store`.
+   - `viewer` may read non-sensitive operator inventories (`GET /api/v1/probes/nodes`, `/api/v1/probes/events`, `/api/v1/igate/status`, `/api/v1/command-center/state`) and receives `403` on probe execution and workflow/alert mutations.
+   - `editor` may run probes and mutate workflows/alerts (`POST /api/v1/probes/run`, `/api/v1/igate/probe`, `/api/v1/command-center/*`) and query RIOT AI health/chat, while admin infrastructure configuration/usage (`PUT /api/v1/riot-ai/config`, `GET /api/v1/riot-ai/usage`, storage/RADIUS/SNMP write routes) requires `admin`.
