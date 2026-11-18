@@ -64,7 +64,7 @@ export const timelineViews: IrViewInput[] = [
     priority: 10,
     actionBindings: {
       listUrl: "/api/v1/timeline/eras",
-      createUrl: "/api/v1/timeline/eras",
+      createUrl: "/api/v1/m/timeline.era",
     },
     spec: {
       title: "Narrative Eras",

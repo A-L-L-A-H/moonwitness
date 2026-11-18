@@ -1,10 +1,17 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import Fastify from "fastify";
 import { closeDb, createActorContext, initDb, modelRegistry } from "@moonwitness/orm";
 import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
-import { TimelineRepository, seedTimeline, timelineAddon, timelineManifest } from "./index.js";
+import {
+  createTimelineAddon,
+  TimelineRepository,
+  seedTimeline,
+  timelineAddon,
+  timelineManifest,
+} from "./index.js";
 
 describe("timeline addon (zero-migration Odoo++ pilot)", () => {
   const createdDirs: string[] = [];
@@ -119,5 +126,73 @@ describe("timeline addon (zero-migration Odoo++ pilot)", () => {
       "RESTORE",
       "DELETE",
     ]);
+  });
+
+  it("mounts /api/v1/timeline/* from createTimelineAddon, isolates tenantId, avoids double listEvents, and fixes timeline.era actionBindings", async () => {
+    const repo = new TimelineRepository();
+    const listSpy = vi.spyOn(repo, "listEvents");
+    const app = Fastify({ logger: false });
+    app.addHook("preHandler", async (request) => {
+      const tenantHeader = request.headers["x-tenant-id"];
+      const roleHeader = request.headers["x-role"];
+      (request as { user?: { id: string; role: string; tenantId?: string }; tenantId?: string }).user =
+        roleHeader
+          ? {
+              id: "user-1",
+              role: String(roleHeader),
+              tenantId: typeof tenantHeader === "string" ? tenantHeader : "default",
+            }
+          : undefined;
+      (request as { tenantId?: string }).tenantId =
+        typeof tenantHeader === "string" ? tenantHeader : "default";
+    });
+
+    const runtime = new AddonRuntimeController();
+    await runtime.syncAll(
+      [
+        { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+        createTimelineAddon({ prefix: "/api/v1", repository: repo, seedDemo: false }),
+      ],
+      app,
+    );
+    await app.ready();
+
+    try {
+      const eraView = await runtime.getViewDescriptor("timeline.era", "editor");
+      expect(eraView?.actionBindings.listUrl).toBe("/api/v1/timeline/eras");
+      expect(eraView?.actionBindings.createUrl).toBe("/api/v1/m/timeline.era");
+
+      const createdA = await app.inject({
+        method: "POST",
+        url: "/api/v1/timeline/events",
+        headers: { "x-role": "editor", "x-tenant-id": "tenant-a" },
+        payload: {
+          kind: "PROJECT",
+          date: "2026-11-18",
+          era: "origins",
+          title: "Tenant A Event",
+        },
+      });
+      expect(createdA.statusCode).toBe(201);
+
+      const listA = await app.inject({
+        method: "GET",
+        url: "/api/v1/timeline/events",
+        headers: { "x-role": "viewer", "x-tenant-id": "tenant-a" },
+      });
+      expect(listA.statusCode).toBe(200);
+      expect(listA.json().total).toBe(1);
+      expect(listSpy).toHaveBeenCalledTimes(1);
+
+      const listB = await app.inject({
+        method: "GET",
+        url: "/api/v1/timeline/events",
+        headers: { "x-role": "viewer", "x-tenant-id": "tenant-b" },
+      });
+      expect(listB.statusCode).toBe(200);
+      expect(listB.json().total).toBe(0);
+    } finally {
+      await app.close();
+    }
   });
 });

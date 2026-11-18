@@ -1,8 +1,28 @@
 import type { Era, TimelineEvent } from "@moonwitness/contracts/types";
-import { SYSTEM_ACTOR, getDb, uuidv7, type ActorContext, type AuditEntry } from "@moonwitness/orm";
+import {
+  getDb,
+  normalizeTenantId,
+  SYSTEM_ACTOR,
+  uuidv7,
+  type ActorContext,
+  type AuditEntry,
+} from "@moonwitness/orm";
 import { timelineEventModel, timelineEraModel } from "./model.js";
 
-export type CreateTimelineEventInput = Omit<TimelineEvent, "id"> & { id?: string };
+export type CreateTimelineEventInput = Omit<
+  TimelineEvent,
+  "id" | "excerpt" | "body" | "location" | "tags" | "sources" | "notes" | "image" | "related"
+> & {
+  id?: string;
+  excerpt?: string;
+  body?: string;
+  location?: string;
+  tags?: string[];
+  sources?: number;
+  notes?: number;
+  image?: TimelineEvent["image"];
+  related?: string[];
+};
 export type UpdateTimelineEventInput = Partial<Omit<TimelineEvent, "id">> & { version?: number };
 
 export interface TimelineFilters {
@@ -14,6 +34,7 @@ export interface TimelineFilters {
   sort?: "newest" | "oldest";
   limit?: number;
   offset?: number;
+  tenantId?: string;
 }
 
 export interface TimelineStats {
@@ -24,9 +45,9 @@ export interface TimelineStats {
 
 export interface ITimelineRepository {
   listEvents(filters: TimelineFilters): Promise<{ data: TimelineEvent[]; total: number }>;
-  getEvent(id: string): Promise<TimelineEvent | null>;
-  getStats(): Promise<TimelineStats>;
-  getEras(): Promise<Era[]>;
+  getEvent(id: string, tenantId?: string): Promise<TimelineEvent | null>;
+  getStats(tenantId?: string): Promise<TimelineStats>;
+  getEras(tenantId?: string): Promise<Era[]>;
   createEvent(input: CreateTimelineEventInput, actor?: ActorContext): Promise<TimelineEvent>;
   updateEvent(
     id: string,
@@ -100,6 +121,10 @@ export class TimelineRepository implements ITimelineRepository {
     const params: unknown[] = [];
 
     if (this.events.softDelete) clauses.push("status != 'deleted'");
+    if (filters.tenantId !== undefined) {
+      clauses.push("tenant_id = ?");
+      params.push(normalizeTenantId(filters.tenantId));
+    }
     if (filters.era) {
       clauses.push("era = ?");
       params.push(filters.era);
@@ -149,16 +174,25 @@ export class TimelineRepository implements ITimelineRepository {
     return { data: rows.map(rowToEvent), total: Number(totalRow?.total ?? 0) };
   }
 
-  async getEvent(id: string): Promise<TimelineEvent | null> {
-    const row = await this.events.findOne(id);
+  async getEvent(id: string, tenantId?: string): Promise<TimelineEvent | null> {
+    const row = await this.events.findOne(
+      id,
+      tenantId !== undefined ? { tenantId: normalizeTenantId(tenantId) } : undefined,
+    );
     if (!row) return null;
     return rowToEvent(row as unknown as Record<string, unknown>);
   }
 
-  async getStats(): Promise<TimelineStats> {
+  async getStats(tenantId?: string): Promise<TimelineStats> {
+    const params: unknown[] = [];
+    const tenantClause = tenantId !== undefined ? " AND tenant_id = ?" : "";
+    if (tenantId !== undefined) {
+      params.push(normalizeTenantId(tenantId));
+    }
     const rows = await getDb().all<Record<string, unknown>>(
       `SELECT era, kind, COUNT(*) AS total FROM ${this.events.table}
-       WHERE status != 'deleted' GROUP BY era, kind`,
+       WHERE status != 'deleted'${tenantClause} GROUP BY era, kind`,
+      params,
     );
 
     const byEra: Record<string, number> = {};
@@ -173,8 +207,11 @@ export class TimelineRepository implements ITimelineRepository {
     return { total, byEra, byKind };
   }
 
-  async getEras(): Promise<Era[]> {
-    const rows = await this.eras.find({ status: "active" });
+  async getEras(tenantId?: string): Promise<Era[]> {
+    const rows = await this.eras.find(
+      { status: "active" },
+      tenantId !== undefined ? { tenantId: normalizeTenantId(tenantId) } : undefined,
+    );
     return rows
       .map((row) => rowToEra(row as unknown as Record<string, unknown>))
       .sort((a, b) => a.years.localeCompare(b.years));
@@ -187,6 +224,14 @@ export class TimelineRepository implements ITimelineRepository {
     const created = await this.events.create(
       {
         ...input,
+        excerpt: input.excerpt ?? "",
+        body: input.body ?? "",
+        location: input.location ?? "",
+        tags: input.tags ?? [],
+        sources: input.sources ?? 0,
+        notes: input.notes ?? 0,
+        image: input.image ?? "hero-witness",
+        related: input.related ?? [],
         id: input.id ?? uuidv7(),
       },
       actor,

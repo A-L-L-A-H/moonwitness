@@ -1,5 +1,11 @@
-import { initDb, closeDb, getDb } from "@moonwitness/orm";
-import { eras, events, seedTimeline, timelineDdl } from "@moonwitness/addons/timeline";
+import { initDb, closeDb, syncModels } from "@moonwitness/orm";
+import {
+  eras,
+  events,
+  seedTimeline,
+  timelineEraModel,
+  timelineEventModel,
+} from "@moonwitness/addons/timeline";
 import { env } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 
@@ -60,7 +66,7 @@ async function main() {
   }
   const dbPath = process.env.DATABASE_URL ?? "./moonwitness.db";
   await initDb(dbPath);
-  await getDb().exec(timelineDdl);
+  await syncModels([timelineEventModel, timelineEraModel]);
   await seedTimeline();
   console.log("Database seeded (idempotent)");
   closeDb();

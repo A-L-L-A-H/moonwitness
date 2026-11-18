@@ -19,7 +19,7 @@ import {
 import { createI18nAddon } from "@moonwitness/addons/i18n";
 import { createAuditAddon } from "@moonwitness/addons/audit";
 import { createAuthAddon, createAuthMidIdentityStore } from "@moonwitness/addons/auth";
-import { seedTimeline, timelineAddon, TimelineRepository } from "@moonwitness/addons/timeline";
+import { createTimelineAddon } from "@moonwitness/addons/timeline";
 import { createControlAddon } from "@moonwitness/addons/control";
 import { createCommandCenterAddon } from "@moonwitness/addons/command-center";
 import { createProbesAddon } from "@moonwitness/addons/probes";
@@ -42,7 +42,6 @@ import {
 } from "./infrastructure/rate-limit";
 import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
 import { createApiMetricsCollector } from "./interface/routes/metrics";
-import { TimelineUseCase } from "./domain/usecases/timeline/timeline.usecase";
 import { authRoutes } from "./interface/routes/auth.routes";
 import { commandCenterRoutes } from "./interface/routes/command-center.routes";
 import { controlRoutes } from "./interface/routes/control.routes";
@@ -54,7 +53,6 @@ import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 import { snmpPollerRoutes } from "./interface/routes/snmp-poller.routes";
 import { storageRoutes } from "./interface/routes/storage.routes";
 import { syslogRoutes } from "./interface/routes/syslog.routes";
-import { timelineRoutes } from "./interface/routes/timeline.routes";
 import {
   optionalAuth,
   requireAuth,
@@ -120,7 +118,7 @@ export function createHostRateLimitPreHandler(options: {
   };
 }
 
-const authBridge: BaseAddonAuthBridge = {
+export const authBridge: BaseAddonAuthBridge = {
   authenticate: requireAuth(),
   optionalAuthenticate: optionalAuth(),
   requireRole,
@@ -221,12 +219,7 @@ async function registerAddonTree(
         }
       },
     }),
-    {
-      ...timelineAddon,
-      registerRoutes: async (scope) => {
-        await scope.register(timelineRoutes, { prefix: prefix + "/timeline" });
-      },
-    },
+    createTimelineAddon(host),
     createControlAddon({
       registerRoutes: async (scope) => {
         await scope.register(controlRoutes, prefix ? { prefix } : {});
@@ -278,9 +271,6 @@ async function registerAddonTree(
     signingPolicy: { mode: env.ADDON_SIGNING_MODE },
   });
   await ensureProbesSchema();
-  if (host.seedDemo) {
-    await seedTimeline();
-  }
 }
 
 /**
@@ -386,40 +376,6 @@ export async function buildCoreApp(options: CoreAppOptions = {}): Promise<Fastif
         deepLinking: false,
       },
     });
-  }
-
-  if (!fastify.hasDecorator("timelineUseCase")) {
-    const repo = new TimelineRepository();
-    fastify.decorate(
-      "timelineUseCase",
-      new TimelineUseCase({
-        listEvents: async (filters) => (await repo.listEvents(filters)).data,
-        countEvents: async (filters) => (await repo.listEvents(filters)).total,
-        getEvent: (id) => repo.getEvent(id),
-        getStats: () => repo.getStats(),
-        getEras: () => repo.getEras(),
-        createEvent: (input, actor) =>
-          repo.createEvent(
-            {
-              ...input,
-              excerpt: input.excerpt ?? "",
-              body: input.body ?? "",
-              location: input.location ?? "",
-              tags: input.tags ?? [],
-              sources: input.sources ?? 0,
-              notes: input.notes ?? 0,
-              image: input.image ?? "hero-witness",
-              related: input.related ?? [],
-            },
-            actor,
-          ),
-        updateEvent: (id, patch, actor) => repo.updateEvent(id, patch, actor),
-        archiveEvent: (id, actor) => repo.archiveEvent(id, actor),
-        restoreEvent: (id, actor) => repo.restoreEvent(id, actor),
-        deleteEvent: (id, actor) => repo.deleteEvent(id, actor),
-        getEventHistory: (id) => repo.getEventHistory(id),
-      }),
-    );
   }
 
   if (prefix) {

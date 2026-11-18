@@ -1,5 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import Fastify, { type FastifyInstance } from "fastify";
 import {
   TimelineErasResponseSchema,
   TimelineEventResponseSchema,
@@ -7,22 +7,26 @@ import {
   TimelineListResponseSchema,
   TimelineStatsResponseSchema,
 } from "@moonwitness/contracts";
-import { TimelineUseCase } from "../../domain/usecases/timeline/timeline.usecase";
-import { timelineRoutes } from "./timeline.routes";
+import {
+  defaultFailClosedAuthBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import {
+  registerTimelineRoutes,
+  type ITimelineRepository,
+} from "@moonwitness/addons/timeline";
 
-vi.mock("../../middleware/auth", () => ({
-  optionalAuth: () => async (request: FastifyRequest) => {
-    request.user = {
+const testAuth: BaseAddonAuthBridge = {
+  ...defaultFailClosedAuthBridge,
+  optionalAuthenticate: async (request) => {
+    (request as { user?: { id: string; role: string } }).user = {
       id: "1",
-      username: "contract-editor",
-      email: "contract@moonwitness.local",
       role: "editor",
-      displayName: "Contract Editor",
     };
   },
-  requireAuth: () => async () => {},
-  requireRole: () => async (_request: FastifyRequest, _reply: FastifyReply) => {},
-}));
+  authenticate: async () => {},
+  requireRole: () => async () => {},
+};
 
 describe("@moonwitness/contracts timeline parity", () => {
   let app: FastifyInstance | null = null;
@@ -44,9 +48,8 @@ describe("@moonwitness/contracts timeline parity", () => {
       related: [],
     };
 
-    const timelineUseCase = new TimelineUseCase({
-      listEvents: async () => [sampleEvent],
-      countEvents: async () => 1,
+    const repository: ITimelineRepository = {
+      listEvents: async () => ({ data: [sampleEvent], total: 1 }),
       getEvent: async (id) => (id === "evt-1" ? sampleEvent : null),
       getStats: async () => ({ total: 1, byEra: { origins: 1 }, byKind: { PROJECT: 1 } }),
       getEras: async () => [
@@ -64,11 +67,16 @@ describe("@moonwitness/contracts timeline parity", () => {
       restoreEvent: async () => sampleEvent,
       deleteEvent: async () => sampleEvent,
       getEventHistory: async () => [],
-    });
+      upsertEra: async (era) => era,
+    };
 
     app = Fastify({ logger: false });
-    app.decorate("timelineUseCase", timelineUseCase);
-    await app.register(timelineRoutes, { prefix: "/api/v1/timeline" });
+    await app.register(
+      async (scope) => {
+        await registerTimelineRoutes(scope, { auth: testAuth, repository });
+      },
+      { prefix: "/api/v1/timeline" },
+    );
     await app.ready();
   });
 
