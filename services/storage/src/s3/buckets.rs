@@ -6,6 +6,7 @@ use axum::response::Response;
 
 use crate::models::Bucket;
 use crate::s3::errors::{request_id_header, try_header_value, S3Error, S3Result};
+use crate::config::StorageBackend;
 use crate::s3::state::{parse_range, validate_bucket_name, AppState, Principal, DEFAULT_REGION};
 use crate::xml::{self, Element};
 
@@ -49,10 +50,12 @@ pub async fn create_bucket(
 ) -> S3Result<Response> {
     validate_bucket_name(&bucket)?;
 
-    let dir = state.bucket_dir(&bucket);
-    tokio::fs::create_dir_all(&dir)
-        .await
-        .map_err(|e| S3Error::internal(format!("cannot create bucket directory: {e}")))?;
+    if state.config.storage_backend == StorageBackend::Filesystem {
+        let dir = state.bucket_dir(&bucket);
+        tokio::fs::create_dir_all(&dir)
+            .await
+            .map_err(|e| S3Error::internal(format!("cannot create bucket directory: {e}")))?;
+    }
 
     let existing: Option<String> = sqlx::query_scalar("SELECT name FROM buckets WHERE name = ?")
         .bind(&bucket)
@@ -118,11 +121,13 @@ pub async fn delete_bucket(
         .execute(&state.pool)
         .await?;
 
-    let dir = state.bucket_dir(&bucket);
-    if dir.exists() {
-        tokio::fs::remove_dir_all(&dir)
-            .await
-            .map_err(|e| S3Error::internal(format!("cannot remove bucket directory: {e}")))?;
+    if state.config.storage_backend == StorageBackend::Filesystem {
+        let dir = state.bucket_dir(&bucket);
+        if dir.exists() {
+            tokio::fs::remove_dir_all(&dir)
+                .await
+                .map_err(|e| S3Error::internal(format!("cannot remove bucket directory: {e}")))?;
+        }
     }
 
     let mut response = Response::new(String::new().into());
@@ -144,7 +149,7 @@ pub async fn list_objects(
 
     let rows = sqlx::query_as::<_, crate::models::ObjectRow>(
         "SELECT bucket, key, etag, size, content_type, storage_class, metadata_json, created_at, \
-         is_delete_marker FROM objects WHERE bucket = ? AND is_delete_marker = 0 \
+         is_delete_marker, storage_backend, storage_ref FROM objects WHERE bucket = ? AND is_delete_marker = 0 \
          ORDER BY key",
     )
     .bind(&bucket)
@@ -386,6 +391,8 @@ mod tests {
             metadata_json: None,
             created_at: 0,
             is_delete_marker: false,
+            storage_backend: "filesystem".to_string(),
+            storage_ref: None,
         }
     }
 
