@@ -4,10 +4,58 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { navHref, type NavItem } from "./nav-items";
-import { Crown, Smiley } from "@moonwitness/ui/icons";
+import {
+  Archive,
+  Compass,
+  Crown,
+  Database,
+  Edit,
+  FileText,
+  Globe,
+  Home,
+  Image as ImageIcon,
+  Layout,
+  Lock,
+  Server,
+  Settings,
+  Shield,
+  Smiley,
+  Terminal,
+  User,
+  Zap,
+  type DnaIconProps,
+} from "@moonwitness/ui/icons";
+import type { ComponentType } from "react";
+
+const SIDEBAR_ICON_MAP: Record<string, ComponentType<DnaIconProps>> = {
+  dashboard: Home,
+  "story-studio": Edit,
+  episodes: FileText,
+  "poster-forge": ImageIcon,
+  collections: Layout,
+  research: Compass,
+  crew: User,
+  "mission-log": Terminal,
+  intelligence: Zap,
+  "id-lab": Shield,
+  "skin-lab": Layout,
+  archive: Archive,
+  settings: Settings,
+  control: Settings,
+  vpn: Lock,
+  syslog: FileText,
+  snmp: Globe,
+  storage: Database,
+  radius: Server,
+};
+
+function SidebarItemIcon({ id }: { readonly id: string }) {
+  const Icon = SIDEBAR_ICON_MAP[id] ?? Compass;
+  return <Icon className="h-5 w-5 shrink-0" />;
+}
 import { Stack } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
-import { IMPERIUM_GATE_URL } from "@/lib/sanctuary-url";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 
 interface SidebarProps {
   items: NavItem[];
@@ -67,18 +115,7 @@ export function Sidebar({
                     : "text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white"
                 }`}
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-5 w-5 shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden
-                >
-                  <path d={item.icon} />
-                </svg>
+                <SidebarItemIcon id={item.id} />
                 {item.label}
               </Link>
             );
@@ -86,13 +123,20 @@ export function Sidebar({
         </Stack>
       </nav>
       <div className="border-t-2 border-[var(--line)] p-4">
-        <Link
-          href={IMPERIUM_GATE_URL || "/"}
-          className="mb-3 flex min-h-10 items-center justify-between border border-[var(--line)] bg-black/25 px-3 py-1.5 font-mono text-[11px] tracking-wider text-[var(--yellow)] transition-colors hover:border-[var(--yellow)] hover:text-white"
-        >
-          <span>IMPERIUM GATE</span>
-          <span>↗</span>
-        </Link>
+        <div className="mb-3 flex flex-col gap-2">
+          <SanctuaryGateLink className="flex min-h-10 items-center justify-between border border-[var(--line)] bg-black/25 px-3 py-1.5 font-mono text-[11px] tracking-wider text-[var(--yellow)] transition-colors hover:border-[var(--yellow)] hover:text-white">
+            <span>IMPERIUM GATE</span>
+            <span>↗</span>
+          </SanctuaryGateLink>
+          <Link
+            href="/moonwitness"
+            onClick={() => onNavigate?.()}
+            className="flex min-h-10 items-center justify-between border border-[var(--line)] bg-black/25 px-3 py-1.5 font-mono text-[11px] tracking-wider text-zinc-300 transition-colors hover:border-[var(--pink)] hover:text-white"
+          >
+            <span>MOONWITNESS</span>
+            <span>↗</span>
+          </Link>
+        </div>
         <div className="relative mb-3 hidden h-28 overflow-hidden border border-[var(--line)] lg:block">
           <Image
             src={artSrc("sidebar-witness")}

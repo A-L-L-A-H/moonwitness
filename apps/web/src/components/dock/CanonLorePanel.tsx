@@ -7,7 +7,7 @@ import {
   SEVEN_STEP_PROMISE,
   WORLD_PATCHES_REGISTRY,
 } from "@moonwitness/canon";
-import { IMPERIUM_GATE_URL } from "@/lib/sanctuary-url";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 
 export function CanonLorePanel() {
   const [patchSearch, setPatchSearch] = useState("");
@@ -43,14 +43,14 @@ export function CanonLorePanel() {
             Promise Flow: {SEVEN_STEP_PROMISE.join(" → ")}
           </p>
         </div>
-        <a
-          href={`${IMPERIUM_GATE_URL}/#the-codex`}
+        <SanctuaryGateLink
+          suffix="/#the-codex"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-zine btn-blue min-h-11 px-4 py-2 text-xs"
         >
           OPEN IN A-L-L-A-H CODEX ↗
-        </a>
+        </SanctuaryGateLink>
       </div>
 
       {/* 8 Canonical Story Eras */}

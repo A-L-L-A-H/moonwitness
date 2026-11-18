@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { WitnessAvatar } from "@moonwitness/ui";
 import {
   DropdownMenu,
@@ -68,11 +69,14 @@ export function ProfileMenu({
           ID Lab — your witness face
         </Link>
         <Link
-          href="/"
+          href="/moonwitness"
           className="block min-h-11 rounded px-3 py-2 text-xs text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white"
         >
-          Public site
+          Moonwitness landing
         </Link>
+        <SanctuaryGateLink className="block min-h-11 rounded px-3 py-2 text-xs text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white">
+          Public site
+        </SanctuaryGateLink>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={onExit}

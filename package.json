@@ -30,6 +30,7 @@
     "gate:release": "node scripts/gatecheck.mjs release",
     "gate:doctor": "node scripts/gatecheck.mjs doctor",
     "branch:guard": "node scripts/branch-guard.mjs",
+    "branches:clean": "node scripts/branch-guard.mjs --prune",
     "commitlint": "node scripts/commitlint.mjs",
     "hooks:install": "node scripts/install-hooks.mjs"
   },

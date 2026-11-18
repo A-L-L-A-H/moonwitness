@@ -4,7 +4,7 @@ test.use({ viewport: { width: 390, height: 844 } });
 
 for (const origin of ["toggle", "link"] as const) {
   test(`Escape dismisses mobile navigation from ${origin} and restores focus`, async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/moonwitness");
     const toggle = page.getByRole("button", { name: "Toggle menu" });
     await toggle.focus();
     await toggle.press("Enter");
@@ -25,7 +25,7 @@ for (const origin of ["toggle", "link"] as const) {
 
 test("search dialog restores focus after Escape, overlay, and Close", async ({ page }) => {
   await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const trigger = page.getByRole("button", { name: "Search the archive" });
   const dialog = page.getByRole("dialog", { name: "Search the archive" });
   const openDialog = async () => {
@@ -52,7 +52,7 @@ test("search dialog restores focus after Escape, overlay, and Close", async ({ p
 
 test("search submission preserves encoded Dock query", async ({ page }) => {
   await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await page.getByRole("button", { name: "Search the archive" }).click();
   const dialog = page.getByRole("dialog", { name: "Search the archive" });
   await dialog.getByRole("textbox", { name: "SEARCH THE SIGNALS" }).fill("signal / moon");
@@ -62,7 +62,7 @@ test("search submission preserves encoded Dock query", async ({ page }) => {
 });
 
 test("keyboard SIGNALS navigation closes menu and reaches the section", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const toggle = page.getByRole("button", { name: "Toggle menu" });
   await toggle.focus();
   await toggle.press("Space");
@@ -86,7 +86,7 @@ test("keyboard SIGNALS navigation closes menu and reaches the section", async ({
 test("editorial signal card does not require a fictional timeline event", async ({ page }) => {
   const requests: string[] = [];
   page.on("request", (request) => requests.push(request.url()));
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await expect(
     page.locator("#signals").getByText("A SIGNAL FROM BELOW", { exact: true }),
   ).toBeVisible();
@@ -95,7 +95,7 @@ test("editorial signal card does not require a fictional timeline event", async 
 
 test("decorative spins follow motion preference changes", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const star = page.locator("#home svg.animate-spin");
   await expect(star).toHaveCSS("animation-name", "none");
   await expect(page.locator("[data-transmission-strip]")).toHaveCSS("animation-name", "none");

@@ -40,6 +40,21 @@ jobs:
               ;;
           esac
 
+      - name: Work branches targeting dev must use short-lived ephemeral prefixes
+        if: github.base_ref == 'dev'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$HEAD_REF" in
+            feat/*|fix/*|chore/*|ci/*|docs/*|refactor/*|test/*|dependabot/*|release-please--*)
+              echo "head branch '$HEAD_REF' matches allowed ephemeral PR prefix"
+              ;;
+            *)
+              echo "::error::Only dev and main persist long-term. PRs into 'dev' must use a single-PR ephemeral branch (feat/*, fix/*, chore/*, ci/*, docs/*, refactor/*, test/*), got '$HEAD_REF'."
+              exit 1
+              ;;
+          esac
+
       - name: main only accepts promotions from dev
         if: github.base_ref == 'main'
         env:

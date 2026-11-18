@@ -1,5 +1,7 @@
 "use client";
 
+import { Bell } from "@moonwitness/ui/icons";
+
 import { feedItems } from "@/lib/data";
 import { Card } from "@moonwitness/ui";
 
@@ -17,17 +19,7 @@ export function Notifications({ open, onToggle }: NotificationsProps) {
         aria-expanded={open}
         className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-zinc-300 hover:bg-[var(--panel-2)] hover:text-white"
       >
-        <svg
-          viewBox="0 0 24 24"
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M18 9 A6 6 0 1 0 6 9 L4 17 L20 17 Z M10 20 Q12 22 14 20" />
-        </svg>
+        <Bell className="h-5 w-5" />
         <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--pink)] text-[9px] font-bold text-white">
           3
         </span>

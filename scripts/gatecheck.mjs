@@ -10,6 +10,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { FORBIDDEN_PUSH_BRANCHES, getBranchAudit, isAllowedBranchName } from "./branch-guard.mjs";
 
 const ROOT = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 
@@ -37,7 +38,7 @@ const STATE_COLOR = {
   [STATE.NA]: COLORS.dim,
 };
 
-const PROTECTED_BRANCHES = ["main", "master"];
+const PROTECTED_BRANCHES = [...FORBIDDEN_PUSH_BRANCHES];
 const TEXT_EXTENSIONS = new Set([
   ".ts",
   ".tsx",
@@ -247,6 +248,23 @@ function stepBranchPolicy(gate) {
   }
   if (PROTECTED_BRANCHES.includes(branch)) {
     gate.add(STATE.BLOCKED, "branch", `'${branch}' is protected; integration happens on dev`);
+    return;
+  }
+  if (!isAllowedBranchName(branch)) {
+    gate.add(
+      STATE.FAIL,
+      "branch",
+      `'${branch}' violates two-branch policy (use feat/*, fix/*, chore/*, ci/*, docs/*, refactor/*, test/*)`,
+    );
+    return;
+  }
+  const audit = getBranchAudit(branch);
+  if (audit.staleMergedBranches.length > 0) {
+    gate.add(
+      STATE.FAIL,
+      "branch-hygiene",
+      `stale merged local branch(es): ${audit.staleMergedBranches.join(", ")} (run pnpm branches:clean)`,
+    );
     return;
   }
   gate.add(STATE.PASS, "branch", branch);
@@ -479,8 +497,31 @@ function gateDoctor() {
     gate.add(STATE.BLOCKED, "branch", "detached HEAD");
   } else if (PROTECTED_BRANCHES.includes(branch)) {
     gate.add(STATE.BLOCKED, "branch", `'${branch}' is protected; switch to dev`);
+  } else if (!isAllowedBranchName(branch)) {
+    gate.add(STATE.FAIL, "branch", `'${branch}' violates ephemeral branch naming policy`);
   } else {
     gate.add(STATE.PASS, "branch", branch);
+  }
+
+  const branchAudit = getBranchAudit(branch);
+  if (branchAudit.staleMergedBranches.length > 0) {
+    gate.add(
+      STATE.BLOCKED,
+      "branch-hygiene",
+      `stale merged branch(es): ${branchAudit.staleMergedBranches.join(", ")} (run pnpm branches:clean)`,
+    );
+  } else if (branchAudit.activeUnmergedExtra.length > 0) {
+    gate.add(
+      STATE.BLOCKED,
+      "branch-hygiene",
+      `extra local branch(es): ${branchAudit.activeUnmergedExtra.join(", ")} (keep only dev & main)`,
+    );
+  } else {
+    gate.add(
+      STATE.PASS,
+      "branch-hygiene",
+      `only dev/main persisted (${branchAudit.localBranches.join(", ")})`,
+    );
   }
 
   const upstream = run("git", ["rev-parse", "--abbrev-ref", "@{upstream}"]);

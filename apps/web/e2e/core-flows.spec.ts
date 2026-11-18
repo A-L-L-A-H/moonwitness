@@ -31,7 +31,7 @@ async function mockControlSession(page: Page) {
 
 test.describe("Authentication", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/moonwitness");
   });
 
   test("should load homepage", async ({ page }) => {
@@ -99,7 +99,8 @@ test.describe("Navigation", () => {
   test("should navigate between main pages", async ({ page }) => {
     await mockControlSession(page);
     const pages = [
-      { path: "/", title: /Moonwitness/i },
+      { path: "/", title: /A-L-L-A-H\.COM/i },
+      { path: "/moonwitness", title: /Moonwitness/i },
       { path: "/vpn", title: /VPN/i },
       { path: "/setup", title: /Setup/ },
       { path: "/mission-control", title: /Shadow Command Center/i },
@@ -110,5 +111,39 @@ test.describe("Navigation", () => {
       await page.goto(path);
       await expect(page).toHaveTitle(title);
     }
+  });
+});
+
+test.describe("Host-Based Routing", () => {
+  test("serves Moonwitness at / for moonwitness.biz.id and A-L-L-A-H at / for a-l-l-a-h.com", async ({
+    page,
+    request,
+  }) => {
+    const mwRes = await request.get("/", {
+      headers: { "x-forwarded-host": "moonwitness.biz.id" },
+    });
+    expect(mwRes.status()).toBe(200);
+    const mwHtml = await mwRes.text();
+    expect(mwHtml).toContain("MOONWITNESS");
+    expect(mwHtml).toMatch(/<title>Moonwitness/i);
+
+    const allahRes = await request.get("/", {
+      headers: { "x-forwarded-host": "a-l-l-a-h.com" },
+    });
+    expect(allahRes.status()).toBe(200);
+    const allahHtml = await allahRes.text();
+    expect(allahHtml).toContain('id="the-gate"');
+    expect(allahHtml).toMatch(/<title>A-L-L-A-H\.COM/i);
+
+    await page.setExtraHTTPHeaders({ "x-forwarded-host": "moonwitness.biz.id" });
+    await page.goto("/");
+    await expect(page).toHaveTitle(/Moonwitness/i);
+    await expect(page.locator("#home")).toBeVisible();
+    await expect(page.locator("h1")).toContainText(/MOONWITNESS/i);
+
+    await page.setExtraHTTPHeaders({ "x-forwarded-host": "a-l-l-a-h.com" });
+    await page.goto("/");
+    await expect(page).toHaveTitle(/A-L-L-A-H\.COM/i);
+    await expect(page.locator("section#the-gate")).toBeVisible();
   });
 });

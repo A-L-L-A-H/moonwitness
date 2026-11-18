@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Crown } from "@moonwitness/ui/icons";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 
 export function LandingFooter() {
   return (
@@ -12,7 +13,10 @@ export function LandingFooter() {
           </span>
           <span className="text-xs text-zinc-600">// Create · Curate · Publish</span>
         </div>
-        <nav className="flex gap-5 text-xs text-zinc-500" aria-label="Footer">
+        <nav className="flex flex-wrap gap-5 text-xs text-zinc-500" aria-label="Footer">
+          <SanctuaryGateLink className="hover:text-[var(--yellow)] max-lg:min-h-11">
+            A-L-L-A-H
+          </SanctuaryGateLink>
           <Link href="/dock" className="hover:text-[var(--pink)] max-lg:min-h-11">
             Archive
           </Link>
