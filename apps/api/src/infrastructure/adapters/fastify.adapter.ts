@@ -20,7 +20,7 @@ import { probesRoutes } from "../../interface/routes/probes.routes";
 import { applyMigrations, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
 import { domainMigrations } from "../persistence/domain";
 import { TimelineUseCase } from "../../domain/usecases/timeline/timeline.usecase";
-import { OrmEventRepository } from "../repositories/orm-event.repository";
+import { TimelineRepository } from "@moonwitness/addon-timeline";
 import { seedBootstrapAdmin } from "../../services/user";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
@@ -141,9 +141,19 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   await seedBootstrapAdmin();
   await ensureProbesSchema();
 
-  // Wire persisted timeline use-case backed by ORM ops_events.
+  // Wire persisted timeline use-case backed by canonical timeline_events / timeline_eras.
   if (!fastify.hasDecorator("timelineUseCase")) {
-    fastify.decorate("timelineUseCase", new TimelineUseCase(new OrmEventRepository()));
+    const repo = new TimelineRepository();
+    fastify.decorate(
+      "timelineUseCase",
+      new TimelineUseCase({
+        listEvents: async (filters) => (await repo.listEvents(filters)).data,
+        countEvents: async (filters) => (await repo.listEvents(filters)).total,
+        getEvent: (id) => repo.getEvent(id),
+        getStats: () => repo.getStats(),
+        getEras: () => repo.getEras(),
+      }),
+    );
   }
 
   // Wire MID OIDC authority into Fastify when key-encryption secret is configured.
