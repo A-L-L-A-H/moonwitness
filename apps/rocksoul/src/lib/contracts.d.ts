@@ -353,6 +353,23 @@ export interface CreateExperienceArgs {
   artifactId?: string | null;
 }
 
+export interface CreateOrchestrationPlanArgs {
+  objective: string;
+  mode: string;
+  concurrencyLimit: number;
+  budgetSeconds: number;
+}
+
+export interface AddOrchestrationTasksArgs {
+  planId: string;
+  tasksJson: string;
+}
+
+export interface UpdateOrchestrationPlanStatusArgs {
+  planId: string;
+  status: string;
+}
+
 export interface StartSupervisedAgentRunArgs {
   agentId: string;
   repositoryId: string;
@@ -435,6 +452,11 @@ export interface NativeCommands {
     args: { worktreePath: string };
     result: AgentRunExecutionResult;
   };
+  create_orchestration_plan: { args: CreateOrchestrationPlanArgs; result: OrchestrationPlanRecord };
+  add_orchestration_tasks: { args: AddOrchestrationTasksArgs; result: OrchestrationTaskRecord[] };
+  get_orchestration_tasks: { args: { planId: string }; result: OrchestrationTaskRecord[] };
+  update_orchestration_plan_status: { args: UpdateOrchestrationPlanStatusArgs; result: OrchestrationPlanRecord };
+  step_orchestration_cycle: { args: { planId: string }; result: OrchestrationTaskRecord[] };
 }
 
 export type NativeCommand = keyof NativeCommands;
@@ -552,4 +574,32 @@ export interface AgentRunExecutionResult {
   changedFiles: string[];
   diffStat: string;
 }
+
+export interface OrchestrationPlanRecord {
+  id: string;
+  objective: string;
+  mode: string;
+  status: string;
+  concurrencyLimit: number;
+  budgetSeconds: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrchestrationTaskRecord {
+  id: string;
+  planId: string;
+  taskIndex: number;
+  title: string;
+  specialistRole: string;
+  dependsOnTaskId?: string | null;
+  agentRunId?: string | null;
+  worktreePath: string;
+  status: string;
+  retryCount: number;
+  maxRetries: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 
