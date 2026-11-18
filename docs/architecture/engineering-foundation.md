@@ -61,6 +61,7 @@ only rebuilt when its inputs change.
 - [ADR-007: RockSoul Local Execution & Data Boundary](./adr-007-rocksoul-local-execution-and-data-boundary.md)
 - [ADR-008: RIOT Intelligence Architecture Baseline](./adr-008-riot-intelligence-baseline.md)
 - [ADR-009: P3 Engine Curation & Canonical Runtime Promotion](./adr-009-p3-engine-curation-and-canon-promotion.md)
+- [ADR-010: Signed Addon Capability Manifests & Pluggable Control Scheduler](./adr-010-p3-signed-addons-and-pluggable-scheduler.md)
 
 ### Architecture, Operations, Design & Domain Specs
 
