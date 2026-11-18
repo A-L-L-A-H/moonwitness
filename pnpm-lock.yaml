@@ -1096,6 +1096,9 @@ importers:
       '@moonwitness/addon-base':
         specifier: workspace:*
         version: link:../__base
+      '@moonwitness/canon':
+        specifier: workspace:*
+        version: link:../../canon
       '@moonwitness/orm':
         specifier: workspace:*
         version: link:../../orm

@@ -64,6 +64,9 @@ import {
   computeMtimeDelta,
   rgbToCrayonRgbl,
   scorePropheticWitness,
+  OX_DX_CANONICAL_HIERARCHY,
+  validateOntologyHierarchyContract,
+  validateWitnessDerivationContract,
 } from "./index";
 
 describe("@moonwitness/canon SSOT invariants", () => {
@@ -289,5 +292,63 @@ describe("@moonwitness/canon SSOT invariants", () => {
       score: 0.85,
       verdict: "corroborated",
     });
+
+    expect(OX_DX_CANONICAL_HIERARCHY[0]).toBe("UNIVERSE");
+    expect(OX_DX_CANONICAL_HIERARCHY[48]).toBe("BIT");
+    expect(validateOntologyHierarchyContract()).toEqual({
+      valid: true,
+      levelCount: 49,
+      mismatches: [],
+    });
+    expect(validateOntologyHierarchyContract(["WRONG"]).valid).toBe(false);
+
+    const validWitness = validateWitnessDerivationContract({
+      mode: "RESEARCH",
+      semanticRecordId: "sem-1",
+      sourceSemanticRecordId: "sem-1",
+      derivationMode: "RESEARCH",
+      frames: [{ id: "f1", reviewStatus: "RESEARCHED", conceptIds: ["c_light", "c_witness"] }],
+      patterns: [{ id: "p1", triggerConcepts: ["c_light"] }],
+      derivedTargets: ["c_derived"],
+      witnesses: [
+        {
+          id: "w1",
+          patternId: "p1",
+          reviewStatus: "CANDIDATE",
+          observedFrameIds: ["f1"],
+          responseStatus: "RESOLVED",
+          positiveDirectionStatus: "RESOLVED",
+          positiveTargetConceptId: "c_derived",
+        },
+      ],
+    });
+    expect(validWitness).toEqual({ valid: true, findings: [] });
+
+    const invalidWitness = validateWitnessDerivationContract({
+      mode: "PRODUCTION",
+      semanticRecordId: "sem-1",
+      sourceSemanticRecordId: "sem-1",
+      derivationMode: "PRODUCTION",
+      frames: [{ id: "f1", reviewStatus: "RESEARCHED", conceptIds: ["c_light"] }],
+      patterns: [{ id: "p1", triggerConcepts: ["c_light"] }],
+      derivedTargets: [],
+      witnesses: [
+        {
+          id: "w1",
+          patternId: "p1",
+          reviewStatus: "LOCKED",
+          observedFrameIds: ["f1"],
+          responseStatus: "UNRESOLVED",
+          positiveDirectionStatus: "RESOLVED",
+        },
+      ],
+    });
+    expect(invalidWitness.valid).toBe(false);
+    expect(invalidWitness.findings.map((f) => f.code)).toEqual([
+      "ENGINE_MAY_ONLY_EMIT_CANDIDATE",
+      "INELIGIBLE_OBSERVED_FRAME",
+      "POSITIVE_DIRECTION_REQUIRES_RESPONSE",
+      "RESOLVED_DIRECTION_REQUIRES_TARGET",
+    ]);
   });
 });
