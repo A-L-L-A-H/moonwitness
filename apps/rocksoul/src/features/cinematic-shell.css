@@ -458,7 +458,7 @@
 }
 
 .astrolabe-monolith small {
-  color: #a9a092;
+  color: var(--world-ash);
   font: 8.5px "IBM Plex Mono", monospace;
 }
 
@@ -471,7 +471,7 @@
   padding-top: 6px;
   border-top: 1px dashed rgba(243, 235, 217, 0.14);
   font: 9.5px "IBM Plex Mono", monospace;
-  color: #b8b0a2;
+  color: var(--color-paper-soft);
 }
 
 .astrolabe-meta-strip b {
@@ -545,7 +545,7 @@
 .katana-cut-shell .hero-art {
   min-height: 156px;
   border: 1px solid rgba(229, 62, 56, 0.48);
-  background: #07080c;
+  background: var(--color-black);
   clip-path: polygon(16px 0, 100% 0, calc(100% - 16px) 100%, 0 100%);
 }
 
@@ -586,7 +586,7 @@
   width: 224px !important;
   height: 48px !important;
   transform: none !important;
-  background: linear-gradient(90deg, var(--world-crimson) 0%, #a4201c 100%) !important;
+  background: linear-gradient(90deg, var(--world-crimson) 0%, var(--world-crimson-deep) 100%) !important;
   border: 1px solid var(--world-crimson-soft) !important;
   color: var(--color-paper) !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.65) !important;
@@ -769,7 +769,7 @@
 .katana-cut-shell .riot-button:disabled {
   background: rgba(24, 24, 30, 0.85) !important;
   border-color: rgba(243, 235, 217, 0.16) !important;
-  color: #8f887d !important;
+  color: var(--color-text-muted) !important;
 }
 
 .katana-cut-shell .outline-button {
@@ -790,7 +790,7 @@
 .katana-cut-shell .filter-strip select {
   background: rgba(8, 9, 14, 0.86) !important;
   border: 1px solid rgba(243, 235, 217, 0.2) !important;
-  color: #c8bfb0 !important;
+  color: var(--color-paper-soft) !important;
   clip-path: polygon(7px 0, 100% 0, calc(100% - 7px) 100%, 0 100%);
 }
 
