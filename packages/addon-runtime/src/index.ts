@@ -1,20 +1,28 @@
+import "./fastify-augment.js";
 import type { FastifyInstance } from "fastify";
 import manifestData from "../manifest.json" with { type: "json" };
 import { systemModels, runAddonLifecycle } from "./addon.js";
 import type { AddonLifecycleDiagnostics, AddonLifecycleResult } from "./addon.js";
 import {
+  buildMetadataRegistryFromModels,
   createMetadataRegistry,
   registerMetadataRoutes,
   registerRuntimeMetaRoutes,
   type RegisteredModel,
 } from "./metadata.js";
-import { registerGenericModelRoutes, type BaseAddonAuthBridge } from "./generic-crud.js";
+import { registerGenericModelRoutes } from "./generic-crud.js";
+import type { BaseAddonAuthBridge } from "./host-context.js";
 import type { AddonRuntimeController } from "./runtime.js";
 
 export { systemModels, runAddonLifecycle };
 export type { AddonLifecycleDiagnostics, AddonLifecycleResult };
 export type { RegisteredModel, MetadataRegistry } from "./metadata.js";
-export { registerMetadataRoutes, registerRuntimeMetaRoutes } from "./metadata.js";
+export {
+  buildMetadataRegistryFromModels,
+  createMetadataRegistry,
+  registerMetadataRoutes,
+  registerRuntimeMetaRoutes,
+} from "./metadata.js";
 export {
   irAddonModel,
   irModelRecord,
@@ -58,11 +66,37 @@ export {
   type RegisteredFieldMetadata,
   type RuntimeViewDescriptor,
 } from "./runtime.js";
+export { registerGenericModelRoutes } from "./generic-crud.js";
 export {
-  registerGenericModelRoutes,
   defaultFailClosedAuthBridge,
+  resolveActorTenantFromBridge,
+  resolveActorContextFromBridge,
+  getRequestCookie,
+  setReplyCookie,
+  clearReplyCookie,
+  type AddonHostContext,
   type BaseAddonAuthBridge,
-} from "./generic-crud.js";
+  type FastifyPreHandler,
+  type HostMidConfig,
+  type HostProxyBridge,
+  type HostRateLimitFactory,
+} from "./host-context.js";
+export {
+  resolveTraceContext,
+  buildChildTraceparent,
+  isCloudflareWorkersRuntime,
+  isLoopbackServiceUrl,
+  resolveUpstreamServiceUrl,
+  getEdgeLoopbackErrorPayload,
+  getUpstreamBridgeHeaders,
+  isBlockedRuntimeHost,
+  validateServiceEndpointUrl,
+  validateRiotAiRuntimeConfig,
+  validateMemoryRuntimeConfig,
+  type EdgeLoopbackErrorPayload,
+  type TraceContext,
+  type UpstreamCorrelationInput,
+} from "./upstream.js";
 export {
   opsJobSchema,
   opsJobModel,
@@ -154,7 +188,11 @@ export async function registerBaseAddon(
     }
   }
 
-  await registerMetadataRoutes(fastify, createMetadataRegistry(merged));
+  const registrySource = opts.runtime
+    ? () => buildMetadataRegistryFromModels(opts.runtime!, extraModels)
+    : createMetadataRegistry(merged);
+
+  await registerMetadataRoutes(fastify, registrySource);
 
   if (opts.runtime) {
     const runtime = opts.runtime;
@@ -163,6 +201,7 @@ export async function registerBaseAddon(
     if (opts.apiPrefix) {
       await fastify.register(
         async (scoped) => {
+          await registerMetadataRoutes(scoped, registrySource);
           await registerRuntimeMetaRoutes(scoped, runtime, auth);
           await registerGenericModelRoutes(scoped, runtime, auth);
         },

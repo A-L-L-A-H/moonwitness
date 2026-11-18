@@ -3,63 +3,18 @@ import { ZodError } from "zod";
 import {
   BaseRepository,
   ConflictError,
-  createActorContext,
-  DEFAULT_TENANT_ID,
   modelRegistry,
   type FindOptions,
 } from "@moonwitness/orm";
-import type { AddonRuntimeController, CrewRoleOrPublic } from "./runtime.js";
+import type { AddonRuntimeController, ModelAclFlags } from "./runtime.js";
+import {
+  defaultFailClosedAuthBridge,
+  resolveActorContextFromBridge,
+  resolveActorTenantFromBridge,
+  type BaseAddonAuthBridge,
+} from "./host-context.js";
 
-export interface BaseAddonAuthBridge {
-  authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void> | void;
-  requireRole: (
-    ...roles: Array<"admin" | "editor" | "viewer">
-  ) => (request: FastifyRequest, reply: FastifyReply) => Promise<void> | void;
-  getActorRole: (request: FastifyRequest) => CrewRoleOrPublic;
-  getActorId: (request: FastifyRequest) => string | null;
-  getActorTenant?: (request: FastifyRequest) => string;
-}
-
-export const defaultFailClosedAuthBridge: BaseAddonAuthBridge = {
-  authenticate: async (request, reply) => {
-    const user = (request as { user?: { id?: unknown; role?: unknown } }).user;
-    if (!user) {
-      await reply.code(401).send({ error: "Not authenticated" });
-    }
-  },
-  requireRole: (...roles) => {
-    return async (request, reply) => {
-      const user = (request as { user?: { role?: string } }).user;
-      if (!user) {
-        await reply.code(401).send({ error: "Not authenticated" });
-        return;
-      }
-      if (!user.role || !roles.includes(user.role as "admin" | "editor" | "viewer")) {
-        await reply.code(403).send({ error: "Forbidden: insufficient permissions" });
-      }
-    };
-  },
-  getActorRole: (request) => {
-    const role = (request as { user?: { role?: string } }).user?.role;
-    if (role === "admin" || role === "editor" || role === "viewer") return role;
-    return "public";
-  },
-  getActorId: (request) => {
-    const id = (request as { user?: { id?: unknown } }).user?.id;
-    return id !== undefined && id !== null ? String(id) : null;
-  },
-  getActorTenant: (request) => {
-    const reqWithTenant = request as { tenantId?: unknown; user?: { tenantId?: unknown } };
-    const raw = reqWithTenant.tenantId ?? reqWithTenant.user?.tenantId;
-    return typeof raw === "string" && raw.trim() ? raw.trim() : DEFAULT_TENANT_ID;
-  },
-};
-
-function resolveActorTenant(auth: BaseAddonAuthBridge, request: FastifyRequest): string {
-  const fromAuth = auth.getActorTenant?.(request);
-  if (fromAuth && fromAuth.trim()) return fromAuth.trim();
-  return defaultFailClosedAuthBridge.getActorTenant!(request);
-}
+export { defaultFailClosedAuthBridge, type BaseAddonAuthBridge };
 
 function repositoryForModel(modelName: string) {
   const desc = modelRegistry.get(modelName);
@@ -84,6 +39,34 @@ function handleOrmError(error: unknown, reply: FastifyReply): FastifyReply {
   return reply.code(400).send({ error: msg });
 }
 
+async function authorizeModelAccess(
+  runtime: AddonRuntimeController,
+  auth: BaseAddonAuthBridge,
+  request: FastifyRequest,
+  reply: FastifyReply,
+  modelName: string,
+  requiredPerm: keyof ModelAclFlags,
+) {
+  const target = repositoryForModel(modelName);
+  if (!target) {
+    await reply.code(404).send({ error: `Model '${modelName}' is not REST-enabled` });
+    return null;
+  }
+  if (!runtime.isModelEnabled(target.desc.name)) {
+    await reply.code(503).send({
+      error: `Addon for model '${target.desc.name}' is disabled`,
+      code: "ADDON_DISABLED",
+    });
+    return null;
+  }
+  const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
+  if (!acl[requiredPerm]) {
+    await reply.code(403).send({ error: "Forbidden" });
+    return null;
+  }
+  return target;
+}
+
 export async function registerGenericModelRoutes(
   fastify: FastifyInstance,
   runtime: AddonRuntimeController,
@@ -95,16 +78,15 @@ export async function registerGenericModelRoutes(
     "/m/:model",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) {
-        return reply
-          .code(404)
-          .send({ error: `Model '${request.params.model}' is not REST-enabled` });
-      }
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canRead) {
-        return reply.code(403).send({ error: "Forbidden" });
-      }
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canRead",
+      );
+      if (!target) return reply;
 
       const query = request.query ?? {};
       const filters: Record<string, unknown> = {};
@@ -116,7 +98,7 @@ export async function registerGenericModelRoutes(
         }
       }
 
-      const tenantId = resolveActorTenant(auth, request);
+      const tenantId = resolveActorTenantFromBridge(auth, request);
       const limit = query.limit ? Math.min(200, Math.max(1, Number(query.limit))) : 50;
       const offset = query.offset ? Math.max(0, Number(query.offset)) : 0;
       const opts: FindOptions = {
@@ -144,16 +126,17 @@ export async function registerGenericModelRoutes(
     "/m/:model/:id",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) {
-        return reply
-          .code(404)
-          .send({ error: `Model '${request.params.model}' is not REST-enabled` });
-      }
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canRead) return reply.code(403).send({ error: "Forbidden" });
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canRead",
+      );
+      if (!target) return reply;
 
-      const tenantId = resolveActorTenant(auth, request);
+      const tenantId = resolveActorTenantFromBridge(auth, request);
       const row = await target.repo.findOne(request.params.id, { tenantId });
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -164,18 +147,18 @@ export async function registerGenericModelRoutes(
     "/m/:model",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) {
-        return reply
-          .code(404)
-          .send({ error: `Model '${request.params.model}' is not REST-enabled` });
-      }
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canCreate) return reply.code(403).send({ error: "Forbidden" });
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canCreate",
+      );
+      if (!target) return reply;
 
       try {
-        const tenantId = resolveActorTenant(auth, request);
-        const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
+        const actor = resolveActorContextFromBridge(auth, request);
         const created = await target.repo.create(request.body ?? {}, actor);
         return reply.code(201).send({ data: created });
       } catch (error) {
@@ -188,18 +171,18 @@ export async function registerGenericModelRoutes(
     "/m/:model/:id",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) {
-        return reply
-          .code(404)
-          .send({ error: `Model '${request.params.model}' is not REST-enabled` });
-      }
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canUpdate) return reply.code(403).send({ error: "Forbidden" });
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canUpdate",
+      );
+      if (!target) return reply;
 
       try {
-        const tenantId = resolveActorTenant(auth, request);
-        const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
+        const actor = resolveActorContextFromBridge(auth, request);
         const updated = await target.repo.update(request.params.id, request.body ?? {}, actor);
         if (!updated) return reply.code(404).send({ error: "Not found" });
         return reply.send({ data: updated });
@@ -213,12 +196,17 @@ export async function registerGenericModelRoutes(
     "/m/:model/:id/archive",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) return reply.code(404).send({ error: "Model not found" });
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canUpdate) return reply.code(403).send({ error: "Forbidden" });
-      const tenantId = resolveActorTenant(auth, request);
-      const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canUpdate",
+      );
+      if (!target) return reply;
+
+      const actor = resolveActorContextFromBridge(auth, request);
       const row = await target.repo.archive(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -229,12 +217,17 @@ export async function registerGenericModelRoutes(
     "/m/:model/:id/restore",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) return reply.code(404).send({ error: "Model not found" });
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canUpdate) return reply.code(403).send({ error: "Forbidden" });
-      const tenantId = resolveActorTenant(auth, request);
-      const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canUpdate",
+      );
+      if (!target) return reply;
+
+      const actor = resolveActorContextFromBridge(auth, request);
       const row = await target.repo.restore(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -245,12 +238,17 @@ export async function registerGenericModelRoutes(
     "/m/:model/:id",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) return reply.code(404).send({ error: "Model not found" });
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canDelete) return reply.code(403).send({ error: "Forbidden" });
-      const tenantId = resolveActorTenant(auth, request);
-      const actor = createActorContext(auth.getActorId(request), "api", request.id, tenantId);
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canDelete",
+      );
+      if (!target) return reply;
+
+      const actor = resolveActorContextFromBridge(auth, request);
       const row = await target.repo.delete(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -261,11 +259,17 @@ export async function registerGenericModelRoutes(
     "/m/:model/:id/history",
     { preHandler },
     async (request, reply) => {
-      const target = repositoryForModel(request.params.model);
-      if (!target) return reply.code(404).send({ error: "Model not found" });
-      const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
-      if (!acl.canRead) return reply.code(403).send({ error: "Forbidden" });
-      const tenantId = resolveActorTenant(auth, request);
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canRead",
+      );
+      if (!target) return reply;
+
+      const tenantId = resolveActorTenantFromBridge(auth, request);
       const row = await target.repo.findOne(request.params.id, {
         includeDeleted: true,
         tenantId,

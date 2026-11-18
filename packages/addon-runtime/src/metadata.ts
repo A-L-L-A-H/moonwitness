@@ -1,8 +1,60 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { createActorContext } from "@moonwitness/orm";
+import { modelRegistry } from "@moonwitness/orm";
 import type { AddonRuntimeController } from "./runtime.js";
-import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "./generic-crud.js";
+import {
+  defaultFailClosedAuthBridge,
+  resolveActorContextFromBridge,
+  type BaseAddonAuthBridge,
+} from "./host-context.js";
+
+const SENSITIVE_META_FIELD_RE = /password_hash|_token|_secret|encrypted_private/i;
+
+function jsonTypeForCodec(codec: string): string {
+  switch (codec) {
+    case "integer":
+      return "integer";
+    case "real":
+      return "number";
+    case "boolean":
+      return "boolean";
+    default:
+      return "string";
+  }
+}
+
+export function buildMetadataRegistryFromModels(
+  runtime: AddonRuntimeController,
+  extraModels: RegisteredModel[] = [],
+): MetadataRegistry {
+  const models: RegisteredModel[] = [];
+  const seen = new Set<string>();
+  for (const desc of modelRegistry.list()) {
+    if (!desc.publicFields || desc.publicFields.length === 0) continue;
+    if (!runtime.isModelEnabled(desc.name)) continue;
+    const publicFields = desc.publicFields
+      .filter((name) => !SENSITIVE_META_FIELD_RE.test(name))
+      .map((name) => {
+        const spec = desc.fields.get(name);
+        const type =
+          name === "tags" || name === "related"
+            ? "string[]"
+            : spec
+              ? jsonTypeForCodec(spec.codec)
+              : "string";
+        return { name, type };
+      });
+    models.push({ name: desc.name, publicFields });
+    seen.add(desc.name);
+  }
+  for (const extra of extraModels) {
+    if (!seen.has(extra.name)) {
+      seen.add(extra.name);
+      models.push(extra);
+    }
+  }
+  return createMetadataRegistry(models);
+}
 
 /**
  * Registered model metadata, declared by addons rather than introspected from
@@ -44,15 +96,18 @@ export function createMetadataRegistry(models: RegisteredModel[] = []): Metadata
  */
 export async function registerMetadataRoutes(
   fastify: FastifyInstance,
-  registry: MetadataRegistry,
+  registryOrResolver: MetadataRegistry | (() => MetadataRegistry),
 ): Promise<void> {
+  const resolveRegistry = (): MetadataRegistry =>
+    typeof registryOrResolver === "function" ? registryOrResolver() : registryOrResolver;
+
   fastify.get("/_meta/models", async () => ({
-    models: registry.models.map((model) => model.name),
+    models: resolveRegistry().models.map((model) => model.name),
   }));
 
   fastify.get("/_meta/models/:name", async (request, reply) => {
     const { name } = request.params as { name: string };
-    const model = registry.models.find((entry) => entry.name === name);
+    const model = resolveRegistry().models.find((entry) => entry.name === name);
     if (!model) {
       return reply.code(404).send({ error: `Model '${name}' not found` });
     }
@@ -68,6 +123,7 @@ export async function registerMetadataRoutes(
   });
 
   fastify.get("/_meta/openapi.json", async () => {
+    const registry = resolveRegistry();
     const schemas: Record<string, unknown> = {};
     for (const model of registry.models) {
       const properties: Record<string, { type: string; description?: string }> = {};
@@ -83,42 +139,53 @@ export async function registerMetadataRoutes(
         properties,
       };
     }
+    const paths: Record<string, unknown> = {
+      "/health": { get: { summary: "Base health check" } },
+      "/_meta/models": { get: { summary: "List registered models" } },
+      "/_meta/models/{name}": { get: { summary: "Get public metadata for a model" } },
+      "/_meta/openapi.json": { get: { summary: "OpenAPI specification" } },
+      "/api/v1/timeline/events": {
+        get: { summary: "List timeline events" },
+        post: { summary: "Create timeline event" },
+      },
+      "/api/v1/timeline/events/{id}": {
+        get: { summary: "Get timeline event" },
+        patch: { summary: "Update timeline event" },
+        delete: { summary: "Soft-delete timeline event" },
+      },
+      "/api/v1/timeline/eras": { get: { summary: "List eras" } },
+      "/api/v1/timeline/stats": { get: { summary: "Timeline stats" } },
+      "/api/v1/auth/login": { post: { summary: "Login with identifier and password" } },
+      "/api/v1/auth/me": { get: { summary: "Current authenticated identity" } },
+      "/api/v1/auth/users": {
+        get: { summary: "List crew users" },
+        post: { summary: "Create crew user" },
+      },
+      "/api/v1/audit/logs": { get: { summary: "List audit logs" } },
+      "/api/v1/command-center/state": { get: { summary: "Command center state" } },
+    };
+    for (const model of registry.models) {
+      const desc = modelRegistry.get(model.name);
+      if (desc?.restEnabled) {
+        paths[`/api/v1/m/${encodeURIComponent(model.name)}`] = {
+          get: { summary: `List ${model.name}` },
+          post: { summary: `Create ${model.name}` },
+        };
+      }
+    }
     return {
       openapi: "3.0.0",
       info: {
         title: "Moonwitness API",
         version: "0.13.0",
       },
-      paths: {
-        "/health": { get: { summary: "Base health check" } },
-        "/_meta/models": { get: { summary: "List registered models" } },
-        "/_meta/models/{name}": { get: { summary: "Get public metadata for a model" } },
-        "/_meta/openapi.json": { get: { summary: "OpenAPI specification" } },
-        "/api/v1/timeline/events": {
-          get: { summary: "List timeline events" },
-          post: { summary: "Create timeline event" },
-        },
-        "/api/v1/timeline/events/{id}": {
-          get: { summary: "Get timeline event" },
-          patch: { summary: "Update timeline event" },
-          delete: { summary: "Soft-delete timeline event" },
-        },
-        "/api/v1/timeline/eras": { get: { summary: "List eras" } },
-        "/api/v1/timeline/stats": { get: { summary: "Timeline stats" } },
-        "/api/v1/auth/login": { post: { summary: "Login with identifier and password" } },
-        "/api/v1/auth/me": { get: { summary: "Current authenticated identity" } },
-        "/api/v1/auth/users": {
-          get: { summary: "List crew users" },
-          post: { summary: "Create crew user" },
-        },
-        "/api/v1/audit/logs": { get: { summary: "List audit logs" } },
-        "/api/v1/command-center/state": { get: { summary: "Command center state" } },
-      },
+      paths,
       components: { schemas },
     };
   });
 
   fastify.get("/_meta/llms.txt", async (_request, reply) => {
+    const registry = resolveRegistry();
     const lines = [
       "# Moonwitness API",
       "",
@@ -199,7 +266,7 @@ export async function registerRuntimeMetaRoutes(
     { preHandler: adminOnly },
     async (request, reply) => {
       try {
-        const actor = createActorContext(auth.getActorId(request), "api", request.id);
+        const actor = resolveActorContextFromBridge(auth, request);
         await runtime.enable(request.params.name, actor);
         return { ok: true, name: request.params.name, enabled: true };
       } catch (error) {
@@ -215,7 +282,7 @@ export async function registerRuntimeMetaRoutes(
     { preHandler: adminOnly },
     async (request, reply) => {
       try {
-        const actor = createActorContext(auth.getActorId(request), "api", request.id);
+        const actor = resolveActorContextFromBridge(auth, request);
         await runtime.disable(request.params.name, actor);
         return { ok: true, name: request.params.name, enabled: false };
       } catch (error) {
@@ -237,7 +304,7 @@ export async function registerRuntimeMetaRoutes(
           .send({ error: parsed.error.issues[0]?.message ?? "Invalid custom field payload" });
       }
       try {
-        const actor = createActorContext(auth.getActorId(request), "api", request.id);
+        const actor = resolveActorContextFromBridge(auth, request);
         const saved = await runtime.registerCustomField(request.params.name, parsed.data, actor);
         return reply.code(201).send({ field: saved });
       } catch (error) {
@@ -258,7 +325,7 @@ export async function registerRuntimeMetaRoutes(
           .code(400)
           .send({ error: parsed.error.issues[0]?.message ?? "Invalid custom field update" });
       }
-      const actor = createActorContext(auth.getActorId(request), "api", request.id);
+      const actor = resolveActorContextFromBridge(auth, request);
       const updated = await runtime.updateCustomField(request.params.id, parsed.data, actor);
       if (!updated) return reply.code(404).send({ error: "Field not found" });
       return { field: updated };

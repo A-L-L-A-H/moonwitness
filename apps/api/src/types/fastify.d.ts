@@ -1,20 +1,13 @@
 import "fastify";
+import "@moonwitness/addon-runtime";
 import type { ITimelineUseCase } from "../domain/usecases/timeline/timeline.usecase";
 
 declare module "fastify" {
   interface FastifyInstance {
     timelineUseCase: ITimelineUseCase;
-    midMounted?: boolean;
   }
 
   interface FastifyRequest {
-    user?: {
-      id: string;
-      username: string;
-      email: string;
-      role: "admin" | "editor" | "viewer";
-      displayName: string;
-    };
     cookies?: Record<string, string>;
   }
 

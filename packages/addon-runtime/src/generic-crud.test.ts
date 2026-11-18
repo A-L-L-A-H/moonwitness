@@ -214,4 +214,64 @@ describe("registerGenericModelRoutes", () => {
 
     await app.close();
   });
+
+  it("returns 503 ADDON_DISABLED on /m/:model when the owning addon is disabled", async () => {
+    const runtime = new AddonRuntimeController();
+    const app = Fastify();
+    await runtime.syncAll(
+      [
+        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        {
+          manifest: {
+            name: "crud_toggle_demo",
+            version: "1.0.0",
+            depends: ["__base"],
+            provides: { models: ["crud.item"] },
+          },
+          models: [itemModel],
+          rules: [
+            {
+              model_name: "crud.item",
+              role: "editor",
+              can_read: true,
+              can_create: true,
+              can_update: true,
+            },
+          ],
+        },
+      ],
+      app,
+    );
+    await registerBaseAddon(app, { runtime, auth: roleAuth, apiPrefix: "/api/v1" });
+    await app.ready();
+
+    await runtime.disable("crud_toggle_demo");
+
+    const disabledGet = await app.inject({
+      method: "GET",
+      url: "/api/v1/m/crud.item",
+      headers: { "x-role": "editor" },
+    });
+    expect(disabledGet.statusCode).toBe(503);
+    expect(disabledGet.json().code).toBe("ADDON_DISABLED");
+
+    const disabledPost = await app.inject({
+      method: "POST",
+      url: "/api/v1/m/crud.item",
+      headers: { "x-role": "editor" },
+      payload: { label: "blocked" },
+    });
+    expect(disabledPost.statusCode).toBe(503);
+    expect(disabledPost.json().code).toBe("ADDON_DISABLED");
+
+    await runtime.enable("crud_toggle_demo");
+    const enabledGet = await app.inject({
+      method: "GET",
+      url: "/api/v1/m/crud.item",
+      headers: { "x-role": "editor" },
+    });
+    expect(enabledGet.statusCode).toBe(200);
+
+    await app.close();
+  });
 });

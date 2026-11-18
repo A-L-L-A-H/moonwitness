@@ -171,10 +171,16 @@ export class AddonRuntimeController {
     { manifest: AddonManifest; def: AddonDefinition; extensionDefs: ModelExtensionDef[] }
   >();
   private readonly enabled = new Map<string, boolean>();
+  private readonly modelOwners = new Map<string, string>();
   private order: string[] = [];
 
   isEnabled(addonName: string): boolean {
     return this.enabled.get(addonName) ?? false;
+  }
+
+  isModelEnabled(modelName: string): boolean {
+    const owner = this.modelOwners.get(modelName);
+    return owner ? this.isEnabled(owner) : true;
   }
 
   getOrder(): string[] {
@@ -203,12 +209,16 @@ export class AddonRuntimeController {
   ): Promise<{ order: string[]; syncReport: SyncReport }> {
     this.definitions.clear();
     this.enabled.clear();
+    this.modelOwners.clear();
 
     const registry = new AddonRegistry();
     for (const def of addons) {
       const manifest = AddonManifestSchema.parse(def.manifest);
       const extensionDefs: ModelExtensionDef[] = [];
       this.definitions.set(manifest.name, { manifest, def, extensionDefs });
+      for (const model of def.models ?? []) {
+        this.modelOwners.set(model.name, manifest.name);
+      }
       registry.add({
         manifest: def.manifest,
         register: def.register ?? (() => {}),
@@ -721,6 +731,7 @@ export class AddonRuntimeController {
   ): Promise<RuntimeViewDescriptor | null> {
     const desc = modelRegistry.get(modelName);
     if (!desc) return null;
+    if (!this.isModelEnabled(modelName)) return null;
     const modelMeta = (await irModelRecord.repository.find({ name: modelName }))[0];
     if (modelMeta && !this.isEnabled(modelMeta.addon)) {
       return null;
