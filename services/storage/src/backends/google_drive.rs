@@ -105,7 +105,7 @@ impl GoogleDrive {
         let metadata = json!({
             "name": display_name,
             "mimeType": content_type,
-            "parents": [self.config.folder_id],
+            "parents": [self.config.folder_id.as_str()],
             "appProperties": {
                 "mw_source": "moonwitness-storage",
                 "mw_bucket": bucket
@@ -191,6 +191,17 @@ impl GoogleDrive {
             .and_then(|value| value.to_str().ok())
             .ok_or_else(|| anyhow!("Google Drive resumable upload response omitted Location"))?
             .to_string();
+        let session_url_parsed = reqwest::Url::parse(&session_url)
+            .context("Google Drive resumable upload returned an invalid session URL")?;
+        if session_url_parsed.scheme() != "https"
+            || session_url_parsed.host_str() != Some("www.googleapis.com")
+            || !session_url_parsed.username().is_empty()
+            || session_url_parsed.password().is_some()
+        {
+            return Err(anyhow!(
+                "Google Drive resumable upload returned an unexpected session URL origin"
+            ));
+        }
 
         let mut file = tokio::fs::File::open(path)
             .await
@@ -206,10 +217,11 @@ impl GoogleDrive {
 
             let end = offset + chunk_len as u64 - 1;
             let is_last = end + 1 == total;
+            let chunk_token = self.access_token().await?;
             let response = self
                 .client
                 .put(&session_url)
-                .bearer_auth(&token)
+                .bearer_auth(&chunk_token)
                 .header(CONTENT_RANGE, format!("bytes {offset}-{end}/{total}"))
                 .body(chunk)
                 .send()
