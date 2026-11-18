@@ -118,7 +118,7 @@ export class OrmEventRepository implements ITimelineRepository {
   async getEras(): Promise<Era[]> {
     // eras remain in timeline_eras addon table; fall back to empty if not seeded
     try {
-      const { timelineEraModel } = await import("@moonwitness/addon-timeline");
+      const { timelineEraModel } = await import("@moonwitness/addons/timeline");
       const rows = await timelineEraModel.repository.find();
       return rows.map((row) => ({
         id: row.id as Era["id"],

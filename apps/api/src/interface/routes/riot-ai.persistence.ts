@@ -10,7 +10,7 @@ import {
   providerConfigSchema,
   usageSummaryModel,
   usageSummarySchema,
-} from "@moonwitness/addon-ai";
+} from "@moonwitness/addons/ai";
 
 export { providerConfigSchema, usageSummarySchema };
 

@@ -3,4 +3,4 @@ export {
   probeNodeSchema,
   probeEventModel,
   probeEventSchema,
-} from "@moonwitness/addon-probes";
+} from "@moonwitness/addons/probes";

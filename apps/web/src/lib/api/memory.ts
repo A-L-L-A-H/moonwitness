@@ -107,6 +107,83 @@ export interface MemoryServiceUploadResult {
   detail?: string;
 }
 
+export type WitnessEpistemicType =
+  "fact" | "testimony" | "hypothesis" | "interpretation" | "dream" | "fiction" | "unknown";
+
+export type WitnessClaimStatus = "active" | "superseded" | "disputed" | "unverified";
+export type WitnessRelationType = "supports" | "contradicts" | "derived_from" | "supersedes";
+
+export interface WitnessClaimRecord {
+  id: string;
+  statement: string;
+  epistemic_type: WitnessEpistemicType;
+  status: WitnessClaimStatus;
+  valid_from?: string | null;
+  valid_until?: string | null;
+  created_at: string;
+  updated_at: string;
+  source_count?: number;
+  revision_count?: number;
+  relation_count?: number;
+}
+
+export interface WitnessClaimsResponse {
+  claims: WitnessClaimRecord[];
+  epistemic_types: WitnessEpistemicType[];
+  statuses: WitnessClaimStatus[];
+  relation_types: WitnessRelationType[];
+}
+
+export interface WitnessClaimSourceRecord {
+  id: string;
+  claim_id: string;
+  archive_id: string;
+  message_id: string;
+  excerpt: string;
+  offset_start?: number | null;
+  offset_end?: number | null;
+  source_sha256: string;
+  attribution: string;
+  rationale: string;
+  created_at: string;
+}
+
+export interface WitnessClaimRevisionRecord {
+  id: string;
+  claim_id: string;
+  revision_no: number;
+  previous_statement: string;
+  new_statement: string;
+  previous_epistemic_type: WitnessEpistemicType;
+  new_epistemic_type: WitnessEpistemicType;
+  reason: string;
+  revised_at: string;
+}
+
+export interface WitnessClaimRelationRecord {
+  id: string;
+  source_claim_id: string;
+  target_claim_id: string;
+  relation_type: WitnessRelationType;
+  note: string;
+  direction: "outgoing" | "incoming";
+  created_at: string;
+  related_claim?: {
+    id: string;
+    statement: string;
+    epistemic_type: WitnessEpistemicType;
+    status: WitnessClaimStatus;
+  } | null;
+}
+
+export interface WitnessClaimLineage {
+  claim: WitnessClaimRecord;
+  sources: WitnessClaimSourceRecord[];
+  revisions: WitnessClaimRevisionRecord[];
+  relations: WitnessClaimRelationRecord[];
+  resolved_messages: MemorySourceMessage[];
+}
+
 async function requestMemoryJson<T>(url: string, init?: RequestInit): Promise<T> {
   try {
     return await requestApiJson<T>(url, init);
@@ -297,5 +374,93 @@ export function useMemoryKnowledge(query: string, enabled: boolean, limit = 12) 
     enabled,
     staleTime: 15_000,
     retry: 0,
+  });
+}
+
+export function fetchWitnessClaims(options?: {
+  epistemicType?: string;
+  status?: string;
+  q?: string;
+  limit?: number;
+  signal?: AbortSignal;
+}): Promise<WitnessClaimsResponse> {
+  const params = new URLSearchParams();
+  if (options?.epistemicType && options.epistemicType !== "all") {
+    params.set("epistemic_type", options.epistemicType);
+  }
+  if (options?.status && options.status !== "all") {
+    params.set("status", options.status);
+  }
+  if (options?.q?.trim()) {
+    params.set("q", options.q.trim());
+  }
+  if (options?.limit !== undefined) {
+    params.set("limit", String(Math.min(500, Math.max(1, Math.trunc(options.limit)))));
+  }
+  const suffix = params.toString();
+  return requestMemoryJson<WitnessClaimsResponse>(
+    `${MEMORY_SERVICE_BASE}/witness/claims${suffix ? `?${suffix}` : ""}`,
+    { signal: options?.signal },
+  );
+}
+
+export function createWitnessClaim(payload: {
+  statement: string;
+  epistemic_type: WitnessEpistemicType;
+  source?: {
+    archive_id: string;
+    message_id: string;
+    excerpt: string;
+    attribution?: string;
+    rationale?: string;
+  };
+}): Promise<WitnessClaimRecord> {
+  return requestMemoryJson<WitnessClaimRecord>(`${MEMORY_SERVICE_BASE}/witness/claims`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function fetchWitnessClaimLineage(
+  claimId: string,
+  signal?: AbortSignal,
+): Promise<WitnessClaimLineage> {
+  return requestMemoryJson<WitnessClaimLineage>(
+    `${MEMORY_SERVICE_BASE}/witness/claims/${encodeURIComponent(claimId)}/lineage`,
+    { signal },
+  );
+}
+
+export function verifyWitnessClaim(payload: {
+  claim_id?: string;
+  action: "verify" | "dispute" | "supersede" | "sync";
+  reason?: string;
+  source?: {
+    archive_id: string;
+    message_id: string;
+    excerpt: string;
+  };
+  sync?: boolean;
+}): Promise<{
+  ok: boolean;
+  action: string;
+  claim: WitnessClaimRecord | null;
+  sync: { triggered: boolean; synced: number };
+}> {
+  return requestMemoryJson(`${MEMORY_SERVICE_BASE}/witness/verify`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function linkWitnessClaims(payload: {
+  source_claim_id: string;
+  target_claim_id: string;
+  relation_type: WitnessRelationType;
+  note?: string;
+}): Promise<Record<string, unknown>> {
+  return requestMemoryJson(`${MEMORY_SERVICE_BASE}/witness/relations`, {
+    method: "POST",
+    body: JSON.stringify(payload),
   });
 }

@@ -45,9 +45,9 @@ import {
   workflowModel,
 } from "../persistence/domain";
 import { TimelineUseCase } from "../../domain/usecases/timeline/timeline.usecase";
-import { TimelineRepository } from "@moonwitness/addon-timeline";
+import { TimelineRepository } from "@moonwitness/addons/timeline";
 import { seedBootstrapAdmin, ensureAuthSchema } from "../../services/user";
-import { createAuthMidIdentityStore } from "@moonwitness/addon-auth";
+import { createAuthMidIdentityStore } from "@moonwitness/addons/auth";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
 export interface BootstrapOptions {

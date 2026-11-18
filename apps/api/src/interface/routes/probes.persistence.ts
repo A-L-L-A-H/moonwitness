@@ -1,5 +1,5 @@
 import { createActorContext, getDb, syncModels, type Migration } from "@moonwitness/orm";
-import { importLegacyProbes } from "@moonwitness/addon-probes";
+import { importLegacyProbes } from "@moonwitness/addons/probes";
 import { probeNodeModel, probeEventModel } from "../../infrastructure/persistence/domain/probes";
 import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 import { isBlockedRuntimeHost } from "../../shared/env";

@@ -1,1 +1,1 @@
-export { opsEventModel, opsEventSchema } from "@moonwitness/addon-probes";
+export { opsEventModel, opsEventSchema } from "@moonwitness/addons/probes";

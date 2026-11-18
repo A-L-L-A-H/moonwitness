@@ -5,4 +5,4 @@ export {
   storageObjectSchema,
   storageUploadSessionModel,
   storageUploadSessionSchema,
-} from "@moonwitness/addon-storage";
+} from "@moonwitness/addons/storage";

@@ -10,7 +10,7 @@ export {
   type RecordAuditInput,
   type ListAuditLogsOptions,
   type AuditLogRecord,
-} from "@moonwitness/addon-audit";
+} from "@moonwitness/addons/audit";
 
 /** Retired: ops_audit_logs is auto-synced by @moonwitness/addon-audit. */
 export const auditLogMigrations: Migration[] = [];

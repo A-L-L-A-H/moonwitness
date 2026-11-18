@@ -515,8 +515,8 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
     ]) {
       expect(resolveNavIconPath(key)).toMatch(/^M/);
     }
-    const i18nSrc = readFileSync(join(REPO_ROOT, "packages/addons/i18n/src/index.ts"), "utf8");
-    const probesSrc = readFileSync(join(REPO_ROOT, "packages/addons/probes/src/index.ts"), "utf8");
+    const i18nSrc = readFileSync(join(REPO_ROOT, "packages/addons/src/i18n/index.ts"), "utf8");
+    const probesSrc = readFileSync(join(REPO_ROOT, "packages/addons/src/probes/index.ts"), "utf8");
     expect(i18nSrc).toMatch(/\bmenus:\s*i18nMenus\b/);
     expect(probesSrc).toMatch(/\bmenus:\s*probesMenus\b/);
   });

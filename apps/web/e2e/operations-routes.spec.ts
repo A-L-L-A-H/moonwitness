@@ -1003,6 +1003,68 @@ test.describe("Intelligence - ArchiveMemoryBridge Integration", () => {
         await route.fulfill({ json: { status: "queued", job_id: "job-1" } });
         return;
       }
+      if (path === "/api/memory/witness/claims" && route.request().method() === "GET") {
+        await route.fulfill({
+          json: {
+            claims: [
+              {
+                id: "claim-1",
+                statement: "Relay node alpha logs UTC timestamps over serial link.",
+                epistemic_type: "fact",
+                status: "active",
+                created_at: "2026-11-18T12:00:00Z",
+                updated_at: "2026-11-18T12:00:00Z",
+                source_count: 1,
+                revision_count: 0,
+                relation_count: 0,
+              },
+            ],
+            epistemic_types: [
+              "fact",
+              "testimony",
+              "hypothesis",
+              "interpretation",
+              "dream",
+              "fiction",
+              "unknown",
+            ],
+            statuses: ["active", "superseded", "disputed", "unverified"],
+            relation_types: ["supports", "contradicts", "derived_from", "supersedes"],
+          },
+        });
+        return;
+      }
+      if (path === "/api/memory/witness/claims/claim-1/lineage") {
+        await route.fulfill({
+          json: {
+            claim: {
+              id: "claim-1",
+              statement: "Relay node alpha logs UTC timestamps over serial link.",
+              epistemic_type: "fact",
+              status: "active",
+              created_at: "2026-11-18T12:00:00Z",
+              updated_at: "2026-11-18T12:00:00Z",
+            },
+            sources: [
+              {
+                id: "src-1",
+                claim_id: "claim-1",
+                archive_id: "arc-1",
+                message_id: "msg-1",
+                excerpt: "logs UTC timestamps over serial link",
+                source_sha256: "b".repeat(64),
+                attribution: "serial-log",
+                rationale: "Primary excerpt",
+                created_at: "2026-11-18T12:00:00Z",
+              },
+            ],
+            revisions: [],
+            relations: [],
+            resolved_messages: [],
+          },
+        });
+        return;
+      }
       await route.fulfill({ json: {} });
     });
 
@@ -1024,5 +1086,15 @@ test.describe("Intelligence - ArchiveMemoryBridge Integration", () => {
     await expect(page.getByText("Conversations: 4 / 10")).toBeVisible();
     await page.getByRole("button", { name: "Resume" }).click();
     await expect(page.getByText("Job resumed from saved checkpoint.")).toBeVisible();
+
+    await page.getByRole("tab", { name: /Witness Ledger \(1\)/i }).click();
+    await expect(
+      page.getByText("Relay node alpha logs UTC timestamps over serial link."),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Inspect Lineage" }).click();
+    await expect(page.getByText("CLAIM PROVENANCE LINEAGE")).toBeVisible();
+    await expect(
+      page.getByText("logs UTC timestamps over serial link", { exact: true }),
+    ).toBeVisible();
   });
 });

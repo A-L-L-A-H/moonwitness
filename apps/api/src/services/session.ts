@@ -15,4 +15,4 @@ export {
   type AuthSessionData as SessionData,
   type BffOAuthTokenRecord,
   type AuthSessionWithUser as SessionWithUser,
-} from "@moonwitness/addon-auth";
+} from "@moonwitness/addons/auth";

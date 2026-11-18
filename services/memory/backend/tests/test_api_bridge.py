@@ -62,3 +62,81 @@ def test_memory_bridge_endpoints_and_cors_for_port_3005(monkeypatch, tmp_path):
         assert "application/x-ndjson" in ndjson.headers["content-type"]
         assert "Unified Monorepo Consolidation" in ndjson.text
 
+
+def test_witness_ledger_api_endpoints_and_verification(monkeypatch, tmp_path):
+    settings = _configure_memory_app(monkeypatch, tmp_path)
+    monkeypatch.setenv("MOONWITNESS_SYNC_URL", "")
+    settings.moonwitness_sync_url = ""
+
+    with TestClient(main.app) as client:
+        unsourced = client.post(
+            "/api/witness/claims",
+            json={
+                "statement": "Signal repeater alpha runs on 144.39 MHz.",
+                "epistemic_type": "hypothesis",
+            },
+        )
+        assert unsourced.status_code == 201
+        claim_a = unsourced.json()
+        assert claim_a["status"] == "unverified"
+
+        sourced = client.post(
+            "/api/witness/claims",
+            json={
+                "statement": "Repeater alpha transmitted at 144.390 MHz in night log.",
+                "epistemic_type": "fact",
+                "source": {
+                    "archive_id": "arc-w1",
+                    "message_id": "msg-w1",
+                    "excerpt": "transmitted at 144.390 MHz",
+                    "attribution": "operator-log",
+                },
+            },
+        )
+        assert sourced.status_code == 201
+        claim_b = sourced.json()
+        assert claim_b["status"] == "active"
+
+        listed = client.get("/api/witness/claims?q=144.39")
+        assert listed.status_code == 200
+        assert len(listed.json()["claims"]) == 2
+        assert "hypothesis" in listed.json()["epistemic_types"]
+
+        verified = client.post(
+            "/api/witness/verify",
+            json={
+                "claim_id": claim_a["id"],
+                "action": "verify",
+                "reason": "Cross-checked against primary archive log",
+                "source": {
+                    "archive_id": "arc-w1",
+                    "message_id": "msg-w2",
+                    "excerpt": "144.39 MHz verified",
+                },
+            },
+        )
+        assert verified.status_code == 200
+        assert verified.json()["claim"]["status"] == "active"
+
+        rel = client.post(
+            "/api/witness/relations",
+            json={
+                "source_claim_id": claim_a["id"],
+                "target_claim_id": claim_b["id"],
+                "relation_type": "supports",
+                "note": "Both describe the same night watch transmission.",
+            },
+        )
+        assert rel.status_code == 201
+
+        lineage = client.get(f"/api/witness/claims/{claim_a['id']}/lineage")
+        assert lineage.status_code == 200
+        assert len(lineage.json()["sources"]) == 1
+        assert len(lineage.json()["revisions"]) == 1
+        assert len(lineage.json()["relations"]) == 1
+
+        exported = client.get("/api/witness/export.json")
+        assert exported.status_code == 200
+        assert len(exported.json()["claims"]) == 2
+
+

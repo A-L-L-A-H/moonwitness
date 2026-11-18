@@ -5,30 +5,38 @@ import { Badge, Button, Card, CardContent, SkinOrnament } from "@moonwitness/ui"
 import { Download, MemoryTapeNode, RefreshCw } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {
+  createWitnessClaim,
   fetchMemoryServiceArchives,
   fetchMemoryServiceDashboard,
   fetchMemoryServiceJobs,
   fetchMemoryServiceKnowledge,
   fetchMemoryServiceSources,
   fetchMemoryServiceSystem,
+  fetchWitnessClaimLineage,
+  fetchWitnessClaims,
   formatMemoryContextPrompt,
   getMemoryServiceExportUrl,
   resumeMemoryJob,
   triggerArchiveBackup,
   uploadMemoryArchive,
+  verifyWitnessClaim,
   type MemoryArchive,
   type MemoryCounts,
   type MemoryJob,
   type MemoryKnowledgeRecord,
   type MemorySourceData,
   type MemorySystemInfo,
+  type WitnessClaimLineage,
+  type WitnessClaimRecord,
+  type WitnessEpistemicType,
 } from "@/lib/api/memory";
 import { ArchiveUploadPanel } from "./archive-upload-panel";
 import { CorpusSearchPanel } from "./corpus-search-panel";
 import { JobQueuePanel } from "./job-queue-panel";
 import { MemoryInspectorDrawer } from "./memory-inspector-drawer";
+import { WitnessLedgerPanel } from "./witness-ledger-panel";
 
-type MemoryTab = "knowledge" | "vault" | "queue";
+type MemoryTab = "knowledge" | "witness" | "vault" | "queue";
 
 export function MemoryWorkspace() {
   const [tab, setTab] = useState<MemoryTab>("knowledge");
@@ -59,26 +67,38 @@ export function MemoryWorkspace() {
   const [sources, setSources] = useState<MemorySourceData | null>(null);
   const [sourceLoading, setSourceLoading] = useState(false);
   const [sourceError, setSourceError] = useState<string | null>(null);
+  const [claims, setClaims] = useState<WitnessClaimRecord[]>([]);
+  const [epistemicFilter, setEpistemicFilter] = useState("all");
+  const [selectedLineage, setSelectedLineage] = useState<WitnessClaimLineage | null>(null);
+  const [lineageLoading, setLineageLoading] = useState(false);
+  const [claimBusyId, setClaimBusyId] = useState<string | null>(null);
+  const [claimCreating, setClaimCreating] = useState(false);
+  const [claimsSyncing, setClaimsSyncing] = useState(false);
 
   const refreshAll = useCallback(async () => {
     try {
-      const [sys, dash, arc, jb, know] = await Promise.all([
+      const [sys, dash, arc, jb, know, witness] = await Promise.all([
         fetchMemoryServiceSystem(),
         fetchMemoryServiceDashboard(),
         fetchMemoryServiceArchives(200),
         fetchMemoryServiceJobs(200),
         fetchMemoryServiceKnowledge({ q: submittedQuery || undefined, limit: 30 }),
+        fetchWitnessClaims({
+          epistemicType: epistemicFilter === "all" ? undefined : epistemicFilter,
+          limit: 100,
+        }).catch(() => ({ claims: [] as WitnessClaimRecord[] })),
       ]);
       setSystem(sys);
       setCounts(dash);
       setArchives(arc);
       setJobs(jb);
       setKnowledge(know);
+      setClaims(witness.claims);
       setOnline(true);
     } catch {
       setOnline(false);
     }
-  }, [submittedQuery]);
+  }, [epistemicFilter, submittedQuery]);
 
   useEffect(() => {
     void refreshAll();
@@ -212,6 +232,83 @@ export function MemoryWorkspace() {
     }
   }
 
+  async function handleCreateClaim(payload: {
+    statement: string;
+    epistemic_type: WitnessEpistemicType;
+    excerpt?: string;
+    archive_id?: string;
+    message_id?: string;
+  }) {
+    setClaimCreating(true);
+    try {
+      const hasSource = payload.archive_id && payload.message_id && payload.excerpt;
+      const created = await createWitnessClaim({
+        statement: payload.statement,
+        epistemic_type: payload.epistemic_type,
+        source: hasSource
+          ? {
+              archive_id: payload.archive_id!,
+              message_id: payload.message_id!,
+              excerpt: payload.excerpt!,
+            }
+          : undefined,
+      });
+      setNotice(`Recorded ${created.epistemic_type} claim (${created.status}).`);
+      await refreshAll();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Failed to create Witness claim.");
+    } finally {
+      setClaimCreating(false);
+    }
+  }
+
+  async function handleSelectLineage(claimId: string) {
+    setLineageLoading(true);
+    try {
+      setSelectedLineage(await fetchWitnessClaimLineage(claimId));
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Lineage lookup failed.");
+    } finally {
+      setLineageLoading(false);
+    }
+  }
+
+  async function handleVerifyClaim(
+    claimId: string,
+    action: "verify" | "dispute" | "supersede",
+    reason?: string,
+  ) {
+    setClaimBusyId(claimId);
+    try {
+      const res = await verifyWitnessClaim({ claim_id: claimId, action, reason });
+      setNotice(`Claim transitioned (${res.claim?.status ?? action}).`);
+      if (selectedLineage?.claim.id === claimId) {
+        setSelectedLineage(await fetchWitnessClaimLineage(claimId));
+      }
+      await refreshAll();
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Claim update failed.");
+    } finally {
+      setClaimBusyId(null);
+    }
+  }
+
+  async function handlePushClaimsSync() {
+    setClaimsSyncing(true);
+    try {
+      const res = await verifyWitnessClaim({ action: "sync", sync: true });
+      setNotice(
+        res.sync.triggered
+          ? `Synced ${res.sync.synced} Witness claim(s) to MoonWitness API.`
+          : "MOONWITNESS_SYNC_URL is not configured on this node.",
+      );
+    } catch (err) {
+      setNotice(err instanceof Error ? err.message : "Claim sync failed.");
+    } finally {
+      setClaimsSyncing(false);
+    }
+  }
+
   return (
     <ConsoleShellAdapter
       plane="creator"
@@ -294,6 +391,7 @@ export function MemoryWorkspace() {
           {(
             [
               { id: "knowledge", label: "Knowledge Corpus" },
+              { id: "witness", label: `Witness Ledger (${claims.length})` },
               { id: "vault", label: `Vault & Upload (${archives.length})` },
               { id: "queue", label: `Worker Queue (${jobs.length})` },
             ] as const
@@ -324,6 +422,23 @@ export function MemoryWorkspace() {
             onClearSearch={handleClearSearch}
             onInspect={handleInspect}
             onCopy={handleCopy}
+          />
+        )}
+
+        {tab === "witness" && (
+          <WitnessLedgerPanel
+            claims={claims}
+            epistemicFilter={epistemicFilter}
+            onEpistemicFilterChange={setEpistemicFilter}
+            selectedLineage={selectedLineage}
+            lineageLoading={lineageLoading}
+            busyClaimId={claimBusyId}
+            creating={claimCreating}
+            syncing={claimsSyncing}
+            onCreateClaim={handleCreateClaim}
+            onSelectLineage={handleSelectLineage}
+            onVerifyAction={handleVerifyClaim}
+            onPushSync={handlePushClaimsSync}
           />
         )}
 

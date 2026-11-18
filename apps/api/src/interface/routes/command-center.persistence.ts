@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { createActorContext, syncModels, type Migration } from "@moonwitness/orm";
-import { importLegacyCommandCenter } from "@moonwitness/addon-command-center";
+import { importLegacyCommandCenter } from "@moonwitness/addons/command-center";
 import { workflowModel, alertModel } from "../../infrastructure/persistence/domain/command-control";
 import { listAuditLogs, tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
 

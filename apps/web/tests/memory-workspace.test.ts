@@ -1,15 +1,20 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  createWitnessClaim,
   fetchMemoryServiceArchives,
   fetchMemoryServiceDashboard,
   fetchMemoryServiceJobs,
   fetchMemoryServiceKnowledge,
   fetchMemoryServiceSources,
   fetchMemoryServiceSystem,
+  fetchWitnessClaimLineage,
+  fetchWitnessClaims,
   getMemoryServiceExportUrl,
+  linkWitnessClaims,
   resumeMemoryJob,
   triggerArchiveBackup,
   uploadMemoryArchive,
+  verifyWitnessClaim,
 } from "../src/lib/api/memory";
 
 function stubJsonFetch(payload: unknown, status = 200) {
@@ -65,5 +70,29 @@ describe("memory companion service client (/api/memory)", () => {
     expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("POST");
     expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/memory/archives");
     expect(fetchMock.mock.calls[2]?.[1]?.method).toBe("POST");
+  });
+
+  it("queries and mutates Witness Ledger endpoints (/api/memory/witness/*)", async () => {
+    const fetchMock = stubJsonFetch({ claims: [], epistemic_types: ["fact"] });
+    await fetchWitnessClaims({ epistemicType: "fact", q: "relay", limit: 20 });
+    await createWitnessClaim({ statement: "Node A active", epistemic_type: "testimony" });
+    await fetchWitnessClaimLineage("claim 1");
+    await verifyWitnessClaim({ claim_id: "claim-1", action: "verify", reason: "Verified" });
+    await linkWitnessClaims({
+      source_claim_id: "claim-1",
+      target_claim_id: "claim-2",
+      relation_type: "supports",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toBe(
+      "/api/memory/witness/claims?epistemic_type=fact&q=relay&limit=20",
+    );
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/memory/witness/claims");
+    expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("POST");
+    expect(fetchMock.mock.calls[2]?.[0]).toBe("/api/memory/witness/claims/claim%201/lineage");
+    expect(fetchMock.mock.calls[3]?.[0]).toBe("/api/memory/witness/verify");
+    expect(fetchMock.mock.calls[3]?.[1]?.method).toBe("POST");
+    expect(fetchMock.mock.calls[4]?.[0]).toBe("/api/memory/witness/relations");
+    expect(fetchMock.mock.calls[4]?.[1]?.method).toBe("POST");
   });
 });

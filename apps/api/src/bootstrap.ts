@@ -7,26 +7,26 @@ import {
   type AddonDefinition,
   type BaseAddonAuthBridge,
   type RegisteredModel,
-} from "@moonwitness/addon-base";
-import { createI18nAddon, seedI18n } from "@moonwitness/addon-i18n";
-import { createAuditAddon } from "@moonwitness/addon-audit";
+} from "@moonwitness/addon-runtime";
+import { createI18nAddon, seedI18n } from "@moonwitness/addons/i18n";
+import { createAuditAddon } from "@moonwitness/addons/audit";
 import {
   createAuthAddon,
   createAuthMidIdentityStore,
   seedBootstrapAdmin,
-} from "@moonwitness/addon-auth";
-import { seedTimeline, timelineAddon } from "@moonwitness/addon-timeline";
-import { createControlAddon } from "@moonwitness/addon-control";
-import { createCommandCenterAddon } from "@moonwitness/addon-command-center";
-import { createProbesAddon } from "@moonwitness/addon-probes";
-import { createAiAddon } from "@moonwitness/addon-ai";
-import { createStorageAddon } from "@moonwitness/addon-storage";
-import { createSnmpAddon } from "@moonwitness/addon-snmp";
-import { createSyslogAddon } from "@moonwitness/addon-syslog";
-import { createRadiusAddon } from "@moonwitness/addon-radius";
-import { createCanonLoreAddon } from "@moonwitness/addon-canon-lore";
-import { createWitnessResearchAddon } from "@moonwitness/addon-witness-research";
-import { createEpistemicAddon } from "@moonwitness/addon-epistemic";
+} from "@moonwitness/addons/auth";
+import { seedTimeline, timelineAddon } from "@moonwitness/addons/timeline";
+import { createControlAddon } from "@moonwitness/addons/control";
+import { createCommandCenterAddon } from "@moonwitness/addons/command-center";
+import { createProbesAddon } from "@moonwitness/addons/probes";
+import { createAiAddon } from "@moonwitness/addons/ai";
+import { createStorageAddon } from "@moonwitness/addons/storage";
+import { createSnmpAddon } from "@moonwitness/addons/snmp";
+import { createSyslogAddon } from "@moonwitness/addons/syslog";
+import { createRadiusAddon } from "@moonwitness/addons/radius";
+import { createCanonLoreAddon } from "@moonwitness/addons/canon-lore";
+import { createWitnessResearchAddon } from "@moonwitness/addons/witness-research";
+import { createEpistemicAddon } from "@moonwitness/addons/epistemic";
 import { midFastifyPlugin } from "@moonwitness/mid";
 import type { FastifyInstance } from "fastify";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";

@@ -1,5 +1,5 @@
 import { initDb, closeDb, getDb } from "@moonwitness/orm";
-import { eras, events, seedTimeline, timelineDdl } from "@moonwitness/addon-timeline";
+import { eras, events, seedTimeline, timelineDdl } from "@moonwitness/addons/timeline";
 import { env } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 

@@ -3,5 +3,5 @@ export {
   workflowSchema,
   alertModel,
   alertSchema,
-} from "@moonwitness/addon-command-center";
-export { controlCommandModel, controlCommandSchema } from "@moonwitness/addon-control";
+} from "@moonwitness/addons/command-center";
+export { controlCommandModel, controlCommandSchema } from "@moonwitness/addons/control";

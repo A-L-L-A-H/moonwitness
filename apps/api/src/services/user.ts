@@ -15,4 +15,4 @@ export {
   type CreateAuthUserInput as CreateUserInput,
   type AuthUserPublic as UserPublic,
   type AuthUserMutationResult as UserMutationResult,
-} from "@moonwitness/addon-auth";
+} from "@moonwitness/addons/auth";

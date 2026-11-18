@@ -44,6 +44,8 @@ const envSchema = {
   /** Optional local apps/memory FastAPI bridge URL (e.g. http://127.0.0.1:8000). */
   MEMORY_API_URL: z.string().max(2048).optional(),
   MEMORY_API_TIMEOUT_MS: z.coerce.number().int().positive().max(120_000).default(10_000),
+  /** Shared Bearer token accepted from apps/memory -> POST /api/v1/memory/sync workers. */
+  MOONWITNESS_SYNC_TOKEN: z.string().min(8).max(512).optional(),
   /** Canonical MoonWitness centralized Identity issuer, JWKS override, and audience allowlist. */
   MID_ISSUER_URL: z.string().max(2048).optional(),
   MID_INTERNAL_URL: z.string().max(2048).optional(),
