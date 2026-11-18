@@ -36,9 +36,9 @@ fn resolve_command_executable(command: &str) -> Result<String, String> {
 
 fn validate_command_args(args: &[String]) -> Result<(), String> {
     for arg in args {
-      if arg.contains('\0') || arg.contains('\n') || arg.contains('\r') {
-          return Err("Command argument contains disallowed control characters".to_string());
-      }
+        if arg.contains('\0') || arg.contains('\n') || arg.contains('\r') {
+            return Err("Command argument contains disallowed control characters".to_string());
+        }
     }
     Ok(())
 }
@@ -201,12 +201,13 @@ pub async fn start_supervised_agent_run(
     let supervisor_id = Uuid::new_v4().to_string();
     let branch_name = format!("agent/{}", &run_id[..8]);
 
-    let spawned_pid: Option<i64> =
-        if let Ok(parsed) = serde_json::from_str::<StructuredAgentCommand>(&prompt) {
-            Some(spawn_supervised_process(&run_id, worktree_dir, &parsed.command, &parsed.args)? as i64)
-        } else {
-            None
-        };
+    let spawned_pid: Option<i64> = if let Ok(parsed) =
+        serde_json::from_str::<StructuredAgentCommand>(&prompt)
+    {
+        Some(spawn_supervised_process(&run_id, worktree_dir, &parsed.command, &parsed.args)? as i64)
+    } else {
+        None
+    };
 
     let transaction = connection
         .unchecked_transaction()
@@ -296,7 +297,9 @@ pub async fn cancel_supervised_agent_run(
         .map_err(|e| e.to_string())?;
 
     let cancel_output = match killed_pid {
-        Some(pid) => format!("Terminated supervised OS process pid {pid} and cleaned up boundaries"),
+        Some(pid) => {
+            format!("Terminated supervised OS process pid {pid} and cleaned up boundaries")
+        }
         None => "Cleaned up process supervisor and boundaries".to_string(),
     };
     transaction
@@ -437,13 +440,9 @@ mod tests {
 
         // Spawn short-lived allowlisted command first and observe real OS PID + completion.
         let done_id = format!("{run_id}-quick");
-        let quick_pid = spawn_supervised_process(
-            &done_id,
-            &worktree_dir,
-            "git",
-            &["--version".to_string()],
-        )
-        .expect("git --version should spawn cleanly");
+        let quick_pid =
+            spawn_supervised_process(&done_id, &worktree_dir, "git", &["--version".to_string()])
+                .expect("git --version should spawn cleanly");
         assert!(quick_pid > 0);
         let mut exited = None;
         for _ in 0..40 {
@@ -457,20 +456,17 @@ mod tests {
 
         // Spawn long-running node child and verify real OS kill cleanup.
         let live_id = format!("{run_id}-live");
-        let args = vec![
-            "-e".to_string(),
-            "setTimeout(() => {}, 15000)".to_string(),
-        ];
+        let args = vec!["-e".to_string(), "setTimeout(() => {}, 15000)".to_string()];
         let live_pid = spawn_supervised_process(&live_id, &worktree_dir, "node", &args)
             .expect("node sleep child should spawn cleanly");
         assert!(live_pid > 0);
-        assert_eq!(
-            poll_supervised_process(&live_id).expect("live poll"),
-            None
-        );
+        assert_eq!(poll_supervised_process(&live_id).expect("live poll"), None);
 
         let killed = kill_supervised_process(&live_id).expect("kill child");
         assert_eq!(killed, Some(live_pid));
-        assert_eq!(kill_supervised_process(&live_id).expect("idempotent kill"), None);
+        assert_eq!(
+            kill_supervised_process(&live_id).expect("idempotent kill"),
+            None
+        );
     }
 }

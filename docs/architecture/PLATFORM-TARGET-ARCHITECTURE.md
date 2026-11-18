@@ -7,9 +7,9 @@ last_reviewed: "2026-11-18"
 
 # MoonWitness Hybrid Target Architecture
 
-> Audit baseline: branch `dev`, `HEAD = 5c38909019d1034fb671bd64344dc35b16bd29a4` (`2026-11-18`). Evolves [ADR-006](./adr-006-three-app-topology-and-trust-zones.md) and [ADR-007](./adr-007-rocksoul-local-execution-and-data-boundary.md) without breaching A-L-L-A-H Tier 0 ecosystem boundaries.
+> Initial audit baseline: `dev` (`HEAD = 5c389090`); P0–P2 hardening verified on `dev` (`2026-11-18`). Evolves [ADR-006](./adr-006-three-app-topology-and-trust-zones.md) and [ADR-007](./adr-007-rocksoul-local-execution-and-data-boundary.md) without breaching A-L-L-A-H Tier 0 ecosystem boundaries.
 
-## 1. Verified As-Is Platform Architecture (`HEAD = 5c389090`)
+## 1. Verified Current Platform Architecture (`dev` Post P0–P2)
 
 ```mermaid
 flowchart LR
@@ -20,25 +20,25 @@ flowchart LR
 
   subgraph ZoneA["Zone A — Cloud / VPS Platform Core"]
     Caddy["Caddy (443/80)"]
-    Web["@moonwitness/web (Next.js :3000)"]
-    API["@moonwitness/api (Fastify :3002)"]
-    Addons["16 Static Addons (__base + 15 domain/ops)"]
-    PG["PostgreSQL 16 / SQLite (@moonwitness/orm)"]
+    Web["@moonwitness/web (Next.js :3000, single /api/v1 proxy + traceparent)"]
+    API["@moonwitness/api (Fastify :3002, /metrics, ORM rate limit, @moonwitness/contracts)"]
+    Addons["16 Static Addons (__base ops.job + 15 domain/ops, tenant_id scoped)"]
+    PG["PostgreSQL 16 / SQLite (@moonwitness/orm + syncModels)"]
     Caddy --> Web
     Caddy --> API
-    Web -->|"Dual Proxy (rewrites + route handler)"| API
+    Web -->|"Single App Router Proxy"| API
     API --> Addons
     Addons --> PG
   end
 
   subgraph ZoneB["Zone B — VPS Host & Telemetry Plane"]
-    ARSY["cp/arsy (Go Host Agent)"]
+    ARSY["cp/arsy (Go Host Agent, V1 capability aligned)"]
     Rad["services/radius (:8090)"]
     SNMP["services/snmp-poller (:8094)"]
     Sys["services/syslog (:8093)"]
-    Sto["services/storage (:8091, missing Dockerfile)"]
-    Mem["services/memory (Python, unwired from Compose)"]
-    API --> ARSY
+    Sto["services/storage (:8091, Dockerfile present)"]
+    Mem["services/memory (docker-compose.memory.yml overlay)"]
+    API -->|"x-request-id + child traceparent"| ARSY
     API --> Rad
     API --> SNMP
     API --> Sys
@@ -46,14 +46,14 @@ flowchart LR
   end
 
   subgraph ZoneC["Zone C — Local-First Desktop & Standalone R&D"]
-    RS["apps/rocksoul (Tauri + Local SQLite + Loopback S3)"]
+    RS["apps/rocksoul (Tauri + Local SQLite + Allowlisted OS Process Supervision)"]
     Eng["17 engines/* (0 direct runtime imports)"]
     RS -->|"OIDC PKCE + Optional HTTP"| API
     RS -.->|"Direct Sync Option"| Mem
   end
 ```
 
-## 2. Proposed Hybrid Target Architecture (3 Tiers: Current -> Hybrid Target -> Future Optional)
+## 2. Three-Stage Architectural Evolution (Baseline -> Implemented Hybrid Core -> Optional P3 Mini-PaaS)
 
 | Tier                               | Scope                                           | Architectural Shape                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |

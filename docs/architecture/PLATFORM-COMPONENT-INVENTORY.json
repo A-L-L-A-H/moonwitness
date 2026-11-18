@@ -22,8 +22,8 @@
     "verifiedVitestSuites": {
       "tasksPassed": 29,
       "tasksTotal": 29,
-      "testFiles": 130,
-      "testsPassed": 787
+      "testFiles": 139,
+      "testsPassed": 790
     },
     "verifiedTypecheckTasks": {
       "passed": 32,
@@ -32,7 +32,7 @@
     "verifiedLintTasks": {
       "passed": 32,
       "total": 32,
-      "note": "addon-base runs echo no lint configured; apps/api reports 0 errors / 7 no-console warnings"
+      "note": "All 32 workspace packages including @moonwitness/addon-base pass ESLint; apps/api reports 0 errors with pre-existing CLI no-console warnings"
     }
   },
   "apps": [
@@ -49,21 +49,21 @@
         "@moonwitness/assets",
         "@moonwitness/avatars",
         "@moonwitness/canon",
+        "@moonwitness/contracts",
         "@moonwitness/core",
         "@moonwitness/types",
         "@moonwitness/ui"
       ],
       "tests": {
         "vitestFiles": 23,
-        "vitestPassed": 109,
+        "vitestPassed": 111,
         "playwrightConfigs": 4,
         "pact": true
       },
       "keyObservations": [
-        "Console (/(console)/*) has 16 route pages including /addons and dynamic /models/[model] driven by AutoModelConsole",
-        "Sanctuary (/(sanctuary)/*) serves /, /codex, /mtime, /scriptures using @moonwitness/canon",
-        "Defines dual API proxy mechanisms (next.config.ts rewrites AND src/app/api/v1/[...path]/route.ts) plus src/proxy.ts",
-        "Carries triple frontend auth flows (cookie session, custom lib/mid-oidc.ts, sanctuary-mid-oidc.ts) and dead Cloudflare stub (cloudflare-runtime.ts returning null)"
+        "Single App Router /api/v1/[...path]/route.ts proxy forwarding x-request-id and W3C traceparent headers",
+        "Consumes @moonwitness/contracts timeline DTOs in src/lib/api/timeline.ts",
+        "mid-oidc.ts deduplicated onto @moonwitness/core PKCE helpers; dead cloudflare-runtime.ts removed in favor of public-assets.ts"
       ]
     },
     {
@@ -78,6 +78,7 @@
       "workspaceDeps": [
         "All 16 @moonwitness/addon-* packages",
         "@moonwitness/ai",
+        "@moonwitness/contracts",
         "@moonwitness/core",
         "@moonwitness/errors",
         "@moonwitness/mid",
@@ -86,14 +87,14 @@
         "@moonwitness/types"
       ],
       "tests": {
-        "vitestFiles": 27,
-        "vitestPassed": 162
+        "vitestFiles": 30,
+        "vitestPassed": 169
       },
       "keyObservations": [
-        "Mounts all 16 addons via AddonRuntimeController, exposes /_meta/* and /api/v1/m/:model, and wires MID OIDC into Auth identity store",
-        "Mixes 5 addon-converged domain re-exports (storage, memory, syslog, snmp, radius) with 9 remaining internal migration lists in domain/index.ts",
-        "control.routes.ts whitelists V1-deferred ARSY resource kinds rejected by cp/arsy internal/resources/unsupported.go",
-        "Uses process-local in-memory rate limiter (no distributed store); no Prometheus /metrics endpoint or OTEL exporter; zero multi-tenancy scoping"
+        "Mounts all 16 addons via AddonRuntimeController and supports tenant_id scoping via resolveRequestTenant",
+        "commandCenterMigrations & probesMigrations retired into syncModels() ORM definitions",
+        "control.routes.ts enforces fail-fast ARSY_V1_SUPPORTED_RESOURCE_KINDS validation matching cp/arsy",
+        "Exposes Prometheus /metrics & /api/v1/metrics, W3C traceparent propagation, and optional SQL createOrmRateLimitStore"
       ]
     },
     {
@@ -110,12 +111,13 @@
         "vitestPassed": 62,
         "playwrightSpecFiles": 1,
         "rustFiles": 20,
-        "ciRustCoverage": false
+        "rustLibTestsPassed": 56,
+        "ciRustCoverage": true
       },
       "keyObservations": [
         "Runs standalone local continuity SQLite DB, loopback OIDC callback listener, loopback S3 gateway, and Google Drive backup",
-        "start_supervised_agent_run writes an agent ledger row with pid=None without spawning an OS child process",
-        "Zero Rust compilation or cargo test checks exist in .github/workflows/ci.yml"
+        "agent_execution.rs enforces allowlisted OS child-process spawn, PID poll, and kill supervision",
+        "rocksoul-tauri cargo check --tests and cargo test --lib run in .github/workflows/ci.yml"
       ]
     }
   ],
@@ -185,13 +187,12 @@
       "path": "services/storage",
       "language": "Rust",
       "trustZone": "Zone B",
-      "status": "BROKEN_CONTAINER_BUILD",
+      "status": "OPTIONAL_DAEMON_COMPOSE_PROFILE",
       "ports": [8091],
-      "dockerfilePresent": false,
+      "dockerfilePresent": true,
       "ciCovered": true,
       "limitations": [
-        "BLOCKER: docker-compose.yml line 222 configures build.dockerfile = Dockerfile under ./services/storage, but no Dockerfile exists",
-        "Fastify proxies SigV4 requests to :8091 and mirrors PUT/DELETE metadata into storage.* addon models"
+        "Starts under docker-compose --profile ops; Rust suite passes 27 tests (19 unit + 8 s3_api integration)"
       ]
     },
     {
@@ -200,14 +201,13 @@
       "path": "services/memory",
       "language": "Python (FastAPI + SQLite FTS5 + LanceDB + Rclone)",
       "trustZone": "Zone B / C",
-      "status": "DISCONNECTED_OR_UNWIRED",
+      "status": "STANDALONE_COMPOSE_OVERLAY_VERIFIED",
       "dockerfilePresent": false,
-      "ciCovered": false,
+      "ciCovered": true,
       "testsPassed": 33,
       "limitations": [
-        "Absent from docker-compose.yml and .github/workflows/ci.yml",
-        "Pytest only succeeds when invoked inside services/memory/backend working directory (pytest from repo root fails with ModuleNotFoundError: app)",
-        "Overlaps with apps/api memory.routes.ts (memory.record IR model) and apps/rocksoul SQLite continuity store"
+        "Runs via isolated docker-compose.memory.yml overlay preserving root docker-compose.yml vps-topology boundaries",
+        "33 passing pytest tests runnable from repo root via services/memory/backend/pyproject.toml and wired in .github/workflows/ci.yml"
       ]
     }
   ],
@@ -249,9 +249,8 @@
       "srcFiles": 13,
       "testFiles": 1,
       "testsPassed": 8,
-      "consumers": ["apps/web", "apps/rocksoul"],
-      "status": "PORTED_FRONTEND_ONLY",
-      "gap": "Not consumed by apps/api or @moonwitness/addon-epistemic / @moonwitness/addon-canon-lore; epistemic/src/engines.ts duplicates math locally"
+      "consumers": ["apps/web", "apps/rocksoul", "packages/addons/epistemic"],
+      "status": "ACTIVE_SHARED_CANON"
     },
     {
       "name": "@moonwitness/cli",
@@ -270,9 +269,9 @@
       "srcFiles": 13,
       "testFiles": 2,
       "testsPassed": 15,
-      "consumers": [],
-      "status": "UNWIRED_CONTRACT_PACKAGE",
-      "gap": "Zero imports in apps/web, apps/api, apps/rocksoul, or packages/addons/*"
+      "consumers": ["apps/web", "apps/api"],
+      "status": "ACTIVE_SHARED_CONTRACTS",
+      "gap": "Timeline endpoints integrated; additional routes can adopt incrementally"
     },
     {
       "name": "@moonwitness/core",
@@ -301,9 +300,8 @@
       "srcFiles": 5,
       "testFiles": 0,
       "testsPassed": 0,
-      "consumersCount": 30,
-      "status": "TOOLING_FOUNDATION",
-      "gap": "Missing from packages/addons/__base"
+      "consumersCount": 31,
+      "status": "TOOLING_FOUNDATION"
     },
     {
       "name": "@moonwitness/mid",
@@ -311,7 +309,7 @@
       "version": "0.0.0",
       "srcFiles": 17,
       "testFiles": 4,
-      "testsPassed": 13,
+      "testsPassed": 14,
       "consumers": ["apps/api", "packages/addons/auth"],
       "status": "ACTIVE_IDENTITY_AUTHORITY"
     },
@@ -321,10 +319,10 @@
       "version": "0.1.0",
       "srcFiles": 23,
       "testFiles": 7,
-      "testsPassed": 49,
+      "testsPassed": 50,
       "consumersCount": 17,
       "status": "ACTIVE_CORE_ENGINE",
-      "gap": "Dual SQLite/libSQL + Postgres support with runtime syncModels(); lacks multi-tenant row isolation"
+      "gap": "Dual SQLite/libSQL + Postgres + D1 drivers with tenant_id metadata & scoping; Postgres RLS deferred to P3"
     },
     {
       "name": "@moonwitness/schema",
@@ -362,7 +360,7 @@
       "version": "0.0.0",
       "srcFiles": 174,
       "testFiles": 23,
-      "testsPassed": 173,
+      "testsPassed": 182,
       "consumers": ["apps/web", "apps/rocksoul"],
       "status": "ACTIVE_DESIGN_SYSTEM"
     }
@@ -375,8 +373,8 @@
       "autoInstall": false,
       "depends": [],
       "srcFiles": 7,
-      "testFiles": 4,
-      "testsPassed": 20,
+      "testFiles": 5,
+      "testsPassed": 23,
       "models": [
         "users",
         "settings",
@@ -385,9 +383,10 @@
         "ir_field",
         "ir_rule",
         "ir_view",
-        "ir_menu"
+        "ir_menu",
+        "ops.job"
       ],
-      "routes": ["/_meta/*", "/api/v1/m/:model", "/health"],
+      "routes": ["/_meta/*", "/api/v1/m/:model (tenant-scoped)", "/health"],
       "classification": "FOUNDATION_IR_RUNTIME"
     },
     {
@@ -479,7 +478,7 @@
       "testsPassed": 1,
       "models": ["epistemic.computation"],
       "routes": ["/api/v1/epistemic/evaluate"],
-      "classification": "DUPLICATED_LITE_ENGINE_WRAPPER"
+      "classification": "CONSOLIDATED_CANON_EVALUATOR_WRAPPER"
     },
     {
       "dir": "command-center",
@@ -492,7 +491,7 @@
       "testsPassed": 1,
       "models": ["command.workflow", "command.alert"],
       "routes": ["Mounted in apps/api commandCenterRoutes"],
-      "classification": "IR_WRAPPER_WITH_API_LEGACY_SQL"
+      "classification": "ADDON_OWNED_ORM_SCHEMA"
     },
     {
       "dir": "control",
@@ -518,7 +517,7 @@
       "testsPassed": 1,
       "models": ["probe.node", "probe.event", "ops.event"],
       "routes": ["Mounted in apps/api probesRoutes"],
-      "classification": "IR_WRAPPER_WITH_API_LEGACY_SQL"
+      "classification": "ADDON_OWNED_ORM_SCHEMA"
     },
     {
       "dir": "ai",

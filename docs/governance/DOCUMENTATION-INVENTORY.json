@@ -9,7 +9,7 @@
     "totalDocsYamlJsonSpecsOnDisk": 113,
     "itemizedRecordCount": 925,
     "bulkMarkdownCount": 2945,
-    "note": "Updated with 7 platform architecture & ecosystem readiness deliverables on dev HEAD 5c389090; superseded draft removed; packages/addons/README.md flagged for 16-addon sync.",
+    "note": "Reconciled with post-P0/P1/P2 verification (790 Vitest, 32/32 lint & typecheck, Go, Python, Rust suites); packages/addons/README.md synced to all 16 live addons.",
     "ratifiedBy": "Master Execution Directive (2026-11-18)",
     "lastReconciled": "2026-11-18"
   },
@@ -14128,7 +14128,7 @@
       "relatedDocuments": [],
       "potentialDuplicates": [],
       "conflictsOrOutdatedClaims": [],
-      "implementationEvidence": "Created and validated via Wave 3/4/5 & pnpm docs:check",
+      "implementationEvidence": "Synchronized on dev to document all 16 live addon packages and verified via pnpm docs:check",
       "recommendedAction": "Maintain co-located in owning workspace."
     },
     {
@@ -14589,7 +14589,7 @@
       ],
       "potentialDuplicates": [],
       "conflictsOrOutdatedClaims": [],
-      "implementationEvidence": "Verified on dev HEAD 5c389090 (2026-11-18): 29/29 Vitest tasks (787 tests), 32/32 typecheck/lint tasks, cp/arsy go test, services/memory 33 pytest.",
+      "implementationEvidence": "Reconciled post-P0/P1/P2 on dev: 29/29 Vitest tasks (790 tests), 32/32 lint & typecheck, Go cp/arsy, 33 memory pytest, 27 storage Rust, 56 rocksoul lib Rust.",
       "recommendedAction": "Review findings and approve P0-P3 roadmap and target architecture ADRs."
     },
     {
@@ -14663,7 +14663,7 @@
       ],
       "potentialDuplicates": [],
       "conflictsOrOutdatedClaims": [],
-      "implementationEvidence": "15-capability weighted scorecard totaling 51.35/100 (51.4%) verified against HEAD 5c389090.",
+      "implementationEvidence": "15-capability weighted scorecard updated to 73.23/100 (73.2%) post-P0/P1/P2 hardening.",
       "recommendedAction": "Gate multi-tenant mini-PaaS hosting behind P0-P2 blockers (tenant isolation, durable queue, storage Docker, OTEL)."
     },
     {
@@ -14700,7 +14700,7 @@
       ],
       "potentialDuplicates": [],
       "conflictsOrOutdatedClaims": [],
-      "implementationEvidence": "Dependency-ordered P0-P3 roadmap, top-10 tasks, and P0-1 starter specification derived from HEAD 5c389090 audit.",
+      "implementationEvidence": "P0-P2 tasks implemented and verified on dev; P3 candidates remain gated on Owner ADRs.",
       "recommendedAction": "Execute P0-1 (services/storage Dockerfile + Compose CI check) first."
     }
   ],

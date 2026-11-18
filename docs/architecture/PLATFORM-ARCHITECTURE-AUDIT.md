@@ -7,7 +7,7 @@ last_reviewed: "2026-11-18"
 
 # MoonWitness Platform Architecture & Ecosystem Readiness Audit
 
-> **Audit Scope & Baseline (2026-11-18):** Code- and test-verified audit on branch `dev` at commit `5c38909019d1034fb671bd64344dc35b16bd29a4` (with `0` staged, `54` unstaged, and `43` untracked pre-existing local workspace items preserved untouched). Read-only runtime scope: zero runtime code, database schemas, dependencies, or Tier 0 A-L-L-A-H canon (`docs/constitution/**`) modified.
+> **Audit & Remediation Baseline (2026-11-18):** Initially audited read-only on branch `dev` at commit `5c38909019d1034fb671bd64344dc35b16bd29a4`, then hardened across P0–P2 on `dev` (preserving all pre-existing concurrent workspace edits and keeping `docs/constitution/**` untouched).
 
 ## Companion Deliverables
 
@@ -22,48 +22,34 @@ last_reviewed: "2026-11-18"
 
 MoonWitness is one product platform inside the broader `A-L-L-A-H` ecosystem, organized around the three-app Trust Zone topology in [ADR-006](./adr-006-three-app-topology-and-trust-zones.md) and desktop local boundaries in [ADR-007](./adr-007-rocksoul-local-execution-and-data-boundary.md):
 
-1. **Actual Platform Maturity:** **Production-Capable Single-Tenant Core + Converging Odoo+ Metadata Runtime.** Core cloud services (`apps/web`, `apps/api` with `16` addons mounted via `AddonRuntimeController`, `@moonwitness/orm`, `@moonwitness/mid`, `cp/arsy`) compile, typecheck (`32/32` Turborepo packages), lint (`32/32` tasks; `@moonwitness/addon-base` has `"no lint configured"`), and pass `787` Vitest tests across `130` files (`29/29` test tasks), plus `go test ./...` across `9` tested `cp/arsy` packages (`5` Go packages have no test files) and `33/33` `services/memory/backend` pytests. Multi-tenant Mini-PaaS capabilities remain unbuilt (**Readiness Score: `51.4 / 100`**).
-2. **Ecosystem vs Product Separation:** Tier 0 canonical governance stays isolated under [docs/constitution/GOVERNANCE/DOCUMENT-INDEX.md](../constitution/GOVERNANCE/DOCUMENT-INDEX.md), while MoonWitness runtime assets inhabit Zone A (`web`, `api`), Zone B (`cp/arsy` + `4` Rust telemetry/S3 daemons + optional Python `services/memory`), and Zone C (`apps/rocksoul` Tauri desktop + `17` archived/standalone `engines/*` directories).
+1. **Actual Platform Maturity (Post P0–P2 Execution):** **Production-Capable Core Platform with Workspace Tenant Scoping, Durable Queue Foundation & Unified Observability.** Core workspaces pass `32/32` ESLint checks (including `@moonwitness/addon-base`), `32/32` TypeScript typechecks, and `29/29` Vitest tasks totaling `790` tests across `139` files, alongside `go test ./...` (`9` tested `cp/arsy` packages), `33/33` `services/memory/backend` pytests, `27/27` `services/storage` Rust tests, and `56/56` `apps/rocksoul/src-tauri` Rust lib tests. **Readiness Score advanced from `51.4 / 100` to `73.2 / 100`.**
+2. **Ecosystem vs Product Separation:** Tier 0 canonical governance stays isolated under [docs/constitution/GOVERNANCE/DOCUMENT-INDEX.md](../constitution/GOVERNANCE/DOCUMENT-INDEX.md), while MoonWitness runtime assets inhabit Zone A (`web`, `api`), Zone B (`cp/arsy` + `4` Rust telemetry/S3 daemons + overlay Python `services/memory`), and Zone C (`apps/rocksoul` Tauri desktop + `17` archived/standalone `engines/*` directories).
 
-## 2. Verified Baseline & Runtime Architecture (`HEAD = 5c389090`)
+## 2. Verified Post-P2 Runtime Architecture (`dev`)
 
 ```mermaid
 flowchart LR
   Users["Operators & Sanctuary Users"] --> Caddy["Caddy Edge"]
   Caddy --> Web["apps/web (:3000 Next.js 16)"]
-  Caddy --> API["apps/api (:3002 Fastify)"]
-  Web -->|"Dual Proxy (next.config + api/v1 route)"| API
-  API --> Addons["16 @moonwitness/addon-* via AddonRuntimeController"]
-  Addons --> ORM["@moonwitness/orm (Postgres / SQLite)"]
-  API --> ARSY["cp/arsy (Go Host Agent)"]
-  API --> Daemons["Rust Daemons (--profile ops: radius, snmp, syslog, storage*)"]
-  RS["apps/rocksoul (Tauri Zone C + Local SQLite + Loopback S3)"] --> API
-  Mem["services/memory (Python LanceDB/FTS5, outside Compose)"] -.-> RS
-  Eng["17 engines/* (0 runtime imports)"] -.->|"Manual TS Port"| Canon["@moonwitness/canon (web + rocksoul only)"]
+  Caddy --> API["apps/api (:3002 Fastify + /metrics + traceparent)"]
+  Web -->|"Single App Router Proxy (/api/v1/*) + @moonwitness/contracts"| API
+  API --> Addons["16 @moonwitness/addon-* via AddonRuntimeController (tenant_id + ops.job)"]
+  Addons --> ORM["@moonwitness/orm (Postgres / SQLite + ORM Rate Limit Store)"]
+  API --> ARSY["cp/arsy (V1 Capability Aligned)"]
+  API --> Daemons["Rust Daemons (--profile ops: radius, snmp, syslog, storage)"]
+  RS["apps/rocksoul (Tauri Zone C + Allowlisted OS Child Supervision)"] --> API
+  Mem["services/memory (docker-compose.memory.yml overlay)"] -.-> RS
+  Eng["17 engines/* (0 direct runtime imports)"] -.->|"Promoted Evaluators"| Canon["@moonwitness/canon (web + rocksoul + addon-epistemic)"]
 ```
 
-> **Compose build alert (`*`):** `docker-compose.yml` line 222 configures `storage` to build a `Dockerfile` under `./services/storage`, but no `Dockerfile` exists in `services/storage/`.
+## 3. P0–P2 Implemented Improvements & Remaining P3 Scope
 
-## 3. Verified Architectural Strengths
+- **P0 Stabilization Completed:** Added [services/storage/Dockerfile](../../services/storage/Dockerfile), aligned `control.routes.ts` to `cp/arsy` V1 supported kinds (`ARSY_V1_SUPPORTED_RESOURCE_KINDS`), consolidated `apps/web` `/api/v1` routing into `apps/web/src/app/api/v1/[...path]/route.ts` while deleting `cloudflare-runtime.ts`, and wired Compose config, `rocksoul-tauri`, and `services/memory` into `.github/workflows/ci.yml`.
+- **P1 Consolidation Completed:** Fixed `midFastifyPlugin` `/health` route collision when `MID_KEY_ENCRYPTION_SECRET` is configured, unified `apps/web/src/lib/mid-oidc.ts` onto `@moonwitness/core`, wired `@moonwitness/contracts` into `@moonwitness/web` and `@moonwitness/api` timeline endpoints, consolidated `packages/addons/epistemic` onto `@moonwitness/canon`, retired `commandCenterMigrations` & `probesMigrations` to empty arrays backed by `syncModels()`, added standalone [docker-compose.memory.yml](../../docker-compose.memory.yml), enabled `@moonwitness/addon-base` ESLint, and synced [packages/addons/README.md](../../packages/addons/README.md) to all 16 live addons.
+- **P2 Architecture Hardening Completed:** Added `tenant_id` scoping (`DEFAULT_TENANT_ID = "default"`, cross-tenant denial on `BaseRepository` mutations, `/m/:model` + history isolation, `resolveRequestTenant` spoof prevention), `ops.job` durable queue with optimistic locking (`packages/addons/__base/src/job-queue.ts`), pluggable SQL `createOrmRateLimitStore` (`RATE_LIMIT_STORE=orm`), Prometheus `/metrics` & `/api/v1/metrics` + W3C `traceparent` child-span propagation, and allowlisted OS child-process supervision in `apps/rocksoul/src-tauri/src/commands/agent_execution.rs`.
+- **Remaining P3 Future Scope:** Dynamic remote/signed addon distribution (beyond static bundling), Postgres RLS policies, full `@moonwitness/contracts` migration across remaining endpoints, external worker daemon/OTLP exporter, and curated promotion of standalone `engines/*` candidates (`witness-semantic`, `ontology`, `moonframe`).
 
-- **16-Addon Odoo+ Metadata Convergence:** Concurrent development landed all `16` addon packages under `packages/addons/*` (`__base`, `i18n`, `audit`, `auth`, `timeline`, `canon-lore`, `witness-research`, `epistemic`, `command-center`, `control`, `probes`, `ai`, `storage`, `snmp`, `syslog`, `radius`), statically registered in `apps/api/src/bootstrap.ts` with `syncModels()` zero-migration DDL, `/_meta/*` view descriptors, `ir_rule` ACLs, live `/addons` toggling, and `/models/[model]` `AutoModelConsole` rendering.
-- **Unified OIDC + Local Identity Store:** `packages/addons/auth/src/mid-store.ts` (`createAuthMidIdentityStore()`) eliminates duplicated `mid` SQL identity tables when `MID_KEY_ENCRYPTION_SECRET` is configured.
-- **Disciplined Trust Zones & Validation Baseline:** `apps/rocksoul` enforces local SQLite continuity and loopback OIDC PKCE (`await_mid_loopback_callback`) without holding cloud admin secrets; `pnpm docs:check` passes `0` errors across governance/architecture hubs.
+## 4. Summary Verdict & Trajectory
 
-## 4. Critical Integration Gaps & Fragmentation
-
-1. **Zero Multi-Tenancy (`5/100`):** `0` `tenant_id`, `org_id`, or `workspace_id` isolation columns or guards exist in `@moonwitness/orm`, addons, or API auth (matches in `apps/rocksoul` `commands/{issues,milestones,projects,repositories}.rs` are local UI project labels only).
-2. **Broken `--profile ops` Build (`P0-1`):** `services/storage` lacks a `Dockerfile`, breaking `docker compose --profile ops build`.
-3. **Engine Split Brain (`0/17` Direct Engine Coupling):** `@moonwitness/canon` serves `apps/web` and `apps/rocksoul`, while `packages/addons/epistemic/src/engines.ts` duplicates lightweight `divine-text`, `mtime`, `crayon`, and `prophetic` helpers locally.
-4. **Orphaned Shared Contracts (`@moonwitness/contracts`):** Passes `15` tests with `0` imports across `apps/` and `packages/addons/*`.
-5. **Control Plane vs API Capability Drift:** `apps/api/src/interface/routes/control.routes.ts` whitelists 10 V1-deferred resource kinds rejected by `cp/arsy/internal/resources/unsupported.go`.
-6. **Frontend Proxy & Auth Duplication:** `apps/web` runs two overlapping `/api/v1` proxies (`next.config.ts` rewrites + `src/app/api/v1/[...path]/route.ts`), three client auth flows (`session.ts`, `mid-oidc.ts`, `sanctuary-mid-oidc.ts`), and a dead `cloudflare-runtime.ts` returning `null`.
-7. **Incomplete Schema Convergence & Unwired Memory:** `5` domain modules (`storage`, `memory`, `syslog`, `snmp`, `radius`) re-export addon models cleanly while `9` migration lists remain in `apps/api/src/infrastructure/persistence/domain/index.ts`; `services/memory` (`33` passing pytests) is absent from `docker-compose.yml` and `.github/workflows/ci.yml`.
-8. **Simulated Desktop Supervision, Single-Process Rate Limits, & Missing Observability/CI:** `apps/rocksoul` `start_supervised_agent_run` creates a DB row (`pid: None`) without spawning an OS child process; `apps/api` uses a process-local in-memory rate limiter and exposes no Prometheus `/metrics` or OTEL tracing; `.github/workflows/ci.yml` never builds or tests `apps/rocksoul/src-tauri` (`20` `.rs` files) or `services/memory`.
-9. **Documentation Drift on `HEAD`:** [packages/addons/README.md](../../packages/addons/README.md) still documents 5 directories rather than the 16 live addons.
-
-## 5. Summary Verdict, Target Trajectory & Next Action
-
-- **Hybrid Mini-PaaS Readiness Score:** **`51.4 / 100`** (`51.35` weighted score across 15 capabilities in [HYBRID-PAAS-READINESS-ASSESSMENT.md](./HYBRID-PAAS-READINESS-ASSESSMENT.md)).
-- **Target Shape ([PLATFORM-TARGET-ARCHITECTURE.md](./PLATFORM-TARGET-ARCHITECTURE.md)):** Consolidate Zone A (`apps/web` single BFF + `@moonwitness/contracts` + `apps/api` tenant context, distributed rate limit, Postgres job queue, OTEL `/metrics`), keep `cp/arsy` synchronized with API capabilities, unify `@moonwitness/canon` across API/addons/UI, wire `services/storage` Dockerfile + `services/memory` Compose/CI, and keep `engines/*` read-only outside curated `@moonwitness/*` package promotions.
-- **Recommended First Implementation Task:** **`P0-1`** in [PLATFORM-ENGINEERING-ROADMAP.md](./PLATFORM-ENGINEERING-ROADMAP.md) — add `services/storage` multi-stage Rust `Dockerfile` matching `services/radius`, `services/syslog`, and `services/snmp-poller`, plus Compose build verification in `.github/workflows/ci.yml`.
+- **Hybrid Mini-PaaS Readiness Score:** **`73.2 / 100`** (`73.23` weighted score across 15 capabilities in [HYBRID-PAAS-READINESS-ASSESSMENT.md](./HYBRID-PAAS-READINESS-ASSESSMENT.md)).
+- **Target Shape ([PLATFORM-TARGET-ARCHITECTURE.md](./PLATFORM-TARGET-ARCHITECTURE.md)):** Ready for single-cluster operator and multi-workspace deployment; proceed to **P3** (`engines/*` curation + dynamic signed plugin manifests + Postgres RLS) only under explicit Owner ADRs in [PLATFORM-ENGINEERING-ROADMAP.md](./PLATFORM-ENGINEERING-ROADMAP.md).

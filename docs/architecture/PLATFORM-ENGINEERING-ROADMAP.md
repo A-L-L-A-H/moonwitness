@@ -7,9 +7,16 @@ last_reviewed: "2026-11-18"
 
 # MoonWitness Platform Engineering Roadmap (P0–P3)
 
-> Audit baseline: branch `dev`, `HEAD = 5c38909019d1034fb671bd64344dc35b16bd29a4` (`2026-11-18`). Translates [PLATFORM-ARCHITECTURE-AUDIT.md](./PLATFORM-ARCHITECTURE-AUDIT.md), [APPLICATION-INTEGRATION-MATRIX.md](./APPLICATION-INTEGRATION-MATRIX.md), and [HYBRID-PAAS-READINESS-ASSESSMENT.md](./HYBRID-PAAS-READINESS-ASSESSMENT.md) into a dependency-ordered engineering plan.
+> Initial baseline: branch `dev`, `HEAD = 5c38909019d1034fb671bd64344dc35b16bd29a4` (`2026-11-18`). Reconciled after P0–P2 execution on `dev` (`2026-11-18`). Translates [PLATFORM-ARCHITECTURE-AUDIT.md](./PLATFORM-ARCHITECTURE-AUDIT.md), [APPLICATION-INTEGRATION-MATRIX.md](./APPLICATION-INTEGRATION-MATRIX.md), and [HYBRID-PAAS-READINESS-ASSESSMENT.md](./HYBRID-PAAS-READINESS-ASSESSMENT.md) into a dependency-ordered engineering plan.
 
-## 1. Prioritized Roadmap (P0–P3)
+## 1. Execution Status Summary (P0–P2 Implemented on `dev`; P3 Pending Owner Decision)
+
+- **P0 (Stabilization):** **IMPLEMENTED & VERIFIED** (`services/storage/Dockerfile` + `.dockerignore`, `control.routes.ts` V1 validation against `ARSY_V1_SUPPORTED_RESOURCE_KINDS`, single `apps/web/src/app/api/v1/[...path]/route.ts` proxy + deletion of dead `cloudflare-runtime.ts`, `.github/workflows/ci.yml` Compose + `rocksoul-tauri` + `services/memory` CI jobs + `services/memory/backend/pyproject.toml`).
+- **P1 (Consolidation):** **IMPLEMENTED & VERIFIED** (`mid-oidc.ts` deduplicated onto `@moonwitness/core`, `@moonwitness/contracts` wired into `@moonwitness/web` and `@moonwitness/api` timeline contracts, `packages/addons/epistemic` deduplicated onto `@moonwitness/canon/src/epistemic-evaluators.ts`, `commandCenterMigrations` & `probesMigrations` retired into `syncModels()` ORM definitions, `docker-compose.memory.yml` Compose overlay isolated cleanly from root `docker-compose.yml`, plus `midFastifyPlugin` `/health` collision guard in `packages/mid/src/plugin.ts` and `@moonwitness/addon-base` ESLint wiring).
+- **P2 (Tenancy, Durable Execution & Observability):** **IMPLEMENTED & VERIFIED** (`tenant_id` metadata & scoping across `@moonwitness/orm`, `@moonwitness/addon-base`, and `apps/api/src/middleware/auth.ts`; pluggable `createOrmRateLimitStore` + durable `ops.job` queue in `packages/addons/__base/src/job-queue.ts`; Prometheus `/metrics` & `/api/v1/metrics` + W3C `traceparent`/`x-request-id` correlation across `apps/web` & `apps/api`; allowlisted OS child-process supervision in `apps/rocksoul/src-tauri/src/commands/agent_execution.rs`).
+- **P3 (Optional Mini-PaaS Evolution & Engine Promotion):** **PROPOSED / NOT STARTED** (pending owner architecture decision and explicit ADR).
+
+## 2. Prioritized Roadmap (P0–P3)
 
 ### P0 — Stabilization & Broken-Contract / Build Remediation (Immediate)
 
@@ -48,19 +55,7 @@ last_reviewed: "2026-11-18"
 
 > Acceptance baseline for every roadmap task: unit/integration coverage in `vitest` / `go test` / `cargo test` / `pytest`, zero `docs:check` regressions, and adherence to `dev`-only local branching (`AGENTS.md`).
 
-## 2. Top 10 Highest-Value Next Engineering Tasks
+## 3. P0–P2 Execution Status & Remaining P3 Candidates
 
-1. **Fix `services/storage` missing `Dockerfile` (`P0-1`)** — unblocks `docker compose --profile ops build` immediately.
-2. **Align `apps/api` `control.routes.ts` with `cp/arsy` V1 supported resources (`P0-2`)** — eliminates runtime 4xx/501 surprises.
-3. **Remove dual `apps/web` `/api/v1` proxy & dead `cloudflare-runtime.ts` (`P0-3`)** — removes subtle header/cookie stripping risk.
-4. **Add CI jobs for `apps/rocksoul/src-tauri` & `services/memory` (`P0-4`)** — eliminates unverified Rust/Python blind spots.
-5. **Deduplicate `packages/addons/epistemic/src/engines.ts` onto `@moonwitness/canon` (`P1-3`)** — removes split brain in epistemic math.
-6. **Consolidate `apps/web` auth onto one OIDC BFF/PKCE stack (`P1-1`)** — shrinks auth/CSRF attack surface.
-7. **Finish migrating the remaining 9 API migration lists to Odoo+ addons (`P1-4`)** — makes `AddonRuntimeController` truly single-source.
-8. **Adopt `@moonwitness/contracts` across `web`/`api`/`rocksoul` boundaries (`P1-2`)** — stops schema drift.
-9. **Add Prometheus `/metrics` & `traceparent` correlation across `api`, `web`, and daemons (`P2-3`)** — makes hybrid debugging possible.
-10. **Design ADR for Tenant Scoping (`P2-1`) & Persistent Job Queue (`P2-2`)** — prerequisite gate before any multi-tenant PaaS claims.
-
-## 3. Recommended First Implementation Task
-
-**Execute `P0-1` (`services/storage` Dockerfile + CI Compose build validation):** it is a strict, zero-breaking-change, 1-PR fix that immediately resolves a verified broken target in `docker-compose.yml` line 222 while aligning `services/storage` with the 3 peer Rust daemons (`radius`, `syslog`, `snmp-poller`).
+1. **Completed in Current Execution (`P0-1..4`, `P1-1..5`, `P2-1..4`):** Storage Docker packaging, `cp/arsy` V1 control route alignment, single App Router `/api/v1` proxy, CI expansion (`Compose`, `rocksoul-tauri`, `services/memory`), `@moonwitness/core` PKCE consolidation, `@moonwitness/contracts` timeline wiring, `addon-epistemic` -> `@moonwitness/canon` deduplication, `command-center` & `probes` ORM convergence, `docker-compose.memory.yml` overlay, `@moonwitness/orm`/`addon-base` `tenant_id` isolation, durable `ops.job` queue + ORM rate-limit store, Prometheus `/metrics` + `traceparent`, and RockSoul OS child-process supervision.
+2. **Next Future Decision Gate (`P3-1` & `P3-2`):** Require explicit Owner ADRs before promoting standalone `engines/*` packages into `packages/` or introducing Postgres RLS + signed third-party addon bundles.
