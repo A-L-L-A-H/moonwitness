@@ -1,34 +1,37 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import { closeDb, initDb } from "@moonwitness/orm";
-import { ensureProbesSchema } from "./probes.persistence";
+import {
+  defaultFailClosedAuthBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { ensureProbesSchema, registerProbesRoutes } from "@moonwitness/addons/probes";
 import { registerHealthRoutes } from "./health.routes";
 
-vi.mock("../../middleware/auth", () => ({
-  requireAuth: () => async (request: FastifyRequest, reply: FastifyReply) => {
+const testAuth: BaseAddonAuthBridge = {
+  ...defaultFailClosedAuthBridge,
+  authenticate: async (request: FastifyRequest, reply: FastifyReply) => {
     const cookieHeader = request.headers.cookie ?? "";
     if (!cookieHeader.includes("mw_session=")) {
       return reply.code(401).send({ error: "Not authenticated" });
     }
     const role = (request.headers["x-test-role"] as string) ?? "editor";
-    request.user = {
+    (request as { user?: { id: string; username: string; role: string } }).user = {
       id: "1",
       username: "test-operator",
-      email: "operator@moonwitness.local",
-      role: role as "admin" | "editor" | "viewer",
-      displayName: "Test Operator",
+      role,
     };
   },
   requireRole:
-    (...allowedRoles: string[]) =>
+    (...allowedRoles) =>
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const user = request.user;
+      const user = (request as { user?: { role: "admin" | "editor" | "viewer" } }).user;
       if (!user) return reply.code(401).send({ error: "Not authenticated" });
       if (!allowedRoles.includes(user.role)) {
         return reply.code(403).send({ error: "Forbidden: insufficient permissions" });
       }
     },
-}));
+};
 
 describe("probes routes & NOC consolidation", () => {
   let app: FastifyInstance | null = null;
@@ -40,10 +43,14 @@ describe("probes routes & NOC consolidation", () => {
     await initDb("file::memory:?cache=shared");
     await ensureProbesSchema();
 
-    const { probesRoutes } = await import("./probes.routes");
     app = Fastify({ logger: false });
     await registerHealthRoutes(app);
-    await app.register(probesRoutes, { prefix: "/api/v1" });
+    await app.register(
+      async (scope) => {
+        await registerProbesRoutes(scope, { auth: testAuth });
+      },
+      { prefix: "/api/v1" },
+    );
     await app.ready();
   });
 

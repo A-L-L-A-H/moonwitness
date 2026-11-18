@@ -1,12 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { createActorContext, syncModels } from "@moonwitness/orm";
-import {
-  alertModel,
-  importLegacyCommandCenter,
-  workflowModel,
-} from "@moonwitness/addons/command-center";
-import { listAuditLogs } from "@moonwitness/addons/audit";
+import { createActorContext, getDb, syncModels, SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
+import { listAuditLogs } from "../audit/index.js";
+import { alertModel, workflowModel } from "./models.js";
 
 export interface CommandCenterFeedItem {
   time: string;
@@ -106,14 +102,115 @@ const INITIAL_ALERTS: readonly PersistedAlert[] = [
   { id: "a-3", text: "Publishing queue delayed (2 items)", ago: "3h ago", level: "low" },
 ];
 
+export async function importLegacyCommandCenter(): Promise<{
+  workflowsImported: number;
+  alertsImported: number;
+}> {
+  const db = getDb();
+  let workflowsImported = 0;
+  let alertsImported = 0;
+
+  try {
+    const wfTable = await db.get<{ name?: string }>(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'command_center_workflows'",
+    );
+    if (wfTable?.name) {
+      const rows = await db.all<Record<string, unknown>>(
+        "SELECT id, actor_id, name, detail, status, sort_order FROM command_center_workflows",
+      );
+      for (const row of rows) {
+        const key = String(row.id);
+        const actorId = String(row.actor_id);
+        const existing = await workflowModel.repository.find({
+          actor_id: actorId,
+          workflow_key: key,
+        });
+        if (existing.length > 0) continue;
+        await workflowModel.repository.upsert(
+          { actor_id: actorId, workflow_key: key },
+          {
+            workflow_key: key,
+            actor_id: actorId,
+            name: String(row.name),
+            detail: String(row.detail),
+            workflow_status: String(row.status) as
+              | "Queued"
+              | "Running"
+              | "Paused"
+              | "Succeeded"
+              | "Failed"
+              | "Cancelled",
+            sort_order: Number(row.sort_order ?? 0),
+            metadata_json: null,
+          },
+          SYSTEM_ACTOR,
+        );
+        workflowsImported += 1;
+      }
+    }
+  } catch {
+    // Legacy table absent or Postgres without sqlite_master.
+  }
+
+  try {
+    const alTable = await db.get<{ name?: string }>(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'command_center_alerts'",
+    );
+    if (alTable?.name) {
+      const rows = await db.all<Record<string, unknown>>(
+        "SELECT id, actor_id, text, ago, level, dismissed FROM command_center_alerts",
+      );
+      for (const row of rows) {
+        const key = String(row.id);
+        const actorId = String(row.actor_id);
+        const existing = await alertModel.repository.find({ actor_id: actorId, alert_key: key });
+        if (existing.length > 0) continue;
+        await alertModel.repository.upsert(
+          { actor_id: actorId, alert_key: key },
+          {
+            alert_key: key,
+            actor_id: actorId,
+            text: String(row.text),
+            ago_label: typeof row.ago === "string" ? row.ago : null,
+            level: String(row.level) as "high" | "medium" | "low",
+            dismissed: Boolean(row.dismissed),
+            dismissed_at: null,
+          },
+          SYSTEM_ACTOR,
+        );
+        alertsImported += 1;
+      }
+    }
+  } catch {
+    // Legacy table absent or Postgres without sqlite_master.
+  }
+
+  return { workflowsImported, alertsImported };
+}
+
+/** Ensures command center tables exist for standalone unit tests. */
 export async function ensureCommandCenterSchema(): Promise<void> {
   await syncModels([workflowModel, alertModel]);
   await importLegacyCommandCenter();
 }
 
-async function seedActorDefaultsIfEmpty(actorId: string): Promise<void> {
-  const actor = createActorContext(actorId, "api");
-  const existingWf = await workflowModel.repository.find({ actor_id: actorId }, { limit: 1 });
+function normalizeActor(actorOrId: ActorContext | string): {
+  actor: ActorContext;
+  actorId: string;
+} {
+  if (typeof actorOrId === "string") {
+    return { actor: createActorContext(actorOrId, "api"), actorId: actorOrId };
+  }
+  return { actor: actorOrId, actorId: actorOrId.actorId ?? "unknown" };
+}
+
+async function seedActorDefaultsIfEmpty(actorOrId: ActorContext | string): Promise<void> {
+  const { actor, actorId } = normalizeActor(actorOrId);
+  const tenantOpt = actor.tenantId ? { tenantId: actor.tenantId } : {};
+  const existingWf = await workflowModel.repository.find(
+    { actor_id: actorId },
+    { limit: 1, ...tenantOpt },
+  );
   if (existingWf.length === 0) {
     for (let i = 0; i < INITIAL_WORKFLOWS.length; i += 1) {
       const wf = INITIAL_WORKFLOWS[i]!;
@@ -133,7 +230,10 @@ async function seedActorDefaultsIfEmpty(actorId: string): Promise<void> {
     }
   }
 
-  const existingAlerts = await alertModel.repository.find({ actor_id: actorId }, { limit: 1 });
+  const existingAlerts = await alertModel.repository.find(
+    { actor_id: actorId },
+    { limit: 1, ...tenantOpt },
+  );
   if (existingAlerts.length === 0) {
     for (const alert of INITIAL_ALERTS) {
       await alertModel.repository.upsert(
@@ -153,25 +253,35 @@ async function seedActorDefaultsIfEmpty(actorId: string): Promise<void> {
   }
 }
 
-export async function getCommandCenterState(actorId: string): Promise<{
+export async function getCommandCenterState(actorOrId: ActorContext | string): Promise<{
   workflows: PersistedWorkflow[];
   alerts: PersistedAlert[];
   feed: CommandCenterFeedItem[];
 }> {
-  await seedActorDefaultsIfEmpty(actorId);
+  const { actor, actorId } = normalizeActor(actorOrId);
+  await seedActorDefaultsIfEmpty(actor);
   const wfRows = await workflowModel.repository.find(
     { actor_id: actorId },
-    { orderBy: [{ field: "sort_order", direction: "ASC" }] },
+    {
+      orderBy: [{ field: "sort_order", direction: "ASC" }],
+      ...(actor.tenantId ? { tenantId: actor.tenantId } : {}),
+    },
   );
 
-  const alertRows = await alertModel.repository.find({
-    actor_id: actorId,
-    dismissed: false,
-  });
+  const alertRows = await alertModel.repository.find(
+    {
+      actor_id: actorId,
+      dismissed: false,
+    },
+    actor.tenantId ? { tenantId: actor.tenantId } : undefined,
+  );
 
   const feed: CommandCenterFeedItem[] = [];
   try {
-    const recentLogs = await listAuditLogs({ limit: 8 });
+    const recentLogs = await listAuditLogs({
+      limit: 8,
+      ...(actor.tenantId ? { tenantId: actor.tenantId } : {}),
+    });
     for (const log of recentLogs) {
       const parsedTime = Date.parse(log.occurredAt);
       const time = Number.isFinite(parsedTime)
@@ -222,11 +332,15 @@ export interface CommandCenterStats {
   alerts: number;
 }
 
-export async function getCommandCenterStats(actorId: string): Promise<CommandCenterStats> {
-  await seedActorDefaultsIfEmpty(actorId);
+export async function getCommandCenterStats(
+  actorOrId: ActorContext | string,
+): Promise<CommandCenterStats> {
+  const { actor, actorId } = normalizeActor(actorOrId);
+  await seedActorDefaultsIfEmpty(actor);
+  const tenantOpt = actor.tenantId ? { tenantId: actor.tenantId } : undefined;
   const [workflows, activeAlerts] = await Promise.all([
-    workflowModel.repository.find({ actor_id: actorId }),
-    alertModel.repository.find({ actor_id: actorId, dismissed: false }),
+    workflowModel.repository.find({ actor_id: actorId }, tenantOpt),
+    alertModel.repository.find({ actor_id: actorId, dismissed: false }, tenantOpt),
   ]);
   const counts: Record<WorkflowStatus, number> = {
     Queued: 0,
@@ -253,21 +367,25 @@ export async function getCommandCenterStats(actorId: string): Promise<CommandCen
 }
 
 export async function createCommandCenterWorkflow(
-  actorId: string,
+  actorOrId: ActorContext | string,
   input: CreateWorkflowInput,
 ): Promise<PersistedWorkflow> {
-  await seedActorDefaultsIfEmpty(actorId);
+  const { actor, actorId } = normalizeActor(actorOrId);
+  await seedActorDefaultsIfEmpty(actor);
   const parsed = createWorkflowInputSchema.parse(input);
   const id = `wf-${randomUUID()}`;
 
   const existing = await workflowModel.repository.find(
     { actor_id: actorId },
-    { orderBy: [{ field: "sort_order", direction: "ASC" }], limit: 1 },
+    {
+      orderBy: [{ field: "sort_order", direction: "ASC" }],
+      limit: 1,
+      ...(actor.tenantId ? { tenantId: actor.tenantId } : {}),
+    },
   );
   const minSort = existing[0]?.sort_order ?? 0;
   const nextSort = Math.min(0, minSort) - 1;
 
-  const actor = createActorContext(actorId, "api");
   await workflowModel.repository.create(
     {
       workflow_key: id,
@@ -290,15 +408,19 @@ export async function createCommandCenterWorkflow(
 }
 
 export async function transitionCommandCenterWorkflow(
-  actorId: string,
+  actorOrId: ActorContext | string,
   workflowId: string,
   nextStatus: WorkflowStatus,
 ): Promise<PersistedWorkflow | null> {
-  await seedActorDefaultsIfEmpty(actorId);
-  const matches = await workflowModel.repository.find({
-    actor_id: actorId,
-    workflow_key: workflowId,
-  });
+  const { actor, actorId } = normalizeActor(actorOrId);
+  await seedActorDefaultsIfEmpty(actor);
+  const matches = await workflowModel.repository.find(
+    {
+      actor_id: actorId,
+      workflow_key: workflowId,
+    },
+    actor.tenantId ? { tenantId: actor.tenantId } : undefined,
+  );
   const row = matches[0];
   if (!row) return null;
 
@@ -311,7 +433,6 @@ export async function transitionCommandCenterWorkflow(
     throw error;
   }
 
-  const actor = createActorContext(actorId, "api");
   await workflowModel.repository.update(row.id, { workflow_status: nextStatus }, actor);
 
   return {
@@ -323,14 +444,18 @@ export async function transitionCommandCenterWorkflow(
 }
 
 export async function toggleCommandCenterWorkflow(
-  actorId: string,
+  actorOrId: ActorContext | string,
   workflowId: string,
 ): Promise<PersistedWorkflow | null> {
-  await seedActorDefaultsIfEmpty(actorId);
-  const matches = await workflowModel.repository.find({
-    actor_id: actorId,
-    workflow_key: workflowId,
-  });
+  const { actor, actorId } = normalizeActor(actorOrId);
+  await seedActorDefaultsIfEmpty(actor);
+  const matches = await workflowModel.repository.find(
+    {
+      actor_id: actorId,
+      workflow_key: workflowId,
+    },
+    actor.tenantId ? { tenantId: actor.tenantId } : undefined,
+  );
   const row = matches[0];
   if (!row) return null;
 
@@ -350,24 +475,27 @@ export async function toggleCommandCenterWorkflow(
     error.statusCode = 409;
     throw error;
   }
-  return transitionCommandCenterWorkflow(actorId, workflowId, nextStatus);
+  return transitionCommandCenterWorkflow(actor, workflowId, nextStatus);
 }
 
 export async function dismissCommandCenterAlert(
-  actorId: string,
+  actorOrId: ActorContext | string,
   alertId: string,
 ): Promise<boolean> {
-  await seedActorDefaultsIfEmpty(actorId);
-  const matches = await alertModel.repository.find({
-    actor_id: actorId,
-    alert_key: alertId,
-    dismissed: false,
-  });
+  const { actor, actorId } = normalizeActor(actorOrId);
+  await seedActorDefaultsIfEmpty(actor);
+  const matches = await alertModel.repository.find(
+    {
+      actor_id: actorId,
+      alert_key: alertId,
+      dismissed: false,
+    },
+    actor.tenantId ? { tenantId: actor.tenantId } : undefined,
+  );
   const existing = matches[0];
   if (!existing) return false;
 
   const now = new Date().toISOString();
-  const actor = createActorContext(actorId, "api");
   await alertModel.repository.update(existing.id, { dismissed: true, dismissed_at: now }, actor);
   return true;
 }

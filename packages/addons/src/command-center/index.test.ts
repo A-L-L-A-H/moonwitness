@@ -2,11 +2,16 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import Fastify from "fastify";
 import { closeDb, getDb, initDb, modelRegistry } from "@moonwitness/orm";
 import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
 import { auditAddon } from "../audit";
 import { authAddon } from "../auth";
-import { commandCenterAddon, workflowModel } from "./index.js";
+import {
+  commandCenterAddon,
+  createCommandCenterAddon,
+  workflowModel,
+} from "./index.js";
 
 describe("../command-center", () => {
   const dirs: string[] = [];
@@ -60,6 +65,83 @@ describe("../command-center", () => {
     const rows = await workflowModel.repository.find({ workflow_key: "wf-legacy-1" });
     expect(rows).toHaveLength(1);
     const view = await runtime.getViewDescriptor("command.workflow", "editor");
-    expect(view?.actionBindings.customActions?.[0]?.id).toBe("advance");
+    expect(view?.actionBindings.listUrl).toBe("/api/v1/command-center/state");
+    expect(view?.actionBindings.customActions?.[0]).toMatchObject({
+      id: "toggle",
+      method: "PATCH",
+      urlTemplate: "/api/v1/command-center/workflows/{id}/toggle",
+    });
+
+    const alertView = await runtime.getViewDescriptor("command.alert", "editor");
+    expect(alertView?.actionBindings.listUrl).toBe("/api/v1/command-center/state");
+    expect(alertView?.actionBindings.createUrl).toBeUndefined();
+    expect(alertView?.actionBindings.customActions?.[0]).toMatchObject({
+      id: "dismiss",
+      method: "DELETE",
+      urlTemplate: "/api/v1/command-center/alerts/{id}",
+    });
+  });
+
+  it("self-mounts /api/v1/command-center/* routes and isolates tenant workflows", async () => {
+    const app = Fastify({ logger: false });
+    app.addHook("preHandler", async (request) => {
+      const tenant = request.headers["x-tenant-id"];
+      (request as { user?: { id: string; role: string; tenantId?: string }; tenantId?: string }).user =
+        {
+          id: "op-1",
+          role: "editor",
+          tenantId: typeof tenant === "string" ? tenant : "default",
+        };
+      (request as { tenantId?: string }).tenantId =
+        typeof tenant === "string" ? tenant : "default";
+    });
+
+    const runtime = new AddonRuntimeController();
+    await runtime.syncAll(
+      [
+        { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+        auditAddon,
+        authAddon,
+        createCommandCenterAddon({ prefix: "/api/v1" }),
+      ],
+      app,
+    );
+    await app.ready();
+
+    try {
+      const createRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/command-center/workflows",
+        headers: { "x-tenant-id": "tenant-a" },
+        payload: { name: "Alpha Workflow", detail: "isolated to tenant-a" },
+      });
+      expect(createRes.statusCode).toBe(201);
+
+      const stateA = await app.inject({
+        method: "GET",
+        url: "/api/v1/command-center/state",
+        headers: { "x-tenant-id": "tenant-a" },
+      });
+      expect(stateA.statusCode).toBe(200);
+      expect(
+        (stateA.json().workflows as Array<{ name: string }>).some(
+          (w) => w.name === "Alpha Workflow",
+        ),
+      ).toBe(true);
+
+      const stateB = await app.inject({
+        method: "GET",
+        url: "/api/v1/command-center/state",
+        headers: { "x-tenant-id": "tenant-b" },
+      });
+      expect(stateB.statusCode).toBe(200);
+      expect(
+        (stateB.json().workflows as Array<{ name: string }>).some(
+          (w) => w.name === "Alpha Workflow",
+        ),
+      ).toBe(false);
+    } finally {
+      await app.close();
+    }
   });
 });

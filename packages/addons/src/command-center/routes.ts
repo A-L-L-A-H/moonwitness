@@ -1,5 +1,9 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
+import {
+  defaultFailClosedAuthBridge,
+  resolveActorContextFromBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
 import {
   commandCenterIdParamSchema,
   createCommandCenterWorkflow,
@@ -10,68 +14,73 @@ import {
   toggleCommandCenterWorkflow,
   transitionCommandCenterWorkflow,
   workflowStatusSchema,
-} from "./command-center.persistence";
+} from "./service.js";
 
-function actorIdFor(request: FastifyRequest): string | null {
-  const user = (request as AuthenticatedRequest).user;
-  if (!user) return null;
-  return String(user.id);
-}
-
-export async function commandCenterRoutes(fastify: FastifyInstance): Promise<void> {
-  const authenticate = requireAuth();
-  const requireOperator = requireRole("admin", "editor");
+export async function registerCommandCenterRoutes(
+  fastify: FastifyInstance,
+  options: { auth?: BaseAddonAuthBridge } = {},
+): Promise<void> {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const requireOperator = auth.requireRole("admin", "editor");
 
   fastify.get(
     "/command-center/state",
-    { preHandler: authenticate },
+    { preHandler: auth.authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const actorId = actorIdFor(request);
-      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
-      const state = await getCommandCenterState(actorId);
+      if (!auth.getActorId(request)) {
+        return reply.code(401).send({ error: "Not authenticated" });
+      }
+      const actor = resolveActorContextFromBridge(auth, request);
+      const state = await getCommandCenterState(actor);
       return reply.code(200).send(state);
     },
   );
 
   fastify.get(
     "/command-center/stats",
-    { preHandler: authenticate },
+    { preHandler: auth.authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const actorId = actorIdFor(request);
-      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
-      const stats = await getCommandCenterStats(actorId);
+      if (!auth.getActorId(request)) {
+        return reply.code(401).send({ error: "Not authenticated" });
+      }
+      const actor = resolveActorContextFromBridge(auth, request);
+      const stats = await getCommandCenterStats(actor);
       return reply.code(200).send(stats);
     },
   );
 
   fastify.post(
     "/command-center/workflows",
-    { preHandler: [authenticate, requireOperator] },
+    { preHandler: [auth.authenticate, requireOperator] },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const actorId = actorIdFor(request);
-      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
+      if (!auth.getActorId(request)) {
+        return reply.code(401).send({ error: "Not authenticated" });
+      }
       const parsed = createWorkflowInputSchema.safeParse(request.body);
       if (!parsed.success) {
         return reply.code(400).send({
           error: parsed.error.issues[0]?.message ?? "Invalid workflow payload",
         });
       }
-      const workflow = await createCommandCenterWorkflow(actorId, parsed.data);
+      const actor = resolveActorContextFromBridge(auth, request);
+      const workflow = await createCommandCenterWorkflow(actor, parsed.data);
       return reply.code(201).send({ workflow });
     },
   );
 
   fastify.patch<{ Params: { id: string } }>(
     "/command-center/workflows/:id/toggle",
-    { preHandler: [authenticate, requireOperator] },
+    { preHandler: [auth.authenticate, requireOperator] },
     async (request, reply) => {
-      const actorId = actorIdFor(request);
-      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
+      if (!auth.getActorId(request)) {
+        return reply.code(401).send({ error: "Not authenticated" });
+      }
       const params = commandCenterIdParamSchema.safeParse(request.params);
       if (!params.success) {
         return reply.code(400).send({ error: "Invalid workflow identifier" });
       }
-      const workflow = await toggleCommandCenterWorkflow(actorId, params.data.id);
+      const actor = resolveActorContextFromBridge(auth, request);
+      const workflow = await toggleCommandCenterWorkflow(actor, params.data.id);
       if (!workflow) {
         return reply.code(404).send({ error: "Workflow not found" });
       }
@@ -81,10 +90,11 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
 
   fastify.patch<{ Params: { id: string }; Body: { status?: string } }>(
     "/command-center/workflows/:id/status",
-    { preHandler: [authenticate, requireOperator] },
+    { preHandler: [auth.authenticate, requireOperator] },
     async (request, reply) => {
-      const actorId = actorIdFor(request);
-      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
+      if (!auth.getActorId(request)) {
+        return reply.code(401).send({ error: "Not authenticated" });
+      }
       const params = commandCenterIdParamSchema.safeParse(request.params);
       if (!params.success) {
         return reply.code(400).send({ error: "Invalid workflow identifier" });
@@ -93,9 +103,10 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
       if (!parsedStatus.success) {
         return reply.code(400).send({ error: "Invalid workflow status" });
       }
+      const actor = resolveActorContextFromBridge(auth, request);
       try {
         const workflow = await transitionCommandCenterWorkflow(
-          actorId,
+          actor,
           params.data.id,
           parsedStatus.data,
         );
@@ -117,15 +128,17 @@ export async function commandCenterRoutes(fastify: FastifyInstance): Promise<voi
 
   fastify.delete<{ Params: { id: string } }>(
     "/command-center/alerts/:id",
-    { preHandler: [authenticate, requireOperator] },
+    { preHandler: [auth.authenticate, requireOperator] },
     async (request, reply) => {
-      const actorId = actorIdFor(request);
-      if (!actorId) return reply.code(401).send({ error: "Not authenticated" });
+      if (!auth.getActorId(request)) {
+        return reply.code(401).send({ error: "Not authenticated" });
+      }
       const params = commandCenterIdParamSchema.safeParse(request.params);
       if (!params.success) {
         return reply.code(400).send({ error: "Invalid alert identifier" });
       }
-      const dismissed = await dismissCommandCenterAlert(actorId, params.data.id);
+      const actor = resolveActorContextFromBridge(auth, request);
+      const dismissed = await dismissCommandCenterAlert(actor, params.data.id);
       if (!dismissed) {
         return reply.code(404).send({ error: "Alert not found" });
       }

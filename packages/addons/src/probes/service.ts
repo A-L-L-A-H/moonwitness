@@ -1,6 +1,6 @@
-import { createActorContext, getDb, syncModels } from "@moonwitness/orm";
-import { importLegacyProbes, probeEventModel, probeNodeModel } from "@moonwitness/addons/probes";
-import { isBlockedRuntimeHost } from "../../shared/env";
+import { createActorContext, getDb, syncModels, SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
+import { isBlockedRuntimeHost } from "@moonwitness/addon-runtime";
+import { probeEventModel, probeNodeModel } from "./models.js";
 
 export interface ProbeNode {
   id: string;
@@ -54,10 +54,43 @@ export const DEFAULT_PROBE_NODES = [
   },
 ] as const;
 
-export async function ensureProbesSchema(): Promise<void> {
-  await syncModels([probeNodeModel, probeEventModel]);
-  await importLegacyProbes();
-  const actor = createActorContext(null, "api");
+export async function importLegacyProbes(): Promise<{ importedNodes: number }> {
+  const db = getDb();
+  let importedNodes = 0;
+  try {
+    const legacy = await db.get<{ name?: string }>(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'igate_nodes'",
+    );
+    if (!legacy?.name) return { importedNodes: 0 };
+
+    const rows = await db.all<Record<string, unknown>>(
+      "SELECT id, name, target_url, category, enabled FROM igate_nodes",
+    );
+    for (const row of rows) {
+      const nodeKey = String(row.id);
+      const existing = await probeNodeModel.repository.find({ node_key: nodeKey });
+      if (existing.length > 0) continue;
+      await probeNodeModel.repository.upsert(
+        { node_key: nodeKey },
+        {
+          node_key: nodeKey,
+          name: String(row.name),
+          target_url: String(row.target_url),
+          category: String(row.category),
+          enabled: Boolean(row.enabled),
+          metadata_json: null,
+        },
+        SYSTEM_ACTOR,
+      );
+      importedNodes += 1;
+    }
+  } catch {
+    // Legacy table absent or Postgres without sqlite_master.
+  }
+  return { importedNodes };
+}
+
+export async function seedDefaultProbeNodes(): Promise<void> {
   for (const node of DEFAULT_PROBE_NODES) {
     const existing = await probeNodeModel.repository.find({ node_key: node.id }, { limit: 1 });
     if (!existing[0]) {
@@ -70,16 +103,26 @@ export async function ensureProbesSchema(): Promise<void> {
           enabled: true,
           metadata_json: null,
         },
-        actor,
+        SYSTEM_ACTOR,
       );
     }
   }
 }
 
-export async function listProbeNodes(): Promise<ProbeNode[]> {
+/** Ensures probe tables & seed nodes exist for standalone unit tests. */
+export async function ensureProbesSchema(): Promise<void> {
+  await syncModels([probeNodeModel, probeEventModel]);
+  await importLegacyProbes();
+  await seedDefaultProbeNodes();
+}
+
+export async function listProbeNodes(tenantId?: string): Promise<ProbeNode[]> {
   const rows = await probeNodeModel.repository.find(
     {},
-    { orderBy: [{ field: "node_key", direction: "ASC" }] },
+    {
+      orderBy: [{ field: "node_key", direction: "ASC" }],
+      ...(tenantId ? { tenantId } : {}),
+    },
   );
 
   return rows.map((row) => ({
@@ -93,13 +136,17 @@ export async function listProbeNodes(): Promise<ProbeNode[]> {
   }));
 }
 
-export async function listRecentProbeEvents(limit = 25): Promise<ProbeEvent[]> {
+export async function listRecentProbeEvents(
+  limit = 25,
+  tenantId?: string,
+): Promise<ProbeEvent[]> {
   const boundedLimit = Math.max(1, Math.min(100, limit));
   const rows = await probeEventModel.repository.find(
     {},
     {
       limit: boundedLimit,
       orderBy: [{ field: "checked_at", direction: "DESC" }],
+      ...(tenantId ? { tenantId } : {}),
     },
   );
 
@@ -135,9 +182,10 @@ export async function recordProbeEvent(params: {
   ok: boolean;
   latencyMs: number;
   actorSub: string;
+  actor?: ActorContext;
 }): Promise<ProbeEvent> {
   const checkedAt = new Date().toISOString();
-  const actor = createActorContext(params.actorSub, "api");
+  const actor = params.actor ?? createActorContext(params.actorSub, "api");
 
   const created = await probeEventModel.repository.create(
     {
@@ -145,7 +193,7 @@ export async function recordProbeEvent(params: {
       status_code: params.statusCode,
       ok: params.ok,
       latency_ms: params.latencyMs,
-      actor_sub: params.actorSub,
+      actor_sub: actor.actorId ?? params.actorSub,
       checked_at: checkedAt,
       error_message: null,
     },
@@ -173,9 +221,13 @@ export async function recordProbeEvent(params: {
 
 export async function executeProbeForNode(
   node: ProbeNode,
-  actorSub: string,
+  actorOrSub: ActorContext | string,
   fetchFn: typeof fetch = globalThis.fetch,
 ): Promise<ProbeEvent> {
+  const actor =
+    typeof actorOrSub === "string" ? createActorContext(actorOrSub, "api") : actorOrSub;
+  const actorSub = actor.actorId ?? "unknown";
+
   if (!validateProbeTargetUrl(node.targetUrl)) {
     return recordProbeEvent({
       nodeId: node.id,
@@ -183,6 +235,7 @@ export async function executeProbeForNode(
       ok: false,
       latencyMs: 0,
       actorSub,
+      actor,
     });
   }
 
@@ -209,5 +262,6 @@ export async function executeProbeForNode(
     ok: probeOk,
     latencyMs,
     actorSub,
+    actor,
   });
 }

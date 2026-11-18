@@ -43,11 +43,8 @@ import {
 import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
 import { createApiMetricsCollector } from "./interface/routes/metrics";
 import { authRoutes } from "./interface/routes/auth.routes";
-import { commandCenterRoutes } from "./interface/routes/command-center.routes";
 import { controlRoutes } from "./interface/routes/control.routes";
 import { memoryRoutes } from "./interface/routes/memory.routes";
-import { ensureProbesSchema } from "./interface/routes/probes.persistence";
-import { probesRoutes } from "./interface/routes/probes.routes";
 import { radiusRoutes } from "./interface/routes/radius.routes";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 import { snmpPollerRoutes } from "./interface/routes/snmp-poller.routes";
@@ -225,16 +222,8 @@ async function registerAddonTree(
         await scope.register(controlRoutes, prefix ? { prefix } : {});
       },
     }),
-    createCommandCenterAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(commandCenterRoutes, prefix ? { prefix } : {});
-      },
-    }),
-    createProbesAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(probesRoutes, prefix ? { prefix } : {});
-      },
-    }),
+    createCommandCenterAddon(host),
+    createProbesAddon(host),
     createAiAddon({
       registerRoutes: async (scope) => {
         await scope.register(riotAiRoutes, prefix ? { prefix } : {});
@@ -270,7 +259,6 @@ async function registerAddonTree(
     runSeeds: true,
     signingPolicy: { mode: env.ADDON_SIGNING_MODE },
   });
-  await ensureProbesSchema();
 }
 
 /**

@@ -1,14 +1,18 @@
 import type { FastifyInstance } from "fastify";
-import { getDb, SYSTEM_ACTOR } from "@moonwitness/orm";
-import type {
-  AddonDefinition,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  defaultFailClosedAuthBridge,
+  type AddonDefinition,
+  type AddonHostContext,
+  type AddonManifestInput,
+  type BaseAddonAuthBridge,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { opsEventModel, probeEventModel, probeNodeModel } from "./models.js";
+import { registerProbesRoutes } from "./routes.js";
+import { importLegacyProbes, seedDefaultProbeNodes } from "./service.js";
 
 export const probesManifest = manifestData as AddonManifestInput;
 export {
@@ -19,42 +23,8 @@ export {
   opsEventModel,
   opsEventSchema,
 } from "./models.js";
-
-export async function importLegacyProbes(): Promise<{ importedNodes: number }> {
-  const db = getDb();
-  let importedNodes = 0;
-  try {
-    const legacy = await db.get<{ name?: string }>(
-      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'igate_nodes'",
-    );
-    if (!legacy?.name) return { importedNodes: 0 };
-
-    const rows = await db.all<Record<string, unknown>>(
-      "SELECT id, name, target_url, category, enabled FROM igate_nodes",
-    );
-    for (const row of rows) {
-      const nodeKey = String(row.id);
-      const existing = await probeNodeModel.repository.find({ node_key: nodeKey });
-      if (existing.length > 0) continue;
-      await probeNodeModel.repository.upsert(
-        { node_key: nodeKey },
-        {
-          node_key: nodeKey,
-          name: String(row.name),
-          target_url: String(row.target_url),
-          category: String(row.category),
-          enabled: Boolean(row.enabled),
-          metadata_json: null,
-        },
-        SYSTEM_ACTOR,
-      );
-      importedNodes += 1;
-    }
-  } catch {
-    // Legacy table absent or Postgres without sqlite_master.
-  }
-  return { importedNodes };
-}
+export * from "./service.js";
+export { registerProbesRoutes } from "./routes.js";
 
 export const probesRules: IrRuleInput[] = [
   { model_name: "probe.node", role: "viewer", can_read: true },
@@ -86,14 +56,14 @@ export const probesViews: IrViewInput[] = [
     model_name: "probe.node",
     view_type: "list",
     actionBindings: {
-      listUrl: "/api/v1/probes/targets",
-      createUrl: "/api/v1/probes/targets",
+      listUrl: "/api/v1/probes/nodes",
+      createUrl: "/api/v1/m/probe.node",
       customActions: [
         {
           id: "run_probe",
           label: "Run Probe",
           method: "POST",
-          urlTemplate: "/api/v1/probes/run/{id}",
+          urlTemplate: "/api/v1/probes/run",
           roles: ["editor", "admin"],
         },
       ],
@@ -120,8 +90,14 @@ export const probesMenus: IrMenuInput[] = [
 ];
 
 export function createProbesAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    auth?: BaseAddonAuthBridge;
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+
   return {
     manifest: probesManifest,
     models: [probeNodeModel, probeEventModel, opsEventModel],
@@ -131,7 +107,23 @@ export function createProbesAddon(
     register: async () => {
       await importLegacyProbes();
     },
-    registerRoutes: options.registerRoutes,
+    seed: async () => {
+      await seedDefaultProbeNodes();
+    },
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerProbesRoutes(scoped, { auth });
+            },
+            { prefix },
+          );
+        } else {
+          await registerProbesRoutes(scope, { auth });
+        }
+      }),
   };
 }
 

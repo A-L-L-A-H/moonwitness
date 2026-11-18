@@ -1,34 +1,36 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import Fastify, { type FastifyInstance } from "fastify";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import { closeDb, initDb } from "@moonwitness/orm";
-import type { FastifyReply, FastifyRequest } from "fastify";
+import {
+  defaultFailClosedAuthBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import {
+  ensureCommandCenterSchema,
+  registerCommandCenterRoutes,
+} from "@moonwitness/addons/command-center";
 
-vi.mock("../../middleware/auth", () => ({
-  requireAuth: () => async (request: FastifyRequest, reply: FastifyReply) => {
+const testAuth: BaseAddonAuthBridge = {
+  ...defaultFailClosedAuthBridge,
+  authenticate: async (request: FastifyRequest, reply: FastifyReply) => {
     const cookieHeader = request.headers.cookie ?? "";
     if (!cookieHeader.includes("mw_session=")) {
       return reply.code(401).send({ error: "Not authenticated" });
     }
     const actor = request.headers["x-test-actor"] === "second" ? "2" : "1";
     const role = (request.headers["x-test-role"] as "admin" | "editor" | "viewer") ?? "editor";
-    request.user = {
-      id: actor,
-      username: actor === "2" ? "editor-two" : "creator-one",
-      email: `actor${actor}@moonwitness.local`,
-      role,
-      displayName: `Actor ${actor}`,
-    };
+    (request as { user?: { id: string; role: string } }).user = { id: actor, role };
   },
   requireRole:
-    (...allowedRoles: ("admin" | "editor" | "viewer")[]) =>
+    (...allowedRoles) =>
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const user = request.user;
+      const user = (request as { user?: { role: "admin" | "editor" | "viewer" } }).user;
       if (!user) return reply.code(401).send({ error: "Not authenticated" });
       if (!allowedRoles.includes(user.role)) {
         return reply.code(403).send({ error: "Forbidden: insufficient permissions" });
       }
     },
-}));
+};
 
 describe("command center persistence routes", () => {
   let app: FastifyInstance | null = null;
@@ -36,11 +38,14 @@ describe("command center persistence routes", () => {
 
   beforeEach(async () => {
     await initDb("file::memory:?cache=shared");
-    const { ensureCommandCenterSchema } = await import("./command-center.persistence");
     await ensureCommandCenterSchema();
-    const { commandCenterRoutes } = await import("./command-center.routes");
     app = Fastify({ logger: false });
-    await app.register(commandCenterRoutes, { prefix: "/api/v1" });
+    await app.register(
+      async (scope) => {
+        await registerCommandCenterRoutes(scope, { auth: testAuth });
+      },
+      { prefix: "/api/v1" },
+    );
     await app.ready();
   });
 

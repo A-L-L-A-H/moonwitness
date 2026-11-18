@@ -1,98 +1,23 @@
 import type { FastifyInstance } from "fastify";
-import { getDb, SYSTEM_ACTOR } from "@moonwitness/orm";
-import type {
-  AddonDefinition,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  defaultFailClosedAuthBridge,
+  type AddonDefinition,
+  type AddonHostContext,
+  type AddonManifestInput,
+  type BaseAddonAuthBridge,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { alertModel, workflowModel } from "./models.js";
+import { registerCommandCenterRoutes } from "./routes.js";
+import { importLegacyCommandCenter } from "./service.js";
 
 export const commandCenterManifest = manifestData as AddonManifestInput;
 export { workflowModel, workflowSchema, alertModel, alertSchema } from "./models.js";
-
-export async function importLegacyCommandCenter(): Promise<{
-  workflowsImported: number;
-  alertsImported: number;
-}> {
-  const db = getDb();
-  let workflowsImported = 0;
-  let alertsImported = 0;
-
-  try {
-    const wfTable = await db.get<{ name?: string }>(
-      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'command_center_workflows'",
-    );
-    if (wfTable?.name) {
-      const rows = await db.all<Record<string, unknown>>(
-        "SELECT id, actor_id, name, detail, status, sort_order FROM command_center_workflows",
-      );
-      for (const row of rows) {
-        const key = String(row.id);
-        const actorId = String(row.actor_id);
-        const existing = await workflowModel.repository.find({
-          actor_id: actorId,
-          workflow_key: key,
-        });
-        if (existing.length > 0) continue;
-        await workflowModel.repository.upsert(
-          { actor_id: actorId, workflow_key: key },
-          {
-            workflow_key: key,
-            actor_id: actorId,
-            name: String(row.name),
-            detail: String(row.detail),
-            workflow_status: String(row.status) as
-              "Queued" | "Running" | "Paused" | "Succeeded" | "Failed" | "Cancelled",
-            sort_order: Number(row.sort_order ?? 0),
-            metadata_json: null,
-          },
-          SYSTEM_ACTOR,
-        );
-        workflowsImported += 1;
-      }
-    }
-  } catch {
-    // Legacy table absent or Postgres without sqlite_master.
-  }
-
-  try {
-    const alTable = await db.get<{ name?: string }>(
-      "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'command_center_alerts'",
-    );
-    if (alTable?.name) {
-      const rows = await db.all<Record<string, unknown>>(
-        "SELECT id, actor_id, text, ago, level, dismissed FROM command_center_alerts",
-      );
-      for (const row of rows) {
-        const key = String(row.id);
-        const actorId = String(row.actor_id);
-        const existing = await alertModel.repository.find({ actor_id: actorId, alert_key: key });
-        if (existing.length > 0) continue;
-        await alertModel.repository.upsert(
-          { actor_id: actorId, alert_key: key },
-          {
-            alert_key: key,
-            actor_id: actorId,
-            text: String(row.text),
-            ago_label: typeof row.ago === "string" ? row.ago : null,
-            level: String(row.level) as "high" | "medium" | "low",
-            dismissed: Boolean(row.dismissed),
-            dismissed_at: null,
-          },
-          SYSTEM_ACTOR,
-        );
-        alertsImported += 1;
-      }
-    }
-  } catch {
-    // Legacy table absent or Postgres without sqlite_master.
-  }
-
-  return { workflowsImported, alertsImported };
-}
+export * from "./service.js";
+export { registerCommandCenterRoutes } from "./routes.js";
 
 export const commandCenterRules: IrRuleInput[] = [
   { model_name: "command.workflow", role: "viewer", can_read: true },
@@ -134,14 +59,14 @@ export const commandCenterViews: IrViewInput[] = [
     model_name: "command.workflow",
     view_type: "list",
     actionBindings: {
-      listUrl: "/api/v1/command-center/overview",
+      listUrl: "/api/v1/command-center/state",
       createUrl: "/api/v1/command-center/workflows",
       customActions: [
         {
-          id: "advance",
-          label: "Advance State",
-          method: "POST",
-          urlTemplate: "/api/v1/command-center/workflows/{id}/advance",
+          id: "toggle",
+          label: "Toggle State",
+          method: "PATCH",
+          urlTemplate: "/api/v1/command-center/workflows/{id}/toggle",
           roles: ["editor", "admin"],
         },
       ],
@@ -157,14 +82,13 @@ export const commandCenterViews: IrViewInput[] = [
     model_name: "command.alert",
     view_type: "list",
     actionBindings: {
-      listUrl: "/api/v1/command-center/overview",
-      createUrl: "/api/v1/command-center/alerts",
+      listUrl: "/api/v1/command-center/state",
       customActions: [
         {
           id: "dismiss",
           label: "Dismiss",
-          method: "POST",
-          urlTemplate: "/api/v1/command-center/alerts/{id}/dismiss",
+          method: "DELETE",
+          urlTemplate: "/api/v1/command-center/alerts/{id}",
           roles: ["editor", "admin"],
         },
       ],
@@ -190,8 +114,14 @@ export const commandCenterMenus: IrMenuInput[] = [
 ];
 
 export function createCommandCenterAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    auth?: BaseAddonAuthBridge;
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+
   return {
     manifest: commandCenterManifest,
     models: [workflowModel, alertModel],
@@ -201,7 +131,20 @@ export function createCommandCenterAddon(
     register: async () => {
       await importLegacyCommandCenter();
     },
-    registerRoutes: options.registerRoutes,
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerCommandCenterRoutes(scoped, { auth });
+            },
+            { prefix },
+          );
+        } else {
+          await registerCommandCenterRoutes(scope, { auth });
+        }
+      }),
   };
 }
 

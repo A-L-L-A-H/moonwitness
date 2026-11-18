@@ -19,7 +19,7 @@ export const workflowModel = defineModel({
   restEnabled: false,
   publicFields: ["workflow_key", "name", "detail", "workflow_status"],
   indexes: [
-    { fields: ["actor_id", "workflow_key"], unique: true },
+    { fields: ["tenant_id", "actor_id", "workflow_key"], unique: true },
     { fields: ["actor_id", "workflow_status"] },
   ],
 });
@@ -42,7 +42,7 @@ export const alertModel = defineModel({
   restEnabled: false,
   publicFields: ["alert_key", "text", "level", "dismissed"],
   indexes: [
-    { fields: ["actor_id", "alert_key"], unique: true },
+    { fields: ["tenant_id", "actor_id", "alert_key"], unique: true },
     { fields: ["actor_id", "dismissed"] },
   ],
 });
