@@ -16,7 +16,16 @@
     "command-eye": "apps/web/public/art/command-eye.png",
     "world-map-atlas": "apps/web/public/art/world-map-atlas.png",
     "sidebar-witness": "apps/web/public/art/sidebar-witness.png",
-    "dock-chronicle-hero": "apps/web/public/art/dock-chronicle-hero.png"
+    "dock-chronicle-hero": "apps/web/public/art/dock-chronicle-hero.png",
+    "dna-lunar-observatory": "apps/web/public/art/dna-lunar-observatory.png",
+    "dna-nexus-hud": "apps/web/public/art/dna-nexus-hud.png",
+    "dna-mycelium-spores": "apps/web/public/art/dna-mycelium-spores.png",
+    "dna-nusantara-nodes": "apps/web/public/art/dna-nusantara-nodes.png",
+    "editorial-light-plate": "apps/web/public/art/editorial-light-plate.png",
+    "wallpaper-lunar-rooftop-wide": "apps/web/public/art/wallpaper-lunar-rooftop-wide.png",
+    "wallpaper-signal-city-wide": "apps/web/public/art/wallpaper-signal-city-wide.png",
+    "wallpaper-atlas-orbit-wide": "apps/web/public/art/wallpaper-atlas-orbit-wide.png",
+    "wallpaper-night-transmission-wide": "apps/web/public/art/wallpaper-night-transmission-wide.png"
   },
   "legacySourceWidths": {
     "hero-witness": 1536,
@@ -34,7 +43,16 @@
     "command-eye": 1024,
     "world-map-atlas": 1536,
     "sidebar-witness": 1024,
-    "dock-chronicle-hero": 1792
+    "dock-chronicle-hero": 1792,
+    "dna-lunar-observatory": 1264,
+    "dna-nexus-hud": 1376,
+    "dna-mycelium-spores": 1024,
+    "dna-nusantara-nodes": 1376,
+    "editorial-light-plate": 1200,
+    "wallpaper-lunar-rooftop-wide": 1376,
+    "wallpaper-signal-city-wide": 1376,
+    "wallpaper-atlas-orbit-wide": 1376,
+    "wallpaper-night-transmission-wide": 1376
   },
   "hero": {
     "city": {

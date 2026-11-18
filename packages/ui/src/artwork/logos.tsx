@@ -12,11 +12,19 @@ export const BRAND_LOGO_IDS = [
   "09-simpul-nusantara",
   "arsy",
   "memory",
+  "mission-control",
+  "dock-chronicle",
+  "scriptures-codex",
+  "mtime-horizon",
+  "id-lab",
+  "addon-studio",
+  "shadow-frequency",
+  "noc-gateway",
 ] as const;
 
 export type BrandLogoId = (typeof BRAND_LOGO_IDS)[number];
 
-export type BrandLogoVariant = "mark" | "lockup" | "wordmark";
+export type BrandLogoVariant = "mark" | "lockup" | "wordmark" | "stamp";
 
 export interface BrandLogoProps extends Omit<SVGProps<SVGSVGElement>, "children" | "id"> {
   variant?: BrandLogoVariant;
@@ -96,6 +104,54 @@ const LOGO_META: Record<BrandLogoId, LogoMeta> = {
     title: "MEMORY",
     subtitle: "TAPE CONTINUITY",
     defaultLabel: "Memory brand logo",
+  },
+  "mission-control": {
+    id: "mission-control",
+    title: "MISSION CONTROL",
+    subtitle: "SHADOW OPERATIONS",
+    defaultLabel: "Mission Control brand logo",
+  },
+  "dock-chronicle": {
+    id: "dock-chronicle",
+    title: "DOCK CHRONICLE",
+    subtitle: "TIMELINE ARCHIVE",
+    defaultLabel: "Dock Chronicle brand logo",
+  },
+  "scriptures-codex": {
+    id: "scriptures-codex",
+    title: "SCRIPTURES CODEX",
+    subtitle: "FOUR REVEALED WITNESSES",
+    defaultLabel: "Scriptures Codex brand logo",
+  },
+  "mtime-horizon": {
+    id: "mtime-horizon",
+    title: "MTIME HORIZON",
+    subtitle: "LUNAR EPOCH OBSERVATORY",
+    defaultLabel: "M-Time Horizon brand logo",
+  },
+  "id-lab": {
+    id: "id-lab",
+    title: "IDENTITY LAB",
+    subtitle: "WITNESS SIGNET ENGINE",
+    defaultLabel: "ID Lab brand logo",
+  },
+  "addon-studio": {
+    id: "addon-studio",
+    title: "ADDON STUDIO",
+    subtitle: "EXTENSIBLE REGISTRY",
+    defaultLabel: "Addon Studio brand logo",
+  },
+  "shadow-frequency": {
+    id: "shadow-frequency",
+    title: "SHADOW FREQUENCY",
+    subtitle: "LEVEL 4 TRANSMISSION",
+    defaultLabel: "Shadow Frequency brand logo",
+  },
+  "noc-gateway": {
+    id: "noc-gateway",
+    title: "NOC GATEWAY",
+    subtitle: "EDGE PROBE PLANE",
+    defaultLabel: "NOC Gateway brand logo",
   },
 };
 
@@ -340,6 +396,82 @@ function BrandGlyph({ id }: { id: BrandLogoId }) {
           <polygon points="14,38 34,38 31,33 17,33" fill="var(--foreground)" fillOpacity="0.2" stroke="var(--border)" strokeWidth="1.2" />
         </g>
       );
+    case "mission-control":
+      return (
+        <g>
+          <rect x="4" y="4" width="40" height="40" rx="4" fill="var(--card)" stroke="var(--border)" strokeWidth={sw} />
+          <circle cx="24" cy="24" r="13" stroke="var(--primary)" strokeWidth={sw} />
+          <circle cx="24" cy="24" r="5" fill="var(--primary)" />
+          <line x1="24" y1="6" x2="24" y2="14" stroke="var(--foreground)" strokeWidth={sw} />
+          <line x1="24" y1="34" x2="24" y2="42" stroke="var(--foreground)" strokeWidth={sw} />
+          <line x1="6" y1="24" x2="14" y2="24" stroke="var(--foreground)" strokeWidth={sw} />
+          <line x1="34" y1="24" x2="42" y2="24" stroke="var(--foreground)" strokeWidth={sw} />
+        </g>
+      );
+    case "dock-chronicle":
+      return (
+        <g>
+          <rect x="5" y="6" width="38" height="36" rx="4" fill="var(--card)" stroke="var(--border)" strokeWidth={sw} />
+          <line x1="12" y1="16" x2="36" y2="16" stroke="var(--primary)" strokeWidth={sw} />
+          <line x1="12" y1="24" x2="32" y2="24" stroke="var(--foreground)" strokeWidth={sw} />
+          <line x1="12" y1="32" x2="28" y2="32" stroke="var(--secondary, var(--accent))" strokeWidth={sw} />
+          <circle cx="34" cy="32" r="3" fill="var(--primary)" />
+        </g>
+      );
+    case "scriptures-codex":
+      return (
+        <g>
+          <rect x="6" y="7" width="36" height="34" rx="2" fill="var(--card)" stroke="var(--primary)" strokeWidth={sw} />
+          <line x1="24" y1="7" x2="24" y2="41" stroke="var(--primary)" strokeWidth="1.6" />
+          <polygon points="15,15 19,20 15,25 11,20" fill="var(--primary)" />
+          <polygon points="33,15 37,20 33,25 29,20" fill="var(--foreground)" fillOpacity="0.6" />
+          <line x1="11" y1="32" x2="19" y2="32" stroke="var(--border)" strokeWidth="1.6" />
+          <line x1="29" y1="32" x2="37" y2="32" stroke="var(--border)" strokeWidth="1.6" />
+        </g>
+      );
+    case "mtime-horizon":
+      return (
+        <g>
+          <circle cx="24" cy="24" r="19" fill="var(--card)" stroke="var(--primary)" strokeWidth={sw} />
+          <path d="M9 28H39" stroke="var(--foreground)" strokeWidth={sw} />
+          <path d="M16 28A8 8 0 0 1 32 28" fill="var(--primary)" />
+          <circle cx="33" cy="14" r="2.5" fill="var(--secondary, var(--accent))" />
+        </g>
+      );
+    case "id-lab":
+      return (
+        <g>
+          <polygon points="24,4 42,14 42,34 24,44 6,34 6,14" fill="var(--card)" stroke="var(--border)" strokeWidth={sw} />
+          <circle cx="24" cy="19" r="6" stroke="var(--primary)" strokeWidth={sw} fill="none" />
+          <path d="M14 36C15.5 29.5 19 27 24 27C29 27 32.5 29.5 34 36" stroke="var(--foreground)" strokeWidth={sw} fill="none" />
+        </g>
+      );
+    case "addon-studio":
+      return (
+        <g>
+          <rect x="6" y="6" width="16" height="16" rx="2" fill="var(--primary)" stroke="var(--border)" strokeWidth="1.5" />
+          <rect x="26" y="6" width="16" height="16" rx="2" fill="var(--card)" stroke="var(--primary)" strokeWidth={sw} />
+          <rect x="6" y="26" width="16" height="16" rx="2" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <rect x="26" y="26" width="16" height="16" rx="2" fill="var(--secondary, var(--accent))" stroke="var(--border)" strokeWidth="1.5" />
+        </g>
+      );
+    case "shadow-frequency":
+      return (
+        <g>
+          <rect x="5" y="5" width="38" height="38" rx="19" fill="var(--card)" stroke="var(--border)" strokeWidth={sw} />
+          <polyline points="10,24 16,14 21,33 27,12 32,30 38,24" stroke="var(--primary)" strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      );
+    case "noc-gateway":
+      return (
+        <g>
+          <rect x="5" y="9" width="38" height="30" rx="4" fill="var(--card)" stroke="var(--border)" strokeWidth={sw} />
+          <circle cx="14" cy="24" r="3.5" fill="var(--green)" />
+          <circle cx="24" cy="24" r="3.5" fill="var(--primary)" />
+          <circle cx="34" cy="24" r="3.5" fill="var(--secondary, var(--accent))" />
+          <line x1="14" y1="15" x2="34" y2="15" stroke="var(--border)" strokeWidth="1.5" />
+        </g>
+      );
   }
 }
 
@@ -415,6 +547,43 @@ function renderBrandSvg(id: BrandLogoId, props: BrandLogoProps) {
           letterSpacing="2"
         >
           {meta.subtitle}
+        </text>
+      </svg>
+    );
+  }
+
+  if (variant === "stamp") {
+    return (
+      <svg
+        viewBox="0 0 88 88"
+        width={svgHeight}
+        height={svgHeight}
+        fill="none"
+        role={decorative ? undefined : "img"}
+        aria-label={accessibleLabel}
+        aria-hidden={decorative ? true : undefined}
+        data-mw-brand-logo={id}
+        data-mw-brand-variant="stamp"
+        className={cn("inline-block shrink-0", className)}
+        style={style}
+        {...rest}
+      >
+        <circle cx="44" cy="44" r="40" stroke="var(--primary)" strokeWidth="2" strokeDasharray="4 3" />
+        <circle cx="44" cy="44" r="33" stroke="var(--border)" strokeWidth="1.2" />
+        <g transform="translate(20 14)">
+          <BrandGlyph id={id} />
+        </g>
+        <text
+          x="44"
+          y="74"
+          textAnchor="middle"
+          fill="var(--foreground)"
+          fontFamily="var(--mw-font-mono, ui-monospace, monospace)"
+          fontSize="6.5"
+          fontWeight="800"
+          letterSpacing="1.2"
+        >
+          {meta.title.slice(0, 14)}
         </text>
       </svg>
     );
@@ -503,4 +672,36 @@ export function ArsyBrandLogo(props: BrandLogoProps) {
 
 export function MemoryBrandLogo(props: BrandLogoProps) {
   return renderBrandSvg("memory", props);
+}
+
+export function MissionControlLogo(props: BrandLogoProps) {
+  return renderBrandSvg("mission-control", props);
+}
+
+export function DockChronicleLogo(props: BrandLogoProps) {
+  return renderBrandSvg("dock-chronicle", props);
+}
+
+export function ScripturesCodexLogo(props: BrandLogoProps) {
+  return renderBrandSvg("scriptures-codex", props);
+}
+
+export function MtimeHorizonLogo(props: BrandLogoProps) {
+  return renderBrandSvg("mtime-horizon", props);
+}
+
+export function IdLabLogo(props: BrandLogoProps) {
+  return renderBrandSvg("id-lab", props);
+}
+
+export function AddonStudioLogo(props: BrandLogoProps) {
+  return renderBrandSvg("addon-studio", props);
+}
+
+export function ShadowFrequencyLogo(props: BrandLogoProps) {
+  return renderBrandSvg("shadow-frequency", props);
+}
+
+export function NocGatewayLogo(props: BrandLogoProps) {
+  return renderBrandSvg("noc-gateway", props);
 }

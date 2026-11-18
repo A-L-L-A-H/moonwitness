@@ -215,8 +215,8 @@ describe("DX Docs Generator", () => {
       expect(icons).toHaveLength(12);
 
       const catalog = generateBrandCatalogDocs();
-      expect(catalog.logos).toHaveLength(10);
-      expect(catalog.cutouts).toHaveLength(12);
+      expect(catalog.logos).toHaveLength(18);
+      expect(catalog.cutouts).toHaveLength(24);
 
       const telemetry = generateTelemetryDocs();
       const symbols = telemetry.map((c) => c.symbol);

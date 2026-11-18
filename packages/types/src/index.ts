@@ -15,7 +15,16 @@ export type ArtKey =
   | "command-eye"
   | "world-map-atlas"
   | "sidebar-witness"
-  | "dock-chronicle-hero";
+  | "dock-chronicle-hero"
+  | "dna-lunar-observatory"
+  | "dna-nexus-hud"
+  | "dna-mycelium-spores"
+  | "dna-nusantara-nodes"
+  | "editorial-light-plate"
+  | "wallpaper-lunar-rooftop-wide"
+  | "wallpaper-signal-city-wide"
+  | "wallpaper-atlas-orbit-wide"
+  | "wallpaper-night-transmission-wide";
 
 export type EraId = "origins" | "neon" | "fracture" | "rebuilding" | "expansions";
 

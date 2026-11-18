@@ -14,6 +14,18 @@ export const CUTOUT_ARTWORK_IDS = [
   "transit-sign",
   "cable-coil",
   "lunar-rock",
+  "oscilloscope-crt",
+  "radar-sweep",
+  "server-rack",
+  "hardware-key",
+  "tape-reel-spools",
+  "astrolabe-disc",
+  "codex-scroll",
+  "mixing-console",
+  "microfilm-strip",
+  "patch-cable-jack",
+  "cipher-wheel",
+  "horizon-sextant",
 ] as const;
 
 export type CutoutArtworkId = (typeof CUTOUT_ARTWORK_IDS)[number];
@@ -40,6 +52,18 @@ const CUTOUT_LABELS: Record<CutoutArtworkId, string> = {
   "transit-sign": "Cutout Transit Sign",
   "cable-coil": "Cutout Cable Coil",
   "lunar-rock": "Cutout Lunar Rock",
+  "oscilloscope-crt": "Cutout Oscilloscope CRT",
+  "radar-sweep": "Cutout Radar Sweep",
+  "server-rack": "Cutout Server Rack",
+  "hardware-key": "Cutout Hardware Key",
+  "tape-reel-spools": "Cutout Tape Reel Spools",
+  "astrolabe-disc": "Cutout Astrolabe Disc",
+  "codex-scroll": "Cutout Codex Scroll",
+  "mixing-console": "Cutout Mixing Console",
+  "microfilm-strip": "Cutout Microfilm Strip",
+  "patch-cable-jack": "Cutout Patch Cable Jack",
+  "cipher-wheel": "Cutout Cipher Wheel",
+  "horizon-sextant": "Cutout Horizon Sextant",
 };
 
 function renderCutoutPaths(id: CutoutArtworkId) {
@@ -189,6 +213,129 @@ function renderCutoutPaths(id: CutoutArtworkId) {
           <circle cx="58" cy="84" r="5" fill="var(--background)" stroke="var(--border)" strokeWidth="1.2" />
         </g>
       );
+    case "oscilloscope-crt":
+      return (
+        <g>
+          <rect x="20" y="34" width="120" height="92" rx="8" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <rect x="30" y="44" width="76" height="58" rx="4" fill="var(--background)" stroke="var(--primary)" strokeWidth="1.8" />
+          <polyline points="36,73 48,73 54,54 62,92 70,60 76,82 84,73 100,73" stroke="var(--primary)" strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="122" cy="54" r="6" fill="var(--primary)" />
+          <circle cx="122" cy="74" r="6" stroke="var(--foreground)" strokeWidth="1.6" fill="none" />
+          <line x1="34" y1="112" x2="100" y2="112" stroke="var(--border)" strokeWidth="2" />
+        </g>
+      );
+    case "radar-sweep":
+      return (
+        <g>
+          <circle cx="80" cy="80" r="54" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <circle cx="80" cy="80" r="36" stroke="var(--border)" strokeWidth="1.4" strokeDasharray="4 4" fill="none" />
+          <circle cx="80" cy="80" r="18" stroke="var(--border)" strokeWidth="1.4" fill="none" />
+          <line x1="80" y1="26" x2="80" y2="134" stroke="var(--border)" strokeWidth="1.2" />
+          <line x1="26" y1="80" x2="134" y2="80" stroke="var(--border)" strokeWidth="1.2" />
+          <path d="M80 80L118 42A54 54 0 0 1 134 80Z" fill="var(--primary)" fillOpacity="0.28" />
+          <line x1="80" y1="80" x2="118" y2="42" stroke="var(--primary)" strokeWidth={sw} />
+          <circle cx="104" cy="64" r="4" fill="var(--primary)" />
+        </g>
+      );
+    case "server-rack":
+      return (
+        <g>
+          <rect x="38" y="22" width="84" height="116" rx="4" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          {[34, 62, 90, 114].map((y, idx) => (
+            <g key={y}>
+              <rect x="46" y={y} width="68" height="18" rx="2" fill="var(--background)" stroke="var(--border)" strokeWidth="1.4" />
+              <circle cx="56" cy={y + 9} r="3" fill={idx === 0 ? "var(--green, var(--primary))" : "var(--primary)"} />
+              <line x1="68" y1={y + 9} x2="104" y2={y + 9} stroke="var(--border)" strokeWidth="2" />
+            </g>
+          ))}
+        </g>
+      );
+    case "hardware-key":
+      return (
+        <g>
+          <circle cx="52" cy="80" r="26" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <circle cx="52" cy="80" r="10" fill="var(--primary)" />
+          <path d="M78 72H136V90H122V82H112V90H98V82H78" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} strokeLinejoin="round" />
+        </g>
+      );
+    case "tape-reel-spools":
+      return (
+        <g>
+          <circle cx="52" cy="70" r="28" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <circle cx="108" cy="70" r="28" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <circle cx="52" cy="70" r="9" fill="var(--primary)" />
+          <circle cx="108" cy="70" r="9" fill="var(--primary)" />
+          <path d="M38 94L62 126H98L122 94" stroke="var(--primary)" strokeWidth={sw} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      );
+    case "astrolabe-disc":
+      return (
+        <g>
+          <circle cx="80" cy="84" r="52" fill="var(--card)" stroke="var(--primary)" strokeWidth={sw} />
+          <circle cx="80" cy="84" r="38" stroke="var(--foreground)" strokeWidth="1.5" fill="none" />
+          <polygon points="80,36 90,74 128,84 90,94 80,132 70,94 32,84 70,74" stroke="var(--primary)" strokeWidth="1.6" fill="none" />
+          <circle cx="80" cy="24" r="8" stroke="var(--primary)" strokeWidth={sw} fill="none" />
+        </g>
+      );
+    case "codex-scroll":
+      return (
+        <g>
+          <rect x="40" y="34" width="80" height="92" rx="4" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <rect x="32" y="26" width="96" height="14" rx="7" fill="var(--primary)" stroke="var(--foreground)" strokeWidth="1.6" />
+          <rect x="32" y="120" width="96" height="14" rx="7" fill="var(--primary)" stroke="var(--foreground)" strokeWidth="1.6" />
+          <line x1="54" y1="58" x2="106" y2="58" stroke="var(--foreground)" strokeWidth="2" />
+          <line x1="54" y1="74" x2="106" y2="74" stroke="var(--border)" strokeWidth="1.8" />
+          <line x1="54" y1="90" x2="94" y2="90" stroke="var(--border)" strokeWidth="1.8" />
+        </g>
+      );
+    case "mixing-console":
+      return (
+        <g>
+          <rect x="22" y="38" width="116" height="84" rx="4" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          {[44, 68, 92, 116].map((x, idx) => (
+            <g key={x}>
+              <line x1={x} y1="52" x2={x} y2="108" stroke="var(--border)" strokeWidth="2.5" />
+              <rect x={x - 6} y={62 + (idx % 3) * 14} width="12" height="10" rx="1" fill="var(--primary)" stroke="var(--foreground)" strokeWidth="1.4" />
+            </g>
+          ))}
+        </g>
+      );
+    case "microfilm-strip":
+      return (
+        <g>
+          <rect x="44" y="20" width="72" height="120" rx="2" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          {[32, 66, 100].map((y) => (
+            <rect key={y} x="58" y={y} width="44" height="24" rx="2" fill="var(--primary)" fillOpacity="0.24" stroke="var(--border)" strokeWidth="1.4" />
+          ))}
+        </g>
+      );
+    case "patch-cable-jack":
+      return (
+        <g>
+          <rect x="64" y="54" width="32" height="58" rx="4" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <polygon points="74,24 86,24 84,54 76,54" fill="var(--primary)" stroke="var(--foreground)" strokeWidth="1.6" />
+          <line x1="80" y1="112" x2="80" y2="140" stroke="var(--primary)" strokeWidth="4" strokeLinecap="round" />
+        </g>
+      );
+    case "cipher-wheel":
+      return (
+        <g>
+          <circle cx="80" cy="80" r="54" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} />
+          <circle cx="80" cy="80" r="36" fill="var(--background)" stroke="var(--primary)" strokeWidth={sw} />
+          <circle cx="80" cy="80" r="14" fill="var(--primary)" />
+          <line x1="80" y1="26" x2="80" y2="44" stroke="var(--foreground)" strokeWidth="2" />
+          <line x1="80" y1="116" x2="80" y2="134" stroke="var(--foreground)" strokeWidth="2" />
+        </g>
+      );
+    case "horizon-sextant":
+      return (
+        <g>
+          <path d="M32 108A68 68 0 0 1 128 108Z" fill="var(--card)" stroke="var(--foreground)" strokeWidth={sw} strokeLinejoin="round" />
+          <line x1="80" y1="108" x2="80" y2="38" stroke="var(--primary)" strokeWidth={sw} />
+          <circle cx="80" cy="38" r="7" fill="var(--primary)" />
+          <line x1="48" y1="122" x2="112" y2="122" stroke="var(--primary)" strokeWidth="2.5" strokeDasharray="4 4" />
+        </g>
+      );
   }
 }
 
@@ -261,4 +408,52 @@ export function CableCoilArt(props: CutoutItemProps) {
 
 export function LunarRockArt(props: CutoutItemProps) {
   return <CutoutArtwork id="lunar-rock" {...props} />;
+}
+
+export function OscilloscopeCrtArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="oscilloscope-crt" {...props} />;
+}
+
+export function RadarSweepArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="radar-sweep" {...props} />;
+}
+
+export function ServerRackArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="server-rack" {...props} />;
+}
+
+export function HardwareKeyArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="hardware-key" {...props} />;
+}
+
+export function TapeReelSpoolsArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="tape-reel-spools" {...props} />;
+}
+
+export function AstrolabeDiscArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="astrolabe-disc" {...props} />;
+}
+
+export function CodexScrollArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="codex-scroll" {...props} />;
+}
+
+export function MixingConsoleArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="mixing-console" {...props} />;
+}
+
+export function MicrofilmStripArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="microfilm-strip" {...props} />;
+}
+
+export function PatchCableJackArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="patch-cable-jack" {...props} />;
+}
+
+export function CipherWheelArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="cipher-wheel" {...props} />;
+}
+
+export function HorizonSextantArt(props: CutoutItemProps) {
+  return <CutoutArtwork id="horizon-sextant" {...props} />;
 }

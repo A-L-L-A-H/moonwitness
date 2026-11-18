@@ -149,6 +149,60 @@ export const ARTWORK = {
     "62% center",
     "04-dock-timeline.png",
   ),
+  "dna-lunar-observatory": entry(
+    "dna-lunar-observatory",
+    "Kubah observatorium bulan dengan cincin orbital kuningan dan langit malam",
+    "center",
+    "07-dna-generated-plate",
+  ),
+  "dna-nexus-hud": entry(
+    "dna-nexus-hud",
+    "Skema telemetri isometrik ruang kontrol dengan jaringan radar cyan",
+    "center",
+    "07-dna-generated-plate",
+  ),
+  "dna-mycelium-spores": entry(
+    "dna-mycelium-spores",
+    "Jaringan hifa miselium bioluminesen terhubung gulungan pita optik",
+    "center",
+    "07-dna-generated-plate",
+  ),
+  "dna-nusantara-nodes": entry(
+    "dna-nusantara-nodes",
+    "Kepulauan malam terhubung kabel optik bawah laut dan menara relai pesisir",
+    "center",
+    "07-dna-generated-plate",
+  ),
+  "editorial-light-plate": entry(
+    "editorial-light-plate",
+    "Cetak linocut editorial kertas krem dengan antena atap, bulan sabit, dan kaset",
+    "center",
+    "07-dna-generated-plate",
+  ),
+  "wallpaper-lunar-rooftop-wide": entry(
+    "wallpaper-lunar-rooftop-wide",
+    "Latar desktop panorama antena atap di bawah bulan raksasa bermandikan neon",
+    "70% center",
+    "07-dna-generated-wallpaper",
+  ),
+  "wallpaper-signal-city-wide": entry(
+    "wallpaper-signal-city-wide",
+    "Latar desktop menara kota beton biru senja dengan suar antena cyan",
+    "70% center",
+    "07-dna-generated-wallpaper",
+  ),
+  "wallpaper-atlas-orbit-wide": entry(
+    "wallpaper-atlas-orbit-wide",
+    "Latar desktop peta cincin astrolabe kuningan di ruang angkasa gelap",
+    "70% center",
+    "07-dna-generated-wallpaper",
+  ),
+  "wallpaper-night-transmission-wide": entry(
+    "wallpaper-night-transmission-wide",
+    "Latar desktop menara siaran radio malam dengan gelombang fosfor pelabuhan",
+    "70% center",
+    "07-dna-generated-wallpaper",
+  ),
 } satisfies Record<ArtKey, ArtEntry>;
 
 export { ART_SOURCES, ART_WIDTHS, outputNames } from "./optimize";
@@ -234,7 +288,16 @@ export type DnaWorldAssetId =
   | "09-simpul-nusantara";
 
 export type SkinAssetKey =
-  "default" | "riot" | "editorial" | "technical" | "archive" | "transmission";
+  | "default"
+  | "riot"
+  | "editorial"
+  | "technical"
+  | "archive"
+  | "transmission"
+  | "sanctuary"
+  | "brutalist"
+  | "noir"
+  | "kinetic";
 
 export interface DnaWorldArtworkMapping {
   dnaId: DnaWorldAssetId;
@@ -247,14 +310,14 @@ export interface DnaWorldArtworkMapping {
 export const DNA_WORLD_ARTWORK_MAP: Record<DnaWorldAssetId, DnaWorldArtworkMapping> = {
   "01-imperium-lumen": {
     dnaId: "01-imperium-lumen",
-    artKey: "command-eye",
+    artKey: "wallpaper-atlas-orbit-wide",
     plateSrc: WORLD_ART_PLATES["world-imperium"].src,
-    recommendedSkin: "editorial",
-    cutoutId: "crescent",
+    recommendedSkin: "sanctuary",
+    cutoutId: "astrolabe-disc",
   },
   "02-lunar-chronicles": {
     dnaId: "02-lunar-chronicles",
-    artKey: "hero-witness",
+    artKey: "dna-lunar-observatory",
     plateSrc: WORLD_ART_PLATES["world-lunar"].src,
     recommendedSkin: "default",
     cutoutId: "lunar-disc",
@@ -264,14 +327,14 @@ export const DNA_WORLD_ARTWORK_MAP: Record<DnaWorldAssetId, DnaWorldArtworkMappi
     artKey: "night-shift",
     plateSrc: WORLD_ART_PLATES["world-rocksoul"].src,
     recommendedSkin: "riot",
-    cutoutId: "cassette-recorder",
+    cutoutId: "mixing-console",
   },
   "04-nexus-paradox": {
     dnaId: "04-nexus-paradox",
-    artKey: "signal-tunnel",
+    artKey: "dna-nexus-hud",
     plateSrc: WORLD_ART_PLATES["world-nexus"].src,
     recommendedSkin: "technical",
-    cutoutId: "satellite-dish",
+    cutoutId: "radar-sweep",
   },
   "05-riot-anarchy": {
     dnaId: "05-riot-anarchy",
@@ -282,14 +345,14 @@ export const DNA_WORLD_ARTWORK_MAP: Record<DnaWorldAssetId, DnaWorldArtworkMappi
   },
   "06-mycelium": {
     dnaId: "06-mycelium",
-    artKey: "fog-voices",
+    artKey: "dna-mycelium-spores",
     plateSrc: WORLD_ART_PLATES["world-mycelium"].src,
     recommendedSkin: "archive",
-    cutoutId: "rooftop-antenna",
+    cutoutId: "tape-reel-spools",
   },
   "09-simpul-nusantara": {
     dnaId: "09-simpul-nusantara",
-    artKey: "world-map-atlas",
+    artKey: "dna-nusantara-nodes",
     plateSrc: WORLD_ART_PLATES["world-nusantara"].src,
     recommendedSkin: "archive",
     cutoutId: "transit-sign",
@@ -305,33 +368,53 @@ export interface SkinArtworkMapping {
 export const SKIN_ARTWORK_MAP: Record<SkinAssetKey, SkinArtworkMapping> = {
   default: {
     skin: "default",
-    artKey: "hero-witness",
+    artKey: "dna-lunar-observatory",
     cutoutId: "lunar-disc",
   },
   riot: {
     skin: "riot",
-    artKey: "crowd-moon",
+    artKey: "wallpaper-lunar-rooftop-wide",
     cutoutId: "signal-radio",
   },
   editorial: {
     skin: "editorial",
-    artKey: "mirror-archive",
-    cutoutId: "crescent",
+    artKey: "editorial-light-plate",
+    cutoutId: "codex-scroll",
   },
   technical: {
     skin: "technical",
-    artKey: "signal-tunnel",
-    cutoutId: "satellite-dish",
+    artKey: "dna-nexus-hud",
+    cutoutId: "oscilloscope-crt",
   },
   archive: {
     skin: "archive",
-    artKey: "dock-chronicle-hero",
-    cutoutId: "cassette-recorder",
+    artKey: "dna-mycelium-spores",
+    cutoutId: "microfilm-strip",
   },
   transmission: {
     skin: "transmission",
-    artKey: "signal-sky",
-    cutoutId: "rooftop-antenna",
+    artKey: "wallpaper-night-transmission-wide",
+    cutoutId: "radar-sweep",
+  },
+  sanctuary: {
+    skin: "sanctuary",
+    artKey: "wallpaper-atlas-orbit-wide",
+    cutoutId: "astrolabe-disc",
+  },
+  brutalist: {
+    skin: "brutalist",
+    artKey: "wallpaper-signal-city-wide",
+    cutoutId: "server-rack",
+  },
+  noir: {
+    skin: "noir",
+    artKey: "city-shadow",
+    cutoutId: "cipher-wheel",
+  },
+  kinetic: {
+    skin: "kinetic",
+    artKey: "dna-nusantara-nodes",
+    cutoutId: "patch-cable-jack",
   },
 };
 
@@ -351,15 +434,15 @@ export interface DesignLibraryCategorySummary {
 
 export const DESIGN_LIBRARY_CATALOGUE = {
   packId: "moonwitness-design-library-v1",
-  totalAssets: 160,
+  totalAssets: 196,
   categories: [
-    { id: "brand", label: "Brand & Seals", count: 16 },
+    { id: "brand", label: "Brand & Seals", count: 18 },
     { id: "ui-kit", label: "HUD & UI Kit", count: 24 },
     { id: "icon-pack", label: "Sovereign Icons", count: 32 },
     { id: "avatar-pack", label: "Witness Avatars", count: 16 },
-    { id: "illustrations", label: "World Illustrations", count: 24 },
-    { id: "wallpapers", label: "Screen Wallpapers", count: 16 },
-    { id: "textures", label: "Surface Textures", count: 20 },
-    { id: "cutouts", label: "Isolated Cutouts", count: 12 },
+    { id: "illustrations", label: "World Illustrations", count: 25 },
+    { id: "wallpapers", label: "Screen Wallpapers", count: 24 },
+    { id: "textures", label: "Surface Textures", count: 33 },
+    { id: "cutouts", label: "Isolated Cutouts", count: 24 },
   ] satisfies readonly DesignLibraryCategorySummary[],
 } as const;

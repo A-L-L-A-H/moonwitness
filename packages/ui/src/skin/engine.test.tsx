@@ -327,17 +327,17 @@ describe("PR 3 Skin Engine & Effect Integrity", () => {
     expect(document.documentElement.getAttribute("data-density")).toBe("spacious");
   });
 
-  it("renders all 10 DnaBrandLogo lockups and all 12 CutoutArtwork assets", () => {
-    expect(BRAND_LOGO_IDS).toHaveLength(10);
+  it("renders all 18 DnaBrandLogo lockups and all 24 CutoutArtwork assets", () => {
+    expect(BRAND_LOGO_IDS).toHaveLength(18);
     for (const id of BRAND_LOGO_IDS) {
-      for (const variant of ["mark", "lockup", "wordmark"] as const) {
+      for (const variant of ["mark", "lockup", "wordmark", "stamp"] as const) {
         const html = renderToString(<DnaBrandLogo id={id} variant={variant} />);
         expect(html).toContain(`data-mw-brand-logo="${id}"`);
         expect(html).toContain(`data-mw-brand-variant="${variant}"`);
       }
     }
 
-    expect(CUTOUT_ARTWORK_IDS).toHaveLength(12);
+    expect(CUTOUT_ARTWORK_IDS).toHaveLength(24);
     for (const id of CUTOUT_ARTWORK_IDS) {
       const html = renderToString(<CutoutArtwork id={id} />);
       expect(html).toContain(`data-mw-cutout="${id}"`);
@@ -345,7 +345,17 @@ describe("PR 3 Skin Engine & Effect Integrity", () => {
   });
 
   it("renders skin-reactive SkinBackdrop, SkinOrnament, and sovereign domain icons across skins", () => {
-    for (const skinName of ["riot", "technical", "editorial", "archive", "transmission"] as const) {
+    for (const skinName of [
+      "riot",
+      "technical",
+      "editorial",
+      "archive",
+      "transmission",
+      "sanctuary",
+      "brutalist",
+      "noir",
+      "kinetic",
+    ] as const) {
       const html = renderToString(
         <SkinProvider defaultSkin={skinName} persist={false}>
           <div>

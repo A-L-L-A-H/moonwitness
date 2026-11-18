@@ -94,7 +94,8 @@ export async function listProbeNodes(): Promise<ProbeNode[]> {
     targetUrl: row.target_url,
     category: row.category,
     enabled: row.enabled,
-    createdAt: row.create_date,
+    createdAt:
+      row.create_date instanceof Date ? row.create_date.toISOString() : String(row.create_date),
   }));
 }
 

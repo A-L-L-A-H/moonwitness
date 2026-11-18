@@ -62,7 +62,7 @@ describe("@moonwitness/contracts timeline parity", () => {
       updateEvent: async (_id, patch) => ({ ...sampleEvent, ...patch }),
       archiveEvent: async () => sampleEvent,
       restoreEvent: async () => sampleEvent,
-      deleteEvent: async () => true,
+      deleteEvent: async () => sampleEvent,
       getEventHistory: async () => [],
     });
 

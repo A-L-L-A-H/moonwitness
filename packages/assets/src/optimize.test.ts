@@ -44,7 +44,12 @@ describe("ARTWORK manifest", () => {
         "crew-rooftop",
         "crew-wall",
         "crowd-moon",
+        "dna-lunar-observatory",
+        "dna-mycelium-spores",
+        "dna-nexus-hud",
+        "dna-nusantara-nodes",
         "dock-chronicle-hero",
+        "editorial-light-plate",
         "fog-voices",
         "hero-witness",
         "mirror-archive",
@@ -54,6 +59,10 @@ describe("ARTWORK manifest", () => {
         "sidebar-witness",
         "signal-sky",
         "signal-tunnel",
+        "wallpaper-atlas-orbit-wide",
+        "wallpaper-lunar-rooftop-wide",
+        "wallpaper-night-transmission-wide",
+        "wallpaper-signal-city-wide",
         "world-map-atlas",
       ].sort(),
     );
@@ -78,7 +87,7 @@ describe("ARTWORK manifest", () => {
       }
       expect(entry.source).toBe(`/art/${key}.png`);
       expect(entry.alt.length).toBeGreaterThan(20);
-      expect(entry.credit).toMatch(/^0[1-6]-/);
+      expect(entry.credit).toMatch(/^0[1-7]-/);
     }
   });
 

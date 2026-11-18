@@ -151,8 +151,10 @@ export const midFastifyPlugin: FastifyPluginAsync<MidFastifyPluginOptions> = asy
     return dispatchToMid(req, rep, stripped || "/");
   });
 
-  // Identity-host root, health, and login — always dispatched to MID
-  fastify.all("/", (req, rep) => dispatchToMid(req, rep));
-  fastify.all("/health", (req, rep) => dispatchToMid(req, rep));
-  fastify.all("/login", (req, rep) => dispatchToMid(req, rep));
+  // Identity-host root, health, and login — register only when host has not mounted them
+  for (const path of ["/", "/health", "/login"] as const) {
+    if (!fastify.hasRoute({ method: "GET", url: path })) {
+      fastify.all(path, (req, rep) => dispatchToMid(req, rep));
+    }
+  }
 };
