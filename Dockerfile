@@ -25,7 +25,6 @@ FROM base AS api
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
 ENV PORT=3002
-ENV DATABASE_URL=/data/moonwitness.db
 
 RUN mkdir -p /data
 COPY --from=builder /app/package.json /app/pnpm-workspace.yaml ./

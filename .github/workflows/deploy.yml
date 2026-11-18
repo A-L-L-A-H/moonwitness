@@ -55,9 +55,8 @@ jobs:
           [ -z "$VPS_DEPLOY_PATH" ] && missing="$missing VPS_DEPLOY_PATH(var)"
           [ -z "$PRODUCTION_URL" ]  && missing="$missing PRODUCTION_URL(var)"
           if [ -n "$missing" ]; then
-            echo "::notice::Skipping remote SSH deploy; missing:$missing"
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            echo "::error::Missing required deployment credentials:$missing"
+            exit 1
           fi
           echo "configured=true" >> "$GITHUB_OUTPUT"
 
@@ -199,3 +198,19 @@ jobs:
       - name: Clean up SSH key
         if: always() && steps.creds.outputs.configured == 'true'
         run: rm -f ~/.ssh/id_ed25519
+
+      - name: Write deployment summary
+        if: always() && steps.creds.outputs.configured == 'true'
+        env:
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
+          DEPLOY_SHA: ${{ github.sha }}
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+          JOB_STATUS: ${{ job.status }}
+        run: |
+          {
+            echo "## Deployment Summary"
+            echo "- **Release Tag:** \`${RELEASE_TAG}\`"
+            echo "- **Commit SHA:** \`${DEPLOY_SHA}\`"
+            echo "- **Health Check:** \`${PRODUCTION_URL%/}/api/health\` (status: \`${JOB_STATUS}\`)"
+            echo "- **Rollback Target:** previous git tag on VPS (\`git describe --abbrev=0 --tags HEAD^\`)"
+          } >> "$GITHUB_STEP_SUMMARY"
