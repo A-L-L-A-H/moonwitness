@@ -6,7 +6,7 @@ test("Signals discloses its fictional storyworld and uses a real archive action"
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const signals = page.locator("#signals");
   await expect(signals.getByText("FICTIONAL STORIES", { exact: false })).toBeVisible();
   const storyLink = signals.getByRole("link", { name: "READ SIGNAL STORY" });
@@ -20,7 +20,7 @@ test("Signals discloses its fictional storyworld and uses a real archive action"
 });
 
 test("entrance is a brief local ink stamp, not a fullscreen gate", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await expect(page.getByText("FREQUENCY LOCKED", { exact: false })).toHaveCount(0);
   const stamp = page.locator("[data-entrance-stamp]");
   await expect(stamp).toHaveCount(1);
@@ -48,7 +48,7 @@ for (const width of [320, 390, 430]) {
   test(`reduced motion content and mobile composition at ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
+    await page.goto("/moonwitness");
     for (const selector of [
       "#storytelling .zine-card-rough",
       "#shadow h2",
@@ -97,7 +97,7 @@ test("timeline preview exposes actual encoded event and empty/error retry states
     });
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await expect(page.locator("#shadow").getByText("Loading archive preview…")).toBeVisible();
   await expect(page.locator("#shadow").getByText("No timeline events available.")).toBeVisible();
   mode = "error";
@@ -140,7 +140,7 @@ test("mobile landing preview opens the query-resolved event detail", async ({ pa
   );
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await page
     .locator("#shadow")
     .getByRole("link", { name: /QA boundary event/ })
@@ -169,7 +169,7 @@ test("live reduction reveals offscreen content and atmosphere responds to resizi
   // Dev-server compile plus two p5 mounts exceeds the default 30s budget.
   test.setTimeout(60000);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await expect(page.locator("#home canvas")).toHaveCount(0);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(page.locator("#shadow h2")).toHaveCSS("opacity", "1");
@@ -191,7 +191,7 @@ test("live reduction reveals offscreen content and atmosphere responds to resizi
 
 test("decorative parallax resets live and survives navigation unmount", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const decoration = page.locator("#home [data-hero-parallax]");
   await expect(decoration).toHaveCount(1);
   await page.evaluate(() => scrollTo(0, 300));
@@ -237,7 +237,7 @@ test("decorative parallax resets live and survives navigation unmount", async ({
 });
 
 test("transmission is a static, honest fiction panel with an immediate CTA", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const section = page.locator("#transmission");
   await section.scrollIntoViewIfNeeded();
   await expect(section).toHaveCSS("opacity", "1");
@@ -271,7 +271,7 @@ test("storytelling renders honest alternating art/type units with horizontal set
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const section = page.locator("#storytelling");
   await section.scrollIntoViewIfNeeded();
   await expect(section.getByText("&lsquo;", { exact: false })).toHaveCount(0);
@@ -307,7 +307,7 @@ test("storytelling renders honest alternating art/type units with horizontal set
 test("shadow runs a decorative red light wipe while preview and CTA stay usable", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const cta = page.getByRole("link", { name: /enter the shadow/i });
   await expect(cta).toHaveCSS("opacity", "1");
   await page.locator("#shadow").scrollIntoViewIfNeeded();
@@ -325,7 +325,7 @@ test("shadow runs a decorative red light wipe while preview and CTA stay usable"
 test("join layers paper, type and ink with overlapping settles and an unmasked CTA", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/moonwitness");
   await expect(page.locator("#about")).toHaveCount(1);
   const about = page.locator("#about");
   await about.scrollIntoViewIfNeeded();
@@ -357,7 +357,7 @@ test("motion toggle pauses continuous effects without recreating the atmosphere 
 }) => {
   test.setTimeout(60000);
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const toggle = page.getByRole("button", { name: /(pause|resume) motion/i });
   await expect(toggle).toHaveAttribute("aria-pressed", "false");
   expect((await toggle.boundingBox())!.height).toBeGreaterThanOrEqual(44);
@@ -380,7 +380,7 @@ for (const width of [320, 390, 430, 768, 1024, 1440]) {
   test(`landing has no horizontal overflow at ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
+    await page.goto("/moonwitness");
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode, RefObject } from "react";
-import { Crown, SearchIcon } from "@moonwitness/ui/icons";
+import { Crown, Menu, SearchIcon } from "@moonwitness/ui/icons";
 import { Input } from "@moonwitness/ui";
 import { SkinSwitcher } from "@/components/skin-switcher";
 
@@ -34,16 +34,7 @@ export function Topbar({
         onClick={onOpenSidebar}
         aria-label="Open sidebar"
       >
-        <svg
-          viewBox="0 0 24 24"
-          className="h-6 w-6"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-        >
-          <path d="M4 7 L20 7 M4 12 L20 12 M4 17 L20 17" />
-        </svg>
+        <Menu className="h-6 w-6" />
       </button>
       <div className="hidden items-center gap-2 text-sm text-zinc-400 sm:flex">
         <Crown className="h-4 w-6 text-[var(--blue)]" />

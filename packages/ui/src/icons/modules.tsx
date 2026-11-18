@@ -1000,3 +1000,26 @@ export function Redo(props: DnaIconProps) {
     </svg>
   );
 }
+
+export function Sun(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <circle
+        cx="12"
+        cy="12"
+        r="3.5"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        fill={accentColor}
+        fillOpacity="0.18"
+      />
+      <path
+        d="M12 2 V4.5 M12 19.5 V22 M4.93 4.93 L6.7 6.7 M17.3 17.3 L19.07 19.07 M2 12 H4.5 M19.5 12 H22 M4.93 19.07 L6.7 17.3 M17.3 6.7 L19.07 4.93"
+        stroke={accentColor}
+        strokeWidth="1.9"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}

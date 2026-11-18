@@ -1,43 +1,46 @@
 # Branching model
 
-MoonWitness uses **two long-lived branches** plus short-lived work branches. The rules below are
-enforced by GitHub rulesets **and** by the local gate, so a mistake fails twice: once on your
-machine, once on the remote.
+MoonWitness enforces a strict **two persistent branches (`dev` and `main`)** policy. No long-lived
+feature or topic branches may remain after a pull request closes. The rules below are enforced by
+GitHub rulesets, `branch-policy.yml`, `branch-cleanup.yml`, and the local gate (`pnpm branch:guard`),
+so drift is caught both locally and in CI.
 
 ## Topology
 
-| Branch                                 | Purpose                          | Who writes               | Force push | Delete  |
-| -------------------------------------- | -------------------------------- | ------------------------ | ---------- | ------- |
-| `dev`                                  | Integration (repository default) | automation + maintainers | blocked    | blocked |
-| `main`                                 | Released, deployable code        | promotion PR only        | blocked    | blocked |
-| `feat/*`, `fix/*`, `chore/*`, `docs/*` | Short-lived work                 | author                   | allowed    | allowed |
+| Branch                                                                 | Purpose                                        | Lifetime                  | Force push | Delete   |
+| ---------------------------------------------------------------------- | ---------------------------------------------- | ------------------------- | ---------- | -------- |
+| `dev`                                                                  | Integration (repository default, PR-protected) | Persistent                | blocked    | blocked  |
+| `main`                                                                 | Released, deployable code (promotion PR only)  | Persistent                | blocked    | blocked  |
+| `feat/*`, `fix/*`, `chore/*`, `ci/*`, `docs/*`, `refactor/*`, `test/*` | Single-PR ephemeral work branch                | Deleted on PR merge/close | allowed    | required |
 
-`dev` is the repository default branch. Clones start there.
+`dev` is the repository default branch. Direct pushes to `dev` and `main` are blocked by GitHub
+rulesets; all changes enter `dev` via pull request and are immediately cleaned up on merge.
 
 > **Legacy:** `master` was frozen and later removed. All its history is preserved in `dev`, in
 > `main`, and in the tag `backup/20261112/master` (kept permanently as an archive).
 
 ## The rules that matter
 
-1. **All development lands on `dev`.** Work branches from `dev` and merges back into `dev`
-   through a pull request. `dev` requires CI green before merge.
-2. **Nobody pushes to `main` directly.** `main` only moves by a promotion PR from `dev`.
-3. **Promotion is automatic.** As soon as CI on `dev` succeeds, `auto-promote.yml` opens (or
-   refreshes) the `dev` → `main` PR with auto-merge enabled. It merges itself once the required
-   checks on `main` pass.
+1. **Only `dev` and `main` persist.** Delete ephemeral PR branches locally and remotely immediately after merge (run `pnpm branches:clean` locally; `branch-cleanup.yml` + `delete_branch_on_merge` handle `origin`).
+2. **Never reuse a merged branch.** Always branch fresh from updated `dev` and delete it once merged.
+3. **All development lands on `dev`.** Work branches from `dev` and merges back into `dev` through a pull request with CI green.
+4. **Nobody pushes to `main` directly.** `main` only moves by a promotion PR from `dev`.
+5. **Promotion is automatic.** As soon as CI on `dev` succeeds, `auto-promote.yml` opens (or refreshes) the `dev` → `main` PR with auto-merge enabled.
 
 ## Day-to-day flow
 
 ```sh
 git switch dev
-git pull --ff-only
+git pull --ff-only origin dev
 git switch -c feat/timeline-filters
 # ...work...
-pnpm gate:quick          # fast loop
+pnpm gate:quick            # fast loop
 git commit -m "feat(timeline): add era filter"
-pnpm gate:push           # full verification
+pnpm gate:push             # full verification (also checks branch hygiene)
 git push -u origin feat/timeline-filters
-gh pr create --base dev  # CI must be green before merge
+gh pr create --base dev    # CI must be green before merge
+# after PR merges:
+pnpm branches:clean        # switches to dev, fast-forwards, prunes merged branches
 ```
 
 ## Promotion flow

@@ -9,8 +9,9 @@
 
 ## Branch
 
-- [ ] This PR targets `dev` (integration) — not `main` or `master`
-- [ ] Promotion PRs (`dev` → `main`) are opened by the repository owner only
+- [ ] This PR targets `dev` (integration) from a single-PR ephemeral branch (`feat/*`, `fix/*`, `chore/*`, `ci/*`, `docs/*`, `refactor/*`, `test/*`) — not `main` or `master`
+- [ ] Only `dev` and `main` persist: this branch will be deleted on merge (`pnpm branches:clean`)
+- [ ] Promotion PRs (`dev` → `main`) are opened by automation or the repository owner only
 
 ## Verification
 

@@ -19,6 +19,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    env:
+      HAS_PERCY_TOKEN: ${{ secrets.PERCY_TOKEN != '' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,7 +56,7 @@ jobs:
         run: pnpm exec playwright test --config cross-world-playwright.config.ts
 
       - name: Optional Percy Cloud Diff (when PERCY_TOKEN configured)
-        if: ${{ secrets.PERCY_TOKEN != '' }}
+        if: env.HAS_PERCY_TOKEN == 'true'
         working-directory: ./apps/web
         run: |
           pnpm --silent dlx @percy/cli@1.32.12 exec -- \
