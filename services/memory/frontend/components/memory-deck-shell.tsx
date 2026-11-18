@@ -2,12 +2,17 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
+import {
+  MEMORY_SKIN_META,
+  MEMORY_SKIN_STORAGE_KEY,
+  applyMemorySkin,
+  nextMemorySkin,
+  resolveMemorySkin,
+  type MemorySkin,
+} from "../lib/skins";
 
 export type DeckMode = "overview" | "vault" | "queue" | "knowledge";
 type Theme = "dark" | "light";
-type MemorySkin = "archive" | "technical" | "editorial" | "riot";
-const MEMORY_SKINS: readonly MemorySkin[] = ["archive", "technical", "editorial", "riot"];
-const MEMORY_SKIN_STORAGE_KEY = "mw-memory-skin";
 
 type Props = {
   activeMode: DeckMode;
@@ -50,27 +55,18 @@ export function MemoryDeckShell({
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(MEMORY_SKIN_STORAGE_KEY) as MemorySkin | null;
-      if (saved && MEMORY_SKINS.includes(saved)) {
-        setSkin(saved);
-        document.documentElement.dataset.skin = saved;
-      } else {
-        document.documentElement.dataset.skin = "archive";
-      }
+      const resolved = resolveMemorySkin(window.localStorage.getItem(MEMORY_SKIN_STORAGE_KEY));
+      setSkin(resolved);
+      document.documentElement.dataset.skin = resolved;
     } catch {
       document.documentElement.dataset.skin = "archive";
     }
   }, []);
 
   function cycleSkin() {
-    const next = MEMORY_SKINS[(MEMORY_SKINS.indexOf(skin) + 1) % MEMORY_SKINS.length] ?? "archive";
+    const next = nextMemorySkin(skin);
     setSkin(next);
-    try {
-      document.documentElement.dataset.skin = next;
-      window.localStorage.setItem(MEMORY_SKIN_STORAGE_KEY, next);
-    } catch {
-      // ignore storage errors in restricted environments
-    }
+    applyMemorySkin(next);
   }
 
   return (
@@ -116,7 +112,7 @@ export function MemoryDeckShell({
             type="button"
             onClick={cycleSkin}
             aria-label={`Memory skin preset (${skin})`}
-            title={`Skin: ${skin} — click to cycle`}
+            title={`Skin: ${MEMORY_SKIN_META[skin].label} (${MEMORY_SKIN_META[skin].grammar}) — click to cycle`}
           >
             <span style={{ fontSize: "10px", fontFamily: "var(--mono-type)", fontWeight: 700 }}>
               {skin.slice(0, 4).toUpperCase()}
