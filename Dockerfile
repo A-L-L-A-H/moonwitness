@@ -21,8 +21,6 @@ ARG API_INTERNAL_URL=http://api:3002
 ENV API_INTERNAL_URL=${API_INTERNAL_URL}
 RUN pnpm --filter @moonwitness/web build
 
-RUN pnpm --filter @moonwitness/a-l-l-a-h build
-
 FROM base AS api
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
@@ -56,20 +54,3 @@ COPY --from=builder /app/apps/web/.next ./apps/web/.next
 
 EXPOSE 3000
 CMD ["pnpm", "--filter", "@moonwitness/web", "start"]
-
-FROM base AS allah
-ENV NODE_ENV=production
-ENV HOSTNAME=0.0.0.0
-ENV PORT=3003
-
-COPY --from=builder /app/package.json /app/pnpm-workspace.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/a-l-l-a-h/package.json ./apps/a-l-l-a-h/package.json
-COPY --from=builder /app/apps/a-l-l-a-h/next.config.ts ./apps/a-l-l-a-h/next.config.ts
-COPY --from=builder /app/apps/a-l-l-a-h/public ./apps/a-l-l-a-h/public
-COPY --from=builder /app/apps/a-l-l-a-h/node_modules ./apps/a-l-l-a-h/node_modules
-COPY --from=builder /app/apps/a-l-l-a-h/.next ./apps/a-l-l-a-h/.next
-
-EXPOSE 3003
-CMD ["pnpm", "--filter", "@moonwitness/a-l-l-a-h", "start"]

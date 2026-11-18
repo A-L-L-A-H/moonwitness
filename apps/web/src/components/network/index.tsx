@@ -129,7 +129,7 @@ function PeerRow({
           {peer.mode.toUpperCase()}
         </span>
         {peer.subnet && (
-          <span className="ml-2 text-[10px] tracking-widest text-[var(--cyan,#00bcd4)]">
+          <span className="ml-2 text-[10px] tracking-widest text-[var(--cyan,var(--blue))]">
             {peer.subnet}
           </span>
         )}
@@ -314,7 +314,7 @@ function NetworkDashboard() {
               WireGuard di host ini. Tambah perangkat, unduh config, langsung tersambung.
             </p>
           </div>
-          <ZineBadge color={data?.enabled ? "#3ddc84" : "#ff2d78"} dark>
+          <ZineBadge color={data?.enabled ? "var(--mint)" : "var(--pink)"} dark>
             {status.isLoading ? "MEMERIKSA" : data?.enabled ? "AKTIF" : "MATI"}
           </ZineBadge>
         </header>

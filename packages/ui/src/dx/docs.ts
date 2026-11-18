@@ -160,5 +160,33 @@ export function generateDocsMarkdown(): string {
     lines.push("");
   }
 
+  lines.push("");
+  lines.push("## Architecture & Usage");
+  lines.push("");
+  lines.push(
+    "`DNA -> Theme Resolver -> Skin Preset -> Semantic & Component Tokens -> CSS Custom Properties`",
+  );
+  lines.push("");
+  lines.push("### Subpath Imports");
+  lines.push("- `@moonwitness/ui` — Core, P0, P1, Primitive, Composite & Layout UI components");
+  lines.push("- `@moonwitness/ui/tokens` — Pure SSR-safe Imperium & Master DNA color tokens");
+  lines.push(
+    "- `@moonwitness/ui/dna` — Canonical token engine, light/dark palettes, CSS variable generators",
+  );
+  lines.push(
+    "- `@moonwitness/ui/skin` — Client `SkinProvider`, `SkinRoot`, `useSkin`, `useThemeMode`, `Skinned.*`",
+  );
+  lines.push(
+    "- `@moonwitness/ui/skins/imperium.css` / `@moonwitness/ui/theme.css` / `@moonwitness/ui/base.css`",
+  );
+  lines.push("");
+  lines.push("### Server vs Client Components");
+  lines.push(
+    "- Import `@moonwitness/ui/tokens`, `@moonwitness/ui/dna`, and pure layout/artwork helpers inside React Server Components without client hydration boundaries.",
+  );
+  lines.push(
+    '- `SkinProvider`, `SkinRoot`, `Button`, `Input`, `Dialog`, `Select`, `Tabs`, and interactive controls declare `"use client"` cleanly.',
+  );
+  lines.push("");
   return lines.join("\n");
 }

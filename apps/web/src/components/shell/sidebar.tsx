@@ -86,15 +86,13 @@ export function Sidebar({
         </Stack>
       </nav>
       <div className="border-t-2 border-[var(--line)] p-4">
-        <a
-          href={IMPERIUM_GATE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
+        <Link
+          href={IMPERIUM_GATE_URL || "/"}
           className="mb-3 flex min-h-10 items-center justify-between border border-[var(--line)] bg-black/25 px-3 py-1.5 font-mono text-[11px] tracking-wider text-[var(--yellow)] transition-colors hover:border-[var(--yellow)] hover:text-white"
         >
           <span>IMPERIUM GATE</span>
           <span>↗</span>
-        </a>
+        </Link>
         <div className="relative mb-3 hidden h-28 overflow-hidden border border-[var(--line)] lg:block">
           <Image
             src={artSrc("sidebar-witness")}

@@ -9,7 +9,10 @@ import { CrewConstellation, Halftone, Staple, TactileTape, Button } from "@moonw
 
 export function Crew() {
   return (
-    <section id="crew" className="relative scroll-mt-20 border-y-2 border-black bg-[#0d0d14] py-24">
+    <section
+      id="crew"
+      className="relative scroll-mt-20 border-y-2 border-black bg-[var(--ink)] py-24"
+    >
       <Halftone tone="pink" className="pointer-events-none absolute inset-0 opacity-40" />
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b-2 border-dashed border-zinc-800 pb-6">

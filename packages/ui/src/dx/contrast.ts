@@ -1,4 +1,5 @@
-import { listDnaWorlds, type MasterDnaWorldSpec } from "../skin/dna-worlds";
+import { MASTER_DNA_LIGHT_PALETTES, type CanonicalDnaId } from "../dna/canonical";
+import { listDnaWorlds, type DnaWorldPalette, type MasterDnaWorldSpec } from "../skin/dna-worlds";
 
 export interface ContrastPairResult {
   readonly pairName: string;
@@ -45,8 +46,11 @@ export function measureContrastRatio(fgHex: string, bgHex: string): number {
   return Number(((lighter + 0.05) / (darker + 0.05)).toFixed(2));
 }
 
-export function auditDnaContrast(world: MasterDnaWorldSpec): ContrastAuditResult {
-  const p = world.palette;
+export function auditPaletteContrast(
+  dnaId: string,
+  dnaName: string,
+  p: DnaWorldPalette,
+): ContrastAuditResult {
   const checks: readonly [string, string, string, number][] = [
     ["text on canvas", p.text, p.canvas, 4.5],
     ["text on surface", p.text, p.surface, 4.5],
@@ -69,13 +73,29 @@ export function auditDnaContrast(world: MasterDnaWorldSpec): ContrastAuditResult
   });
 
   return {
-    dnaId: world.id,
-    dnaName: world.name,
+    dnaId,
+    dnaName,
     passed: pairs.every((pair) => pair.passed),
     pairs,
   };
 }
 
+export function auditDnaContrast(world: MasterDnaWorldSpec): ContrastAuditResult {
+  return auditPaletteContrast(world.id, world.name, world.palette);
+}
+
 export function auditAllDnaWorlds(): readonly ContrastAuditResult[] {
   return listDnaWorlds().map(auditDnaContrast);
+}
+
+export function auditAllDnaWorldsAndModes(): readonly ContrastAuditResult[] {
+  const dark = auditAllDnaWorlds();
+  const light = listDnaWorlds().map((world) =>
+    auditPaletteContrast(
+      `${world.id}:light`,
+      `${world.name} (Light)`,
+      MASTER_DNA_LIGHT_PALETTES[world.id as CanonicalDnaId],
+    ),
+  );
+  return [...dark, ...light];
 }

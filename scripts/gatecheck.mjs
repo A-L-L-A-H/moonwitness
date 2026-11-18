@@ -352,6 +352,15 @@ function quickSteps(gate) {
   stepCommand(gate, "format", "pnpm", ["format:check"]);
   stepCommand(gate, "lint", "pnpm", ["lint", "--filter=@moonwitness/*"]);
   stepCommand(gate, "typecheck", "pnpm", ["typecheck", "--filter=@moonwitness/*"]);
+  stepCommand(gate, "ui-contrast", "pnpm", ["ui:contrast"]);
+  stepCommand(gate, "ui-governance", "pnpm", [
+    "--filter",
+    "@moonwitness/ui",
+    "exec",
+    "vitest",
+    "run",
+    "src/dx/architecture.test.ts",
+  ]);
 }
 
 function localSteps(gate) {

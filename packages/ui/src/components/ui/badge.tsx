@@ -1,25 +1,29 @@
+"use client";
+
 import * as React from "react";
 import { cva, type VariantProps } from "../../lib/utils";
 import { cn } from "../../lib/utils";
+import type { SkinName } from "../../skin/compositions";
+import { useComponentSkin } from "./skin-adapter";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:ring-offset-2",
+  "inline-flex items-center border px-2.5 py-0.5 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2",
   {
     variants: {
       variant: {
         default:
-          "border-[var(--pink)] bg-[var(--pink)]/10 text-[var(--pink)] hover:bg-[var(--pink)]/20",
+          "border-[var(--primary)] bg-[var(--primary)]/15 text-[var(--foreground)] hover:bg-[var(--primary)]/25",
         secondary:
-          "border-[var(--yellow)] bg-[var(--yellow)]/10 text-[var(--yellow)] hover:bg-[var(--yellow)]/20",
+          "border-[var(--secondary)] bg-[var(--secondary)]/15 text-[var(--foreground)] hover:bg-[var(--secondary)]/25",
         destructive:
-          "border-[var(--red)] bg-[var(--red)]/10 text-[var(--red)] hover:bg-[var(--red)]/20",
-        outline: "border-[var(--line)] text-[var(--foreground)] hover:bg-[var(--panel)]",
+          "border-[var(--destructive)] bg-[var(--destructive)] text-[var(--destructive-foreground)]",
+        outline: "border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]",
         pink: "border-[var(--pink)] bg-[var(--pink)] text-[var(--ink)]",
         yellow: "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]",
         blue: "border-[var(--blue)] bg-[var(--blue)] text-[var(--ink)]",
-        dna: "mw-dna-badge rounded-none border-[var(--dna-border,#d6b46c)] bg-[var(--dna-surface-elevated,#0e1322)] text-[var(--dna-focus,#fff4d2)]",
+        dna: "mw-dna-badge rounded-none border-[var(--dna-border)] bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)]",
         imperium:
-          "rounded-none border-[#d6b46c]/55 bg-[#0e1322] font-mono tracking-wider text-[#f5dfa6]",
+          "rounded-none border-[var(--dna-border)] bg-[var(--dna-surface-elevated)] font-mono tracking-wider text-[var(--dna-focus)]",
       },
     },
     defaultVariants: {
@@ -29,10 +33,29 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {}
-
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+  extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof badgeVariants> {
+  skin?: SkinName;
 }
+
+const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
+  ({ className, variant, skin, ...props }, ref) => {
+    const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
+    return (
+      <div
+        ref={ref}
+        data-skin={resolvedSkin}
+        data-dna={dnaId}
+        data-variant={variant ?? "default"}
+        className={cn(
+          variant !== "dna" && variant !== "imperium" && recipe.badge,
+          badgeVariants({ variant }),
+          className,
+        )}
+        {...props}
+      />
+    );
+  },
+);
+Badge.displayName = "Badge";
 
 export { Badge, badgeVariants };

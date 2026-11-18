@@ -3,6 +3,7 @@
 
 import type { DNATokens, TokenPath, TokenReference, ColorToken } from './tokens';
 import { defaultTheme } from './default-theme';
+import { normalizeColorTokenToCss } from './canonical';
 
 type TokenValue = string | number | boolean | ColorToken | Record<string, unknown>;
 
@@ -97,13 +98,37 @@ function generateShadcnHSLVars(theme: DNATokens): Record<string, string> {
 
   for (const [cssName, tokenKey] of Object.entries(map)) {
     const token = sem[tokenKey];
-    if (token && typeof token === 'object' && 'hsl' in token) {
-      vars[cssName] = (token as ColorToken).hsl!;
+    if (token && typeof token === 'object' && 'hex' in token) {
+      vars[cssName] = normalizeColorTokenToCss(token as ColorToken);
     }
   }
 
-  // radius
-  if (theme.radius) vars.radius = String(theme.radius);
+  // Scalar radius token (never stringify the RadiusToken object)
+  if (theme.radius) {
+    vars["radius"] = typeof theme.radius === "string" ? theme.radius : (theme.radius.lg ?? "0.5rem");
+  }
+
+  // Bridge legacy palette vars when defined on theme
+  const legacy = theme.colors?.legacy;
+  if (legacy) {
+    const legacyMap: Record<string, keyof typeof legacy> = {
+      ink: 'ink',
+      panel: 'panel',
+      'panel-2': 'panel2',
+      paper: 'paper',
+      pink: 'pink',
+      blue: 'blue',
+      yellow: 'yellow',
+      purple: 'purple',
+      red: 'red',
+      green: 'green',
+      line: 'line',
+    };
+    for (const [cssName, tokenKey] of Object.entries(legacyMap)) {
+      const token = legacy[tokenKey];
+      if (token?.hex) vars[cssName] = token.hex;
+    }
+  }
 
   return vars;
 }

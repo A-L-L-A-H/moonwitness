@@ -12,7 +12,11 @@ export function ZineBadge({ color, dark = false, className, style, ...props }: Z
   return (
     <span
       className={cn(SOURCE_PROBE_CLASS, "px-2 py-0.5 font-brush text-[10px]", className)}
-      style={{ background: color, color: dark ? "#111" : "#fff", ...style }}
+      style={{
+        background: color,
+        color: dark ? "var(--ink, currentColor)" : "var(--brand-white, currentColor)",
+        ...style,
+      }}
       {...props}
     />
   );

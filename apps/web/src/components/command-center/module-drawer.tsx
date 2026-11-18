@@ -30,7 +30,10 @@ export function ModuleDrawer({ module, projects, onQueue, onClose }: ModuleDrawe
             className="flex h-14 w-14 items-center justify-center rounded-md"
             style={{
               background: module.color,
-              color: module.color === "#ffd21f" ? "#111" : "#fff",
+              color:
+                module.color.toLowerCase().includes("ffd21f") || module.color === "var(--yellow)"
+                  ? "#111"
+                  : "#fff",
             }}
           >
             <ModuleGlyph icon={module.icon} className="h-7 w-7" />

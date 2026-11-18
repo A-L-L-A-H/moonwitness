@@ -58,7 +58,6 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
 
     // Routing targets
     expect(caddyContent).toContain("reverse_proxy web:3000");
-    expect(caddyContent).toContain("reverse_proxy allah:3003");
     expect(caddyContent).toContain("reverse_proxy api:3002");
 
     // Hostnames and issuer domain
@@ -91,7 +90,6 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
       const rawCompose = readFileSync(composePath, "utf-8");
       expect(rawCompose).toContain("caddy:");
       expect(rawCompose).toContain("web:");
-      expect(rawCompose).toContain("allah:");
       expect(rawCompose).toContain("api:");
       expect(rawCompose).toContain("postgres:");
       expect(rawCompose).toContain("radius:");
@@ -103,26 +101,17 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     const { services, networks, volumes } = parsedConfig;
 
     // 1. Service Set validation
-    const expectedServices = [
-      "caddy",
-      "web",
-      "allah",
-      "api",
-      "postgres",
-      "radius",
-      "snmp-poller",
-      "syslog",
-    ];
+    const expectedServices = ["caddy", "web", "api", "postgres", "radius", "snmp-poller", "syslog"];
     for (const service of expectedServices) {
       expect(services).toHaveProperty(service);
     }
     // Excluded services
+    expect(services).not.toHaveProperty("allah");
     expect(services).not.toHaveProperty("memory");
     expect(services).not.toHaveProperty("rocksoul");
 
     const caddy = services.caddy;
     const web = services.web;
-    const allah = services.allah;
     const api = services.api;
     const postgres = services.postgres;
     const radius = services.radius;
@@ -132,7 +121,6 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
 
     expect(caddy).toBeDefined();
     expect(web).toBeDefined();
-    expect(allah).toBeDefined();
     expect(api).toBeDefined();
     expect(postgres).toBeDefined();
     expect(radius).toBeDefined();
@@ -140,17 +128,7 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(syslog).toBeDefined();
     expect(netInternal).toBeDefined();
 
-    if (
-      !caddy ||
-      !web ||
-      !allah ||
-      !api ||
-      !postgres ||
-      !radius ||
-      !snmp ||
-      !syslog ||
-      !netInternal
-    ) {
+    if (!caddy || !web || !api || !postgres || !radius || !snmp || !syslog || !netInternal) {
       throw new Error("Missing expected services or networks in configuration");
     }
 
@@ -163,7 +141,6 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
 
     // Internal app/API/management services must NOT publish host ports directly
     expect(web.ports).toBeUndefined();
-    expect(allah.ports).toBeUndefined();
     expect(api.ports).toBeUndefined();
     expect(postgres.ports).toBeUndefined();
     expect(snmp.ports).toBeUndefined();
@@ -199,7 +176,6 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
 
     // Frontends on moonwitness-public
     expect(web.networks).toHaveProperty("moonwitness-public");
-    expect(allah.networks).toHaveProperty("moonwitness-public");
 
     // API bridges both networks
     expect(api.networks).toHaveProperty("moonwitness-public");

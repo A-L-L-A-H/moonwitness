@@ -310,3 +310,5 @@ export const MASTER_DNA_PALETTES = {
     focus: "#fde68a",
   },
 } as const;
+
+export type MasterDnaPaletteMap = typeof MASTER_DNA_PALETTES;
