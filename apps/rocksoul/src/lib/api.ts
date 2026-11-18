@@ -429,8 +429,6 @@ export async function call<Command extends NativeCommand>(
       "http://localhost:3000",
       "http://127.0.0.1:3002",
       "http://localhost:3002",
-      "http://127.0.0.1:3003",
-      "http://localhost:3003",
       "http://127.0.0.1:8000",
       "http://localhost:8000",
       "http://127.0.0.1:8787",
@@ -442,7 +440,7 @@ export async function call<Command extends NativeCommand>(
       return suffix === "" || suffix.startsWith("/") || suffix.startsWith("?") || suffix.startsWith("#");
     });
     if (!matched || /\s/.test(rawUrl)) {
-      throw new Error("Only local MoonWitness endpoints on ports 3000, 3002, 3003, 8000, or 8787 may be opened.");
+      throw new Error("Only local MoonWitness endpoints on ports 3000, 3002, 8000, or 8787 may be opened.");
     }
     if (typeof window !== "undefined" && typeof window.open === "function") {
       window.open(rawUrl, "_blank", "noopener,noreferrer");
