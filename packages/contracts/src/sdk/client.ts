@@ -18,8 +18,9 @@ export class MoonwitnessApiError extends Error {
 }
 
 export function getCsrfTokenFromCookie(): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE}=([^;]+)`));
+  const cookieHeader = (globalThis as { document?: { cookie?: string } }).document?.cookie;
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE}=([^;]+)`));
   return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
 
