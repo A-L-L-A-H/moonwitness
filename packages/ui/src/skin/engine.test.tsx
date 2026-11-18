@@ -25,6 +25,11 @@ import {
   useThemeMode,
   type SkinName,
 } from "./index";
+import { BRAND_LOGO_IDS, DnaBrandLogo } from "../artwork/logos";
+import { CUTOUT_ARTWORK_IDS, CutoutArtwork } from "../artwork/cutouts";
+import { SkinBackdrop } from "../artwork/backdrop";
+import { SkinOrnament } from "../primitives/tactile-hardware";
+import { SkinPalette, VpnTunnel } from "../icons/modules";
 
 let container: HTMLDivElement;
 let root: Root;
@@ -275,5 +280,85 @@ describe("PR 3 Skin Engine & Effect Integrity", () => {
     expect(baseCss).toContain(':where(body:not([data-dna="01-imperium-lumen"]))');
     expect(baseCss).toContain(".duotone");
     expect(baseCss).toContain(".scanlines");
+  });
+
+  it("persists and restores mw-dna and mw-density in localStorage and sets data-dna on documentElement", () => {
+    localStorage.setItem("mw-dna", "04-nexus-paradox");
+    localStorage.setItem("mw-density", "compact");
+
+    function PersistenceProbe() {
+      const { dnaId, density, setDna, setDensity } = useSkin();
+      return (
+        <div>
+          <span data-testid="dna-density">{`${dnaId}:${density}`}</span>
+          <button
+            type="button"
+            data-testid="switch-dna-density"
+            onClick={() => {
+              setDna("09-simpul-nusantara");
+              setDensity("spacious");
+            }}
+          >
+            switch
+          </button>
+        </div>
+      );
+    }
+
+    renderNode(
+      <SkinProvider persist>
+        <PersistenceProbe />
+      </SkinProvider>,
+    );
+
+    expect(container.querySelector('[data-testid="dna-density"]')?.textContent).toBe(
+      "04-nexus-paradox:compact",
+    );
+    expect(document.documentElement.getAttribute("data-dna")).toBe("04-nexus-paradox");
+    expect(document.documentElement.getAttribute("data-density")).toBe("compact");
+
+    act(() => {
+      container.querySelector<HTMLButtonElement>('[data-testid="switch-dna-density"]')?.click();
+    });
+
+    expect(localStorage.getItem("mw-dna")).toBe("09-simpul-nusantara");
+    expect(localStorage.getItem("mw-density")).toBe("spacious");
+    expect(document.documentElement.getAttribute("data-dna")).toBe("09-simpul-nusantara");
+    expect(document.documentElement.getAttribute("data-density")).toBe("spacious");
+  });
+
+  it("renders all 10 DnaBrandLogo lockups and all 12 CutoutArtwork assets", () => {
+    expect(BRAND_LOGO_IDS).toHaveLength(10);
+    for (const id of BRAND_LOGO_IDS) {
+      for (const variant of ["mark", "lockup", "wordmark"] as const) {
+        const html = renderToString(<DnaBrandLogo id={id} variant={variant} />);
+        expect(html).toContain(`data-mw-brand-logo="${id}"`);
+        expect(html).toContain(`data-mw-brand-variant="${variant}"`);
+      }
+    }
+
+    expect(CUTOUT_ARTWORK_IDS).toHaveLength(12);
+    for (const id of CUTOUT_ARTWORK_IDS) {
+      const html = renderToString(<CutoutArtwork id={id} />);
+      expect(html).toContain(`data-mw-cutout="${id}"`);
+    }
+  });
+
+  it("renders skin-reactive SkinBackdrop, SkinOrnament, and sovereign domain icons across skins", () => {
+    for (const skinName of ["riot", "technical", "editorial", "archive", "transmission"] as const) {
+      const html = renderToString(
+        <SkinProvider defaultSkin={skinName} persist={false}>
+          <div>
+            <SkinBackdrop skin={skinName} dnaId="03-rocksoul" />
+            <SkinOrnament slot="corner" label={skinName} />
+            <VpnTunnel />
+            <SkinPalette />
+          </div>
+        </SkinProvider>,
+      );
+      expect(html).toContain(`data-mw-backdrop-skin="${skinName}"`);
+      expect(html).toContain('data-mw-icon="true"');
+      expect(html).toContain("data-mw-ornament");
+    }
   });
 });

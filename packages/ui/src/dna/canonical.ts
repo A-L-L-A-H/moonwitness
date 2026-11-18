@@ -151,11 +151,25 @@ export interface CanonicalResolvedTokens {
   };
   readonly typography: {
     readonly display: string;
+    readonly heading: string;
     readonly editorial: string;
     readonly body: string;
     readonly label: string;
     readonly technical: string;
     readonly componentUi: string;
+    readonly headingTracking: string;
+    readonly headingTransform: string;
+  };
+  readonly atmosphere: {
+    readonly canvasPattern: string;
+    readonly cardBorderStyle: string;
+    readonly cardClip: string;
+    readonly ornament: string;
+    readonly iconStroke: string;
+    readonly iconCap: string;
+    readonly mediaFilter: string;
+    readonly motionDuration: string;
+    readonly worldAccent: string;
   };
   readonly elevation: {
     readonly shadowSurface: string;
@@ -382,12 +396,195 @@ export function createCanonicalColorToken(hex: string, alpha?: number): ColorTok
 interface SkinRecipeSpec {
   readonly radius: CanonicalShapeTokens["radius"];
   readonly borderWidth: string;
+  readonly borderStyle: string;
+  readonly cardClip: string;
   readonly fontFamily: string;
+  readonly displayFont: string;
+  readonly headingFont: string;
+  readonly bodyFont: string;
+  readonly headingTracking: string;
+  readonly headingTransform: string;
   readonly textTransform: string;
   readonly buttonShadow: string;
   readonly cardShadow: string;
   readonly overlayShadow: string;
+  readonly canvasPattern: string;
+  readonly iconStroke: string;
+  readonly iconCap: string;
+  readonly ornament: string;
+  readonly mediaFilter: string;
+  readonly motionDuration: string;
 }
+
+/**
+ * Chromatic surface & mood palettes per Skin Archetype (dark + WCAG AA light).
+ * When `skin === "default"`, the raw Master DNA palette is used directly;
+ * specialized skins apply unmistakable chromatic + material identity.
+ */
+export const SKIN_SURFACE_PALETTES: Readonly<
+  Record<Exclude<SkinName, "default">, Readonly<Record<CanonicalThemeMode, DnaPaletteSpec>>>
+> = {
+  riot: {
+    dark: {
+      canvas: "#07070c",
+      surface: "#12101b",
+      surfaceElevated: "#1c1829",
+      text: "#f7f1e1",
+      mutedText: "#cfc6b4",
+      border: "#ff2d78",
+      accent: "#ff4088",
+      accentSecondary: "#ffd21f",
+      accentForeground: "#07070c",
+      focus: "#ffd21f",
+      success: "#3ddc84",
+      warning: "#ffd21f",
+      danger: "#ff4d5a",
+    },
+    light: {
+      canvas: "#f4eede",
+      surface: "#fffdf7",
+      surfaceElevated: "#ebe0c9",
+      text: "#0b0b10",
+      mutedText: "#3f3a32",
+      border: "#0b0b10",
+      accent: "#b80d4d",
+      accentSecondary: "#854d0e",
+      accentForeground: "#ffffff",
+      focus: "#0b0b10",
+      success: "#15803d",
+      warning: "#92400e",
+      danger: "#b91c1c",
+    },
+  },
+  editorial: {
+    dark: {
+      canvas: "#11100f",
+      surface: "#191715",
+      surfaceElevated: "#24211d",
+      text: "#faf6ee",
+      mutedText: "#c9c0b1",
+      border: "#9c7c3e",
+      accent: "#f5d061",
+      accentSecondary: "#e04f5f",
+      accentForeground: "#11100f",
+      focus: "#ffe699",
+      success: "#4ade80",
+      warning: "#f5d061",
+      danger: "#f87171",
+    },
+    light: {
+      canvas: "#faf6ee",
+      surface: "#ffffff",
+      surfaceElevated: "#efe8da",
+      text: "#171411",
+      mutedText: "#4f483f",
+      border: "#2c2620",
+      accent: "#8c1d2e",
+      accentSecondary: "#6b4c1b",
+      accentForeground: "#ffffff",
+      focus: "#171411",
+      success: "#15803d",
+      warning: "#92400e",
+      danger: "#b91c1c",
+    },
+  },
+  technical: {
+    dark: {
+      canvas: "#050a10",
+      surface: "#0a131f",
+      surfaceElevated: "#102033",
+      text: "#e6f4fc",
+      mutedText: "#97bed1",
+      border: "#0e7490",
+      accent: "#00e5ff",
+      accentSecondary: "#38bdf8",
+      accentForeground: "#041016",
+      focus: "#7df4ff",
+      success: "#2dd4bf",
+      warning: "#facc15",
+      danger: "#fb7185",
+    },
+    light: {
+      canvas: "#eef5fa",
+      surface: "#ffffff",
+      surfaceElevated: "#ddebf5",
+      text: "#061826",
+      mutedText: "#2d526b",
+      border: "#0b5cab",
+      accent: "#005a8d",
+      accentSecondary: "#0284c7",
+      accentForeground: "#ffffff",
+      focus: "#061826",
+      success: "#0f766e",
+      warning: "#a16207",
+      danger: "#be123c",
+    },
+  },
+  archive: {
+    dark: {
+      canvas: "#14110d",
+      surface: "#1e1913",
+      surfaceElevated: "#2a231b",
+      text: "#f5ead6",
+      mutedText: "#cabba1",
+      border: "#8c6b3b",
+      accent: "#f0b849",
+      accentSecondary: "#d97706",
+      accentForeground: "#14110d",
+      focus: "#ffe08a",
+      success: "#4ade80",
+      warning: "#f0b849",
+      danger: "#f87171",
+    },
+    light: {
+      canvas: "#f2e8d5",
+      surface: "#fbf6ec",
+      surfaceElevated: "#e6d8be",
+      text: "#1d160e",
+      mutedText: "#4f4130",
+      border: "#4a3728",
+      accent: "#7c3a0a",
+      accentSecondary: "#92400e",
+      accentForeground: "#ffffff",
+      focus: "#1d160e",
+      success: "#15803d",
+      warning: "#92400e",
+      danger: "#b91c1c",
+    },
+  },
+  transmission: {
+    dark: {
+      canvas: "#050811",
+      surface: "#0b1222",
+      surfaceElevated: "#131f38",
+      text: "#eaf2ff",
+      mutedText: "#9eb8de",
+      border: "#2563eb",
+      accent: "#38bdf8",
+      accentSecondary: "#3ddc84",
+      accentForeground: "#050811",
+      focus: "#7dd3fc",
+      success: "#3ddc84",
+      warning: "#fbbf24",
+      danger: "#fb7185",
+    },
+    light: {
+      canvas: "#eef4fb",
+      surface: "#ffffff",
+      surfaceElevated: "#dfe9f7",
+      text: "#091324",
+      mutedText: "#334b6e",
+      border: "#1d4ed8",
+      accent: "#0369a1",
+      accentSecondary: "#0f766e",
+      accentForeground: "#ffffff",
+      focus: "#091324",
+      success: "#0f766e",
+      warning: "#a16207",
+      danger: "#be123c",
+    },
+  },
+};
 
 const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
   default: {
@@ -400,11 +597,25 @@ const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
       full: "9999px",
     },
     borderWidth: "1px",
+    borderStyle: "solid",
+    cardClip: "none",
     fontFamily: IMPERIUM_LUMEN_TOKENS.typography.body,
+    displayFont: 'var(--font-brush), Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    headingFont: 'var(--font-brush), Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    bodyFont: IMPERIUM_LUMEN_TOKENS.typography.body,
+    headingTracking: "0.03em",
+    headingTransform: "none",
     textTransform: "none",
     buttonShadow: "0 3px 0 var(--brand-ink, #08090d)",
     cardShadow: "0 2px 10px rgba(0, 0, 0, 0.28)",
     overlayShadow: "0 18px 40px rgba(0, 0, 0, 0.45)",
+    canvasPattern:
+      "radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--primary) 10%, transparent) 0, transparent 42%)",
+    iconStroke: "1.95",
+    iconCap: "round",
+    ornament: "lunar-bracket",
+    mediaFilter: "none",
+    motionDuration: "200ms",
   },
   riot: {
     radius: {
@@ -416,11 +627,25 @@ const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
       full: "9999px",
     },
     borderWidth: "2px",
+    borderStyle: "solid",
+    cardClip: "none",
     fontFamily: 'var(--font-brush), Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    displayFont: 'var(--font-brush), Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    headingFont: 'var(--font-brush), Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif',
+    bodyFont: 'var(--font-mono), ui-monospace, SFMono-Regular, monospace',
+    headingTracking: "0.06em",
+    headingTransform: "uppercase",
     textTransform: "uppercase",
     buttonShadow: "4px 4px 0 var(--brand-ink, #08090d)",
-    cardShadow: "5px 5px 0 rgba(0, 0, 0, 0.6)",
+    cardShadow: "6px 6px 0 var(--dna-accent-secondary, #ffd21f)",
     overlayShadow: "8px 8px 0 var(--dna-accent-secondary, #ed149b)",
+    canvasPattern:
+      "radial-gradient(color-mix(in srgb, var(--primary) 16%, transparent) 1px, transparent 1.5px)",
+    iconStroke: "2.3",
+    iconCap: "square",
+    ornament: "staple-tape",
+    mediaFilter: "contrast(1.18) saturate(1.25)",
+    motionDuration: "120ms",
   },
   editorial: {
     radius: {
@@ -432,11 +657,25 @@ const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
       full: "9999px",
     },
     borderWidth: "1px",
+    borderStyle: "solid",
+    cardClip: "none",
     fontFamily: IMPERIUM_LUMEN_TOKENS.typography.editorial,
+    displayFont: 'var(--font-cinzel), "Cinzel", "Palatino Linotype", Georgia, serif',
+    headingFont: 'var(--font-cinzel), "Cinzel", "Palatino Linotype", Georgia, serif',
+    bodyFont: IMPERIUM_LUMEN_TOKENS.typography.editorial,
+    headingTracking: "-0.01em",
+    headingTransform: "none",
     textTransform: "none",
     buttonShadow: "none",
-    cardShadow: "0 4px 20px rgba(0, 0, 0, 0.14)",
+    cardShadow: "0 12px 32px rgba(0, 0, 0, 0.16)",
     overlayShadow: "0 20px 50px rgba(0, 0, 0, 0.3)",
+    canvasPattern:
+      "linear-gradient(90deg, color-mix(in srgb, var(--border) 18%, transparent) 1px, transparent 1px)",
+    iconStroke: "1.4",
+    iconCap: "round",
+    ornament: "editorial-rule",
+    mediaFilter: "contrast(1.04) saturate(0.92)",
+    motionDuration: "320ms",
   },
   technical: {
     radius: {
@@ -448,11 +687,26 @@ const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
       full: "2px",
     },
     borderWidth: "1px",
+    borderStyle: "dashed",
+    cardClip:
+      "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))",
     fontFamily: IMPERIUM_LUMEN_TOKENS.typography.technical,
+    displayFont: 'var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace',
+    headingFont: 'var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace',
+    bodyFont: IMPERIUM_LUMEN_TOKENS.typography.technical,
+    headingTracking: "0.14em",
+    headingTransform: "uppercase",
     textTransform: "uppercase",
     buttonShadow: "0 0 0 1px var(--dna-border)",
-    cardShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.06)",
-    overlayShadow: "0 0 24px rgba(46, 168, 255, 0.2)",
+    cardShadow: "inset 0 1px 0 color-mix(in srgb, var(--primary) 35%, transparent)",
+    overlayShadow: "0 0 24px rgba(46, 168, 255, 0.25)",
+    canvasPattern:
+      "linear-gradient(to right, color-mix(in srgb, var(--primary) 11%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--primary) 11%, transparent) 1px, transparent 1px)",
+    iconStroke: "1.6",
+    iconCap: "square",
+    ornament: "cad-reticle",
+    mediaFilter: "grayscale(0.55) contrast(1.15) saturate(1.15)",
+    motionDuration: "70ms",
   },
   archive: {
     radius: {
@@ -464,11 +718,25 @@ const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
       full: "9999px",
     },
     borderWidth: "2px",
+    borderStyle: "double",
+    cardClip: "none",
     fontFamily: IMPERIUM_LUMEN_TOKENS.typography.editorial,
+    displayFont: '"Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif',
+    headingFont: 'var(--font-hand), "Palatino Linotype", Georgia, serif',
+    bodyFont: IMPERIUM_LUMEN_TOKENS.typography.editorial,
+    headingTracking: "0.02em",
+    headingTransform: "none",
     textTransform: "none",
     buttonShadow: "2px 3px 0 rgba(0, 0, 0, 0.35)",
-    cardShadow: "3px 4px 0 rgba(0, 0, 0, 0.25)",
+    cardShadow: "4px 4px 0 rgba(0, 0, 0, 0.28)",
     overlayShadow: "6px 6px 0 rgba(0, 0, 0, 0.35)",
+    canvasPattern:
+      "repeating-linear-gradient(0deg, transparent 0 27px, color-mix(in srgb, var(--border) 16%, transparent) 27px 28px)",
+    iconStroke: "1.75",
+    iconCap: "round",
+    ornament: "archival-stamp",
+    mediaFilter: "sepia(0.36) contrast(1.05)",
+    motionDuration: "240ms",
   },
   transmission: {
     radius: {
@@ -480,11 +748,25 @@ const SKIN_RECIPES: Readonly<Record<SkinName, SkinRecipeSpec>> = {
       full: "9999px",
     },
     borderWidth: "1px",
+    borderStyle: "solid",
+    cardClip: "none",
     fontFamily: IMPERIUM_LUMEN_TOKENS.typography.technical,
+    displayFont: 'var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace',
+    headingFont: 'var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace',
+    bodyFont: IMPERIUM_LUMEN_TOKENS.typography.technical,
+    headingTracking: "0.12em",
+    headingTransform: "uppercase",
     textTransform: "uppercase",
-    buttonShadow: "0 0 14px rgba(46, 168, 255, 0.28)",
-    cardShadow: "0 0 18px rgba(46, 168, 255, 0.14)",
-    overlayShadow: "0 0 28px rgba(46, 168, 255, 0.26)",
+    buttonShadow: "0 0 14px rgba(56, 189, 248, 0.32)",
+    cardShadow: "0 0 22px rgba(56, 189, 248, 0.16)",
+    overlayShadow: "0 0 28px rgba(56, 189, 248, 0.28)",
+    canvasPattern:
+      "repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--primary) 8%, transparent) 2px 3px)",
+    iconStroke: "1.8",
+    iconCap: "round",
+    ornament: "signal-led",
+    mediaFilter: "contrast(1.16) saturate(1.15)",
+    motionDuration: "150ms",
   },
 };
 
@@ -503,6 +785,25 @@ export interface ResolveCanonicalTokensOptions {
   density?: CanonicalDensity;
 }
 
+function pickContrastForeground(bgHex: string): string {
+  const clean = bgHex.replace(/^#/, "");
+  const normalized =
+    clean.length === 3
+      ? clean
+          .split("")
+          .map((c) => `${c}${c}`)
+          .join("")
+      : clean;
+  const r = Number.parseInt(normalized.slice(0, 2), 16) / 255;
+  const g = Number.parseInt(normalized.slice(2, 4), 16) / 255;
+  const b = Number.parseInt(normalized.slice(4, 6), 16) / 255;
+  const toLinear = (v: number) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+  const lum = 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  const whiteContrast = 1.05 / (lum + 0.05);
+  const darkContrast = (lum + 0.05) / 0.054;
+  return whiteContrast >= darkContrast ? BRAND_TOKENS.white : BRAND_TOKENS.ink;
+}
+
 /** Single canonical pipeline resolver: DNA -> Theme Mode -> Skin -> Semantic -> Component Tokens */
 export function resolveCanonicalTokens(
   options: ResolveCanonicalTokensOptions = {},
@@ -514,10 +815,16 @@ export function resolveCanonicalTokens(
   const density: CanonicalDensity =
     options.density && options.density in DENSITY_PADDING ? options.density : "comfortable";
 
-  const palette: DnaPaletteSpec =
+  const baseDnaPalette: DnaPaletteSpec =
     mode === "light" ? MASTER_DNA_LIGHT_PALETTES[dnaId] : MASTER_DNA_PALETTES[dnaId];
+  const palette: DnaPaletteSpec =
+    skin === "default" ? baseDnaPalette : SKIN_SURFACE_PALETTES[skin][mode];
   const recipe = SKIN_RECIPES[skin];
   const densityMetrics = DENSITY_PADDING[density];
+  const resolvedSecondaryAccent = palette.accentSecondary ?? palette.accent;
+  const resolvedSecondaryFg = palette.accentSecondary
+    ? pickContrastForeground(resolvedSecondaryAccent)
+    : palette.accentForeground;
 
   const semantic: CanonicalSemanticTokens = {
     canvas: palette.canvas,
@@ -533,16 +840,12 @@ export function resolveCanonicalTokens(
     primary: palette.accent,
     primaryForeground: palette.accentForeground,
     secondary: palette.accentSecondary ?? palette.surfaceElevated,
-    secondaryForeground: palette.accentSecondary
-      ? mode === "light"
-        ? BRAND_TOKENS.white
-        : BRAND_TOKENS.ink
-      : palette.text,
+    secondaryForeground: palette.accentSecondary ? resolvedSecondaryFg : palette.text,
     muted: palette.surfaceElevated,
     mutedForeground: palette.mutedText,
-    accent: palette.accentSecondary ?? palette.accent,
-    accentSecondary: palette.accentSecondary ?? palette.accent,
-    accentForeground: palette.accentForeground,
+    accent: resolvedSecondaryAccent,
+    accentSecondary: resolvedSecondaryAccent,
+    accentForeground: resolvedSecondaryFg,
     destructive: palette.danger ?? BRAND_TOKENS.red,
     destructiveForeground: BRAND_TOKENS.white,
     border: palette.border,
@@ -570,7 +873,7 @@ export function resolveCanonicalTokens(
         medium: "2px",
         thick: "3px",
       },
-      borderStyle: "solid",
+      borderStyle: recipe.borderStyle,
       outlineWidth: "2px",
       outlineOffset: "3px",
     },
@@ -580,12 +883,26 @@ export function resolveCanonicalTokens(
       breakpoints: IMPERIUM_LUMEN_TOKENS.layout.breakpoints,
     },
     typography: {
-      display: IMPERIUM_LUMEN_TOKENS.typography.display,
+      display: recipe.displayFont,
+      heading: recipe.headingFont,
       editorial: IMPERIUM_LUMEN_TOKENS.typography.editorial,
-      body: IMPERIUM_LUMEN_TOKENS.typography.body,
+      body: recipe.bodyFont,
       label: IMPERIUM_LUMEN_TOKENS.typography.label,
       technical: IMPERIUM_LUMEN_TOKENS.typography.technical,
       componentUi: recipe.fontFamily,
+      headingTracking: recipe.headingTracking,
+      headingTransform: recipe.headingTransform,
+    },
+    atmosphere: {
+      canvasPattern: recipe.canvasPattern,
+      cardBorderStyle: recipe.borderStyle,
+      cardClip: recipe.cardClip,
+      ornament: recipe.ornament,
+      iconStroke: recipe.iconStroke,
+      iconCap: recipe.iconCap,
+      mediaFilter: recipe.mediaFilter,
+      motionDuration: recipe.motionDuration,
+      worldAccent: baseDnaPalette.accent,
     },
     elevation: {
       shadowSurface: recipe.cardShadow,
@@ -641,7 +958,7 @@ export function resolveCanonicalTokens(
 export function canonicalTokensToCssVariables(
   resolved: CanonicalResolvedTokens,
 ): Readonly<Record<`--${string}`, string>> {
-  const { brand, semantic, components, shape, typography, elevation } = resolved;
+  const { brand, semantic, components, shape, typography, elevation, atmosphere } = resolved;
   return {
     "--dna-canvas": semantic.canvas,
     "--dna-surface": semantic.surface,
@@ -653,6 +970,7 @@ export function canonicalTokensToCssVariables(
     "--dna-accent-secondary": semantic.accentSecondary,
     "--dna-accent-fg": semantic.primaryForeground,
     "--dna-focus": semantic.focus,
+    "--dna-world-accent": atmosphere.worldAccent,
     "--dna-success": semantic.success,
     "--dna-warning": semantic.warning,
     "--dna-danger": semantic.error,
@@ -683,7 +1001,7 @@ export function canonicalTokensToCssVariables(
     "--input": `hsl(${hexToHslString(semantic.input)})`,
     "--ring": `hsl(${hexToHslString(semantic.ring)})`,
     "--radius": shape.radius.lg,
-    // Component & elevation tokens driven by active skin + density
+    // Component & 8-Axis Skin Grammar tokens driven by active skin + DNA + density
     "--mw-btn-radius": components.button.radius,
     "--mw-btn-border-width": components.button.borderWidth,
     "--mw-btn-shadow": components.button.shadow,
@@ -693,12 +1011,25 @@ export function canonicalTokensToCssVariables(
     "--mw-input-border-width": components.input.borderWidth,
     "--mw-card-radius": components.card.radius,
     "--mw-card-border-width": components.card.borderWidth,
+    "--mw-card-border-style": atmosphere.cardBorderStyle,
+    "--mw-card-clip": atmosphere.cardClip,
     "--mw-card-shadow": elevation.shadowSurface,
     "--mw-card-padding": components.card.padding,
     "--mw-badge-radius": components.badge.radius,
     "--mw-dialog-radius": components.dialog.radius,
     "--mw-dialog-shadow": elevation.shadowOverlay,
     "--mw-font-component": typography.componentUi,
+    "--mw-font-display": typography.display,
+    "--mw-font-heading": typography.heading,
+    "--mw-font-body": typography.body,
+    "--mw-heading-tracking": typography.headingTracking,
+    "--mw-heading-transform": typography.headingTransform,
+    "--mw-canvas-pattern": atmosphere.canvasPattern,
+    "--mw-icon-stroke": atmosphere.iconStroke,
+    "--mw-icon-cap": atmosphere.iconCap,
+    "--mw-ornament": atmosphere.ornament,
+    "--mw-media-filter": atmosphere.mediaFilter,
+    "--mw-motion-duration": atmosphere.motionDuration,
     // Legacy variable bridge derived from active canonical theme (supports mode + skin switching)
     "--ink": semantic.background,
     "--panel": semantic.surface,

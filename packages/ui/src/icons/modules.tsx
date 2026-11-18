@@ -1023,3 +1023,175 @@ export function Sun(props: DnaIconProps) {
     </svg>
   );
 }
+
+export function VpnTunnel(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="12,2.5 20,7 20,17 12,21.5 4,17 4,7"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        fill={accentColor}
+        fillOpacity="0.12"
+      />
+      <path
+        d="M8.5 10 H15.5 M13 7.5 L15.5 10 L13 12.5 M15.5 14 H8.5 M11 11.5 L8.5 14 L11 16.5"
+        stroke={accentColor}
+        strokeWidth="1.8"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+export function SyslogStream(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <rect x="3" y="4" width="18" height="16" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M6.5 8.5 H14 M6.5 12 H17.5 M6.5 15.5 H12.5" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="15.5" y="7.5" width="2" height="2" fill={accentColor} />
+      <rect x="15" y="14.5" width="2.5" height="2" fill={accentColor} />
+    </svg>
+  );
+}
+
+export function SnmpProbe(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <circle cx="12" cy="12" r="8.5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4.5" stroke={accentColor} strokeWidth="1.4" strokeDasharray="2 2" />
+      <path d="M12 12 L17.5 6.5" stroke={accentColor} strokeWidth="2" strokeLinecap="square" />
+      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function StorageBucket(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="12,3 20,7 12,11 4,7"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        fill={accentColor}
+        fillOpacity="0.18"
+      />
+      <path d="M4 7 V17 L12 21 L20 17 V7" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M4 12 L12 16 L20 12" stroke={accentColor} strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+export function RadiusKey(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="12,2.5 20,6 20,12.5 12,21.5 4,12.5 4,6"
+        stroke="currentColor"
+        strokeWidth="1.9"
+      />
+      <circle cx="10.5" cy="11" r="2.2" stroke={accentColor} strokeWidth="1.8" />
+      <path d="M12.7 11 H17 M15.5 11 V13.5" stroke={accentColor} strokeWidth="1.8" strokeLinecap="square" />
+    </svg>
+  );
+}
+
+export function MtimeHorizon(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M2.5 17.5 H21.5" stroke="currentColor" strokeWidth="1.9" strokeLinecap="square" />
+      <path d="M5.5 17.5 C6 11.5 10 8 15 8" stroke={accentColor} strokeWidth="1.8" strokeDasharray="2 2" />
+      <path
+        d="M16.2 13.8 C13.6 14.2 11.5 12.1 11.5 9.5 C11.5 7.9 12.4 6.5 13.8 5.8 C11.3 6.1 9.5 8.2 9.5 10.7 C9.5 13.4 11.7 15.6 14.4 15.6 C16 15.6 17.5 14.8 18.4 13.6 C17.7 13.8 16.9 13.9 16.2 13.8 Z"
+        fill={accentColor}
+        stroke="currentColor"
+        strokeWidth="1.3"
+      />
+    </svg>
+  );
+}
+
+export function ScriptureFolio(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M3 5 H10.5 L12 7 L13.5 5 H21 V19 H13.5 L12 20.5 L10.5 19 H3 Z" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M12 7 V20.5" stroke={accentColor} strokeWidth="1.8" />
+      <path d="M5.5 9.5 H9.5 M5.5 13 H9.5 M14.5 9.5 H18.5 M14.5 13 H18.5" stroke={accentColor} strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+export function MemoryTapeNode(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <rect x="2.5" y="5.5" width="19" height="13" stroke="currentColor" strokeWidth="1.9" />
+      <circle cx="8" cy="12" r="2.2" stroke={accentColor} strokeWidth="1.7" />
+      <circle cx="16" cy="12" r="2.2" stroke={accentColor} strokeWidth="1.7" />
+      <path d="M8 14.2 H16" stroke="currentColor" strokeWidth="1.6" />
+      <polygon points="12,2.5 14,5.5 10,5.5" fill={accentColor} />
+    </svg>
+  );
+}
+
+export function ArsyRelay(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M12 8.5 L7.5 21 M12 8.5 L16.5 21 M9 16.5 H15" stroke="currentColor" strokeWidth="1.9" />
+      <circle cx="12" cy="7.5" r="1.8" fill={accentColor} />
+      <path d="M7.5 4.5 C5 6.8 5 10.2 7.5 12.5 M16.5 4.5 C19 6.8 19 10.2 16.5 12.5" stroke={accentColor} strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+export function SimpulNode(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M6 16 L10.5 9.5 L15 14 L18.5 7.5" stroke={accentColor} strokeWidth="1.9" />
+      <circle cx="6" cy="16" r="2.2" stroke="currentColor" strokeWidth="1.8" fill={accentColor} fillOpacity="0.25" />
+      <circle cx="10.5" cy="9.5" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="15" cy="14" r="2.2" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="18.5" cy="7.5" r="2.2" stroke={accentColor} strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+export function MyceliumSpore(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M12 12 L6 6 M12 12 L18.5 7.5 M12 12 L6.5 18 M12 12 L18 17.5" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="12" r="2.8" fill={accentColor} stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="6" cy="6" r="1.8" stroke={accentColor} strokeWidth="1.6" />
+      <circle cx="18.5" cy="7.5" r="1.8" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="6.5" cy="18" r="1.8" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="18" cy="17.5" r="1.8" stroke={accentColor} strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+export function SkinPalette(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="12,3 20.5,8 12,13 3.5,8"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        fill={accentColor}
+        fillOpacity="0.22"
+      />
+      <path d="M3.5 12.5 L12 17.5 L20.5 12.5" stroke={accentColor} strokeWidth="1.8" />
+      <path d="M3.5 16.5 L12 21.5 L20.5 16.5" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}

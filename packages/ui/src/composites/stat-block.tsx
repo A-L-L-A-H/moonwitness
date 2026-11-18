@@ -1,6 +1,8 @@
+"use client";
+
 import { cn } from "../cn";
 import { ZineCard } from "../primitives/zine-card";
-import { Staple } from "../primitives/tactile-hardware";
+import { SkinOrnament } from "../primitives/tactile-hardware";
 
 export interface StatBlockProps {
   /** Nilai besar yang ditampilkan */
@@ -39,16 +41,18 @@ export function StatBlock({
         >
           {value}
         </div>
-        <div className="mt-2 font-mono text-[11px] font-bold tracking-widest text-zinc-300 uppercase">
+        <div className="mt-2 font-mono text-[11px] font-bold tracking-widest text-[var(--foreground)] uppercase">
           {label}
         </div>
-        {trend && <div className="mt-1 font-mono text-[11px] text-zinc-400">{trend}</div>}
+        {trend && (
+          <div className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">{trend}</div>
+        )}
       </div>
     );
   }
   return (
-    <ZineCard className="photocopy-grit relative overflow-hidden p-4 shadow-[4px_4px_0_rgba(0,0,0,0.8)] transition-all hover:-translate-y-1">
-      <Staple className="top-1 left-2 -rotate-45" />
+    <ZineCard className="relative overflow-hidden p-4 transition-all hover:-translate-y-1">
+      <SkinOrnament slot="corner" className="top-1.5 left-2" />
       <span aria-hidden className="absolute inset-x-0 top-0 h-1.5" style={{ background: color }} />
       <div
         className="cmyk-slip font-brush text-3xl leading-none sm:text-4xl mt-1"
@@ -58,12 +62,14 @@ export function StatBlock({
       </div>
       <div
         className={cn(
-          "mt-2 font-mono text-[11px] font-bold tracking-widest text-zinc-400 uppercase",
+          "mt-2 font-mono text-[11px] font-bold tracking-widest text-[var(--muted-foreground)] uppercase",
         )}
       >
         {label}
       </div>
-      {trend && <div className="mt-1 font-mono text-[11px] text-zinc-500">{trend}</div>}
+      {trend && (
+        <div className="mt-1 font-mono text-[11px] text-[var(--muted-foreground)]">{trend}</div>
+      )}
     </ZineCard>
   );
 }

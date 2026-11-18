@@ -35,7 +35,10 @@ export function ZineImage({
         alt={alt ?? entry.alt}
         loading={eager ? "eager" : "lazy"}
         decoding="async"
-        style={{ objectPosition: position ?? entry.position ?? "center" }}
+        style={{
+          objectPosition: position ?? entry.position ?? "center",
+          filter: "var(--mw-media-filter, none)",
+        }}
         className={cn("absolute inset-0 h-full w-full object-cover", className)}
       />
     </picture>

@@ -2,6 +2,7 @@
 
 import { ZineCard } from "../primitives/zine-card";
 import { ZineImage } from "../primitives/zine-image";
+import { useSkin } from "../skin";
 
 export interface CollectionItem {
   id: string;
@@ -19,8 +20,9 @@ export function CollectionsGrid<T extends CollectionItem>({
   collections,
   onOpenCollection,
 }: CollectionsGridProps<T>) {
+  const { skin } = useSkin();
   return (
-    <div className="@container">
+    <div className="@container" data-skin={skin}>
       <div className="grid grid-cols-2 gap-4 @[30rem]:grid-cols-4">
         {collections.map((collection) => (
           <button
@@ -39,10 +41,10 @@ export function CollectionsGrid<T extends CollectionItem>({
                 />
               </span>
               <span className="block p-3">
-                <span className="block font-brush text-sm leading-tight text-white group-hover:text-[var(--pink)]">
+                <span className="block font-brush text-sm leading-tight text-[var(--foreground)] group-hover:text-[var(--primary)]">
                   {collection.name}
                 </span>
-                <span className="mt-1 block text-[11px] tracking-widest text-zinc-400">
+                <span className="mt-1 block text-[11px] tracking-widest text-[var(--muted-foreground)]">
                   {collection.episodes} EPISODES
                 </span>
               </span>

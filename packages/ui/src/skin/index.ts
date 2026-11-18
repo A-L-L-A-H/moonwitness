@@ -43,7 +43,9 @@ export type { SkinPreset } from "./presets";
 export type ThemeMode = "dark" | "light" | "system";
 
 const SKIN_STORAGE_KEY = "mw-skin";
+const DNA_STORAGE_KEY = "mw-dna";
 const THEME_STORAGE_KEY = "mw-theme";
+const DENSITY_STORAGE_KEY = "mw-density";
 const VALID_SKINS: readonly SkinName[] = [
   "default",
   "riot",
@@ -200,6 +202,30 @@ function readStoredSkin(fallback: SkinName): SkinName {
   return fallback;
 }
 
+function readStoredDna(fallback: MasterDnaId): MasterDnaId {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(DNA_STORAGE_KEY);
+    if (stored && isValidDnaId(stored)) return stored;
+  } catch {
+    /* ignore storage failures */
+  }
+  return fallback;
+}
+
+function readStoredDensity(fallback: CanonicalDensity): CanonicalDensity {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const stored = window.localStorage.getItem(DENSITY_STORAGE_KEY);
+    if (stored === "compact" || stored === "comfortable" || stored === "spacious") {
+      return stored;
+    }
+  } catch {
+    /* ignore storage failures */
+  }
+  return fallback;
+}
+
 function writeStyleVariables(elementId: string, selector: string, vars: Readonly<Record<`--${string}`, string>>): void {
   if (typeof document === "undefined") return;
   let el = document.getElementById(elementId) as HTMLStyleElement | null;
@@ -288,6 +314,16 @@ export function SkinProvider({
     if (storedSkin !== initialSafeSkin) {
       setSkinState(storedSkin);
     }
+    if (!defaultDna && !parentDnaWorld) {
+      const storedDna = readStoredDna(initialSafeDna);
+      if (storedDna !== initialSafeDna) {
+        setDnaState(storedDna);
+      }
+    }
+    const storedDensity = readStoredDensity(defaultDensity);
+    if (storedDensity !== defaultDensity) {
+      setDensityState(storedDensity);
+    }
     const storedMode = getStoredThemeMode();
     if (storedMode !== defaultTheme) {
       setModeState(storedMode);
@@ -334,13 +370,11 @@ export function SkinProvider({
   useEffect(() => {
     if (resolvedScope !== "document" || typeof document === "undefined") return;
     document.documentElement.setAttribute("data-skin", skin);
+    document.documentElement.setAttribute("data-dna", dnaId);
     document.documentElement.setAttribute("data-theme", resolvedMode);
     document.documentElement.setAttribute("data-density", density);
-    if (defaultDna) {
-      document.documentElement.setAttribute("data-dna", dnaId);
-    }
     writeStyleVariables("mw-skin-engine-variables", ":root", cssVariables);
-  }, [resolvedScope, skin, dnaId, resolvedMode, density, defaultDna, cssVariables]);
+  }, [resolvedScope, skin, dnaId, resolvedMode, density, cssVariables]);
 
   const setSkin = useCallback(
     (nextSkin: SkinName) => {
@@ -362,9 +396,16 @@ export function SkinProvider({
     (nextDna: MasterDnaId) => {
       const valid: MasterDnaId = isValidDnaId(nextDna) ? nextDna : "02-lunar-chronicles";
       setDnaState(valid);
+      if (resolvedScope === "document" && persist && typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem(DNA_STORAGE_KEY, valid);
+        } catch {
+          /* ignore storage failures */
+        }
+      }
       onDnaChange?.(valid);
     },
-    [onDnaChange],
+    [resolvedScope, persist, onDnaChange],
   );
 
   const setMode = useCallback(
@@ -381,9 +422,19 @@ export function SkinProvider({
     [resolvedScope, persist, onThemeChange],
   );
 
-  const setDensity = useCallback((nextDensity: CanonicalDensity) => {
-    setDensityState(nextDensity);
-  }, []);
+  const setDensity = useCallback(
+    (nextDensity: CanonicalDensity) => {
+      setDensityState(nextDensity);
+      if (resolvedScope === "document" && persist && typeof window !== "undefined") {
+        try {
+          window.localStorage.setItem(DENSITY_STORAGE_KEY, nextDensity);
+        } catch {
+          /* ignore storage failures */
+        }
+      }
+    },
+    [resolvedScope, persist],
+  );
 
   const preset = getPreset(skin);
   const getClasses = useCallback(

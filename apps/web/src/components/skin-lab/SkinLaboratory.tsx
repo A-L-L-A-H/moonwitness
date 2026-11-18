@@ -2,22 +2,28 @@
 
 import { useMemo, useState } from "react";
 import {
+  BRAND_LOGO_IDS,
   Badge,
   Button,
+  CUTOUT_ARTWORK_IDS,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
+  CutoutArtwork,
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DnaBrandLogo,
   EmptyStateArt,
   LoadingConstellation,
   ScrollArea,
+  SkinBackdrop,
+  SkinOrnament,
   SkinPlayground,
   SkinScope,
   Tabs,
@@ -33,17 +39,62 @@ import {
   auditDnaContrast,
   getDnaWorld,
   listDnaWorlds,
+  listPresets,
+  skinPresets,
+  useSkin,
+  type CanonicalDensity,
   type MasterDnaId,
+  type ThemeMode,
 } from "@moonwitness/ui";
+import {
+  ArsyRelay,
+  MemoryTapeNode,
+  MtimeHorizon,
+  MyceliumSpore,
+  RadiusKey,
+  ScriptureFolio,
+  SimpulNode,
+  SkinPalette,
+  SnmpProbe,
+  StorageBucket,
+  SyslogStream,
+  VpnTunnel,
+} from "@moonwitness/ui/icons";
 import { EmpireShell } from "@/components/shell";
+
+const SOVEREIGN_DOMAIN_ICONS = [
+  { id: "vpn", label: "VPN Tunnel", Icon: VpnTunnel },
+  { id: "syslog", label: "Syslog Stream", Icon: SyslogStream },
+  { id: "snmp", label: "SNMP Probe", Icon: SnmpProbe },
+  { id: "storage", label: "Storage Bucket", Icon: StorageBucket },
+  { id: "radius", label: "RADIUS Key", Icon: RadiusKey },
+  { id: "mtime", label: "MTIME Horizon", Icon: MtimeHorizon },
+  { id: "scripture", label: "Scripture Folio", Icon: ScriptureFolio },
+  { id: "memory", label: "Memory Tape", Icon: MemoryTapeNode },
+  { id: "arsy", label: "Arsy Relay", Icon: ArsyRelay },
+  { id: "simpul", label: "Simpul Node", Icon: SimpulNode },
+  { id: "mycelium", label: "Mycelium Spore", Icon: MyceliumSpore },
+  { id: "skin-palette", label: "Skin Palette", Icon: SkinPalette },
+] as const;
 
 export function SkinLaboratory() {
   const worlds = useMemo(() => listDnaWorlds(), []);
+  const presets = useMemo(() => listPresets(), []);
+  const {
+    skin: activeSkin,
+    setSkin,
+    dnaId: globalDnaId,
+    setDna,
+    mode: activeTheme,
+    setMode,
+    density: activeDensity,
+    setDensity,
+  } = useSkin();
   const [selectedDnaId, setSelectedDnaId] = useState<MasterDnaId>("05-riot-anarchy");
   const [searchFilter, setSearchFilter] = useState("");
   const [selectValue, setSelectValue] = useState("witness");
   const [sampleInput, setSampleInput] = useState("Witness frame verification");
-  const [labView, setLabView] = useState<"focus" | "compare" | "dx">("focus");
+  const [labView, setLabView] = useState<"focus" | "compare" | "assets" | "dx">("focus");
 
   const activeWorld = getDnaWorld(selectedDnaId);
   const activeAudit = useMemo(() => auditDnaContrast(activeWorld), [activeWorld]);
@@ -69,44 +120,133 @@ export function SkinLaboratory() {
       }}
     >
       <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-8">
-        <header className="flex flex-col justify-between gap-4 border-b-2 border-[var(--line)] pb-5 sm:flex-row sm:items-end">
-          <div>
-            <p className="font-mono text-[10px] tracking-[0.28em] text-[var(--pink)]">
-              MOONFRAME DESIGN ENGINE · 7 MASTER DNA WORLDS
-            </p>
-            <h1 className="mt-2 font-brush text-4xl text-zinc-100 sm:text-5xl">SKIN LABORATORY</h1>
-            <p className="mt-2 max-w-2xl text-sm text-zinc-400">
-              Interactive matrix verifying 9 shared primitives, abstract vector scenes, and measured
-              WCAG 2.1 AA contrast ratios across all seven canonical worlds.
-            </p>
+        <header className="relative overflow-hidden border-2 border-[var(--border)] bg-[var(--card)] p-5">
+          <SkinBackdrop skin={activeSkin} dnaId={selectedDnaId} />
+          <SkinOrnament slot="corner" className="right-3 top-3" />
+          <div className="relative flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="font-mono text-[10px] tracking-[0.28em] text-[var(--primary)]">
+                MOONFRAME 8-AXIS SKIN ENGINE · 7 MASTER DNA WORLDS
+              </p>
+              <h1 className="mt-2 font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
+                SKIN LABORATORY
+              </h1>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--muted-foreground)]">
+                Interactive matrix verifying 8-axis skin presets, 10 brand logos, 12 vector cutouts,
+                12 domain icons, and measured WCAG 2.1 AA contrast across all 84 DNA combinations.
+              </p>
+            </div>
+            <div
+              className="flex flex-wrap lg:flex-nowrap items-center gap-2 shrink-0"
+              role="tablist"
+              aria-label="Skin laboratory mode"
+            >
+              {(
+                [
+                  { id: "focus", label: "SINGLE WORLD" },
+                  { id: "compare", label: "7-WORLD AUDIT GRID" },
+                  { id: "assets", label: "LOGOS & CUTOUTS" },
+                  { id: "dx", label: "TOKEN & PLAYGROUND" },
+                ] as const
+              ).map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={labView === mode.id}
+                  onClick={() => setLabView(mode.id)}
+                  className={`min-h-11 whitespace-nowrap border-2 px-3 py-2 font-mono text-[11px] tracking-wider transition-colors ${
+                    labView === mode.id
+                      ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)]"
+                      : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <div
-            className="flex flex-wrap lg:flex-nowrap items-center gap-2 shrink-0"
-            role="tablist"
-            aria-label="Skin laboratory mode"
-          >
-            {(
-              [
-                { id: "focus", label: "SINGLE WORLD" },
-                { id: "compare", label: "7-WORLD AUDIT GRID" },
-                { id: "dx", label: "TOKEN & PLAYGROUND" },
-              ] as const
-            ).map((mode) => (
-              <button
-                key={mode.id}
-                type="button"
-                role="tab"
-                aria-selected={labView === mode.id}
-                onClick={() => setLabView(mode.id)}
-                className={`min-h-11 whitespace-nowrap border-2 px-3 py-2 font-mono text-[11px] tracking-wider transition-colors ${
-                  labView === mode.id
-                    ? "border-[var(--pink)] bg-[var(--pink)]/20 text-white"
-                    : "border-[var(--line)] bg-[var(--panel)] text-zinc-400 hover:text-white"
-                }`}
-              >
-                {mode.label}
-              </button>
-            ))}
+
+          {/* Global 4-Axis Skin Engine Controls */}
+          <div className="relative mt-5 grid grid-cols-1 gap-3 border-t border-[var(--border)] pt-4 md:grid-cols-3">
+            <div className="space-y-1.5">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+                Global Surface Skin ({activeSkin})
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {presets.map((key) => {
+                  const preset = skinPresets[key];
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSkin(key)}
+                      className={`border px-2.5 py-1 font-mono text-[10px] uppercase transition-colors ${
+                        activeSkin === key
+                          ? "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)] font-bold"
+                          : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+                Theme Mode ({activeTheme}) &amp; Density ({activeDensity})
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {(["dark", "light", "system"] as const satisfies readonly ThemeMode[]).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setMode(m)}
+                    className={`border px-2.5 py-1 font-mono text-[10px] uppercase transition-colors ${
+                      activeTheme === m
+                        ? "border-[var(--primary)] bg-[var(--primary)]/20 text-[var(--foreground)] font-bold"
+                        : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
+                {(["compact", "comfortable", "spacious"] as const satisfies readonly CanonicalDensity[]).map(
+                  (d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDensity(d)}
+                      className={`border px-2.5 py-1 font-mono text-[10px] uppercase transition-colors ${
+                        activeDensity === d
+                          ? "border-[var(--secondary)] bg-[var(--secondary)]/20 text-[var(--foreground)] font-bold"
+                          : "border-[var(--border)] bg-[var(--background)] text-[var(--muted-foreground)]"
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--muted-foreground)]">
+                Sync Global DNA ({globalDnaId})
+              </div>
+              <div className="flex items-center gap-2">
+                <DnaBrandLogo id={selectedDnaId} variant="mark" size={28} />
+                <button
+                  type="button"
+                  onClick={() => setDna(selectedDnaId)}
+                  className="border border-[var(--primary)] bg-[var(--primary)]/15 px-3 py-1.5 font-mono text-[10px] font-bold uppercase text-[var(--foreground)] hover:bg-[var(--primary)]/25"
+                >
+                  Apply {selectedDnaId} Globally
+                </button>
+              </div>
+            </div>
           </div>
         </header>
 
@@ -422,14 +562,79 @@ export function SkinLaboratory() {
           </div>
         )}
 
+        {labView === "assets" && (
+          <div className="space-y-6">
+            <section className="relative overflow-hidden border-2 border-[var(--border)] bg-[var(--card)] p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="font-brush text-2xl text-[var(--foreground)]">
+                  10 CANONICAL BRAND LOGO LOCKUPS
+                </h2>
+                <SkinOrnament slot="tag" label={`${activeSkin.toUpperCase()} · ${globalDnaId}`} />
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                {BRAND_LOGO_IDS.map((logoId) => (
+                  <div
+                    key={logoId}
+                    className="flex flex-col items-start justify-between gap-3 border border-[var(--border)] bg-[var(--background)] p-3"
+                  >
+                    <DnaBrandLogo id={logoId} variant="mark" size={40} />
+                    <DnaBrandLogo id={logoId} variant="lockup" size={28} className="max-w-full" />
+                    <span className="font-mono text-[10px] uppercase text-[var(--muted-foreground)]">
+                      {logoId}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="border-2 border-[var(--border)] bg-[var(--card)] p-5">
+              <h2 className="mb-4 font-brush text-2xl text-[var(--foreground)]">
+                12 ISOLATED VECTOR CUTOUTS
+              </h2>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                {CUTOUT_ARTWORK_IDS.map((cutoutId) => (
+                  <div
+                    key={cutoutId}
+                    className="flex flex-col items-center gap-2 border border-[var(--border)] bg-[var(--background)] p-3 text-center"
+                  >
+                    <CutoutArtwork id={cutoutId} className="h-24 w-24" />
+                    <span className="font-mono text-[10px] uppercase text-[var(--muted-foreground)]">
+                      {cutoutId}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="border-2 border-[var(--border)] bg-[var(--card)] p-5">
+              <h2 className="mb-4 font-brush text-2xl text-[var(--foreground)]">
+                12 SOVEREIGN DOMAIN ICONS
+              </h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
+                {SOVEREIGN_DOMAIN_ICONS.map(({ id, label, Icon }) => (
+                  <div
+                    key={id}
+                    className="flex items-center gap-3 border border-[var(--border)] bg-[var(--background)] px-3 py-2.5"
+                  >
+                    <Icon className="h-6 w-6 shrink-0 text-[var(--primary)]" />
+                    <span className="font-mono text-[11px] text-[var(--foreground)]">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+
         {labView === "dx" && (
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="border-2 border-[var(--line)] bg-[var(--panel)] p-5">
-              <h2 className="mb-4 font-brush text-2xl text-zinc-100">SKIN PLAYGROUND</h2>
+            <div className="border-2 border-[var(--border)] bg-[var(--card)] p-5">
+              <h2 className="mb-4 font-brush text-2xl text-[var(--foreground)]">SKIN PLAYGROUND</h2>
               <SkinPlayground />
             </div>
-            <div className="border-2 border-[var(--line)] bg-[var(--panel)] p-5">
-              <h2 className="mb-4 font-brush text-2xl text-zinc-100">DNA TOKEN INSPECTOR</h2>
+            <div className="border-2 border-[var(--border)] bg-[var(--card)] p-5">
+              <h2 className="mb-4 font-brush text-2xl text-[var(--foreground)]">
+                DNA TOKEN INSPECTOR
+              </h2>
               <TokenInspector />
             </div>
           </div>

@@ -9,12 +9,15 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement> & { skin?: SkinName }
 >(({ className, skin, ...props }, ref) => {
-  const { skin: resolvedSkin, dnaId } = useComponentSkin(skin);
+  const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
   return (
     <div
       data-skin={resolvedSkin}
       data-dna={dnaId}
-      className="relative w-full overflow-x-auto rounded-[var(--mw-card-radius,0.5rem)] border border-[var(--border)] bg-[var(--card)]"
+      className={cn(
+        "relative w-full overflow-x-auto",
+        recipe.card,
+      )}
     >
       <table
         ref={ref}

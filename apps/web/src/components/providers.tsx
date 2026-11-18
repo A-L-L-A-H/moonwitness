@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 import { SkinProvider } from "@moonwitness/ui";
-import { ThemeBootstrap } from "./theme-bootstrap";
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -21,7 +20,6 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeBootstrap />
       <RootSkinProvider>{children}</RootSkinProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

@@ -58,18 +58,18 @@ export function TopRail({
       )}
     >
       <BrandLink href={brandHref} className="hud-brand flex min-h-11 items-center gap-2">
-        <Crown className="h-5 w-8 shrink-0 text-[var(--yellow)]" />
-        <span className="font-brush text-sm leading-none text-[var(--paper)] sm:text-lg">
-          MOON<span className="text-[var(--pink)]">WITNESS</span>
+        <Crown className="h-5 w-8 shrink-0 text-[var(--primary)]" />
+        <span className="font-brush text-sm leading-none text-[var(--foreground)] sm:text-lg">
+          MOON<span className="text-[var(--primary)]">WITNESS</span>
         </span>
         {subtitle ? (
-          <span className="hidden font-hand text-sm text-[var(--paper)] 2xl:inline">
+          <span className="hidden font-hand text-sm text-[var(--muted-foreground)] 2xl:inline">
             {subtitle}
           </span>
         ) : null}
       </BrandLink>
       {actions ? <div className="hud-top-actions">{actions}</div> : null}
-      <div className="hud-breadcrumb flex min-w-0 flex-wrap items-center gap-2 text-sm text-[var(--paper)]">
+      <div className="hud-breadcrumb flex min-w-0 flex-wrap items-center gap-2 text-sm text-[var(--foreground)]">
         {start}
         <span className="min-w-0 break-words font-medium">{title}</span>
       </div>
@@ -187,7 +187,7 @@ export function CommandStrip({ left, right, className }: CommandStripProps) {
   return (
     <footer
       className={cn(
-        "hud-panel hud-edge-top flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-[10px] tracking-widest text-[var(--paper)]",
+        "hud-panel hud-edge-top flex shrink-0 flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-[10px] tracking-widest text-[var(--muted-foreground)]",
         getClasses("hudPanel"),
         className,
       )}

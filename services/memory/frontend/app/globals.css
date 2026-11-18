@@ -2,48 +2,49 @@
 
 :root {
   color-scheme: dark;
-  --surrounding: #100e0b;
-  --case: #292720;
-  --case-raised: #363329;
-  --case-edge: #655f50;
-  --display: #171912;
-  --display-raised: #1d2018;
-  --ink: #f0eadc;
-  --muted: #b2aa95;
-  --line: #444236;
+  --surrounding: var(--dna-canvas, var(--background, #100e0b));
+  --case: var(--dna-surface, var(--card, #292720));
+  --case-raised: var(--dna-surface-elevated, var(--muted, #363329));
+  --case-edge: var(--dna-border, var(--border, #655f50));
+  --display: var(--dna-canvas, var(--background, #171912));
+  --display-raised: var(--dna-surface-elevated, #1d2018);
+  --ink: var(--dna-text, var(--foreground, #f0eadc));
+  --muted: var(--dna-muted-text, var(--muted-foreground, #b2aa95));
+  --line: var(--dna-border, var(--border, #444236));
   --line-strong: #746d58;
-  --accent: #e7d96b;
-  --accent-ink: #1c1b10;
+  --accent: var(--dna-accent, var(--primary, #e7d96b));
+  --accent-ink: var(--dna-accent-foreground, var(--primary-foreground, #1c1b10));
   --signal: #f08b72;
   --signal-soft: #39221d;
-  --field: #12140f;
+  --field: var(--dna-canvas, #12140f);
   --paper: #e5dbc0;
   --paper-ink: #29251b;
-  --focus: #f3e77e;
-  --display-type: "Barlow Condensed", Impact, sans-serif;
-  --ui-type: "IBM Plex Sans", Arial, sans-serif;
+  --focus: var(--dna-focus, #f3e77e);
+  --display-type: var(--mw-font-display, "Barlow Condensed", Impact, sans-serif);
+  --ui-type: var(--mw-font-body, "IBM Plex Sans", Arial, sans-serif);
+  --mono-type: var(--mw-font-mono, "IBM Plex Mono", ui-monospace, monospace);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --surrounding: #e0d9ca;
-  --case: #bdb39f;
-  --case-raised: #cec4ae;
-  --case-edge: #7c735f;
-  --display: #ede8d8;
-  --display-raised: #f7f2e4;
-  --ink: #241f17;
-  --muted: #625a4c;
-  --line: #b8ae98;
+  --surrounding: var(--dna-canvas, var(--background, #e0d9ca));
+  --case: var(--dna-surface, var(--card, #bdb39f));
+  --case-raised: var(--dna-surface-elevated, var(--muted, #cec4ae));
+  --case-edge: var(--dna-border, var(--border, #7c735f));
+  --display: var(--dna-canvas, var(--background, #ede8d8));
+  --display-raised: var(--dna-surface-elevated, #f7f2e4);
+  --ink: var(--dna-text, var(--foreground, #241f17));
+  --muted: var(--dna-muted-text, var(--muted-foreground, #625a4c));
+  --line: var(--dna-border, var(--border, #b8ae98));
   --line-strong: #817862;
-  --accent: #816900;
-  --accent-ink: #201a08;
+  --accent: var(--dna-accent, var(--primary, #816900));
+  --accent-ink: var(--dna-accent-foreground, var(--primary-foreground, #201a08));
   --signal: #8d3325;
   --signal-soft: #f0d7cf;
-  --field: #f7f2e4;
+  --field: var(--dna-canvas, #f7f2e4);
   --paper: #e5dbc0;
   --paper-ink: #29251b;
-  --focus: #57440e;
+  --focus: var(--dna-focus, #57440e);
 }
 
 *,

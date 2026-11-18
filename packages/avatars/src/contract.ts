@@ -37,7 +37,18 @@ export interface SavedAvatar {
   updatedAt: string;
 }
 
-const PALETTES: readonly PaletteName[] = ["street", "moon", "acid", "signal"];
+const PALETTES: readonly PaletteName[] = [
+  "street",
+  "moon",
+  "acid",
+  "signal",
+  "imperium",
+  "lunar",
+  "rocksoul",
+  "nexus",
+  "mycelium",
+  "nusantara",
+];
 const BACKGROUNDS: readonly BackgroundName[] = ["ink", "paper", "transparent"];
 
 export function normalizeSeed(seed: string): string {

@@ -16,8 +16,10 @@ export { RansomText, type RansomTextProps } from "./primitives/ransom-text";
 export {
   TactileTape,
   Staple,
+  SkinOrnament,
   type TactileTapeProps,
   type StapleProps,
+  type SkinOrnamentProps,
 } from "./primitives/tactile-hardware";
 export {
   DistressedSticker,
@@ -442,6 +444,7 @@ export {
 export {
   BRAND_TOKENS,
   MASTER_DNA_LIGHT_PALETTES,
+  SKIN_SURFACE_PALETTES,
   DEPRECATED_TOKEN_ALIASES,
   hexToHslString,
   normalizeColorTokenToCss,
@@ -639,12 +642,29 @@ export {
   Calendar as CalendarIcon,
   Clock,
 } from "./icons/primitives";
-export { Grid as GridIcon } from "./icons/modules";
+export {
+  Grid as GridIcon,
+  VpnTunnel,
+  SyslogStream,
+  SnmpProbe,
+  StorageBucket,
+  RadiusKey,
+  MtimeHorizon,
+  ScriptureFolio,
+  MemoryTapeNode,
+  ArsyRelay,
+  SimpulNode,
+  MyceliumSpore,
+  SkinPalette,
+} from "./icons/modules";
 
 /* Artwork System */
 export * from "./artwork/vector";
 export * from "./artwork/generative";
 export * from "./artwork/compositions";
+export * from "./artwork/logos";
+export * from "./artwork/cutouts";
+export * from "./artwork/backdrop";
 
 /* DX Layer */
 export { TokenInspector, type TokenInspectorProps } from "./dx/inspector";

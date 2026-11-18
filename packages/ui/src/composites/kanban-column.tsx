@@ -1,6 +1,9 @@
 "use client";
 
 import { ZineImage } from "../primitives/zine-image";
+import { cn } from "../lib/utils";
+import { useSkin } from "../skin";
+import { kanbanColumnVariants } from "../skin/compositions";
 import { defaultKindColors } from "./kind-colors";
 
 export interface KanbanCard {
@@ -33,18 +36,23 @@ const DEFAULT_STAGE_COLOR: Record<string, string> = {
 export const STAGE_COLOR = DEFAULT_STAGE_COLOR;
 
 export function KanbanColumn<C extends KanbanCard>({ column, onOpenItem }: KanbanColumnProps<C>) {
+  const { skin, density } = useSkin();
   const color = column.color ?? DEFAULT_STAGE_COLOR[column.stage] ?? "#9ca3af";
   return (
     <section
       aria-label={`${column.stage}, ${column.count} item`}
-      className="flex min-w-0 flex-col gap-3 border-t-4 bg-[var(--panel)] p-3"
+      data-skin={skin}
+      className={cn(
+        kanbanColumnVariants({ skin, compact: density === "compact" }),
+        "min-w-0 border-t-4",
+      )}
       style={{ borderTopColor: color }}
     >
       <header className="flex items-baseline justify-between gap-2">
         <h3 className="font-brush text-base leading-none" style={{ color }}>
           {column.stage}
         </h3>
-        <span className="text-[11px] text-zinc-500">{column.count}</span>
+        <span className="text-[11px] text-[var(--muted-foreground)]">{column.count}</span>
       </header>
       <div className="flex flex-col gap-2">
         {column.items.map((card) => (
@@ -58,7 +66,7 @@ export function KanbanColumn<C extends KanbanCard>({ column, onOpenItem }: Kanba
               <ZineImage art={card.thumb} alt="" sizes="64px" />
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-xs text-zinc-200">{card.title}</span>
+              <span className="block truncate text-xs text-[var(--foreground)]">{card.title}</span>
               <span
                 className="mt-1 block text-[10px] tracking-widest"
                 style={{ color: defaultKindColors[card.type] ?? "#9ca3af" }}
@@ -70,7 +78,9 @@ export function KanbanColumn<C extends KanbanCard>({ column, onOpenItem }: Kanba
         ))}
       </div>
       {column.more > 0 && (
-        <p className="text-center text-[10px] tracking-widest text-zinc-600">+{column.more} MORE</p>
+        <p className="text-center text-[10px] tracking-widest text-[var(--muted-foreground)]">
+          +{column.more} MORE
+        </p>
       )}
     </section>
   );
