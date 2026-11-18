@@ -3,7 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import type { WorldPlateKey } from "@moonwitness/assets";
 import { FOUR_CORPUS_CONCORDANCE, FOUR_CORPUS_POLICY } from "@/data/empire-canon-codex";
+import { artPlateSrc } from "@/lib/art";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
@@ -95,7 +97,7 @@ export function FourScripturesSanctum({
                 <div>
                   <div className="relative mb-3 h-24 w-full overflow-hidden border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)]">
                     <Image
-                      src={`/art/story-plate-0${idx + 1}.webp`}
+                      src={artPlateSrc(`story-plate-0${idx + 1}` as WorldPlateKey)}
                       alt=""
                       fill
                       sizes="(max-width: 640px) 90vw, (max-width: 1023px) 45vw, 22vw"
@@ -159,7 +161,7 @@ export function FourScripturesSanctum({
             <div className="flex flex-col gap-2">
               <Link
                 href="/scriptures"
-                className="btn-luxe-secondary inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-white"
+                className="btn-luxe-secondary inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-[var(--dna-text)]"
               >
                 {locale === "id"
                   ? "BUKA STUDIO 4 KITAB & PENCARI AYAT ›"
@@ -169,7 +171,7 @@ export function FourScripturesSanctum({
                 <DnaButton
                   type="button"
                   onClick={onInspectCorpusDoor}
-                  className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-text)] uppercase hover:text-white cursor-pointer"
+                  className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-text)] uppercase hover:opacity-90 cursor-pointer"
                 >
                   INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
                 </DnaButton>

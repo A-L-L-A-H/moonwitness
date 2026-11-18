@@ -39,7 +39,7 @@ export function ControlLogin({ instanceName }: { instanceName?: string }) {
           <p className="text-[10px] tracking-[0.3em] text-[var(--muted-foreground)]">
             {(instanceName ?? "CONTROL PLANE").toUpperCase()}
           </p>
-          <h1 className="mt-1 font-brush text-4xl leading-tight text-white sm:text-5xl">
+          <h1 className="mt-1 font-brush text-4xl leading-tight text-[var(--foreground)] sm:text-5xl">
             ENTER <span className="text-[var(--primary)]">THE SHADOW</span>
           </h1>
           <p className="mt-3 text-sm leading-relaxed text-[var(--muted-foreground)]">

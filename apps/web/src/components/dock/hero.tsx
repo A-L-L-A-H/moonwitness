@@ -1,36 +1,49 @@
 "use client";
 
-import Image from "next/image";
-import { artSrc } from "@/lib/art";
-import { DistressedSticker, Grain } from "@moonwitness/ui";
+import {
+  CutoutArtwork,
+  DistressedSticker,
+  DnaBrandLogo,
+  Grain,
+  SkinArtworkFrame,
+  useSkin,
+} from "@moonwitness/ui";
 import { Splatter, Star4 } from "@moonwitness/ui/icons";
 
 export function DockHero({ visibleCount, total }: { visibleCount: number; total: number }) {
+  const { skin } = useSkin();
   return (
-    <div className="relative overflow-hidden border-b-2 border-[var(--border)] bg-[var(--ink)]">
+    <div className="relative overflow-hidden border-b-2 border-[var(--border)] bg-[var(--background)]">
       <Grain />
-      <Image
-        src={artSrc("dock-chronicle-hero")}
-        alt=""
-        fill
-        priority
-        quality={82}
-        className="object-cover object-[62%_45%]"
+      <SkinArtworkFrame
+        skin={skin}
+        artKey={skin === "default" ? "dock-chronicle-hero" : undefined}
+        eager
         sizes="(max-width: 1024px) 100vw, 80vw"
+        className="pointer-events-none absolute inset-0"
+        plateClassName="object-cover object-[62%_45%] opacity-60"
+        scrimClassName="bg-gradient-to-r from-[var(--background)]/95 via-[var(--background)]/70 to-[var(--background)]/25"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[color-mix(in_srgb,var(--ink)_95%,transparent)] via-[color-mix(in_srgb,var(--ink)_68%,transparent)] to-[color-mix(in_srgb,var(--ink)_22%,transparent)]" />
       <Splatter className="absolute -left-6 top-4 h-32 w-32 text-[var(--primary)] opacity-60" />
       <Star4 className="absolute right-[28%] top-8 hidden h-6 w-6 text-[var(--primary)] opacity-70 md:block" />
+      <CutoutArtwork
+        id="tape-reel-spools"
+        decorative
+        className="pointer-events-none absolute right-[18%] bottom-3 z-[2] hidden h-28 w-28 text-[var(--primary)] opacity-25 md:block"
+      />
       <div className="relative z-10 grid gap-6 px-4 py-10 sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div className="min-w-0">
+          <div className="mb-2 flex flex-wrap items-center gap-2.5">
+            <DnaBrandLogo id="dock-chronicle" variant="lockup" size={24} decorative />
+          </div>
           <p className="font-mono text-[11px] font-bold tracking-[0.2em] text-[var(--primary)]">
             ARCHIVE // PUBLIC RECORD
           </p>
-          <h1 className="mt-2 font-brush text-4xl leading-none text-[var(--paper)] drop-shadow-[3px_3px_0_rgba(0,0,0,0.8)] sm:text-6xl">
-            DOCK <span className="text-[var(--paper)]/70">//</span>{" "}
+          <h1 className="mt-2 font-brush text-4xl leading-none text-[var(--foreground)] sm:text-6xl">
+            DOCK <span className="text-[var(--muted-foreground)]">//</span>{" "}
             <span className="text-[var(--primary)]">TIMELINE</span> CHRONICLE
           </h1>
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-[var(--paper)]/90">
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-[var(--foreground)]/90">
             A public chronology of projects, stories, signals, and moments across the Empire.
             Different people. Same sky. Many stories.
           </p>

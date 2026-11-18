@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { LUMINOUS_NAMES_OF_ALLAH, TASBIH_PHRASES } from "@/data/remembrance-sanctuary";
 import type { WorldIdentifier } from "@/data/empire-registry";
+import { artPlateSrc } from "@/lib/art";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import {
   ScrollChapterReveal,
@@ -486,7 +487,7 @@ export function RemembranceSanctuary({
                 {/* Hand-crafted Obsidian & Gold-Leaf Nonagram Rosette Dial */}
                 <div className="pointer-events-none absolute inset-4 overflow-hidden rounded-full border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)] shadow-[0_0_54px_rgba(223,192,123,0.14),inset_0_0_36px_rgba(0,0,0,0.92)]">
                   <Image
-                    src="/art/nonagram-sanctuary-dial.webp"
+                    src={artPlateSrc("nonagram-sanctuary-dial")}
                     alt=""
                     fill
                     loading="eager"
@@ -630,7 +631,7 @@ export function RemembranceSanctuary({
                   <button
                     type="button"
                     onClick={() => onNavigateToWorld(selectedName.linkedWorldId)}
-                    className="btn-luxe-secondary px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-white cursor-pointer"
+                    className="btn-luxe-secondary px-4 py-1.5 font-mono text-[10px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-[var(--dna-text)] cursor-pointer"
                   >
                     {selectedName.worldLabel} &rsaquo;
                   </button>
@@ -899,7 +900,7 @@ export function RemembranceSanctuary({
                       <button
                         type="button"
                         onClick={() => void removeJournalNote(note.id)}
-                        className="shrink-0 font-mono text-[9px] text-[var(--dna-muted)] hover:text-white cursor-pointer"
+                        className="shrink-0 font-mono text-[9px] text-[var(--dna-muted)] hover:text-[var(--dna-text)] cursor-pointer"
                       >
                         DELETE
                       </button>
@@ -920,7 +921,7 @@ export function RemembranceSanctuary({
               <button
                 type="button"
                 onClick={exportPrivateMuhasabahJson}
-                className="btn-luxe-secondary px-3 py-1 text-[var(--dna-accent)] hover:text-white cursor-pointer"
+                className="btn-luxe-secondary px-3 py-1 text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
               >
                 EXPORT JSON
               </button>

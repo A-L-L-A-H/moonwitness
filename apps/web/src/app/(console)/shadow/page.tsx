@@ -1,18 +1,25 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowRight, Crown, EyeIcon, Smiley, Splatter, Star4 } from "@moonwitness/ui/icons";
-import { Grain, Tape, ZineInput } from "@moonwitness/ui";
+import {
+  CutoutArtwork,
+  DnaBrandLogo,
+  Grain,
+  SkinArtworkFrame,
+  Tape,
+  ZineInput,
+  useSkin,
+} from "@moonwitness/ui";
 import { authenticate } from "@/lib/auth";
 import { startMidLogin } from "@/lib/mid-oidc";
 import { notifySessionChange } from "@/lib/session";
-import { artSrc } from "@/lib/art";
 
 export default function ShadowPage() {
   const router = useRouter();
+  const { skin } = useSkin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -56,24 +63,25 @@ export default function ShadowPage() {
   }
 
   return (
-    <div className="relative min-h-screen overflow-x-clip">
+    <div className="relative min-h-screen overflow-x-clip bg-[var(--background)]">
       <Grain />
-      <Image
-        src={artSrc("city-shadow")}
-        alt=""
-        fill
-        priority
-        className="object-cover object-[65%_center]"
+      <SkinArtworkFrame
+        skin={skin}
+        artKey={skin === "default" ? "city-shadow" : undefined}
+        showCutout
+        eager
         sizes="100vw"
+        className="pointer-events-none absolute inset-0"
+        plateClassName="object-cover object-[65%_center] opacity-60"
+        scrimClassName="bg-gradient-to-r from-[var(--background)]/92 via-[var(--background)]/62 to-[var(--background)]/25"
       />
-      <div className="absolute inset-0 bg-gradient-to-r from-[rgba(11,11,16,0.92)] via-[rgba(11,11,16,0.55)] to-[rgba(11,11,16,0.25)]" />
       <Splatter className="absolute -left-8 top-20 h-48 w-48 text-[var(--primary)] opacity-60" />
       <Star4 className="absolute right-[16%] top-40 hidden h-10 w-10 text-[var(--primary)] lg:block" />
 
       {/* top bar */}
       <header className="relative z-10 flex min-h-16 items-center justify-between gap-2 border-b border-[var(--border)] bg-[var(--card)]/90 px-4 py-2 backdrop-blur-sm sm:px-8">
         <Link href="/" className="flex min-w-0 items-center gap-2 max-lg:min-h-11">
-          <Crown className="h-5 w-8 shrink-0 text-[var(--primary)]" />
+          <DnaBrandLogo id="shadow-frequency" variant="mark" size={26} decorative />
           <span className="font-brush text-lg text-[var(--foreground)] sm:text-2xl">
             MOON<span className="text-[var(--primary)]">WITNESS</span>
           </span>
@@ -109,7 +117,18 @@ export default function ShadowPage() {
           <div className="zine-card-rough relative p-7 sm:p-9">
             <Tape className="-top-3 left-10 -rotate-6" />
             <Tape className="-top-2 right-8 rotate-3" />
-            <Crown className="absolute right-6 top-6 h-6 w-9 rotate-12 text-[var(--primary)]" />
+            <DnaBrandLogo
+              id="shadow-frequency"
+              variant="stamp"
+              size={38}
+              className="absolute right-6 top-6 rotate-6"
+              decorative
+            />
+            <CutoutArtwork
+              id="cipher-wheel"
+              decorative
+              className="pointer-events-none absolute -right-4 bottom-4 h-24 w-24 text-[var(--primary)]/10"
+            />
 
             <h1 className="font-brush text-4xl leading-tight text-[var(--foreground)] sm:text-5xl">
               ENTER <span className="text-[var(--primary)]">THE SHADOW</span>

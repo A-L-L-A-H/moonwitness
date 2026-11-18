@@ -58,6 +58,15 @@ describe("Topbar", () => {
     const skinBtn = screen.getByRole("button", { name: /Switch skin \(riot\)/i });
     fireEvent.click(skinBtn);
     expect(screen.getByRole("button", { name: /Switch skin \(technical\)/i })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText("Select skin preset"), {
+      target: { value: "sanctuary" },
+    });
+    expect(screen.getByRole("button", { name: /Switch skin \(sanctuary\)/i })).toBeInTheDocument();
+
+    const themeBtn = screen.getByRole("button", { name: /Switch to light theme/i });
+    fireEvent.click(themeBtn);
+    expect(screen.getByRole("button", { name: /Switch to dark theme/i })).toBeInTheDocument();
   });
 
   it("supports optional MoonWitness ID sign-in and signed-in @username state", () => {

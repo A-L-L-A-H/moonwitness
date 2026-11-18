@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { SatelliteDishArt, SkinOrnament } from "@moonwitness/ui";
+import { CutoutArtwork, SatelliteDishArt, SkinOrnament } from "@moonwitness/ui";
 import { SnmpProbe } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";
@@ -45,7 +45,12 @@ function SnmpMonitor() {
       search={{ value: query, onChange: setQuery, placeholder: "Search devices…" }}
     >
       <main className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-8">
-        <header className="border-b-2 border-[var(--border)] pb-5">
+        <header className="relative overflow-hidden border-b-2 border-[var(--border)] pb-5">
+          <CutoutArtwork
+            id="patch-cable-jack"
+            decorative
+            className="pointer-events-none absolute right-2 top-1 hidden h-24 w-24 text-[var(--primary)]/15 sm:block"
+          />
           <div className="flex flex-wrap items-center gap-2">
             <SnmpProbe className="h-4 w-4 text-[var(--primary)]" />
             <p className="font-mono text-[10px] tracking-[0.3em] text-[var(--primary)]">

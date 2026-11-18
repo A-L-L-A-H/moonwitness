@@ -68,7 +68,7 @@ export function EventDetailPanel({
       )}
 
       {(canEdit || canDelete || (historyEntries && historyEntries.length > 0)) && (
-        <div className="space-y-3 border-t-2 border-[var(--border)] bg-black/25 p-4">
+        <div className="space-y-3 border-t-2 border-[var(--border)] bg-[var(--muted)]/55 p-4">
           {(canEdit || canDelete) && (
             <div className="flex flex-wrap gap-2">
               {canEdit && onArchive && (

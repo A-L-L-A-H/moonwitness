@@ -35,7 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html:
-              'try { const saved = localStorage.getItem("mw-memory-theme"); document.documentElement.dataset.theme = saved === "light" ? "light" : "dark"; const validSkins = ["archive","technical","editorial","riot","cinema","console","sanctuary","brutalist","noir","kinetic"]; const savedSkin = localStorage.getItem("mw-memory-skin"); document.documentElement.dataset.skin = validSkins.includes(savedSkin) ? savedSkin : "archive"; } catch { document.documentElement.dataset.theme = "dark"; document.documentElement.dataset.skin = "archive"; }',
+              'try { const saved = localStorage.getItem("mw-memory-theme"); document.documentElement.dataset.theme = saved === "light" ? "light" : "dark"; const aliases = { cinema: "default", console: "transmission" }; const validSkins = ["default","editorial","technical","riot","archive","transmission","sanctuary","brutalist","noir","kinetic"]; const rawSkin = localStorage.getItem("mw-memory-skin"); const mapped = aliases[rawSkin] || rawSkin; document.documentElement.dataset.skin = validSkins.includes(mapped) ? mapped : "default"; } catch { document.documentElement.dataset.theme = "dark"; document.documentElement.dataset.skin = "default"; }',
           }}
         />
         {children}

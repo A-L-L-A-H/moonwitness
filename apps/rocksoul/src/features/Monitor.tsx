@@ -1,9 +1,6 @@
 import React from "react";
 import {
   Activity,
-  ArrowUpRight,
-  Cpu,
-  ExternalLink,
   FolderGit2,
   GitBranch,
   HardDrive,
@@ -12,6 +9,8 @@ import {
   ShieldCheck,
   Square,
 } from "lucide-react";
+import { BarChart, RadialGauge } from "@moonwitness/ui";
+import { ArrowUpRight, ExternalLink, Server } from "@moonwitness/ui/icons";
 import { FOUR_ENTRY_DOORS, PRIME_CODE_AXIOMS, SUPREME_IDENTITY } from "@moonwitness/canon";
 import { thumbSignalUrl } from "../assets/art";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
@@ -181,11 +180,57 @@ export default function Monitor({
         </article>
       </div>
 
+      <section className="riot-panel" aria-label="Ecosystem visual telemetry" style={{ marginBottom: "14px" }}>
+        <div className="panel-heading cream">
+          <span>
+            <Server size={15} /> LIVE TELEMETRY GAUGES &amp; DISTRIBUTION
+          </span>
+          <span>@MOONWITNESS/UI CHARTS</span>
+        </div>
+        <div
+          className="monitor-panel-body"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "auto auto minmax(180px, 1fr)",
+            gap: "16px",
+            alignItems: "center",
+          }}
+        >
+          <RadialGauge
+            value={onlineServices}
+            max={Math.max(1, services.length)}
+            size={104}
+            label="STACK ONLINE"
+            colorVar="var(--color-lime)"
+            ariaLabel="Stack services online ratio"
+          />
+          <RadialGauge
+            value={Math.round(primaryDisk?.used_pct ?? 0)}
+            max={100}
+            size={104}
+            label={`${primaryDisk?.drive ?? "C:"} USED`}
+            unit="%"
+            colorVar="var(--color-orange)"
+            ariaLabel="Primary disk capacity used"
+          />
+          <BarChart
+            height={110}
+            ariaLabel="Overseer telemetry counters"
+            data={[
+              { label: "ONLINE", value: onlineServices, colorVar: "var(--color-lime)" },
+              { label: "DIRTY", value: totalDirty, colorVar: "var(--color-orange)" },
+              { label: "SESS", value: sessions.length, colorVar: "var(--color-purple)" },
+              { label: "PLANS", value: plans.length, colorVar: "var(--color-pink)" },
+            ]}
+          />
+        </div>
+      </section>
+
       <div className="monitor-grid">
         <section className="riot-panel monitor-panel-wide">
           <div className="panel-heading cream">
             <span>
-              <Cpu size={15} /> LIVE GIT WORKTREES &amp; AGENT CHANGES
+              <Server size={15} /> LIVE GIT WORKTREES &amp; AGENT CHANGES
             </span>
             <span>READ-ONLY SNAPSHOT</span>
           </div>

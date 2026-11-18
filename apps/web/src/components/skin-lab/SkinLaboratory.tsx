@@ -22,6 +22,7 @@ import {
   EmptyStateArt,
   LoadingConstellation,
   ScrollArea,
+  SkinArtworkFrame,
   SkinBackdrop,
   SkinMatrixCompare,
   SkinOrnament,
@@ -269,7 +270,7 @@ export function SkinLaboratory() {
                 onClick={() => setSelectedDnaId(world.id)}
                 className={`min-h-16 border-2 p-3 text-left transition-all ${
                   active
-                    ? "border-white shadow-[0_0_20px_rgba(255,255,255,0.12)]"
+                    ? "border-[var(--foreground)] shadow-[0_0_20px_rgba(255,255,255,0.12)]"
                     : "border-[var(--line)] opacity-85 hover:opacity-100"
                 }`}
                 style={{
@@ -317,8 +318,15 @@ export function SkinLaboratory() {
                   {activeWorld.metaphor} — {activeWorld.shapeLanguage}
                 </p>
               </div>
-              <div className="w-full sm:w-72 shrink-0">
+              <div className="w-full sm:w-72 shrink-0 space-y-2">
                 <WorldArtwork dnaId={activeWorld.id} />
+                <SkinArtworkFrame
+                  skin={activeSkin}
+                  dnaId={activeWorld.id}
+                  preferDnaArtwork
+                  sizes="288px"
+                  className="h-24 w-full border border-[var(--border)]"
+                />
               </div>
             </div>
 
