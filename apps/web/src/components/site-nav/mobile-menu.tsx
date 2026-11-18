@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@moonwitness/ui";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import type { NavLink } from "./links";
 
 export interface MobileMenuProps {
@@ -29,6 +30,12 @@ export function MobileMenu({ links, active, onSelect, onClose }: MobileMenuProps
           {link.label}
         </a>
       ))}
+      <SanctuaryGateLink
+        onClick={onClose}
+        className="flex min-h-11 items-center px-2 py-2.5 font-brush text-lg text-[var(--yellow)]"
+      >
+        A-L-L-A-H
+      </SanctuaryGateLink>
       <Link href="/shadow" onClick={onClose} className="mt-2 inline-block">
         <Button className="px-5 py-2.5 text-base">JOIN THE CREW →</Button>
       </Link>

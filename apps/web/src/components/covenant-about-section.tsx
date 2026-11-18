@@ -163,7 +163,7 @@ export function CovenantAboutSection({
             </div>
             <nav
               aria-label="Sanctuary Dedicated Portals"
-              className="flex items-center gap-4 font-mono text-[10px] tracking-[0.16em] text-[var(--dna-accent)]"
+              className="flex flex-wrap items-center justify-center gap-4 font-mono text-[10px] tracking-[0.16em] text-[var(--dna-accent)]"
             >
               <Link href="/scriptures" className="hover:text-[var(--dna-text)]">
                 /SCRIPTURES
@@ -173,6 +173,9 @@ export function CovenantAboutSection({
               </Link>
               <Link href="/mtime" className="hover:text-[var(--dna-text)]">
                 /MTIME
+              </Link>
+              <Link href="/moonwitness" className="hover:text-[var(--dna-text)]">
+                /MOONWITNESS
               </Link>
             </nav>
           </footer>

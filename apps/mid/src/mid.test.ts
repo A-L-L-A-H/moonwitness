@@ -914,4 +914,24 @@ describe("@moonwitness/mid OIDC & SSO Worker", () => {
     expect(authCols.rows.map((row) => row.name)).toContain("resource");
     expect(refreshCols.rows.map((row) => row.name)).toContain("resource");
   });
+
+  it("allows localhost:3000 and rejects retired localhost:3003 redirect_uri for allah-sanctuary", async () => {
+    const challenge = await sha256Base64Url("allah_sanctuary_local_pkce_verifier_0123456789");
+    const allowedLocal = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=allah-sanctuary&redirect_uri=${encodeURIComponent("http://localhost:3000/auth/callback")}&response_type=code&scope=openid%20profile&state=st_allah_local&nonce=nc_allah_local&code_challenge=${challenge}&code_challenge_method=S256`,
+      ),
+      env,
+    );
+    expect(allowedLocal.status).toBe(200);
+    expect(await allowedLocal.text()).toContain("ALLAH Sanctuary");
+
+    const rejectedLegacyPort = await handler(
+      new Request(
+        `https://id.moonwitness.biz.id/authorize?client_id=allah-sanctuary&redirect_uri=${encodeURIComponent("http://localhost:3003/auth/callback")}&response_type=code&scope=openid%20profile&state=st_allah_old&nonce=nc_allah_old&code_challenge=${challenge}&code_challenge_method=S256`,
+      ),
+      env,
+    );
+    expect(rejectedLegacyPort.status).toBe(400);
+  });
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import NextImage from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   createAvatar,
@@ -338,13 +339,14 @@ export function IdLab() {
                       "radial-gradient(circle at 30% 20%, rgba(46,168,255,0.16), transparent 55%), radial-gradient(circle at 75% 80%, rgba(255,45,120,0.14), transparent 55%)",
                   }}
                 />
-                <img
-                  ref={previewRef}
+                <NextImage
+                  ref={previewRef as React.Ref<HTMLImageElement>}
                   key={`${effectiveSeed}-${palette}-${background}-${radius}-${halftone}-${crown}-${moon}-${tape}`}
                   src={`data:image/svg+xml;utf8,${encodeURIComponent(svg)}`}
                   alt={`Preview avatar ${effectiveSeed}`}
                   width={size}
                   height={size}
+                  unoptimized
                   className="avatar-pop relative drop-shadow-[0_10px_24px_rgba(0,0,0,0.6)]"
                   style={{ width: size, height: size }}
                   draggable={false}

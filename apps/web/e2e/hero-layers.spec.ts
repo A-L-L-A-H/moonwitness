@@ -14,7 +14,7 @@ test("runtime timeline has exact hero-only targets and CTA is usable during intr
       ).detail;
     });
   });
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
   await expect
     .poll(() =>
       page.evaluate(
@@ -44,7 +44,7 @@ test("runtime timeline has exact hero-only targets and CTA is usable during intr
 
 test("hero images use Next img descriptors and one responsive LCP preload", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   const root = page.locator("[data-hero-root]");
   await expect(root.locator("img")).toHaveCount(3);
   const sources = {
@@ -81,7 +81,7 @@ test("hero images use Next img descriptors and one responsive LCP preload", asyn
 
 test("initial reduced motion leaves the server-rendered hero fully usable", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto("/");
+  await page.goto("/moonwitness");
   for (const selector of [
     "[data-hero-headline]",
     "[data-hero-character-reveal]",
@@ -98,7 +98,7 @@ for (const width of [320, 390, 430, 768, 1024, 1440]) {
   test(`hero separate layers and in-flow face-safe content at ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
     await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
+    await page.goto("/moonwitness");
     const root = page.locator("[data-hero-root]");
     await expect(root).toHaveCount(1);
     await expect(root.locator("img")).toHaveCount(3);
@@ -138,7 +138,7 @@ test("CTA is keyboard usable from render without JavaScript enhancement", async 
     viewport: { width: 1440, height: 900 },
   });
   const page = await context.newPage();
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
   const cta = page.locator("[data-hero-cta]");
   await expect(cta).toBeVisible();
   await cta.focus();
@@ -151,7 +151,7 @@ test("CTA is keyboard usable from render without JavaScript enhancement", async 
 test("live reduction ends scoped intro, never replays, and unmount stops detached writes", async ({
   page,
 }) => {
-  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
   const root = page.locator("[data-hero-root]");
   await expect(root).toHaveCount(1);
   await page.emulateMedia({ reducedMotion: "reduce" });

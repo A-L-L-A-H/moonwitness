@@ -40,6 +40,7 @@ describe("EmpireOfLightExperience centralized UI integration", () => {
 
     expect(html).toContain('data-dna="01-imperium-lumen"');
     expect(html).toContain("mw-site-nav");
+    expect(html).toContain('href="/moonwitness"');
     expect(html).toContain("mw-illustrated-hero");
     expect(html).toContain("mw-world-explorer");
     expect(html.match(/mw-world-tile/g)?.length ?? 0).toBeGreaterThanOrEqual(9);

@@ -9,6 +9,7 @@ import { useSavedAvatar } from "@/lib/avatar-store";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { SkinSwitcher } from "@/components/skin-switcher";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { activeByPath, navHref, navItems, operationsNavItems } from "./nav-items";
 import { Notifications } from "./notifications";
 import { ProfileMenu } from "./profile-menu";
@@ -135,7 +136,21 @@ export function ConsoleShellAdapter({
             <strong className="text-[var(--blue)]">OPERATIONS CONSOLE</strong>
             <div>WEB → API → ARSY PLANE</div>
           </div>
-        ) : undefined
+        ) : (
+          <div className="flex flex-col gap-1.5 font-mono text-[10px] tracking-wider">
+            <SanctuaryGateLink className="flex min-h-9 items-center justify-between border border-[var(--line)] px-2.5 py-1 text-[var(--yellow)] transition-colors hover:border-[var(--yellow)] hover:text-white">
+              <span>IMPERIUM GATE</span>
+              <span aria-hidden="true">↗</span>
+            </SanctuaryGateLink>
+            <Link
+              href="/moonwitness"
+              className="flex min-h-9 items-center justify-between border border-[var(--line)] px-2.5 py-1 text-[var(--paper)] transition-colors hover:border-[var(--pink)] hover:text-white"
+            >
+              <span>MOONWITNESS</span>
+              <span aria-hidden="true">↗</span>
+            </Link>
+          </div>
+        )
       }
       commandLeft={
         operations ? "MOONWITNESS OPERATIONS /// HOST, NETWORK & STORAGE PLANE" : FOOTER_LEFT

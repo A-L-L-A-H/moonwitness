@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Crown, SearchIcon, GlobeIcon } from "@moonwitness/ui/icons";
+import { Crown, GlobeIcon, Menu, SearchIcon, X } from "@moonwitness/ui/icons";
 import { Button } from "@moonwitness/ui";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { links } from "./links";
 import { MobileMenu } from "./mobile-menu";
 import { SearchDialog } from "./search-dialog";
@@ -58,7 +59,7 @@ export function SiteNav() {
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
           <Link
-            href="/"
+            href="/moonwitness"
             className="flex items-center gap-2 max-lg:min-h-11"
             aria-label="Moonwitness home"
           >
@@ -84,6 +85,9 @@ export function SiteNav() {
                 {link.label}
               </a>
             ))}
+            <SanctuaryGateLink className="whitespace-nowrap px-2.5 py-1.5 font-brush text-sm tracking-wider text-[var(--yellow)] transition-colors hover:text-white xl:px-3">
+              A-L-L-A-H
+            </SanctuaryGateLink>
           </nav>
 
           <div className="ml-auto flex items-center gap-2">
@@ -114,20 +118,7 @@ export function SiteNav() {
               aria-label="Toggle menu"
               aria-expanded={menuOpen}
             >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              >
-                {menuOpen ? (
-                  <path d="M5 5 L19 19 M19 5 L5 19" />
-                ) : (
-                  <path d="M4 7 L20 7 M4 12 L20 12 M4 17 L20 17" />
-                )}
-              </svg>
+              {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>

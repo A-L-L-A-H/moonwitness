@@ -6,8 +6,7 @@ Consolidated monorepo for the A-L-L-A-H / MoonWitness / ROCKSOUL ecosystem: Turb
 
 ```text
 apps/
-  a-l-l-a-h/            Next.js Empire of the Light Frontier & Canon Codex (port 3003)
-  web/                  Next.js App Router — MoonWitness Universe & Operations (port 3000)
+  web/                  Next.js App Router — A-L-L-A-H Sanctuary & MoonWitness Operations (port 3000)
   api/                  Fastify REST API, SQLite/libSQL, addon host & proxies (port 3002)
   rocksoul/             ROCKSOUL DX desktop workbench (Tauri 2 + React 19 + SQLite, port 1420)
   memory/               How U Remind Me — FastAPI + SQLite FTS5 + LanceDB vault (8000 / 3005 / 9000)
@@ -60,9 +59,8 @@ Butuh Docker Engine/Desktop dengan Docker Compose. Sebelum menyalakan stack prod
 docker compose up --build
 ```
 
-- Web (`@moonwitness/web`): <http://localhost:3000> (API rewrite ke `http://api:3002`)
+- Web (`@moonwitness/web`): <http://localhost:3000> (A-L-L-A-H Sanctuary `/` & MoonWitness Console `/moonwitness`, API rewrite ke `http://api:3002`)
 - API (`@moonwitness/api`): <http://localhost:3002/api/v1/healthz> (SQLite di volume `moonwitness-data`)
-- A-L-L-A-H Frontier (`@moonwitness/a-l-l-a-h`): <http://localhost:3003>
 
 Hentikan dengan `Ctrl+C` atau `docker compose down` (volume `moonwitness-data` dipertahankan), atau `docker compose down -v` untuk menghapus volume.
 

@@ -174,6 +174,12 @@ describe("ConsoleShellAdapter", () => {
       container.querySelector('nav a[href="/mission-control?module=story-forge"]')?.textContent,
     ).toBe("Story Studio");
     expect(container.querySelector('nav a[href="/dock"]')?.textContent).toBe("Archive");
+    expect(container.querySelector('.hud-rail-footer a[href="/"]')?.textContent).toContain(
+      "IMPERIUM GATE",
+    );
+    expect(
+      container.querySelector('.hud-rail-footer a[href="/moonwitness"]')?.textContent,
+    ).toContain("MOONWITNESS");
   });
 
   it("closes notifications on rail navigation, including keyboard-generated clicks, and calls onNavigate", async () => {

@@ -85,7 +85,7 @@ const FIRST_PARTY_CLIENTS = [
   {
     clientId: "allah-sanctuary",
     name: "ALLAH Sanctuary",
-    redirectUris: ["https://a-l-l-a-h.com/auth/callback", "http://localhost:3003/auth/callback"],
+    redirectUris: ["https://a-l-l-a-h.com/auth/callback", "http://localhost:3000/auth/callback"],
     allowedScopes: ["openid", "profile", "email", "offline_access"],
     clientType: "public",
     firstParty: 1,

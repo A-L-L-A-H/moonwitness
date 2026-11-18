@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { OctagramMandalaIcon } from "./sacred-icons";
 import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
@@ -21,12 +22,13 @@ export function SiteSubpageHeader({
     },
     { href: "/codex", id: "codex", label: "CODEX DOORS" },
     { href: "/mtime", id: "mtime", label: "M-TIME · MĪQĀT" },
+    { href: "/moonwitness", id: "moonwitness", label: "MOONWITNESS" },
   ] as const;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)]/92 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-8">
-        <Link href="/" className="flex min-h-[44px] items-center gap-3 focus:outline-none">
+        <SanctuaryGateLink className="flex min-h-[44px] items-center gap-3 focus:outline-none">
           <OctagramMandalaIcon className="h-8 w-8 shrink-0" />
           <div className="flex flex-col">
             <span className="font-monument text-sm tracking-[0.16em] text-[var(--dna-text)]">
@@ -36,21 +38,33 @@ export function SiteSubpageHeader({
               EMPIRE OF THE LIGHT
             </span>
           </div>
-        </Link>
+        </SanctuaryGateLink>
 
         <nav aria-label="Sanctuary Portal Links" className="flex flex-wrap items-center gap-2">
           {links.map((item) => {
             const isCurrent = item.id === activeRoute;
+            const linkClass = `btn-luxe-secondary inline-flex items-center px-3.5 py-1.5 font-mono text-[10px] tracking-[0.16em] uppercase ${
+              isCurrent
+                ? "text-[var(--dna-text)]"
+                : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
+            }`;
+            if (item.id === "home") {
+              return (
+                <SanctuaryGateLink
+                  key={item.id}
+                  data-active={isCurrent ? "true" : "false"}
+                  className={linkClass}
+                >
+                  {item.label}
+                </SanctuaryGateLink>
+              );
+            }
             return (
               <Link
                 key={item.id}
                 href={item.href}
                 data-active={isCurrent ? "true" : "false"}
-                className={`btn-luxe-secondary inline-flex items-center px-3.5 py-1.5 font-mono text-[10px] tracking-[0.16em] uppercase ${
-                  isCurrent
-                    ? "text-[var(--dna-text)]"
-                    : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
-                }`}
+                className={linkClass}
               >
                 {item.label}
               </Link>

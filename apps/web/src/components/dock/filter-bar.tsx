@@ -1,5 +1,7 @@
 "use client";
 
+import { Grid, List } from "@moonwitness/ui/icons";
+
 import type { Era, EraId } from "@moonwitness/types";
 import { cn } from "@moonwitness/ui";
 
@@ -95,15 +97,7 @@ export function FilterBar({
               view === "grid" ? "bg-[var(--pink)] text-white" : "text-zinc-400 hover:text-white",
             )}
           >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M4 4 L10 4 L10 10 L4 10 Z M14 4 L20 4 L20 10 L14 10 Z M4 14 L10 14 L10 20 L4 20 Z M14 14 L20 14 L20 20 L14 20 Z" />
-            </svg>
+            <Grid className="h-4 w-4" />
           </button>
           <button
             type="button"
@@ -115,16 +109,7 @@ export function FilterBar({
               view === "list" ? "bg-[var(--pink)] text-white" : "text-zinc-400 hover:text-white",
             )}
           >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            >
-              <path d="M4 6 L20 6 M4 12 L20 12 M4 18 L20 18" />
-            </svg>
+            <List className="h-4 w-4" />
           </button>
         </div>
       </div>

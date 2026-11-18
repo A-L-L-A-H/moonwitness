@@ -83,6 +83,7 @@ export {
   Zap,
   Heart,
   Star,
+  Sun,
   Flag,
   Bookmark,
   Tag,
