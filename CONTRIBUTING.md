@@ -9,14 +9,15 @@ pnpm hooks:install         # optional: pre-push branch guard + gate
 pnpm gate:doctor           # confirms toolchain, git identity, remote, branch
 ```
 
-Work happens on `dev`. Never commit directly to `main` or `master` — the remote rejects it and the
-local gate refuses to run there. See [docs/engineering/BRANCHING.md](docs/engineering/BRANCHING.md).
+Work happens via short-lived ephemeral branches off `dev` merged via PR. Only `dev` and `main`
+persist long-term — never leave merged work branches around and never commit directly to `main` or
+`master`. See [docs/engineering/BRANCHING.md](docs/engineering/BRANCHING.md).
 
 ## The loop
 
 ```sh
 git switch dev
-git pull --ff-only
+git pull --ff-only origin dev
 git switch -c feat/your-change
 
 # edit
@@ -26,7 +27,10 @@ git add <specific files>
 git commit -m "feat(scope): short lowercase summary"
 
 pnpm gate:push             # full verification before it leaves your machine
-git push origin HEAD:refs/heads/dev
+git push -u origin feat/your-change
+gh pr create --base dev
+# after PR merges:
+pnpm branches:clean        # syncs dev and deletes merged local/remote tracking refs
 ```
 
 ## Commit messages
