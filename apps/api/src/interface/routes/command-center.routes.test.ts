@@ -12,14 +12,24 @@ vi.mock("../../middleware/auth", () => ({
       return reply.code(401).send({ error: "Not authenticated" });
     }
     const actor = request.headers["x-test-actor"] === "second" ? 2 : 1;
+    const role = (request.headers["x-test-role"] as "admin" | "editor" | "viewer") ?? "editor";
     request.user = {
       id: actor,
       username: actor === 2 ? "editor-two" : "creator-one",
       email: `actor${actor}@moonwitness.local`,
-      role: "editor",
+      role,
       displayName: `Actor ${actor}`,
     };
   },
+  requireRole:
+    (...allowedRoles: ("admin" | "editor" | "viewer")[]) =>
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const user = request.user;
+      if (!user) return reply.code(401).send({ error: "Not authenticated" });
+      if (!allowedRoles.includes(user.role)) {
+        return reply.code(403).send({ error: "Forbidden: insufficient permissions" });
+      }
+    },
 }));
 
 describe("command center persistence routes", () => {
