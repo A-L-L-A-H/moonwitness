@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { z } from "zod";
 import type { FastifyInstance } from "fastify";
-import { createActorContext } from "@moonwitness/orm";
 import {
   defaultFailClosedAuthBridge,
+  resolveActorContextFromBridge,
   type AddonDefinition,
   type AddonManifestInput,
   type BaseAddonAuthBridge,
@@ -122,7 +122,7 @@ export function createEpistemicAddon(
           const inputJson = JSON.stringify(parsed.data);
           const outputJson = JSON.stringify(output);
           const digest = createHash("sha256").update(inputJson).digest("hex");
-          const actor = createActorContext(auth.getActorId(request), "api", request.id);
+          const actor = resolveActorContextFromBridge(auth, request);
           const saved = await epistemicComputationModel.repository.create(
             {
               engine: parsed.data.engine,

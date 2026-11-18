@@ -1,10 +1,13 @@
 import type { FastifyInstance } from "fastify";
-import type {
-  AddonDefinition,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  defaultFailClosedAuthBridge,
+  resolveActorTenantFromBridge,
+  type AddonDefinition,
+  type AddonManifestInput,
+  type BaseAddonAuthBridge,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import {
@@ -110,8 +113,11 @@ export const canonLoreMenus: IrMenuInput[] = [
   },
 ];
 
-export function createCanonLoreAddon(options: { prefix?: string } = {}): AddonDefinition {
+export function createCanonLoreAddon(
+  options: { prefix?: string; auth?: BaseAddonAuthBridge } = {},
+): AddonDefinition {
   const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
 
   return {
     manifest: canonLoreManifest,
@@ -126,11 +132,12 @@ export function createCanonLoreAddon(options: { prefix?: string } = {}): AddonDe
     views: canonLoreViews,
     menus: canonLoreMenus,
     registerRoutes: async (scope: FastifyInstance) => {
-      scope.get(`${prefix}/canon/overview`, async () => {
+      scope.get(`${prefix}/canon/overview`, async (request) => {
+        const tenantId = resolveActorTenantFromBridge(auth, request);
         const [codexCount, entityCount, episodeCount] = await Promise.all([
-          canonCodexModel.repository.count(),
-          canonEntityModel.repository.count(),
-          canonEpisodeModel.repository.count(),
+          canonCodexModel.repository.count({}, { tenantId }),
+          canonEntityModel.repository.count({}, { tenantId }),
+          canonEpisodeModel.repository.count({}, { tenantId }),
         ]);
         return { codexCount, entityCount, episodeCount };
       });

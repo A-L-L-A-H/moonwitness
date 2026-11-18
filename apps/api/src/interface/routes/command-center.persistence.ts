@@ -6,7 +6,7 @@ import {
   importLegacyCommandCenter,
   workflowModel,
 } from "@moonwitness/addons/command-center";
-import { listAuditLogs, tryRecordAuditLog } from "@moonwitness/addons/audit";
+import { listAuditLogs } from "@moonwitness/addons/audit";
 
 export interface CommandCenterFeedItem {
   time: string;
@@ -259,7 +259,6 @@ export async function createCommandCenterWorkflow(
 ): Promise<PersistedWorkflow> {
   await seedActorDefaultsIfEmpty(actorId);
   const parsed = createWorkflowInputSchema.parse(input);
-  const now = new Date().toISOString();
   const id = `wf-${randomUUID()}`;
 
   const existing = await workflowModel.repository.find(
@@ -282,25 +281,6 @@ export async function createCommandCenterWorkflow(
     },
     actor,
   );
-  try {
-    await tryRecordAuditLog({
-      domain: "command-center",
-      entity: "workflow",
-      entityId: id,
-      action: "CREATE",
-      actor,
-      actorRole: null,
-      correlationId: actor.requestId ?? null,
-      requestPath: null,
-      outcome: "success",
-      before: null,
-      after: { id, name: parsed.name, status: parsed.status },
-      metadata: null,
-      occurredAt: now,
-    });
-  } catch {
-    // audit logging optional in isolated unit tests
-  }
 
   return {
     id,
@@ -332,29 +312,8 @@ export async function transitionCommandCenterWorkflow(
     throw error;
   }
 
-  const now = new Date().toISOString();
   const actor = createActorContext(actorId, "api");
   await workflowModel.repository.update(row.id, { workflow_status: nextStatus }, actor);
-
-  try {
-    await tryRecordAuditLog({
-      domain: "command-center",
-      entity: "workflow",
-      entityId: workflowId,
-      action: "UPDATE",
-      actor,
-      actorRole: null,
-      correlationId: actor.requestId ?? null,
-      requestPath: null,
-      outcome: "success",
-      before: { status: current },
-      after: { status: nextStatus },
-      metadata: null,
-      occurredAt: now,
-    });
-  } catch {
-    // audit logging optional in isolated unit tests
-  }
 
   return {
     id: row.workflow_key,
@@ -411,25 +370,5 @@ export async function dismissCommandCenterAlert(
   const now = new Date().toISOString();
   const actor = createActorContext(actorId, "api");
   await alertModel.repository.update(existing.id, { dismissed: true, dismissed_at: now }, actor);
-
-  try {
-    await tryRecordAuditLog({
-      domain: "command-center",
-      entity: "alert",
-      entityId: alertId,
-      action: "UPDATE",
-      actor,
-      actorRole: null,
-      correlationId: actor.requestId ?? null,
-      requestPath: null,
-      outcome: "success",
-      before: { dismissed: false },
-      after: { dismissed: true },
-      metadata: null,
-      occurredAt: now,
-    });
-  } catch {
-    // audit logging optional in isolated unit tests
-  }
   return true;
 }

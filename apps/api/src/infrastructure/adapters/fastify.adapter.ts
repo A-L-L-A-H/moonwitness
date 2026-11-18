@@ -45,6 +45,7 @@ import {
   ensureAuthSchema,
   seedBootstrapAdmin,
 } from "@moonwitness/addons/auth";
+import { attachAuditOutboxSubscriber } from "@moonwitness/addons/audit";
 import { midFastifyPlugin } from "@moonwitness/mid";
 
 export interface BootstrapOptions {
@@ -178,6 +179,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   await initializeRiotAiPersistence();
   if (!options.authExternallyMounted) {
     await ensureAuthSchema();
+    attachAuditOutboxSubscriber();
     await seedBootstrapAdmin();
   }
   if (!options.externallyMountedAddons) {

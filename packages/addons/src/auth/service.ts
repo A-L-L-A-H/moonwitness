@@ -1,5 +1,5 @@
 import { createActorContext, getDb, syncModels, SYSTEM_ACTOR } from "@moonwitness/orm";
-import { auditLogModel, tryRecordAuditLog } from "../audit";
+import { auditLogModel, tryRecordAuditLog } from "../audit/index.js";
 import { authOAuthTokenModel, authSessionModel, authUserModel } from "./models.js";
 import { hashAuthPassword, verifyAuthPassword } from "./passwords.js";
 
@@ -281,22 +281,6 @@ export async function createUser(input: CreateAuthUserInput): Promise<AuthUserPu
     },
     actor,
   );
-  await tryRecordAuditLog({
-    domain: "identity",
-    entity: "user",
-    entityId: created.id,
-    action: "CREATE",
-    actor,
-    outcome: "success",
-    after: {
-      id: created.id,
-      username: created.username,
-      email: created.email,
-      role: created.role,
-      displayName: created.display_name,
-    },
-    occurredAt: new Date().toISOString(),
-  });
   return {
     id: created.id,
     username: created.username,
@@ -385,18 +369,6 @@ export async function updateUserRole(
   }
   const actor = createActorContext(actorUserId ? String(actorUserId) : null, "api");
   const updated = await authUserModel.repository.update(target.id, { role: nextRole }, actor);
-  await tryRecordAuditLog({
-    domain: "identity",
-    entity: "user",
-    entityId: target.id,
-    action: "UPDATE",
-    actor,
-    actorRole: "admin",
-    outcome: "success",
-    before: { role: target.role },
-    after: { role: nextRole },
-    occurredAt: new Date().toISOString(),
-  });
   return {
     ok: true,
     user: updated
@@ -492,16 +464,6 @@ export async function createSession(
     },
     actor,
   );
-  await tryRecordAuditLog({
-    domain: "identity",
-    entity: "session",
-    entityId: sessionToken,
-    action: "CREATE",
-    actor,
-    outcome: "success",
-    after: { id: sessionToken, userId: canonicalUserId },
-    occurredAt: now.toISOString(),
-  });
   return sessionToken;
 }
 
@@ -542,17 +504,6 @@ export async function revokeSession(sessionToken: string): Promise<void> {
   if (!row || row.revoked) return;
   const actor = createActorContext(row.user_id, "api");
   await authSessionModel.repository.update(row.id, { revoked: true }, actor);
-  await tryRecordAuditLog({
-    domain: "identity",
-    entity: "session",
-    entityId: sessionToken,
-    action: "UPDATE",
-    actor,
-    outcome: "success",
-    before: { revoked: false },
-    after: { revoked: true },
-    occurredAt: new Date().toISOString(),
-  });
 }
 
 export async function revokeAllUserSessions(userId: string | number): Promise<void> {

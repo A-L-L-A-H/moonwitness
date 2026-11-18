@@ -1,7 +1,8 @@
 import type { FastifyInstance } from "fastify";
-import { getDb, onModelWrite, uuidv7, type ActorContext, type AuditAction } from "@moonwitness/orm";
+import { createActorContext, onModelWrite, type ActorContext, type AuditAction } from "@moonwitness/orm";
 import {
   defaultFailClosedAuthBridge,
+  resolveActorTenantFromBridge,
   type AddonDefinition,
   type AddonManifestInput,
   type BaseAddonAuthBridge,
@@ -15,6 +16,13 @@ import { auditLogModel } from "./model.js";
 export const auditManifest = manifestData as AddonManifestInput;
 export { auditLogModel, auditLogSchema } from "./model.js";
 
+const MODEL_DOMAIN_MAP: Record<string, string> = {
+  auth: "identity",
+  command: "command-center",
+  probe: "probes",
+  riot_ai: "riot-ai",
+};
+
 export interface RecordAuditInput {
   domain: string;
   entity: string;
@@ -22,7 +30,7 @@ export interface RecordAuditInput {
   action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE" | "EXECUTE" | "ACCESS";
   actor?:
     | ActorContext
-    | { actorId?: string | null; requestId?: string | null; role?: string | null }
+    | { actorId?: string | null; requestId?: string | null; role?: string | null; tenantId?: string }
     | null;
   actorRole?: string | null;
   correlationId?: string | null;
@@ -32,6 +40,7 @@ export interface RecordAuditInput {
   after?: unknown;
   metadata?: unknown;
   occurredAt?: string;
+  tenantId?: string;
 }
 
 function toJson(value: unknown): string | null {
@@ -53,34 +62,36 @@ export async function recordAuditLog(input: RecordAuditInput): Promise<void> {
     (input.actor && "role" in input.actor
       ? ((input.actor as { role?: string | null }).role ?? null)
       : null);
+  const tenantId =
+    input.tenantId ??
+    (input.actor && "tenantId" in input.actor
+      ? (input.actor as { tenantId?: string }).tenantId
+      : undefined);
 
   const occurredAt = input.occurredAt ?? new Date().toISOString();
-  await getDb().run(
-    `INSERT INTO ops_audit_logs (
-      id, create_uid, create_date, write_uid, write_date, status, deleted_uid, deleted_date,
-      version, source, source_ref, domain, entity, entity_id, action, actor_id, actor_role,
-      correlation_id, request_path, outcome, before_json, after_json, metadata_json, occurred_at
-    ) VALUES (?, ?, ?, ?, ?, 'active', NULL, NULL, 1, 'api', NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      uuidv7(),
-      actorId,
-      occurredAt,
-      actorId,
-      occurredAt,
-      input.domain,
-      input.entity,
-      input.entityId,
-      input.action,
-      actorId,
-      actorRole,
-      correlationId,
-      input.requestPath ?? null,
-      input.outcome ?? "success",
-      toJson(input.before),
-      toJson(input.after),
-      toJson(input.metadata),
-      occurredAt,
-    ],
+  const ormActor = createActorContext(
+    actorId,
+    "api",
+    correlationId ?? undefined,
+    tenantId,
+  );
+  await auditLogModel.repository.create(
+    {
+      domain: input.domain.slice(0, 80) || "platform",
+      entity: input.entity.slice(0, 120) || "unknown",
+      entity_id: (input.entityId || "unknown").slice(0, 200),
+      action: input.action,
+      actor_id: actorId ? actorId.slice(0, 200) : null,
+      actor_role: actorRole ? actorRole.slice(0, 80) : null,
+      correlation_id: correlationId ? correlationId.slice(0, 200) : null,
+      request_path: input.requestPath ? input.requestPath.slice(0, 500) : null,
+      outcome: input.outcome ?? "success",
+      before_json: toJson(input.before),
+      after_json: toJson(input.after),
+      metadata_json: toJson(input.metadata),
+      occurred_at: occurredAt,
+    },
+    ormActor,
   );
 }
 
@@ -102,6 +113,7 @@ export interface ListAuditLogsOptions {
   entity?: string;
   actorId?: string;
   limit?: number;
+  tenantId?: string;
 }
 
 export interface AuditLogRecord {
@@ -122,47 +134,40 @@ export interface AuditLogRecord {
 }
 
 export async function listAuditLogs(options: ListAuditLogsOptions = {}): Promise<AuditLogRecord[]> {
-  const clauses: string[] = [];
-  const params: unknown[] = [];
+  const filters: Record<string, unknown> = {};
   if (options.domain?.trim()) {
-    clauses.push("domain = ?");
-    params.push(options.domain.trim());
+    filters.domain = options.domain.trim();
   }
   if (options.entity?.trim()) {
-    clauses.push("entity = ?");
-    params.push(options.entity.trim());
+    filters.entity = options.entity.trim();
   }
   if (options.actorId?.trim()) {
-    clauses.push("actor_id = ?");
-    params.push(options.actorId.trim());
+    filters.actor_id = options.actorId.trim();
   }
   const limit = Math.min(200, Math.max(1, options.limit ?? 50));
-  const where = clauses.length > 0 ? `WHERE ${clauses.join(" AND ")}` : "";
-  const rows = await getDb().all<Record<string, unknown>>(
-    `SELECT id, domain, entity, entity_id, action, actor_id, actor_role,
-            correlation_id, request_path, outcome, before_json, after_json,
-            metadata_json, occurred_at
-       FROM ops_audit_logs
-       ${where}
-      ORDER BY occurred_at DESC, id DESC
-      LIMIT ?`,
-    [...params, limit],
-  );
+  const rows = await auditLogModel.repository.find(filters, {
+    limit,
+    orderBy: [
+      { field: "occurred_at", direction: "DESC" },
+      { field: "id", direction: "DESC" },
+    ],
+    ...(options.tenantId ? { tenantId: options.tenantId } : {}),
+  });
   return rows.map((row) => ({
-    id: String(row.id),
-    domain: String(row.domain),
-    entity: String(row.entity),
-    entityId: String(row.entity_id),
-    action: String(row.action),
-    actorId: typeof row.actor_id === "string" ? row.actor_id : null,
-    actorRole: typeof row.actor_role === "string" ? row.actor_role : null,
-    correlationId: typeof row.correlation_id === "string" ? row.correlation_id : null,
-    requestPath: typeof row.request_path === "string" ? row.request_path : null,
-    outcome: String(row.outcome),
-    beforeJson: typeof row.before_json === "string" ? row.before_json : null,
-    afterJson: typeof row.after_json === "string" ? row.after_json : null,
-    metadataJson: typeof row.metadata_json === "string" ? row.metadata_json : null,
-    occurredAt: String(row.occurred_at),
+    id: row.id,
+    domain: row.domain,
+    entity: row.entity,
+    entityId: row.entity_id,
+    action: row.action,
+    actorId: row.actor_id,
+    actorRole: row.actor_role,
+    correlationId: row.correlation_id,
+    requestPath: row.request_path,
+    outcome: row.outcome,
+    beforeJson: row.before_json,
+    afterJson: row.after_json,
+    metadataJson: row.metadata_json,
+    occurredAt: row.occurred_at,
   }));
 }
 
@@ -177,7 +182,8 @@ export function attachAuditOutboxSubscriber(): () => void {
   activeOutboxUnsubscribe = onModelWrite("*", async (event) => {
     if (event.model === "ops.audit_log" || event.model.startsWith("ir.")) return;
     if (event.actor.source === "seed") return;
-    const domain = event.model.includes(".") ? event.model.split(".")[0]! : "platform";
+    const prefix = event.model.includes(".") ? event.model.split(".")[0]! : "platform";
+    const domain = MODEL_DOMAIN_MAP[prefix] ?? prefix;
     await tryRecordAuditLog({
       domain,
       entity: event.model,
@@ -187,6 +193,7 @@ export function attachAuditOutboxSubscriber(): () => void {
       before: event.before,
       after: event.record,
       occurredAt: event.timestamp,
+      tenantId: event.actor.tenantId,
     });
   });
   return activeOutboxUnsubscribe;
@@ -246,6 +253,7 @@ export function createAuditAddon(
           entity: request.query?.entity,
           actorId: request.query?.actorId,
           limit: Number.isFinite(limit) ? limit : 50,
+          tenantId: resolveActorTenantFromBridge(auth, request),
         });
         return { data: logs, logs };
       });

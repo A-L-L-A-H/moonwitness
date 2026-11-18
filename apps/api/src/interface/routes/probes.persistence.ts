@@ -1,6 +1,5 @@
 import { createActorContext, getDb, syncModels } from "@moonwitness/orm";
 import { importLegacyProbes, probeEventModel, probeNodeModel } from "@moonwitness/addons/probes";
-import { tryRecordAuditLog } from "@moonwitness/addons/audit";
 import { isBlockedRuntimeHost } from "../../shared/env";
 
 export interface ProbeNode {
@@ -163,26 +162,6 @@ export async function recordProbeEvent(params: {
        SELECT id FROM orm_probe_events ORDER BY checked_at DESC LIMIT 1000
      )`,
   );
-
-  try {
-    await tryRecordAuditLog({
-      domain: "probes",
-      entity: "probe_event",
-      entityId: created.id,
-      action: "EXECUTE",
-      actor,
-      actorRole: null,
-      correlationId: actor.requestId ?? null,
-      requestPath: null,
-      outcome: params.ok ? "success" : "failure",
-      before: null,
-      after: { nodeId: params.nodeId, statusCode: params.statusCode, ok: params.ok },
-      metadata: null,
-      occurredAt: checkedAt,
-    });
-  } catch {
-    // audit logging optional in isolated unit tests
-  }
 
   return {
     id: created.id,

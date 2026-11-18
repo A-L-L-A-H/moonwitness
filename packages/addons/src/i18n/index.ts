@@ -1,8 +1,10 @@
 import { z } from "zod";
 import type { FastifyInstance } from "fastify";
-import { SYSTEM_ACTOR, createActorContext } from "@moonwitness/orm";
+import { SYSTEM_ACTOR } from "@moonwitness/orm";
 import {
   defaultFailClosedAuthBridge,
+  resolveActorContextFromBridge,
+  resolveActorTenantFromBridge,
   type AddonDefinition,
   type AddonManifestInput,
   type BaseAddonAuthBridge,
@@ -110,9 +112,10 @@ export function createI18nAddon(
       scope.get<{ Params: { locale: string } }>(
         `${prefix}/i18n/bundle/:locale`,
         async (request) => {
+          const tenantId = resolveActorTenantFromBridge(auth, request);
           const rows = await i18nTermModel.repository.find(
             { locale_code: request.params.locale },
-            { orderBy: "term_key ASC" },
+            { orderBy: "term_key ASC", tenantId },
           );
           const terms: Record<string, string> = {};
           for (const row of rows) terms[row.term_key] = row.value;
@@ -130,7 +133,7 @@ export function createI18nAddon(
               .code(400)
               .send({ error: parsed.error.issues[0]?.message ?? "Invalid term payload" });
           }
-          const actor = createActorContext(auth.getActorId(request), "api", request.id);
+          const actor = resolveActorContextFromBridge(auth, request);
           const saved = await i18nTermModel.repository.upsert(
             { locale_code: parsed.data.locale_code, term_key: parsed.data.term_key },
             parsed.data,

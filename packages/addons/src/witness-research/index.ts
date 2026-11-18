@@ -8,6 +8,7 @@ import {
 } from "@moonwitness/canon";
 import {
   defaultFailClosedAuthBridge,
+  resolveActorTenantFromBridge,
   type AddonDefinition,
   type AddonManifestInput,
   type BaseAddonAuthBridge,
@@ -127,12 +128,13 @@ export function createWitnessResearchAddon(
     views: witnessResearchViews,
     menus: witnessResearchMenus,
     registerRoutes: async (scope: FastifyInstance) => {
-      scope.get(`${prefix}/witness/summary`, { preHandler: auth.authenticate }, async () => {
+      scope.get(`${prefix}/witness/summary`, { preHandler: auth.authenticate }, async (request) => {
+        const tenantId = resolveActorTenantFromBridge(auth, request);
         const [sources, claims, runs, edges] = await Promise.all([
-          knowledgeSourceModel.repository.count(),
-          witnessClaimModel.repository.count(),
-          researchRunModel.repository.count(),
-          sidraEdgeModel.repository.count(),
+          knowledgeSourceModel.repository.count({}, { tenantId }),
+          witnessClaimModel.repository.count({}, { tenantId }),
+          researchRunModel.repository.count({}, { tenantId }),
+          sidraEdgeModel.repository.count({}, { tenantId }),
         ]);
         return { sources, claims, runs, edges };
       });

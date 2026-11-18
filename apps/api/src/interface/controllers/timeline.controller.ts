@@ -11,7 +11,6 @@ import type { Result } from "@moonwitness/core";
 import type { ApiError } from "@moonwitness/contracts";
 import { createActorContext, SYSTEM_ACTOR } from "@moonwitness/orm";
 import type { ActorContext } from "@moonwitness/orm";
-import { tryRecordAuditLog } from "@moonwitness/addons/audit";
 
 /**
  * Timeline endpoints.
@@ -24,7 +23,7 @@ export class TimelineController {
 
   private actor(request: FastifyRequest): ActorContext {
     if (request.user) {
-      return createActorContext(String(request.user.id), "api", request.id);
+      return createActorContext(String(request.user.id), "api", request.id, request.tenantId);
     }
     return SYSTEM_ACTOR;
   }
@@ -58,19 +57,6 @@ export class TimelineController {
   ) {
     const actor = this.actor(request);
     const result = await this._timelineUseCase.createEvent(request.body, actor);
-    if (result.ok) {
-      await tryRecordAuditLog({
-        domain: "timeline",
-        entity: "timeline.event",
-        entityId: result.value.data.id,
-        action: "CREATE",
-        actor,
-        actorRole: request.user?.role ?? null,
-        requestPath: request.url,
-        outcome: "success",
-        after: result.value.data,
-      });
-    }
     return this.handleResult(result, reply, 201);
   }
 
@@ -80,76 +66,24 @@ export class TimelineController {
   ) {
     const actor = this.actor(request);
     const result = await this._timelineUseCase.updateEvent(request.params.id, request.body, actor);
-    if (result.ok) {
-      await tryRecordAuditLog({
-        domain: "timeline",
-        entity: "timeline.event",
-        entityId: result.value.data.id,
-        action: "UPDATE",
-        actor,
-        actorRole: request.user?.role ?? null,
-        requestPath: request.url,
-        outcome: "success",
-        after: result.value.data,
-      });
-    }
     return this.handleResult(result, reply);
   }
 
   async archiveEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
     const actor = this.actor(request);
     const result = await this._timelineUseCase.archiveEvent(request.params.id, actor);
-    if (result.ok) {
-      await tryRecordAuditLog({
-        domain: "timeline",
-        entity: "timeline.event",
-        entityId: result.value.data.id,
-        action: "ARCHIVE",
-        actor,
-        actorRole: request.user?.role ?? null,
-        requestPath: request.url,
-        outcome: "success",
-        after: result.value.data,
-      });
-    }
     return this.handleResult(result, reply);
   }
 
   async restoreEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
     const actor = this.actor(request);
     const result = await this._timelineUseCase.restoreEvent(request.params.id, actor);
-    if (result.ok) {
-      await tryRecordAuditLog({
-        domain: "timeline",
-        entity: "timeline.event",
-        entityId: result.value.data.id,
-        action: "RESTORE",
-        actor,
-        actorRole: request.user?.role ?? null,
-        requestPath: request.url,
-        outcome: "success",
-        after: result.value.data,
-      });
-    }
     return this.handleResult(result, reply);
   }
 
   async deleteEvent(request: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) {
     const actor = this.actor(request);
     const result = await this._timelineUseCase.deleteEvent(request.params.id, actor);
-    if (result.ok) {
-      await tryRecordAuditLog({
-        domain: "timeline",
-        entity: "timeline.event",
-        entityId: result.value.data.id,
-        action: "DELETE",
-        actor,
-        actorRole: request.user?.role ?? null,
-        requestPath: request.url,
-        outcome: "success",
-        before: result.value.data,
-      });
-    }
     return this.handleResult(result, reply);
   }
 
