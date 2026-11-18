@@ -65,6 +65,16 @@ describe("@moonwitness/addon-epistemic", () => {
     expect(res.statusCode).toBe(201);
     expect(res.json().output.luminance).toBeCloseTo(1, 4);
     expect(res.json().output.contrastVsBlack).toBe(21);
+
+    const textRes = await app.inject({
+      method: "POST",
+      url: "/api/v1/epistemic/evaluate",
+      payload: { engine: "divine-text", text: "  بِسْمِ   ٱللَّهِ  " },
+    });
+    expect(textRes.statusCode).toBe(201);
+    expect(textRes.json().output.canonical).toBe("بسم الله");
+    expect(textRes.json().output.wordCount).toBe(2);
+    expect(textRes.json().output.sha256).toHaveLength(64);
     await app.close();
   });
 });

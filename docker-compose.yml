@@ -244,6 +244,33 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  memory:
+    profiles: ["ops", "memory"]
+    build:
+      context: ./services/memory/backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      MEMORY_DATA_DIR: /data
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://moonwitness.biz.id,https://a-l-l-a-h.com}
+    volumes:
+      - memory-data:/data
+    networks:
+      - moonwitness-internal
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -290,6 +317,8 @@ volumes:
     name: syslog-data
   storage-data:
     name: storage-data
+  memory-data:
+    name: memory-data
   caddy_data:
     name: caddy_data
   caddy_config:

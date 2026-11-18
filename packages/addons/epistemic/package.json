@@ -16,6 +16,7 @@
   "dependencies": {
     "@moonwitness/addon-audit": "workspace:*",
     "@moonwitness/addon-base": "workspace:*",
+    "@moonwitness/canon": "workspace:*",
     "@moonwitness/orm": "workspace:*",
     "zod": "^4.6.7"
   },

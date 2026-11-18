@@ -7,6 +7,7 @@ import type { SkinName } from "../../skin/compositions";
 import { Button } from "./button";
 import { Empty, EmptyDescription, EmptyTitle } from "./empty";
 import { Input } from "./input";
+import { useComponentSkin } from "./skin-adapter";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./table";
 
 export interface DataTableColumn<T> {
@@ -42,6 +43,7 @@ export function DataTable<T>({
   skin,
   className,
 }: DataTableProps<T>) {
+  const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
   const [query, setQuery] = React.useState("");
   const [sortCol, setSortCol] = React.useState<string | null>(null);
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
@@ -89,7 +91,11 @@ export function DataTable<T>({
   };
 
   return (
-    <div className={cn("space-y-3", className)}>
+    <div
+      data-skin={resolvedSkin}
+      data-dna={dnaId}
+      className={cn("space-y-3 p-3", recipe.card, className)}
+    >
       {searchable ? (
         <div className="flex items-center justify-between gap-2">
           <Input

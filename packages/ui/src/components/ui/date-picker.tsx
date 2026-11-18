@@ -7,6 +7,7 @@ import type { SkinName } from "../../skin/compositions";
 import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import { useComponentSkin } from "./skin-adapter";
 
 export interface DatePickerProps {
   value?: Date;

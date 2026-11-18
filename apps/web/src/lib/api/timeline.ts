@@ -1,20 +1,29 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ApiErrorSchema,
+  type CreateEventBody,
+  type TimelineErasResponse,
+  type TimelineEventResponse,
+  type TimelineListResponse,
+  type TimelineStatsResponse,
+} from "@moonwitness/contracts";
 import type {
   ArtKey,
-  Era,
   EraId,
   EventKind,
   TimelineEvent,
   TimelineFilters,
-  TimelineStats,
 } from "@moonwitness/types";
 
 const API_BASE = "/api/v1";
 const MAX_TIMELINE_PAGE_SIZE = 100;
 
-export interface CreateTimelineEventInput {
+export type CreateTimelineEventInput = Omit<
+  CreateEventBody,
+  "excerpt" | "body" | "location" | "tags" | "sources" | "notes" | "image" | "related"
+> & {
   id?: string;
   kind: EventKind;
   date: string;
@@ -29,7 +38,7 @@ export interface CreateTimelineEventInput {
   image?: ArtKey;
   imagePosition?: string;
   related?: string[];
-}
+};
 
 export type UpdateTimelineEventInput = Partial<Omit<TimelineEvent, "id">> & {
   version?: number;
@@ -58,8 +67,9 @@ async function requestTimelineJson<T>(url: string, init?: RequestInit): Promise<
     ...init,
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error?: string }).error ?? `HTTP ${res.status}`);
+    const raw = await res.json().catch(() => ({ error: res.statusText }));
+    const parsedErr = ApiErrorSchema.safeParse(raw);
+    throw new Error(parsedErr.success ? parsedErr.data.error : `HTTP ${res.status}`);
   }
   return res.json() as Promise<T>;
 }
@@ -72,7 +82,7 @@ export async function fetchTimelineEvents(
   filters: TimelineFilters = {},
   apiBase = API_BASE,
   signal?: AbortSignal,
-): Promise<{ data: TimelineEvent[]; total: number }> {
+): Promise<TimelineListResponse> {
   const params = new URLSearchParams();
   if (filters.era) params.set("era", filters.era);
   if (filters.kind) params.set("kind", filters.kind);
@@ -84,7 +94,7 @@ export async function fetchTimelineEvents(
     params.set("limit", String(Math.min(Math.max(filters.limit, 1), MAX_TIMELINE_PAGE_SIZE)));
   if (filters.offset) params.set("offset", String(filters.offset));
 
-  return fetchJson<{ data: TimelineEvent[]; total: number }>(
+  return fetchJson<TimelineListResponse>(
     `${apiBase}/timeline/events?${params}`,
     signal,
   );
@@ -112,8 +122,8 @@ export function useTimelineEvents(filters: TimelineFilters = {}) {
 export async function fetchTimelineEvent(
   id: string,
   signal?: AbortSignal,
-): Promise<{ data: TimelineEvent }> {
-  return fetchJson<{ data: TimelineEvent }>(
+): Promise<TimelineEventResponse> {
+  return fetchJson<TimelineEventResponse>(
     `${API_BASE}/timeline/events/${encodeURIComponent(id)}`,
     signal,
   );
@@ -160,7 +170,7 @@ export function useTimelineStats() {
   return useQuery({
     queryKey: ["timeline", "stats"],
     queryFn: ({ signal }) =>
-      fetchJson<{ data: TimelineStats }>(`${API_BASE}/timeline/stats`, signal),
+      fetchJson<TimelineStatsResponse>(`${API_BASE}/timeline/stats`, signal),
     staleTime: 60_000,
   });
 }
@@ -168,7 +178,7 @@ export function useTimelineStats() {
 export function useTimelineEras() {
   return useQuery({
     queryKey: ["timeline", "eras"],
-    queryFn: ({ signal }) => fetchJson<{ data: Era[] }>(`${API_BASE}/timeline/eras`, signal),
+    queryFn: ({ signal }) => fetchJson<TimelineErasResponse>(`${API_BASE}/timeline/eras`, signal),
     staleTime: 60_000,
   });
 }
@@ -176,8 +186,8 @@ export function useTimelineEras() {
 export async function createTimelineEvent(
   input: CreateTimelineEventInput,
   apiBase = API_BASE,
-): Promise<{ data: TimelineEvent }> {
-  return requestTimelineJson<{ data: TimelineEvent }>(`${apiBase}/timeline/events`, {
+): Promise<TimelineEventResponse> {
+  return requestTimelineJson<TimelineEventResponse>(`${apiBase}/timeline/events`, {
     method: "POST",
     body: JSON.stringify(input),
   });

@@ -220,6 +220,94 @@ export function SkinBackdrop({
           ))}
         </g>
       )}
+
+      {skin === "sanctuary" && (
+        <g>
+          <circle cx="200" cy="150" r="105" stroke="var(--primary)" strokeOpacity="0.22" strokeWidth="0.4" />
+          <circle cx="200" cy="150" r="68" stroke="var(--primary)" strokeOpacity="0.3" strokeWidth="0.35" strokeDasharray="3 3" />
+          <polygon
+            points="200,45 224,126 305,150 224,174 200,255 176,174 95,150 176,126"
+            stroke="var(--primary)"
+            strokeOpacity="0.26"
+            strokeWidth="0.4"
+          />
+          {geometry.constellation.stars.slice(0, 12).map((star, idx) => (
+            <circle
+              key={`sanc-${idx}`}
+              cx={star.x}
+              cy={star.y}
+              r={0.8}
+              fill="var(--primary)"
+              fillOpacity="0.45"
+            />
+          ))}
+        </g>
+      )}
+
+      {skin === "brutalist" && (
+        <g>
+          {geometry.grid.slice(0, 4).map((line, idx) => (
+            <line
+              key={`brut-${idx}`}
+              x1={0}
+              y1={idx * 75 + 24}
+              x2={400}
+              y2={idx * 75 + 24}
+              stroke="var(--border)"
+              strokeOpacity="0.25"
+              strokeWidth="1.2"
+            />
+          ))}
+          <rect x="28" y="28" width="90" height="90" stroke="var(--primary)" strokeOpacity="0.22" strokeWidth="1.4" />
+          <rect x="282" y="182" width="90" height="90" stroke="var(--border)" strokeOpacity="0.2" strokeWidth="1.4" />
+        </g>
+      )}
+
+      {skin === "noir" && (
+        <g>
+          {Array.from({ length: 10 }, (_, idx) => (
+            <rect
+              key={`sprocket-l-${idx}`}
+              x={8}
+              y={10 + idx * 29}
+              width={8}
+              height={14}
+              rx={1}
+              fill="var(--foreground)"
+              fillOpacity="0.18"
+            />
+          ))}
+          {geometry.halftone.slice(0, 50).map((dot, idx) => (
+            <circle
+              key={`noir-${idx}`}
+              cx={dot.x}
+              cy={dot.y}
+              r={dot.size * 0.16}
+              fill="var(--primary)"
+              fillOpacity="0.22"
+            />
+          ))}
+        </g>
+      )}
+
+      {skin === "kinetic" && (
+        <g>
+          {geometry.splatter.map((sp, idx) => (
+            <polygon
+              key={`kin-${idx}`}
+              points={`${sp.x},${sp.y} ${sp.x + sp.size * 2},${sp.y - sp.size} ${sp.x + sp.size},${sp.y + sp.size}`}
+              fill={idx % 2 === 0 ? "var(--primary)" : "var(--accent)"}
+              fillOpacity="0.34"
+            />
+          ))}
+          <path
+            d={geometry.stroke.pathData}
+            stroke="var(--accent)"
+            strokeOpacity="0.4"
+            strokeWidth="0.9"
+          />
+        </g>
+      )}
     </svg>
   );
 }

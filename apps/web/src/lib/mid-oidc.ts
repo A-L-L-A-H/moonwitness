@@ -1,10 +1,13 @@
+import {
+  DEFAULT_MID_ISSUER_URL,
+  createPkceAuthorizationRequest,
+  normalizeIssuerUrl,
+} from "@moonwitness/core";
+
 const STORAGE_PKCE_KEY = "mw_mid_pkce";
 
 function getMidIssuer(): string {
-  return (process.env.NEXT_PUBLIC_MID_ISSUER_URL ?? "https://id.moonwitness.biz.id").replace(
-    /\/+$/g,
-    "",
-  );
+  return normalizeIssuerUrl(process.env.NEXT_PUBLIC_MID_ISSUER_URL ?? DEFAULT_MID_ISSUER_URL);
 }
 
 function sanitizeNextPath(rawPath: string | undefined): string {
@@ -14,50 +17,25 @@ function sanitizeNextPath(rawPath: string | undefined): string {
   return "/mission-control";
 }
 
-function randomUrlSafeString(byteLen: number): string {
-  const bytes = new Uint8Array(byteLen);
-  crypto.getRandomValues(bytes);
-  let binary = "";
-  for (const byte of bytes) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-async function computeS256Challenge(verifier: string): Promise<string> {
-  const encoded = new TextEncoder().encode(verifier);
-  const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", encoded));
-  let binary = "";
-  for (const byte of digest) binary += String.fromCharCode(byte);
-  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
 function resolveCallbackUrl(): string {
   return `${window.location.origin}/auth/callback`;
 }
 
-/** Initiate OAuth 2.1 + PKCE SSO sign-in flow against MoonWitness ID. */
+/** Initiate OAuth 2.1 + PKCE SSO sign-in flow against MoonWitness ID using @moonwitness/core. */
 export async function startMidLogin(nextPath = "/mission-control"): Promise<void> {
-  const verifier = randomUrlSafeString(48);
-  const state = randomUrlSafeString(18);
-  const nonce = randomUrlSafeString(18);
-  const challenge = await computeS256Challenge(verifier);
   const safeNext = sanitizeNextPath(nextPath);
+  const pkce = await createPkceAuthorizationRequest({
+    issuerUrl: getMidIssuer(),
+    clientId: "moonwitness-web",
+    redirectUri: resolveCallbackUrl(),
+  });
 
   window.sessionStorage.setItem(
     STORAGE_PKCE_KEY,
-    JSON.stringify({ verifier, state, nextPath: safeNext }),
+    JSON.stringify({ verifier: pkce.verifier, state: pkce.state, nextPath: safeNext }),
   );
 
-  const authUrl = new URL(`${getMidIssuer()}/authorize`);
-  authUrl.searchParams.set("client_id", "moonwitness-web");
-  authUrl.searchParams.set("redirect_uri", resolveCallbackUrl());
-  authUrl.searchParams.set("response_type", "code");
-  authUrl.searchParams.set("scope", "openid profile email offline_access");
-  authUrl.searchParams.set("state", state);
-  authUrl.searchParams.set("nonce", nonce);
-  authUrl.searchParams.set("code_challenge", challenge);
-  authUrl.searchParams.set("code_challenge_method", "S256");
-
-  window.location.assign(authUrl.toString());
+  window.location.assign(pkce.authorizeUrl);
 }
 
 /** Complete OAuth 2.1 authorization_code exchange via the server-side BFF on `/auth/callback`. */

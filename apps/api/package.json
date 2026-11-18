@@ -38,6 +38,7 @@
     "@moonwitness/addon-timeline": "workspace:*",
     "@moonwitness/addon-witness-research": "workspace:*",
     "@moonwitness/ai": "workspace:*",
+    "@moonwitness/contracts": "workspace:*",
     "@moonwitness/core": "workspace:*",
     "@moonwitness/errors": "workspace:*",
     "@moonwitness/mid": "workspace:*",

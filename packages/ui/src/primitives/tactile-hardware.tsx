@@ -184,6 +184,70 @@ export function SkinOrnament({
         </span>
       );
     }
+    if (activeSkin === "sanctuary") {
+      return (
+        <span
+          aria-hidden="true"
+          data-mw-ornament={activeSkin}
+          data-mw-ornament-slot={slot}
+          className={cn(
+            "pointer-events-none inline-flex items-center border border-[var(--primary)]/60 bg-[var(--background)] px-2.5 py-0.5 font-serif text-[9px] tracking-[0.2em] text-[var(--primary)] uppercase",
+            className,
+          )}
+          {...props}
+        >
+          ✦ {tagText}
+        </span>
+      );
+    }
+    if (activeSkin === "brutalist") {
+      return (
+        <span
+          aria-hidden="true"
+          data-mw-ornament={activeSkin}
+          data-mw-ornament-slot={slot}
+          className={cn(
+            "pointer-events-none inline-flex items-center border-2 border-[var(--border)] bg-[var(--foreground)] px-2 py-0.5 font-mono text-[9px] font-black tracking-widest text-[var(--background)] uppercase",
+            className,
+          )}
+          {...props}
+        >
+          {tagText}
+        </span>
+      );
+    }
+    if (activeSkin === "noir") {
+      return (
+        <span
+          aria-hidden="true"
+          data-mw-ornament={activeSkin}
+          data-mw-ornament-slot={slot}
+          className={cn(
+            "pointer-events-none inline-flex items-center border border-[var(--border)] bg-[var(--card)] px-2 py-0.5 font-mono text-[9px] tracking-widest text-[var(--primary)] uppercase",
+            className,
+          )}
+          {...props}
+        >
+          FRAME // {tagText}
+        </span>
+      );
+    }
+    if (activeSkin === "kinetic") {
+      return (
+        <span
+          aria-hidden="true"
+          data-mw-ornament={activeSkin}
+          data-mw-ornament-slot={slot}
+          className={cn(
+            "pointer-events-none inline-flex items-center -skew-x-6 border border-[var(--primary)] bg-[var(--primary)] px-2 py-0.5 font-brush text-[9px] tracking-wider text-[var(--primary-foreground)] uppercase",
+            className,
+          )}
+          {...props}
+        >
+          ▸ {tagText}
+        </span>
+      );
+    }
     return (
       <span
         aria-hidden="true"
@@ -259,6 +323,62 @@ export function SkinOrnament({
         data-mw-ornament-slot={slot}
         className={cn(
           "pointer-events-none absolute h-1.5 w-4 rounded-full bg-[var(--green)] shadow-[0_0_8px_var(--green)]",
+          className,
+        )}
+        {...props}
+      />
+    );
+  }
+  if (activeSkin === "sanctuary") {
+    return (
+      <span
+        aria-hidden="true"
+        data-mw-ornament={activeSkin}
+        data-mw-ornament-slot={slot}
+        className={cn(
+          "pointer-events-none absolute h-2.5 w-2.5 rotate-45 border border-[var(--primary)] bg-[var(--background)]",
+          className,
+        )}
+        {...props}
+      />
+    );
+  }
+  if (activeSkin === "brutalist") {
+    return (
+      <span
+        aria-hidden="true"
+        data-mw-ornament={activeSkin}
+        data-mw-ornament-slot={slot}
+        className={cn(
+          "pointer-events-none absolute h-2.5 w-2.5 bg-[var(--border)]",
+          className,
+        )}
+        {...props}
+      />
+    );
+  }
+  if (activeSkin === "noir") {
+    return (
+      <span
+        aria-hidden="true"
+        data-mw-ornament={activeSkin}
+        data-mw-ornament-slot={slot}
+        className={cn(
+          "pointer-events-none absolute h-3 w-1.5 border border-[var(--border)] bg-[var(--muted)]",
+          className,
+        )}
+        {...props}
+      />
+    );
+  }
+  if (activeSkin === "kinetic") {
+    return (
+      <span
+        aria-hidden="true"
+        data-mw-ornament={activeSkin}
+        data-mw-ornament-slot={slot}
+        className={cn(
+          "pointer-events-none absolute h-2 w-4 -skew-x-12 bg-[var(--primary)]",
           className,
         )}
         {...props}
