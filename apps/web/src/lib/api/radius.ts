@@ -181,10 +181,13 @@ export function useDeleteRadiusUser() {
   const invalidate = useRadiusUserInvalidation();
   return useMutation({
     mutationFn: async (username: string) => {
-      const response = await requestApiResponse(`${API_BASE}/users/${encodeURIComponent(username)}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await requestApiResponse(
+        `${API_BASE}/users/${encodeURIComponent(username)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
       if (!response.ok && response.status !== 204) {
         const text = await response.text();
         throw new Error(text.trim() || `HTTP ${response.status}`);

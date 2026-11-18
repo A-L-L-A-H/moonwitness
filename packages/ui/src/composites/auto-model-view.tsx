@@ -512,7 +512,9 @@ export function AutoModelView({
         ) : viewMode === "kanban" && groupField ? (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3" data-mw-view-mode="kanban">
             {Array.from(
-              new Set(filteredRows.map((row) => formatCellValue(resolveFieldValue(row, groupField)))),
+              new Set(
+                filteredRows.map((row) => formatCellValue(resolveFieldValue(row, groupField))),
+              ),
             ).map((group) => (
               <section
                 key={group}

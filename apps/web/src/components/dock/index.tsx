@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import type { EraId, EventKind, TimelineEvent } from "@moonwitness/types";
 import { ConsoleShellAdapter } from "../shell/console-shell-adapter";
 import { Star4 } from "@moonwitness/ui/icons";
-import { EraBand , NativeSelect } from "@moonwitness/ui";
+import { EraBand, NativeSelect } from "@moonwitness/ui";
 import { DockHero } from "./hero";
 import { FilterBar, type SortKey } from "./filter-bar";
 import { EventList } from "./event-list";

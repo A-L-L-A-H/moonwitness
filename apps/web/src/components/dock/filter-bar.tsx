@@ -3,7 +3,7 @@
 import { Grid, List } from "@moonwitness/ui/icons";
 
 import type { Era, EraId } from "@moonwitness/types";
-import { cn , NativeSelect } from "@moonwitness/ui";
+import { cn, NativeSelect } from "@moonwitness/ui";
 
 export type SortKey = "newest" | "oldest";
 

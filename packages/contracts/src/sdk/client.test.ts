@@ -18,7 +18,10 @@ describe("moonwitness sdk transport", () => {
   it("returns parsed JSON and includes credentials", async () => {
     const fn = mockFetch({ ok: 1 });
     await expect(requestApiJson<{ ok: number }>("/api/v1/x")).resolves.toEqual({ ok: 1 });
-    expect(fn).toHaveBeenCalledWith("/api/v1/x", expect.objectContaining({ credentials: "include" }));
+    expect(fn).toHaveBeenCalledWith(
+      "/api/v1/x",
+      expect.objectContaining({ credentials: "include" }),
+    );
   });
 
   it("throws MoonwitnessApiError with status and message", async () => {

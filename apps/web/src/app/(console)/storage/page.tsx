@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { IndustrialBatteryArt, SkinOrnament , NativeSelect } from "@moonwitness/ui";
+import { IndustrialBatteryArt, SkinOrnament, NativeSelect } from "@moonwitness/ui";
 import { StorageBucket } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import {

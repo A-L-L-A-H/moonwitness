@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { SRGBL_V8_STAGES } from "@moonwitness/canon";
-import { CutoutArtwork, RadialGauge, SkinOrnament, Sparkline , NativeSelect } from "@moonwitness/ui";
+import { CutoutArtwork, RadialGauge, SkinOrnament, Sparkline, NativeSelect } from "@moonwitness/ui";
 import { MtimeHorizon } from "@moonwitness/ui/icons";
 import {
   useRiotAiChat,

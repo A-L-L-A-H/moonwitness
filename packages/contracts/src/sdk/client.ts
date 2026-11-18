@@ -73,7 +73,8 @@ export async function requestApiJson<T>(url: string, init?: RequestInit): Promis
 export function createMoonwitnessClient(baseUrl = "/api/v1") {
   const modelBase = (name: string) => `${baseUrl}/m/${encodeURIComponent(name)}`;
   return {
-    requestJson: <T>(path: string, init?: RequestInit) => requestApiJson<T>(`${baseUrl}${path}`, init),
+    requestJson: <T>(path: string, init?: RequestInit) =>
+      requestApiJson<T>(`${baseUrl}${path}`, init),
     requestRaw: (path: string, init?: RequestInit) => requestApiResponse(`${baseUrl}${path}`, init),
     auth: {
       me: <T = unknown>(init?: RequestInit) => requestApiJson<T>(`${baseUrl}/auth/me`, init),
@@ -125,8 +126,11 @@ export function createMoonwitnessClient(baseUrl = "/api/v1") {
             encodeURIComponent(id),
           ),
         ),
-      mutate: (url: string, method: "POST" | "PATCH" | "DELETE", payload?: Record<string, unknown>) =>
-        requestApiJson(url, { method, ...(payload ? { body: JSON.stringify(payload) } : {}) }),
+      mutate: (
+        url: string,
+        method: "POST" | "PATCH" | "DELETE",
+        payload?: Record<string, unknown>,
+      ) => requestApiJson(url, { method, ...(payload ? { body: JSON.stringify(payload) } : {}) }),
     }),
   };
 }

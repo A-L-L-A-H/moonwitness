@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import { CutoutArtwork, RooftopAntennaArt, SkinOrnament , NativeSelect } from "@moonwitness/ui";
+import { CutoutArtwork, RooftopAntennaArt, SkinOrnament, NativeSelect } from "@moonwitness/ui";
 import { SyslogStream } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useCurrentUser } from "@/lib/api/onboarding";

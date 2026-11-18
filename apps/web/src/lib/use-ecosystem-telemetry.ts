@@ -94,8 +94,12 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
         const [healthRes, readyRes, statsRes, erasRes] = await Promise.all([
           requestApiResponse("/api/v1/healthz", { signal: controller.signal }),
           requestApiResponse("/api/v1/readyz", { signal: controller.signal }).catch(() => null),
-          requestApiResponse("/api/v1/timeline/stats", { signal: controller.signal }).catch(() => null),
-          requestApiResponse("/api/v1/timeline/eras", { signal: controller.signal }).catch(() => null),
+          requestApiResponse("/api/v1/timeline/stats", { signal: controller.signal }).catch(
+            () => null,
+          ),
+          requestApiResponse("/api/v1/timeline/eras", { signal: controller.signal }).catch(
+            () => null,
+          ),
         ]);
 
         if (!healthRes.ok) {

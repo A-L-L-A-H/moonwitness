@@ -234,12 +234,7 @@ export function AutoModelConsole({
                   onChange={(e) =>
                     setFieldType(
                       e.target.value as
-                        | "text"
-                        | "integer"
-                        | "real"
-                        | "boolean"
-                        | "date"
-                        | "selection",
+                        "text" | "integer" | "real" | "boolean" | "date" | "selection",
                     )
                   }
                 >

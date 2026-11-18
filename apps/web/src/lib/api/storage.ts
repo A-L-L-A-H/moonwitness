@@ -51,7 +51,9 @@ export function useStorageHealth() {
   return useQuery({
     queryKey: ["storage", "health"],
     queryFn: async () => {
-      const res = await requestApiResponse(`${API_BASE}/storage/health`, { credentials: "include" });
+      const res = await requestApiResponse(`${API_BASE}/storage/health`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json() as Promise<{ status: string; service: string; reachable?: boolean }>;
     },
@@ -90,10 +92,13 @@ export function useCreateBucket() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
-      const res = await requestApiResponse(`${API_BASE}/storage/buckets/${encodeURIComponent(name)}`, {
-        method: "PUT",
-        credentials: "include",
-      });
+      const res = await requestApiResponse(
+        `${API_BASE}/storage/buckets/${encodeURIComponent(name)}`,
+        {
+          method: "PUT",
+          credentials: "include",
+        },
+      );
       if (!res.ok) throw new Error(await res.text());
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["storage", "buckets"] }),
@@ -104,10 +109,13 @@ export function useDeleteBucket() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (name: string) => {
-      const res = await requestApiResponse(`${API_BASE}/storage/buckets/${encodeURIComponent(name)}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const res = await requestApiResponse(
+        `${API_BASE}/storage/buckets/${encodeURIComponent(name)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
       if (!res.ok) throw new Error(await res.text());
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["storage", "buckets"] }),
