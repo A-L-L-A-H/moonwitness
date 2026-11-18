@@ -61,6 +61,18 @@ describe("registerMetadataRoutes", () => {
     await routes.get("/_meta/models/:name")!({ params: { name: "nope" } }, reply);
     expect(reply.code).toHaveBeenCalledWith(404);
   });
+
+  it("exposes /_meta/openapi.json with registered model schemas", async () => {
+    const { fastify, routes } = createRoutes();
+    const spec = (await routes.get("/_meta/openapi.json")!({}, fakeReply())) as {
+      openapi: string;
+      paths: Record<string, unknown>;
+      components: { schemas: Record<string, { properties: Record<string, unknown> }> };
+    };
+    expect(spec.openapi).toBe("3.0.0");
+    expect(spec.paths["/_meta/models"]).toBeDefined();
+    expect(spec.components.schemas["timeline.event"]?.properties).toHaveProperty("title");
+  });
 });
 
 function createRoutes() {

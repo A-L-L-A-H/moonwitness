@@ -1,0 +1,14 @@
+{
+  "name": "ai",
+  "version": "0.1.0",
+  "description": "RIOT AI runtime & semantic memory record store",
+  "category": "intelligence",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["riot-ai", "memory"],
+    "models": ["riot_ai.provider_config", "riot_ai.usage_summary", "memory.record"],
+    "migrations": []
+  }
+}

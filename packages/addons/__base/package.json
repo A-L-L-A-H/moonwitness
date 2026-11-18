@@ -5,8 +5,11 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./addon": "./src/addon.ts",
     "./registry": "./src/registry.ts",
-    "./metadata": "./src/metadata.ts"
+    "./metadata": "./src/metadata.ts",
+    "./runtime": "./src/runtime.ts",
+    "./ir-models": "./src/ir-models.ts"
   },
   "scripts": {
     "build": "echo \"addon-base: no build output\"",

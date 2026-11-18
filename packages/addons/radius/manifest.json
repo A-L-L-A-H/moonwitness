@@ -1,0 +1,14 @@
+{
+  "name": "radius",
+  "version": "0.1.0",
+  "description": "RADIUS AAA clients and accounting session history",
+  "category": "network",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "auth", "audit"],
+  "provides": {
+    "routes": ["radius"],
+    "models": ["radius.client", "radius.session"],
+    "migrations": []
+  }
+}

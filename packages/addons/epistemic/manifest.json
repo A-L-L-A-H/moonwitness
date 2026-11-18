@@ -1,0 +1,14 @@
+{
+  "name": "epistemic",
+  "version": "0.1.0",
+  "description": "Epistemic engines (divine-text, mtime, crayon RGBL/SRGBL, prophetic verification)",
+  "category": "engines",
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "depends": ["__base", "audit"],
+  "provides": {
+    "routes": ["epistemic"],
+    "models": ["epistemic.computation"],
+    "migrations": []
+  }
+}
