@@ -168,6 +168,86 @@ export interface MidLoopbackCallback {
   redirect_uri: string;
 }
 
+export type MemoryCategory =
+  | "working"
+  | "project"
+  | "episodic"
+  | "semantic"
+  | "procedural"
+  | "preference";
+
+export type MemoryStatus = "active" | "corrected" | "archived" | "deleted";
+
+export interface MemoryRecord {
+  id: string;
+  category: MemoryCategory;
+  title: string;
+  content: string;
+  sourceType: string;
+  sourceRef: string;
+  confidence: string;
+  status: MemoryStatus;
+  retention: string;
+  projectId: string | null;
+  repositoryId: string | null;
+  issueId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkSessionRecord {
+  id: string;
+  name: string;
+  status: "active" | "closed" | "interrupted";
+  projectId: string | null;
+  repositoryId: string | null;
+  issueId: string | null;
+  contextJson: string;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+}
+
+export interface ResumePointRecord {
+  id: string;
+  workSessionId: string;
+  title: string;
+  summary: string;
+  contextJson: string;
+  createdAt: string;
+}
+
+export interface ExperienceRecord {
+  id: string;
+  title: string;
+  summary: string;
+  evidenceJson: string;
+  taskId: string | null;
+  runId: string | null;
+  artifactId: string | null;
+  status: "observed" | "verified" | "rejected";
+  createdAt: string;
+}
+
+export interface LessonRecord {
+  id: string;
+  experienceId: string | null;
+  proposal: string;
+  status: "proposed" | "accepted" | "rejected";
+  acceptedAt: string | null;
+  createdAt: string;
+}
+
+export interface SoulJournalEntry {
+  id: string;
+  kind: "experience" | "lesson";
+  title: string;
+  summary: string;
+  status: string;
+  evidenceJson: string;
+  createdAt: string;
+}
+
 export interface CreateIssueArgs {
   title: string;
   description?: string | undefined;
@@ -218,6 +298,61 @@ export interface GitExecuteArgs {
   message?: string | undefined;
 }
 
+export interface CaptureMemoryArgs {
+  title: string;
+  content: string;
+  category?: MemoryCategory;
+  sourceRef?: string;
+  projectId?: string | null;
+}
+
+export interface CreateMemoryArgs {
+  category: MemoryCategory;
+  title: string;
+  content: string;
+  sourceType: string;
+  sourceRef: string;
+  confidence: string;
+  retention: string;
+  projectId?: string | null;
+  repositoryId?: string | null;
+  issueId?: string | null;
+}
+
+export interface UpdateMemoryArgs {
+  memoryId: string;
+  title: string;
+  content: string;
+  category: MemoryCategory;
+  status: MemoryStatus;
+  retention: string;
+  sourceRef: string;
+}
+
+export interface CreateWorkSessionArgs {
+  name: string;
+  projectId?: string | null;
+  repositoryId?: string | null;
+  issueId?: string | null;
+  contextJson?: string;
+}
+
+export interface CreateResumePointArgs {
+  workSessionId: string;
+  title: string;
+  summary: string;
+  contextJson?: string;
+}
+
+export interface CreateExperienceArgs {
+  title: string;
+  summary: string;
+  evidenceJson?: string;
+  taskId?: string | null;
+  runId?: string | null;
+  artifactId?: string | null;
+}
+
 export interface NativeCommands {
   await_mid_loopback_callback: { args: { authorizeUrl: string }; result: MidLoopbackCallback };
   get_dashboard: { args: Record<string, never>; result: Dashboard };
@@ -256,6 +391,29 @@ export interface NativeCommands {
   s3_gateway_status: { args: Record<string, never>; result: S3GatewayStatus };
   start_s3_gateway: { args: Record<string, never>; result: S3GatewayStatus };
   stop_s3_gateway: { args: Record<string, never>; result: S3GatewayStatus };
+  capture_memory: { args: CaptureMemoryArgs; result: MemoryRecord };
+  create_memory: { args: CreateMemoryArgs; result: MemoryRecord };
+  search_memories: {
+    args: { query?: string; category?: MemoryCategory };
+    result: MemoryRecord[];
+  };
+  update_memory: { args: UpdateMemoryArgs; result: MemoryRecord };
+  delete_memory: { args: { memoryId: string }; result: void };
+  create_work_session: { args: CreateWorkSessionArgs; result: WorkSessionRecord };
+  list_work_sessions: { args: Record<string, never>; result: WorkSessionRecord[] };
+  close_work_session: { args: { sessionId: string }; result: void };
+  create_resume_point: { args: CreateResumePointArgs; result: ResumePointRecord };
+  list_resume_points: { args: Record<string, never>; result: ResumePointRecord[] };
+  create_experience: { args: CreateExperienceArgs; result: ExperienceRecord };
+  create_lesson: {
+    args: { experienceId?: string | null; proposal: string };
+    result: LessonRecord;
+  };
+  resolve_lesson: {
+    args: { lessonId: string; status: "accepted" | "rejected" };
+    result: LessonRecord;
+  };
+  list_soul_journal: { args: Record<string, never>; result: SoulJournalEntry[] };
 }
 
 export type NativeCommand = keyof NativeCommands;
@@ -263,3 +421,79 @@ export type CommandArguments<Command extends NativeCommand> =
   NativeCommands[Command]["args"];
 export type CommandResult<Command extends NativeCommand> =
   NativeCommands[Command]["result"];
+
+export type RocksoulDomain =
+  | "threshold"
+  | "archive"
+  | "studio"
+  | "riot_deck"
+  | "signal_room";
+
+export type RocksoulPolicyMode = "assisted" | "supervised" | "autonomous";
+export type RocksoulRisk = "read_only" | "local_write" | "external" | "destructive" | "irreversible";
+
+export type RocksoulToolAction =
+  | "read_repository"
+  | "read_selected_path"
+  | "create_worktree"
+  | "write_worktree"
+  | "run_declared_check"
+  | "read_credential"
+  | "commit_isolated_branch"
+  | "push_owner_branch"
+  | "merge_owner_branch"
+  | "delete_data"
+  | "request_network"
+  | "export_artifact";
+
+export type RocksoulApprovalStatus =
+  | "pending"
+  | "granted"
+  | "denied"
+  | "expired"
+  | "revoked";
+
+export interface RocksoulEventEnvelope {
+  eventId: string;
+  objectiveId: string | null;
+  planId: string | null;
+  runId: string | null;
+  stepId: string | null;
+  artifactId: string | null;
+  domain: RocksoulDomain;
+  kind: string;
+  timestamp: string;
+  actor: string;
+  reason: string;
+  provenance: string;
+}
+
+export interface RocksoulProviderSpec {
+  providerId: string;
+  version: string;
+  executable: string;
+  argvTemplate: string[];
+  cwdScope: string;
+  networkAllowed: boolean;
+  timeoutMs: number;
+  maxOutputBytes: number;
+}
+
+export interface RocksoulToolRequest {
+  action: RocksoulToolAction;
+  target: string;
+  arguments: Record<string, unknown>;
+  risk: RocksoulRisk;
+  runId: string | null;
+}
+
+export interface RocksoulApproval {
+  approvalId: string;
+  action: RocksoulToolAction;
+  target: string;
+  arguments: Record<string, unknown>;
+  risk: RocksoulRisk;
+  runId: string;
+  status: RocksoulApprovalStatus;
+  expiresAt: string;
+}
