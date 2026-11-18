@@ -349,10 +349,7 @@ export function SkinOrnament({
         aria-hidden="true"
         data-mw-ornament={activeSkin}
         data-mw-ornament-slot={slot}
-        className={cn(
-          "pointer-events-none absolute h-2.5 w-2.5 bg-[var(--border)]",
-          className,
-        )}
+        className={cn("pointer-events-none absolute h-2.5 w-2.5 bg-[var(--border)]", className)}
         {...props}
       />
     );

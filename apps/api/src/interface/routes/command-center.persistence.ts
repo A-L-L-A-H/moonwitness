@@ -334,11 +334,7 @@ export async function transitionCommandCenterWorkflow(
 
   const now = new Date().toISOString();
   const actor = createActorContext(actorId, "api");
-  await workflowModel.repository.update(
-    row.id,
-    { workflow_status: nextStatus },
-    actor,
-  );
+  await workflowModel.repository.update(row.id, { workflow_status: nextStatus }, actor);
 
   try {
     await tryRecordAuditLog({
@@ -414,11 +410,7 @@ export async function dismissCommandCenterAlert(
 
   const now = new Date().toISOString();
   const actor = createActorContext(actorId, "api");
-  await alertModel.repository.update(
-    existing.id,
-    { dismissed: true, dismissed_at: now },
-    actor,
-  );
+  await alertModel.repository.update(existing.id, { dismissed: true, dismissed_at: now }, actor);
 
   try {
     await tryRecordAuditLog({

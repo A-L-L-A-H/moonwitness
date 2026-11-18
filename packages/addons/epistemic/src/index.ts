@@ -103,7 +103,7 @@ export function createEpistemicAddon(
               .send({ error: parsed.error.issues[0]?.message ?? "Invalid engine payload" });
           }
 
-          let output: Record<string, unknown>;
+          let output: object;
           switch (parsed.data.engine) {
             case "divine-text":
               output = normalizeDivineText(parsed.data.text);

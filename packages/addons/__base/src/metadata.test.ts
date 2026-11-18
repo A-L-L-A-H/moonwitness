@@ -45,7 +45,7 @@ describe("registerMetadataRoutes", () => {
   });
 
   it("exposes only approved fields for a model", async () => {
-    const { fastify, routes } = createRoutes();
+    const { routes } = createRoutes();
     const handler = routes.get("/_meta/models/:name")!;
     const reply = fakeReply();
     const result = (await handler({ params: { name: "timeline.event" } }, reply)) as {
@@ -63,7 +63,7 @@ describe("registerMetadataRoutes", () => {
   });
 
   it("exposes /_meta/openapi.json with registered model schemas", async () => {
-    const { fastify, routes } = createRoutes();
+    const { routes } = createRoutes();
     const spec = (await routes.get("/_meta/openapi.json")!({}, fakeReply())) as {
       openapi: string;
       paths: Record<string, unknown>;

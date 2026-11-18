@@ -9,13 +9,7 @@ import {
   type TimelineListResponse,
   type TimelineStatsResponse,
 } from "@moonwitness/contracts";
-import type {
-  ArtKey,
-  EraId,
-  EventKind,
-  TimelineEvent,
-  TimelineFilters,
-} from "@moonwitness/types";
+import type { ArtKey, EraId, EventKind, TimelineEvent, TimelineFilters } from "@moonwitness/types";
 
 const API_BASE = "/api/v1";
 const MAX_TIMELINE_PAGE_SIZE = 100;
@@ -94,10 +88,7 @@ export async function fetchTimelineEvents(
     params.set("limit", String(Math.min(Math.max(filters.limit, 1), MAX_TIMELINE_PAGE_SIZE)));
   if (filters.offset) params.set("offset", String(filters.offset));
 
-  return fetchJson<TimelineListResponse>(
-    `${apiBase}/timeline/events?${params}`,
-    signal,
-  );
+  return fetchJson<TimelineListResponse>(`${apiBase}/timeline/events?${params}`, signal);
 }
 
 export function useTimelineEvents(filters: TimelineFilters = {}) {
@@ -169,8 +160,7 @@ export async function fetchTimelineRelatedEvents(
 export function useTimelineStats() {
   return useQuery({
     queryKey: ["timeline", "stats"],
-    queryFn: ({ signal }) =>
-      fetchJson<TimelineStatsResponse>(`${API_BASE}/timeline/stats`, signal),
+    queryFn: ({ signal }) => fetchJson<TimelineStatsResponse>(`${API_BASE}/timeline/stats`, signal),
     staleTime: 60_000,
   });
 }

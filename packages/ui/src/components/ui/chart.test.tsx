@@ -68,13 +68,24 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(gauge?.getAttribute("aria-label")).toBe("CPU 74%");
   });
 
-  it("renders all 6 skins inside SkinMatrixCompare and formats CSS/JSON exports", () => {
+  it("renders all 10 skins inside SkinMatrixCompare and formats CSS/JSON exports", () => {
     renderNode(<SkinMatrixCompare dnaId="05-riot-anarchy" mode="dark" density="compact" />);
 
     const scopes = container.querySelectorAll("[data-mw-matrix-compare='true'] [data-skin]");
     const skinNames = new Set(Array.from(scopes).map((el) => el.getAttribute("data-skin")));
     expect(skinNames).toEqual(
-      new Set(["default", "riot", "editorial", "technical", "archive", "transmission"]),
+      new Set([
+        "default",
+        "riot",
+        "editorial",
+        "technical",
+        "archive",
+        "transmission",
+        "sanctuary",
+        "brutalist",
+        "noir",
+        "kinetic",
+      ]),
     );
 
     const cssOut = formatSkinTokensAsCss("05-riot-anarchy", "technical", "light", "compact");

@@ -269,7 +269,16 @@
   --mw-card-radius: 0px;
   --mw-card-border-width: 1px;
   --mw-card-border-style: solid;
-  --mw-card-clip: polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px);
+  --mw-card-clip: polygon(
+    8px 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    0 calc(100% - 8px),
+    0 8px
+  );
   --mw-card-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
   --mw-input-radius: 0px;
   --mw-input-border-width: 1px;

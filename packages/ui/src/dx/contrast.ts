@@ -1,4 +1,8 @@
-import { MASTER_DNA_LIGHT_PALETTES, type CanonicalDnaId } from "../dna/canonical";
+import {
+  MASTER_DNA_LIGHT_PALETTES,
+  SKIN_SURFACE_PALETTES,
+  type CanonicalDnaId,
+} from "../dna/canonical";
 import { listDnaWorlds, type DnaWorldPalette, type MasterDnaWorldSpec } from "../skin/dna-worlds";
 
 export interface ContrastPairResult {
@@ -98,4 +102,15 @@ export function auditAllDnaWorldsAndModes(): readonly ContrastAuditResult[] {
     ),
   );
   return [...dark, ...light];
+}
+
+export function auditAllSkinPalettesAndModes(): readonly ContrastAuditResult[] {
+  const results: ContrastAuditResult[] = [];
+  for (const [skinName, modes] of Object.entries(SKIN_SURFACE_PALETTES)) {
+    results.push(auditPaletteContrast(`skin:${skinName}:dark`, `${skinName} (Dark)`, modes.dark));
+    results.push(
+      auditPaletteContrast(`skin:${skinName}:light`, `${skinName} (Light)`, modes.light),
+    );
+  }
+  return results;
 }

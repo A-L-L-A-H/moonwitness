@@ -75,7 +75,11 @@ type ShowcaseVariant =
   | "editorial"
   | "technical"
   | "archive"
-  | "transmission";
+  | "transmission"
+  | "sanctuary"
+  | "brutalist"
+  | "noir"
+  | "kinetic";
 
 const VIEWPORT_WIDTH: Readonly<Record<ViewportPreset, string>> = {
   desktop: "100%",

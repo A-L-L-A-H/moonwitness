@@ -36,7 +36,10 @@ export function WitnessAvatar({
       alt={alt ?? `Avatar ${seed}`}
       width={size}
       height={size}
-      className={cn("shrink-0 select-none", className)}
+      className={cn(
+        "mw-witness-avatar shrink-0 select-none border-[length:var(--mw-card-border-width,1px)] border-[var(--border)] [filter:var(--mw-media-filter,none)] transition-transform duration-[var(--mw-motion-duration,200ms)]",
+        className,
+      )}
       draggable={false}
     />
   );

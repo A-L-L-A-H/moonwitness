@@ -60,7 +60,7 @@ describe("DX Docs Generator", () => {
     it("returns array of SkinDoc", () => {
       const docs = generateSkinDocs();
       expect(Array.isArray(docs)).toBe(true);
-      expect(docs.length).toBe(6);
+      expect(docs.length).toBe(10);
     });
 
     it("each SkinDoc has required fields", () => {
@@ -83,6 +83,10 @@ describe("DX Docs Generator", () => {
       expect(names).toContain("technical");
       expect(names).toContain("archive");
       expect(names).toContain("transmission");
+      expect(names).toContain("sanctuary");
+      expect(names).toContain("brutalist");
+      expect(names).toContain("noir");
+      expect(names).toContain("kinetic");
     });
 
     it("each skin has component configs", () => {
@@ -205,7 +209,7 @@ describe("DX Docs Generator", () => {
 
     it("documents 8-axis skin atmosphere, brand logos, cutouts, and telemetry primitives", () => {
       const atmosphere = generateSkinAtmosphereDocs();
-      expect(atmosphere).toHaveLength(6);
+      expect(atmosphere).toHaveLength(10);
 
       const icons = generateArtworkDocs();
       expect(icons).toHaveLength(12);

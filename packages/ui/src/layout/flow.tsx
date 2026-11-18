@@ -9,7 +9,7 @@ interface FlowProps extends React.HTMLAttributes<HTMLDivElement> {
 export function Flow({ gap = 4, className = "", style = {}, children, ...props }: FlowProps) {
   return React.createElement(
     "div",
-    { className: cn("flex flex-wrap", "gap-" + gap, className), style, ...props },
+    { className: cn("flex flex-wrap items-center", "gap-" + gap, className), style, ...props },
     children,
   );
 }

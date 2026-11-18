@@ -251,9 +251,15 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      APP_HOST: 0.0.0.0
-      APP_PORT: 8000
-      MEMORY_DATA_DIR: /data
+      DATA_DIR: /data
+      MID_ISSUER_URL: ${MID_ISSUER_URL:-https://id.moonwitness.biz.id}
+      MID_AUDIENCE: ${MEMORY_MID_AUDIENCE:-moonwitness-memory}
+      MEMORY_REQUIRE_AUTH: ${MEMORY_REQUIRE_AUTH:-true}
+      MOONWITNESS_SYNC_URL: http://api:3002
+      S3_ENDPOINT_URL: ${MEMORY_S3_ENDPOINT_URL:-http://storage:8091}
+      S3_BUCKET: ${MEMORY_S3_BUCKET:-mw-memory}
+      S3_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-local-memory-access}
+      S3_SECRET_KEY: ${STORAGE_SECRET_KEY:-replace-this-long-random-secret}
       CORS_ORIGINS: ${CORS_ORIGINS:-https://moonwitness.biz.id,https://a-l-l-a-h.com}
     volumes:
       - memory-data:/data

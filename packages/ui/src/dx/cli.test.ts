@@ -19,10 +19,10 @@ describe("DX CLI Validators", () => {
   });
 
   describe("validateSkinCoverage", () => {
-    it("passes for all 6 skins", () => {
+    it("passes for all 10 skins", () => {
       const results = validateSkinCoverage();
       const skinResults = results.filter((r) => r.check.startsWith("Skin:"));
-      expect(skinResults.length).toBe(6);
+      expect(skinResults.length).toBe(10);
 
       for (const result of skinResults) {
         expect(result.status).toBe("pass");
@@ -56,8 +56,8 @@ describe("DX CLI Validators", () => {
       const skinResults = results.filter((r) => r.check.startsWith("Skin:"));
 
       expect(tokenResults.length).toBe(5);
-      expect(skinResults.length).toBe(6);
-      expect(results.length).toBe(11);
+      expect(skinResults.length).toBe(10);
+      expect(results.length).toBe(15);
     });
   });
 

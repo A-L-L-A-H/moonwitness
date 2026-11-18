@@ -34,6 +34,10 @@ const SKINS: readonly SkinName[] = [
   "technical",
   "archive",
   "transmission",
+  "sanctuary",
+  "brutalist",
+  "noir",
+  "kinetic",
 ];
 
 describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
@@ -158,6 +162,8 @@ describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
       "--mw-canvas-pattern",
       "--mw-icon-stroke",
       "--mw-icon-cap",
+      "--mw-card-transform",
+      "--mw-card-hover-transform",
       "--mw-ornament",
       "--mw-media-filter",
       "--mw-motion-duration",
@@ -198,6 +204,6 @@ describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
         }
       }
     }
-    expect(count).toBe(84);
+    expect(count).toBe(140);
   });
 });

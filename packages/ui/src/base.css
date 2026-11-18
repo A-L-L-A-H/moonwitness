@@ -374,6 +374,25 @@
   [data-skin="kinetic"] :is(.zine-card, .zine-card-rough):hover {
     transform: var(--mw-card-hover-transform, skewX(0deg) translateY(-4px) scale(1.015));
   }
+  [data-skin="riot"] .mw-witness-avatar {
+    transform: rotate(-3deg);
+    box-shadow: 3px 3px 0 var(--primary);
+  }
+  [data-skin="technical"] .mw-witness-avatar {
+    border-style: dashed;
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  [data-skin="sanctuary"] .mw-witness-avatar {
+    box-shadow: 0 0 0 2px var(--primary);
+  }
+  [data-skin="brutalist"] .mw-witness-avatar {
+    border-radius: 0px !important;
+    border-width: 3px;
+    box-shadow: 3px 3px 0 var(--border);
+  }
+  [data-skin="kinetic"] .mw-witness-avatar {
+    transform: skewX(-4deg);
+  }
 
   .scene-panel,
   .atlas-frame {

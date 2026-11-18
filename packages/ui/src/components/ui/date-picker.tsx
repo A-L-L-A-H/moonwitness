@@ -32,6 +32,7 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
     },
     ref,
   ) => {
+    const { skin: resolvedSkin, dnaId } = useComponentSkin(skin);
     const [open, setOpen] = React.useState(false);
 
     return (
@@ -41,7 +42,9 @@ const DatePicker = React.forwardRef<HTMLButtonElement, DatePickerProps>(
             ref={ref}
             type="button"
             variant="outline"
-            skin={skin}
+            skin={resolvedSkin}
+            data-skin={resolvedSkin}
+            data-dna={dnaId}
             disabled={disabled}
             aria-label={ariaLabel}
             className={cn(

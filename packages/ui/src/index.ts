@@ -701,6 +701,7 @@ export {
   auditDnaContrast,
   auditAllDnaWorlds,
   auditAllDnaWorldsAndModes,
+  auditAllSkinPalettesAndModes,
   type ContrastPairResult,
   type ContrastAuditResult,
 } from "./dx/contrast";

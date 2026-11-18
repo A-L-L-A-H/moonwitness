@@ -8,6 +8,7 @@ import type {
   UpdateTimelineEventInput,
 } from "../../domain/usecases/timeline/timeline.repository";
 import type { Result } from "@moonwitness/core";
+import type { ApiError } from "@moonwitness/contracts";
 import { createActorContext, SYSTEM_ACTOR } from "@moonwitness/orm";
 import type { ActorContext } from "@moonwitness/orm";
 import { tryRecordAuditLog } from "../../infrastructure/audit/audit-log";
@@ -179,6 +180,10 @@ export class TimelineController {
             ? 400
             : 500;
 
-    return reply.code(status).send({ error: result.error.message });
+    const errorBody: ApiError = {
+      error: result.error.message,
+      ...(errObj.code ? { code: errObj.code } : {}),
+    };
+    return reply.code(status).send(errorBody);
   }
 }
