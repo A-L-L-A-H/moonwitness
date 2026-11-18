@@ -1,5 +1,7 @@
 # ROCKSOUL DX — Desktop Product Contract
 
+> **Historical contract notice:** This document is retained as product provenance. Technical choices described as open are reconciled against the checked-out implementation by `apps/rocksoul/docs/reconciliation-v2/BASELINE-EVIDENCE.md`; the runtime authority remains ADR-006 and `RUNTIME-SERVICE-INVENTORY.md`.
+
 **Status:** DECIDED product form and boundaries; detailed interaction and technical choices PROPOSED  
 **Owner:** Product owner  
 **Owning repository:** `A-L-L-A-H/rocksoul-dx`  

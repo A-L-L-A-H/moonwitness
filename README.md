@@ -2,14 +2,14 @@
 
 Consolidated monorepo for the A-L-L-A-H / MoonWitness / ROCKSOUL ecosystem: Turborepo + pnpm workspaces, shared packages, strict TypeScript, local quality gates, and Conventional Commits governance.
 
-## Struktur
+## Topology
 
 ```text
 apps/
   web/                  Next.js App Router — A-L-L-A-H Sanctuary & MoonWitness Operations (port 3000)
   api/                  Fastify REST API, SQLite/libSQL, addon host & proxies (port 3002)
   rocksoul/             ROCKSOUL DX desktop workbench (Tauri 2 + React 19 + SQLite, port 1420)
-  memory/               How U Remind Me — FastAPI + SQLite FTS5 + LanceDB vault (8000 / 3005 / 9000)
+  memory/               FastAPI + SQLite FTS5 + LanceDB local memory vault (ports 8000 / 3005 / 9000)
 services/
   radius/               Rust Axum RADIUS service
   snmp-poller/          Rust Axum SNMP poller service
@@ -36,68 +36,93 @@ docs/
   engineering/                       BRANCHING, GATECHECK, CI-CD, RELEASING, SECURITY
 ```
 
-## Prasyarat
+## Prerequisites
 
-- Node.js >= 20 (lihat `.nvmrc`)
-- pnpm (`12.18.0`, dikunci lewat `packageManager`)
-- Optional per service: Rust toolchain (`apps/rocksoul`, `services/*`), Go (`cp/arsy`), Python 3.12 (`apps/memory`)
+- Node.js >= 20 (see `.nvmrc`)
+- pnpm (`12.18.0`, pinned via `packageManager`)
+- Rust toolchain (`apps/rocksoul`, `services/*`)
+- Go 1.22+ (`cp/arsy`)
+- Python 3.12 (`apps/memory`)
 
-## Mulai
+## Quickstart
 
 ```sh
 pnpm install
-pnpm hooks:install     # opsional: pre-push branch guard + gate
-pnpm gate:doctor       # cek toolchain, git identity, remote, branch
-pnpm dev               # jalankan workspace apps dalam mode watch
+pnpm hooks:install     # install pre-push branch guard and gatehooks
+pnpm gate:doctor       # verify local toolchains, git identity, and remotes
+pnpm dev               # run workspace apps in watch mode
 ```
 
-## Jalankan dengan Docker Compose
+## Docker Compose Profiles
 
-Butuh Docker Engine/Desktop dengan Docker Compose. Sebelum menyalakan stack production (`NODE_ENV=production`), set secret runtime wajib (`STORAGE_ACCESS_KEY` dan `STORAGE_SECRET_KEY`; opsional `CORS_ORIGINS`):
+The compose architecture supports isolated runtime tiers via Compose profiles:
+
+### Default Tier (Core Web + API + Ingress)
 
 ```sh
 docker compose up --build
 ```
 
-- Web (`@moonwitness/web`): <http://localhost:3000> (A-L-L-A-H Sanctuary `/` & MoonWitness Console `/moonwitness`, API rewrite ke `http://api:3002`)
-- API (`@moonwitness/api`): <http://localhost:3002/api/v1/healthz> (SQLite di volume `moonwitness-data`)
+- Ingress (`caddy`): <http://localhost:80>, <https://localhost:443>
+- Web (`@moonwitness/web`): <http://localhost:3000>
+- API (`@moonwitness/api`): <http://localhost:3002/api/v1/healthz>
 
-Hentikan dengan `Ctrl+C` atau `docker compose down` (volume `moonwitness-data` dipertahankan), atau `docker compose down -v` untuk menghapus volume.
+### Ops Tier (Background & Telemetry Services)
 
-Kerja dilakukan di branch `dev`. `main` hanya menerima promosi lewat pull request, `master` dibekukan. Detail: [docs/engineering/BRANCHING.md](docs/engineering/BRANCHING.md).
-
-## Perintah
+Starts the supplementary telemetry and storage workers:
 
 ```sh
-pnpm gate:quick        # format, lint, typecheck (feedback cepat)
-pnpm gate:local        # install frozen, format, lint, typecheck, test, build
-pnpm gate:push         # gate:local + branch policy, secret scan, audit, commit lint
-pnpm gate:release      # kesiapan rilis di main: versi, changelog, tag
-pnpm gate:doctor       # diagnosis environment
-
-pnpm lint              # ESLint seluruh workspace
-pnpm typecheck         # tsc --noEmit seluruh workspace
-pnpm test              # Vitest
-pnpm build             # production build (cache Turborepo)
-pnpm format            # Prettier
+docker compose --profile ops up --build
 ```
 
-Gate melaporkan setiap langkah sebagai `PASS`, `FAIL`, `BLOCKED`, atau `NOT APPLICABLE` — tidak ada skip diam-diam. Lihat [docs/engineering/GATECHECK.md](docs/engineering/GATECHECK.md).
+- RADIUS (`services/radius`): Port 1812/udp, 1813/udp
+- SNMP Poller (`services/snmp-poller`): Port 162/udp
+- Syslog (`services/syslog`): Port 514/udp
+- Object Storage (`services/storage`): S3-compatible SigV4 API on port 9000
+- Postgres (`postgres`): Shared relational storage for telemetry
 
-## Konvensi
+### Tear Down
 
-- Package internal memakai pola just-in-time: export source TS langsung, di-transpile oleh Next (`transpilePackages`). Tidak perlu langkah build terpisah untuk `ui`/`core`.
-- Environment variable divalidasi saat startup lewat `parseEnv` dari `@moonwitness/core`; tambahkan schema baru di `apps/web/src/env.ts` / `apps/api/src/shared/env.ts` dan dokumentasikan di `.env.example`.
-- Commit mengikuti Conventional Commits (`feat:`, `fix:`, `chore:`, …). Changelog dan versi dihasilkan dari pesan commit — lihat [docs/engineering/RELEASING.md](docs/engineering/RELEASING.md).
-- Tambah app baru di `apps/*`, package baru di `packages/*` — keduanya otomatis masuk workspace dan pipeline Turbo.
+```sh
+docker compose down        # preserves volume data
+docker compose down -v     # destroys container volumes
+```
 
-## Dokumentasi engineering
+All development happens on `dev`. `main` only accepts promotions via pull requests. Detailed branching policies: [docs/engineering/BRANCHING.md](docs/engineering/BRANCHING.md).
 
-- [Arsitektur fondasi](docs/architecture/engineering-foundation.md)
-- [Branching](docs/engineering/BRANCHING.md)
-- [Gate lokal](docs/engineering/GATECHECK.md)
-- [CI/CD](docs/engineering/CI-CD.md)
-- [Releasing](docs/engineering/RELEASING.md)
-- [Deployment](docs/engineering/DEPLOYMENT.md)
-- [Security](docs/engineering/SECURITY.md)
+## Quality Gates & Verification
+
+```sh
+pnpm gate:quick        # fast feedback: format, lint, typecheck
+pnpm gate:local        # full check: frozen install, lint, typecheck, test, build
+pnpm gate:push         # gate:local + branch policy, secret scan, audit, commitlint
+pnpm gate:release      # release readiness check for main: version, changelog, tags
+pnpm gate:doctor       # diagnostic environment check
+
+pnpm lint              # workspace ESLint
+pnpm typecheck         # workspace TypeScript validation
+pnpm test              # workspace Vitest suite
+pnpm build             # production Turbo build
+pnpm format            # Prettier formatting
+```
+
+All gate stages output unambiguous statuses: `PASS`, `FAIL`, `BLOCKED`, or `NOT APPLICABLE`. No silent skips. See [docs/engineering/GATECHECK.md](docs/engineering/GATECHECK.md).
+
+## Conventions
+
+- Internal packages use just-in-time TypeScript source compilation consumed directly via `transpilePackages`.
+- Environment configurations are validated at process boot via `parseEnv` from `@moonwitness/core` (`apps/web/src/env.ts`, `apps/api/src/shared/env.ts`).
+- Commit messages strictly follow Conventional Commits (`feat:`, `fix:`, `chore:`, etc.).
+- New applications belong in `apps/*`; reusable packages in `packages/*`.
+
+## Engineering References
+
+- [Architecture Foundation](docs/architecture/engineering-foundation.md)
+- [ADR-007: RockSoul Local Execution & Data Boundary](docs/architecture/adr-007-rocksoul-local-execution-and-data-boundary.md)
+- [Branching Model](docs/engineering/BRANCHING.md)
+- [Local Quality Gates](docs/engineering/GATECHECK.md)
+- [CI/CD Pipelines](docs/engineering/CI-CD.md)
+- [Release Process](docs/engineering/RELEASING.md)
+- [Deployment Guide](docs/engineering/DEPLOYMENT.md)
+- [Security Model](docs/engineering/SECURITY.md)
 - [Contributing](CONTRIBUTING.md)

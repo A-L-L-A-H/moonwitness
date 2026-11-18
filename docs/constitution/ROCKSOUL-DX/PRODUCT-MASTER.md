@@ -1,5 +1,7 @@
 # ROCKSOUL DX — Product Master
 
+> **Historical constitution notice:** This document is retained as product provenance. It predates selected implementation decisions. The checked-out implementation now uses Tauri 2, React/Vite, Rust and SQLite under `apps/rocksoul`; authoritative runtime topology is ADR-006 and `RUNTIME-SERVICE-INVENTORY.md`. The reconciled implementation baseline is `apps/rocksoul/docs/reconciliation-v2/`.
+
 **Repository:** `A-L-L-A-H/rocksoul-dx`  
 **Product type:** **Private desktop application (desktop-first)**  
 **Primary user:** Product owner only  
