@@ -743,19 +743,71 @@ export async function call<Command extends NativeCommand>(
   if (command === "get_agent_execution_steps" || command === "get_orchestration_tasks") {
     return [] as unknown as CommandResult<Command>;
   }
-  if (command === "list_studio_drafts" || command === "list_research_claims") {
-    return [] as unknown as CommandResult<Command>;
+  if (command === "list_studio_drafts") {
+    const projectFilter = stringArg("projectId");
+    const drafts = readPreview<Array<{ id: string; title: string; content: string; kind: string; version: number; projectId?: string | null; createdAt: string; updatedAt: string }>>("studio_drafts", []);
+    return (projectFilter ? drafts.filter((draft) => draft.projectId === projectFilter) : drafts) as unknown as CommandResult<Command>;
   }
-  if (command === "get_companion_profile") {
-    return {
+  if (command === "save_studio_draft") {
+    const drafts = readPreview<Array<{ id: string; title: string; content: string; kind: string; version: number; projectId?: string | null; createdAt: string; updatedAt: string }>>("studio_drafts", []);
+    const draftId = stringArg("draftId");
+    const existing = draftId ? drafts.find((draft) => draft.id === draftId) : undefined;
+    const now = timestamp();
+    const saved = existing
+      ? {
+          ...existing,
+          title: stringArg("title") || existing.title,
+          content: stringArg("content") ?? existing.content,
+          kind: stringArg("kind") || existing.kind,
+          projectId: stringArg("projectId") ?? existing.projectId ?? null,
+          version: existing.version + 1,
+          updatedAt: now,
+        }
+      : {
+          id: crypto.randomUUID(),
+          title: stringArg("title") || "Untitled Draft",
+          content: stringArg("content") ?? "",
+          kind: stringArg("kind") || "story",
+          version: 1,
+          projectId: stringArg("projectId") ?? null,
+          createdAt: now,
+          updatedAt: now,
+        };
+    writePreview("studio_drafts", [saved, ...drafts.filter((draft) => draft.id !== saved.id)]);
+    return saved as unknown as CommandResult<Command>;
+  }
+  if (command === "list_research_claims") {
+    return readPreview("research_claims", []) as unknown as CommandResult<Command>;
+  }
+  if (command === "record_research_claim") {
+    const claims = readPreview<Array<{ id: string; question: string; claim: string; sourceCitation: string; confidence: string; createdAt: string }>>("research_claims", []);
+    const record = {
+      id: crypto.randomUUID(),
+      question: stringArg("question") || "",
+      claim: stringArg("claim") || "",
+      sourceCitation: stringArg("sourceCitation") || "",
+      confidence: stringArg("confidence") || "verified",
+      createdAt: timestamp(),
+    };
+    writePreview("research_claims", [record, ...claims]);
+    return record as unknown as CommandResult<Command>;
+  }
+  if (command === "get_companion_profile" || command === "update_companion_state") {
+    const stored = readPreview<{ state?: string } | null>("companion_profile", null);
+    const nextState = command === "update_companion_state" ? stringArg("companionState") || "active" : undefined;
+    const profile = {
       id: "default",
       name: "RockSoul Sentinel",
       personality: "Stoic, analytical, loyal companion",
-      state: "idle",
+      state: nextState ?? stored?.["state"] ?? "idle",
       dailyBriefing: "Browser preview active.",
       eveningRecap: "Local desktop required for live telemetry.",
-      updatedAt: new Date().toISOString(),
-    } as unknown as CommandResult<Command>;
+      updatedAt: timestamp(),
+    };
+    if (nextState) {
+      writePreview("companion_profile", profile);
+    }
+    return profile as unknown as CommandResult<Command>;
   }
 
   throw new Error(`Unsupported native command: ${command}`);
