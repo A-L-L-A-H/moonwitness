@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { createActorContext } from "@moonwitness/orm";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { createRateLimiter } from "../../infrastructure/rate-limit";
 import { requireRole } from "../../middleware/auth";
@@ -57,6 +58,7 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
         durationMs: Date.now() - startedAt,
         usage,
         ...(errorCode ? { errorCode } : {}),
+        ...(request.tenantId ? { tenantId: request.tenantId } : {}),
       };
       await persistInferenceAudit(record);
       auditEventWritten = true;
@@ -254,11 +256,12 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
     }
     const config = await upsertProviderConfig(
       { profileKey: "default", label, enabled, preferredModel },
-      {
-        actorId: request.user ? String(request.user.id) : null,
-        source: "api",
-        requestId: request.id,
-      },
+      createActorContext(
+        request.user ? String(request.user.id) : null,
+        "api",
+        request.id,
+        request.tenantId,
+      ),
     );
     return reply.send({
       config: {
@@ -284,20 +287,26 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
       return reply.code(400).send({ error: "invalid usage summary query" });
     }
     const since = new Date(Date.now() - query.data.days * 24 * 60 * 60 * 1000).toISOString();
-    const entries = await listOperatorUsageSummary({ limit: query.data.limit + 1, since });
+    const entries = await listOperatorUsageSummary({
+      limit: query.data.limit + 1,
+      since,
+      tenantId: request.tenantId,
+    });
     const truncated = entries.length > query.data.limit;
     return reply.send({
       entries: truncated ? entries.slice(0, query.data.limit) : entries,
-      summary: await getUsageOverview(query.data.days, query.data.limit),
+      summary: await getUsageOverview(query.data.days, query.data.limit, request.tenantId),
     });
   });
 
   fastify.get(
     "/riot-ai/config/history",
     { preHandler: requireRole("admin") },
-    async (_request, reply) => {
+    async (request, reply) => {
       setNoStore(reply);
-      return reply.send({ history: await listProviderConfigHistory("default") });
+      return reply.send({
+        history: await listProviderConfigHistory("default", request.tenantId),
+      });
     },
   );
 

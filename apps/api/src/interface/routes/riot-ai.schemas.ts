@@ -209,9 +209,9 @@ function aggregateTokenMetric(
   };
 }
 
-export async function getUsageOverview(days = 30, limit = 5000) {
+export async function getUsageOverview(days = 30, limit = 5000, tenantId?: string) {
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
-  const entries = await listOperatorUsageSummary({ limit: limit + 1, since });
+  const entries = await listOperatorUsageSummary({ limit: limit + 1, since, tenantId });
   const isComplete = entries.length <= limit;
   const measuredEntries = isComplete ? entries : entries.slice(0, limit + 1);
   return {

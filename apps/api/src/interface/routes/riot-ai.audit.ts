@@ -15,6 +15,7 @@ export interface InferenceAuditRecord {
   durationMs: number;
   usage: InferenceUsage;
   errorCode?: string;
+  tenantId?: string;
 }
 
 export type InferenceAuditWriter = (record: InferenceAuditRecord) => void;
@@ -30,6 +31,7 @@ export type InferenceSummaryWriter = (record: {
   totalTokens: number | null;
   errorCode?: string;
   occurredAt: string;
+  tenantId?: string;
 }) => Promise<void>;
 
 const defaultAuditWriter: InferenceAuditWriter = (record) => {
@@ -65,6 +67,7 @@ export async function persistInferenceAudit(
     completionTokens: record.usage.completionTokens,
     totalTokens: record.usage.totalTokens,
     ...(record.errorCode ? { errorCode: record.errorCode } : {}),
+    ...(record.tenantId ? { tenantId: record.tenantId } : {}),
     occurredAt: new Date().toISOString(),
   });
   if (includeAuditLog) auditWriter(record);

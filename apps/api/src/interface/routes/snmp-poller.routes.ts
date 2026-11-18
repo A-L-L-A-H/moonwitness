@@ -31,6 +31,15 @@ function forwardHeaders(request: FastifyRequest): Record<string, string> {
   return getUpstreamBridgeHeaders(headers, request);
 }
 
+function normalizeSnmpVersion(raw: unknown): "v1" | "v2c" | "v3" {
+  const value = String(raw ?? "")
+    .trim()
+    .toLowerCase();
+  if (value === "v1" || value === "1") return "v1";
+  if (value === "v3" || value === "3") return "v3";
+  return "v2c";
+}
+
 async function mirrorSnmpMutation(
   request: FastifyRequest,
   target: string,
@@ -40,8 +49,14 @@ async function mirrorSnmpMutation(
 ): Promise<void> {
   if (status >= 400 || (method !== "POST" && method !== "DELETE")) return;
   try {
-    const authUser = (request as AuthenticatedRequest).user;
-    const actor = createActorContext(authUser ? String(authUser.id) : null, "api", request.id);
+    const authReq = request as AuthenticatedRequest;
+    const authUser = authReq.user;
+    const actor = createActorContext(
+      authUser ? String(authUser.id) : null,
+      "api",
+      request.id,
+      authReq.tenantId,
+    );
     const bodyObj =
       request.body && typeof request.body === "object"
         ? (request.body as Record<string, unknown>)
@@ -70,13 +85,10 @@ async function mirrorSnmpMutation(
             device_key: deviceKey,
             name,
             host,
-            port: Number.isInteger(portRaw) && portRaw > 0 ? portRaw : 161,
-            version:
-              resObj.version != null
-                ? String(resObj.version).slice(0, 20)
-                : bodyObj.version != null
-                  ? String(bodyObj.version).slice(0, 20)
-                  : null,
+            port: Number.isInteger(portRaw) && portRaw > 0 && portRaw <= 65535 ? portRaw : 161,
+            snmp_version: normalizeSnmpVersion(
+              resObj.snmp_version ?? resObj.version ?? bodyObj.snmp_version ?? bodyObj.version,
+            ),
             enabled: typeof resObj.enabled === "boolean" ? resObj.enabled : true,
             metadata_json: null,
           },
@@ -90,7 +102,10 @@ async function mirrorSnmpMutation(
     if (deviceMatch && method === "DELETE") {
       const deviceKey = decodeURIComponent(deviceMatch[1] ?? "").slice(0, 120);
       if (deviceKey) {
-        const existing = await snmpDeviceModel.repository.find({ device_key: deviceKey });
+        const existing = await snmpDeviceModel.repository.find(
+          { device_key: deviceKey },
+          authReq.tenantId ? { tenantId: authReq.tenantId } : undefined,
+        );
         for (const row of existing) {
           await snmpDeviceModel.repository.delete(row.id, actor);
         }
@@ -101,26 +116,20 @@ async function mirrorSnmpMutation(
     const addTargetMatch = /^\/api\/devices\/([^/]+)\/targets$/.exec(target);
     if (addTargetMatch && method === "POST") {
       const deviceKey = decodeURIComponent(addTargetMatch[1] ?? "").slice(0, 120);
-      const oid = String(resObj.oid ?? bodyObj.oid ?? "").slice(0, 500);
+      const oid = String(resObj.oid ?? bodyObj.oid ?? "").slice(0, 200);
       const targetKey = String(resObj.id ?? bodyObj.id ?? `${deviceKey}:${oid}`).slice(0, 120);
       if (deviceKey && oid && targetKey) {
         const intervalRaw = Number(resObj.interval_sec ?? bodyObj.interval_sec ?? 60);
+        const rawLabel = resObj.label ?? resObj.name ?? bodyObj.label ?? bodyObj.name ?? oid;
         await snmpTargetModel.repository.upsert(
           { target_key: targetKey },
           {
             target_key: targetKey,
             device_key: deviceKey,
             oid,
-            name:
-              resObj.name != null
-                ? String(resObj.name).slice(0, 200)
-                : bodyObj.name != null
-                  ? String(bodyObj.name).slice(0, 200)
-                  : null,
-            poll_interval_sec:
-              Number.isInteger(intervalRaw) && intervalRaw > 0 ? intervalRaw : null,
+            label: String(rawLabel).slice(0, 200),
+            interval_sec: Number.isInteger(intervalRaw) && intervalRaw > 0 ? intervalRaw : 60,
             enabled: typeof resObj.enabled === "boolean" ? resObj.enabled : true,
-            metadata_json: null,
           },
           actor,
         );
@@ -132,14 +141,17 @@ async function mirrorSnmpMutation(
     if (delTargetMatch && method === "DELETE") {
       const targetKey = decodeURIComponent(delTargetMatch[1] ?? "").slice(0, 120);
       if (targetKey) {
-        const existing = await snmpTargetModel.repository.find({ target_key: targetKey });
+        const existing = await snmpTargetModel.repository.find(
+          { target_key: targetKey },
+          authReq.tenantId ? { tenantId: authReq.tenantId } : undefined,
+        );
         for (const row of existing) {
           await snmpTargetModel.repository.delete(row.id, actor);
         }
       }
     }
-  } catch {
-    // Best-effort ORM mirror for SNMP proxy operations
+  } catch (err) {
+    request.log.warn({ err, target, method }, "snmp ORM mirror failed");
   }
 }
 

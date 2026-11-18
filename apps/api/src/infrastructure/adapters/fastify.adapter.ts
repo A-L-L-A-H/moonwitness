@@ -24,8 +24,8 @@ import { commandCenterRoutes } from "../../interface/routes/command-center.route
 import { memoryRoutes } from "../../interface/routes/memory.routes";
 import { ensureProbesSchema } from "../../interface/routes/probes.persistence";
 import { probesRoutes } from "../../interface/routes/probes.routes";
-import { applyMigrations, createD1DatabaseFromOrm, getDb, syncModels } from "@moonwitness/orm";
-import { riotAiMigrations } from "../../interface/routes/riot-ai.persistence";
+import { createD1DatabaseFromOrm, getDb, syncModels } from "@moonwitness/orm";
+import { initializeRiotAiPersistence } from "../../interface/routes/riot-ai.persistence";
 import { workflowModel, alertModel } from "@moonwitness/addons/command-center";
 import { controlCommandModel } from "@moonwitness/addons/control";
 import { memoryRecordModel } from "@moonwitness/addons/ai";
@@ -175,7 +175,7 @@ export async function buildFastify(options: BootstrapOptions): Promise<FastifyIn
   }
 
   // Ensure remaining domain schemas exist before serving routes.
-  await applyMigrations(riotAiMigrations);
+  await initializeRiotAiPersistence();
   if (!options.authExternallyMounted) {
     await ensureAuthSchema();
     await seedBootstrapAdmin();

@@ -31,13 +31,12 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import {
   initDb,
   closeDb,
-  applyMigrations,
   createActorContext,
   defineModel,
 } from "@moonwitness/orm";
 import { z } from "zod";
 import { env } from "../../shared/env";
-import { riotAiMigrations } from "./riot-ai.persistence";
+import { initializeRiotAiPersistence } from "./riot-ai.persistence";
 import {
   setInferenceAuditWriterForTests,
   writeInferenceAudit,
@@ -102,7 +101,7 @@ describe("RIOT Intelligence inference routes", () => {
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
     await ensureAuthSchema();
-    await applyMigrations([...riotAiMigrations]);
+    await initializeRiotAiPersistence();
     const { riotAiRoutes } = await import("./riot-ai.routes");
     auditRecords.length = 0;
     setInferenceAuditWriterForTests();
@@ -122,7 +121,7 @@ describe("RIOT Intelligence inference routes", () => {
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
     await ensureAuthSchema();
-    await applyMigrations([...riotAiMigrations]);
+    await initializeRiotAiPersistence();
     const { riotAiRoutes } = await import("./riot-ai.routes");
     const server = Fastify({ logger: false });
     await server.register(riotAiRoutes);
@@ -139,7 +138,7 @@ describe("RIOT Intelligence inference routes", () => {
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
     await ensureAuthSchema();
-    await applyMigrations([...riotAiMigrations]);
+    await initializeRiotAiPersistence();
     const { riotAiRoutes } = await import("./riot-ai.routes");
     auditRecords.length = 0;
     setInferenceAuditWriterForTests();
