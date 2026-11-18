@@ -96,7 +96,7 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
                     y1={a.y * 0.7}
                     x2={b.x}
                     y2={b.y * 0.7}
-                    stroke="#2ea8ff"
+                    stroke="var(--accent)"
                     strokeWidth="0.25"
                     opacity="0.65"
                     pathLength={1}
@@ -110,7 +110,7 @@ export function CrewConstellation<W extends WitnessItem, S extends CrewStat>({
                   cx={w.x}
                   cy={w.y * 0.7}
                   r={selected.id === w.id ? 2.2 : 1.3}
-                  fill={selected.id === w.id ? "#ffd21f" : "#ff2d78"}
+                  fill={selected.id === w.id ? "var(--yellow)" : "var(--primary)"}
                 />
               ))}
             </svg>

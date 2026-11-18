@@ -2,7 +2,6 @@
 
 import { ArrowRight, TornTicket } from "../icons";
 import { cn } from "../lib/utils";
-import { ZineBadge } from "../primitives/zine-badge";
 import { ZineImage } from "../primitives/zine-image";
 import { defaultKindColors } from "./kind-colors";
 import { SkinOrnament } from "../primitives/tactile-hardware";
@@ -22,11 +21,14 @@ export interface EventCardData {
 }
 
 export function KindBadge({ kind, color }: { kind: string; color?: string }) {
-  const c = color ?? defaultKindColors[kind] ?? "#9ca3af";
+  const c = color ?? defaultKindColors[kind] ?? "var(--muted-foreground)";
   return (
-    <ZineBadge color={c} dark={kind === "SIGNAL"}>
+    <span
+      className="inline-flex items-center border border-[var(--border)] bg-[var(--card)]/95 px-2 py-0.5 font-brush text-[10px] text-[var(--foreground)] shadow-sm"
+      style={{ borderLeftWidth: "3px", borderLeftColor: c }}
+    >
       {kind}
-    </ZineBadge>
+    </span>
   );
 }
 

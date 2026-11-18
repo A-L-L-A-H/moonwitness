@@ -46,7 +46,13 @@ export function ModuleCard<T extends ModuleItem>({ module, onOpen, art }: Module
       ) : null}
       <span
         className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md"
-        style={{ background: module.color, color: module.color === "#ffd21f" ? "#111" : "#fff" }}
+        style={{
+          background: module.color,
+          color:
+            module.color === "var(--yellow)" || module.color === "var(--primary)"
+              ? "var(--primary-foreground)"
+              : "var(--brand-white)",
+        }}
       >
         <ModuleGlyph icon={module.icon} className="h-6 w-6" />
       </span>
