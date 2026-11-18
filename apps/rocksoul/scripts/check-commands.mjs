@@ -7,6 +7,7 @@ const commandFiles = [
   "src-tauri/src/commands/issues.rs",
   "src-tauri/src/commands/milestones.rs",
   "src-tauri/src/commands/monitor.rs",
+  "src-tauri/src/commands/orchestration.rs",
   "src-tauri/src/commands/projects.rs",
   "src-tauri/src/commands/repositories.rs",
   "src-tauri/src/commands/s3_gateway.rs",
@@ -113,6 +114,11 @@ const commandArgs = {
   cancel_supervised_agent_run: ["run_id"],
   get_agent_execution_steps: ["run_id"],
   evaluate_agent_worktree_evidence: ["worktree_path"],
+  create_orchestration_plan: ["objective", "mode", "concurrency_limit", "budget_seconds"],
+  add_orchestration_tasks: ["plan_id", "tasks_json"],
+  get_orchestration_tasks: ["plan_id"],
+  update_orchestration_plan_status: ["plan_id", "status"],
+  step_orchestration_cycle: ["plan_id"],
 };
 const argumentInterfaces = new Map();
 for (const [, name, body] of contracts.matchAll(/export interface ([A-Za-z][A-Za-z0-9]*) \{([\s\S]*?)\n\}/g)) {

@@ -257,8 +257,13 @@ fn migrate(connection: &Connection) -> Result<(), String> {
             .execute_batch(include_str!("../migrations/005_agent_execution.sql"))
             .map_err(|error| error.to_string())?;
     }
+    if version < 6 {
+        transaction
+            .execute_batch(include_str!("../migrations/006_orchestration.sql"))
+            .map_err(|error| error.to_string())?;
+    }
     transaction
-        .pragma_update(None, "user_version", 5)
+        .pragma_update(None, "user_version", 6)
         .map_err(|error| error.to_string())?;
     transaction.commit().map_err(|error| error.to_string())
 }
@@ -395,7 +400,7 @@ mod tests {
             .expect("cloud backup settings table should exist");
         assert_eq!(issue_title, "Existing issue");
         assert_eq!(backup_table, 1);
-        assert_eq!(version, 5);
+        assert_eq!(version, 6);
         for table in [
             "memories",
             "memory_corrections",
@@ -406,6 +411,8 @@ mod tests {
             "lessons",
             "agent_execution_steps",
             "agent_supervisors",
+            "orchestration_plans",
+            "orchestration_tasks",
         ] {
             let exists: i64 = connection
                 .query_row(
@@ -481,7 +488,7 @@ mod tests {
             .query_row("PRAGMA user_version", [], |row| row.get(0))
             .expect("schema version should load");
         assert_eq!(closed_at_columns, 1);
-        assert_eq!(version, 5);
+        assert_eq!(version, 6);
         let title: String = connection
             .query_row("SELECT title FROM issues WHERE id = 'i1'", [], |row| {
                 row.get(0)
