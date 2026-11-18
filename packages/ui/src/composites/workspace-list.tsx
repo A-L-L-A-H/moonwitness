@@ -35,7 +35,7 @@ export function WorkspaceList<T extends WorkspaceItem>({
           <span
             aria-hidden
             className="h-2 w-2 shrink-0 rounded-full"
-            style={{ background: defaultKindColors[item.kind] ?? "#9ca3af" }}
+            style={{ background: defaultKindColors[item.kind] ?? "var(--muted-foreground)" }}
           />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm text-[var(--foreground)]">{item.title}</span>

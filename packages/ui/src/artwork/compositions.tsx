@@ -10,8 +10,12 @@ export function HeroIllustration({
   title = "Cosmic Horizon Sanctuary",
   className = "",
 }: HeroIllustrationProps) {
-  const { surface, border, accent, text } = getDnaWorld("01-imperium-lumen").palette;
-  const lunarAccent = getDnaWorld("02-lunar-chronicles").palette.accent;
+  const lumen = getDnaWorld("01-imperium-lumen").palette;
+  const surface = `var(--card, ${lumen.surface})`;
+  const border = `var(--border, ${lumen.border})`;
+  const accent = `var(--primary, ${lumen.accent})`;
+  const text = `var(--foreground, ${lumen.text})`;
+  const lunarAccent = `var(--accent, ${getDnaWorld("02-lunar-chronicles").palette.accent})`;
   return (
     <svg
       viewBox="0 0 320 140"
@@ -93,7 +97,12 @@ export interface WorldArtworkProps {
  */
 export function WorldArtwork({ dnaId, className = "" }: WorldArtworkProps) {
   const world = getDnaWorld(dnaId);
-  const { canvas, surfaceElevated, border, accent, text } = world.palette;
+  const p = world.palette;
+  const canvas = `var(--dna-canvas, ${p.canvas})`;
+  const surfaceElevated = `var(--dna-surface-elevated, ${p.surfaceElevated})`;
+  const border = `var(--dna-border, ${p.border})`;
+  const accent = `var(--dna-accent, ${p.accent})`;
+  const text = `var(--dna-text, ${p.text})`;
 
   return (
     <svg

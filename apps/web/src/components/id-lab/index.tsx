@@ -11,6 +11,8 @@ import {
   type PaletteName,
 } from "@moonwitness/avatars";
 import {
+  CutoutArtwork,
+  DnaBrandLogo,
   SkinBackdrop,
   SkinOrnament,
   Sticker,
@@ -320,7 +322,8 @@ export function IdLab() {
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-3">
-          <div>
+          <div className="space-y-2">
+            <DnaBrandLogo id="id-lab" variant="stamp" size={32} decorative />
             <h1 className="font-brush text-3xl text-[var(--foreground)] sm:text-4xl">
               ID <span className="text-[var(--primary)]">LAB</span>
             </h1>
@@ -343,6 +346,11 @@ export function IdLab() {
               <Tape className="-top-3 left-10 -rotate-3" />
               <div className="halftone relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-md bg-[var(--ink)] p-8">
                 <SkinBackdrop seed={effectiveSeed.length} />
+                <CutoutArtwork
+                  id="hardware-key"
+                  decorative
+                  className="pointer-events-none absolute right-3 bottom-3 h-20 w-20 text-[var(--primary)]/20"
+                />
                 <div
                   className="pointer-events-none absolute inset-0 opacity-40"
                   style={{

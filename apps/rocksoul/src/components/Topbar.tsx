@@ -1,7 +1,7 @@
 import React from "react";
-import { Activity, ChevronDown, Command, FolderGit2, LogIn, LogOut, Palette, RefreshCw, Settings2 } from "lucide-react";
+import { Activity, Command, FolderGit2, LogIn, RefreshCw } from "lucide-react";
 import { DnaBrandLogo, listPresets, useSkin, type SkinName } from "@moonwitness/ui";
-import { CrimsonCrownSvg } from "./ui/RocksoulVectors";
+import { ChevronDown, LogOut, Settings, SkinPalette, Sun } from "@moonwitness/ui/icons";
 import type { Repository } from "../lib/contracts";
 
 const ROCKSOUL_PRIORITY_SKINS: readonly SkinName[] = ["riot", "technical", "editorial"];
@@ -45,15 +45,15 @@ export default function Topbar({
   onSignIn,
   onSignOut,
 }: TopbarProps) {
-  const { skin, setSkin } = useSkin();
+  const { skin, setSkin, resolvedMode, setMode } = useSkin();
   const nextSkin =
     ROCKSOUL_SKIN_CYCLE[(ROCKSOUL_SKIN_CYCLE.indexOf(skin) + 1) % ROCKSOUL_SKIN_CYCLE.length] ?? "riot";
+  const nextMode = resolvedMode === "dark" ? "light" : "dark";
 
   return (
     <header className="topbar">
       <div className="topbar-brand">
         <DnaBrandLogo id="03-rocksoul" variant="mark" size={24} decorative />
-        <CrimsonCrownSvg className="brand-crown-img" />
         <span>
           ROCKSOUL <b>- DX</b>
         </span>
@@ -116,10 +116,31 @@ export default function Topbar({
           title={`Skin: ${skin} → click for ${nextSkin}`}
           onClick={() => setSkin(nextSkin)}
         >
-          <Palette size={13} /> {skin.toUpperCase()}
+          <SkinPalette size={13} /> {skin.toUpperCase()}
+        </button>
+        <select
+          aria-label="Select skin preset"
+          className="shortcut"
+          value={skin}
+          onChange={(e) => setSkin(e.target.value as SkinName)}
+        >
+          {ROCKSOUL_SKIN_CYCLE.map((preset) => (
+            <option key={preset} value={preset}>
+              {preset.toUpperCase()}
+            </option>
+          ))}
+        </select>
+        <button
+          type="button"
+          className="icon-button"
+          aria-label={`Switch to ${nextMode} theme`}
+          title={`Current: ${resolvedMode} — click for ${nextMode}`}
+          onClick={() => setMode(nextMode)}
+        >
+          <Sun size={16} />
         </button>
         <button className="icon-button" aria-label="Settings" onClick={onSettings}>
-          <Settings2 size={19} />
+          <Settings size={19} />
         </button>
         {identity ? (
           <div className="identity-chip">

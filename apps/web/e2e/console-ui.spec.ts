@@ -321,7 +321,9 @@ for (const viewport of viewports) {
       for (const preset of presets) {
         await switcher.click();
         await expect(switcher).toHaveAttribute("aria-expanded", "true");
-        await page.getByRole("button", { name: new RegExp(`^${preset.label}\\b`, "i") }).click();
+        await page
+          .locator(`[data-mw-skin-switcher-menu="true"] [data-mw-skin-option="${preset.id}"]`)
+          .click();
         await expect(switcher).toHaveAttribute("aria-expanded", "false");
         expect(await page.evaluate(() => localStorage.getItem("mw-skin"))).toBe(preset.id);
         for (const [index, surface] of surfaces.entries()) {

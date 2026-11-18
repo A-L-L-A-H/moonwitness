@@ -11,8 +11,11 @@ import {
   encryptBackupFile,
   getDb,
   initDb,
+  initPostgresDb,
+  listDatabaseTables,
   restoreDatabase,
   verifyIntegrity,
+  type PoolLike,
 } from "../index.js";
 
 const dirs: string[] = [];
@@ -115,5 +118,71 @@ describe("backup and restore", () => {
   it("rejects empty backup/restore paths", async () => {
     await expect(backupDatabase("")).rejects.toThrow();
     await expect(restoreDatabase("", "x.db")).rejects.toThrow();
+  });
+
+  it("verifies PostgreSQL index & constraint integrity and dispatches pg_dump/pg_restore", async () => {
+    let invalidIndexes: Array<{ index_name: string }> = [];
+    let unvalidatedConstraints: Array<{ constraint_name: string }> = [];
+
+    const mockPool: PoolLike = {
+      query: async (sql: string) => {
+        if (sql.includes("SELECT 1 AS ok")) {
+          return { rows: [{ ok: 1 }], rowCount: 1 };
+        }
+        if (sql.includes("pg_index")) {
+          return { rows: invalidIndexes, rowCount: invalidIndexes.length };
+        }
+        if (sql.includes("pg_constraint")) {
+          return { rows: unvalidatedConstraints, rowCount: unvalidatedConstraints.length };
+        }
+        if (sql.includes("information_schema.tables")) {
+          return { rows: [{ table_name: "users" }, { table_name: "ir_addons" }], rowCount: 2 };
+        }
+        return { rows: [], rowCount: 0 };
+      },
+      connect: async () => ({
+        query: async () => ({ rows: [], rowCount: 0 }),
+        release: () => {},
+      }),
+      end: async () => {},
+    };
+
+    const pgUrl = "postgres://moonwitness:secret@localhost:5432/moonwitness";
+    await initPostgresDb(pgUrl, mockPool);
+
+    expect(await listDatabaseTables()).toEqual(["users", "ir_addons"]);
+    expect(await verifyIntegrity()).toEqual({ ok: true, errors: [] });
+
+    invalidIndexes = [{ index_name: "idx_broken" }];
+    unvalidatedConstraints = [{ constraint_name: "fk_broken" }];
+    const broken = await verifyIntegrity();
+    expect(broken.ok).toBe(false);
+    expect(broken.errors).toEqual([
+      "invalid or unready postgres index: idx_broken",
+      "unvalidated postgres constraint: fk_broken",
+    ]);
+
+    const invocations: Array<{ command: string; args: string[] }> = [];
+    await backupDatabase("/tmp/mw.pgdump", {
+      runCommand: async (command, args) => {
+        invocations.push({ command, args });
+      },
+    });
+    await restoreDatabase("/tmp/mw.pgdump", pgUrl, {
+      runCommand: async (command, args) => {
+        invocations.push({ command, args });
+      },
+    });
+
+    expect(invocations).toEqual([
+      {
+        command: "pg_dump",
+        args: ["--format=custom", "--no-owner", "--no-acl", "-f", "/tmp/mw.pgdump", pgUrl],
+      },
+      {
+        command: "pg_restore",
+        args: ["--clean", "--if-exists", "--no-owner", "--no-acl", "-d", pgUrl, "/tmp/mw.pgdump"],
+      },
+    ]);
   });
 });

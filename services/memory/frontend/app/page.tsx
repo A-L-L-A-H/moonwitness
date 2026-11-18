@@ -878,6 +878,73 @@ export default function Home() {
                     tone={counts.failed_jobs ? "orange" : "default"}
                   />
                 </section>
+                <div
+                  className="deck-readout__telemetry"
+                  style={{
+                    marginTop: "12px",
+                    border: "1px solid var(--line)",
+                    background: "var(--field)",
+                    padding: "10px 12px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: "10px",
+                      fontFamily: "var(--mono-type)",
+                      color: "var(--muted)",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <span>PIPELINE DISTRIBUTION</span>
+                    <span>
+                      {counts.active_jobs} RUN · {counts.failed_jobs} ERR ·{" "}
+                      {Math.max(0, counts.archives)} ARCHIVES
+                    </span>
+                  </div>
+                  <svg
+                    role="img"
+                    aria-label="Overview memory telemetry bars"
+                    viewBox="0 0 240 44"
+                    width="100%"
+                    height="44"
+                    style={{ display: "block" }}
+                  >
+                    {[
+                      { label: "ARCH", value: counts.archives, fill: "var(--accent)" },
+                      { label: "MSG", value: counts.messages, fill: "var(--ink)" },
+                      { label: "MEM", value: counts.knowledge, fill: "var(--accent)" },
+                      { label: "ACT", value: counts.active_jobs, fill: "var(--focus)" },
+                      { label: "ERR", value: counts.failed_jobs, fill: "var(--signal)" },
+                    ].map((bar, idx) => {
+                      const peak = Math.max(
+                        1,
+                        counts.archives,
+                        counts.messages,
+                        counts.knowledge,
+                        counts.active_jobs,
+                        counts.failed_jobs,
+                      );
+                      const h = Math.max(3, Math.round((bar.value / peak) * 24));
+                      const x = idx * 48 + 8;
+                      return (
+                        <g key={bar.label}>
+                          <rect x={x} y={28 - h} width={28} height={h} rx={2} fill={bar.fill} />
+                          <text
+                            x={x + 14}
+                            y={40}
+                            textAnchor="middle"
+                            fontSize={8}
+                            fill="var(--muted)"
+                          >
+                            {bar.label}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </svg>
+                </div>
                 <div className="deck-readout__systems" aria-label="System integration status">
                   <EngineStatus
                     label="API CORE"
@@ -1216,6 +1283,45 @@ export default function Home() {
                     </strong>
                     <span>COMPLETE</span>
                   </div>
+                </div>
+                <div
+                  style={{
+                    margin: "8px 0 12px",
+                    border: "1px solid var(--line)",
+                    background: "var(--field)",
+                    padding: "8px 10px",
+                  }}
+                >
+                  <svg
+                    role="img"
+                    aria-label="Queue stage distribution sparkline"
+                    viewBox="0 0 210 36"
+                    width="100%"
+                    height="36"
+                    style={{ display: "block" }}
+                  >
+                    {[
+                      { label: "RUN", val: runningJobs, fill: "var(--accent)" },
+                      { label: "ATTN", val: counts.failed_jobs, fill: "var(--signal)" },
+                      {
+                        label: "DONE",
+                        val: jobs.filter((job) => job.status === "complete").length,
+                        fill: "var(--ink)",
+                      },
+                    ].map((stage, idx) => {
+                      const peak = Math.max(1, jobs.length, runningJobs, counts.failed_jobs);
+                      const w = Math.max(6, Math.round((stage.val / peak) * 140));
+                      const y = idx * 12 + 2;
+                      return (
+                        <g key={stage.label}>
+                          <text x={2} y={y + 8} fontSize={8} fill="var(--muted)">
+                            {stage.label}
+                          </text>
+                          <rect x={38} y={y} width={w} height={8} rx={2} fill={stage.fill} />
+                        </g>
+                      );
+                    })}
+                  </svg>
                 </div>
                 <div className="queue-filters" role="group" aria-label="Filter worker jobs">
                   {(["all", "active", "attention", "complete"] as QueueFilter[]).map((filter) => (

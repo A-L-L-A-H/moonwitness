@@ -92,7 +92,7 @@ function ArchiveStrip() {
               className="archive-preview photocopy-grit group relative w-64 shrink-0 snap-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:rotate-1"
             >
               <Staple className="top-1 left-2 -rotate-12" />
-              <div className="relative h-32 overflow-hidden bg-black/60">
+              <div className="relative h-32 overflow-hidden bg-[var(--background)]">
                 <Image
                   src={artSrc(ev.image)}
                   alt=""
@@ -102,15 +102,12 @@ function ArchiveStrip() {
                   sizes="260px"
                 />
                 <span
-                  className="absolute left-2 top-2 px-2.5 py-0.5 font-brush text-[11px] shadow-[2px_2px_0_rgba(0,0,0,0.8)]"
-                  style={{
-                    background: kindColors[ev.kind],
-                    color: ev.kind === "SIGNAL" ? "#111" : "#fff",
-                  }}
+                  className="absolute left-2 top-2 border border-[var(--border)] border-l-4 bg-[var(--card)]/95 px-2 py-0.5 font-brush text-[11px] text-[var(--foreground)] shadow-[2px_2px_0_rgba(0,0,0,0.45)]"
+                  style={{ borderLeftColor: kindColors[ev.kind] }}
                 >
                   {ev.kind}
                 </span>
-                <span className="absolute bottom-1 right-2 font-mono text-[9px] text-white/80 bg-black/80 px-1.5 py-0.5">
+                <span className="absolute bottom-1 right-2 border border-[var(--border)] bg-[var(--card)]/90 px-1.5 py-0.5 font-mono text-[9px] text-[var(--foreground)]">
                   {ev.date}
                 </span>
               </div>

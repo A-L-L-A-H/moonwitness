@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { SRGBL_V8_STAGES } from "@moonwitness/canon";
-import { RadialGauge, SkinOrnament, Sparkline } from "@moonwitness/ui";
+import { CutoutArtwork, RadialGauge, SkinOrnament, Sparkline } from "@moonwitness/ui";
 import { MtimeHorizon } from "@moonwitness/ui/icons";
 import {
   useRiotAiChat,
@@ -259,7 +259,17 @@ export function IntelligenceDashboard({
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-8">
-      <header className="relative flex flex-col justify-between gap-5 border-b-2 border-[var(--border)] pb-6 sm:flex-row sm:items-end">
+      <header className="relative overflow-hidden flex flex-col justify-between gap-5 border-b-2 border-[var(--border)] pb-6 sm:flex-row sm:items-end">
+        <CutoutArtwork
+          id="oscilloscope-crt"
+          decorative
+          className="pointer-events-none absolute right-24 top-0 hidden h-24 w-24 text-[var(--primary)]/15 md:block"
+        />
+        <CutoutArtwork
+          id="radar-sweep"
+          decorative
+          className="pointer-events-none absolute right-2 top-0 hidden h-24 w-24 text-[var(--accent)]/15 lg:block"
+        />
         <div>
           <p className="inline-flex items-center gap-2 font-mono text-[10px] tracking-[0.3em] text-[var(--primary)]">
             <MtimeHorizon className="h-4 w-4" />

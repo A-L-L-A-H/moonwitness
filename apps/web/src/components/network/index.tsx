@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { CableCoilArt, Tape, ZineBadge, ZineCard, ZineCardRough, ZineInput } from "@moonwitness/ui";
+import {
+  CableCoilArt,
+  CutoutArtwork,
+  Tape,
+  ZineBadge,
+  ZineCard,
+  ZineCardRough,
+  ZineInput,
+} from "@moonwitness/ui";
 import { Crown, VpnTunnel } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { ControlGate } from "@/components/control/gate";
@@ -311,7 +319,12 @@ function NetworkDashboard() {
       search={{ value: query, onChange: setQuery, placeholder: "Filter peer…" }}
     >
       <div className="space-y-6 px-4 py-6 sm:px-8">
-        <header className="flex flex-wrap items-end justify-between gap-3">
+        <header className="relative overflow-hidden flex flex-wrap items-end justify-between gap-3">
+          <CutoutArtwork
+            id="cipher-wheel"
+            decorative
+            className="pointer-events-none absolute right-24 -top-2 hidden h-20 w-20 text-[var(--primary)]/15 sm:block"
+          />
           <div>
             <h1 className="font-brush text-3xl text-[var(--foreground)] sm:text-4xl">
               VPN <span className="text-[var(--primary)]">TUNNEL</span>

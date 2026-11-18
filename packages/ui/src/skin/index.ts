@@ -116,10 +116,10 @@ const defaultSkinContext: SkinContextValue = {
   preset: skinPresets.default,
   tokens: initialResolvedTokens,
   cssVariables: canonicalTokensToCssVariables(initialResolvedTokens),
-  setSkin: () => {},
-  setDna: () => {},
-  setMode: () => {},
-  setDensity: () => {},
+  setSkin: () => { },
+  setDna: () => { },
+  setMode: () => { },
+  setDensity: () => { },
   getClasses: () => "",
   effects: "",
 };
@@ -859,3 +859,8 @@ export {
   type SkinScopeProps,
   type SkinRootProps,
 } from "./dna-worlds";
+export {
+  MOONFRAME_SKIN_ALIAS_MAP,
+  resolveMoonframeSkinAlias,
+  type MoonframeLegacySkinId,
+} from "./presets";

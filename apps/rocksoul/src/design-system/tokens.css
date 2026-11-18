@@ -149,6 +149,34 @@
   --container-full: 100%;
 }
 
+/* === LIGHT THEME OVERRIDES === */
+:root[data-theme="light"] {
+  --color-black: #ede7d8;
+  --color-black-soft: #f6f1e4;
+  --color-charcoal: #ffffff;
+  --color-charcoal-2: #e7dfd0;
+  --color-panel: #f7f3e8;
+  --color-panel-2: #ebe4d5;
+  --color-surface-3: #e3dbca;
+  --color-surface-hover: #dcd4c2;
+  --color-paper: #171614;
+  --color-paper-soft: #3a362f;
+  --color-dirty-white: #171614;
+  --color-muted: #5c574d;
+  --color-line: #b9b09c;
+  --color-line-soft: #cfc6b2;
+  --color-border-strong: #8d8471;
+  --color-lime: #4f6400;
+  --color-lime-dim: #415200;
+  --color-lime-bright: #5e7700;
+  --color-orange: #b8330d;
+  --color-orange-dim: #9e2908;
+  --color-pink: #b0217b;
+  --color-purple: #4d3fd8;
+  --color-clean: #18794e;
+  --color-critical: #c81e1e;
+}
+
 /* === REDUCED MOTION === */
 @media (prefers-reduced-motion: reduce) {
   :root {

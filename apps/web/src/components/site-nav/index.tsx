@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Crown, GlobeIcon, Menu, SearchIcon, X } from "@moonwitness/ui/icons";
+import { GlobeIcon, Menu, SearchIcon, X } from "@moonwitness/ui/icons";
 import { Button, DnaBrandLogo, useSkin, type BrandLogoId } from "@moonwitness/ui";
 import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { SkinSwitcher } from "@/components/skin-switcher";
@@ -71,7 +71,6 @@ export function SiteNav() {
               size={28}
               decorative
             />
-            <Crown className="hidden h-5 w-8 text-[var(--primary)] sm:inline-block" />
             <span className="font-brush text-xl tracking-wide text-[var(--foreground)] sm:text-2xl">
               MOON<span className="text-[var(--primary)]">WITNESS</span>
             </span>

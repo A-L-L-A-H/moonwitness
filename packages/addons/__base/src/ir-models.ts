@@ -8,8 +8,11 @@ export const irAddonSchema = z.object({
   category: z.string().max(80).default("general"),
   depends_json: z.string().default("[]"),
   provides_json: z.string().default("{}"),
+  capabilities_json: z.string().default("[]"),
   schema_hash: z.string().default(""),
   state: z.enum(["installed", "disabled", "upgrade_pending", "error"]).default("installed"),
+  signature_status: z.enum(["unsigned", "verified", "invalid"]).default("unsigned"),
+  signature_key_id: z.string().nullable().default(null),
   auto_install: z.boolean().default(true),
   last_error: z.string().nullable().default(null),
 });

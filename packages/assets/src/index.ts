@@ -217,65 +217,179 @@ export type WorldPlateKey =
   | "world-mycelium"
   | "world-nusantara"
   | "story-archive"
-  | "story-transmission";
+  | "story-transmission"
+  | "astrolabe-orrery-plate"
+  | "celestial-gate-bg"
+  | "gate-crowd-moon"
+  | "meridian-sky-chart"
+  | "nonagram-sanctuary-dial"
+  | "sidra-lote-constellation"
+  | "story-plate-01"
+  | "story-plate-02"
+  | "story-plate-03"
+  | "story-plate-04"
+  | "tawhid-100center-orb"
+  | "world-angel"
+  | "world-arsy"
+  | "world-crayon"
+  | "world-moonwitness"
+  | "world-mythos"
+  | "world-qalam"
+  | "world-sidra"
+  | "world-sincan";
 
 export interface WorldPlateEntry {
   key: WorldPlateKey;
   src: string;
+  srcSet: string;
+  fallback: string;
+  fallbackSrcSet: string;
   alt: string;
+  width: number;
+  position?: string | undefined;
+}
+
+function plateEntry(
+  key: WorldPlateKey,
+  fileBase: string,
+  width: number,
+  alt: string,
+  position?: string,
+): WorldPlateEntry {
+  const widths = effectiveWidths(width);
+  const largest = widths[widths.length - 1] ?? width;
+  return {
+    key,
+    src: `/art/${fileBase}.webp`,
+    srcSet: srcSetFor(fileBase, "avif", widths),
+    fallback: `/art/${fileBase}-${largest}.webp`,
+    fallbackSrcSet: srcSetFor(fileBase, "webp", widths),
+    alt,
+    width,
+    ...(position !== undefined ? { position } : {}),
+  };
 }
 
 export const WORLD_ART_PLATES: Record<WorldPlateKey, WorldPlateEntry> = {
-  "sanctuary-hero": {
-    key: "sanctuary-hero",
-    src: "/art/celestial-gate-bg.webp",
-    alt: "Gerbang kosmik MoonWitness",
-  },
-  "world-imperium": {
-    key: "world-imperium",
-    src: "/art/astrolabe-orrery-plate.webp",
-    alt: "Plate astrolabe Imperium Lumen",
-  },
-  "world-lunar": {
-    key: "world-lunar",
-    src: "/art/world-moonwitness.webp",
-    alt: "Dunia Lunar Chronicles MoonWitness",
-  },
-  "world-rocksoul": {
-    key: "world-rocksoul",
-    src: "/art/world-rocksoul.webp",
-    alt: "Dunia audio dan frekuensi Rocksoul",
-  },
-  "world-nexus": {
-    key: "world-nexus",
-    src: "/art/world-arsy.webp",
-    alt: "Topologi Nexus Paradox dan Arsy",
-  },
-  "world-riot": {
-    key: "world-riot",
-    src: "/art/gate-crowd-moon.webp",
-    alt: "Poster kerumunan dan bulan Riot Anarchy",
-  },
-  "world-mycelium": {
-    key: "world-mycelium",
-    src: "/art/world-sidra.webp",
-    alt: "Jaringan hidup Mycelium Sidra",
-  },
-  "world-nusantara": {
-    key: "world-nusantara",
-    src: "/art/world-sincan.webp",
-    alt: "Simpul Nusantara warisan kepulauan",
-  },
-  "story-archive": {
-    key: "story-archive",
-    src: "/art/story-plate-01.webp",
-    alt: "Lempeng kronik arsip pertama",
-  },
-  "story-transmission": {
-    key: "story-transmission",
-    src: "/art/story-plate-04.webp",
-    alt: "Lempeng transmisi sinyal malam",
-  },
+  "sanctuary-hero": plateEntry(
+    "sanctuary-hero",
+    "celestial-gate-bg",
+    1600,
+    "Gerbang kosmik MoonWitness",
+  ),
+  "world-imperium": plateEntry(
+    "world-imperium",
+    "astrolabe-orrery-plate",
+    880,
+    "Plate astrolabe Imperium Lumen",
+  ),
+  "world-lunar": plateEntry(
+    "world-lunar",
+    "world-moonwitness",
+    480,
+    "Dunia Lunar Chronicles MoonWitness",
+  ),
+  "world-rocksoul": plateEntry(
+    "world-rocksoul",
+    "world-rocksoul",
+    480,
+    "Dunia audio dan frekuensi Rocksoul",
+  ),
+  "world-nexus": plateEntry("world-nexus", "world-arsy", 480, "Topologi Nexus Paradox dan Arsy"),
+  "world-riot": plateEntry(
+    "world-riot",
+    "gate-crowd-moon",
+    1600,
+    "Poster kerumunan dan bulan Riot Anarchy",
+  ),
+  "world-mycelium": plateEntry(
+    "world-mycelium",
+    "world-sidra",
+    480,
+    "Jaringan hidup Mycelium Sidra",
+  ),
+  "world-nusantara": plateEntry(
+    "world-nusantara",
+    "world-sincan",
+    480,
+    "Simpul Nusantara warisan kepulauan",
+  ),
+  "story-archive": plateEntry(
+    "story-archive",
+    "story-plate-01",
+    960,
+    "Lempeng kronik arsip pertama",
+  ),
+  "story-transmission": plateEntry(
+    "story-transmission",
+    "story-plate-04",
+    960,
+    "Lempeng transmisi sinyal malam",
+  ),
+  "astrolabe-orrery-plate": plateEntry(
+    "astrolabe-orrery-plate",
+    "astrolabe-orrery-plate",
+    880,
+    "Lempeng mekanik astrolabe orrery Imperium Lumen",
+  ),
+  "celestial-gate-bg": plateEntry(
+    "celestial-gate-bg",
+    "celestial-gate-bg",
+    1600,
+    "Latar gerbang kosmik sanctuary MoonWitness",
+  ),
+  "gate-crowd-moon": plateEntry(
+    "gate-crowd-moon",
+    "gate-crowd-moon",
+    1600,
+    "Poster kerumunan dan purnama di gerbang kota",
+  ),
+  "meridian-sky-chart": plateEntry(
+    "meridian-sky-chart",
+    "meridian-sky-chart",
+    960,
+    "Peta bintang dan garis meridian langit observatorium",
+  ),
+  "nonagram-sanctuary-dial": plateEntry(
+    "nonagram-sanctuary-dial",
+    "nonagram-sanctuary-dial",
+    880,
+    "Dial nonagram geometris sembilan cluster sanctuary",
+  ),
+  "sidra-lote-constellation": plateEntry(
+    "sidra-lote-constellation",
+    "sidra-lote-constellation",
+    960,
+    "Konstelasi jaringan daun Sidra Lote-Tree",
+  ),
+  "story-plate-01": plateEntry("story-plate-01", "story-plate-01", 960, "Lempeng naratif DX 01"),
+  "story-plate-02": plateEntry("story-plate-02", "story-plate-02", 960, "Lempeng naratif DX 02"),
+  "story-plate-03": plateEntry("story-plate-03", "story-plate-03", 960, "Lempeng naratif DX 03"),
+  "story-plate-04": plateEntry("story-plate-04", "story-plate-04", 960, "Lempeng naratif DX 04"),
+  "tawhid-100center-orb": plateEntry(
+    "tawhid-100center-orb",
+    "tawhid-100center-orb",
+    720,
+    "Orb konsentris 100CENTER keliling pusat tunggal",
+  ),
+  "world-angel": plateEntry("world-angel", "world-angel", 480, "Kartu dunia Angel With Shotgun"),
+  "world-arsy": plateEntry("world-arsy", "world-arsy", 480, "Kartu dunia Arsy Control Plane"),
+  "world-crayon": plateEntry("world-crayon", "world-crayon", 480, "Kartu dunia Crayon Chronicle"),
+  "world-moonwitness": plateEntry(
+    "world-moonwitness",
+    "world-moonwitness",
+    480,
+    "Kartu dunia MoonWitness Flagship",
+  ),
+  "world-mythos": plateEntry("world-mythos", "world-mythos", 480, "Kartu dunia Mythos Folklore"),
+  "world-qalam": plateEntry(
+    "world-qalam",
+    "world-qalam",
+    480,
+    "Kartu dunia Qalam Scripture Studio",
+  ),
+  "world-sidra": plateEntry("world-sidra", "world-sidra", 480, "Kartu dunia Sidra Mycelium"),
+  "world-sincan": plateEntry("world-sincan", "world-sincan", 480, "Kartu dunia Sin Can Mirror"),
 };
 
 export type DnaWorldAssetId =
@@ -434,15 +548,33 @@ export interface DesignLibraryCategorySummary {
 
 export const DESIGN_LIBRARY_CATALOGUE = {
   packId: "moonwitness-design-library-v1",
-  totalAssets: 196,
+  totalAssets: 216,
   categories: [
     { id: "brand", label: "Brand & Seals", count: 18 },
     { id: "ui-kit", label: "HUD & UI Kit", count: 24 },
     { id: "icon-pack", label: "Sovereign Icons", count: 32 },
     { id: "avatar-pack", label: "Witness Avatars", count: 16 },
-    { id: "illustrations", label: "World Illustrations", count: 25 },
+    { id: "illustrations", label: "World Illustrations", count: 45 },
     { id: "wallpapers", label: "Screen Wallpapers", count: 24 },
     { id: "textures", label: "Surface Textures", count: 33 },
     { id: "cutouts", label: "Isolated Cutouts", count: 24 },
   ] satisfies readonly DesignLibraryCategorySummary[],
 } as const;
+
+export function resolveArtworkEntry(key: string):
+  | {
+      srcSet: string;
+      fallback: string;
+      fallbackSrcSet: string;
+      alt: string;
+      position?: string | undefined;
+    }
+  | undefined {
+  if (key in ARTWORK) {
+    return ARTWORK[key as ArtKey];
+  }
+  if (key in WORLD_ART_PLATES) {
+    return WORLD_ART_PLATES[key as WorldPlateKey];
+  }
+  return undefined;
+}

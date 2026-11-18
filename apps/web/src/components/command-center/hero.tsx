@@ -1,29 +1,35 @@
-import Image from "next/image";
+"use client";
+
 import Link from "next/link";
 import { Crown, Splatter, Star4 } from "@moonwitness/ui/icons";
 import {
+  CutoutArtwork,
   DistressedSticker,
+  DnaBrandLogo,
+  SkinArtworkFrame,
   Staple,
   TactileTape,
   Button,
   CornerBrackets,
   Gauge,
+  useSkin,
 } from "@moonwitness/ui";
 import type { Project } from "@moonwitness/types";
-import { artSrc } from "@/lib/art";
 import { AtmosphereField } from "@/components/atmosphere";
 
 export function CommandHero({ project }: { project: Project }) {
+  const { skin } = useSkin();
   return (
     <div className="grain relative overflow-hidden border-b-2 border-[var(--border)] bg-[var(--ink)]">
-      <Image
-        src={artSrc("shadow-command-hero")}
-        alt=""
-        fill
-        priority
-        quality={82}
+      <SkinArtworkFrame
+        skin={skin}
+        artKey={skin === "default" ? "shadow-command-hero" : undefined}
+        showCutout={false}
+        eager
         sizes="(max-width: 1024px) 100vw, 80vw"
-        className="object-cover object-[72%_42%] filter contrast-110"
+        className="pointer-events-none absolute inset-0"
+        plateClassName="object-cover object-[72%_42%] opacity-85 filter contrast-110"
+        scrimClassName="bg-transparent"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-[color-mix(in_srgb,var(--ink)_96%,transparent)] via-[color-mix(in_srgb,var(--ink)_70%,transparent)] to-[color-mix(in_srgb,var(--ink)_8%,transparent)]" />
       <div className="absolute inset-0 bg-gradient-to-t from-[color-mix(in_srgb,var(--ink)_90%,transparent)] via-transparent to-transparent" />
@@ -41,10 +47,16 @@ export function CommandHero({ project }: { project: Project }) {
         className="-top-1 right-8 hidden rotate-2 text-[10px] sm:flex"
       />
       <Star4 className="absolute right-[34%] top-10 hidden h-6 w-6 text-[var(--primary)] opacity-70 lg:block" />
+      <CutoutArtwork
+        id="radar-sweep"
+        decorative
+        className="pointer-events-none absolute right-[24%] bottom-4 z-[2] hidden h-28 w-28 text-[var(--primary)] opacity-25 lg:block"
+      />
 
       <div className="relative z-10 grid gap-6 px-4 py-8 sm:px-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,340px)] lg:items-center lg:gap-10">
         <div className="min-w-0">
           <div className="mb-4 flex flex-wrap items-center gap-3">
+            <DnaBrandLogo id="mission-control" variant="lockup" size={24} decorative />
             <DistressedSticker variant="hazard" text="SAME MOON DIFFERENT PEOPLE" />
             <DistressedSticker
               variant="barcode"

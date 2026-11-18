@@ -353,12 +353,15 @@ async function execWithQueryable(queryable: PgQueryable, sql: string): Promise<v
  * Async PostgreSQL driver implementing `OrmDriverHandle`.
  */
 export class PostgresDriver implements OrmDriverHandle {
+  readonly dialect = "postgres" as const;
   private pool: PoolLike | null = null;
+  private connectionString: string | null = null;
 
   async init(connectionString: string, poolOverride?: PoolLike): Promise<void> {
     if (this.pool) {
       throw new Error("Database already initialized. Close it before re-initializing.");
     }
+    this.connectionString = connectionString;
     if (poolOverride) {
       this.pool = poolOverride;
       return;
@@ -366,6 +369,7 @@ export class PostgresDriver implements OrmDriverHandle {
     const pgMod = await import("pg");
     const PoolCtor = pgMod.Pool ?? pgMod.default?.Pool;
     if (!PoolCtor) {
+      this.connectionString = null;
       throw new Error("PostgreSQL Pool constructor is unavailable in 'pg' module.");
     }
     this.pool = new PoolCtor({
@@ -376,9 +380,14 @@ export class PostgresDriver implements OrmDriverHandle {
     }) as PoolLike;
   }
 
+  getConnectionString(): string | null {
+    return this.connectionString;
+  }
+
   close(): void {
     const current = this.pool;
     this.pool = null;
+    this.connectionString = null;
     if (current) {
       void current.end().catch(() => {});
     }

@@ -3197,7 +3197,7 @@ a {
   --line: var(--dna-border, #5a3446);
 }
 
-:root[data-skin="cinema"] {
+:root[data-skin="default"] {
   --surrounding: var(--dna-canvas, #0d0a08);
   --case: var(--dna-surface, #1a1410);
   --case-raised: var(--dna-surface-elevated, #241b14);
@@ -3206,7 +3206,7 @@ a {
   --line: var(--dna-border, #4b3926);
 }
 
-:root[data-skin="console"] {
+:root[data-skin="transmission"] {
   --surrounding: var(--dna-canvas, #0a100c);
   --case: var(--dna-surface, #111b15);
   --case-raised: var(--dna-surface-elevated, #18251e);

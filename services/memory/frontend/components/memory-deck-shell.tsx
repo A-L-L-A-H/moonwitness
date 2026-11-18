@@ -2,7 +2,9 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
+import { MemoryDeckMark } from "./memory-deck-mark";
 import {
+  MEMORY_SKINS,
   MEMORY_SKIN_META,
   MEMORY_SKIN_STORAGE_KEY,
   applyMemorySkin,
@@ -51,7 +53,7 @@ export function MemoryDeckShell({
   transport,
   children,
 }: Props) {
-  const [skin, setSkin] = useState<MemorySkin>("archive");
+  const [skin, setSkin] = useState<MemorySkin>("default");
 
   useEffect(() => {
     try {
@@ -59,12 +61,17 @@ export function MemoryDeckShell({
       setSkin(resolved);
       document.documentElement.dataset.skin = resolved;
     } catch {
-      document.documentElement.dataset.skin = "archive";
+      document.documentElement.dataset.skin = "default";
     }
   }, []);
 
   function cycleSkin() {
     const next = nextMemorySkin(skin);
+    setSkin(next);
+    applyMemorySkin(next);
+  }
+
+  function handleSelectSkin(next: MemorySkin) {
     setSkin(next);
     applyMemorySkin(next);
   }
@@ -77,12 +84,7 @@ export function MemoryDeckShell({
       <header className="deck-fascia">
         <div className="deck-brand">
           <span className="deck-brand__mark" aria-hidden="true">
-            <svg viewBox="0 0 32 32" width="22" height="22" fill="none">
-              <rect x="2" y="6" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="2" />
-              <circle cx="11" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
-              <circle cx="21" cy="16" r="3" stroke="currentColor" strokeWidth="1.8" />
-              <line x1="14" y1="16" x2="18" y2="16" stroke="currentColor" strokeWidth="1.6" />
-            </svg>
+            <MemoryDeckMark />
           </span>
           <span className="deck-brand__type">
             <strong>MOONWITNESS</strong>
@@ -118,6 +120,27 @@ export function MemoryDeckShell({
               {skin.slice(0, 4).toUpperCase()}
             </span>
           </button>
+          <select
+            aria-label="Select memory skin"
+            value={skin}
+            onChange={(event) => handleSelectSkin(resolveMemorySkin(event.target.value))}
+            style={{
+              height: "32px",
+              padding: "0 8px",
+              borderRadius: "4px",
+              border: "1px solid var(--case-edge)",
+              background: "var(--case-raised)",
+              color: "var(--ink)",
+              fontSize: "11px",
+              fontFamily: "var(--mono-type)",
+            }}
+          >
+            {MEMORY_SKINS.map((preset) => (
+              <option key={preset} value={preset}>
+                {MEMORY_SKIN_META[preset].label}
+              </option>
+            ))}
+          </select>
           <button
             className="deck-icon-button"
             type="button"

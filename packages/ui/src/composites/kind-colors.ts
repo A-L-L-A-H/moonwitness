@@ -1,11 +1,11 @@
-/** Default colors per item kind/category. Override via props in components. */
+/** Default semantic color tokens per item kind/category. */
 export const defaultKindColors: Record<string, string> = {
-  PROJECT: "#ff2d78",
-  STORY: "#2ea8ff",
-  SIGNAL: "#ffd21f",
-  WORLD: "#a855f7",
-  PEOPLE: "#ff2d78",
-  RESEARCH: "#2ea8ff",
+  PROJECT: "var(--primary)",
+  STORY: "var(--accent)",
+  SIGNAL: "var(--green)",
+  WORLD: "var(--purple)",
+  PEOPLE: "var(--pink)",
+  RESEARCH: "var(--blue)",
 };
 
 /** @deprecated Use defaultKindColors */

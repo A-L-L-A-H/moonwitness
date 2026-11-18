@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { WORLD_ART_PLATES as ASSET_WORLD_PLATES, type WorldPlateKey } from "@moonwitness/assets";
 import { SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import type { DockNodeTelemetry, WorldIdentifier } from "@/data/empire-registry";
+import { artPlateSrc } from "@/lib/art";
 
 export { SacredCornerBrackets };
 
@@ -16,13 +18,14 @@ export function StoryPlateGeometrySvg({
   readonly panelNumber: string;
   readonly accentHex: string;
 }) {
-  const plateSrc = panelNumber.includes("01")
-    ? "/art/story-plate-01.webp"
+  const plateKey: WorldPlateKey = panelNumber.includes("01")
+    ? "story-plate-01"
     : panelNumber.includes("02")
-      ? "/art/story-plate-02.webp"
+      ? "story-plate-02"
       : panelNumber.includes("03")
-        ? "/art/story-plate-03.webp"
-        : "/art/story-plate-04.webp";
+        ? "story-plate-03"
+        : "story-plate-04";
+  const plateSrc = artPlateSrc(plateKey);
 
   return (
     <div
@@ -78,7 +81,7 @@ export function Monocentric100CenterSvg({
       className="relative h-48 w-48 shrink-0 overflow-hidden rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)] shadow-[0_0_38px_rgba(223,192,123,0.16)]"
     >
       <Image
-        src="/art/tawhid-100center-orb.webp"
+        src={artPlateSrc("tawhid-100center-orb")}
         alt="100CENTER concentric pearl orb surrounded by three rings of 99 reflections"
         fill
         sizes="192px"
@@ -126,7 +129,7 @@ export function MeridianConstellationMapSvg({
       className="relative h-44 sm:h-48 w-full overflow-hidden border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] shadow-[inset_0_0_28px_rgba(0,0,0,0.9)]"
     >
       <Image
-        src="/art/meridian-sky-chart.webp"
+        src={artPlateSrc("meridian-sky-chart")}
         alt=""
         fill
         sizes="(max-width: 1024px) 100vw, 520px"
@@ -307,7 +310,7 @@ export function AstrolabeOrreryMap({
       {/* Hand-crafted Brass & Obsidian Astrolabe Art Dial */}
       <div className="relative h-full w-full overflow-hidden rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)] shadow-[0_0_64px_rgba(223,192,123,0.14),inset_0_0_40px_rgba(0,0,0,0.92)]">
         <Image
-          src="/art/astrolabe-orrery-plate.webp"
+          src={artPlateSrc("astrolabe-orrery-plate")}
           alt=""
           fill
           loading="eager"
@@ -494,15 +497,15 @@ export function DoorPortalGlyph({
 }
 
 const WORLD_ART_PLATES: Record<WorldIdentifier, string> = {
-  moonwitness: "/art/meridian-sky-chart.webp",
-  arsy: "/art/astrolabe-orrery-plate.webp",
-  "human-pen": "/art/nonagram-sanctuary-dial.webp",
-  sidra: "/art/sidra-lote-constellation.webp",
-  "rocksoul-dx": "/art/story-plate-03.webp",
-  crayon: "/art/story-plate-01.webp",
-  "sin-can": "/art/story-plate-02.webp",
-  mythos: "/art/story-plate-04.webp",
-  "angel-with-shotgun": "/art/celestial-gate-bg.webp",
+  moonwitness: ASSET_WORLD_PLATES["meridian-sky-chart"].fallback,
+  arsy: ASSET_WORLD_PLATES["astrolabe-orrery-plate"].fallback,
+  "human-pen": ASSET_WORLD_PLATES["nonagram-sanctuary-dial"].fallback,
+  sidra: ASSET_WORLD_PLATES["sidra-lote-constellation"].fallback,
+  "rocksoul-dx": ASSET_WORLD_PLATES["story-plate-03"].fallback,
+  crayon: ASSET_WORLD_PLATES["story-plate-01"].fallback,
+  "sin-can": ASSET_WORLD_PLATES["story-plate-02"].fallback,
+  mythos: ASSET_WORLD_PLATES["story-plate-04"].fallback,
+  "angel-with-shotgun": ASSET_WORLD_PLATES["celestial-gate-bg"].fallback,
 };
 
 /**
@@ -521,7 +524,7 @@ export function AstrolabeSealMedallion({
       className={`relative overflow-hidden rounded-full border border-[var(--dna-accent)]/45 bg-[var(--dna-canvas)] shadow-[0_0_26px_rgba(223,192,123,0.26)] ${className}`}
     >
       <Image
-        src="/art/astrolabe-orrery-plate.webp"
+        src={artPlateSrc("astrolabe-orrery-plate")}
         alt=""
         fill
         loading="eager"

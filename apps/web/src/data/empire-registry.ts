@@ -1,3 +1,4 @@
+import { WORLD_ART_PLATES } from "@moonwitness/assets";
 import type { WorldIdentifier } from "@moonwitness/canon";
 
 export type { WorldIdentifier };
@@ -77,39 +78,39 @@ export const WORLD_ART: Readonly<
   Record<WorldIdentifier, { readonly src: string; readonly subject: string }>
 > = {
   moonwitness: {
-    src: "/art/world-moonwitness.webp",
+    src: WORLD_ART_PLATES["world-moonwitness"].fallback,
     subject: "An illustrated archive hall beneath a moonlit sky",
   },
   arsy: {
-    src: "/art/world-arsy.webp",
+    src: WORLD_ART_PLATES["world-arsy"].fallback,
     subject: "A radio relay dish overlooking a twilight skyline",
   },
   "human-pen": {
-    src: "/art/world-qalam.webp",
+    src: WORLD_ART_PLATES["world-qalam"].fallback,
     subject: "An illuminated writing pen over editorial panels",
   },
   sidra: {
-    src: "/art/world-sidra.webp",
+    src: WORLD_ART_PLATES["world-sidra"].fallback,
     subject: "A luminous tree of connected knowledge",
   },
   "rocksoul-dx": {
-    src: "/art/world-rocksoul.webp",
+    src: WORLD_ART_PLATES["world-rocksoul"].fallback,
     subject: "A playful creative studio controller over vibrant color",
   },
   crayon: {
-    src: "/art/world-crayon.webp",
+    src: WORLD_ART_PLATES["world-crayon"].fallback,
     subject: "A bright spectrum of illustrated editorial crayons",
   },
   "sin-can": {
-    src: "/art/world-sincan.webp",
+    src: WORLD_ART_PLATES["world-sincan"].fallback,
     subject: "A luminous scarlet archway leading into honest self-reflection",
   },
   mythos: {
-    src: "/art/world-mythos.webp",
+    src: WORLD_ART_PLATES["world-mythos"].fallback,
     subject: "Historic stone colonnades preserving ancient human memory",
   },
   "angel-with-shotgun": {
-    src: "/art/world-angel.webp",
+    src: WORLD_ART_PLATES["world-angel"].fallback,
     subject: "A winged guardian silhouette under dramatic golden-violet sky light",
   },
 };

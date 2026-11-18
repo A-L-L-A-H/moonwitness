@@ -1,4 +1,11 @@
 import type { FastifyInstance } from "fastify";
+import { z } from "zod";
+import {
+  evaluateWsiSemanticFrame,
+  queryOxDxHierarchy,
+  validateOntologyHierarchyContract,
+  validateWitnessDerivationContract,
+} from "@moonwitness/canon";
 import {
   defaultFailClosedAuthBridge,
   type AddonDefinition,
@@ -129,6 +136,70 @@ export function createWitnessResearchAddon(
         ]);
         return { sources, claims, runs, edges };
       });
+
+      scope.get<{ Querystring: { q?: string } }>(
+        `${prefix}/witness/ontology/zones`,
+        { preHandler: auth.authenticate },
+        async (request) => {
+          const levels = queryOxDxHierarchy(request.query.q ?? "");
+          const contract = validateOntologyHierarchyContract();
+          return { contract, levels };
+        },
+      );
+
+      const evaluateFrameSchema = z.object({
+        statement: z.string().min(1),
+        sourceRef: z.string().min(1),
+        agent: z.string().optional(),
+        recipient: z.string().optional(),
+        domain: z.string().optional(),
+        scope: z.string().optional(),
+        genre: z.string().optional(),
+        swingDepth: z.number().int().min(0).max(3).optional(),
+      });
+
+      scope.post<{ Body: unknown }>(
+        `${prefix}/witness/evaluate-frame`,
+        { preHandler: auth.requireRole("admin", "editor") },
+        async (request, reply) => {
+          const parsed = evaluateFrameSchema.safeParse(request.body);
+          if (!parsed.success) {
+            return reply
+              .code(400)
+              .send({ error: parsed.error.issues[0]?.message ?? "Invalid semantic frame input" });
+          }
+          const frame = evaluateWsiSemanticFrame(parsed.data);
+          const contract = validateWitnessDerivationContract({
+            mode: "RESEARCH",
+            semanticRecordId: parsed.data.sourceRef,
+            sourceSemanticRecordId: parsed.data.sourceRef,
+            derivationMode: "RESEARCH",
+            frames: [
+              {
+                id: "frame-1",
+                reviewStatus: "RESEARCHED",
+                conceptIds: frame.frameStatus === "ONSIDE" ? ["c_grounded"] : [],
+              },
+            ],
+            patterns: [{ id: "wsi-p18", triggerConcepts: ["c_grounded"] }],
+            derivedTargets: ["c_verified"],
+            witnesses: [
+              {
+                id: "w-candidate-1",
+                patternId: "wsi-p18",
+                reviewStatus: "CANDIDATE",
+                observedFrameIds: ["frame-1"],
+                responseStatus: frame.frameStatus === "ONSIDE" ? "RESOLVED" : "UNRESOLVED",
+                positiveDirectionStatus: frame.frameStatus === "ONSIDE" ? "RESOLVED" : "UNRESOLVED",
+                ...(frame.frameStatus === "ONSIDE"
+                  ? { positiveTargetConceptId: "c_verified" }
+                  : {}),
+              },
+            ],
+          });
+          return { frame, contract };
+        },
+      );
     },
   };
 }

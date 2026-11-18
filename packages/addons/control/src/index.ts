@@ -11,6 +11,17 @@ import { controlCommandModel } from "./models.js";
 
 export const controlManifest = manifestData as AddonManifestInput;
 export { controlCommandModel, controlCommandSchema } from "./models.js";
+export {
+  ArsyHttpSchedulerAdapter,
+  DurableQueueSchedulerAdapter,
+  createControlScheduler,
+  processControlSchedulerJob,
+  type ControlSchedulerAction,
+  type ControlDispatchRequest,
+  type ControlDispatchResult,
+  type ControlSchedulerBackend,
+  type FetchLike,
+} from "./scheduler.js";
 
 export const controlRules: IrRuleInput[] = [
   { model_name: "control.command", role: "viewer", can_read: true },

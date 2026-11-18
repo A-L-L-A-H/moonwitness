@@ -48,7 +48,7 @@ test("hero images use Next img descriptors and one responsive LCP preload", asyn
   const root = page.locator("[data-hero-root]");
   await expect(root.locator("img")).toHaveCount(3);
   const sources = {
-    city: "crowd-moon.png",
+    city: "crowd-moon-1440.webp",
     moon: "hero-moon-v2.png",
     character: "hero-character-v2.png",
   };
@@ -103,7 +103,7 @@ for (const width of [320, 390, 430, 768, 1024, 1440]) {
     await expect(root).toHaveCount(1);
     await expect(root.locator("img")).toHaveCount(3);
     const sources = {
-      city: "crowd-moon.png",
+      city: "crowd-moon-1440.webp",
       moon: "hero-moon-v2.png",
       character: "hero-character-v2.png",
     };

@@ -334,3 +334,205 @@ export function tokenizeAndParseAqel(source: string): {
 
   return { tokens, statements, diagnostics };
 }
+
+/* -------------------------------------------------------------------------- */
+/* 7. P3 Engine Promotions: Witness-Semantic Validator & OX-DX Contract Guard */
+/* -------------------------------------------------------------------------- */
+
+export type WitnessReviewStatus = "CANDIDATE" | "RESEARCHED" | "REVIEWED" | "LOCKED";
+
+export interface WitnessValidationFinding {
+  readonly severity: "error" | "warning";
+  readonly code: string;
+  readonly path: string;
+  readonly message: string;
+}
+
+export interface WitnessContractValidationInput {
+  readonly mode: "RESEARCH" | "PRODUCTION";
+  readonly semanticRecordId: string;
+  readonly sourceSemanticRecordId: string;
+  readonly derivationMode: "RESEARCH" | "PRODUCTION";
+  readonly frames: ReadonlyArray<{
+    readonly id: string;
+    readonly reviewStatus: WitnessReviewStatus;
+    readonly conceptIds: readonly string[];
+  }>;
+  readonly patterns: ReadonlyArray<{
+    readonly id: string;
+    readonly triggerConcepts: readonly string[];
+  }>;
+  readonly derivedTargets: readonly string[];
+  readonly witnesses: ReadonlyArray<{
+    readonly id: string;
+    readonly patternId: string;
+    readonly reviewStatus: WitnessReviewStatus;
+    readonly observedFrameIds: readonly string[];
+    readonly responseStatus: "RESOLVED" | "UNRESOLVED";
+    readonly positiveDirectionStatus: "RESOLVED" | "UNRESOLVED";
+    readonly positiveTargetConceptId?: string;
+  }>;
+}
+
+export interface WitnessContractValidationReport {
+  readonly valid: boolean;
+  readonly findings: readonly WitnessValidationFinding[];
+}
+
+function isFrameEligible(
+  status: WitnessReviewStatus,
+  mode: WitnessContractValidationInput["mode"],
+): boolean {
+  if (mode === "PRODUCTION") {
+    return status === "REVIEWED" || status === "LOCKED";
+  }
+  return status === "RESEARCHED" || status === "REVIEWED" || status === "LOCKED";
+}
+
+/**
+ * Curated witness derivation contract validator promoted from `engines/witness-semantic`:
+ * enforces candidate-only engine emissions, mode eligibility, and positive-direction grounding.
+ */
+export function validateWitnessDerivationContract(
+  input: WitnessContractValidationInput,
+): WitnessContractValidationReport {
+  const findings: WitnessValidationFinding[] = [];
+  const frames = new Map(input.frames.map((frame) => [frame.id, frame]));
+  const patterns = new Map(input.patterns.map((pattern) => [pattern.id, pattern]));
+  const derivedTargets = new Set(input.derivedTargets);
+
+  if (input.sourceSemanticRecordId !== input.semanticRecordId) {
+    findings.push({
+      severity: "error",
+      code: "SOURCE_SEMANTIC_RECORD_MISMATCH",
+      path: "/sourceSemanticRecordId",
+      message: input.sourceSemanticRecordId,
+    });
+  }
+  if (input.derivationMode !== input.mode) {
+    findings.push({
+      severity: "error",
+      code: "WITNESS_MODE_MISMATCH",
+      path: "/mode",
+      message: input.derivationMode,
+    });
+  }
+
+  for (const [index, witness] of input.witnesses.entries()) {
+    if (witness.reviewStatus !== "CANDIDATE") {
+      findings.push({
+        severity: "error",
+        code: "ENGINE_MAY_ONLY_EMIT_CANDIDATE",
+        path: `/witnesses/${index}/reviewStatus`,
+        message: witness.reviewStatus,
+      });
+    }
+
+    const pattern = patterns.get(witness.patternId);
+    if (!pattern) {
+      findings.push({
+        severity: "error",
+        code: "UNKNOWN_WITNESS_PATTERN",
+        path: `/witnesses/${index}/patternId`,
+        message: witness.patternId,
+      });
+      continue;
+    }
+
+    for (const frameId of witness.observedFrameIds) {
+      const frame = frames.get(frameId);
+      if (!frame) {
+        findings.push({
+          severity: "error",
+          code: "UNKNOWN_OBSERVED_FRAME",
+          path: `/witnesses/${index}/observedFrameIds`,
+          message: frameId,
+        });
+        continue;
+      }
+      if (!isFrameEligible(frame.reviewStatus, input.mode)) {
+        findings.push({
+          severity: "error",
+          code: "INELIGIBLE_OBSERVED_FRAME",
+          path: `/witnesses/${index}/observedFrameIds`,
+          message: `${frameId}:${frame.reviewStatus}`,
+        });
+      }
+      const frameConcepts = new Set(frame.conceptIds);
+      for (const trigger of pattern.triggerConcepts) {
+        if (!frameConcepts.has(trigger)) {
+          findings.push({
+            severity: "error",
+            code: "WITNESS_TRIGGER_NOT_PRESENT",
+            path: `/witnesses/${index}/matchedConceptIds`,
+            message: trigger,
+          });
+        }
+      }
+    }
+
+    if (witness.responseStatus === "UNRESOLVED" && witness.positiveDirectionStatus === "RESOLVED") {
+      findings.push({
+        severity: "error",
+        code: "POSITIVE_DIRECTION_REQUIRES_RESPONSE",
+        path: `/witnesses/${index}/positiveDirection`,
+        message: witness.id,
+      });
+    }
+
+    if (witness.positiveDirectionStatus === "RESOLVED") {
+      if (!witness.positiveTargetConceptId) {
+        findings.push({
+          severity: "error",
+          code: "RESOLVED_DIRECTION_REQUIRES_TARGET",
+          path: `/witnesses/${index}/positiveDirection/targetConceptId`,
+          message: witness.id,
+        });
+      } else if (!derivedTargets.has(witness.positiveTargetConceptId)) {
+        findings.push({
+          severity: "error",
+          code: "POSITIVE_TARGET_MUST_BE_DERIVED_TARGET",
+          path: `/witnesses/${index}/positiveDirection/targetConceptId`,
+          message: witness.positiveTargetConceptId,
+        });
+      }
+    }
+  }
+
+  return {
+    valid: findings.length === 0,
+    findings,
+  };
+}
+
+export const OX_DX_CANONICAL_HIERARCHY = OX_DX_SEVEN_ZONES.flatMap((zone) =>
+  zone.levels.map((entry) => entry.replace(/^\d+\s+/, "")),
+);
+
+/**
+ * Validates that an ontology spine matches the canonical 49-level Universal Ontology order
+ * (`UNIVERSE` -> `BIT`) promoted from `engines/ontology/specifications/universe-contract.json`.
+ */
+export function validateOntologyHierarchyContract(
+  levels: readonly string[] = OX_DX_CANONICAL_HIERARCHY,
+): { valid: boolean; levelCount: number; mismatches: readonly string[] } {
+  const mismatches: string[] = [];
+  if (levels.length !== OX_DX_CANONICAL_HIERARCHY.length) {
+    mismatches.push(
+      `Expected ${OX_DX_CANONICAL_HIERARCHY.length} ontology levels, received ${levels.length}`,
+    );
+  }
+  const limit = Math.min(levels.length, OX_DX_CANONICAL_HIERARCHY.length);
+  for (let i = 0; i < limit; i += 1) {
+    if (levels[i] !== OX_DX_CANONICAL_HIERARCHY[i]) {
+      mismatches.push(
+        `Level ${i + 1}: expected '${OX_DX_CANONICAL_HIERARCHY[i]}', got '${levels[i]}'`,
+      );
+    }
+  }
+  return {
+    valid: mismatches.length === 0,
+    levelCount: levels.length,
+    mismatches,
+  };
+}

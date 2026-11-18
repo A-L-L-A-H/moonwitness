@@ -30,7 +30,7 @@ Every response sets `x-content-type-options: nosniff`, `x-frame-options: DENY`, 
 
 ## Backup and restore
 
-- **PostgreSQL (VPS Compose production):** `docker-compose.yml` provisions `postgres:16-alpine` on `postgres-data`. Take consistent backups with `pg_dump --format=custom` and restore with `pg_restore` against the stopped API container, then verify `GET /api/v1/readyz`.
+- **PostgreSQL (VPS Compose production):** `docker-compose.yml` provisions `postgres:16-alpine` on `postgres-data`. `@moonwitness/orm` (`backupDatabase`, `restoreDatabase`, `verifyIntegrity`) and CLI helpers (`node scripts/backup-db.mjs`, `node scripts/restore-db.mjs`) wrap `pg_dump --format=custom`, `pg_restore --clean --if-exists`, AES-256-GCM encryption, and `pg_index`/`pg_constraint` verification (verified in CI via `POSTGRES_TEST_URL` in `packages/orm/src/__tests__/postgres.live.test.ts`); after restore, verify `GET /api/v1/readyz`.
 - **SQLite/libSQL (local dev / single-node SQLite mode):** Use the tested helpers from `@moonwitness/orm`:
 
 ```ts

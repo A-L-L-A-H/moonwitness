@@ -40,6 +40,7 @@ function rowToObject(row: unknown, columns: string[]): Record<string, unknown> {
  * Turso URLs are intentionally not configured in this slice.
  */
 export class LibSqlDriver implements LibSqlExecutor {
+  readonly dialect = "sqlite" as const;
   private client: Client | null = null;
 
   async init(dbPath: string): Promise<void> {
