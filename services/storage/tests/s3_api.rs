@@ -212,6 +212,7 @@ async fn multipart_upload_assembles_object() {
 
     let create = client
         .post(server.url("/big/stream.bin?uploads"))
+        .header("content-type", "video/mp4")
         .send()
         .await
         .unwrap();
@@ -261,6 +262,7 @@ async fn multipart_upload_assembles_object() {
         .await
         .unwrap();
     assert_eq!(get.status(), 200);
+    assert_eq!(get.headers().get("content-type").unwrap(), "video/mp4");
     assert_eq!(get.text().await.unwrap(), "aaaabbbbcccc");
 }
 
