@@ -6,6 +6,7 @@ use std::sync::Arc;
 
 use axum::http::HeaderMap;
 
+use crate::backends::google_drive::GoogleDrive;
 use crate::config::Config;
 use crate::db::Pool;
 use crate::s3::errors::{S3Error, S3Result};
@@ -18,14 +19,23 @@ pub const SERVICE_NAME: &str = "s3";
 pub struct AppState {
     pub config: Arc<Config>,
     pub pool: Pool,
+    pub google_drive: Option<GoogleDrive>,
 }
 
 impl AppState {
     pub fn new(config: Config, pool: Pool) -> Self {
+        let google_drive = config.google_drive.clone().map(GoogleDrive::new);
         AppState {
             config: Arc::new(config),
             pool,
+            google_drive,
         }
+    }
+
+    /// Local staging path used before a remote backend upload.
+    pub fn staging_path(&self) -> PathBuf {
+        self.config.storage_root_path().join(".staging")
+            .join(format!("{}.upload", uuid::Uuid::new_v4()))
     }
 
     /// Absolute path of a bucket directory.
