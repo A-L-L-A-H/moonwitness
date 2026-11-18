@@ -167,6 +167,7 @@ pub fn capture_memory(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub fn create_memory(
     app: AppHandle,
     category: String,
@@ -282,6 +283,7 @@ pub fn search_memories(
 }
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub fn update_memory(
     app: AppHandle,
     memory_id: String,
