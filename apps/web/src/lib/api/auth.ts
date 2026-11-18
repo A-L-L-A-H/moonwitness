@@ -1,7 +1,10 @@
 "use client";
 
+import { buildCsrfLogoutInit, requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { normalizeRole, type CrewRoleName } from "@/lib/roles";
+
+export { buildCsrfLogoutInit };
 
 const APP_AUTH_BASE = "/api/v1/auth";
 const AUDIT_BASE = "/api/v1/audit";
@@ -40,41 +43,8 @@ export function normalizeAuthUser(raw: RawAuthUser): AuthUser {
   };
 }
 
-/**
- * Build logout RequestInit with optional CSRF header when `mw_csrf` cookie is present.
- * Omits `headers` when absent so stateless/test logout requests stay minimal.
- */
-export function buildCsrfLogoutInit(): RequestInit {
-  const init: RequestInit = { method: "POST", credentials: "include" };
-  if (typeof document === "undefined") return init;
-  const match = document.cookie.match(/(?:^|;\s*)mw_csrf=([^;]+)/);
-  if (!match?.[1]) return init;
-  return {
-    ...init,
-    headers: { "x-csrf-token": decodeURIComponent(match[1]) },
-  };
-}
-
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    headers: init?.body
-      ? { "content-type": "application/json", ...(init.headers ?? {}) }
-      : init?.headers,
-    ...init,
-  });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const message =
-      (body as { message?: string; error?: string } | null)?.message ??
-      (body as { error?: string } | null)?.error ??
-      `HTTP ${res.status}`;
-    const error = new Error(message) as Error & { status?: number };
-    error.status = res.status;
-    throw error;
-  }
-  return body as T;
+  return requestApiJson<T>(url, init);
 }
 
 export function useCurrentUser() {

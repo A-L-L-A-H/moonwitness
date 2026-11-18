@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { Button } from "@moonwitness/ui";
+import { DnaButton } from "@moonwitness/ui/imperium";
 import {
   DHGS_13_STEPS,
   QUARANTINED_AMBIGUITY_LEDGER,
@@ -30,9 +32,10 @@ export function DhgsAndMTimeSimulator() {
           {DHGS_13_STEPS.map((step) => {
             const active = step.stepNumber === activeStep.stepNumber;
             return (
-              <button
+              <Button
                 key={step.code}
                 type="button"
+                variant="plain"
                 aria-pressed={active}
                 onClick={() => setActiveStepNum(step.stepNumber)}
                 className={`min-h-[44px] border px-2.5 py-1.5 font-mono text-[10px] cursor-pointer ${
@@ -42,7 +45,7 @@ export function DhgsAndMTimeSimulator() {
                 }`}
               >
                 {String(step.stepNumber).padStart(2, "0")} {step.code}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -71,12 +74,13 @@ export function DhgsAndMTimeSimulator() {
           <div className="font-mono text-[10.5px] tracking-[0.16em] text-[var(--dna-accent)] uppercase">
             ANTIKYTHERA M-TIME · LIVE ASTRONOMICAL &amp; CRITERION ENGINE
           </div>
-          <Link
-            href="/mtime"
-            className="btn-luxe-secondary inline-flex items-center px-3.5 py-1 font-mono text-[10px] text-[var(--dna-accent)] uppercase"
+          <DnaButton
+            asChild
+            tone="secondary"
+            className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] text-[var(--dna-accent)] uppercase"
           >
-            OPEN FULL M-TIME PAGE &rsaquo;
-          </Link>
+            <Link href="/mtime">OPEN FULL M-TIME PAGE &rsaquo;</Link>
+          </DnaButton>
         </div>
         <MTimeInteractiveEngine compact />
       </div>

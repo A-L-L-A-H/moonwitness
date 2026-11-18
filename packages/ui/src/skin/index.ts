@@ -7,12 +7,15 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type CSSProperties,
   type ReactNode,
 } from "react";
 import { flushSync } from "react-dom";
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 import {
   canonicalTokensToCssVariables,
   resolveCanonicalTokens,
@@ -390,7 +393,7 @@ export function SkinProvider({
   const cssVariables = useMemo(() => canonicalTokensToCssVariables(tokens), [tokens]);
 
   // Keep documentElement attributes and CSS variables synchronized when acting as root provider
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (resolvedScope !== "document" || typeof document === "undefined") return;
     document.documentElement.setAttribute("data-skin", skin);
     document.documentElement.setAttribute("data-dna", dnaId);

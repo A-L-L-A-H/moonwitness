@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Archive, Layers3, RadioTower, Sparkles } from "lucide-react";
+import { Archive, Layers3, RadioTower, Sparkles } from "@moonwitness/ui/icons";
 import {
   Awakening,
   CommandBar,

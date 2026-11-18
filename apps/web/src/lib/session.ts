@@ -1,3 +1,4 @@
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useEffect, useState } from "react";
 
 export interface Session {
@@ -20,7 +21,7 @@ export function useCurrentIdentity(): Session | null {
   useEffect(() => {
     async function fetchSession() {
       try {
-        const response = await fetch("/api/v1/auth/me", buildAuthFetchInit());
+        const response = await requestApiResponse("/api/v1/auth/me", buildAuthFetchInit());
         if (response.ok) {
           const data = await response.json();
           const user: unknown = data?.user;
@@ -56,7 +57,7 @@ export function useCurrentIdentity(): Session | null {
 
   useEffect(() => {
     function onSessionChange() {
-      fetch("/api/v1/auth/me", buildAuthFetchInit())
+      requestApiResponse("/api/v1/auth/me", buildAuthFetchInit())
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           const user: unknown = data?.user;

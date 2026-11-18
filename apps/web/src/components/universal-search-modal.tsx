@@ -12,7 +12,8 @@ import {
   type WorldIdentifier,
 } from "@/data/empire-registry";
 import { LUMINOUS_NAMES_OF_ALLAH } from "@/data/remembrance-sanctuary";
-import { SearchLensIcon } from "@moonwitness/ui/imperium";
+import { Button, Dialog, DialogContent, DialogTitle, Input } from "@moonwitness/ui";
+import { DnaButton, SearchLensIcon } from "@moonwitness/ui/imperium";
 import { WorldEmblemById } from "./sacred-icons";
 
 export function UniversalSearchModal({
@@ -37,17 +38,11 @@ export function UniversalSearchModal({
         if (isOpen) {
           onClose();
         }
-      } else if (event.key === "Escape" && isOpen) {
-        onClose();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  if (!isOpen) {
-    return null;
-  }
 
   const normalizedQuery = searchQuery.trim().toLowerCase();
 
@@ -95,38 +90,41 @@ export function UniversalSearchModal({
   );
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Search the Empire of the Light"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/82 px-4 pt-16 sm:pt-20 backdrop-blur-md"
-      onClick={onClose}
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
     >
-      <div
-        className="octa-bevel-shell w-full max-w-2xl p-6 sm:p-7"
-        onClick={(event) => event.stopPropagation()}
+      <DialogContent
+        hideClose
+        aria-describedby={undefined}
+        aria-label="Search the Empire of the Light"
+        className="octa-bevel-shell top-16 sm:top-20 translate-y-0 w-full max-w-2xl p-6 sm:p-7"
       >
+        <DialogTitle className="sr-only">Search the Empire of the Light</DialogTitle>
         <div className="flex items-center justify-between gap-2 border-b border-[var(--dna-accent)]/25 pb-3">
           <div className="flex items-center gap-3 flex-1">
             <SearchLensIcon className="h-5 w-5 shrink-0 text-[var(--dna-accent)]" />
-            <input
+            <Input
               type="search"
               autoFocus
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Search Worlds, Taurat/Zabur/Injīl/Al-Qur’ān, Attributes, SRGBL v8..."
               aria-label="Search query"
-              className="font-sans w-full bg-transparent text-sm sm:text-base text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none"
+              className="min-h-0 border-0 bg-transparent px-0 py-0 font-sans w-full text-sm sm:text-base text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             />
           </div>
-          <button
+          <DnaButton
             type="button"
+            tone="secondary"
             onClick={onClose}
             aria-label="Close Search"
-            className="btn-luxe-secondary min-w-[54px] px-3.5 py-1 text-[11px] font-mono text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
+            className="min-w-[54px] px-3.5 py-1 text-[11px] font-mono text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
           >
             ESC
-          </button>
+          </DnaButton>
         </div>
 
         <div className="mt-2.5 flex items-center justify-between font-mono text-[10px] tracking-[0.16em] text-[var(--dna-muted)] uppercase">
@@ -141,14 +139,15 @@ export function UniversalSearchModal({
             </div>
             <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
               {matchingWorlds.map((worldEntry) => (
-                <button
+                <Button
                   key={worldEntry.id}
                   type="button"
+                  variant="plain"
                   onClick={() => {
                     onNavigateToWorld(worldEntry.id);
                     onClose();
                   }}
-                  className="min-h-[44px] flex items-center gap-3 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/12 transition-colors cursor-pointer"
+                  className="min-h-[44px] h-auto justify-start flex items-center gap-3 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/12 transition-colors cursor-pointer"
                 >
                   <WorldEmblemById worldId={worldEntry.id} className="h-8 w-8 shrink-0" />
                   <div>
@@ -159,7 +158,7 @@ export function UniversalSearchModal({
                       {worldEntry.tagline}
                     </div>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -171,14 +170,15 @@ export function UniversalSearchModal({
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {matchingScriptures.map((corpus) => (
-                  <button
+                  <Button
                     key={corpus.code}
                     type="button"
+                    variant="plain"
                     onClick={() => {
                       onNavigateToDoor("epistemic-corpus");
                       onClose();
                     }}
-                    className="min-h-[44px] border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] transition-colors cursor-pointer"
+                    className="min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-between font-mono text-[10px] text-[var(--dna-accent)]">
                       <span>{corpus.code}</span>
@@ -190,7 +190,7 @@ export function UniversalSearchModal({
                     <div className="font-sans text-[11px] text-[var(--dna-muted)] truncate">
                       {corpus.ethicalCore}
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -203,14 +203,15 @@ export function UniversalSearchModal({
               </div>
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {matchingNames.map((entry) => (
-                  <button
+                  <Button
                     key={entry.id}
                     type="button"
+                    variant="plain"
                     onClick={() => {
                       onJumpToRemembrance();
                       onClose();
                     }}
-                    className="min-h-[44px] border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/12 transition-colors cursor-pointer"
+                    className="min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] hover:bg-[var(--dna-accent)]/12 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span dir="rtl" lang="ar" className="text-base text-[var(--dna-text)]">
@@ -226,7 +227,7 @@ export function UniversalSearchModal({
                     <div className="font-sans text-[11px] text-[var(--dna-muted)] truncate">
                       {entry.meaning}
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -238,14 +239,15 @@ export function UniversalSearchModal({
             </div>
             <div className="mt-2 space-y-2">
               {matchingCodex.map((codexItem) => (
-                <button
+                <Button
                   key={codexItem.id}
                   type="button"
+                  variant="plain"
                   onClick={() => {
                     onNavigateToDoor(codexItem.doorId);
                     onClose();
                   }}
-                  className="min-h-[44px] w-full border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] transition-colors cursor-pointer"
+                  className="min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 w-full border border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)] transition-colors cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-[11px] font-mono text-[var(--dna-accent)]">
                     <span>{codexItem.category}</span>
@@ -257,7 +259,7 @@ export function UniversalSearchModal({
                   <p className="font-serif mt-0.5 text-xs text-[var(--dna-muted)]">
                     {codexItem.subtitle}
                   </p>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -268,14 +270,15 @@ export function UniversalSearchModal({
             </div>
             <div className="mt-2 space-y-2">
               {matchingAxioms.map((axiomRecord) => (
-                <button
+                <Button
                   key={axiomRecord.id}
                   type="button"
+                  variant="plain"
                   onClick={() => {
                     onNavigateToWorld("sidra");
                     onClose();
                   }}
-                  className="min-h-[44px] w-full border border-[var(--dna-accent)]/15 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)]/45 transition-colors cursor-pointer"
+                  className="min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 w-full border border-[var(--dna-accent)]/15 bg-[var(--dna-canvas)] p-3 text-left hover:border-[var(--dna-accent)]/45 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-xs font-mono text-[var(--dna-accent)]">
                     <span>{axiomRecord.discipline}</span>
@@ -287,12 +290,12 @@ export function UniversalSearchModal({
                   <p className="font-serif mt-0.5 text-xs text-[var(--dna-muted)] line-clamp-2">
                     {axiomRecord.exposition}
                   </p>
-                </button>
+                </Button>
               ))}
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

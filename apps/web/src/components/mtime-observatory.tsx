@@ -13,6 +13,7 @@ import {
 import {
   CutoutArtwork,
   DnaBrandLogo,
+  Input,
   LunarDiscArt,
   RadialGauge,
   SkinOrnament,
@@ -111,12 +112,12 @@ export function MTimeInteractiveEngine({ compact = false }: { readonly compact?:
               ? "LAPIS 1 · WAKTU FISIK UTC & MERIDIAN"
               : "LAYER 1 · PHYSICAL UTC TIME & MERIDIAN"}
           </div>
-          <input
+          <Input
             type="text"
             value={dateIso}
             onChange={(e) => setDateIso(e.target.value)}
             aria-label="UTC ISO Timestamp"
-            className="w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] px-3 py-2 font-mono text-xs text-[var(--dna-text)] focus:outline-none"
+            className="min-h-0 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] px-3 py-2 font-mono text-xs text-[var(--dna-text)] focus:outline-none"
           />
           <div className="flex flex-wrap gap-1.5">
             {HISTORICAL_DATE_PRESETS.map((preset) => (
@@ -392,12 +393,13 @@ export function MTimeObservatory() {
               : "Strictly separating physical UTC time, solar-lunar geometry, calendar visibility criteria (MABIMS_ID_2026 / DIYANET_1978), field observation, and official decree."}
           </p>
           <div>
-            <Link
-              href="/codex?door=sovereign-runtimes"
-              className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
+            <DnaButton
+              asChild
+              tone="secondary"
+              className="min-h-0 inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
             >
-              DOOR IV SOVEREIGN RUNTIMES &rsaquo;
-            </Link>
+              <Link href="/codex?door=sovereign-runtimes">DOOR IV SOVEREIGN RUNTIMES &rsaquo;</Link>
+            </DnaButton>
           </div>
         </div>
 

@@ -6,7 +6,8 @@
   "license": "UNLICENSED",
   "exports": {
     ".": "./src/index.ts",
-    "./timeline": "./src/timeline/index.ts"
+    "./timeline": "./src/timeline/index.ts",
+    "./sdk": "./src/sdk/index.ts"
   },
   "dependencies": {
     "@moonwitness/errors": "workspace:*",

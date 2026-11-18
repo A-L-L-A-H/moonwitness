@@ -134,12 +134,12 @@ test.describe("Skin Laboratory & Canon Integration", () => {
     ).toBe(false);
 
     // Toggle Light mode & assert canvas background luminance increases distinctly
-    const darkBg = await playground
+    const darkBg = await stage
       .locator('[data-dna="05-riot-anarchy"]')
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundColor);
     await playground.getByLabel("Theme Mode").selectOption("light");
-    const lightBg = await playground
+    const lightBg = await stage
       .locator('[data-dna="05-riot-anarchy"]')
       .first()
       .evaluate((el) => getComputedStyle(el).backgroundColor);

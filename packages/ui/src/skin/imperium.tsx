@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
 import { cn } from "../lib/utils";
 import {
   MASTER_DNA_IDS,
@@ -21,9 +22,14 @@ import {
   CrescentStarIcon,
   CrownEmblemIcon,
   DiamondStarOrnament,
+  DoorPortalVector,
+  GatewayWaveformVector,
+  MeridianArcLines,
   OctagramMandalaIcon,
   SacredCornerBrackets,
   SearchLensIcon,
+  SidraConstellationLinks,
+  TasbihBeadRingVector,
 } from "./imperium-icons";
 
 export {
@@ -46,9 +52,14 @@ export {
   CrescentStarIcon,
   CrownEmblemIcon,
   DiamondStarOrnament,
+  DoorPortalVector,
+  GatewayWaveformVector,
+  MeridianArcLines,
   OctagramMandalaIcon,
   SacredCornerBrackets,
   SearchLensIcon,
+  SidraConstellationLinks,
+  TasbihBeadRingVector,
 };
 
 import {
@@ -77,13 +88,15 @@ export {
 
 export interface DnaButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   readonly tone?: "primary" | "secondary";
+  readonly asChild?: boolean;
 }
 
 /**
  * Shared DNA-adaptive action button.
  */
 export const DnaButton = React.forwardRef<HTMLButtonElement, DnaButtonProps>(
-  ({ tone = "secondary", type = "button", className, children, ...props }, ref) => {
+  ({ tone = "secondary", type = "button", asChild = false, className, children, ...props }, ref) => {
+    const Comp = asChild ? Slot : "button";
     const world = useDnaWorld();
     const isImperium = world.id === "01-imperium-lumen";
     const baseClass = isImperium
@@ -98,9 +111,14 @@ export const DnaButton = React.forwardRef<HTMLButtonElement, DnaButtonProps>(
         : "mw-dna-button-secondary inline-flex min-h-[44px] items-center justify-center gap-2 border px-4 py-2 text-xs uppercase";
 
     return (
-      <button ref={ref} type={type} className={cn(baseClass, className)} {...props}>
+      <Comp
+        ref={ref}
+        type={asChild ? undefined : type}
+        className={cn(baseClass, className)}
+        {...props}
+      >
         {children}
-      </button>
+      </Comp>
     );
   },
 );

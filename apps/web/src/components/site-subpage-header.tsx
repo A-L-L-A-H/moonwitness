@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { DnaButton } from "@moonwitness/ui/imperium";
 import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import { OctagramMandalaIcon } from "./sacred-icons";
@@ -43,41 +44,37 @@ export function SiteSubpageHeader({
         <nav aria-label="Sanctuary Portal Links" className="flex flex-wrap items-center gap-2">
           {links.map((item) => {
             const isCurrent = item.id === activeRoute;
-            const linkClass = `btn-luxe-secondary inline-flex items-center px-3.5 py-1.5 font-mono text-[10px] tracking-[0.16em] uppercase ${
+            const linkClass = `min-h-0 inline-flex items-center px-3.5 py-1.5 font-mono text-[10px] tracking-[0.16em] uppercase ${
               isCurrent
                 ? "text-[var(--dna-text)]"
                 : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"
             }`;
             if (item.id === "home") {
               return (
-                <SanctuaryGateLink
-                  key={item.id}
-                  data-active={isCurrent ? "true" : "false"}
-                  className={linkClass}
-                >
-                  {item.label}
-                </SanctuaryGateLink>
+                <DnaButton key={item.id} asChild tone="secondary" className={linkClass}>
+                  <SanctuaryGateLink data-active={isCurrent ? "true" : "false"}>
+                    {item.label}
+                  </SanctuaryGateLink>
+                </DnaButton>
               );
             }
             return (
-              <Link
-                key={item.id}
-                href={item.href}
-                data-active={isCurrent ? "true" : "false"}
-                className={linkClass}
-              >
-                {item.label}
-              </Link>
+              <DnaButton key={item.id} asChild tone="secondary" className={linkClass}>
+                <Link href={item.href} data-active={isCurrent ? "true" : "false"}>
+                  {item.label}
+                </Link>
+              </DnaButton>
             );
           })}
-          <button
+          <DnaButton
             type="button"
+            tone="secondary"
             onClick={toggleLocale}
             aria-label={locale === "en" ? "Switch to Indonesian" : "Ganti ke Bahasa Inggris"}
-            className="btn-luxe-secondary px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-[var(--dna-accent)] uppercase cursor-pointer"
+            className="min-h-0 px-3 py-1.5 font-mono text-[10px] tracking-[0.18em] text-[var(--dna-accent)] uppercase"
           >
             {locale.toUpperCase()}
-          </button>
+          </DnaButton>
           <SanctuaryIdentityControl />
         </nav>
       </div>

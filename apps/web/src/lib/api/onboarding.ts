@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/control";
@@ -27,23 +28,11 @@ export interface AuthUser {
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    headers: init?.body ? { "content-type": "application/json" } : undefined,
-    ...init,
-  });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const message = (body as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
-    const error = new Error(message) as Error & { status?: number };
-    error.status = res.status;
-    throw error;
-  }
+  const body = await requestApiJson<T>(url, init);
   if (body === null || typeof body !== "object") {
     throw new Error("The control plane returned an unreadable response.");
   }
-  return body as T;
+  return body;
 }
 
 export function useSetupStatus() {

@@ -1,7 +1,7 @@
 "use client";
 
 import type { Era, TimelineEvent } from "@moonwitness/types";
-import { EventDetail } from "@moonwitness/ui";
+import { EventDetail, Sheet, SheetContent, SheetTitle, ZineButton } from "@moonwitness/ui";
 import type { TimelineEventAuditEntry } from "@/lib/api/timeline";
 
 interface EventDetailPanelProps {
@@ -72,24 +72,26 @@ export function EventDetailPanel({
           {(canEdit || canDelete) && (
             <div className="flex flex-wrap gap-2">
               {canEdit && onArchive && (
-                <button
+                <ZineButton
                   type="button"
+                  tone="yellow"
                   disabled={mutating}
                   onClick={() => onArchive(event.id)}
-                  className="btn-zine btn-yellow min-h-10 px-3 py-1.5 text-[11px] disabled:opacity-50"
+                  className="min-h-10 px-3 py-1.5 text-[11px] disabled:opacity-50"
                 >
                   ARCHIVE EVENT
-                </button>
+                </ZineButton>
               )}
               {canDelete && onDelete && (
-                <button
+                <ZineButton
                   type="button"
+                  tone="pink"
                   disabled={mutating}
                   onClick={() => onDelete(event.id)}
-                  className="btn-zine min-h-10 border-red-400 px-3 py-1.5 text-[11px] text-red-300 disabled:opacity-50"
+                  className="min-h-10 border-red-400 px-3 py-1.5 text-[11px] text-red-300 disabled:opacity-50"
                 >
                   DELETE EVENT
-                </button>
+                </ZineButton>
               )}
             </div>
           )}
@@ -138,14 +140,22 @@ export function EventDetailPanel({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 xl:hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Event detail"
+    <Sheet
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose?.();
+      }}
     >
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="absolute inset-y-0 right-0 w-full max-w-md">{detail}</div>
-    </div>
+      <SheetContent
+        side="right"
+        hideClose
+        aria-describedby={undefined}
+        aria-label="Event detail"
+        className="w-full max-w-md sm:max-w-md p-0 xl:hidden overflow-y-auto"
+      >
+        <SheetTitle className="sr-only">Event detail</SheetTitle>
+        {detail}
+      </SheetContent>
+    </Sheet>
   );
 }

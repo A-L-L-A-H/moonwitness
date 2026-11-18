@@ -18,9 +18,10 @@ const badgeVariants = cva(
         destructive:
           "border-[var(--destructive)] bg-[var(--destructive)] text-[var(--destructive-foreground)]",
         outline: "border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--muted)]",
-        pink: "border-[var(--pink)] bg-[var(--pink)] text-[var(--ink)]",
-        yellow: "border-[var(--yellow)] bg-[var(--yellow)] text-[var(--ink)]",
-        blue: "border-[var(--blue)] bg-[var(--blue)] text-[var(--ink)]",
+        pink: "border-[var(--primary)] bg-[var(--primary)] text-[var(--primary-foreground)]",
+        yellow:
+          "border-[var(--secondary)] bg-[var(--secondary)] text-[var(--secondary-foreground)]",
+        blue: "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-foreground)]",
         dna: "mw-dna-badge rounded-none border-[var(--dna-border)] bg-[var(--dna-surface-elevated)] text-[var(--dna-focus)]",
         imperium:
           "rounded-none border-[var(--dna-border)] bg-[var(--dna-surface-elevated)] font-mono tracking-wider text-[var(--dna-focus)]",

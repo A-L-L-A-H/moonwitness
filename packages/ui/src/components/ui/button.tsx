@@ -50,6 +50,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             variant !== "imperiumPrimary" &&
             variant !== "imperiumSecondary" &&
             variant !== "link" &&
+            variant !== "plain" &&
             recipe.button,
           className,
         )}

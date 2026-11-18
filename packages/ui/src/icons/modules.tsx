@@ -1244,3 +1244,329 @@ export function SkinPalette(props: DnaIconProps) {
     </svg>
   );
 }
+
+export function Activity(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polyline
+        points="2,12 6,12 9,4.5 14.5,19.5 18,12 22,12"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        fill="none"
+      />
+      <circle cx="18" cy="12" r="1.6" fill={accentColor} />
+    </svg>
+  );
+}
+
+export function AudioLines(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M3 10 V14 M7.5 6 V18 M12 3 V21 M16.5 7 V17 M21 10 V14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="square"
+      />
+      <path d="M12 5 V19" stroke={accentColor} strokeWidth="2" strokeLinecap="square" />
+    </svg>
+  );
+}
+
+export function Command(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M15 6 V18 A2.5 2.5 0 1 0 17.5 15.5 H6.5 A2.5 2.5 0 1 0 9 18 V6 A2.5 2.5 0 1 0 6.5 8.5 H17.5 A2.5 2.5 0 1 0 15 6 Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <rect x="10.8" y="10.8" width="2.4" height="2.4" fill={accentColor} />
+    </svg>
+  );
+}
+
+export function Crosshair(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <circle cx="12" cy="12" r="7.5" stroke="currentColor" strokeWidth="1.9" />
+      <path
+        d="M12 2 V6.5 M12 17.5 V22 M2 12 H6.5 M17.5 12 H22"
+        stroke="currentColor"
+        strokeWidth="1.9"
+      />
+      <circle cx="12" cy="12" r="2" fill={accentColor} />
+    </svg>
+  );
+}
+
+export function FolderGit2(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M3 6.5 V18.5 H21 V8.5 H12.5 L10 6.5 Z"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinejoin="miter"
+      />
+      <circle cx="11" cy="14" r="1.5" stroke={accentColor} strokeWidth="1.6" />
+      <circle cx="16.5" cy="12" r="1.5" stroke={accentColor} strokeWidth="1.6" />
+      <path d="M12.5 14 H14.5 L15.5 13" stroke={accentColor} strokeWidth="1.6" />
+    </svg>
+  );
+}
+
+export function GitBranch(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M6.5 7.5 V16.5" stroke="currentColor" strokeWidth="1.9" />
+      <path d="M17.5 8.5 V11 L13 14.5 H6.5" stroke={accentColor} strokeWidth="1.9" fill="none" />
+      <circle cx="6.5" cy="5.5" r="2" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="6.5" cy="18.5" r="2" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17.5" cy="6.5" r="2" stroke={accentColor} strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+export function GitCommitHorizontal(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M2.5 12 H8.5 M15.5 12 H21.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="square"
+      />
+      <circle cx="12" cy="12" r="3.5" stroke={accentColor} strokeWidth="2" />
+    </svg>
+  );
+}
+
+export function HardDrive(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path d="M4 13.5 H20 L18.5 5.5 H5.5 Z" stroke="currentColor" strokeWidth="1.9" />
+      <rect x="4" y="13.5" width="16" height="5.5" stroke="currentColor" strokeWidth="1.9" />
+      <circle cx="8" cy="16.2" r="1.1" fill={accentColor} />
+      <path d="M14 16.2 H17.5" stroke={accentColor} strokeWidth="1.8" strokeLinecap="square" />
+    </svg>
+  );
+}
+
+export function Layers3(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon points="12,3 20.5,7.5 12,12 3.5,7.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M3.5 12 L12 16.5 L20.5 12" stroke={accentColor} strokeWidth="1.8" />
+      <path d="M3.5 16.5 L12 21 L20.5 16.5" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+export function ListChecks(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M3.5 7 L5.5 9 L9 5 M3.5 15.5 L5.5 17.5 L9 13.5"
+        stroke={accentColor}
+        strokeWidth="2"
+        strokeLinecap="square"
+      />
+      <path
+        d="M12 7 H20.5 M12 15.5 H20.5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+export function LogIn(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M14 4 H19.5 V20 H14"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="square"
+      />
+      <path
+        d="M4 12 H15 M11 7.5 L15.5 12 L11 16.5"
+        stroke={accentColor}
+        strokeWidth="2"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+export function Play(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="6.5,4.5 19.5,12 6.5,19.5"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        fill={accentColor}
+        fillOpacity="0.2"
+      />
+    </svg>
+  );
+}
+
+export function Radio(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M5.5 18.5 A9 9 0 0 1 5.5 5.5 M18.5 5.5 A9 9 0 0 1 18.5 18.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        fill="none"
+      />
+      <path
+        d="M8.5 15.5 A5 5 0 0 1 8.5 8.5 M15.5 8.5 A5 5 0 0 1 15.5 15.5"
+        stroke={accentColor}
+        strokeWidth="1.8"
+        fill="none"
+      />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function RadioTower(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M7.5 11.5 A6 6 0 0 1 16.5 11.5 M4.5 8.5 A10 10 0 0 1 19.5 8.5"
+        stroke={accentColor}
+        strokeWidth="1.7"
+        fill="none"
+      />
+      <circle cx="12" cy="11.5" r="1.8" fill="currentColor" />
+      <path
+        d="M12 13.5 L8 21.5 M12 13.5 L16 21.5 M9.5 18.5 H14.5"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+export function ShieldAlert(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M12 3 L19.5 6 V12 C19.5 16.8 16.2 19.8 12 21.5 C7.8 19.8 4.5 16.8 4.5 12 V6 Z"
+        stroke="currentColor"
+        strokeWidth="1.9"
+      />
+      <path d="M12 8 V13" stroke={accentColor} strokeWidth="2.1" strokeLinecap="square" />
+      <circle cx="12" cy="16.5" r="1.2" fill={accentColor} />
+    </svg>
+  );
+}
+
+export function ShieldCheck(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M12 3 L19.5 6 V12 C19.5 16.8 16.2 19.8 12 21.5 C7.8 19.8 4.5 16.8 4.5 12 V6 Z"
+        stroke="currentColor"
+        strokeWidth="1.9"
+      />
+      <path
+        d="M8.5 12 L11 14.5 L15.8 9.5"
+        stroke={accentColor}
+        strokeWidth="2"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+export function Sparkles(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <polygon
+        points="11,3 13,8.5 18.5,10.5 13,12.5 11,18 9,12.5 3.5,10.5 9,8.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <polygon
+        points="18.5,14 19.5,16.5 22,17.5 19.5,18.5 18.5,21 17.5,18.5 15,17.5 17.5,16.5"
+        fill={accentColor}
+      />
+    </svg>
+  );
+}
+
+export function Square(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <rect
+        x="5"
+        y="5"
+        width="14"
+        height="14"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        fill={accentColor}
+        fillOpacity="0.16"
+      />
+    </svg>
+  );
+}
+
+export function Swords(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <path
+        d="M14.5 17.5 L20.5 11.5 V4 H13 L7 10 M5 14 L9 18 M3.5 19.5 L6.5 16.5"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="square"
+      />
+      <path
+        d="M9.5 17.5 L3.5 11.5 V4 H11 L17 10 M19 14 L15 18 M20.5 19.5 L17.5 16.5"
+        stroke={accentColor}
+        strokeWidth="1.8"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+export function Workflow(props: DnaIconProps) {
+  const { accentColor, svgProps } = resolveIconSvgProps(props);
+  return (
+    <svg {...svgProps}>
+      <rect x="3" y="3.5" width="7" height="7" stroke="currentColor" strokeWidth="1.8" />
+      <rect x="14" y="13.5" width="7" height="7" stroke={accentColor} strokeWidth="1.8" />
+      <path d="M6.5 10.5 V17 H14" stroke="currentColor" strokeWidth="1.8" fill="none" />
+    </svg>
+  );
+}

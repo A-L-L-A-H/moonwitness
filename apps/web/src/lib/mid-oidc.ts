@@ -1,3 +1,4 @@
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import {
   DEFAULT_MID_ISSUER_URL,
   createPkceAuthorizationRequest,
@@ -65,7 +66,7 @@ export async function completeMidCallback(searchParams: URLSearchParams): Promis
     throw new Error("State mismatch detected during SSO callback.");
   }
 
-  const response = await fetch("/api/v1/auth/bff/exchange", {
+  const response = await requestApiResponse("/api/v1/auth/bff/exchange", {
     method: "POST",
     credentials: "include",
     headers: { "content-type": "application/json" },

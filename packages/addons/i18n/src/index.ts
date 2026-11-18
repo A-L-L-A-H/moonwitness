@@ -6,6 +6,7 @@ import {
   type AddonDefinition,
   type AddonManifestInput,
   type BaseAddonAuthBridge,
+  type IrMenuInput,
   type IrRuleInput,
   type IrViewInput,
 } from "@moonwitness/addon-base";
@@ -46,6 +47,18 @@ export const i18nViews: IrViewInput[] = [
   },
 ];
 
+export const i18nMenus: IrMenuInput[] = [
+  {
+    menu_key: "i18n.locales",
+    label: "I18n Locales",
+    href: "/models/i18n.locale",
+    icon: "i18n",
+    plane: "creator",
+    sort_order: 62,
+    min_role: "viewer",
+  },
+];
+
 export async function seedI18n(): Promise<void> {
   await i18nLocaleModel.repository.upsert(
     { code: "en" },
@@ -83,6 +96,7 @@ export function createI18nAddon(
     models: [i18nLocaleModel, i18nTermModel],
     rules: i18nRules,
     views: i18nViews,
+    menus: i18nMenus,
     seed: seedI18n,
     registerRoutes: async (scope: FastifyInstance) => {
       scope.get(`${prefix}/i18n/locales`, async () => {

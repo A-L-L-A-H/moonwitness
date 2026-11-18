@@ -68,11 +68,11 @@ export interface CommandCenterState {
 }
 
 const LIVE_FEED_COLORS: Record<string, string> = {
-  TIMELINE: "#ff4ecd",
-  IDENTITY: "#38bdf8",
-  "COMMAND-CENTER": "#facc15",
-  RADIUS: "#34d399",
-  CONTROL: "#f97316",
+  TIMELINE: "var(--pink)",
+  IDENTITY: "var(--blue)",
+  "COMMAND-CENTER": "var(--yellow)",
+  RADIUS: "var(--green)",
+  CONTROL: "var(--primary)",
 };
 
 export function useCommandCenter(): CommandCenterState {
@@ -109,7 +109,7 @@ export function useCommandCenter(): CommandCenterState {
               id: `live-feed-${idx}-${entry.tag}`,
               text: `[${entry.tag}] ${entry.msg}`,
               ago: entry.time,
-              color: LIVE_FEED_COLORS[entry.tag] ?? "#38bdf8",
+              color: LIVE_FEED_COLORS[entry.tag] ?? "var(--blue)",
             })),
           );
         }

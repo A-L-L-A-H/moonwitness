@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
   CROSS_REPO_TOPOLOGY_ATLAS,
   ECOSYSTEM_RUNTIME_CATALOG,
@@ -121,11 +122,12 @@ export function DoorSovereignPanel() {
               {CROSS_REPO_TOPOLOGY_ATLAS.map((org) => {
                 const isSelected = org.orgName === activeOrg.orgName;
                 return (
-                  <button
+                  <Button
                     key={org.orgName}
                     type="button"
+                    variant="plain"
                     onClick={() => setSelectedOrg(org.orgName)}
-                    className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
+                    className={`min-h-[44px] h-auto flex-col items-start justify-start gap-0 border p-3.5 text-left transition-colors cursor-pointer ${
                       isSelected
                         ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20"
                         : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/45"
@@ -137,7 +139,7 @@ export function DoorSovereignPanel() {
                     <div className="font-monument mt-0.5 text-xs sm:text-sm text-[var(--dna-text)]">
                       {org.orgName}/*
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -204,11 +206,12 @@ export function DoorSovereignPanel() {
             {OX_DX_SEVEN_ZONES.map((zone, idx) => {
               const isSelected = idx === selectedZoneIdx;
               return (
-                <button
+                <Button
                   key={zone.zoneName}
                   type="button"
+                  variant="plain"
                   onClick={() => setSelectedZoneIdx(idx)}
-                  className={`min-h-[44px] border p-2.5 text-left transition-colors cursor-pointer ${
+                  className={`min-h-[44px] h-auto flex-col items-start justify-start gap-0 border p-2.5 text-left transition-colors cursor-pointer ${
                     isSelected
                       ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/20"
                       : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/45"
@@ -220,7 +223,7 @@ export function DoorSovereignPanel() {
                   <div className="font-monument mt-0.5 text-[11px] text-[var(--dna-text)]">
                     {zone.zoneName.replace(/^ZONE 0\d · /, "")}
                   </div>
-                </button>
+                </Button>
               );
             })}
           </div>

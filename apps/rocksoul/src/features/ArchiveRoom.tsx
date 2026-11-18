@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { call } from "../lib";
 import type {
   MemoryCategory,
@@ -29,12 +29,14 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [resumeTitle, setResumeTitle] = useState("");
   const [resumeSummary, setResumeSummary] = useState("");
+  const queryRef = useRef(query);
+  queryRef.current = query;
 
-  const refresh = async () => {
+  const refresh = useCallback(async (searchQuery = queryRef.current) => {
     setError("");
     try {
       const [memoryRows, sessionRows, pointRows, journalRows] = await Promise.all([
-        call("search_memories", { query }),
+        call("search_memories", { query: searchQuery }),
         call("list_work_sessions"),
         call("list_resume_points"),
         call("list_soul_journal"),
@@ -43,20 +45,20 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
       setSessions(sessionRows);
       setResumePoints(pointRows);
       setJournal(journalRows);
-      if (!selectedSessionId && sessionRows[0]) setSelectedSessionId(sessionRows[0].id);
+      setSelectedSessionId((current) => (!current && sessionRows[0] ? sessionRows[0].id : current));
     } catch (refreshError) {
       setError(refreshError instanceof Error ? refreshError.message : String(refreshError));
     }
-  };
-
-  useEffect(() => {
-    void refresh();
   }, []);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => void refresh(), 180);
+    void refresh("");
+  }, [refresh]);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => void refresh(query), 180);
     return () => window.clearTimeout(timeout);
-  }, [query]);
+  }, [query, refresh]);
 
   const saveMemory = async (event: React.FormEvent) => {
     event.preventDefault();

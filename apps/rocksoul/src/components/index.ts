@@ -5,3 +5,5 @@ export { default as RiotRail } from "./RiotRail";
 export { default as SettingsDialog } from "./SettingsDialog";
 export { default as Topbar } from "./Topbar";
 export { default as CaptureDialog } from "./CaptureDialog";
+export { default as CommandSwitchboardModal } from "./CommandSwitchboardModal";
+export { default as OidcCallbackScreen } from "./OidcCallbackScreen";

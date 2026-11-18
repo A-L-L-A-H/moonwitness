@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
-import { WitnessAvatar } from "@moonwitness/ui";
 import {
+  Button,
   DropdownMenu,
-  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  WitnessAvatar,
 } from "@moonwitness/ui";
 
 interface ProfileMenuProps {
@@ -33,7 +34,9 @@ export function ProfileMenu({
   return (
     <DropdownMenu open={open} onOpenChange={onToggle}>
       <DropdownMenuTrigger asChild>
-        <button
+        <Button
+          type="button"
+          variant="plain"
           aria-label="Profile menu"
           className="flex min-h-11 items-center gap-2 rounded-md px-2 py-1.5 hover:bg-[var(--muted)]"
         >
@@ -51,7 +54,7 @@ export function ProfileMenu({
             </span>
             <span className="block text-[10px] text-[var(--muted-foreground)]">{role}</span>
           </span>
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 p-2 min-w-[12rem]" side="top" align="end" sideOffset={8}>
         <div className="border-b border-[var(--border)] px-3 py-2">

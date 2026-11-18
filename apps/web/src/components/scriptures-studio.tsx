@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -10,16 +11,10 @@ import {
   type ScriptureCorpusFilter,
   type UnifiedScriptureHit,
 } from "@moonwitness/canon";
-import { CutoutArtwork, DnaBrandLogo } from "@moonwitness/ui";
+import { Button, CutoutArtwork, DnaBrandLogo, Input } from "@moonwitness/ui";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
-import {
-  DnaBadge,
-  DnaButton,
-  DnaChamber,
-  DiamondStarOrnament,
-  SacredCornerBrackets,
-  SearchLensIcon,
-} from "@moonwitness/ui/imperium";
+import { DnaBadge, DnaButton, DnaChamber, SearchLensIcon } from "@moonwitness/ui/imperium";
+import { ClassicalWitnessPanel, MoralRootsConcordancePanel } from "./scriptures-panels";
 import { SiteSubpageHeader } from "./site-subpage-header";
 
 interface ScripturesApiResponse {
@@ -150,7 +145,7 @@ export function ScripturesStudio() {
     async function runSearch() {
       setLoading(true);
       try {
-        const res = await fetch(
+        const res = await requestApiResponse(
           `/api/scriptures?corpus=${encodeURIComponent(corpusFilter)}&q=${encodeURIComponent(query)}&limit=12`,
           {
             cache: "no-store",
@@ -234,50 +229,7 @@ export function ScripturesStudio() {
         </div>
 
         {/* Classical Manuscript Witness Panel */}
-        <section className="relative border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)]/95 p-6 sm:p-8">
-          <SacredCornerBrackets />
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
-            <h2 className="font-monument text-base sm:text-lg tracking-[0.16em] text-[var(--dna-text)] uppercase">
-              {locale === "id"
-                ? "SAMPEL NASKAH KLASIK PRIMER (IBRANI · YUNANI · ARAB)"
-                : "PRIMARY CLASSICAL WITNESS EXCERPTS (HEBREW · GREEK · ARABIC)"}
-            </h2>
-            <span className="font-mono text-[10px] text-[var(--dna-accent)]">
-              OSHB WLC 4.20 · SBLGNT v1.2 · DIVINE-TEXT
-            </span>
-          </div>
-
-          <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {(payload?.crosswalk?.passages ?? []).map((item) => (
-              <article
-                key={item.corpusCode}
-                className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-2.5"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[10.5px]">
-                  <span className="text-[var(--dna-accent)] font-bold">
-                    {item.corpusCode} · {item.corpusName}
-                  </span>
-                  <span className="text-[var(--dna-muted)]">{item.language}</span>
-                </div>
-                <div className="font-mono text-[10px] text-[var(--dna-accent)]">
-                  {item.reference}
-                </div>
-                <p
-                  dir={item.dir}
-                  lang={
-                    item.language === "Arabic" ? "ar" : item.language === "Hebrew" ? "he" : "el"
-                  }
-                  className="border-y border-[var(--dna-accent)]/15 py-3 font-serif text-base sm:text-lg leading-loose text-[var(--dna-text)]"
-                >
-                  {item.originalText}
-                </p>
-                <p className="font-serif text-xs text-[var(--dna-muted)] leading-relaxed">
-                  {item.summary}
-                </p>
-              </article>
-            ))}
-          </div>
-        </section>
+        <ClassicalWitnessPanel locale={locale} passages={payload?.crosswalk?.passages ?? []} />
 
         {/* Live 18,384-Verse 4-Corpus Witness Search Console */}
         <DnaChamber cornerBrackets className="p-6 sm:p-8 space-y-5">
@@ -308,12 +260,13 @@ export function ScripturesStudio() {
                     ? "SALIN TAUTAN"
                     : "COPY DEEP LINK"}
               </DnaButton>
-              <Link
-                href="/codex?door=epistemic-corpus"
-                className="btn-luxe-secondary inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
+              <DnaButton
+                asChild
+                tone="secondary"
+                className="min-h-0 inline-flex items-center px-4 py-1.5 font-mono text-[10.5px] text-[var(--dna-accent)] uppercase"
               >
-                DOOR II EPISTEMIC SPINE &rsaquo;
-              </Link>
+                <Link href="/codex?door=epistemic-corpus">DOOR II EPISTEMIC SPINE &rsaquo;</Link>
+              </DnaButton>
             </div>
           </div>
 
@@ -323,20 +276,21 @@ export function ScripturesStudio() {
               const active = corpusFilter === tab.id;
               const num = counts ? counts[tab.countKey] : null;
               return (
-                <button
+                <DnaButton
                   key={tab.id}
                   type="button"
+                  tone="secondary"
                   aria-pressed={active}
                   onClick={() => setCorpusFilter(tab.id)}
-                  className={`px-3.5 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors cursor-pointer ${
+                  className={`min-h-0 px-3.5 py-2 font-mono text-[10.5px] tracking-[0.12em] uppercase transition-colors ${
                     active
                       ? "border border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
-                      : "btn-luxe-secondary text-[var(--dna-muted)]"
+                      : "text-[var(--dna-muted)]"
                   }`}
                 >
                   {locale === "id" ? tab.labelId : tab.labelEn}
                   {num ? ` (${num.toLocaleString("en-US")})` : ""}
-                </button>
+                </DnaButton>
               );
             })}
           </div>
@@ -344,13 +298,13 @@ export function ScripturesStudio() {
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="flex flex-1 items-center gap-3 border border-[var(--dna-accent)]/40 bg-[var(--dna-canvas)] px-4 py-2.5">
               <SearchLensIcon className="h-4 w-4 text-[var(--dna-accent)]" />
-              <input
+              <Input
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 aria-label="Search across Taurat, Zabur, Injil, and Quran corpora"
                 placeholder="Gen 1:1, Ps 23:1, John 1:1, 2:256, الله, θεος..."
-                className="w-full bg-transparent font-mono text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none"
+                className="min-h-0 w-full border-0 bg-transparent px-0 py-0 font-mono text-sm text-[var(--dna-text)] placeholder-[var(--dna-muted)] focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
               />
             </div>
           </div>
@@ -396,15 +350,16 @@ export function ScripturesStudio() {
                       <DnaBadge className="font-mono text-[10px] text-[var(--dna-text)]">
                         {hit.reference}
                       </DnaBadge>
-                      <button
+                      <Button
                         type="button"
+                        variant="plain"
                         onClick={() =>
                           void copyShareUrl(hit.reference.replace(/^QS\s+/i, ""), hit.corpusCode)
                         }
                         className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] px-2 py-0.5 text-[10px] text-[var(--dna-accent)] hover:text-[var(--dna-text)] cursor-pointer"
                       >
                         {copiedLink === hit.reference.replace(/^QS\s+/i, "") ? "COPIED" : "SHARE"}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                   <p
@@ -431,57 +386,7 @@ export function ScripturesStudio() {
         </DnaChamber>
 
         {/* Shared Moral Roots Concordance Matrix */}
-        <section className="relative border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-6 sm:p-8 space-y-5">
-          <SacredCornerBrackets />
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-3">
-            <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.18em] text-[var(--dna-accent)] uppercase">
-              <DiamondStarOrnament className="h-3.5 w-3.5 text-[var(--dna-accent)]" />
-              <span>SHARED MORAL ROOTS // FOUR-CORPUS CONCORDANCE</span>
-            </div>
-            <span className="font-mono text-[10.5px] text-[var(--dna-muted)]">
-              {activeTheme.arabicRoot}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {FOUR_CORPUS_CONCORDANCE.map((theme) => (
-              <button
-                key={theme.id}
-                type="button"
-                aria-pressed={theme.id === activeTheme.id}
-                onClick={() => setActiveThemeId(theme.id)}
-                className="btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] text-[var(--dna-text)] uppercase cursor-pointer"
-              >
-                {theme.title}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { code: "TAURAT", body: activeTheme.tauratWitness },
-              { code: "ZABUR", body: activeTheme.zaburWitness },
-              { code: "INJĪL", body: activeTheme.injilWitness },
-              { code: "AL-QUR’ĀN", body: activeTheme.quranWitness },
-            ].map((item) => (
-              <div
-                key={item.code}
-                className="border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] p-4"
-              >
-                <div className="font-monument text-xs tracking-[0.16em] text-[var(--dna-accent)]">
-                  {item.code}
-                </div>
-                <p className="mt-2 font-serif text-xs leading-relaxed text-[var(--dna-muted)]">
-                  {item.body}
-                </p>
-              </div>
-            ))}
-          </div>
-          <div className="border-t border-[var(--dna-accent)]/15 pt-3 font-mono text-[11px] text-[var(--dna-muted)]">
-            <span className="text-[var(--dna-accent)]">STEWARDSHIP ACTION:</span>{" "}
-            {activeTheme.livedPractice}
-          </div>
-        </section>
+        <MoralRootsConcordancePanel activeTheme={activeTheme} onSelectTheme={setActiveThemeId} />
       </main>
     </div>
   );

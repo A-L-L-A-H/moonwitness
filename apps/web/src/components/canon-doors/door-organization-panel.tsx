@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
   CENTER_100_STEWARDSHIP_CLUSTERS,
   OWNER_FOUR_LINE_MANIFESTO,
@@ -168,9 +169,10 @@ export function DoorOrganizationPanel() {
             {SYAFAAT_BASE_STATES.map((stateObj) => {
               const isSelected = stateObj.state === activeSyafaatState;
               return (
-                <button
+                <Button
                   key={stateObj.state}
                   type="button"
+                  variant="plain"
                   onClick={() => setActiveSyafaatState(stateObj.state)}
                   className={`min-h-[44px] border px-3 py-1.5 font-mono text-[11px] tracking-[0.14em] cursor-pointer transition-colors ${
                     isSelected
@@ -179,7 +181,7 @@ export function DoorOrganizationPanel() {
                   }`}
                 >
                   {stateObj.state}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -196,11 +198,12 @@ export function DoorOrganizationPanel() {
               {CENTER_100_STEWARDSHIP_CLUSTERS.map((cluster, idx) => {
                 const selected = idx === selectedClusterIdx;
                 return (
-                  <button
+                  <Button
                     key={cluster.clusterCode}
                     type="button"
+                    variant="plain"
                     onClick={() => setSelectedClusterIdx(idx)}
-                    className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
+                    className={`min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 border p-3.5 text-left transition-colors cursor-pointer ${
                       selected
                         ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/15"
                         : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/50"
@@ -216,7 +219,7 @@ export function DoorOrganizationPanel() {
                     <div className="mt-1 font-sans text-xs text-[var(--dna-muted)]">
                       {cluster.humanEthicalFocus}
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
