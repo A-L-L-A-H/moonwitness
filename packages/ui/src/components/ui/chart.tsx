@@ -227,7 +227,7 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-        ) : null}
+          ) : null}
           {showLastDot && last ? (
             <circle cx={last.x} cy={last.y} r={3} fill={colorVar}>
               <title>{String(last.val)}</title>
@@ -350,7 +350,7 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-        ) : null}
+          ) : null}
           {coords.map(({ x, y, point }) => (
             <g key={point.label}>
               <circle
