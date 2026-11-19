@@ -7,6 +7,7 @@ use std::{
     time::Duration,
 };
 use tauri::{AppHandle, Manager};
+use url::Url;
 use uuid::Uuid;
 
 static DATABASE_ACCESS: OnceLock<RwLock<()>> = OnceLock::new();
@@ -289,9 +290,68 @@ pub fn record_event(
     Ok(())
 }
 
+#[allow(dead_code)]
+const ROCKSOUL_POSTGRES_ENV_KEY: &str = "ROCKSOUL_DATABASE_URL";
+
+#[allow(dead_code)]
+fn is_loopback_postgres_host(host: &str) -> bool {
+    matches!(
+        host.to_ascii_lowercase().as_str(),
+        "localhost" | "127.0.0.1" | "[::1]" | "::1"
+    )
+}
+
+/// Validates that a PostgreSQL connection URL targets only a local workstation loopback host.
+#[allow(dead_code)]
+pub fn validate_private_postgres_url(url: &str) -> Result<(), String> {
+    let parsed = Url::parse(url).map_err(|error| format!("Invalid PostgreSQL URL: {error}"))?;
+    match parsed.scheme() {
+        "postgres" | "postgresql" => {}
+        scheme => {
+            return Err(format!(
+                "Unsupported ROCKSOUL PostgreSQL scheme '{scheme}'; expected postgres:// or postgresql://"
+            ));
+        }
+    }
+
+    let host = parsed
+        .host_str()
+        .ok_or_else(|| "PostgreSQL URL must include a loopback host".to_string())?;
+    if !is_loopback_postgres_host(host) {
+        return Err(format!(
+            "Refusing non-loopback PostgreSQL host '{host}': Zone C ROCKSOUL data must stay workstation-local"
+        ));
+    }
+
+    if let Some((_, override_host)) = parsed.query_pairs().find(|(key, _)| key == "host") {
+        if !is_loopback_postgres_host(&override_host) {
+            return Err(format!(
+                "Refusing non-loopback PostgreSQL host query override '{override_host}': Zone C ROCKSOUL data must stay workstation-local"
+            ));
+        }
+    }
+
+    Ok(())
+}
+
+/// Resolves and validates the optional workstation-local PostgreSQL URL from `ROCKSOUL_DATABASE_URL`.
+#[allow(dead_code)]
+pub fn resolve_rocksoul_postgres_url() -> Option<String> {
+    let raw = std::env::var(ROCKSOUL_POSTGRES_ENV_KEY).ok()?;
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    validate_private_postgres_url(trimmed).ok()?;
+    Some(trimmed.to_string())
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{backup_connection, migrate, remove_database_files, verify_integrity};
+    use super::{
+        backup_connection, migrate, remove_database_files, resolve_rocksoul_postgres_url,
+        validate_private_postgres_url, verify_integrity,
+    };
     use rusqlite::Connection;
     use std::{fs, path::PathBuf};
     use uuid::Uuid;
@@ -534,5 +594,74 @@ mod tests {
             .expect("existing issue should remain");
         assert_eq!(closed_at_columns, 1);
         assert_eq!(title, "Existing issue");
+    }
+
+    #[test]
+    fn validate_private_postgres_url_accepts_loopback_hosts() {
+        for url in [
+            "postgres://postgres@127.0.0.1:5432/rocksoul",
+            "postgresql://localhost:5432/rocksoul",
+            "postgres://postgres@[::1]:5432/rocksoul",
+        ] {
+            assert!(
+                validate_private_postgres_url(url).is_ok(),
+                "expected loopback PostgreSQL URL to be accepted: {url}"
+            );
+        }
+    }
+
+    #[test]
+    fn validate_private_postgres_url_rejects_remote_hosts_and_non_postgres_schemes() {
+        for url in [
+            "postgres://user:pass@api.moonwitness.biz.id:5432/moonwitness",
+            "postgresql://10.0.0.5:5432/rocksoul",
+            "postgres://localhost:5432/rocksoul?host=api.moonwitness.biz.id",
+            "postgres:///rocksoul",
+            "mysql://localhost:3306/rocksoul",
+            "sqlite:///tmp/rocksoul.sqlite3",
+            "http://127.0.0.1:5432/rocksoul",
+            "not-a-url",
+        ] {
+            assert!(
+                validate_private_postgres_url(url).is_err(),
+                "expected non-private or non-postgres URL to be rejected: {url}"
+            );
+        }
+    }
+
+    #[test]
+    fn resolve_rocksoul_postgres_url_enforces_private_loopback_boundary() {
+        let previous = std::env::var_os("ROCKSOUL_DATABASE_URL");
+        struct EnvGuard(Option<std::ffi::OsString>);
+        impl Drop for EnvGuard {
+            fn drop(&mut self) {
+                match self.0.take() {
+                    Some(value) => std::env::set_var("ROCKSOUL_DATABASE_URL", value),
+                    None => std::env::remove_var("ROCKSOUL_DATABASE_URL"),
+                }
+            }
+        }
+        let _guard = EnvGuard(previous);
+
+        std::env::remove_var("ROCKSOUL_DATABASE_URL");
+        assert_eq!(resolve_rocksoul_postgres_url(), None);
+
+        std::env::set_var("ROCKSOUL_DATABASE_URL", "   ");
+        assert_eq!(resolve_rocksoul_postgres_url(), None);
+
+        std::env::set_var(
+            "ROCKSOUL_DATABASE_URL",
+            "postgres://user:pass@api.moonwitness.biz.id:5432/moonwitness",
+        );
+        assert_eq!(resolve_rocksoul_postgres_url(), None);
+
+        std::env::set_var(
+            "ROCKSOUL_DATABASE_URL",
+            "  postgresql://localhost:5432/rocksoul  ",
+        );
+        assert_eq!(
+            resolve_rocksoul_postgres_url().as_deref(),
+            Some("postgresql://localhost:5432/rocksoul")
+        );
     }
 }

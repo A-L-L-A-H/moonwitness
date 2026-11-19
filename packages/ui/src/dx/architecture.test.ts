@@ -43,7 +43,7 @@ const LEGACY_HEX_CEILINGS: Readonly<Record<string, number>> = {
 };
 
 /** Apps whose CSS and TSX must not contain any palette literal. */
-const STRICT_TOKEN_APPS: readonly string[] = ["web", "rocksoul"];
+const STRICT_TOKEN_APPS: readonly string[] = ["web", "rocksoul", "edge"];
 
 /** 6-digit only in TSX: 3-digit matches collide with editorial labels such as "#014". */
 const TSX_HEX_LITERAL = /#[0-9a-fA-F]{6}\b/g;
@@ -347,7 +347,7 @@ describe("UI architecture: package boundaries", () => {
 });
 
 describe("UI architecture: unified web & sovereign DNA icon governance", () => {
-  it("GATE-01: enforces single web frontend app boundary in apps/web", () => {
+  it("GATE-01: enforces canonical frontend app boundaries (edge, rocksoul, web)", () => {
     const retiredDir = join(APPS_ROOT, "a-l-l-a-h");
     expect(existsSync(join(retiredDir, "package.json"))).toBe(false);
     expect(existsSync(join(retiredDir, "src"))).toBe(false);
@@ -359,14 +359,15 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
       .filter((dir) => existsSync(join(APPS_ROOT, dir, "src")))
       .filter((dir) => walk(join(APPS_ROOT, dir, "src"), [".tsx"]).length > 0)
       .sort();
-    expect(appsWithTsx).toEqual(["rocksoul", "web"]);
+    expect(appsWithTsx).toEqual(["edge", "rocksoul", "web"]);
   });
 
-  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui, @moonwitness/web, and rocksoul-dx", () => {
+  it("GATE-02: forbids generic external icon libraries in @moonwitness/ui, @moonwitness/web, @moonwitness/edge, and rocksoul-dx", () => {
     const bannedDeps = ["lucide-react", "@heroicons/react", "react-icons", "@tabler/icons-react"];
     for (const manifestPath of [
       join(UI_ROOT, "package.json"),
       join(APPS_ROOT, "web/package.json"),
+      join(APPS_ROOT, "edge/package.json"),
       join(APPS_ROOT, "rocksoul/package.json"),
     ]) {
       const pkg = JSON.parse(readFileSync(manifestPath, "utf8")) as {
@@ -386,6 +387,7 @@ describe("UI architecture: unified web & sovereign DNA icon governance", () => {
     const filesToScan = [
       ...walk(join(UI_ROOT, "src"), [".ts", ".tsx"]),
       ...walk(join(APPS_ROOT, "web/src"), [".ts", ".tsx"]),
+      ...walk(join(APPS_ROOT, "edge/src"), [".ts", ".tsx"]),
       ...walk(join(APPS_ROOT, "rocksoul/src"), [".ts", ".tsx"]),
     ].filter((file) => !/\.test\.(ts|tsx)$/.test(file));
     const offenders: string[] = [];

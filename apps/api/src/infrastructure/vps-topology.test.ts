@@ -53,12 +53,12 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(existsSync(envExamplePath)).toBe(true);
   });
 
-  it("enforces three-app workspace topology under apps/ (MW-0101)", () => {
+  it("enforces canonical app workspace topology under apps/ (MW-0101 + edge)", () => {
     const appDirs = readdirSync(resolve(repoRoot, "apps"), { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
       .map((entry) => entry.name)
       .sort();
-    expect(appDirs).toEqual(["api", "rocksoul", "web"]);
+    expect(appDirs).toEqual(["api", "edge", "rocksoul", "web"]);
   });
 
   it("validates Caddy reverse proxy routing and security headers", () => {
