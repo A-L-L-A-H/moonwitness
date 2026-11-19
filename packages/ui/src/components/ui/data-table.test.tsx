@@ -2,7 +2,7 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DataTable, SkinProvider } from "../../index";
+import { DataTable, SkinProvider, type DataTableColumn } from "../../index";
 
 type Row = {
   id: string;
@@ -14,7 +14,7 @@ type Row = {
 let container: HTMLDivElement;
 let root: Root;
 
-function renderTable(columns: Parameters<typeof DataTable<Row>>[0]["columns"]) {
+function renderTable(columns: readonly DataTableColumn<Row>[]) {
   const rows: Row[] = [
     { id: "1", name: "Alpha", count: 42, status: "Ready" },
     { id: "2", name: "Beta", count: 7, status: "Pending review" },
@@ -35,10 +35,7 @@ function setSearchValue(value: string) {
     throw new Error("DataTable search input was not rendered");
   }
 
-  const valueSetter = Object.getOwnPropertyDescriptor(
-    HTMLInputElement.prototype,
-    "value",
-  )?.set;
+  const valueSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
 
   act(() => {
     valueSetter?.call(input, value);
