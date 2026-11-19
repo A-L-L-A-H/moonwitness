@@ -74,9 +74,8 @@ FieldLabel.displayName = "FieldLabel";
 const FieldControl = React.forwardRef<HTMLElement, { children: React.ReactElement }>(
   ({ children }, ref) => {
     const ctx = React.useContext(FieldContext);
-    const childDescription = (
-      children.props as React.HTMLAttributes<HTMLElement>
-    )["aria-describedby"];
+    const childProps = children.props as React.HTMLAttributes<HTMLElement>;
+    const childDescription = childProps["aria-describedby"];
     const describedByIds = [
       ...(childDescription?.split(/\s+/).filter(Boolean) ?? []),
       ...(ctx?.hasDescription ? [ctx.descriptionId] : []),

@@ -314,7 +314,7 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
     expect(container.querySelector('svg[role="img"][aria-label="Bar chart"]')).not.toBeNull();
   });
 
-  it("only references rendered field descriptions and preserves caller-provided IDs", () => {
+  it("references only rendered field descriptions and preserves caller IDs", () => {
     renderNode(
       <SkinProvider defaultSkin="archive" persist={false}>
         <Form
@@ -337,7 +337,10 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
             label="Field with help and error"
             description="Additional context."
           >
-            <Input data-testid="described-error-control" aria-describedby="external-help" />
+            <Input
+              data-testid="described-error-control"
+              aria-describedby="external-help"
+            />
           </FormField>
         </Form>
         <p id="external-help">Shared help text.</p>
