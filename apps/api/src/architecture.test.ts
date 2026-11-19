@@ -348,5 +348,30 @@ describe("apps/api Thin-Host & ORM Addon Architecture Gates", () => {
     });
     expect(codexReadB.statusCode).toBe(200);
     expect(codexReadB.json().data).toHaveLength(0);
+
+    // API-GATE-10: constitutional __base models + /m/:model/read-group live in booted host
+    const companyList = await app.inject({
+      method: "GET",
+      url: "/api/v1/m/res.company",
+      headers: { cookie: `mw_session=${sessionToken}` },
+    });
+    expect(companyList.statusCode).toBe(200);
+    expect(companyList.json().total).toBeGreaterThanOrEqual(1);
+
+    const groupRead = await app.inject({
+      method: "GET",
+      url: "/api/v1/m/canon.codex/read-group?groupBy=canon_tier",
+      headers: tenantAHeaders,
+    });
+    expect(groupRead.statusCode).toBe(200);
+    expect(groupRead.json().groups).toEqual([{ canon_tier: "canonical", count: 1 }]);
+  });
+
+  it("API-GATE-09: refactored addons eliminate raw SQL in timeline and probe retention", () => {
+    const timelineRepo = readFileSync(join(ADDONS_SRC_DIR, "timeline/repository.ts"), "utf8");
+    expect(timelineRepo).not.toMatch(/\bgetDb\s*\(/);
+
+    const probesService = readFileSync(join(ADDONS_SRC_DIR, "probes/service.ts"), "utf8");
+    expect(probesService).not.toMatch(/DELETE FROM orm_probe_events/i);
   });
 });
