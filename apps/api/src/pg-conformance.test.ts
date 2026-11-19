@@ -10,7 +10,6 @@ import {
   defineModel,
   getDb,
   initPostgresDb,
-  isPostgresUrl,
   modelRegistry,
   PolicyError,
   syncModels,
@@ -31,20 +30,7 @@ import {
 } from "@moonwitness/addon-runtime";
 import { createSession, createUser } from "@moonwitness/addons/auth";
 import { buildApp } from "./app";
-
-function resolvePostgresConformanceUrl(): string {
-  const candidates = [
-    process.env.TEST_POSTGRES_URL?.trim(),
-    process.env.POSTGRES_TEST_URL?.trim(),
-    process.env.DATABASE_URL?.trim(),
-  ];
-  for (const candidate of candidates) {
-    if (candidate && isPostgresUrl(candidate)) {
-      return candidate;
-    }
-  }
-  return "";
-}
+import { resolvePostgresConformanceUrl } from "./pg-conformance-config";
 
 const POSTGRES_CONFORMANCE_URL = resolvePostgresConformanceUrl();
 
@@ -58,7 +44,12 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
   const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
   const dbName = `mw_pg_conf_${suffix}`;
   const adminPool = new Pool({ connectionString: baseUrl, max: 2 });
-  await adminPool.query(`CREATE DATABASE "${dbName}"`);
+  try {
+    await adminPool.query(`CREATE DATABASE "${dbName}"`);
+  } catch (error) {
+    await adminPool.end().catch(() => {});
+    throw error;
+  }
 
   const targetUrl = new URL(baseUrl);
   targetUrl.pathname = `/${dbName}`;
@@ -584,6 +575,316 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
       });
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.json().data.status).toBe("deleted");
+    });
+
+    it("1c. enforces group-aware readGroups and writeGroups (including authenticated auth_users group_keys_json, implied res.groups, and relation target policies) against PostgreSQL", async () => {
+      const isolated = await createIsolatedPostgresDb(POSTGRES_CONFORMANCE_URL);
+      let app: FastifyInstance | null = null;
+      cleanups.push(async () => {
+        if (app) {
+          await app.close();
+          app = null;
+        }
+        closeDb();
+        await isolated.drop();
+      });
+
+      const suffix = isolated.dbName.slice(-8);
+      const targetModel = defineModel({
+        name: `conf.grp_dept_${suffix}`,
+        table: `conf_grp_depts_${suffix}`,
+        schema: z.object({
+          name: z.string().min(1),
+          audit_budget: z.number().int().default(7000),
+          secret_vault_key: z.string().default("vault-secret"),
+        }),
+        restEnabled: true,
+        fieldPolicies: {
+          audit_budget: {
+            readGroups: ["ops.group_auditor"],
+            writeGroups: ["ops.group_auditor"],
+          },
+          secret_vault_key: {
+            sensitive: true,
+            readGroups: ["ops.group_lead"],
+          },
+        },
+      });
+
+      const docModel = defineModel({
+        name: `conf.grp_doc_${suffix}`,
+        table: `conf_grp_docs_${suffix}`,
+        schema: z.object({
+          code: z.string().min(1),
+          dept_id: z.string().nullable().default(null),
+          title: z.string().min(1),
+          classification: z.string().default("internal"),
+          audit_finding: z.string().default("pg-secret-finding"),
+          lead_secret: z.string().default("lead-token-xyz"),
+        }),
+        restEnabled: true,
+        indexes: [{ fields: ["code"], unique: true }],
+        relations: {
+          dept_id: { model: targetModel.name, targetField: "id", onDelete: "restrict" },
+        },
+        fieldPolicies: {
+          audit_finding: {
+            readRoles: ["admin"],
+            readGroups: ["ops.group_auditor"],
+            writeRoles: ["admin"],
+            writeGroups: ["ops.group_auditor"],
+          },
+          lead_secret: {
+            sensitive: true,
+            readGroups: ["ops.group_lead"],
+            writeGroups: ["ops.group_lead"],
+          },
+        },
+        actions: {
+          update_finding: {
+            scope: "record",
+            operation: "update",
+            roles: ["viewer", "editor", "admin"],
+            handler: async ({ record, input, repository, actor }) => {
+              const payload = input as { audit_finding?: string; title?: string };
+              return repository.update(
+                String(record!.id),
+                {
+                  ...(payload.audit_finding ? { audit_finding: payload.audit_finding } : {}),
+                  ...(payload.title ? { title: payload.title } : {}),
+                },
+                actor,
+              );
+            },
+          },
+        },
+      });
+
+      app = await buildApp({
+        dbPath: isolated.dbUrl,
+        prefix: "/api/v1",
+        addons: [
+          {
+            manifest: {
+              name: `conf_grp_addon_${suffix}`,
+              version: "1.0.0",
+              depends: ["__base"],
+              provides: { models: [targetModel.name, docModel.name] },
+            },
+            models: [targetModel, docModel],
+            data: [
+              {
+                id: `grp_auditor_${suffix}`,
+                model: "res.groups",
+                key: { group_key: "ops.group_auditor" },
+                values: {
+                  group_key: "ops.group_auditor",
+                  name: "Ops Auditor",
+                  category: "ops",
+                  implied_ids_json: '["base.group_viewer"]',
+                },
+              },
+              {
+                id: `grp_lead_${suffix}`,
+                model: "res.groups",
+                key: { group_key: "ops.group_lead" },
+                values: {
+                  group_key: "ops.group_lead",
+                  name: "Ops Lead",
+                  category: "ops",
+                  implied_ids_json: '["ops.group_auditor"]',
+                },
+              },
+            ],
+            rules: [
+              {
+                rule_key: `conf.grp_dept.viewer_${suffix}`,
+                model_name: targetModel.name,
+                scope: "group",
+                groups: ["base.group_viewer"],
+                can_read: true,
+                can_create: true,
+              },
+              {
+                rule_key: `conf.grp_doc.viewer_${suffix}`,
+                model_name: docModel.name,
+                scope: "group",
+                groups: ["base.group_viewer"],
+                can_read: true,
+                can_create: true,
+                can_update: true,
+              },
+            ],
+          },
+        ],
+      });
+
+      const plainViewer = await createUser({
+        username: `pg-plain-viewer-${suffix}`,
+        email: `pg-plain-viewer-${suffix}@moonwitness.local`,
+        password: "CorrectHorseBatteryStaple!2026",
+        role: "viewer",
+        displayName: "Plain Viewer",
+        groups: [],
+      });
+      const leadViewer = await createUser({
+        username: `pg-lead-viewer-${suffix}`,
+        email: `pg-lead-viewer-${suffix}@moonwitness.local`,
+        password: "CorrectHorseBatteryStaple!2026",
+        role: "viewer",
+        displayName: "Lead Viewer",
+        groups: ["ops.group_lead"],
+      });
+
+      const plainCookie = `mw_session=${await createSession(plainViewer.id)}`;
+      const leadCookie = `mw_session=${await createSession(leadViewer.id)}`;
+
+      const deptRes = await app.inject({
+        method: "POST",
+        url: `/api/v1/m/${targetModel.name}`,
+        headers: { cookie: leadCookie },
+        payload: { name: "Audit Dept", audit_budget: 12000 },
+      });
+      expect(deptRes.statusCode).toBe(201);
+      const deptId = deptRes.json().data.id as string;
+      expect(deptRes.json().data.audit_budget).toBe(12000);
+      expect(deptRes.json().data.secret_vault_key).toBe("vault-secret");
+
+      // Plain viewer (role=viewer, no groups) is denied writing group-protected fields
+      const plainDeniedWrite = await app.inject({
+        method: "POST",
+        url: `/api/v1/m/${docModel.name}`,
+        headers: { cookie: plainCookie },
+        payload: { code: "G-1", title: "Blocked", audit_finding: "forged" },
+      });
+      expect(plainDeniedWrite.statusCode).toBe(403);
+      expect(plainDeniedWrite.json().code).toBe("FIELD_WRITE_FORBIDDEN");
+
+      // Viewer with ops.group_lead (which implies ops.group_auditor) succeeds despite role=viewer
+      const leadCreate = await app.inject({
+        method: "POST",
+        url: `/api/v1/m/${docModel.name}`,
+        headers: { cookie: leadCookie },
+        payload: {
+          code: "G-1",
+          dept_id: deptId,
+          title: "PG Group Doc",
+          audit_finding: "pg-audit-only-needle",
+          lead_secret: "lead-pg-secret",
+        },
+      });
+      expect(leadCreate.statusCode).toBe(201);
+      const docId = leadCreate.json().data.id as string;
+      expect(leadCreate.json().data.audit_finding).toBe("pg-audit-only-needle");
+      expect(leadCreate.json().data.lead_secret).toBe("lead-pg-secret");
+
+      // Plain viewer reads with ?with=dept_id -> cannot see audit_finding, lead_secret, or target audit_budget / secret_vault_key
+      const plainRead = await app.inject({
+        method: "GET",
+        url: `/api/v1/m/${docModel.name}/${docId}?with=dept_id`,
+        headers: { cookie: plainCookie },
+      });
+      expect(plainRead.statusCode).toBe(200);
+      expect(plainRead.json().data.title).toBe("PG Group Doc");
+      expect(plainRead.json().data.audit_finding).toBeUndefined();
+      expect(plainRead.json().data.lead_secret).toBeUndefined();
+      expect(plainRead.json().data.$dept_id.name).toBe("Audit Dept");
+      expect(plainRead.json().data.$dept_id.audit_budget).toBeUndefined();
+      expect(plainRead.json().data.$dept_id.secret_vault_key).toBeUndefined();
+
+      // Plain viewer cannot infer audit_finding via filter, orderBy, readGroup, ?q=, or ?fields=
+      expect(
+        (
+          await app.inject({
+            method: "GET",
+            url: `/api/v1/m/${docModel.name}?audit_finding=pg-audit-only-needle`,
+            headers: { cookie: plainCookie },
+          })
+        ).statusCode,
+      ).toBe(403);
+      expect(
+        (
+          await app.inject({
+            method: "GET",
+            url: `/api/v1/m/${docModel.name}?orderBy=audit_finding%20ASC`,
+            headers: { cookie: plainCookie },
+          })
+        ).statusCode,
+      ).toBe(403);
+      expect(
+        (
+          await app.inject({
+            method: "GET",
+            url: `/api/v1/m/${docModel.name}?fields=title,audit_finding`,
+            headers: { cookie: plainCookie },
+          })
+        ).statusCode,
+      ).toBe(403);
+      expect(
+        (
+          await app.inject({
+            method: "GET",
+            url: `/api/v1/m/${docModel.name}/read-group?groupBy=audit_finding`,
+            headers: { cookie: plainCookie },
+          })
+        ).statusCode,
+      ).toBe(403);
+      const plainSearchGroup = await app.inject({
+        method: "GET",
+        url: `/api/v1/m/${docModel.name}/read-group?groupBy=classification&q=pg-audit-only-needle`,
+        headers: { cookie: plainCookie },
+      });
+      expect(plainSearchGroup.statusCode).toBe(200);
+      expect(plainSearchGroup.json().groups).toEqual([]);
+
+      // Plain viewer RPC input on restricted field fails with 403
+      const plainRpc = await app.inject({
+        method: "POST",
+        url: "/api/v1/rpc",
+        headers: { cookie: plainCookie },
+        payload: {
+          model: docModel.name,
+          method: "update_finding",
+          id: docId,
+          kwargs: { audit_finding: "blocked" },
+        },
+      });
+      expect(plainRpc.statusCode).toBe(403);
+      expect(plainRpc.json().code).toBe("FIELD_WRITE_FORBIDDEN");
+
+      // Lead viewer reads hydrated relation + runs RPC + reads group-protected readGroup
+      const leadRead = await app.inject({
+        method: "GET",
+        url: `/api/v1/m/${docModel.name}/${docId}?with=dept_id`,
+        headers: { cookie: leadCookie },
+      });
+      expect(leadRead.statusCode).toBe(200);
+      expect(leadRead.json().data.audit_finding).toBe("pg-audit-only-needle");
+      expect(leadRead.json().data.lead_secret).toBe("lead-pg-secret");
+      expect(leadRead.json().data.$dept_id.audit_budget).toBe(12000);
+      expect(leadRead.json().data.$dept_id.secret_vault_key).toBe("vault-secret");
+
+      const leadRpc = await app.inject({
+        method: "POST",
+        url: "/api/v1/rpc",
+        headers: { cookie: leadCookie },
+        payload: {
+          model: docModel.name,
+          method: "update_finding",
+          id: docId,
+          kwargs: { audit_finding: "pg-audit-updated" },
+        },
+      });
+      expect(leadRpc.statusCode).toBe(200);
+      expect(leadRpc.json().result.audit_finding).toBe("pg-audit-updated");
+
+      const leadGroup = await app.inject({
+        method: "GET",
+        url: `/api/v1/m/${docModel.name}/read-group?groupBy=audit_finding&q=pg-audit-updated`,
+        headers: { cookie: leadCookie },
+      });
+      expect(leadGroup.statusCode).toBe(200);
+      expect(leadGroup.json().groups).toEqual([{ audit_finding: "pg-audit-updated", count: 1 }]);
     });
 
     it("2. enforces model semantics on PostgreSQL: defaults, constrains, many2one, many2many + query budget, computed DAG, hook rollback vs isolation, 409 optimistic locking, and _orm_audit_log", async () => {

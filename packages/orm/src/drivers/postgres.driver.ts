@@ -202,24 +202,19 @@ export function translateSqlForPostgres(sql: string): {
   }
 
   if (/^\s*PRAGMA\s+integrity_check\b/i.test(sql)) {
-    return {
-      sql: "SELECT 'ok' AS integrity_check",
-      isInsertWithoutReturning: false,
-    };
+    throw new Error(
+      "Unsupported PostgreSQL PRAGMA: integrity_check. Use verifyIntegrity() for PostgreSQL catalog verification.",
+    );
   }
 
   if (/^\s*PRAGMA\s+foreign_key_check\b/i.test(sql)) {
-    return {
-      sql: "SELECT 1 AS fk_violation WHERE 1 = 0",
-      isInsertWithoutReturning: false,
-    };
+    throw new Error(
+      "Unsupported PostgreSQL PRAGMA: foreign_key_check. Use verifyIntegrity() for PostgreSQL catalog constraint verification.",
+    );
   }
 
   if (/^\s*PRAGMA\b/i.test(sql)) {
-    return {
-      sql: "SELECT 1 AS ok",
-      isInsertWithoutReturning: false,
-    };
+    throw new Error(`Unsupported PostgreSQL PRAGMA statement: ${sql.trim()}`);
   }
 
   let transformed = sql

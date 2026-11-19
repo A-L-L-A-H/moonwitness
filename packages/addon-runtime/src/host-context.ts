@@ -89,6 +89,11 @@ export const defaultFailClosedAuthBridge: BaseAddonAuthBridge = {
     const id = (request as { user?: { id?: unknown } }).user?.id;
     return id !== undefined && id !== null ? String(id) : null;
   },
+  getActorGroups: (request) => {
+    const groups = (request as { user?: { groups?: unknown } }).user?.groups;
+    if (!Array.isArray(groups)) return [];
+    return groups.filter((g): g is string => typeof g === "string" && g.trim().length > 0);
+  },
   getActorTenant: (request) => {
     const reqWithTenant = request as { tenantId?: unknown; user?: { tenantId?: unknown } };
     const raw = reqWithTenant.tenantId ?? reqWithTenant.user?.tenantId;

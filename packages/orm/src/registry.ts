@@ -599,15 +599,33 @@ class OrmModelRegistry {
         if (
           !fields.has(fieldName) &&
           !METADATA_NAMES.has(fieldName) &&
-          !(base.computed && fieldName in base.computed)
+          !(base.computed && fieldName in base.computed) &&
+          !(base.relations && fieldName in base.relations)
         ) {
           throw new Error(
             `Unknown field '${fieldName}' in fieldPolicies for model '${base.name}'.`,
           );
         }
+        const normalizeGroupList = (
+          groups: string[] | undefined,
+          key: "readGroups" | "writeGroups",
+        ): string[] | undefined => {
+          if (groups === undefined) return undefined;
+          const cleaned = groups.map((g) => g.trim()).filter(Boolean);
+          if (cleaned.length !== groups.length) {
+            throw new Error(
+              `Field policy '${key}' on '${base.name}.${fieldName}' contains an empty group reference.`,
+            );
+          }
+          return cleaned;
+        };
+        const readGroups = normalizeGroupList(policy.readGroups, "readGroups");
+        const writeGroups = normalizeGroupList(policy.writeGroups, "writeGroups");
         clonedFieldPolicies[fieldName] = {
           ...(policy.readRoles ? { readRoles: [...policy.readRoles] } : {}),
           ...(policy.writeRoles ? { writeRoles: [...policy.writeRoles] } : {}),
+          ...(readGroups !== undefined ? { readGroups } : {}),
+          ...(writeGroups !== undefined ? { writeGroups } : {}),
           ...(policy.sensitive !== undefined ? { sensitive: policy.sensitive } : {}),
         };
       }

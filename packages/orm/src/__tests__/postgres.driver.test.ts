@@ -46,14 +46,29 @@ describe("translateSqlForPostgres", () => {
     );
     expect(pragmaInfo.isInsertWithoutReturning).toBe(false);
 
-    const pragmaOther = translateSqlForPostgres("PRAGMA journal_mode = WAL");
-    expect(pragmaOther.sql).toBe("SELECT 1 AS ok");
-
-    expect(translateSqlForPostgres("PRAGMA integrity_check").sql).toBe(
-      "SELECT 'ok' AS integrity_check",
+    const pragmaIndexList = translateSqlForPostgres("PRAGMA index_list(timeline_events)");
+    expect(pragmaIndexList.sql).toBe(
+      "SELECT indexname AS name FROM pg_indexes WHERE schemaname = 'public' AND tablename = 'timeline_events'",
     );
-    expect(translateSqlForPostgres("PRAGMA foreign_key_check").sql).toBe(
-      "SELECT 1 AS fk_violation WHERE 1 = 0",
+    expect(pragmaIndexList.isInsertWithoutReturning).toBe(false);
+
+    expect(() => translateSqlForPostgres("PRAGMA integrity_check")).toThrow(
+      /Unsupported PostgreSQL PRAGMA: integrity_check/i,
+    );
+    expect(() => translateSqlForPostgres("PRAGMA foreign_key_check")).toThrow(
+      /Unsupported PostgreSQL PRAGMA: foreign_key_check/i,
+    );
+    expect(() => translateSqlForPostgres("PRAGMA journal_mode = WAL")).toThrow(
+      /Unsupported PostgreSQL PRAGMA statement/i,
+    );
+    expect(() => translateSqlForPostgres("PRAGMA foreign_keys = ON")).toThrow(
+      /Unsupported PostgreSQL PRAGMA statement/i,
+    );
+    expect(() => translateSqlForPostgres("PRAGMA user_version")).toThrow(
+      /Unsupported PostgreSQL PRAGMA statement/i,
+    );
+    expect(() => translateSqlForPostgres("PRAGMA table_info(users; DROP TABLE users)")).toThrow(
+      /Unsupported PostgreSQL PRAGMA statement/i,
     );
 
     const commentAndRowid = translateSqlForPostgres(
@@ -177,5 +192,22 @@ describe("PostgresDriver", () => {
       "ROLLBACK",
     ]);
     expect(mock.client.release).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects unsupported PRAGMA statements at driver execution time without querying the pool", async () => {
+    const mock = createMockPool();
+    const driver = new PostgresDriver();
+    await driver.init("postgresql://localhost:5432/moonwitness", mock.pool);
+
+    await expect(driver.all("PRAGMA integrity_check")).rejects.toThrow(
+      /Unsupported PostgreSQL PRAGMA: integrity_check/i,
+    );
+    await expect(driver.all("PRAGMA foreign_key_check")).rejects.toThrow(
+      /Unsupported PostgreSQL PRAGMA: foreign_key_check/i,
+    );
+    await expect(driver.exec("PRAGMA journal_mode = WAL")).rejects.toThrow(
+      /Unsupported PostgreSQL PRAGMA statement/i,
+    );
+    expect(mock.calls).toEqual([]);
   });
 });

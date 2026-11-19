@@ -11,6 +11,7 @@ import {
 import { Awakening, PreviewRoom, Threshold } from "./features/World";
 import useMotionPreference from "./features/useMotionPreference";
 import type { Issue, IssueStatus, MilestoneStatus, UpdateIssueArgs } from "./lib/contracts";
+import { subscribeEdgeOrmPubsub } from "./lib";
 import {
   ROCKSOUL_MID_AUTH_EVENT,
   getStoredRocksoulOidcSession,
@@ -61,6 +62,8 @@ export default function App() {
     setPage,
     refresh,
     refreshMonitor,
+    syncEdgeOrm,
+    setEdgeOrmStatus,
     openEcosystemUrl,
     loading,
     monitor,
@@ -103,7 +106,10 @@ export default function App() {
     const timer =
       typeof window !== "undefined"
         ? window.setTimeout(() => {
-            if (active) void refreshMonitor();
+            if (active) {
+              void refreshMonitor();
+              void syncEdgeOrm();
+            }
           }, 250)
         : null;
     void refresh().finally(() => {
@@ -115,7 +121,17 @@ export default function App() {
         window.clearTimeout(timer);
       }
     };
-  }, [refresh, refreshMonitor]);
+  }, [refresh, refreshMonitor, syncEdgeOrm]);
+
+  useEffect(() => {
+    if (typeof subscribeEdgeOrmPubsub !== "function") return;
+    return subscribeEdgeOrmPubsub((status) => {
+      setEdgeOrmStatus(status);
+      if (status.projects_synced > 0 || status.tasks_synced > 0) {
+        void refresh();
+      }
+    });
+  }, [refresh, setEdgeOrmStatus]);
 
   useEffect(() => {
     if (!autoMonitor) return;

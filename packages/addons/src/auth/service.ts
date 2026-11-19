@@ -16,6 +16,7 @@ export interface AuthUser {
   isActive: boolean;
   companyId: string;
   companyIds: string[];
+  groups: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +29,7 @@ export interface CreateAuthUserInput {
   displayName: string;
   companyId?: string;
   companyIds?: string[];
+  groups?: string[];
 }
 
 export interface AuthUserPublic {
@@ -73,6 +75,7 @@ export interface AuthSessionWithUser {
   displayName: string;
   companyId?: string;
   companyIds?: string[];
+  groups?: string[];
 }
 
 export const SESSION_COOKIE_NAME = "mw_session";
@@ -118,6 +121,19 @@ function parseCompanyIds(raw: string | null | undefined, fallbackCompanyId: stri
   return [fallbackCompanyId];
 }
 
+function parseGroupKeys(raw: string | null | undefined): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed)) {
+      return parsed.filter((g): g is string => typeof g === "string" && g.trim().length > 0);
+    }
+  } catch {
+    // fallback
+  }
+  return [];
+}
+
 function mapUserRecord(row: {
   id: string;
   legacy_user_id: number | null;
@@ -129,6 +145,7 @@ function mapUserRecord(row: {
   is_active: boolean;
   company_id?: string;
   company_ids_json?: string;
+  group_keys_json?: string;
   create_date: Date;
   write_date: Date;
 }): AuthUser {
@@ -144,6 +161,7 @@ function mapUserRecord(row: {
     isActive: row.is_active,
     companyId,
     companyIds: parseCompanyIds(row.company_ids_json, companyId),
+    groups: parseGroupKeys(row.group_keys_json),
     createdAt: row.create_date,
     updatedAt: row.write_date,
   };
@@ -304,6 +322,7 @@ export async function createUser(input: CreateAuthUserInput): Promise<AuthUserPu
       last_login_at: null,
       ...(input.companyId ? { company_id: input.companyId } : {}),
       ...(input.companyIds ? { company_ids_json: JSON.stringify(input.companyIds) } : {}),
+      ...(input.groups ? { group_keys_json: JSON.stringify(input.groups) } : {}),
     },
     actor,
   );
@@ -524,6 +543,7 @@ export async function getSessionWithUser(
     displayName: user.displayName,
     companyId: user.companyId,
     companyIds: user.companyIds,
+    groups: user.groups,
   };
 }
 

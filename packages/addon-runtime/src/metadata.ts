@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { z } from "zod";
 import { modelRegistry } from "@moonwitness/orm";
 import type { AddonRuntimeController, CrewRoleOrPublic } from "./runtime.js";
@@ -26,6 +26,7 @@ export function buildMetadataRegistryFromModels(
   runtime: AddonRuntimeController,
   extraModels: RegisteredModel[] = [],
   role: CrewRoleOrPublic = "public",
+  actorGroups?: Iterable<string>,
 ): MetadataRegistry {
   const models: RegisteredModel[] = [];
   const seen = new Set<string>();
@@ -33,7 +34,7 @@ export function buildMetadataRegistryFromModels(
     if (!desc.publicFields || desc.publicFields.length === 0) continue;
     if (!runtime.isModelEnabled(desc.name)) continue;
     const publicFields = desc.publicFields
-      .filter((name) => canReadField(desc, name, role))
+      .filter((name) => canReadField(desc, name, role, actorGroups))
       .map((name) => {
         const spec = desc.fields.get(name);
         const type =
@@ -96,18 +97,30 @@ export function createMetadataRegistry(models: RegisteredModel[] = []): Metadata
  */
 export async function registerMetadataRoutes(
   fastify: FastifyInstance,
-  registryOrResolver: MetadataRegistry | (() => MetadataRegistry),
+  registryOrResolver:
+    | MetadataRegistry
+    | ((
+        request?: FastifyRequest,
+        reply?: FastifyReply,
+      ) => MetadataRegistry | Promise<MetadataRegistry>),
 ): Promise<void> {
-  const resolveRegistry = (): MetadataRegistry =>
-    typeof registryOrResolver === "function" ? registryOrResolver() : registryOrResolver;
+  const resolveRegistry = async (
+    request?: FastifyRequest,
+    reply?: FastifyReply,
+  ): Promise<MetadataRegistry> =>
+    typeof registryOrResolver === "function"
+      ? registryOrResolver(request, reply)
+      : registryOrResolver;
 
-  fastify.get("/_meta/models", async () => ({
-    models: resolveRegistry().models.map((model) => model.name),
+  fastify.get("/_meta/models", async (request, reply) => ({
+    models: (await resolveRegistry(request, reply)).models.map((model) => model.name),
   }));
 
   fastify.get("/_meta/models/:name", async (request, reply) => {
     const { name } = request.params as { name: string };
-    const model = resolveRegistry().models.find((entry) => entry.name === name);
+    const model = (await resolveRegistry(request, reply)).models.find(
+      (entry) => entry.name === name,
+    );
     if (!model) {
       return reply.code(404).send({ error: `Model '${name}' not found` });
     }
@@ -122,8 +135,8 @@ export async function registerMetadataRoutes(
     };
   });
 
-  fastify.get("/_meta/openapi.json", async () => {
-    const registry = resolveRegistry();
+  fastify.get("/_meta/openapi.json", async (request, reply) => {
+    const registry = await resolveRegistry(request, reply);
     const schemas: Record<string, unknown> = {};
     for (const model of registry.models) {
       const properties: Record<string, { type: string; description?: string }> = {};
@@ -184,8 +197,8 @@ export async function registerMetadataRoutes(
     };
   });
 
-  fastify.get("/_meta/llms.txt", async (_request, reply) => {
-    const registry = resolveRegistry();
+  fastify.get("/_meta/llms.txt", async (request, reply) => {
+    const registry = await resolveRegistry(request, reply);
     const lines = [
       "# Moonwitness API",
       "",
@@ -344,6 +357,7 @@ export async function registerRuntimeMetaRoutes(
       const view = await runtime.getViewDescriptor(
         request.params.model,
         auth.getActorRole(request),
+        auth.getActorGroups?.(request),
       );
       if (!view) {
         return reply

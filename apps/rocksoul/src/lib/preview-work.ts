@@ -471,6 +471,21 @@ export function handlePreviewWorkCommand(
   if (command === "get_agent_execution_steps" || command === "get_orchestration_tasks") {
     return { handled: true, value: [] };
   }
+  if (command === "sync_edge_orm") {
+    return {
+      handled: true,
+      value: {
+        connected: false,
+        edge_url: "https://moonwitness-edge-tasks.bjo163.workers.dev",
+        cursor: null,
+        projects_synced: 0,
+        tasks_synced: 0,
+        outbox_pushed: 0,
+        last_synced_at: null,
+        error: "Edge ORM SQLite pub/sub sync is active in the native desktop app.",
+      },
+    };
+  }
 
   return { handled: false };
 }

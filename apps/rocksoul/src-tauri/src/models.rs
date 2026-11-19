@@ -180,3 +180,15 @@ pub struct MidLoopbackCallback {
     pub state: String,
     pub redirect_uri: String,
 }
+
+#[derive(Debug, Clone, Serialize)]
+pub struct EdgeOrmSyncStatus {
+    pub connected: bool,
+    pub edge_url: String,
+    pub cursor: Option<String>,
+    pub projects_synced: i64,
+    pub tasks_synced: i64,
+    pub outbox_pushed: i64,
+    pub last_synced_at: Option<String>,
+    pub error: Option<String>,
+}

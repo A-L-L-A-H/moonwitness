@@ -1,11 +1,12 @@
 mod commands;
 mod db;
 mod models;
+mod orm;
 pub mod rocksoul_contracts;
 mod tray;
 
 use crate::commands::repositories;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 /// Chromium flags that keep WebView2 on the hardware GPU path (D3D11 via ANGLE)
 /// so the WebGL2 cinematic renderer is rasterized and composited on the GPU.
@@ -38,6 +39,31 @@ pub fn run() {
             let handle = app.handle().clone();
             tauri::async_runtime::spawn_blocking(move || {
                 let _ = repositories::ensure_default_workspace_repository(&handle);
+            });
+            let pubsub_handle = app.handle().clone();
+            let wake_rx = orm::register_edge_sync_wakeup();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_secs(2));
+                loop {
+                    if let Ok(mut connection) = db::connect(&pubsub_handle) {
+                        if let Ok(status) = orm::sync_with_edge_pubsub(&mut connection, None, None)
+                        {
+                            if status.projects_synced > 0
+                                || status.tasks_synced > 0
+                                || status.outbox_pushed > 0
+                            {
+                                let _ = pubsub_handle.emit("orm://pubsub", &status);
+                            }
+                        }
+                    }
+                    if wake_rx
+                        .recv_timeout(std::time::Duration::from_secs(10))
+                        .is_ok()
+                    {
+                        std::thread::sleep(std::time::Duration::from_millis(120));
+                        while wake_rx.try_recv().is_ok() {}
+                    }
+                }
             });
             Ok(())
         })
@@ -114,6 +140,7 @@ pub fn run() {
             commands::repositories::add_repository,
             commands::repositories::git_snapshot,
             commands::repositories::git_execute,
+            commands::projects::sync_edge_orm,
         ])
         .build(tauri::generate_context!())
         .expect("error while building ROCKSOUL - DX")

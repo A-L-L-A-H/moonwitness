@@ -3,7 +3,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("./lib/api", () => ({ call: vi.fn(), isDesktop: vi.fn(() => false) }));
+vi.mock("./lib/api", () => ({
+  call: vi.fn(),
+  isDesktop: vi.fn(() => false),
+  subscribeEdgeOrmPubsub: vi.fn(() => () => {}),
+}));
 vi.mock("./features/world/WorldCanvas", () => ({
   default: ({ destination }: { destination: string }) => (
     <div data-testid="world-canvas" data-destination={destination} />

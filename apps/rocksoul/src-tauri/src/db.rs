@@ -272,6 +272,7 @@ fn migrate(connection: &Connection) -> Result<(), String> {
     transaction
         .pragma_update(None, "user_version", 7)
         .map_err(|error| error.to_string())?;
+    crate::orm::init_orm_schema(&transaction)?;
     transaction.commit().map_err(|error| error.to_string())
 }
 
@@ -352,7 +353,7 @@ pub fn resolve_rocksoul_postgres_url() -> Option<String> {
 pub fn export_sqlite_reconciliation_manifest(
     connection: &Connection,
 ) -> Result<serde_json::Value, String> {
-    const TABLES: [&str; 11] = [
+    const TABLES: [&str; 14] = [
         "workspaces",
         "projects",
         "repositories",
@@ -364,6 +365,9 @@ pub fn export_sqlite_reconciliation_manifest(
         "orchestration_plans",
         "orchestration_tasks",
         "events",
+        "pj_projects",
+        "pj_tasks",
+        "pj_sync_logs",
     ];
     let mut counts = serde_json::Map::new();
     let mut total_rows: i64 = 0;

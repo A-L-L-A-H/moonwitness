@@ -1,8 +1,12 @@
 use rusqlite::{params, Connection, OptionalExtension};
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use uuid::Uuid;
 
-use crate::{db, models::Project};
+use crate::{
+    db,
+    models::{EdgeOrmSyncStatus, Project},
+    orm,
+};
 
 pub fn query_projects(connection: &Connection) -> Result<Vec<Project>, String> {
     let mut statement = connection
@@ -23,77 +27,93 @@ pub fn query_projects(connection: &Connection) -> Result<Vec<Project>, String> {
 }
 
 #[tauri::command]
-pub fn list_projects(app: AppHandle) -> Result<Vec<Project>, String> {
-    let connection = db::connect(&app)?;
-    query_projects(&connection)
+pub async fn list_projects(app: AppHandle) -> Result<Vec<Project>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let connection = db::connect(&app)?;
+        query_projects(&connection)
+    })
+    .await
+    .map_err(|error| format!("Project worker failed: {error}"))?
 }
 
 #[tauri::command]
-pub fn create_project(
+pub async fn create_project(
     app: AppHandle,
     name: String,
     description: Option<String>,
 ) -> Result<Project, String> {
-    let clean_name = name.trim();
-    if clean_name.is_empty() {
-        return Err("Project name cannot be empty.".into());
-    }
-    let description = description.unwrap_or_default();
-    let id = Uuid::new_v4().to_string();
-    let mut connection = db::connect(&app)?;
-    let transaction = connection
-        .transaction()
-        .map_err(|error| error.to_string())?;
-    transaction.execute(
-        "INSERT INTO projects (id, workspace_id, name, description) VALUES (?1, 'local', ?2, ?3)",
-        params![id, clean_name, description],
-    ).map_err(|error| error.to_string())?;
-    db::record_event(
-        &transaction,
-        "project",
-        &format!("Created project {}", clean_name),
-        "{}",
-    )?;
-    transaction.commit().map_err(|error| error.to_string())?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let clean_name = name.trim().to_string();
+        if clean_name.is_empty() {
+            return Err("Project name cannot be empty.".into());
+        }
+        let description = description.unwrap_or_default();
+        let id = Uuid::new_v4().to_string();
+        let mut connection = db::connect(&app)?;
+        let transaction = connection
+            .transaction()
+            .map_err(|error| error.to_string())?;
+        transaction
+            .execute(
+                "INSERT INTO projects (id, workspace_id, name, description) VALUES (?1, 'local', ?2, ?3)",
+                params![id, clean_name, description],
+            )
+            .map_err(|error| error.to_string())?;
+        orm::mirror_legacy_project_to_orm(&transaction, &id, &clean_name, &description, "active", true)?;
+        db::record_event(
+            &transaction,
+            "project",
+            &format!("Created project {}", clean_name),
+            "{}",
+        )?;
+        transaction.commit().map_err(|error| error.to_string())?;
+        orm::notify_edge_sync();
 
-    let mut statement = connection
-        .prepare("SELECT id, name, description, status FROM projects WHERE id = ?1")
-        .map_err(|error| error.to_string())?;
-    statement
-        .query_row([id], |row| {
-            Ok(Project {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                description: row.get(2)?,
-                status: row.get(3)?,
+        let mut statement = connection
+            .prepare("SELECT id, name, description, status FROM projects WHERE id = ?1")
+            .map_err(|error| error.to_string())?;
+        statement
+            .query_row([id], |row| {
+                Ok(Project {
+                    id: row.get(0)?,
+                    name: row.get(1)?,
+                    description: row.get(2)?,
+                    status: row.get(3)?,
+                })
             })
-        })
-        .map_err(|error| error.to_string())
+            .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| format!("Project creation worker failed: {error}"))?
 }
 
 #[tauri::command]
-pub fn update_project(
+pub async fn update_project(
     app: AppHandle,
     project_id: String,
     name: String,
     description: String,
     status: String,
 ) -> Result<(), String> {
-    let clean_name = name.trim();
-    if clean_name.is_empty() {
-        return Err("Project name cannot be empty.".into());
-    }
-    if !["active", "paused", "done", "archived"].contains(&status.as_str()) {
-        return Err("Unsupported project status.".into());
-    }
-    let mut connection = db::connect(&app)?;
-    update_project_with_connection(
-        &mut connection,
-        &project_id,
-        clean_name,
-        &description,
-        &status,
-    )
+    tauri::async_runtime::spawn_blocking(move || {
+        let clean_name = name.trim().to_string();
+        if clean_name.is_empty() {
+            return Err("Project name cannot be empty.".into());
+        }
+        if !["active", "paused", "done", "archived"].contains(&status.as_str()) {
+            return Err("Unsupported project status.".into());
+        }
+        let mut connection = db::connect(&app)?;
+        update_project_with_connection(
+            &mut connection,
+            &project_id,
+            &clean_name,
+            &description,
+            &status,
+        )
+    })
+    .await
+    .map_err(|error| format!("Project update worker failed: {error}"))?
 }
 
 fn update_project_with_connection(
@@ -115,19 +135,39 @@ fn update_project_with_connection(
     if changed == 0 {
         return Err("Project not found.".into());
     }
+    orm::mirror_legacy_project_to_orm(&transaction, project_id, name, description, status, true)?;
     db::record_event(
         &transaction,
         "project",
         &format!("Updated project {name}"),
         "{}",
     )?;
-    transaction.commit().map_err(|error| error.to_string())
+    transaction.commit().map_err(|error| error.to_string())?;
+    orm::notify_edge_sync();
+    Ok(())
 }
 
 #[tauri::command]
-pub fn delete_project(app: AppHandle, project_id: String) -> Result<(), String> {
-    let mut connection = db::connect(&app)?;
-    delete_project_with_connection(&mut connection, &project_id)
+pub async fn delete_project(app: AppHandle, project_id: String) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut connection = db::connect(&app)?;
+        delete_project_with_connection(&mut connection, &project_id)
+    })
+    .await
+    .map_err(|error| format!("Project delete worker failed: {error}"))?
+}
+
+#[tauri::command]
+pub async fn sync_edge_orm(app: AppHandle) -> Result<EdgeOrmSyncStatus, String> {
+    let handle = app.clone();
+    let status = tauri::async_runtime::spawn_blocking(move || {
+        let mut connection = db::connect(&handle)?;
+        orm::sync_with_edge_pubsub(&mut connection, None, None)
+    })
+    .await
+    .map_err(|error| format!("Edge ORM pub/sub sync worker failed: {error}"))??;
+    let _ = app.emit("orm://pubsub", &status);
+    Ok(status)
 }
 
 fn delete_project_with_connection(
@@ -149,13 +189,16 @@ fn delete_project_with_connection(
     transaction
         .execute("DELETE FROM projects WHERE id = ?1", [project_id])
         .map_err(|error| error.to_string())?;
+    orm::soft_delete_orm_project(&transaction, project_id)?;
     db::record_event(
         &transaction,
         "project",
         &format!("Deleted project {project_name}"),
         "{}",
     )?;
-    transaction.commit().map_err(|error| error.to_string())
+    transaction.commit().map_err(|error| error.to_string())?;
+    orm::notify_edge_sync();
+    Ok(())
 }
 
 #[cfg(test)]
