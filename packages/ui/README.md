@@ -14,11 +14,9 @@ Shared MoonWitness Design DNA skin engine, tokens, primitives, composites, artwo
 
 Use the canonical resolver and skin boundary for new consumer code. The package keeps separate public entry points because token resolution is server-safe while the React skin runtime is client-side.
 
-| Public entry point       | Canonical responsibility                                                                                                                           |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@moonwitness/ui/tokens` | Base Imperium Lumen brand/semantic token definitions and server-safe base CSS variable map (`IMPERIUM_LUMEN_TOKENS`, `imperiumLumenCssVariables`). |
-| `@moonwitness/ui/dna`    | Server-safe DNA/skin/mode/density resolution (`resolveCanonicalTokens`, `canonicalTokensToCssVariables`) and canonical token types.                |
-| `@moonwitness/ui/skin`   | Client-side visual scope and state APIs: `SkinRoot`, `SkinScope`, `SkinProvider`, `useSkin`, `useThemeMode`, and presets.                          |
+- `@moonwitness/ui/tokens`: base Imperium Lumen tokens and server-safe base CSS variables.
+- `@moonwitness/ui/dna`: server-safe DNA, skin, mode and density resolution via `resolveCanonicalTokens` and `canonicalTokensToCssVariables`.
+- `@moonwitness/ui/skin`: client-side visual scope and state APIs, including `SkinRoot`, `SkinScope`, `SkinProvider`, `useSkin`, and `useThemeMode`.
 
 Use `SkinRoot` once at an application's visual root. Use `SkinScope` for a deliberately different DNA/skin presentation inside a route or subtree. Add `SkinProvider` when the application needs the interactive React context, persistence, or `useSkin` controls; it is a state provider, not a replacement for the app's visual identity boundary.
 
@@ -28,12 +26,7 @@ import { SkinRoot } from "@moonwitness/ui/skin";
 
 export function AppRoot({ children }: { children: ReactNode }) {
   return (
-    <SkinRoot
-      dnaId="05-riot-anarchy"
-      skin="riot"
-      mode="dark"
-      density="comfortable"
-    >
+    <SkinRoot dnaId="05-riot-anarchy" skin="riot" mode="dark" density="comfortable">
       {children}
     </SkinRoot>
   );
@@ -43,10 +36,7 @@ export function AppRoot({ children }: { children: ReactNode }) {
 For server-side token calculation or explicit CSS-variable output, use the pure resolver rather than reading from the browser or reaching into package source files:
 
 ```ts
-import {
-  canonicalTokensToCssVariables,
-  resolveCanonicalTokens,
-} from "@moonwitness/ui/dna";
+import { canonicalTokensToCssVariables, resolveCanonicalTokens } from "@moonwitness/ui/dna";
 
 const resolved = resolveCanonicalTokens({
   dnaId: "05-riot-anarchy",
