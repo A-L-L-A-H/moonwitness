@@ -23,6 +23,45 @@ const DEFAULT_SERIES_VARS = [
   "var(--green)",
 ] as const;
 
+type AccessibleChartRow = {
+  readonly label: string;
+  readonly value: string | number;
+};
+
+function AccessibleChartTable({
+  ariaLabel,
+  rows,
+}: {
+  ariaLabel: string;
+  rows: readonly AccessibleChartRow[];
+}) {
+  return (
+    <table className="sr-only">
+      <caption>{ariaLabel}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Category</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows.length > 0 ? (
+          rows.map((row, index) => (
+            <tr key={`${row.label}-${index}`}>
+              <th scope="row">{row.label}</th>
+              <td>{row.value}</td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan={2}>No data available</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  );
+}
+
 const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
   ({ className, title, skin, children, ...props }, ref) => {
     const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
@@ -48,17 +87,30 @@ export interface BarChartProps extends React.SVGAttributes<SVGSVGElement> {
   data: readonly ChartDataPoint[];
   height?: number;
   ariaLabel?: string;
+  accessibleData?: boolean;
 }
 
 const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
-  ({ data, height = 160, ariaLabel = "Bar chart", className, ...props }, ref) => {
+  (
+    {
+      data,
+      height = 160,
+      ariaLabel = "Bar chart",
+      accessibleData = true,
+      className,
+      ...props
+    },
+    ref,
+  ) => {
     const max = Math.max(1, ...data.map((d) => d.value));
     const width = Math.max(120, data.length * 48);
     return (
+      <>
       <svg
         ref={ref}
         role="img"
-        aria-label={ariaLabel}
+        aria-label={accessibleData ? undefined : ariaLabel}
+        aria-hidden={accessibleData || undefined}
         viewBox={`0 0 ${width} ${height}`}
         className={cn("w-full overflow-visible", className)}
         {...props}
@@ -86,6 +138,13 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
           );
         })}
       </svg>
+      {accessibleData ? (
+        <AccessibleChartTable
+          ariaLabel={ariaLabel}
+          rows={data.map((point) => ({ label: point.label, value: point.value }))}
+        />
+      ) : null}
+      </>
     );
   },
 );
@@ -99,6 +158,7 @@ export interface SparklineProps extends Omit<React.SVGAttributes<SVGSVGElement>,
   fillOpacity?: number;
   showLastDot?: boolean;
   ariaLabel?: string;
+  accessibleData?: boolean;
 }
 
 const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
@@ -111,6 +171,7 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
       fillOpacity = 0.16,
       showLastDot = true,
       ariaLabel = "Telemetry sparkline",
+      accessibleData = true,
       className,
       ...props
     },
@@ -143,10 +204,12 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
         : "";
 
     return (
+      <>
       <svg
         ref={ref}
         role="img"
-        aria-label={ariaLabel}
+        aria-label={accessibleData ? undefined : ariaLabel}
+        aria-hidden={accessibleData || undefined}
         viewBox={`0 0 ${width} ${height}`}
         data-mw-chart="sparkline"
         className={cn("h-auto w-full overflow-visible", className)}
@@ -171,6 +234,17 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
           </circle>
         ) : null}
       </svg>
+      {accessibleData ? (
+        <AccessibleChartTable
+          ariaLabel={ariaLabel}
+          rows={data.map((point, index) =>
+            typeof point === "number"
+              ? { label: `Point ${index + 1}`, value: point }
+              : { label: point.label, value: point.value },
+          )}
+        />
+      ) : null}
+      </>
     );
   },
 );
@@ -184,6 +258,7 @@ export interface LineChartProps extends Omit<React.SVGAttributes<SVGSVGElement>,
   showGrid?: boolean;
   colorVar?: string;
   ariaLabel?: string;
+  accessibleData?: boolean;
 }
 
 const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
@@ -196,6 +271,7 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
       showGrid = true,
       colorVar = "var(--primary)",
       ariaLabel = "Time series chart",
+      accessibleData = true,
       className,
       ...props
     },
@@ -226,10 +302,12 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
         : "";
 
     return (
+      <>
       <svg
         ref={ref}
         role="img"
-        aria-label={ariaLabel}
+        aria-label={accessibleData ? undefined : ariaLabel}
+        aria-hidden={accessibleData || undefined}
         viewBox={`0 0 ${width} ${height}`}
         data-mw-chart={area ? "area" : "line"}
         className={cn("h-auto w-full overflow-visible", className)}
@@ -298,6 +376,13 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
           </g>
         ))}
       </svg>
+      {accessibleData ? (
+        <AccessibleChartTable
+          ariaLabel={ariaLabel}
+          rows={data.map((point) => ({ label: point.label, value: point.value }))}
+        />
+      ) : null}
+      </>
     );
   },
 );
@@ -320,6 +405,7 @@ export interface RadialGaugeProps extends Omit<React.SVGAttributes<SVGSVGElement
   unit?: string;
   colorVar?: string;
   ariaLabel?: string;
+  accessibleData?: boolean;
 }
 
 const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
@@ -332,6 +418,7 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
       unit = "%",
       colorVar = "var(--primary)",
       ariaLabel,
+      accessibleData = true,
       className,
       ...props
     },
@@ -345,10 +432,16 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
     const displayValue = Math.round(ratio * safeMax);
 
     return (
+      <>
       <svg
         ref={ref}
         role="img"
-        aria-label={ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`}
+        aria-label={
+          accessibleData
+            ? undefined
+            : (ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`)
+        }
+        aria-hidden={accessibleData || undefined}
         viewBox="0 0 88 88"
         width={size}
         height={size}
@@ -394,6 +487,13 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
           </text>
         ) : null}
       </svg>
+      {accessibleData ? (
+        <AccessibleChartTable
+          ariaLabel={ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`}
+          rows={[{ label: label ?? "Value", value: `${displayValue}${unit}` }]}
+        />
+      ) : null}
+      </>
     );
   },
 );
