@@ -14,9 +14,7 @@ type Row = {
 let container: HTMLDivElement;
 let root: Root;
 
-function renderTable(
-  columns: Parameters<typeof DataTable<Row>>[0]["columns"],
-) {
+function renderTable(columns: Parameters<typeof DataTable<Row>>[0]["columns"]) {
   const rows: Row[] = [
     { id: "1", name: "Alpha", count: 42, status: "Ready" },
     { id: "2", name: "Beta", count: 7, status: "Pending review" },
