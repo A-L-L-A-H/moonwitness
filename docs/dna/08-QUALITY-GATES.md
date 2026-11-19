@@ -53,7 +53,15 @@ For each DNA:
 - [ ] No change to business behavior or accessibility contract.
 - [ ] Visual comparison evidence in Skin Laboratory.
 - [ ] Build, typecheck, accessibility, and relevant interaction tests pass.
-- [ ] Measured WCAG contrast ratios for every skin's token pairs pass `pnpm ui:contrast` (a failing pair exits non-zero and blocks the commit).
+- [ ] Measured contrast ratios for semantic token pairs pass `pnpm ui:contrast`; this is a token-pair gate, not a complete WCAG audit.
+
+### Contrast measurement contract
+
+- Normal text and muted text, success text, and accent foreground pairs use a minimum **4.5:1** contrast ratio.
+- Focus indicators use a separate minimum **3:1** non-text contrast ratio against canvas and surface.
+- `contrast.test.ts` verifies 7 DNA worlds × 2 modes (14 palettes) and 9 skin surface palettes × 2 modes (18 palettes), with failure output naming the DNA/skin and failing pair.
+- `canonical.test.ts` separately evaluates the resolved semantic token combinations across 7 DNA worlds × 10 resolver skins × 2 modes (140 combinations); it does not substitute for visual, browser, screen-reader, or complete WCAG review.
+- Run `pnpm --filter @moonwitness/ui ui:contrast` for the dedicated contrast gate and `pnpm --filter @moonwitness/ui test` for the resolver matrix and architecture checks.
 - [ ] Design-system component and skin contracts pass `pnpm ui:test`.
 - [ ] Glyphs render only through `Icon` from `@moonwitness/ui` (`ICON_PURITY`) and the skip landmark stays owned by `RouteShell`/`SkipLink` (`LANDMARK_PURITY`).
 
