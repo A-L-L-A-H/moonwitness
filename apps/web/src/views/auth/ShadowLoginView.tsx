@@ -171,7 +171,7 @@ export function ShadowLoginView() {
             <CutoutArtwork
               id="cipher-wheel"
               decorative
-              className="pointer-events-none absolute -right-4 bottom-4 h-24 w-24 text-[var(--primary)]/10"
+              className="pointer-events-none absolute bottom-4 h-24 w-24 text-[var(--primary)]/10 ltr:-right-4 rtl:-left-4"
             />
 
             <h1 className="font-brush text-4xl leading-tight text-[var(--foreground)] sm:text-5xl">

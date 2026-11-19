@@ -31,6 +31,10 @@ describe("Enterprise Reference Architecture Gates (WEB-GATE-01..06)", () => {
     expect(Object.keys(en)).toEqual(Object.keys(ar));
     expect(Object.keys(en.navigation)).toEqual(Object.keys(id.navigation));
     expect(Object.keys(en.navigation)).toEqual(Object.keys(ar.navigation));
+    expect(Object.keys(en.apps)).toEqual(Object.keys(id.apps));
+    expect(Object.keys(en.apps)).toEqual(Object.keys(ar.apps));
+    expect(Object.keys(en.addons)).toEqual(Object.keys(id.addons));
+    expect(Object.keys(en.addons)).toEqual(Object.keys(ar.addons));
     expect(ar.navigation.missionControl).toBeTruthy();
     expect(id.navigation.missionControl).toBeTruthy();
   });

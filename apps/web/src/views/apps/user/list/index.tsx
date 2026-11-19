@@ -34,15 +34,15 @@ export function UserListView() {
     >
       <div className="space-y-4">
         <Card className="relative overflow-hidden">
-          <SkinOrnament slot="corner" className="left-2 top-2" />
+          <SkinOrnament slot="corner" className="start-2 top-2" />
           <CutoutArtwork
             id="hardware-key"
             decorative
-            className="pointer-events-none absolute -right-4 -top-2 hidden h-24 w-24 opacity-20 sm:block"
+            className="pointer-events-none absolute -top-2 hidden h-24 w-24 opacity-20 sm:block ltr:-right-4 rtl:-left-4"
           />
           <CardHeader>
             <Badge variant="outline" className="w-fit">
-              IDENTITY & MULTI-TENANCY
+              {dictionary.apps.usersBadge}
             </Badge>
             <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
               {dictionary.apps.usersTitle}
@@ -51,9 +51,9 @@ export function UserListView() {
           <CardContent className="flex flex-wrap gap-2">
             {(
               [
-                { id: "auth.user", label: "Platform Operators (auth.user)" },
-                { id: "res.partner", label: "Partners & Contacts (res.partner)" },
-                { id: "res.company", label: "Company Tenants (res.company)" },
+                { id: "auth.user", label: dictionary.apps.usersOperatorsBtn },
+                { id: "res.partner", label: dictionary.apps.usersPartnersBtn },
+                { id: "res.company", label: dictionary.apps.usersCompaniesBtn },
               ] as const
             ).map((m) => (
               <Button

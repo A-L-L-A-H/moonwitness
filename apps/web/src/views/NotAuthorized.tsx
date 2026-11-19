@@ -23,7 +23,7 @@ export function NotAuthorizedView({ requiredRole }: { requiredRole?: string }) {
   return (
     <div className="flex min-h-[70vh] items-center justify-center p-6">
       <Card className="relative max-w-lg overflow-hidden">
-        <SkinOrnament slot="corner" className="right-2 top-2" />
+        <SkinOrnament slot="corner" className="end-2 top-2" />
         <CardHeader className="flex flex-col items-center text-center">
           <CutoutArtwork id="cipher-wheel" decorative className="mb-3 h-24 w-24 opacity-80" />
           <Badge variant="destructive">HTTP 401 / RBAC DENIED</Badge>
