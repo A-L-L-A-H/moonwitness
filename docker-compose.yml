@@ -130,13 +130,16 @@ services:
       HTTP_PORT: 8090
       RADIUS_AUTH_PORT: 1812
       RADIUS_ACCT_PORT: 1813
-      DATABASE_URL: sqlite:/data/radius.db?mode=rwc
+      DATABASE_URL: ${RADIUS_DATABASE_URL:-postgresql://${RADIUS_POSTGRES_USER:-${POSTGRES_USER:-moonwitness}}:${RADIUS_POSTGRES_PASSWORD:-${POSTGRES_PASSWORD:-moonwitness}}@postgres:5432/${RADIUS_POSTGRES_DB:-radius}}
       RADIUS_SECRET: ${RADIUS_SECRET:-}
       RADIUS_NAS_CLIENTS: ${RADIUS_NAS_CLIENTS:-}
     volumes:
       - radius-data:/data
     networks:
       - moonwitness-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "${RADIUS_BIND_IP:-127.0.0.1}:1812:1812/udp"
       - "${RADIUS_BIND_IP:-127.0.0.1}:1813:1813/udp"
@@ -162,7 +165,7 @@ services:
       HOST: 0.0.0.0
       ALLOW_PUBLIC_BIND: "1"
       HTTP_PORT: 8094
-      DATABASE_URL: sqlite:/data/snmp.db?mode=rwc
+      DATABASE_URL: ${SNMP_DATABASE_URL:-postgresql://${SNMP_POSTGRES_USER:-${POSTGRES_USER:-moonwitness}}:${SNMP_POSTGRES_PASSWORD:-${POSTGRES_PASSWORD:-moonwitness}}@postgres:5432/${SNMP_POSTGRES_DB:-snmp}}
       SNMP_CREDENTIAL_KEY: ${SNMP_CREDENTIAL_KEY:-}
       SNMP_POLL_INTERVAL: ${SNMP_POLL_INTERVAL:-60}
       SNMP_TIMEOUT_MS: ${SNMP_TIMEOUT_MS:-2000}
@@ -170,6 +173,9 @@ services:
       - snmp-data:/data
     networks:
       - moonwitness-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8094/health"]
       interval: 15s
@@ -194,12 +200,15 @@ services:
       HTTP_PORT: 8093
       SYSLOG_UDP_PORT: 5140
       SYSLOG_TCP_PORT: 5514
-      DATABASE_URL: sqlite:/data/syslog.db?mode=rwc
+      DATABASE_URL: ${SYSLOG_DATABASE_URL:-postgresql://${SYSLOG_POSTGRES_USER:-${POSTGRES_USER:-moonwitness}}:${SYSLOG_POSTGRES_PASSWORD:-${POSTGRES_PASSWORD:-moonwitness}}@postgres:5432/${SYSLOG_POSTGRES_DB:-syslog}}
       SYSLOG_MAX_MESSAGES: ${SYSLOG_MAX_MESSAGES:-100000}
     volumes:
       - syslog-data:/data
     networks:
       - moonwitness-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "${SYSLOG_BIND_IP:-127.0.0.1}:5140:5140/udp"
       - "${SYSLOG_BIND_IP:-127.0.0.1}:5514:5514/tcp"
@@ -225,7 +234,7 @@ services:
       HOST: 0.0.0.0
       ALLOW_PUBLIC_BIND: "1"
       HTTP_PORT: 8091
-      DATABASE_URL: sqlite:/data/storage.db?mode=rwc
+      DATABASE_URL: ${STORAGE_DATABASE_URL:-postgresql://${STORAGE_POSTGRES_USER:-${POSTGRES_USER:-moonwitness}}:${STORAGE_POSTGRES_PASSWORD:-${POSTGRES_PASSWORD:-moonwitness}}@postgres:5432/${STORAGE_POSTGRES_DB:-storage}}
       STORAGE_ACCESS_KEY: ${STORAGE_ACCESS_KEY:-}
       STORAGE_SECRET_KEY: ${STORAGE_SECRET_KEY:-}
       STORAGE_BACKEND: ${STORAGE_BACKEND:-filesystem}
@@ -237,6 +246,9 @@ services:
       - storage-data:/data
     networks:
       - moonwitness-internal
+    depends_on:
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8091/health"]
       interval: 15s

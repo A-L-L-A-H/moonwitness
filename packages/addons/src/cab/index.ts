@@ -13,59 +13,15 @@ import {
   type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
+import {
+  projectProjectModel,
+  projectProjectSchema,
+  projectTaskModel,
+  projectTaskSchema,
+} from "../project/index.js";
 
 export const cabManifest = manifestData as AddonManifestInput;
-
-export const projectProjectSchema = z.object({
-  code: z.string().min(1).max(40),
-  name: z.string().min(1).max(180),
-  summary: z.string().max(2000).default(""),
-  project_status: z
-    .enum(["planned", "active", "on_hold", "completed", "archived"])
-    .default("active"),
-});
-
-export const projectProjectModel = defineModel({
-  name: "project.project",
-  table: "pj_projects",
-  schema: projectProjectSchema,
-  extensible: true,
-  restEnabled: true,
-  searchFields: ["code", "name", "summary"],
-  publicFields: ["code", "name", "summary", "project_status"],
-  relations: {
-    tasks: {
-      model: "project.task",
-      type: "one2many",
-      targetField: "code",
-      inverseField: "project_code",
-    },
-  },
-  indexes: [{ fields: ["tenant_id", "code"], unique: true }, { fields: ["project_status"] }],
-});
-
-export const projectTaskSchema = z.object({
-  project_code: z.string().min(1).max(40),
-  title: z.string().min(1).max(180),
-  description: z.string().max(4000).default(""),
-  priority: z.enum(["low", "normal", "high", "critical"]).default("normal"),
-  task_status: z.enum(["todo", "in_progress", "review", "done"]).default("todo"),
-  estimated_hours: z.number().nonnegative().default(0),
-});
-
-export const projectTaskModel = defineModel({
-  name: "project.task",
-  table: "pj_tasks",
-  schema: projectTaskSchema,
-  extensible: true,
-  restEnabled: true,
-  searchFields: ["project_code", "title", "description"],
-  publicFields: ["project_code", "title", "priority", "task_status", "estimated_hours"],
-  relations: {
-    project_code: { model: "project.project", targetField: "code" },
-  },
-  indexes: [{ fields: ["project_code"] }, { fields: ["priority"] }, { fields: ["task_status"] }],
-});
+export { projectProjectModel, projectProjectSchema, projectTaskModel, projectTaskSchema };
 
 export const cabDecisionInputSchema = z.object({
   outcome: z.enum(["approved", "approved_with_conditions", "deferred", "rejected"]),
@@ -220,38 +176,6 @@ export const helpdeskTicketModel = defineModel({
 });
 
 export const cabRules: IrRuleInput[] = [
-  { model_name: "project.project", role: "viewer", can_read: true },
-  {
-    model_name: "project.project",
-    role: "editor",
-    can_read: true,
-    can_create: true,
-    can_update: true,
-  },
-  {
-    model_name: "project.project",
-    role: "admin",
-    can_read: true,
-    can_create: true,
-    can_update: true,
-    can_delete: true,
-  },
-  { model_name: "project.task", role: "viewer", can_read: true },
-  {
-    model_name: "project.task",
-    role: "editor",
-    can_read: true,
-    can_create: true,
-    can_update: true,
-  },
-  {
-    model_name: "project.task",
-    role: "admin",
-    can_read: true,
-    can_create: true,
-    can_update: true,
-    can_delete: true,
-  },
   { model_name: "cab.change", role: "viewer", can_read: true },
   {
     model_name: "cab.change",
@@ -331,13 +255,7 @@ export function createCabAddon(
 
   return {
     manifest: cabManifest,
-    models: [
-      projectProjectModel,
-      projectTaskModel,
-      cabChangeModel,
-      cabDecisionModel,
-      helpdeskTicketModel,
-    ],
+    models: [cabChangeModel, cabDecisionModel, helpdeskTicketModel],
     rules: cabRules,
     views: cabViews,
     menus: cabMenus,

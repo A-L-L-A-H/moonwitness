@@ -17,6 +17,7 @@ import { createWitnessResearchAddon } from "./witness-research/index.js";
 import { createMizanAddon } from "./mizan/index.js";
 import { createCelestialAddon } from "./celestial/index.js";
 import { createKhidraAddon } from "./khidra/index.js";
+import { createProjectAddon } from "./project/index.js";
 import { createCabAddon } from "./cab/index.js";
 import { createGeoAddon } from "./geo/index.js";
 import { createAccountAddon } from "./account/index.js";
@@ -43,6 +44,7 @@ export * from "./witness-research/index.js";
 export * from "./mizan/index.js";
 export * from "./celestial/index.js";
 export * from "./khidra/index.js";
+export * from "./project/index.js";
 export * from "./cab/index.js";
 export * from "./geo/index.js";
 export * from "./account/index.js";
@@ -52,7 +54,7 @@ export * from "./performance/index.js";
 export * from "./observatory/index.js";
 
 /**
- * Returns the canonical 25 MoonWitness domain addons in topological dependency order.
+ * Returns the canonical 26 MoonWitness domain addons in topological dependency order.
  */
 export function createPlatformAddons(host: AddonHostContext): AddonDefinition[] {
   const { prefix, auth } = host;
@@ -75,6 +77,7 @@ export function createPlatformAddons(host: AddonHostContext): AddonDefinition[] 
     createMizanAddon({ prefix, auth }),
     createCelestialAddon({ prefix, auth }),
     createKhidraAddon({ prefix, auth }),
+    createProjectAddon({ prefix, auth }),
     createCabAddon({ prefix, auth }),
     createGeoAddon({ prefix, auth }),
     createAccountAddon({ prefix, auth }),

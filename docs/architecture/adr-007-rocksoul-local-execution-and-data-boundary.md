@@ -55,3 +55,8 @@ ROCKSOUL is a private local Tauri application, while MoonWitness is a public/clo
 ## Reversal conditions
 
 This decision may be revised only with a documented owner-approved ADR that addresses key recovery, threat model, process isolation and cross-zone privacy.
+
+## Implementation & Private PostgreSQL Addendum (2026-11-19, `dev`, `#282` / `#288`)
+
+- **Bounded Process Supervisor (`apps/rocksoul/src-tauri/src/commands/agent_execution.rs`):** Enforces `ActionApprovalBound`, `cmd.env_clear()` + `SAFE_ENV_ALLOWLIST`, concurrent 256 KiB pipe drainers, timeout watchdog + Windows `taskkill /F /T /PID`, startup `reconcile_stale_agent_runs`, and explicit UI state labels distinguishing `planned`, `queued`, `executing`, `blocked`, and `verified` execution states.
+- **Private Loopback PostgreSQL Boundary (`apps/rocksoul/src-tauri/src/db.rs`):** Enforces `validate_private_postgres_url` and `resolve_rocksoul_postgres_url` (`127.0.0.1` / `localhost` / `::1` only, rejecting VPS/LAN hosts) alongside non-destructive `export_sqlite_reconciliation_manifest` before any local SQLite-to-PostgreSQL data migration.

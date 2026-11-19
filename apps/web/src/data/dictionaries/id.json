@@ -318,6 +318,28 @@
         "shadow": "Shadow",
         "missionControl": "Pusat Komando",
         "backToTop": "Kembali ke atas ↑"
+      },
+      "hero": {
+        "frequency": "SIARAN TERPENYAPUNYA // 1420.4 MHz",
+        "title": "MOONWITNESS",
+        "tagline": "MANUSIA. TEMPAT. KISAH.",
+        "subline": "SISI LAIN DARI REALITAS.",
+        "copy": "Jejaring kisah global bagi pencari makna.\nBerbeda manusia. Satu bulan yang sama.\nPerspektif lebih luas.",
+        "cta": "JELAJAHI SINYAL",
+        "notePaper": "LIHAT LEBIH JAUH DARIPADA KITA.",
+        "noteInk": "BULAN YANG SAMA.\nSAKSI YANG BERBEDA."
+      },
+      "index": {
+        "pauseMotion": "JEDA GERAK",
+        "resumeMotion": "LANJUTKAN GERAK"
+      },
+      "marquee": {
+        "item1": "BULAN YANG SAMA",
+        "item2": "ORANG YANG BERBEDA",
+        "item3": "PERSPEKTIF LEBIH LUAS",
+        "item4": "SISI LAIN REALITAS",
+        "item5": "KISAH TERUS MENGORBIT",
+        "item6": "IKUTI SINYALNYA"
       }
     }
   },

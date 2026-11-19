@@ -1,16 +1,129 @@
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from .config import get_settings
 from .witness_ledger import init_witness_ledger
 
+POSTGRES_SCHEMES = frozenset({"postgres", "postgresql"})
+LOOPBACK_POSTGRES_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+
+# Zone C PostgreSQL + pgvector metadata DDL; raw ZIP/JSON archives and embedding models stay on local disk.
+POSTGRES_SCHEMA_STATEMENTS: tuple[str, ...] = (
+    "CREATE EXTENSION IF NOT EXISTS vector;",
+    """
+    CREATE TABLE IF NOT EXISTS archives (
+        id TEXT PRIMARY KEY,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        size_bytes BIGINT NOT NULL,
+        sha256 TEXT NOT NULL UNIQUE,
+        status TEXT NOT NULL DEFAULT 'queued',
+        drive_status TEXT NOT NULL DEFAULT 'pending',
+        drive_key TEXT,
+        drive_error TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    """.strip(),
+    """
+    CREATE TABLE IF NOT EXISTS chunks (
+        id TEXT PRIMARY KEY,
+        archive_id TEXT NOT NULL REFERENCES archives(id) ON DELETE CASCADE,
+        conversation_id TEXT NOT NULL,
+        chunk_index INTEGER NOT NULL DEFAULT 0,
+        kind TEXT NOT NULL DEFAULT 'knowledge',
+        title TEXT NOT NULL DEFAULT '',
+        summary TEXT NOT NULL DEFAULT '',
+        content TEXT NOT NULL DEFAULT '',
+        source_message_ids JSONB NOT NULL DEFAULT '[]'::jsonb,
+        tags JSONB NOT NULL DEFAULT '[]'::jsonb,
+        confidence DOUBLE PRECISION NOT NULL DEFAULT 0.5,
+        embedding vector(384),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_chunks_archive ON chunks(archive_id);
+    CREATE INDEX IF NOT EXISTS idx_chunks_conversation ON chunks(archive_id, conversation_id);
+    CREATE INDEX IF NOT EXISTS idx_chunks_embedding ON chunks USING hnsw (embedding vector_cosine_ops);
+    """.strip(),
+    """
+    CREATE TABLE IF NOT EXISTS entities (
+        id TEXT PRIMARY KEY,
+        archive_id TEXT NOT NULL REFERENCES archives(id) ON DELETE CASCADE,
+        chunk_id TEXT REFERENCES chunks(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        entity_type TEXT NOT NULL DEFAULT 'entity',
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+    CREATE INDEX IF NOT EXISTS idx_entities_archive ON entities(archive_id);
+    CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(name);
+    """.strip(),
+)
+
+
+def validate_private_postgres_url(url: str) -> str:
+    """Validate that a Zone C PostgreSQL URL uses postgres(ql):// on a loopback host."""
+    if not isinstance(url, str) or not url.strip():
+        raise ValueError("Private PostgreSQL URL must be a non-empty string")
+    normalized = url.strip()
+    parsed = urlsplit(normalized)
+    if parsed.scheme.lower() not in POSTGRES_SCHEMES:
+        raise ValueError(
+            f"Unsupported database scheme {parsed.scheme!r}; expected postgres:// or postgresql://"
+        )
+    try:
+        _ = parsed.port
+    except ValueError as exc:
+        raise ValueError("Invalid port in private PostgreSQL URL") from exc
+    hostname = (parsed.hostname or "").lower()
+    if not parsed.netloc or hostname not in LOOPBACK_POSTGRES_HOSTS:
+        raise ValueError(
+            f"Refusing non-loopback PostgreSQL host {hostname!r}; Zone C Memory must stay local"
+        )
+    return normalized
+
+
+def get_postgres_schema_sql() -> str:
+    """Return the combined Zone C PostgreSQL + pgvector metadata DDL script."""
+    return "\n\n".join(POSTGRES_SCHEMA_STATEMENTS)
+
+
+def export_sqlite_reconciliation_counts(
+    db_conn: sqlite3.Connection | None = None,
+) -> dict[str, int]:
+    """Return non-destructive SQLite row counts for PostgreSQL migration reconciliation.
+
+    Preserves raw archive binaries and source SQLite records intact.
+    """
+    tables = ("archives", "jobs", "messages", "knowledge", "chunks", "entities")
+
+    def _read(conn: sqlite3.Connection) -> dict[str, int]:
+        present = {
+            row[0]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        return {
+            table: int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+            if table in present
+            else 0
+            for table in tables
+        }
+
+    if db_conn is not None:
+        return _read(db_conn)
+    with connection() as db:
+        return _read(db)
+
 
 def utc_now() -> str:
-    return datetime.now(timezone.utc).isoformat()
+    return datetime.now(UTC).isoformat()
 
 
 @contextmanager
@@ -187,7 +300,7 @@ def create_sync_job(archive_id: str) -> str | None:
 
 def claim_job():
     """Atomically claim a job and recover workers abandoned for over ten minutes."""
-    stale_before = (datetime.now(timezone.utc) - timedelta(minutes=10)).isoformat()
+    stale_before = (datetime.now(UTC) - timedelta(minutes=10)).isoformat()
     with connection() as db:
         db.execute("BEGIN IMMEDIATE")
         row = db.execute(

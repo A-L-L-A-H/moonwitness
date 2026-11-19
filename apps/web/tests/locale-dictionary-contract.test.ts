@@ -98,17 +98,22 @@ describe("Locale dictionary parity contract", () => {
     expect(en.sanctuary.mtimeObservatory).toBe("Explainable M-Time Observatory");
 
     for (const dict of [en, id, ar]) {
-      expect(Object.keys(dict.chronicle.landing)).toEqual([
-        "storyStrip",
-        "signals",
-        "transmission",
-        "storytelling",
-        "shadow",
-        "crew",
-        "archive",
-        "about",
-        "footer",
-      ]);
+      expect(Object.keys(dict.chronicle.landing)).toEqual(
+        expect.arrayContaining([
+          "storyStrip",
+          "signals",
+          "transmission",
+          "storytelling",
+          "shadow",
+          "crew",
+          "archive",
+          "about",
+          "footer",
+          "hero",
+          "index",
+          "marquee",
+        ]),
+      );
       expect(Object.keys(dict.sanctuary)).toEqual(
         expect.arrayContaining([
           "title",

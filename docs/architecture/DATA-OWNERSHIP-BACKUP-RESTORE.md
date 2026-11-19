@@ -8,8 +8,9 @@
 This specification began as an inventory of the legacy database topology. The SQLite/libSQL references in Sections 2–5 describe pre-migration state, not an approved current or target architecture. The current owner-approved target is PostgreSQL across cloud, development, tests and private local apps, with separate database ownership and credentials per trust zone. Actual conversion status must be tracked against #288; do not infer that conversion is complete from this historical inventory.
 
 - Core API and the integrated MoonWitness Identity (MID) authority (`packages/mid` mounted in `apps/api`) share the primary database configured via `DATABASE_URL` through `@moonwitness/orm`.
-- Each Rust telemetry/storage service (`--profile ops`) owns one dedicated SQLite database file on its named volume.
-- Local companion services (`apps/rocksoul`, `services/memory`) maintain strictly local-first SQLite / LanceDB stores outside the VPS stack (`ADR-007`).
+- Optional Rust telemetry/storage services (`--profile ops` in `docker-compose.yml`) default to isolated per-service PostgreSQL databases (`radius`, `snmp`, `syslog`, `storage` on `postgres:5432`) via `RADIUS_DATABASE_URL`, `SNMP_DATABASE_URL`, `SYSLOG_DATABASE_URL`, and `STORAGE_DATABASE_URL`, with object payloads remaining filesystem/S3 blobs.
+- Edge Project & Task host (`apps/edge`) consumes centralized `@moonwitness/addons/project` via `@moonwitness/orm` (`HYPERDRIVE`/`DATABASE_URL` PostgreSQL primary with Cloudflare D1 `DB` binding).
+- Local companion services (`apps/rocksoul`, `services/memory`) enforce workstation-local loopback PostgreSQL boundaries (`validate_private_postgres_url`), non-destructive SQLite reconciliation snapshots, and keep raw archive binaries/models on disk (`ADR-007`).
 - All production databases initialize with versioned migrations; there is zero legacy migration from Cloudflare D1 in the VPS runtime.
 - No application data or database clients exist on MikroTik / RouterOS.
 

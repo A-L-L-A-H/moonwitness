@@ -12,6 +12,7 @@ import {
 import { createMizanAddon } from "./mizan/index.js";
 import { createCelestialAddon } from "./celestial/index.js";
 import { createKhidraAddon, irAutomationModel } from "./khidra/index.js";
+import { createProjectAddon } from "./project/index.js";
 import { createCabAddon } from "./cab/index.js";
 import { createGeoAddon } from "./geo/index.js";
 import { createAccountAddon } from "./account/index.js";
@@ -59,6 +60,7 @@ describe("Harvested moonwitness-main domain addons: mizan, celestial, khidra, ca
         createMizanAddon({ prefix: "/api/v1", auth }),
         createCelestialAddon({ prefix: "/api/v1", auth }),
         createKhidraAddon({ prefix: "/api/v1", auth }),
+        createProjectAddon({ prefix: "/api/v1", auth }),
         createCabAddon({ prefix: "/api/v1", auth }),
         createGeoAddon({ prefix: "/api/v1", auth }),
         createAccountAddon({ prefix: "/api/v1", auth }),
