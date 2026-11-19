@@ -276,8 +276,8 @@ export function SkinScope({
         data-density={resolved.density}
         className={className}
         style={{
-          ...(canonicalVars as CSSProperties),
           ...vars,
+          ...(canonicalVars as CSSProperties),
           backgroundColor: resolved.semantic.canvas,
           color: resolved.semantic.foreground,
           ...style,
