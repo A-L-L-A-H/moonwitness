@@ -2,7 +2,7 @@ import type { FastifyError, FastifyInstance } from "fastify";
 import Fastify from "fastify";
 import FastifyCookie from "@fastify/cookie";
 import FastifyCors from "@fastify/cors";
-import { createActorContext, createD1DatabaseFromOrm, getDb } from "@moonwitness/orm";
+import { createActorContext } from "@moonwitness/orm";
 import {
   AddonRuntimeController,
   baseManifest,
@@ -18,7 +18,7 @@ import {
 } from "@moonwitness/addon-runtime";
 import { createI18nAddon } from "@moonwitness/addons/i18n";
 import { createAuditAddon } from "@moonwitness/addons/audit";
-import { createAuthAddon, createAuthMidIdentityStore } from "@moonwitness/addons/auth";
+import { createAuthAddon } from "@moonwitness/addons/auth";
 import { createTimelineAddon } from "@moonwitness/addons/timeline";
 import { createControlAddon } from "@moonwitness/addons/control";
 import { createCommandCenterAddon } from "@moonwitness/addons/command-center";
@@ -31,7 +31,6 @@ import { createRadiusAddon } from "@moonwitness/addons/radius";
 import { createCanonLoreAddon } from "@moonwitness/addons/canon-lore";
 import { createWitnessResearchAddon } from "@moonwitness/addons/witness-research";
 import { createEpistemicAddon } from "@moonwitness/addons/epistemic";
-import { midFastifyPlugin } from "@moonwitness/mid";
 import { env, parseCorsOrigins } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import {
@@ -42,7 +41,6 @@ import {
 } from "./infrastructure/rate-limit";
 import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
 import { createApiMetricsCollector } from "./interface/routes/metrics";
-import { authRoutes } from "./interface/routes/auth.routes";
 import { controlRoutes } from "./interface/routes/control.routes";
 import { memoryRoutes } from "./interface/routes/memory.routes";
 import { radiusRoutes } from "./interface/routes/radius.routes";
@@ -107,9 +105,12 @@ export function createHostRateLimitPreHandler(options: {
     reply.header("x-ratelimit-remaining", result.remaining);
     if (!result.allowed) {
       reply.header("retry-after", Math.ceil(result.retryAfterMs / 1000));
-      return reply
-        .code(429)
-        .send({ error: options.message ?? "too many requests", code: "RATE_LIMITED" });
+      return reply.code(429).send({
+        statusCode: 429,
+        error: "Too Many Requests",
+        message: options.message ?? "too many requests",
+        code: "RATE_LIMITED",
+      });
     }
     return undefined;
   };
@@ -168,7 +169,6 @@ async function registerAddonTree(
 ): Promise<void> {
   const runtime = new AddonRuntimeController();
   const prefix = host.prefix;
-  const midKeyEncryptionSecret = host.mid?.keyEncryptionSecret;
 
   const addons: AddonDefinition[] = [
     {
@@ -194,28 +194,7 @@ async function registerAddonTree(
     },
     createI18nAddon({ prefix, auth: host.auth }),
     createAuditAddon({ prefix, auth: host.auth }),
-    createAuthAddon({
-      registerRoutes: async (scope) => {
-        if (midKeyEncryptionSecret && host.mid) {
-          await scope.register(midFastifyPlugin, {
-            db: createD1DatabaseFromOrm(getDb()),
-            identityStore: createAuthMidIdentityStore(),
-            keyEncryptionSecret: midKeyEncryptionSecret,
-            issuerUrl: host.mid.issuerUrl,
-            cookieDomain: host.mid.cookieDomain,
-            corsOrigins: host.mid.corsOrigins,
-          });
-          if (!target.hasDecorator("midMounted")) {
-            target.decorate("midMounted", true);
-          }
-        }
-        if (prefix) {
-          await scope.register(authRoutes, { prefix, mountAuditRoute: false });
-        } else {
-          await scope.register(authRoutes, { mountAuditRoute: false });
-        }
-      },
-    }),
+    createAuthAddon(host),
     createTimelineAddon(host),
     createControlAddon({
       registerRoutes: async (scope) => {

@@ -3,8 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb, getDb, initDb } from "@moonwitness/orm";
 import { encodeBase64Url, type PublicEs256Jwk } from "@moonwitness/core";
-import { createUser, ensureAuthSchema } from "@moonwitness/addons/auth";
-import { resetMidJwksCacheForTests } from "../../middleware/mid-jwt";
+import { createUser, ensureAuthSchema, resetMidJwksCacheForTests } from "@moonwitness/addons/auth";
 
 const API_PREFIX = "/api/v1";
 const ENCODER = new TextEncoder();

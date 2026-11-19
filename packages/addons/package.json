@@ -32,6 +32,7 @@
     "@moonwitness/addon-runtime": "workspace:*",
     "@moonwitness/canon": "workspace:*",
     "@moonwitness/contracts": "workspace:*",
+    "@moonwitness/core": "workspace:*",
     "@moonwitness/mid": "workspace:*",
     "@moonwitness/orm": "workspace:*",
     "zod": "^4.6.7"

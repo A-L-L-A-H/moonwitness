@@ -545,6 +545,9 @@ importers:
       '@moonwitness/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@moonwitness/core':
+        specifier: workspace:*
+        version: link:../core
       '@moonwitness/mid':
         specifier: workspace:*
         version: link:../mid

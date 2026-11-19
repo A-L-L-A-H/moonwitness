@@ -5,8 +5,7 @@
 
 import type { FastifyRequest, FastifyReply } from "fastify";
 import { DEFAULT_TENANT_ID, normalizeTenantId } from "@moonwitness/orm";
-import { getSessionWithUser, SESSION_COOKIE_NAME } from "@moonwitness/addons/auth";
-import { verifyMidBearerToken } from "./mid-jwt";
+import { resolveAuthIdentityFromRequest, SESSION_COOKIE_NAME } from "@moonwitness/addons/auth";
 
 export interface AuthenticatedRequest extends FastifyRequest {
   tenantId?: string;
@@ -44,29 +43,7 @@ export async function resolveRequestIdentity(request: FastifyRequest): Promise<{
   user: AuthenticatedUser | null;
   expiredSessionCookie: boolean;
 }> {
-  const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
-  if (sessionId) {
-    const session = await getSessionWithUser(sessionId);
-    if (session) {
-      return {
-        user: {
-          id: session.userId,
-          username: session.username,
-          email: session.email,
-          role: session.role,
-          displayName: session.displayName,
-        },
-        expiredSessionCookie: false,
-      };
-    }
-  }
-
-  const bearerUser = await verifyMidBearerToken(request.headers.authorization);
-  if (bearerUser) {
-    return { user: bearerUser, expiredSessionCookie: false };
-  }
-
-  return { user: null, expiredSessionCookie: Boolean(sessionId) };
+  return resolveAuthIdentityFromRequest(request);
 }
 
 async function resolveAuthenticatedUser(

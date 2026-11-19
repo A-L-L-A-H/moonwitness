@@ -2,8 +2,7 @@ import { webcrypto } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb, getDb, initDb } from "@moonwitness/orm";
-import { createUser, ensureAuthSchema } from "@moonwitness/addons/auth";
-import { resetMidJwksCacheForTests } from "./mid-jwt";
+import { createUser, ensureAuthSchema, resetMidJwksCacheForTests } from "@moonwitness/addons/auth";
 
 const ENCODER = new TextEncoder();
 

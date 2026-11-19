@@ -1,6 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { listAuditLogs } from "@moonwitness/addons/audit";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
 import {
   createUser,
   deleteUser,
@@ -8,10 +7,13 @@ import {
   findUserByUsername,
   listUsers,
   updateUserRole,
-} from "@moonwitness/addons/auth";
+} from "./service.js";
 
-export function registerAuthAdminRoutes(fastify: FastifyInstance, mountAuditRoute: boolean): void {
-  const requireAdmin = [requireAuth(), requireRole("admin")];
+export function registerAuthAdminRoutes(
+  fastify: FastifyInstance,
+  auth: BaseAddonAuthBridge = defaultFailClosedAuthBridge,
+): void {
+  const requireAdmin = [auth.authenticate, auth.requireRole("admin")];
 
   fastify.get("/auth/users", { preHandler: requireAdmin }, async (_request, reply) => {
     reply.header("cache-control", "no-store");
@@ -80,7 +82,7 @@ export function registerAuthAdminRoutes(fastify: FastifyInstance, mountAuditRout
       if (!["admin", "editor", "viewer"].includes(role)) {
         return reply.code(400).send({ error: "Role must be admin, editor, or viewer" });
       }
-      const actorId = (request as AuthenticatedRequest).user?.id;
+      const actorId = auth.getActorId(request) ?? undefined;
       const result = await updateUserRole(targetId, role as "admin" | "editor" | "viewer", actorId);
       if (!result.ok) {
         const status =
@@ -104,7 +106,7 @@ export function registerAuthAdminRoutes(fastify: FastifyInstance, mountAuditRout
       reply.header("cache-control", "no-store");
       const targetId = request.params.id.trim();
       if (!targetId) return reply.code(400).send({ error: "Invalid user id" });
-      const actorId = (request as AuthenticatedRequest).user?.id;
+      const actorId = auth.getActorId(request) ?? undefined;
       const result = await deleteUser(targetId, actorId);
       if (!result.ok) {
         const status = result.code === "NOT_FOUND" ? 404 : result.code === "FORBIDDEN" ? 403 : 409;
@@ -113,24 +115,4 @@ export function registerAuthAdminRoutes(fastify: FastifyInstance, mountAuditRout
       return reply.send({ ok: true, user: result.user });
     },
   );
-
-  if (mountAuditRoute) {
-    fastify.get("/audit/logs", { preHandler: requireAdmin }, async (request, reply) => {
-      reply.header("cache-control", "no-store");
-      const query = request.query as {
-        domain?: string;
-        entity?: string;
-        actorId?: string;
-        limit?: string;
-      };
-      const parsedLimit = query.limit ? Number(query.limit) : undefined;
-      const logs = await listAuditLogs({
-        domain: query.domain,
-        entity: query.entity,
-        actorId: query.actorId,
-        limit: Number.isFinite(parsedLimit) ? parsedLimit : undefined,
-      });
-      return reply.send({ logs });
-    });
-  }
 }

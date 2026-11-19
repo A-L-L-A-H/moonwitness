@@ -1,22 +1,14 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import rateLimit from "@fastify/rate-limit";
-import { resolveRequestIdentity } from "../../middleware/auth";
-import { verifyMidBffExchangeClaims } from "../../middleware/mid-jwt";
 import {
-  consumeBffOAuthTokens,
-  createSession,
-  CSRF_COOKIE_NAME,
-  findUserByEmail,
-  findUserByUsername,
-  generateToken,
-  getCsrfCookieOptions,
-  getSessionCookieOptions,
-  revokeSession,
-  SESSION_COOKIE_NAME,
-  storeBffOAuthTokens,
-  verifyUserPassword,
-} from "@moonwitness/addons/auth";
-import { registerAuthAdminRoutes } from "./auth.admin";
+  clearReplyCookie,
+  defaultFailClosedAuthBridge,
+  getRequestCookie,
+  setReplyCookie,
+  type BaseAddonAuthBridge,
+  type FastifyPreHandler,
+  type HostRateLimitFactory,
+} from "@moonwitness/addon-runtime";
+import { registerAuthAdminRoutes } from "./admin-routes.js";
 import {
   createLocalMidJwkResolver,
   isAllowedBffOrigin,
@@ -26,23 +18,76 @@ import {
   postMidFormEndpoint,
   resolveMidBaseUrl,
   resolveOrProvisionMidUser,
-} from "./auth.bff";
+} from "./bff.js";
+import { resolveAuthIdentityFromRequest, verifyMidBffExchangeClaims } from "./mid-jwt.js";
+import { generateToken } from "./passwords.js";
+import {
+  consumeBffOAuthTokens,
+  createSession,
+  CSRF_COOKIE_NAME,
+  findUserByEmail,
+  findUserByUsername,
+  getCsrfCookieOptions,
+  getSessionCookieOptions,
+  revokeSession,
+  SESSION_COOKIE_NAME,
+  storeBffOAuthTokens,
+  verifyUserPassword,
+} from "./service.js";
 
-export async function authRoutes(
-  fastify: FastifyInstance,
-  options: { mountAuditRoute?: boolean } = {},
-) {
-  await fastify.register(async (authScope) => {
-    await authScope.register(rateLimit, {
-      max: 10,
-      timeWindow: 60000,
-      keyGenerator: (request) => request.ip,
-      errorResponseBuilder: () => ({
+function createLocalFallbackRateLimit(
+  max: number,
+  windowMs: number,
+  message: string,
+): FastifyPreHandler {
+  const buckets = new Map<string, { count: number; resetAt: number }>();
+  return async (request, reply) => {
+    const now = Date.now();
+    const key = request.ip;
+    let bucket = buckets.get(key);
+    if (!bucket || now >= bucket.resetAt) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      buckets.set(key, bucket);
+    }
+    const allowed = bucket.count < max;
+    if (allowed) bucket.count += 1;
+    reply.header("x-ratelimit-limit", max);
+    reply.header("x-ratelimit-remaining", Math.max(0, max - bucket.count));
+    if (!allowed) {
+      reply.header("retry-after", Math.ceil((bucket.resetAt - now) / 1000));
+      return reply.code(429).send({
         statusCode: 429,
         error: "Too Many Requests",
+        message,
+        code: "RATE_LIMITED",
+      });
+    }
+  };
+}
+
+export interface AuthRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+  rateLimit?: HostRateLimitFactory;
+  midHost?: FastifyInstance;
+}
+
+export async function registerAuthRoutes(
+  fastify: FastifyInstance,
+  options: AuthRoutesOptions = {},
+): Promise<void> {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const midHost = options.midHost ?? fastify;
+  const authRatePreHandler = options.rateLimit
+    ? options.rateLimit({
+        max: 10,
+        windowMs: 60_000,
+        scope: "auth",
         message: "terlalu banyak percobaan; coba lagi nanti",
-      }),
-    });
+      })
+    : createLocalFallbackRateLimit(10, 60_000, "terlalu banyak percobaan; coba lagi nanti");
+
+  await fastify.register(async (authScope) => {
+    authScope.addHook("preHandler", authRatePreHandler);
     authScope.addHook("onSend", async (_request, reply, payload) => {
       reply.header("cache-control", "no-store");
       return payload;
@@ -91,7 +136,7 @@ export async function authRoutes(
       }
 
       const sessionId = await createSession(user.id);
-      reply.setCookie(SESSION_COOKIE_NAME, sessionId, getSessionCookieOptions());
+      setReplyCookie(reply, SESSION_COOKIE_NAME, sessionId, getSessionCookieOptions());
 
       return reply.send({
         user: {
@@ -127,7 +172,7 @@ export async function authRoutes(
 
       let tokenExchangeRes: { status: number; json: () => Promise<unknown> };
       try {
-        tokenExchangeRes = await postMidFormEndpoint(authScope, "/oauth/token", formParams);
+        tokenExchangeRes = await postMidFormEndpoint(midHost, "/oauth/token", formParams);
       } catch (error) {
         request.log.warn({ err: error }, "MID token exchange request failed");
         return reply.code(502).send({
@@ -160,13 +205,13 @@ export async function authRoutes(
       }
 
       const useLocalMid =
-        !process.env.MID_INTERNAL_URL?.trim() && authScope.hasDecorator("midMounted");
+        !process.env.MID_INTERNAL_URL?.trim() && midHost.hasDecorator("midMounted");
       const verification = await verifyMidBffExchangeClaims({
         accessToken: tokenPayload.access_token,
         idToken: typeof tokenPayload.id_token === "string" ? tokenPayload.id_token : undefined,
         clientId: parsed.clientId,
         midBaseUrl: resolveMidBaseUrl(),
-        resolveLocalJwkByKid: useLocalMid ? createLocalMidJwkResolver(authScope) : undefined,
+        resolveLocalJwkByKid: useLocalMid ? createLocalMidJwkResolver(midHost) : undefined,
       });
 
       if (!verification) {
@@ -203,8 +248,8 @@ export async function authRoutes(
         expiresInSec,
       });
 
-      reply.setCookie(SESSION_COOKIE_NAME, sessionId, getSessionCookieOptions());
-      reply.setCookie(CSRF_COOKIE_NAME, generateToken(24), getCsrfCookieOptions());
+      setReplyCookie(reply, SESSION_COOKIE_NAME, sessionId, getSessionCookieOptions());
+      setReplyCookie(reply, CSRF_COOKIE_NAME, generateToken(24), getCsrfCookieOptions());
 
       return reply.send({
         authenticated: true,
@@ -225,7 +270,7 @@ export async function authRoutes(
           .send({ error: "Forbidden", message: "Untrusted origin or invalid CSRF token" });
       }
 
-      const sessionId = request.cookies?.[SESSION_COOKIE_NAME];
+      const sessionId = getRequestCookie(request, SESSION_COOKIE_NAME);
       if (sessionId) {
         const tokenRecord = await consumeBffOAuthTokens(sessionId);
         if (tokenRecord?.refreshToken) {
@@ -234,15 +279,15 @@ export async function authRoutes(
             token: tokenRecord.refreshToken,
             token_type_hint: "refresh_token",
           });
-          await postMidFormEndpoint(authScope, "/oauth/revoke", revokeParams).catch((error) => {
+          await postMidFormEndpoint(midHost, "/oauth/revoke", revokeParams).catch((error) => {
             request.log.warn({ err: error }, "Best-effort MID refresh token revocation failed");
           });
         }
         await revokeSession(sessionId);
       }
 
-      reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
-      reply.clearCookie(CSRF_COOKIE_NAME, { path: "/" });
+      clearReplyCookie(reply, SESSION_COOKIE_NAME, { path: "/" });
+      clearReplyCookie(reply, CSRF_COOKIE_NAME, { path: "/" });
       return reply.send({ ok: true });
     }
 
@@ -250,10 +295,10 @@ export async function authRoutes(
     authScope.post("/auth/bff/logout", performLogout);
 
     authScope.get("/auth/me", async (request: FastifyRequest, reply: FastifyReply) => {
-      const { user, expiredSessionCookie } = await resolveRequestIdentity(request);
+      const { user, expiredSessionCookie } = await resolveAuthIdentityFromRequest(request);
       if (!user) {
         if (expiredSessionCookie) {
-          reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+          clearReplyCookie(reply, SESSION_COOKIE_NAME, { path: "/" });
           return reply.code(401).send({ error: "Session expired or invalid" });
         }
         return reply.code(401).send({ error: "Not authenticated" });
@@ -262,5 +307,5 @@ export async function authRoutes(
     });
   });
 
-  registerAuthAdminRoutes(fastify, options.mountAuditRoute ?? true);
+  registerAuthAdminRoutes(fastify, auth);
 }

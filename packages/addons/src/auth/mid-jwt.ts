@@ -1,3 +1,4 @@
+import type { FastifyRequest } from "fastify";
 import {
   decodeJwtParts,
   normalizeIssuerUrl,
@@ -6,7 +7,13 @@ import {
   type PublicEs256Jwk,
 } from "@moonwitness/core";
 import { getDb } from "@moonwitness/orm";
-import { findUserById, getUserPublic } from "@moonwitness/addons/auth";
+import { getRequestCookie } from "@moonwitness/addon-runtime";
+import {
+  findUserById,
+  getSessionWithUser,
+  getUserPublic,
+  SESSION_COOKIE_NAME,
+} from "./service.js";
 
 export const DEFAULT_API_ALLOWED_AUDIENCES = [
   "moonwitness-web",
@@ -136,6 +143,36 @@ export async function verifyMidBearerToken(
         : undefined;
   const pub = getUserPublic(user);
   return claimTenant ? { ...pub, tenantId: claimTenant } : pub;
+}
+
+/** Resolve caller identity from session cookie or MoonWitness ID Bearer JWT. */
+export async function resolveAuthIdentityFromRequest(request: FastifyRequest): Promise<{
+  user: VerifiedMidUser | null;
+  expiredSessionCookie: boolean;
+}> {
+  const sessionId = getRequestCookie(request, SESSION_COOKIE_NAME);
+  if (sessionId) {
+    const session = await getSessionWithUser(sessionId);
+    if (session) {
+      return {
+        user: {
+          id: session.userId,
+          username: session.username,
+          email: session.email,
+          role: session.role,
+          displayName: session.displayName,
+        },
+        expiredSessionCookie: false,
+      };
+    }
+  }
+
+  const bearerUser = await verifyMidBearerToken(request.headers.authorization);
+  if (bearerUser) {
+    return { user: bearerUser, expiredSessionCookie: false };
+  }
+
+  return { user: null, expiredSessionCookie: Boolean(sessionId) };
 }
 
 export interface VerifiedMidProvisionClaims {

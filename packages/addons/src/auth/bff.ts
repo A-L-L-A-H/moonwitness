@@ -1,20 +1,28 @@
 import { timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyRequest } from "fastify";
 import { DEFAULT_MID_ISSUER_URL, normalizeIssuerUrl, type PublicEs256Jwk } from "@moonwitness/core";
-import { type VerifiedMidProvisionClaims } from "../../middleware/mid-jwt";
+import { getRequestCookie } from "@moonwitness/addon-runtime";
+import type { VerifiedMidProvisionClaims } from "./mid-jwt.js";
+import { generateToken } from "./passwords.js";
 import {
   CSRF_COOKIE_NAME,
   createUser,
   findUserByEmail,
   findUserById,
   findUserByUsername,
-  generateToken,
   getUserPublic,
   type AuthUserPublic as UserPublic,
-} from "@moonwitness/addons/auth";
-import { parseCorsOrigins } from "../../shared/env";
+} from "./service.js";
 
 const DEV_DEFAULT_ALLOWED_ORIGINS = new Set(["http://localhost:3000", "http://127.0.0.1:3000"]);
+
+function parseCorsOriginsList(raw?: string): string[] {
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
 
 export interface BffExchangeRequestBody {
   readonly code: string;
@@ -79,7 +87,7 @@ export function isAllowedBffOrigin(request: FastifyRequest): boolean {
     return false;
   }
 
-  const configuredOrigins = parseCorsOrigins(process.env.CORS_ORIGINS);
+  const configuredOrigins = parseCorsOriginsList(process.env.CORS_ORIGINS);
   if (configuredOrigins.includes(originUrl.origin)) return true;
 
   if (configuredOrigins.length === 0 && process.env.NODE_ENV !== "production") {
@@ -97,7 +105,7 @@ export function isAllowedBffOrigin(request: FastifyRequest): boolean {
 
 export function isValidOptionalCsrfHeader(request: FastifyRequest): boolean {
   const headerVal = request.headers["x-csrf-token"];
-  const cookieVal = request.cookies?.[CSRF_COOKIE_NAME];
+  const cookieVal = getRequestCookie(request, CSRF_COOKIE_NAME);
   if (!cookieVal) return true;
   if (headerVal === undefined || typeof headerVal !== "string" || !headerVal.trim()) return false;
   const a = Buffer.from(headerVal, "utf8");
@@ -114,7 +122,7 @@ export function parseBffExchangeBody(rawBody: unknown): BffExchangeRequestBody |
   const clientId = typeof body.client_id === "string" ? body.client_id.trim() : "";
 
   if (!code || code.length > 2048) return null;
-  if (!codeVerifier || codeVerifier.length > 512) return null;
+  if (!codeVerifier || code.length > 512) return null;
   if (!redirectUri || redirectUri.length > 2048) return null;
   if (!clientId || clientId.length > 128 || !/^[a-zA-Z0-9._-]+$/.test(clientId)) return null;
 
@@ -218,7 +226,7 @@ export function createLocalMidJwkResolver(fastify: FastifyInstance) {
       url: "/.well-known/jwks.json",
       headers: { host: issuerHost },
     });
-    if (res.statusCode !== 200) return null;
+    if (res.statusCode < 200 || res.statusCode >= 300) return null;
     try {
       const body = res.json() as { keys?: PublicEs256Jwk[] };
       return body.keys?.find((entry) => entry.kid === kid) ?? null;

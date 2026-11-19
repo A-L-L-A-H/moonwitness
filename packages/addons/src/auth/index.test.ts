@@ -2,11 +2,13 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import Fastify from "fastify";
 import { closeDb, getDb, initDb, modelRegistry } from "@moonwitness/orm";
 import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
 import { auditAddon, listAuditLogs } from "../audit";
 import {
   authAddon,
+  createAuthAddon,
   createAuthMidIdentityStore,
   createUser,
   generateToken,
@@ -124,5 +126,53 @@ describe("../auth", () => {
     await expect(verifyAuthPassword("moonwitness-secret-2026", tampered)).resolves.toBe(false);
 
     expect(generateToken(24)).toMatch(/^[0-9a-f]{48}$/);
+  });
+
+  it("declares createUrl '/api/v1/auth/users' and self-mounts /api/v1/auth/* plus MID plugin from createAuthAddon(host)", async () => {
+    const app = Fastify({ logger: false });
+    const runtime = new AddonRuntimeController();
+    await runtime.syncAll(
+      [
+        { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+        auditAddon,
+        createAuthAddon({
+          prefix: "/api/v1",
+          mid: {
+            keyEncryptionSecret: "test-mid-key-encryption-secret-32c",
+            issuerUrl: "https://id.moonwitness.biz.id",
+          },
+        }),
+      ],
+      app,
+    );
+    await app.ready();
+
+    try {
+      const userView = await runtime.getViewDescriptor("auth.user", "admin");
+      expect(userView?.actionBindings.createUrl).toBe("/api/v1/auth/users");
+
+      const midHealth = await app.inject({ method: "GET", url: "/api/v1/mid/health" });
+      expect(midHealth.statusCode).toBe(200);
+
+      const unauthMe = await app.inject({ method: "GET", url: "/api/v1/auth/me" });
+      expect(unauthMe.statusCode).toBe(401);
+
+      const user = await createUser({
+        username: "selfhost_admin",
+        email: "selfhost@moonwitness.local",
+        password: "SelfHostAdmin!2026",
+        role: "admin",
+        displayName: "Self Host Admin",
+      });
+      const loginRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/auth/login",
+        payload: { identifier: user.username, password: "SelfHostAdmin!2026" },
+      });
+      expect(loginRes.statusCode).toBe(200);
+      expect(loginRes.json().user.username).toBe("selfhost_admin");
+    } finally {
+      await app.close();
+    }
   });
 });
