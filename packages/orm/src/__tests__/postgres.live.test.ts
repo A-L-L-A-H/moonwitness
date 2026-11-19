@@ -78,7 +78,6 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
           slug: "alpha-one",
           weight: 7,
           pg_note: "verified",
-          _attrs: { region: "id-jkt" },
         },
         SYSTEM_ACTOR,
       );
