@@ -168,7 +168,9 @@ describe("PostgresDriver", () => {
     const driver = new PostgresDriver();
     await driver.init("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
 
-    let finishShutdown: (() => void) | null = null;
+    let finishShutdown: () => void = () => {
+      throw new Error("Pool shutdown callback was not initialized");
+    };
     mock.pool.end = vi.fn(
       () =>
         new Promise<void>((resolve) => {
@@ -187,9 +189,6 @@ describe("PostgresDriver", () => {
     await Promise.resolve();
     expect(firstSettled).toBe(false);
 
-    if (!finishShutdown) {
-      throw new Error("Expected pool shutdown callback to be registered");
-    }
     finishShutdown();
 
     await Promise.all([firstClose, secondClose]);
@@ -200,7 +199,9 @@ describe("PostgresDriver", () => {
     const mock = createMockPool();
     await initPostgresDb("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
 
-    let finishShutdown: (() => void) | null = null;
+    let finishShutdown: () => void = () => {
+      throw new Error("Pool shutdown callback was not initialized");
+    };
     mock.pool.end = vi.fn(
       () =>
         new Promise<void>((resolve) => {
@@ -219,9 +220,6 @@ describe("PostgresDriver", () => {
     await Promise.resolve();
     expect(settled).toBe(false);
 
-    if (!finishShutdown) {
-      throw new Error("Expected pool shutdown callback to be registered");
-    }
     finishShutdown();
     await closing;
     expect(settled).toBe(true);
