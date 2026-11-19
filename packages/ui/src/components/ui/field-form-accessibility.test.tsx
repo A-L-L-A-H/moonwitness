@@ -2,14 +2,7 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  Field,
-  FieldControl,
-  FieldDescription,
-  Form,
-  FormField,
-  Input,
-} from "../../index";
+import { Field, FieldControl, FieldDescription, Form, FormField, Input } from "../../index";
 
 let container: HTMLDivElement;
 let root: Root;
