@@ -1,5 +1,7 @@
 # ORM Domain Backlog (implemented scaffolding)
 
+> **Status (2026-11-19):** All legacy `apps/api` ORM scaffolding listed below (`identity_*` ghost models, manual `domainMigrations` SQL registries, `apps/api/src/db/seeders`, `OrmEventRepository`, and domain route modules under `apps/api/src/interface/routes/`) has been **retired and superseded** by self-hosted domain addons in [`packages/addons`](../packages/addons/src/index.ts) synced cleanly via `@moonwitness/orm`'s zero-migration `syncModels()` and enforced permanently by `apps/api/src/architecture.test.ts` (`API-GATE-01..08`). The original backlog inventory is retained below for historical provenance.
+
 This document tracks ORM models/migrations added to accommodate MoonWitness operational domains.
 
 ## P0

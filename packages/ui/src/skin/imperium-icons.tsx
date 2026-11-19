@@ -150,3 +150,257 @@ export function CrownEmblemIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+/**
+ * Arc links connecting Meridian Observatory sky chart coordinates.
+ */
+export function MeridianArcLines({
+  meridians,
+  activeIndex,
+}: {
+  readonly meridians: readonly { readonly code: string; readonly x: number; readonly y: number }[];
+  readonly activeIndex: number;
+}) {
+  return (
+    <svg
+      viewBox="0 0 360 132"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+    >
+      {meridians.map((src, idx) => {
+        const dst = meridians[(idx + 1) % meridians.length];
+        if (!dst) return null;
+        const activeSeg = idx === activeIndex;
+        return (
+          <path
+            key={`${src.code}-${dst.code}`}
+            d={`M${src.x} ${src.y} Q180 24 ${dst.x} ${dst.y}`}
+            fill="none"
+            stroke={activeSeg ? "var(--dna-text)" : "var(--dna-accent)"}
+            strokeOpacity={activeSeg ? 0.8 : 0.28}
+            strokeWidth={activeSeg ? 1.3 : 0.75}
+            strokeDasharray={activeSeg ? undefined : "3 3"}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+/**
+ * Compact harmonic waveform badge for telemetry gateway panels.
+ */
+export function GatewayWaveformVector({ variant = 0 }: { readonly variant?: number }) {
+  const phase = variant * 11;
+  return (
+    <svg viewBox="0 0 120 22" fill="none" aria-hidden="true" className="h-5 w-full opacity-80">
+      <line
+        x1="0"
+        y1="11"
+        x2="120"
+        y2="11"
+        stroke="var(--dna-accent)"
+        strokeOpacity="0.18"
+        strokeWidth="0.6"
+      />
+      <path
+        d={`M0 11 Q15 ${4 + (phase % 5)} 30 11 T60 11 T90 11 T120 11`}
+        stroke="var(--dna-accent)"
+        strokeWidth="1.15"
+        strokeOpacity="0.75"
+      />
+      <path
+        d={`M0 11 Q15 ${17 - (phase % 4)} 30 11 T60 11 T90 11 T120 11`}
+        stroke="var(--dna-accent)"
+        strokeWidth="0.7"
+        strokeOpacity="0.4"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Architectural miniature portal glyph for Canon Entry Doors.
+ */
+export function DoorPortalVector({
+  doorId,
+  active = false,
+}: {
+  readonly doorId: string;
+  readonly active?: boolean;
+}) {
+  const stroke = active ? "var(--dna-text)" : "var(--dna-accent)";
+  if (doorId === "story-universe") {
+    return (
+      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+        <path d="M8 30 V16 C8 9 18 5 18 5 C18 5 28 9 28 16 V30" stroke={stroke} strokeWidth="1.3" />
+        <circle cx="18" cy="18" r="4.5" stroke={stroke} strokeOpacity="0.75" strokeWidth="1" />
+        <path
+          d="M18 11 L19.2 16.8 L25 18 L19.2 19.2 L18 25 L16.8 19.2 L11 18 L16.8 16.8 Z"
+          fill={stroke}
+          fillOpacity="0.7"
+        />
+      </svg>
+    );
+  }
+  if (doorId === "epistemic-corpus") {
+    return (
+      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+        <polygon points="18,4 30,18 18,32 6,18" stroke={stroke} strokeWidth="1.25" />
+        <polygon
+          points="18,9 25,18 18,27 11,18"
+          stroke={stroke}
+          strokeOpacity="0.6"
+          strokeWidth="0.9"
+        />
+        <circle cx="18" cy="18" r="2.2" fill={stroke} />
+      </svg>
+    );
+  }
+  if (doorId === "empire-organization") {
+    return (
+      <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+        <circle cx="18" cy="18" r="12" stroke={stroke} strokeWidth="1.15" strokeDasharray="3 2" />
+        <circle cx="18" cy="18" r="7" stroke={stroke} strokeWidth="1.2" />
+        <circle cx="18" cy="18" r="2.4" fill={stroke} />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 36 36" fill="none" aria-hidden="true" className="h-8 w-8">
+      <circle cx="18" cy="18" r="12" stroke={stroke} strokeWidth="1" strokeOpacity="0.55" />
+      <ellipse
+        cx="18"
+        cy="18"
+        rx="13"
+        ry="5"
+        transform="rotate(-30 18 18)"
+        stroke={stroke}
+        strokeWidth="1.1"
+      />
+      <ellipse
+        cx="18"
+        cy="18"
+        rx="13"
+        ry="5"
+        transform="rotate(30 18 18)"
+        stroke={stroke}
+        strokeWidth="1.1"
+      />
+      <circle cx="18" cy="18" r="2.4" fill={stroke} />
+    </svg>
+  );
+}
+
+/**
+ * 33-bead Dhikr progress orbital dial SVG ring.
+ */
+export function TasbihBeadRingVector({
+  beadCount,
+  progressFraction,
+  quietMode = false,
+}: {
+  readonly beadCount: number;
+  readonly progressFraction: number;
+  readonly quietMode?: boolean;
+}) {
+  return (
+    <svg viewBox="0 0 180 180" className="absolute inset-0 h-full w-full" aria-hidden="true">
+      <circle
+        cx="90"
+        cy="90"
+        r="74"
+        fill="var(--dna-canvas)"
+        fillOpacity="0.85"
+        stroke="var(--dna-accent)"
+        strokeOpacity="0.22"
+        strokeWidth="1"
+      />
+      <circle
+        cx="90"
+        cy="90"
+        r="64"
+        fill="none"
+        stroke="var(--dna-accent)"
+        strokeOpacity="0.14"
+        strokeWidth="1.5"
+      />
+      <circle
+        cx="90"
+        cy="90"
+        r="64"
+        fill="none"
+        stroke="var(--dna-text)"
+        strokeOpacity="0.68"
+        strokeWidth="1.5"
+        strokeDasharray="402.12"
+        strokeDashoffset={(402.12 * (1 - progressFraction)).toFixed(2)}
+        transform="rotate(-90 90 90)"
+        style={{ transition: quietMode ? "none" : "stroke-dashoffset 260ms ease" }}
+      />
+      {Array.from({ length: 33 }, (_, i) => {
+        const angle = (i * Math.PI * 2) / 33 - Math.PI / 2;
+        const cx = Number((90 + Math.cos(angle) * 74).toFixed(2));
+        const cy = Number((90 + Math.sin(angle) * 74).toFixed(2));
+        const lit = i < beadCount;
+        const isMilestone = i === 10 || i === 21 || i === 32;
+        return (
+          <circle
+            key={i}
+            cx={cx}
+            cy={cy}
+            r={lit ? (isMilestone ? 4 : 3.2) : isMilestone ? 2.2 : 1.7}
+            fill={lit ? "var(--dna-text)" : "var(--dna-accent)"}
+            fillOpacity={lit ? 0.98 : isMilestone ? 0.55 : 0.28}
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+/**
+ * Constellation connection lines for Sidra Knowledge Graph nodes.
+ */
+export function SidraConstellationLinks({
+  axioms,
+  selectedId,
+}: {
+  readonly axioms: readonly {
+    readonly id: string;
+    readonly coordinateX: number;
+    readonly coordinateY: number;
+    readonly connectedIds: readonly string[];
+  }[];
+  readonly selectedId: string;
+}) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 h-full w-full"
+    >
+      {axioms.map((axiomNode) =>
+        axiomNode.connectedIds.map((targetId) => {
+          const targetNode = axioms.find((candidate) => candidate.id === targetId);
+          if (!targetNode) return null;
+          const isHighlighted = axiomNode.id === selectedId || targetNode.id === selectedId;
+          return (
+            <line
+              key={`${axiomNode.id}-${targetNode.id}`}
+              x1={axiomNode.coordinateX}
+              y1={axiomNode.coordinateY}
+              x2={targetNode.coordinateX}
+              y2={targetNode.coordinateY}
+              stroke={isHighlighted ? "var(--dna-text)" : "var(--dna-accent)"}
+              strokeWidth={isHighlighted ? "0.7" : "0.35"}
+              strokeOpacity={isHighlighted ? "0.75" : "0.24"}
+            />
+          );
+        }),
+      )}
+    </svg>
+  );
+}

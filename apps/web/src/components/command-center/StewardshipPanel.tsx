@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ZineButton } from "@moonwitness/ui";
 import {
   CENTER_100_STEWARDSHIP_CLUSTERS,
   DHGS_13_STEPS,
@@ -25,14 +26,15 @@ export function StewardshipPanel() {
             WINGS 10 · PRIME CODE (PC01–PC09) · 100CENTER · DHGS
           </h2>
         </div>
-        <button
+        <ZineButton
           type="button"
+          tone="blue"
           aria-expanded={expanded}
           onClick={() => setExpanded((prev) => !prev)}
-          className="btn-zine btn-blue min-h-11 px-4 py-2 text-xs"
+          className="min-h-11 px-4 py-2 text-xs"
         >
           {expanded ? "HIDE STEWARDSHIP MATRIX" : "OPEN STEWARDSHIP MATRIX"}
-        </button>
+        </ZineButton>
       </div>
 
       {expanded && (

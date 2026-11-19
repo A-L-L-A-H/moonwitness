@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Badge, ZineCardRough } from "@moonwitness/ui";
+import { Badge, Button, ZineCardRough } from "@moonwitness/ui";
 import { SectionHeading } from "./section-heading";
 import {
   fetchProbeNodes,
@@ -25,8 +25,8 @@ export function NocProbesPanel() {
         fetchProbeNodes(),
         fetchRecentProbeEvents(10),
       ]);
-      setNodes(nodesData.nodes);
-      setEvents(eventsData.events);
+      setNodes(Array.isArray(nodesData?.nodes) ? nodesData.nodes : []);
+      setEvents(Array.isArray(eventsData?.events) ? eventsData.events : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load NOC probes");
     } finally {
@@ -73,14 +73,15 @@ export function NocProbesPanel() {
               Canonical identity, API, and sanctuary endpoints verified by Core API.
             </p>
           </div>
-          <button
+          <Button
             type="button"
+            variant="secondary"
             disabled={probing || loading}
             onClick={() => handleRunProbes()}
-            className="border-2 border-[var(--border)] bg-[var(--secondary)] px-4 py-2 font-mono text-xs font-bold text-[var(--secondary-foreground)] shadow-[3px_3px_0px_var(--ink)] transition-transform active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50"
+            className="border-2 border-[var(--border)] px-4 py-2 font-mono text-xs font-bold shadow-[3px_3px_0px_var(--ink)] transition-transform active:translate-x-0.5 active:translate-y-0.5"
           >
             {probing ? "PROBING ALL NODES…" : "PROBE ALL NODES"}
-          </button>
+          </Button>
         </div>
 
         {error && (
@@ -118,7 +119,10 @@ export function NocProbesPanel() {
                       {isOk === null ? (
                         <span className="text-[var(--muted-foreground)]">UNPROBED</span>
                       ) : isOk ? (
-                        <Badge variant="default" className="bg-[var(--green)] text-[var(--ink)]">
+                        <Badge
+                          variant="default"
+                          className="border-[var(--green)] bg-[var(--green)]/15 text-[var(--green)]"
+                        >
                           ONLINE ({latest?.statusCode})
                         </Badge>
                       ) : (
@@ -132,14 +136,16 @@ export function NocProbesPanel() {
                     </td>
                     <td className="py-2.5 pr-4">{latest ? `${latest.latencyMs} ms` : "—"}</td>
                     <td className="py-2.5 text-right">
-                      <button
+                      <Button
                         type="button"
+                        variant="outline"
+                        size="sm"
                         disabled={probing}
                         onClick={() => handleRunProbes(node.id)}
-                        className="border border-[var(--border)] bg-[var(--card)] px-2.5 py-1 text-[11px] font-bold text-[var(--card-foreground)] shadow-[2px_2px_0px_var(--ink)] hover:bg-[var(--muted)] disabled:opacity-50"
+                        className="min-h-0 border border-[var(--border)] bg-[var(--card)] px-2.5 py-1 text-[11px] font-bold text-[var(--card-foreground)] shadow-[2px_2px_0px_var(--ink)] hover:bg-[var(--muted)]"
                       >
                         PROBE
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

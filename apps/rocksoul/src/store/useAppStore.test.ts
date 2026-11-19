@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../lib", () => ({ call: vi.fn() }));
 
 import { call } from "../lib";
+import type {
+  CreateMilestoneArgs,
+  UpdateIssueArgs,
+  UpdateMilestoneArgs,
+  UpdateProjectArgs,
+} from "../lib/contracts";
 import { useAppStore } from "./useAppStore";
 
 const mockedCall = call as unknown as ReturnType<typeof vi.fn>;
@@ -82,21 +88,21 @@ describe("useAppStore actions", () => {
     });
 
     await useAppStore.getState().createIssue({ title: "Issue" });
-    await useAppStore.getState().editIssue({ issueId: "issue-1" } as any);
+    await useAppStore.getState().editIssue({ issueId: "issue-1" } as unknown as UpdateIssueArgs);
     await useAppStore.getState().deleteIssue("issue-1");
     await useAppStore.getState().updateIssue("issue-1", "done");
     await useAppStore.getState().createProject({ name: "Project" });
-    await useAppStore.getState().editProject({ projectId: "project-1" } as any);
+    await useAppStore.getState().editProject({ projectId: "project-1" } as unknown as UpdateProjectArgs);
     await useAppStore.getState().deleteProject("project-1");
-    await useAppStore.getState().createMilestone({ title: "Milestone" } as any);
+    await useAppStore.getState().createMilestone({ title: "Milestone" } as unknown as CreateMilestoneArgs);
     await useAppStore.getState().updateMilestone("milestone-1", "done");
-    await useAppStore.getState().editMilestone({ milestoneId: "milestone-1" } as any);
+    await useAppStore.getState().editMilestone({ milestoneId: "milestone-1" } as unknown as UpdateMilestoneArgs);
     await useAppStore.getState().deleteMilestone("milestone-1");
     await useAppStore.getState().addRepository("C:/repo");
 
     expect(
       mockedCall.mock.calls.filter(
-        (callArgs: any[]) => !["get_dashboard", "list_projects", "list_milestones"].includes(callArgs[0]),
+        (callArgs: unknown[]) => !["get_dashboard", "list_projects", "list_milestones"].includes(String(callArgs[0])),
       ),
     ).toEqual([
       ["create_issue", { title: "Issue" }],

@@ -6,13 +6,14 @@ import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app";
-import { events, seedTimeline } from "@moonwitness/addon-timeline";
-import { SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
-import { ok } from "@moonwitness/core";
-import { createUser } from "./services/user";
-import { createSession } from "./services/session";
-import type { ITimelineUseCase } from "./domain/usecases/timeline/timeline.usecase";
-import { timelineRoutes } from "./interface/routes/timeline.routes";
+import { authBridge } from "./bootstrap";
+import {
+  events,
+  registerTimelineRoutes,
+  seedTimeline,
+  type ITimelineRepository,
+} from "@moonwitness/addons/timeline";
+import { createSession, createUser } from "@moonwitness/addons/auth";
 
 let app: FastifyInstance;
 let actorTestApp: FastifyInstance | null = null;
@@ -278,52 +279,64 @@ describe("timeline API", () => {
       displayName: "API Actor",
     });
     const sessionId = await createSession(user.id);
-    const getEvent = vi.fn(async (_id: string, _actor: ActorContext) => ok({ data: events[0]! }));
-    const timelineUseCase: ITimelineUseCase = {
-      listEvents: async () => ok({ data: [], total: 0 }),
+    const getEvent = vi.fn(async (_id: string, _tenantId?: string) => events[0]!);
+    const createEvent = vi.fn(async () => events[0]!);
+    const repository: ITimelineRepository = {
+      listEvents: async () => ({ data: [], total: 0 }),
       getEvent,
-      getStats: async () => ok({ data: { total: 0, byEra: {}, byKind: {} } }),
-      getEras: async () => ok({ data: [] }),
-      createEvent: async () => ok({ data: events[0]! }),
-      updateEvent: async () => ok({ data: events[0]! }),
-      archiveEvent: async () => ok({ data: events[0]! }),
-      restoreEvent: async () => ok({ data: events[0]! }),
-      deleteEvent: async () => ok({ data: events[0]! }),
-      getEventHistory: async () => ok({ data: [] }),
+      getStats: async () => ({ total: 0, byEra: {}, byKind: {} }),
+      getEras: async () => [],
+      createEvent,
+      updateEvent: async () => events[0]!,
+      archiveEvent: async () => events[0]!,
+      restoreEvent: async () => events[0]!,
+      deleteEvent: async () => events[0]!,
+      getEventHistory: async () => [],
+      upsertEra: async (era) => era,
     };
     actorTestApp = Fastify({ logger: false });
-    actorTestApp.decorate("timelineUseCase", timelineUseCase);
     await actorTestApp.register(cookie);
-    await actorTestApp.register(timelineRoutes, { prefix: "/api/v1/timeline" });
+    await actorTestApp.register(
+      async (scope) => {
+        await registerTimelineRoutes(scope, { auth: authBridge, repository });
+      },
+      { prefix: "/api/v1/timeline" },
+    );
     await actorTestApp.ready();
 
     const anonymous = await actorTestApp.inject({
       method: "GET",
       url: "/api/v1/timeline/events/evt-001",
-      headers: { "x-actor-id": "attacker", "x-actor-role": "admin" },
+      headers: { "x-actor-id": "attacker", "x-actor-role": "admin", "x-tenant-id": "tenant-x" },
     });
     expect(anonymous.statusCode).toBe(200);
-    expect(getEvent).toHaveBeenCalledWith("evt-001", SYSTEM_ACTOR);
-    getEvent.mockClear();
+    expect(getEvent).toHaveBeenCalledWith("evt-001", "default");
 
-    const response = await actorTestApp.inject({
-      method: "GET",
-      url: "/api/v1/timeline/events/evt-001",
+    const postRes = await actorTestApp.inject({
+      method: "POST",
+      url: "/api/v1/timeline/events",
       headers: {
         cookie: `mw_session=${sessionId}`,
         "x-actor-id": "attacker",
         "x-actor-role": "admin",
       },
+      payload: {
+        kind: "PROJECT",
+        date: "2026-11-18",
+        era: "origins",
+        title: "Actor Propagation",
+      },
     });
 
-    expect(response.statusCode).toBe(200);
-    expect(getEvent).toHaveBeenCalledTimes(1);
-    expect(getEvent).toHaveBeenCalledWith(
-      "evt-001",
+    expect(postRes.statusCode).toBe(201);
+    expect(createEvent).toHaveBeenCalledTimes(1);
+    expect(createEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Actor Propagation" }),
       expect.objectContaining({
         actorId: String(user.id),
         source: "api",
         requestId: expect.any(String),
+        tenantId: "default",
       }),
     );
   });

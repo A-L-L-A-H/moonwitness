@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/control";
@@ -21,18 +22,7 @@ export interface PortForwardInput {
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    headers: init?.body ? { "content-type": "application/json" } : undefined,
-    ...init,
-  });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const message = (body as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
-    throw new Error(message);
-  }
-  return body as T;
+  return requestApiJson<T>(url, init);
 }
 
 export function usePortForwards() {

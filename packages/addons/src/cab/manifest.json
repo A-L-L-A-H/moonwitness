@@ -1,0 +1,15 @@
+{
+  "name": "cab",
+  "version": "1.0.0",
+  "description": "Change Advisory Board (RFC Governance), Project Portfolio, and Helpdesk SLA Ticketing",
+  "category": "operations",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["cab.rfc", "project.portfolio", "helpdesk.sla"],
+  "provides": {
+    "routes": ["/api/v1/cab/summary"],
+    "models": ["project.project", "project.task", "cab.change", "cab.decision", "helpdesk.ticket"],
+    "auditActions": ["cab.decision.record", "helpdesk.ticket.resolve"]
+  }
+}

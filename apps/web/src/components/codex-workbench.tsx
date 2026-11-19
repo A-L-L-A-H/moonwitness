@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import {
-  DHGS_13_STEPS,
   evaluateDhgsAssuranceLoop,
   evaluateSrgblModel,
   evaluateWsiSemanticFrame,
@@ -10,12 +9,14 @@ import {
   tokenizeAndParseAqel,
   type SrgblCriterionWeight,
 } from "@moonwitness/canon";
-import { RadialGauge, SkinOrnament } from "@moonwitness/ui";
+import { Input, RadialGauge, SkinOrnament, Slider, Textarea } from "@moonwitness/ui";
 import { ScriptureFolio } from "@moonwitness/ui/icons";
 import { DnaButton, DnaChamber, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { MizanLiveTabPanel, WitnessEngineLiveTabPanel } from "./codex-workbench-live-tabs";
+import { AqelTabPanel, OxDxDhgsTabPanel } from "./codex-workbench-tabs";
 
-type WorkbenchTab = "wsi" | "srgbl" | "oxdx" | "aqel";
+type WorkbenchTab = "wsi" | "srgbl" | "oxdx" | "aqel" | "wx-engine" | "mizan";
 
 const DEFAULT_AQEL_SOURCE = `# نظام التحقق المعرفي — عقد الصدق
 عرّف المعيار = "الميزان"
@@ -111,6 +112,8 @@ export function CodexWorkbench() {
     { id: "srgbl", code: "SRGBL-v8", label: "SRGBL v8 EVALUATOR" },
     { id: "oxdx", code: "OX-DX/DHGS", label: "OX-DX 49 & DHGS-13" },
     { id: "aqel", code: "AQEL-v0.1", label: "AQEL ARABIC LEXER" },
+    { id: "wx-engine", code: "WX-01..09", label: "9-MODULE WITNESS ENGINE" },
+    { id: "mizan", code: "MIZAN-MCDA", label: "MIZAN DECISION ENGINE" },
   ];
 
   const toggleDhgsStep = (code: string) => {
@@ -139,19 +142,20 @@ export function CodexWorkbench() {
           {tabs.map((tab) => {
             const selected = activeTab === tab.id;
             return (
-              <button
+              <DnaButton
                 key={tab.id}
                 type="button"
+                tone="secondary"
                 aria-pressed={selected}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 font-mono text-[10px] tracking-[0.12em] uppercase cursor-pointer ${
+                className={`min-h-0 px-3 py-1.5 font-mono text-[10px] tracking-[0.12em] uppercase ${
                   selected
                     ? "border border-[var(--dna-accent)] bg-[var(--dna-accent)]/20 text-[var(--dna-text)]"
-                    : "btn-luxe-secondary text-[var(--dna-muted)]"
+                    : "text-[var(--dna-muted)]"
                 }`}
               >
                 {tab.code} · {tab.label}
-              </button>
+              </DnaButton>
             );
           })}
         </div>
@@ -163,11 +167,11 @@ export function CodexWorkbench() {
           <div className="space-y-3">
             <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               CLAIM STATEMENT
-              <textarea
+              <Textarea
                 rows={2}
                 value={wsiStatement}
                 onChange={(e) => setWsiStatement(e.target.value)}
-                className="mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] p-2.5 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
+                className="mt-1 min-h-0 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] p-2.5 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
               />
             </label>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -184,24 +188,25 @@ export function CodexWorkbench() {
                   className="block font-mono text-[10px] text-[var(--dna-muted)]"
                 >
                   {field.label}
-                  <input
+                  <Input
                     type="text"
                     value={field.val}
                     onChange={(e) => field.set(e.target.value)}
-                    className="mt-1 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--dna-text)] focus:outline-none"
+                    className="mt-1 min-h-0 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--dna-text)] focus:outline-none"
                   />
                 </label>
               ))}
             </div>
             <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               BOUNDED SWING DEPTH (MAX 3 HOPS): {wsiDepth}
-              <input
-                type="range"
+              <Slider
                 min={0}
                 max={3}
-                value={wsiDepth}
-                onChange={(e) => setWsiDepth(Number(e.target.value))}
-                className="mt-1 block w-full accent-[var(--dna-accent)]"
+                step={1}
+                value={[wsiDepth]}
+                onValueChange={([v]) => setWsiDepth(v ?? 0)}
+                aria-label="Bounded swing depth"
+                className="mt-2"
               />
             </label>
           </div>
@@ -266,11 +271,11 @@ export function CodexWorkbench() {
           <div className="space-y-3">
             <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
               INQUIRY QUESTION
-              <input
+              <Input
                 type="text"
                 value={srgblQuestion}
                 onChange={(e) => setSrgblQuestion(e.target.value)}
-                className="mt-1 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-1.5 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
+                className="mt-1 min-h-0 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] px-3 py-1.5 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
               />
             </label>
             <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
@@ -285,11 +290,11 @@ export function CodexWorkbench() {
                   className="block font-mono text-[10px] text-[var(--dna-muted)]"
                 >
                   {stage.label}
-                  <textarea
+                  <Textarea
                     rows={2}
                     value={stage.val}
                     onChange={(e) => stage.set(e.target.value)}
-                    className="mt-1 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-2 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
+                    className="mt-1 min-h-0 w-full border border-[var(--dna-accent)]/30 bg-[var(--dna-canvas)] p-2 font-serif text-xs text-[var(--dna-text)] focus:outline-none"
                   />
                 </label>
               ))}
@@ -353,128 +358,30 @@ export function CodexWorkbench() {
 
       {/* TAB 3: OX-DX 49 & DHGS-13 (#34) */}
       {activeTab === "oxdx" && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="space-y-3">
-            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
-              QUERY OX-DX 49 ONTOLOGICAL LEVELS ({oxdxHits.length} MATCHED)
-              <input
-                type="search"
-                value={oxdxQuery}
-                onChange={(e) => setOxdxQuery(e.target.value)}
-                placeholder="Origin, Covenant, Sovereign, Physics, AI..."
-                className="mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] px-3 py-2 font-mono text-xs text-[var(--dna-text)] focus:outline-none"
-              />
-            </label>
-            <div className="max-h-56 overflow-y-auto border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-3 space-y-1.5">
-              {oxdxHits.slice(0, 14).map((hit, idx) => (
-                <div
-                  key={`${hit.zoneIndex}-${hit.level}-${idx}`}
-                  className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/10 pb-1.5 font-mono text-[10.5px]"
-                >
-                  <span className="text-[var(--dna-accent)]">
-                    Z0{hit.zoneIndex} · {hit.zoneName}
-                  </span>
-                  <span className="text-[var(--dna-muted)]">{hit.level}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5">
-              <span className="font-mono text-[10.5px] text-[var(--dna-accent)]">
-                DHGS 13-STEP VERIFICATION LOOP ({dhgsResult.completedCount}/{dhgsResult.totalSteps})
-              </span>
-              <span
-                className={`border px-2 py-0.5 font-mono text-[10px] font-bold ${
-                  dhgsResult.status === "VERIFIED_LOOP"
-                    ? "border-[var(--dna-success)]/50 bg-[var(--dna-success)]/10 text-[var(--dna-success)]"
-                    : "border-[var(--dna-accent)]/40 bg-[var(--dna-accent)]/10 text-[var(--dna-accent)]"
-                }`}
-              >
-                {dhgsResult.status}
-              </span>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {DHGS_13_STEPS.map((step) => {
-                const checked = doneDhgsCodes.includes(step.code);
-                return (
-                  <button
-                    key={step.code}
-                    type="button"
-                    aria-pressed={checked}
-                    onClick={() => toggleDhgsStep(step.code)}
-                    className={`px-2 py-1 font-mono text-[9.5px] cursor-pointer ${
-                      checked
-                        ? "border border-[var(--dna-success)]/60 bg-[var(--dna-success)]/15 text-[var(--dna-success)]"
-                        : "border border-[var(--dna-accent)]/25 bg-[var(--dna-surface)] text-[var(--dna-muted)]"
-                    }`}
-                  >
-                    {String(step.stepNumber).padStart(2, "0")}·{step.code}
-                  </button>
-                );
-              })}
-            </div>
-            <div className="font-mono text-[10.5px] text-[var(--dna-muted)]">
-              NEXT REQUIRED STEP: {dhgsResult.nextRequiredStep ?? "COMPLETE · LOOP VERIFIED"}
-            </div>
-          </div>
-        </div>
+        <OxDxDhgsTabPanel
+          oxdxQuery={oxdxQuery}
+          oxdxHits={oxdxHits}
+          doneDhgsCodes={doneDhgsCodes}
+          dhgsResult={dhgsResult}
+          onQueryChange={setOxdxQuery}
+          onToggleStep={toggleDhgsStep}
+        />
       )}
 
       {/* TAB 4: AQEL v0.1 ARABIC LEXER / AST (#35) */}
       {activeTab === "aqel" && (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="space-y-3">
-            <label className="block font-mono text-[10px] text-[var(--dna-accent)]">
-              AQEL v0.1 SOURCE BUFFER (DETERMINISTIC ARABIC-FIRST GRAMMAR)
-              <textarea
-                dir="rtl"
-                lang="ar"
-                rows={7}
-                value={aqelSource}
-                onChange={(e) => setAqelSource(e.target.value)}
-                className="mt-1 w-full border border-[var(--dna-accent)]/35 bg-[var(--dna-canvas)] p-3 font-serif text-base leading-relaxed text-[var(--dna-text)] focus:outline-none"
-              />
-            </label>
-          </div>
-          <div className="border border-[var(--dna-accent)]/25 bg-[var(--dna-canvas)] p-5 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--dna-accent)]/20 pb-2.5 font-mono text-[10.5px]">
-              <span className="text-[var(--dna-accent)]">
-                TOKENS: {aqelResult.tokens.length} · AST STATEMENTS: {aqelResult.statements.length}
-              </span>
-              <span className="text-[var(--dna-success)]">
-                DIAGNOSTICS: {aqelResult.diagnostics.length} ERRORS
-              </span>
-            </div>
-            <div className="space-y-1.5">
-              {aqelResult.statements.map((st, idx) => (
-                <div
-                  key={`${st.line}-${idx}`}
-                  className="flex flex-wrap items-center justify-between gap-2 border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] px-3 py-1.5 font-mono text-[11px]"
-                >
-                  <span className="text-[var(--dna-accent)]">
-                    L{st.line} · KEYWORD [{st.keyword}]
-                  </span>
-                  <span dir="rtl" lang="ar" className="text-[var(--dna-text)]">
-                    {st.target}
-                  </span>
-                </div>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {aqelResult.tokens.slice(0, 18).map((tok, i) => (
-                <span
-                  key={i}
-                  className="border border-[var(--dna-accent)]/20 bg-[var(--dna-surface)] px-2 py-0.5 font-mono text-[9.5px] text-[var(--dna-muted)]"
-                >
-                  {tok.kind}: {tok.value}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+        <AqelTabPanel
+          aqelSource={aqelSource}
+          aqelResult={aqelResult}
+          onSourceChange={setAqelSource}
+        />
       )}
+
+      {/* TAB 5: 9-MODULE WITNESS ENGINE (WX-01..09) */}
+      {activeTab === "wx-engine" && <WitnessEngineLiveTabPanel />}
+
+      {/* TAB 6: MIZAN MULTI-CRITERIA DECISION ENGINE */}
+      {activeTab === "mizan" && <MizanLiveTabPanel />}
     </DnaChamber>
   );
 }

@@ -5,7 +5,7 @@ import {
   EraSchema,
   EventKindSchema,
   TimelineEventSchema,
-} from "@moonwitness/schema/timeline";
+} from "../schema/timeline";
 
 /** Canonical error envelope shared by every API operation. */
 export const ApiErrorSchema = z.object({

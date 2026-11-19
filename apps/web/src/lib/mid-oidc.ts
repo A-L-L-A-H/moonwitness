@@ -1,78 +1,42 @@
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import {
-  DEFAULT_MID_ISSUER_URL,
-  createPkceAuthorizationRequest,
-  normalizeIssuerUrl,
+  beginBrowserPkceRedirect,
+  consumeStoredPkceEnvelope,
+  extractOAuthCallbackParams,
+  removeBrowserStorage,
+  resolveBrowserOriginCallbackUrl,
+  resolveConfiguredMidIssuer,
+  sanitizeRedirectPath,
 } from "@moonwitness/core";
 
 const STORAGE_PKCE_KEY = "mw_mid_pkce";
 
-function getMidIssuer(): string {
-  return normalizeIssuerUrl(process.env.NEXT_PUBLIC_MID_ISSUER_URL ?? DEFAULT_MID_ISSUER_URL);
-}
-
-function sanitizeNextPath(rawPath: string | undefined): string {
-  if (typeof rawPath === "string" && rawPath.startsWith("/") && !rawPath.startsWith("//")) {
-    return rawPath;
-  }
-  return "/mission-control";
-}
-
-function resolveCallbackUrl(): string {
-  return `${window.location.origin}/auth/callback`;
-}
-
-/** Initiate OAuth 2.1 + PKCE SSO sign-in flow against MoonWitness ID using @moonwitness/core. */
+/** Initiate OAuth 2.1 + PKCE sign-in flow against MoonWitness ID using @moonwitness/core. */
 export async function startMidLogin(nextPath = "/mission-control"): Promise<void> {
-  const safeNext = sanitizeNextPath(nextPath);
-  const pkce = await createPkceAuthorizationRequest({
-    issuerUrl: getMidIssuer(),
+  await beginBrowserPkceRedirect({
+    issuerUrl: resolveConfiguredMidIssuer(process.env.NEXT_PUBLIC_MID_ISSUER_URL),
     clientId: "moonwitness-web",
-    redirectUri: resolveCallbackUrl(),
+    redirectUri: resolveBrowserOriginCallbackUrl("/auth/callback"),
+    storageKey: STORAGE_PKCE_KEY,
+    nextPath: sanitizeRedirectPath(nextPath, "/mission-control"),
   });
-
-  window.sessionStorage.setItem(
-    STORAGE_PKCE_KEY,
-    JSON.stringify({ verifier: pkce.verifier, state: pkce.state, nextPath: safeNext }),
-  );
-
-  window.location.assign(pkce.authorizeUrl);
 }
 
 /** Complete OAuth 2.1 authorization_code exchange via the server-side BFF on `/auth/callback`. */
 export async function completeMidCallback(searchParams: URLSearchParams): Promise<string> {
-  const oauthError = searchParams.get("error");
-  if (oauthError) {
-    throw new Error(searchParams.get("error_description") || oauthError);
-  }
-  const code = searchParams.get("code");
-  const state = searchParams.get("state");
-  if (!code || !state) {
-    throw new Error("Missing authorization code or state parameter.");
-  }
+  const { code, state } = extractOAuthCallbackParams(searchParams);
+  const stored = consumeStoredPkceEnvelope(STORAGE_PKCE_KEY, state, {
+    expired: "Login session expired. Return to Sign In and try again.",
+    mismatch: "State mismatch detected during SSO callback.",
+  });
 
-  const rawStored = window.sessionStorage.getItem(STORAGE_PKCE_KEY);
-  window.sessionStorage.removeItem(STORAGE_PKCE_KEY);
-  if (!rawStored) {
-    throw new Error("Login session expired. Return to Sign In and try again.");
-  }
-
-  const stored = JSON.parse(rawStored) as {
-    verifier: string;
-    state: string;
-    nextPath?: string;
-  };
-  if (stored.state !== state) {
-    throw new Error("State mismatch detected during SSO callback.");
-  }
-
-  const response = await fetch("/api/v1/auth/bff/exchange", {
+  const response = await requestApiResponse("/api/v1/auth/bff/exchange", {
     method: "POST",
-    credentials: "include",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       code,
       code_verifier: stored.verifier,
-      redirect_uri: resolveCallbackUrl(),
+      redirect_uri: resolveBrowserOriginCallbackUrl("/auth/callback"),
       client_id: "moonwitness-web",
     }),
   });
@@ -92,7 +56,7 @@ export async function completeMidCallback(searchParams: URLSearchParams): Promis
     );
   }
 
-  return sanitizeNextPath(stored.nextPath);
+  return sanitizeRedirectPath(stored.nextPath, "/mission-control");
 }
 
 /**
@@ -105,12 +69,7 @@ export function getStoredMidAccessToken(): null {
 
 /** Remove stored ephemeral MoonWitness ID PKCE state on logout. */
 export function clearStoredMidSession(): void {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.removeItem(STORAGE_PKCE_KEY);
-  } catch {
-    // Ignore storage unavailability during teardown.
-  }
+  removeBrowserStorage("sessionStorage", STORAGE_PKCE_KEY);
 }
 
 export * from "./sanctuary-mid-oidc";

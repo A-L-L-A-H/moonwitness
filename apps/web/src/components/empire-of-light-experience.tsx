@@ -1,16 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
-  CrescentStarIcon,
   CrownEmblemIcon,
   IllustratedHero,
   PrimaryAction,
-  SearchLensIcon,
-  SecondaryAction,
-  SiteNavigation,
   WorldExplorer,
   WorldTile,
 } from "@moonwitness/ui/imperium";
@@ -18,19 +14,25 @@ import gateCrowdMoonArt from "../../public/art/gate-crowd-moon.webp";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import {
-  NAVIGATION_TABS,
   WORLD_ART,
   WORLD_DOMAINS,
   type NavigationSectionId,
   type WorldIdentifier,
 } from "@/data/empire-registry";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 import { CanonCodexSanctum } from "./canon-codex-sanctum";
+import { CelestialCanvas } from "./celestial-canvas";
+import { CelestialHudCapsule } from "./celestial-hud-capsule";
 import { CovenantAboutSection } from "./covenant-about-section";
 import { DockMatrixSection } from "./dock-matrix-section";
+import { EmpireNavigation } from "./empire-navigation";
 import { triggerSacredViewTransition } from "./motion-primitives";
-import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
 import { UniversalSearchModal } from "./universal-search-modal";
 import { WorldsSanctum } from "./worlds-sanctum";
+
+const WORLD_TAGLINES_EN: Readonly<Partial<Record<WorldIdentifier, string>>> = {
+  crayon: "Making Life More Colorful!",
+};
 
 const WORLD_TAGLINES_ID: Readonly<Record<WorldIdentifier, string>> = {
   moonwitness: "Kisah · Pengetahuan · Arsip",
@@ -44,13 +46,39 @@ const WORLD_TAGLINES_ID: Readonly<Record<WorldIdentifier, string>> = {
   "angel-with-shotgun": "Hukum · Keadilan · Masyarakat",
 };
 
+const WORLD_TAGLINES_AR: Readonly<Record<WorldIdentifier, string>> = {
+  moonwitness: "قصص · معرفة · أرشيف",
+  arsy: "إذاعة · تقنية · بنية تحتية",
+  "human-pen": "تفكّر · اكتب · أبدع · شارك",
+  sidra: "تواصل · استكشف · تعلّم",
+  "rocksoul-dx": "العب · أبدع · احلم",
+  crayon: "لتكن الحياة أكثر إشراقاً",
+  "sin-can": "تأمّل · تساءل · افهم",
+  mythos: "استكشف · اكتشف · تذكّر",
+  "angel-with-shotgun": "قانون · عدالة · مجتمع",
+};
+
 export function EmpireOfLightExperience() {
   const { locale, toggleLocale } = useSanctuaryLocale();
+  const handleLocaleSwitch = useCallback(() => {
+    if (typeof window !== "undefined") {
+      const currentPath = window.location.pathname;
+      const currentPathLocale = getLocaleFromPath(currentPath);
+      if (currentPathLocale) {
+        const order = ["en", "id", "ar"] as const;
+        const next = order[(order.indexOf(locale) + 1) % order.length] ?? "en";
+        window.location.assign(getLocalizedUrl(currentPath, next));
+        return;
+      }
+    }
+    toggleLocale();
+  }, [locale, toggleLocale]);
   const [activeNavTab, setActiveNavTab] = useState<NavigationSectionId>("the-gate");
   const [activeWorldId, setActiveWorldId] = useState<WorldIdentifier>("human-pen");
   const [activeDoorId, setActiveDoorId] = useState<EntryDoorId>("story-universe");
   const [sanctuaryRadianceActive, setSanctuaryRadianceActive] = useState<boolean>(false);
   const [quietMode, setQuietMode] = useState<boolean>(false);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [searchModalOpen, setSearchModalOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
@@ -79,6 +107,9 @@ export function EmpireOfLightExperience() {
 
     const updateScroll = () => {
       rafId = 0;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      setScrollProgress(Math.max(0, Math.min(1, window.scrollY / maxScroll)));
+
       const nearBottom =
         window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 40;
       if (nearBottom) {
@@ -186,162 +217,27 @@ export function EmpireOfLightExperience() {
 
   return (
     <div className="home-page relative min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] selection:bg-[var(--dna-accent)] selection:text-[var(--dna-canvas)]">
-      <SiteNavigation
-        navLabel="Primary Empire Navigation"
+      {sanctuaryRadianceActive && !quietMode ? (
+        <CelestialCanvas
+          sanctuaryRadianceActive={sanctuaryRadianceActive}
+          quietMode={quietMode}
+          scrollProgress={scrollProgress}
+        />
+      ) : null}
+
+      <EmpireNavigation
+        locale={locale}
+        activeNavTab={activeNavTab}
+        sanctuaryRadianceActive={sanctuaryRadianceActive}
+        quietMode={quietMode}
         mobileMenuOpen={mobileMenuOpen}
-        brand={
-          <a
-            href="#the-gate"
-            onClick={(event) => {
-              event.preventDefault();
-              navigateToSection("the-gate");
-            }}
-            className="home-header-brand group flex min-h-[44px] items-center gap-2.5 sm:gap-3"
-          >
-            <CrownEmblemIcon className="h-8 w-8 shrink-0 text-[var(--dna-accent)]" />
-            <div className="flex flex-col leading-tight">
-              <span className="home-brand-wordmark text-base sm:text-lg font-bold tracking-[0.06em] text-[var(--dna-text)]">
-                A-L-L-A-H.COM
-              </span>
-              <span className="home-brand-tagline text-[11px] font-bold tracking-[0.12em] text-[var(--dna-accent)] uppercase">
-                EMPIRE OF THE LIGHT
-              </span>
-            </div>
-          </a>
-        }
-        items={[
-          ...NAVIGATION_TABS.map((navTab) => ({
-            id: navTab.id,
-            label: navTab.label,
-            href: `#${navTab.id}`,
-            active: activeNavTab === navTab.id,
-            onSelect: (event: React.MouseEvent<HTMLAnchorElement>) => {
-              event.preventDefault();
-              navigateToSection(navTab.id);
-            },
-          })),
-          {
-            id: "moonwitness",
-            label: "MOONWITNESS",
-            href: "/moonwitness",
-            active: false,
-          },
-        ]}
-        actions={
-          <>
-            <button
-              type="button"
-              onClick={() => setSearchModalOpen(true)}
-              aria-label="Search the Empire of the Light"
-              title="Search (Ctrl+K)"
-              className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--dna-text)] hover:text-[var(--dna-accent)] transition-colors cursor-pointer"
-            >
-              <SearchLensIcon className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              aria-pressed={sanctuaryRadianceActive}
-              onClick={() => setSanctuaryRadianceActive((prev) => !prev)}
-              aria-label="Toggle Sanctuary Radiance Mode"
-              title="Toggle Sanctuary Radiance"
-              className={`flex min-h-[44px] min-w-[44px] items-center justify-center transition-colors cursor-pointer ${
-                sanctuaryRadianceActive
-                  ? "text-[var(--dna-accent)]"
-                  : "text-[var(--dna-text)] hover:text-[var(--dna-accent)]"
-              }`}
-            >
-              <CrescentStarIcon className="h-5 w-5" />
-            </button>
-
-            <SecondaryAction
-              onClick={toggleLocale}
-              aria-label={locale === "en" ? "Switch to Indonesian" : "Switch to English"}
-              title={locale === "en" ? "Ganti ke Bahasa Indonesia" : "Switch to English"}
-              className="hidden sm:inline-flex font-mono text-xs"
-            >
-              {locale.toUpperCase()}
-            </SecondaryAction>
-
-            <div className="hidden xl:inline-flex">
-              <SanctuaryIdentityControl />
-            </div>
-
-            <SecondaryAction
-              aria-pressed={quietMode}
-              onClick={() => setQuietMode((prev) => !prev)}
-              aria-label="Toggle Quiet Contemplative Motion Mode"
-              className="hidden xl:inline-flex font-mono text-xs"
-            >
-              {quietMode ? "QUIET" : "LIGHT"}
-            </SecondaryAction>
-
-            <PrimaryAction
-              onClick={() => navigateToSection("the-dock")}
-              className="hidden 2xl:inline-flex px-3.5 py-1.5 text-xs"
-            >
-              <span>{locale === "id" ? "GABUNG KRU" : "JOIN THE CREW"}</span>
-              <span aria-hidden="true">&rarr;</span>
-            </PrimaryAction>
-
-            <CrownEmblemIcon
-              className="hidden 2xl:block h-7 w-7 shrink-0 text-[var(--dna-accent)]"
-              aria-hidden="true"
-            />
-
-            <SecondaryAction
-              aria-expanded={mobileMenuOpen}
-              aria-controls="mobile-sanctuary-nav"
-              aria-label="Toggle Empire Navigation Menu"
-              onClick={() => setMobileMenuOpen((prev) => !prev)}
-              className="flex min-w-[44px] px-3 lg:hidden"
-            >
-              <span className="font-mono text-sm">{mobileMenuOpen ? "✕" : "☰"}</span>
-            </SecondaryAction>
-          </>
-        }
-        mobileDrawer={
-          <div
-            id="mobile-sanctuary-nav"
-            role="region"
-            aria-label="Mobile Navigation"
-            className="mx-4 mb-3 border-2 border-[var(--dna-accent)] bg-[var(--dna-canvas)] p-4 shadow-[4px_4px_0_var(--dna-accent-secondary)] lg:hidden"
-          >
-            <div className="grid grid-cols-2 gap-2">
-              {NAVIGATION_TABS.map((navTab) => {
-                const isTabActive = activeNavTab === navTab.id;
-                return (
-                  <SecondaryAction
-                    key={navTab.id}
-                    data-active={isTabActive ? "true" : "false"}
-                    onClick={() => navigateToSection(navTab.id)}
-                    className="w-full justify-center"
-                  >
-                    {navTab.label}
-                  </SecondaryAction>
-                );
-              })}
-              <Link
-                href="/moonwitness"
-                onClick={() => setMobileMenuOpen(false)}
-                className="mw-secondary-action btn-luxe-secondary inline-flex min-h-[44px] w-full items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase"
-              >
-                MOONWITNESS
-              </Link>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-[var(--dna-accent)]/25 pt-3">
-              <SecondaryAction
-                aria-pressed={quietMode}
-                onClick={() => setQuietMode((prev) => !prev)}
-                className="flex-1"
-              >
-                {quietMode ? "RESTORE MOTION" : "QUIET MODE"}
-              </SecondaryAction>
-              <SecondaryAction onClick={toggleLocale}>{locale.toUpperCase()}</SecondaryAction>
-              <SanctuaryIdentityControl compact />
-            </div>
-          </div>
-        }
+        onNavigateToSection={navigateToSection}
+        onOpenSearch={() => setSearchModalOpen(true)}
+        onToggleRadiance={() => setSanctuaryRadianceActive((prev) => !prev)}
+        onToggleLocale={handleLocaleSwitch}
+        onToggleQuietMode={() => setQuietMode((prev) => !prev)}
+        onToggleMobileMenu={() => setMobileMenuOpen((prev) => !prev)}
+        onCloseMobileMenu={() => setMobileMenuOpen(false)}
       />
 
       <main id="main" className="bg-girih-filigree">
@@ -366,34 +262,54 @@ export function EmpireOfLightExperience() {
           kicker={
             locale === "id"
               ? "HUB KEHIDUPAN · PEMBELAJARAN · AKSI"
-              : "ACCOUNTABLE LIFE · LEARNING · ACTION HUB"
+              : locale === "ar"
+                ? "مركز الحياة · التعلّم · العمل المسؤول"
+                : "ACCOUNTABLE LIFE · LEARNING · ACTION HUB"
           }
           title={
             <h1 id="gate-heading" className="home-gate-heading">
               <span className="sr-only">
                 {locale === "id"
                   ? "A-L-L-A-H.COM — Empire of the Light. Jelajahi sembilan dunia pembelajaran."
-                  : "A-L-L-A-H.COM — Empire of the Light. Explore the nine learning worlds."}
+                  : locale === "ar"
+                    ? "A-L-L-A-H.COM — مملكة النور. استكشف العوالم المعرفية التسعة."
+                    : "A-L-L-A-H.COM — Empire of the Light. Explore the nine learning worlds."}
               </span>
               <span className="home-gate-heading-visible" aria-hidden="true">
                 A-L-L-A-H.COM
               </span>
             </h1>
           }
-          subtitle={locale === "id" ? "KERAJAAN CAHAYA" : "EMPIRE OF THE LIGHT"}
+          subtitle={
+            locale === "id"
+              ? "KERAJAAN CAHAYA"
+              : locale === "ar"
+                ? "مَمْلَكَةُ النُّور"
+                : "EMPIRE OF THE LIGHT"
+          }
           callouts={
             locale === "id"
               ? ["CAHAYA MILIK SEMUA", "TEMUKAN TERANG DALAM GELAP", "PENGINGAT JALAN PULANG"]
-              : ["SUNSHINE BELONG", "FIND LIGHT IN DARKNESS", "HOW U REMIND ME"]
+              : locale === "ar"
+                ? ["النور للجميع", "اعثر على النور في العتمة", "تذكير بطريق العودة"]
+                : ["SUNSHINE BELONG", "FIND LIGHT IN DARKNESS", "HOW U REMIND ME"]
           }
           description={
             locale === "id"
               ? "Satu semesta berilustrasi dengan kemungkinan tanpa batas. Setiap orang punya ruang untuk belajar, mencipta, dan bertumbuh di sini."
-              : "One universe. Infinite possibilities. Everyone has a welcoming world to explore, learn, and build here."
+              : locale === "ar"
+                ? "كونٌ واحد بإمكاناتٍ لا محدودة؛ لكل إنسان هنا مساحةٌ للتعلّم والإبداع والشهادة الصادقة."
+                : "One universe. Infinite possibilities. Everyone has a welcoming world to explore, learn, and build here."
           }
           actions={
             <PrimaryAction onClick={() => navigateToSection("the-worlds")}>
-              <span>{locale === "id" ? "JELAJAHI SEMBILAN DUNIA" : "EXPLORE THE NINE WORLDS"}</span>
+              <span>
+                {locale === "id"
+                  ? "JELAJAHI SEMBILAN DUNIA"
+                  : locale === "ar"
+                    ? "استكشف العوالم التسعة"
+                    : "EXPLORE THE NINE WORLDS"}
+              </span>
               <span aria-hidden="true">&rarr;</span>
             </PrimaryAction>
           }
@@ -402,30 +318,59 @@ export function EmpireOfLightExperience() {
               <div className="flex flex-col items-center gap-1.5 text-[var(--dna-accent)]">
                 <CrownEmblemIcon className="h-7 w-7" />
                 <span className="text-[11px] tracking-[0.14em]">
-                  {locale === "id" ? "MISI BERSAMA" : "SHARED COMPASS"}
+                  {locale === "id"
+                    ? "MISI BERSAMA"
+                    : locale === "ar"
+                      ? "البوصلة المشتركة"
+                      : "SHARED COMPASS"}
                 </span>
               </div>
               <ul className="mt-2.5 flex flex-col items-center gap-0.5 text-lg font-black leading-tight tracking-[0.06em] text-[var(--dna-text)]">
-                <li>DREAM</li>
-                <li>EXPLORE</li>
-                <li>LEARN</li>
-                <li>CREATE</li>
-                <li>CONNECT</li>
+                {locale === "ar" ? (
+                  <>
+                    <li>احلم</li>
+                    <li>استكشف</li>
+                    <li>تعلّم</li>
+                    <li>أبدع</li>
+                    <li>تواصل</li>
+                  </>
+                ) : (
+                  <>
+                    <li>DREAM</li>
+                    <li>EXPLORE</li>
+                    <li>LEARN</li>
+                    <li>CREATE</li>
+                    <li>CONNECT</li>
+                  </>
+                )}
               </ul>
-              <button
+              <Button
                 type="button"
+                variant="plain"
                 onClick={() => navigateToSection("the-worlds")}
-                className="mt-4 inline-flex min-h-[44px] items-center gap-2 border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] px-3.5 py-1.5 text-xs font-black text-[var(--dna-canvas)] shadow-[3px_3px_0_var(--dna-accent-secondary)] hover:bg-[var(--dna-text)] transition-colors cursor-pointer"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-none border-2 border-[var(--dna-canvas)] bg-[var(--dna-accent)] px-3.5 py-1.5 text-xs font-black text-[var(--dna-canvas)] shadow-[3px_3px_0_var(--dna-accent-secondary)] hover:bg-[var(--dna-text)] transition-colors cursor-pointer"
               >
-                <span>{locale === "id" ? "MENUJU DUNIA" : "TO THE WORLDS"}</span>
+                <span>
+                  {locale === "id"
+                    ? "MENUJU DUNIA"
+                    : locale === "ar"
+                      ? "إلى العوالم"
+                      : "TO THE WORLDS"}
+                </span>
                 <span aria-hidden="true">&rarr;</span>
-              </button>
+              </Button>
             </div>
           }
           shelf={
             <WorldExplorer
               heading={
-                <h2>{locale === "id" ? "JELAJAHI SEMBILAN DUNIA" : "EXPLORE THE NINE WORLDS"}</h2>
+                <h2>
+                  {locale === "id"
+                    ? "JELAJAHI SEMBILAN DUNIA"
+                    : locale === "ar"
+                      ? "استكشف العوالم التسعة"
+                      : "EXPLORE THE NINE WORLDS"}
+                </h2>
               }
               trailing={
                 <span className="text-[var(--dna-accent-secondary)] text-xl" aria-hidden="true">
@@ -435,13 +380,21 @@ export function EmpireOfLightExperience() {
             >
               {WORLD_DOMAINS.map((worldItem, index) => {
                 const art = WORLD_ART[worldItem.id];
+                const localizedTagline =
+                  locale === "id"
+                    ? WORLD_TAGLINES_ID[worldItem.id]
+                    : locale === "ar"
+                      ? WORLD_TAGLINES_AR[worldItem.id]
+                      : (WORLD_TAGLINES_EN[worldItem.id] ?? worldItem.tagline);
+                const ctaLabel =
+                  locale === "id" ? "JELAJAHI" : locale === "ar" ? "استكشف" : "EXPLORE";
                 return (
                   <WorldTile
                     key={worldItem.id}
                     indexLabel={`0${index + 1}`}
                     title={worldItem.name}
-                    tagline={locale === "id" ? WORLD_TAGLINES_ID[worldItem.id] : worldItem.tagline}
-                    ctaLabel={locale === "id" ? "JELAJAHI" : "EXPLORE"}
+                    tagline={localizedTagline}
+                    ctaLabel={ctaLabel}
                     active={activeWorldId === worldItem.id}
                     onClick={() => selectAndInspectWorld(worldItem.id)}
                     media={
@@ -504,6 +457,15 @@ export function EmpireOfLightExperience() {
           onReturnToGate={() => navigateToSection("the-gate")}
         />
       </main>
+
+      <CelestialHudCapsule
+        activeNavTab={activeNavTab}
+        activeWorldId={activeWorldId}
+        pageScrollFraction={scrollProgress}
+        onNavigateSection={navigateToSection}
+        onJumpToRemembrance={jumpToRemembranceSanctuary}
+        onOpenSearch={() => setSearchModalOpen(true)}
+      />
 
       <UniversalSearchModal
         isOpen={searchModalOpen}

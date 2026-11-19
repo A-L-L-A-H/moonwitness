@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
   FOUR_CORPUS_POLICY,
   P18_KEY_WITNESS_SPEC,
@@ -58,9 +59,10 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
           {P18_KEY_WITNESS_SPEC.corpusSpine9Layers.map((layer, idx) => {
             const active = idx === selectedLayerIdx;
             return (
-              <button
+              <Button
                 key={layer}
                 type="button"
+                variant="plain"
                 onClick={() => setSelectedLayerIdx(idx)}
                 className={`min-h-[44px] border p-2 text-center font-mono text-[10px] cursor-pointer ${transitionClass} ${
                   active
@@ -69,7 +71,7 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
                 }`}
               >
                 {layer}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -85,9 +87,10 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
             {P18_KEY_WITNESS_SPEC.controlledKeys5Families.map((fam, idx) => {
               const selected = idx === selectedFamilyIdx;
               return (
-                <button
+                <Button
                   key={fam.family}
                   type="button"
+                  variant="plain"
                   onClick={() => setSelectedFamilyIdx(idx)}
                   className={`min-h-[44px] border px-2.5 py-1 font-mono text-[10px] cursor-pointer ${transitionClass} ${
                     selected
@@ -96,7 +99,7 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
                   }`}
                 >
                   {fam.family}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -136,9 +139,10 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
           </div>
           <div className="flex items-center gap-1.5">
             {[-2, -1, 0, 1, 2].map((val) => (
-              <button
+              <Button
                 key={val}
                 type="button"
+                variant="plain"
                 onClick={() => setDirection(val)}
                 className={`min-h-[44px] flex-1 border font-mono text-xs cursor-pointer ${transitionClass} ${
                   direction === val
@@ -147,7 +151,7 @@ export function P18KeyWitnessInspector({ quietMode }: { readonly quietMode: bool
                 }`}
               >
                 {val > 0 ? `+${val}` : val}
-              </button>
+              </Button>
             ))}
           </div>
           <div className="flex flex-wrap gap-1.5">

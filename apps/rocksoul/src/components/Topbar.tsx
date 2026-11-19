@@ -1,6 +1,6 @@
 import React from "react";
-import { Activity, Command, FolderGit2, LogIn, RefreshCw } from "lucide-react";
-import { DnaBrandLogo, listPresets, useSkin, type SkinName } from "@moonwitness/ui";
+import { Activity, Command, FolderGit2, LogIn, RefreshCw } from "@moonwitness/ui/icons";
+import { DnaBrandLogo, NativeSelect, listPresets, useSkin, type SkinName } from "@moonwitness/ui";
 import { ChevronDown, LogOut, Settings, SkinPalette, Sun } from "@moonwitness/ui/icons";
 import type { Repository } from "../lib/contracts";
 
@@ -69,7 +69,8 @@ export default function Topbar({
         </div>
         <label className="context-chip repo-picker">
           <GitBranchIcon />
-          <select
+          <NativeSelect
+            className="h-auto w-auto border-0 bg-transparent p-0"
             aria-label="Selected repository"
             value={selectedRepository}
             onChange={(e) => onRepositoryChange(e.target.value)}
@@ -80,7 +81,7 @@ export default function Topbar({
                 {repo.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
           <ChevronDown size={13} />
         </label>
         <span className="local-pill">
@@ -118,9 +119,9 @@ export default function Topbar({
         >
           <SkinPalette size={13} /> {skin.toUpperCase()}
         </button>
-        <select
+        <NativeSelect
           aria-label="Select skin preset"
-          className="shortcut"
+          className="shortcut h-auto w-auto"
           value={skin}
           onChange={(e) => setSkin(e.target.value as SkinName)}
         >
@@ -129,7 +130,7 @@ export default function Topbar({
               {preset.toUpperCase()}
             </option>
           ))}
-        </select>
+        </NativeSelect>
         <button
           type="button"
           className="icon-button"

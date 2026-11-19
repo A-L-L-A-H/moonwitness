@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { HERO_LAYERS } from "@moonwitness/assets";
 import {
   ArrowRight,
@@ -12,17 +13,23 @@ import {
   Splatter,
   Star4,
 } from "@moonwitness/ui/icons";
-import { DistressedSticker, Grain, SkinArtworkFrame, useSkin } from "@moonwitness/ui";
+import { DistressedSticker, Grain, SkinArtworkFrame, ZineButton, useSkin } from "@moonwitness/ui";
 import { AtmosphereField } from "@/components/atmosphere";
 import { useParallax } from "@/lib/motion/use-parallax";
 import { useHeroIntro } from "@/lib/motion/use-hero-intro";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 import { artSrc } from "@/lib/art";
 
 export function Hero() {
   const root = useHeroIntro();
+  const pathname = usePathname() ?? "";
+  const pathLocale = getLocaleFromPath(pathname);
+  const { locale } = useSanctuaryLocale();
   const { skin } = useSkin();
   const characterParallax = useParallax(0.12);
   const moonParallax = useParallax(0.08);
+  const dockHref = pathLocale ? getLocalizedUrl("/dock", pathLocale) : "/dock";
   return (
     <section ref={root} id="home" data-hero-root className="hero-scene">
       <link
@@ -91,8 +98,20 @@ export function Hero() {
               <Crown aria-hidden="true" className="hero-crown" />
               <h1 className="font-brush">MOONWITNESS</h1>
             </div>
-            <p className="hero-tagline font-hand">PEOPLE. PLACES. STORIES.</p>
-            <p className="hero-subline font-hand">ANOTHER SIDE OF REALITY.</p>
+            <p className="hero-tagline font-hand">
+              {locale === "id"
+                ? "MANUSIA. TEMPAT. KISAH."
+                : locale === "ar"
+                  ? "أناس. أماكن. حكايات."
+                  : "PEOPLE. PLACES. STORIES."}
+            </p>
+            <p className="hero-subline font-hand">
+              {locale === "id"
+                ? "SISI LAIN DARI REALITAS."
+                : locale === "ar"
+                  ? "الجانب الآخر من الواقع."
+                  : "ANOTHER SIDE OF REALITY."}
+            </p>
           </div>
         </div>
         <div className="hero-stage" aria-hidden="true">
@@ -125,17 +144,42 @@ export function Hero() {
         </div>
         <div className="hero-copy-placement">
           <div className="hero-copy-paper">
-            <p className="font-hand">
-              A global story network for curious humans.
-              <br />
-              Different people. Same moon.
-              <br />
-              <strong>Bigger perspectives.</strong>
-            </p>
+            {locale === "id" ? (
+              <p className="font-hand">
+                Jejaring kisah global bagi pencari makna.
+                <br />
+                Berbeda manusia. Satu bulan yang sama.
+                <br />
+                <strong>Perspektif lebih luas.</strong>
+              </p>
+            ) : locale === "ar" ? (
+              <p className="font-hand">
+                شبكة قصص عالمية لأهل التساؤل والشهود.
+                <br />
+                أناسٌ مختلفون تحت قمرٍ واحد.
+                <br />
+                <strong>آفاقٌ أوسع.</strong>
+              </p>
+            ) : (
+              <p className="font-hand">
+                A global story network for curious humans.
+                <br />
+                Different people. Same moon.
+                <br />
+                <strong>Bigger perspectives.</strong>
+              </p>
+            )}
           </div>
-          <Link data-hero-cta href="/dock" className="btn-zine hero-cta">
-            EXPLORE THE SIGNALS <ArrowRight aria-hidden="true" className="h-5 w-5" />
-          </Link>
+          <ZineButton asChild className="hero-cta">
+            <Link data-hero-cta href={dockHref}>
+              {locale === "id"
+                ? "JELAJAHI SINYAL"
+                : locale === "ar"
+                  ? "استكشف الإشارات"
+                  : "EXPLORE THE SIGNALS"}{" "}
+              <ArrowRight aria-hidden="true" className="h-5 w-5" />
+            </Link>
+          </ZineButton>
         </div>
         <div className="hero-note-placement" aria-hidden="true">
           <div data-hero-annotations className="hero-notes font-hand">
@@ -196,9 +240,13 @@ export function Hero() {
           width: 57%;
         }
         .hero-frequency {
+          display: table;
+          padding: 2px 8px;
+          background: var(--card);
+          border: 1px solid var(--border);
           font-size: 10px;
           letter-spacing: 0.1em;
-          color: var(--paper);
+          color: var(--card-foreground);
           margin-bottom: 12px;
         }
         .hero-title-paper {
@@ -236,10 +284,14 @@ export function Hero() {
           transform: rotate(-2deg);
         }
         .hero-subline {
+          display: table;
           margin: 6px 0 0 32px;
+          padding: 3px 10px;
+          background: var(--card);
+          border: 1px solid var(--border);
           font-size: 18px;
           font-weight: 700;
-          color: var(--paper);
+          color: var(--card-foreground);
         }
         .hero-stage {
           position: absolute;
@@ -276,12 +328,12 @@ export function Hero() {
           max-width: 400px;
         }
         .hero-copy-paper {
-          background: var(--hero-caption-paper);
-          color: var(--ink);
+          background: var(--card);
+          color: var(--card-foreground);
           padding: 12px 16px;
           transform: rotate(-1deg);
           box-shadow: var(--hero-print-shadow);
-          border: 1px solid var(--ink);
+          border: 1.5px solid var(--border);
         }
         .hero-copy-paper p {
           font-size: 21px;

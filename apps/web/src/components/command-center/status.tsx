@@ -36,12 +36,18 @@ function statBlocks(stats: CommandCenterStats | null) {
 }
 
 const STATUS_UI: Record<CommandCenterSyncStatus, { label: string; className: string }> = {
-  live: { label: "LIVE", className: "bg-[var(--green)] text-black" },
+  live: {
+    label: "LIVE",
+    className: "border-[var(--green)] bg-[var(--green)]/15 text-[var(--green)]",
+  },
   loading: {
     label: "SYNCING",
     className: "bg-[var(--secondary)] text-[var(--secondary-foreground)]",
   },
-  offline: { label: "OFFLINE", className: "bg-[var(--red)] text-white" },
+  offline: {
+    label: "OFFLINE",
+    className: "bg-[var(--destructive)] text-[var(--destructive-foreground)]",
+  },
 };
 
 export function UniverseStatus({

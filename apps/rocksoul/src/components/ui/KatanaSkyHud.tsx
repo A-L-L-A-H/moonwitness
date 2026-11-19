@@ -1,5 +1,6 @@
 import React from "react";
-import { Crosshair, Radio } from "lucide-react";
+import { AstrolabeOrbitPlate } from "@moonwitness/ui/artwork";
+import { Crosshair, Radio } from "@moonwitness/ui/icons";
 import type { EcosystemServiceStatus, MonitorSnapshot } from "../../lib/contracts";
 
 const PORT_FALLBACKS: EcosystemServiceStatus[] = [
@@ -39,35 +40,7 @@ export function KatanaSkyHud({ monitor, mode = "compact", onOpenUrl }: KatanaSky
     return (
       <section className="astrolabe-crown" aria-label="Orbital Ecosystem Sanctuary">
         <div className="astrolabe-ring-wrap">
-          <svg
-            className="astrolabe-svg"
-            viewBox="0 0 920 150"
-            preserveAspectRatio="xMidYMid meet"
-            aria-hidden="true"
-          >
-            <ellipse
-              cx="460"
-              cy="75"
-              rx="410"
-              ry="56"
-              fill="none"
-              stroke="rgba(229, 62, 56, 0.38)"
-              strokeWidth="1"
-              strokeDasharray="6 6"
-            />
-            <ellipse
-              cx="460"
-              cy="75"
-              rx="290"
-              ry="38"
-              fill="none"
-              stroke="rgba(243, 235, 217, 0.2)"
-              strokeWidth="0.9"
-            />
-            <circle cx="460" cy="75" r="24" fill="rgba(229, 62, 56, 0.12)" stroke="var(--world-crimson)" strokeWidth="1.4" />
-            <circle cx="460" cy="75" r="5" fill="var(--color-lime)" />
-            <line x1="50" y1="75" x2="870" y2="75" stroke="rgba(229, 62, 56, 0.2)" strokeDasharray="3 5" />
-          </svg>
+          <AstrolabeOrbitPlate className="astrolabe-svg" />
           <div className="astrolabe-nodes">
             {services.map((svc, idx) => {
               const port = extractPort(svc.url);

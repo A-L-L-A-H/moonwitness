@@ -1,13 +1,13 @@
 import js from "@eslint/js";
-import hooks from "eslint-plugin-react-hooks";
+import { reactInternal } from "@moonwitness/eslint-config/react-internal";
 import globals from "globals";
 
 export default [
   { ignores: ["dist/**", "src-tauri/**", "node_modules/**", "coverage/**"] },
-  js.configs.recommended,
-  hooks.configs.flat.recommended,
+  ...reactInternal,
   {
     files: ["**/*.{js,jsx}"],
+    ...js.configs.recommended,
     languageOptions: {
       ecmaVersion: "latest",
       sourceType: "module",

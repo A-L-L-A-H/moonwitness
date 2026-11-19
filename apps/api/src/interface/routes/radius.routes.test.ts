@@ -2,9 +2,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
 
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
+import { registerRadiusRoutes } from "@moonwitness/addons/radius";
+
 async function loadRoutes(allowWrite: boolean) {
-  vi.doMock("../../middleware/auth", () => ({
-    requireAuth: () => async () => {},
+  const auth: BaseAddonAuthBridge = {
+    ...defaultFailClosedAuthBridge,
+    authenticate: async () => {},
     requireRole: () =>
       allowWrite
         ? async () => {}
@@ -14,10 +18,8 @@ async function loadRoutes(allowWrite: boolean) {
           ) => {
             reply.code(403).send({ error: "Forbidden: insufficient permissions" });
           },
-  }));
-  vi.resetModules();
-  const module = await import("./radius.routes");
-  return module.radiusRoutes;
+  };
+  return async (instance: FastifyInstance) => registerRadiusRoutes(instance, { auth });
 }
 
 describe("RADIUS proxy authorization", () => {

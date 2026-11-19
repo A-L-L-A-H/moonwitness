@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@moonwitness/ui";
 import {
   DX_MANGA_FOUR_PANELS,
   EIGHT_STORY_ERAS,
@@ -80,9 +81,10 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
               {(["SILENCE", "NOISE"] as const).map((modeLabel) => {
                 const selected = noiseSilenceMode === modeLabel;
                 return (
-                  <button
+                  <Button
                     key={modeLabel}
                     type="button"
+                    variant="plain"
                     aria-pressed={selected}
                     onClick={() => setNoiseSilenceMode(modeLabel)}
                     className={`min-h-[44px] border px-4 py-2 font-mono text-xs tracking-[0.18em] uppercase ${transitionClass} cursor-pointer ${
@@ -92,7 +94,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                     }`}
                   >
                     {modeLabel}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -113,11 +115,12 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
               {GOD_PROMISE_THREE_TRACKS.map((track) => {
                 const isCurrent = track.trackCode === activeTrack.trackCode;
                 return (
-                  <button
+                  <Button
                     key={track.trackCode}
                     type="button"
+                    variant="plain"
                     onClick={() => setActiveTrackCode(track.trackCode)}
-                    className={`min-h-[44px] border p-4 text-left ${transitionClass} cursor-pointer ${
+                    className={`min-h-[44px] h-auto flex-col items-stretch justify-start gap-0 border p-4 text-left ${transitionClass} cursor-pointer ${
                       isCurrent
                         ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/15"
                         : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/50"
@@ -130,7 +133,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                     <div className="font-monument mt-1 text-sm tracking-[0.08em] text-[var(--dna-text)]">
                       {track.title}
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -234,11 +237,12 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
               {UNIVERSE_FOUR_LENSES.map((lens) => {
                 const isSelected = lens.id === activeLens.id;
                 return (
-                  <button
+                  <Button
                     key={lens.id}
                     type="button"
+                    variant="plain"
                     onClick={() => setActiveLensId(lens.id)}
-                    className={`min-h-[44px] border p-3.5 text-left transition-colors cursor-pointer ${
+                    className={`min-h-[44px] h-auto flex-col items-start justify-start gap-0 border p-3.5 text-left transition-colors cursor-pointer ${
                       isSelected
                         ? "border-[var(--dna-accent)] bg-[var(--dna-accent)]/15"
                         : "border-[var(--dna-accent)]/20 bg-[var(--dna-canvas)] hover:border-[var(--dna-accent)]/45"
@@ -250,7 +254,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                     <div className="font-monument mt-1 text-xs sm:text-sm text-[var(--dna-text)]">
                       {lens.name}
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -346,9 +350,10 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                   {FIFTEEN_STORY_EPISODES.map((ep) => {
                     const isSelected = ep.code === activeEpisode.code;
                     return (
-                      <button
+                      <Button
                         key={ep.code}
                         type="button"
+                        variant="plain"
                         onClick={() => setActiveEpisodeCode(ep.code)}
                         className={`min-h-[44px] border px-2.5 py-1.5 font-mono text-[10px] cursor-pointer ${transitionClass} ${
                           isSelected
@@ -357,7 +362,7 @@ export function DoorUniversePanel({ quietMode }: { readonly quietMode: boolean }
                         }`}
                       >
                         {ep.code} · {ep.title}
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>

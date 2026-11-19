@@ -38,10 +38,11 @@ export function ChamberWingTabs<T extends string>({
           <DnaButton
             key={wing.id}
             type="button"
+            tone="secondary"
             role="tab"
             aria-selected={isActive}
             onClick={() => onSelectWing(wing.id)}
-            className={`btn-luxe-secondary px-4 py-2.5 text-left cursor-pointer ${transitionClass} ${
+            className={`h-auto flex-col items-stretch justify-start gap-0 px-4 py-2.5 text-left ${transitionClass} ${
               isActive
                 ? "text-[var(--dna-text)]"
                 : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"

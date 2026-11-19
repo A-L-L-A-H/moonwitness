@@ -1,6 +1,8 @@
 "use client";
 
+import { buildCsrfLogoutInit, requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notifySessionChange } from "@/lib/session";
 
 const API_BASE = "/api/v1/control";
 
@@ -27,23 +29,11 @@ export interface AuthUser {
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    headers: init?.body ? { "content-type": "application/json" } : undefined,
-    ...init,
-  });
-  const body = await res.json().catch(() => null);
-  if (!res.ok) {
-    const message = (body as { error?: string } | null)?.error ?? `HTTP ${res.status}`;
-    const error = new Error(message) as Error & { status?: number };
-    error.status = res.status;
-    throw error;
-  }
+  const body = await requestApiJson<T>(url, init);
   if (body === null || typeof body !== "object") {
     throw new Error("The control plane returned an unreadable response.");
   }
-  return body as T;
+  return body;
 }
 
 export function useSetupStatus() {
@@ -87,6 +77,7 @@ export function useCreateSuperuser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["control", "setup"] });
       queryClient.invalidateQueries({ queryKey: ["control", "auth"] });
+      notifySessionChange();
     },
   });
 }
@@ -101,6 +92,7 @@ export function useLogin() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["control"] });
+      notifySessionChange();
     },
   });
 }
@@ -108,9 +100,11 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => requestJson<{ ok: boolean }>(`${API_BASE}/auth/logout`, { method: "POST" }),
+    mutationFn: () =>
+      requestJson<{ ok: boolean }>(`${API_BASE}/auth/logout`, buildCsrfLogoutInit()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["control"] });
+      notifySessionChange();
     },
   });
 }

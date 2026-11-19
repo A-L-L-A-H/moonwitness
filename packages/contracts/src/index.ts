@@ -2,10 +2,12 @@ export * from "./timeline/endpoints";
 export * from "./canon";
 export * from "./knowledge";
 export * from "./witness";
+export * from "./continuity";
 export * from "./chronicle";
 export * from "./research";
 export * from "./sidra";
 export * from "./publication";
+export * from "./sdk";
 
 /**
  * Deferred Write Models (MW-0411):

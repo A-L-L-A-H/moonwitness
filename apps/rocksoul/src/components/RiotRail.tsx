@@ -1,16 +1,17 @@
 import React from "react";
-import { Activity, GitBranch, ListChecks, RadioTower, Swords } from "lucide-react";
+import { Activity, GitBranch, ListChecks, RadioTower, Swords } from "@moonwitness/ui/icons";
 import { Home } from "@moonwitness/ui/icons";
-import { AnarchyStarSigil } from "./ui/RocksoulVectors";
+import { AnarchyStarSigil } from "@moonwitness/ui/artwork";
+import type { PageRoute } from "../router/useWorldRouter";
 
 export interface RiotRailProps {
   page: string;
-  onNavigate: (page: any) => void;
+  onNavigate: (page: PageRoute) => void;
   onSwitchboard: () => void;
 }
 
 export default function RiotRail({ page, onNavigate, onSwitchboard }: RiotRailProps) {
-  const items = [
+  const items: Array<{ id: PageRoute; label: string; icon: React.ReactNode }> = [
     { id: "deck", label: "DECK", icon: <Home size={20} strokeWidth={2.4} /> },
     { id: "monitor", label: "OVERSEER", icon: <Activity size={20} strokeWidth={2.4} /> },
     { id: "pit", label: "PIT", icon: <ListChecks size={20} strokeWidth={2.4} /> },

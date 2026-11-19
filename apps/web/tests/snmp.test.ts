@@ -17,7 +17,8 @@ describe("SNMP operations route", () => {
       created_at: 1,
     };
 
-    expect(snmp && navHref(snmp)).toBe("/snmp");
+    expect(snmp && navHref(snmp)).toBe("/control?tab=snmp");
+    expect(activeByPath("/control", "snmp")).toBe("snmp");
     expect(activeByPath("/snmp")).toBe("snmp");
     expect(sanitizeSnmpDevices([device])).toEqual([
       {

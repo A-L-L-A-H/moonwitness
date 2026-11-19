@@ -6,7 +6,8 @@ import { isWriteRole, normalizeRole } from "../src/lib/roles";
 describe("RADIUS operations navigation", () => {
   it("registers the read-only console route", () => {
     const radius = operationsNavItems.find((item) => item.id === "radius");
-    expect(radius && navHref(radius)).toBe("/radius");
+    expect(radius && navHref(radius)).toBe("/control?tab=radius");
+    expect(activeByPath("/control", "radius")).toBe("radius");
     expect(activeByPath("/radius")).toBe("radius");
   });
 

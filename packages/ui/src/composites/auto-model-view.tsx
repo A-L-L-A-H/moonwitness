@@ -1,117 +1,39 @@
 "use client";
 
-import { useMemo, useState, type ComponentType, type FormEvent } from "react";
-import { CutoutArtwork, type CutoutArtworkId } from "../artwork/cutouts";
+import { useMemo, useState, type FormEvent } from "react";
+import { CutoutArtwork } from "../artwork/cutouts";
 import { cn } from "../cn";
-import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
-import {
-  ArsyRelay,
-  MemoryTapeNode,
-  MtimeHorizon,
-  MyceliumSpore,
-  RadiusKey,
-  ScriptureFolio,
-  SimpulNode,
-  SkinPalette,
-  SnmpProbe,
-  StorageBucket,
-  SyslogStream,
-  VpnTunnel,
-} from "../icons/modules";
-import type { DnaIconProps } from "../icons/types";
+import { ArsyRelay } from "../icons/modules";
 import { SkinOrnament } from "../primitives/tactile-hardware";
-import { useSkin, type SkinName } from "../skin";
+import { useSkin } from "../skin";
+import { AutoModelForm } from "./auto-model/form";
+import { AutoModelHistoryPanel } from "./auto-model/history";
+import { AutoModelKanban } from "./auto-model/kanban";
+import { AutoModelTable } from "./auto-model/table";
+import {
+  DOMAIN_ICON_MAP,
+  formatCellValue,
+  resolveFieldValue,
+  type AutoModelAcl,
+  type AutoModelFieldSpec,
+  type AutoModelHistoryEntry,
+  type AutoModelRow,
+  type AutoModelViewProps,
+} from "./auto-model/types";
 
-export type AutoModelFieldType =
-  "text" | "textarea" | "number" | "integer" | "boolean" | "select" | "date" | "tags";
-
-export interface AutoModelFieldSpec {
-  readonly name: string;
-  readonly label: string;
-  readonly type: AutoModelFieldType;
-  readonly required?: boolean;
-  readonly readonly?: boolean;
-  readonly selection?: readonly string[];
-  readonly isCustom?: boolean;
-  readonly placeholder?: string;
-}
-
-export interface AutoModelAcl {
-  readonly canRead: boolean;
-  readonly canCreate: boolean;
-  readonly canUpdate: boolean;
-  readonly canDelete: boolean;
-}
-
-export interface AutoModelViewDescriptor {
-  readonly model: string;
-  readonly title?: string;
-  readonly description?: string;
-  readonly domainIcon?: string;
-  readonly cutoutId?: CutoutArtworkId;
-  readonly fields: readonly AutoModelFieldSpec[];
-  readonly acl?: Partial<AutoModelAcl>;
-}
-
-export interface AutoModelRow extends Record<string, unknown> {
-  readonly id: string;
-  readonly _attrs?: Record<string, unknown>;
-  readonly status?: string;
-  readonly version?: number;
-}
-
-export interface AutoModelCustomAction {
-  readonly id: string;
-  readonly label: string;
-  readonly onTrigger: (id: string) => Promise<void> | void;
-}
-
-export interface AutoModelViewProps {
-  descriptor: AutoModelViewDescriptor;
-  rows: readonly AutoModelRow[];
-  loading?: boolean;
-  error?: string | null;
-  onCreate?: (values: Record<string, unknown>) => Promise<void> | void;
-  onUpdate?: (id: string, values: Record<string, unknown>) => Promise<void> | void;
-  onArchive?: (id: string) => Promise<void> | void;
-  onRestore?: (id: string) => Promise<void> | void;
-  onDelete?: (id: string) => Promise<void> | void;
-  customActions?: readonly AutoModelCustomAction[];
-  className?: string;
-  skin?: SkinName;
-}
-
-const DOMAIN_ICON_MAP: Record<string, ComponentType<DnaIconProps>> = {
-  vpn: VpnTunnel,
-  syslog: SyslogStream,
-  snmp: SnmpProbe,
-  storage: StorageBucket,
-  radius: RadiusKey,
-  mtime: MtimeHorizon,
-  scripture: ScriptureFolio,
-  memory: MemoryTapeNode,
-  arsy: ArsyRelay,
-  simpul: SimpulNode,
-  mycelium: MyceliumSpore,
-  skin: SkinPalette,
-};
-
-function resolveFieldValue(row: AutoModelRow, field: AutoModelFieldSpec): unknown {
-  if (field.isCustom && row._attrs && field.name in row._attrs) {
-    return row._attrs[field.name];
-  }
-  return row[field.name];
-}
-
-function formatCellValue(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "—";
-  if (Array.isArray(value)) return value.join(", ");
-  if (typeof value === "boolean") return value ? "TRUE" : "FALSE";
-  return String(value);
-}
+export type {
+  AutoModelAcl,
+  AutoModelCustomAction,
+  AutoModelFieldSpec,
+  AutoModelFieldType,
+  AutoModelHistoryEntry,
+  AutoModelRow,
+  AutoModelViewDescriptor,
+  AutoModelViewProps,
+} from "./auto-model/types";
 
 export function AutoModelView({
   descriptor,
@@ -124,6 +46,7 @@ export function AutoModelView({
   onRestore,
   onDelete,
   customActions = [],
+  onInspectHistory,
   className,
   skin: explicitSkin,
 }: AutoModelViewProps) {
@@ -144,6 +67,45 @@ export function AutoModelView({
   const [submitting, setSubmitting] = useState(false);
 
   const DomainIcon = DOMAIN_ICON_MAP[descriptor.domainIcon ?? "arsy"] ?? ArsyRelay;
+  const visibleFields = useMemo(() => {
+    const wanted = descriptor.columns;
+    if (!wanted || wanted.length === 0) return descriptor.fields;
+    const ordered = wanted
+      .map((name) => descriptor.fields.find((f) => f.name === name))
+      .filter((f): f is AutoModelFieldSpec => f !== undefined);
+    return ordered.length > 0 ? ordered : descriptor.fields;
+  }, [descriptor.columns, descriptor.fields]);
+
+  const groupField = useMemo(
+    () =>
+      descriptor.fields.find((f) => f.name === "status") ??
+      descriptor.fields.find((f) => f.type === "select"),
+    [descriptor.fields],
+  );
+  const [viewMode, setViewMode] = useState<"list" | "kanban">(
+    groupField ? (descriptor.defaultViewMode ?? "list") : "list",
+  );
+  const [historyRowId, setHistoryRowId] = useState<string | null>(null);
+  const [historyEntries, setHistoryEntries] = useState<readonly AutoModelHistoryEntry[]>([]);
+  const [historyBusy, setHistoryBusy] = useState(false);
+
+  async function inspectHistory(id: string) {
+    if (!onInspectHistory) return;
+    if (historyRowId === id) {
+      setHistoryRowId(null);
+      return;
+    }
+    setHistoryRowId(id);
+    setHistoryBusy(true);
+    try {
+      setHistoryEntries(await onInspectHistory(id));
+    } catch {
+      setHistoryEntries([]);
+    } finally {
+      setHistoryBusy(false);
+    }
+  }
+
   const editableFields = useMemo(
     () => descriptor.fields.filter((f) => !f.readonly),
     [descriptor.fields],
@@ -295,6 +257,18 @@ export function AutoModelView({
             aria-label={`Filter ${descriptor.model}`}
             className="w-48 sm:w-60"
           />
+          {groupField ? (
+            <Button
+              skin={activeSkin}
+              type="button"
+              size="sm"
+              variant="outline"
+              aria-pressed={viewMode === "kanban"}
+              onClick={() => setViewMode((mode) => (mode === "list" ? "kanban" : "list"))}
+            >
+              {viewMode === "list" ? "KANBAN" : "LIST"}
+            </Button>
+          ) : null}
           {acl.canCreate && onCreate ? (
             <Button skin={activeSkin} type="button" size="sm" onClick={openCreateForm}>
               + Create
@@ -314,111 +288,19 @@ export function AutoModelView({
         ) : null}
 
         {formOpen ? (
-          <form
+          <AutoModelForm
+            model={descriptor.model}
+            activeSkin={activeSkin}
+            editingRowId={editingRowId}
+            editableFields={editableFields}
+            draftValues={draftValues}
+            formError={formError}
+            submitting={submitting}
+            missingRequired={missingRequired}
+            onDraftChange={(name, value) => setDraftValues((prev) => ({ ...prev, [name]: value }))}
+            onCancel={() => setFormOpen(false)}
             onSubmit={(e) => void handleSubmit(e)}
-            className="space-y-3 border border-[var(--border)] bg-[var(--background)] p-4"
-            aria-label={editingRowId ? `Edit ${descriptor.model}` : `Create ${descriptor.model}`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-bold uppercase tracking-wider">
-                {editingRowId ? `Edit ${descriptor.model}` : `New ${descriptor.model}`}
-              </span>
-              <Button
-                skin={activeSkin}
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setFormOpen(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-
-            {formError ? (
-              <div role="alert" className="text-xs text-[var(--destructive)]">
-                {formError}
-              </div>
-            ) : null}
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {editableFields.map((field) => {
-                const value = draftValues[field.name];
-                return (
-                  <label key={field.name} className="block space-y-1 text-xs">
-                    <span className="flex items-center gap-1.5 font-mono text-[11px] text-[var(--muted-foreground)]">
-                      <span>{field.label}</span>
-                      {field.required ? <span className="text-[var(--destructive)]">*</span> : null}
-                      {field.isCustom ? (
-                        <Badge skin={activeSkin} variant="outline">
-                          CUSTOM
-                        </Badge>
-                      ) : null}
-                    </span>
-
-                    {field.type === "select" && field.selection ? (
-                      <select
-                        value={String(value ?? "")}
-                        onChange={(e) =>
-                          setDraftValues((prev) => ({ ...prev, [field.name]: e.target.value }))
-                        }
-                        className="h-9 w-full border border-[var(--border)] bg-[var(--card)] px-2.5 text-xs text-[var(--foreground)]"
-                      >
-                        <option value="">Select {field.label}</option>
-                        {field.selection.map((opt) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    ) : field.type === "boolean" ? (
-                      <div className="flex items-center gap-2 py-1.5">
-                        <input
-                          type="checkbox"
-                          checked={Boolean(value)}
-                          onChange={(e) =>
-                            setDraftValues((prev) => ({ ...prev, [field.name]: e.target.checked }))
-                          }
-                        />
-                        <span>{value ? "Enabled" : "Disabled"}</span>
-                      </div>
-                    ) : field.type === "textarea" ? (
-                      <textarea
-                        rows={2}
-                        value={String(value ?? "")}
-                        placeholder={field.placeholder}
-                        onChange={(e) =>
-                          setDraftValues((prev) => ({ ...prev, [field.name]: e.target.value }))
-                        }
-                        className="w-full border border-[var(--border)] bg-[var(--card)] px-2.5 py-1.5 text-xs text-[var(--foreground)]"
-                      />
-                    ) : (
-                      <Input
-                        skin={activeSkin}
-                        type={
-                          field.type === "number" || field.type === "integer"
-                            ? "number"
-                            : field.type === "date"
-                              ? "date"
-                              : "text"
-                        }
-                        value={String(value ?? "")}
-                        placeholder={field.placeholder}
-                        onChange={(e) =>
-                          setDraftValues((prev) => ({ ...prev, [field.name]: e.target.value }))
-                        }
-                      />
-                    )}
-                  </label>
-                );
-              })}
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button skin={activeSkin} type="submit" disabled={submitting || missingRequired}>
-                {submitting ? "Saving…" : editingRowId ? "Update" : "Create"}
-              </Button>
-            </div>
-          </form>
+          />
         ) : null}
 
         {loading ? (
@@ -443,109 +325,43 @@ export function AutoModelView({
               </div>
             </div>
           </div>
+        ) : viewMode === "kanban" && groupField ? (
+          <AutoModelKanban
+            activeSkin={activeSkin}
+            filteredRows={filteredRows}
+            visibleFields={visibleFields}
+            groupField={groupField}
+            acl={acl}
+            canUpdate={Boolean(onUpdate)}
+            onEdit={openEditForm}
+          />
         ) : (
-          <div className="overflow-x-auto border border-[var(--border)]">
-            <table className="w-full border-collapse text-left text-xs">
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--muted)]/60 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
-                  {descriptor.fields.map((field) => (
-                    <th key={field.name} className="px-3 py-2">
-                      {field.label}
-                      {field.isCustom ? " *" : ""}
-                    </th>
-                  ))}
-                  {acl.canUpdate ||
-                  acl.canDelete ||
-                  onArchive ||
-                  onRestore ||
-                  customActions.length > 0 ? (
-                    <th className="px-3 py-2 text-right">Actions</th>
-                  ) : null}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredRows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className="border-b border-[var(--border)]/60 transition-colors hover:bg-[var(--muted)]/35"
-                  >
-                    {descriptor.fields.map((field) => (
-                      <td key={field.name} className="px-3 py-2 text-[var(--foreground)]">
-                        {formatCellValue(resolveFieldValue(row, field))}
-                      </td>
-                    ))}
-                    {acl.canUpdate ||
-                    acl.canDelete ||
-                    onArchive ||
-                    onRestore ||
-                    customActions.length > 0 ? (
-                      <td className="px-3 py-2 text-right">
-                        <div className="inline-flex items-center gap-1.5">
-                          {acl.canUpdate && onUpdate ? (
-                            <Button
-                              skin={activeSkin}
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => openEditForm(row)}
-                            >
-                              Edit
-                            </Button>
-                          ) : null}
-                          {onArchive && row.status !== "archived" ? (
-                            <Button
-                              skin={activeSkin}
-                              type="button"
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => void onArchive(row.id)}
-                            >
-                              Archive
-                            </Button>
-                          ) : null}
-                          {onRestore && row.status === "archived" ? (
-                            <Button
-                              skin={activeSkin}
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => void onRestore(row.id)}
-                            >
-                              Restore
-                            </Button>
-                          ) : null}
-                          {customActions.map((act) => (
-                            <Button
-                              key={act.id}
-                              skin={activeSkin}
-                              type="button"
-                              size="sm"
-                              variant="outline"
-                              onClick={() => void act.onTrigger(row.id)}
-                            >
-                              {act.label}
-                            </Button>
-                          ))}
-                          {acl.canDelete && onDelete ? (
-                            <Button
-                              skin={activeSkin}
-                              type="button"
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => void onDelete(row.id)}
-                            >
-                              Delete
-                            </Button>
-                          ) : null}
-                        </div>
-                      </td>
-                    ) : null}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <AutoModelTable
+            activeSkin={activeSkin}
+            filteredRows={filteredRows}
+            visibleFields={visibleFields}
+            acl={acl}
+            hasUpdateHandler={Boolean(onUpdate)}
+            hasDeleteHandler={Boolean(onDelete)}
+            hasHistoryHandler={Boolean(onInspectHistory)}
+            onArchive={onArchive}
+            onRestore={onRestore}
+            customActions={customActions}
+            onInspectHistory={(id) => void inspectHistory(id)}
+            onEdit={openEditForm}
+            onDelete={(id) => onDelete && void onDelete(id)}
+          />
         )}
+
+        {historyRowId ? (
+          <AutoModelHistoryPanel
+            activeSkin={activeSkin}
+            rowId={historyRowId}
+            loading={historyBusy}
+            entries={historyEntries}
+            onClose={() => setHistoryRowId(null)}
+          />
+        ) : null}
       </CardContent>
     </Card>
   );

@@ -1,11 +1,19 @@
 "use client";
 
+import {
+  MoonwitnessApiError,
+  TENANT_STORAGE_KEY,
+  moonwitnessSdk,
+  requestApiJson,
+  requestApiResponse,
+} from "@moonwitness/contracts/sdk";
 import { useCallback, useEffect, useState } from "react";
-import type {
-  AutoModelFieldSpec,
-  AutoModelFieldType,
-  AutoModelRow,
-  AutoModelViewDescriptor,
+import {
+  resolveNavIconPath,
+  type AutoModelFieldSpec,
+  type AutoModelFieldType,
+  type AutoModelRow,
+  type AutoModelViewDescriptor,
 } from "@moonwitness/ui";
 import { navHref, type NavItem } from "@/components/shell/nav-items";
 
@@ -90,31 +98,36 @@ export interface RuntimeViewDescriptorResponse {
   actionBindings: RuntimeActionBindings;
 }
 
-const DEFAULT_MENU_ICON_PATH = "M4 7 L12 3 L20 7 L12 11 Z M4 12 L12 16 L20 12 M4 17 L12 21 L20 17";
+export function getActiveTenantId(): string {
+  if (typeof window === "undefined") return "default";
+  try {
+    const val = window.localStorage.getItem(TENANT_STORAGE_KEY)?.trim();
+    return val || "default";
+  } catch {
+    return "default";
+  }
+}
 
-function getCsrfHeaders(): Record<string, string> {
-  if (typeof document === "undefined") return {};
-  const match = document.cookie.match(/(?:^|;\s*)mw_csrf=([^;]+)/);
-  if (!match?.[1]) return {};
-  return { "x-csrf-token": decodeURIComponent(match[1]) };
+export function setActiveTenantId(slug: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const next = slug.trim() || "default";
+    window.localStorage.setItem(TENANT_STORAGE_KEY, next);
+    window.dispatchEvent(new Event("mw:tenant-changed"));
+  } catch {
+    // ignore storage failures
+  }
 }
 
 async function fetchApiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const headers: Record<string, string> = {
-    ...getCsrfHeaders(),
-    ...(init?.body ? { "content-type": "application/json" } : {}),
-    ...(init?.headers as Record<string, string> | undefined),
-  };
-  const response = await fetch(url, {
-    credentials: "include",
-    ...init,
-    headers,
-  });
-  const body = (await response.json().catch(() => ({}))) as T & { error?: string };
-  if (!response.ok) {
-    throw new Error(body.error ?? `Request failed (${response.status})`);
+  try {
+    return await requestApiJson<T>(url, init);
+  } catch (err) {
+    if (err instanceof MoonwitnessApiError && err.message === `HTTP ${err.status}`) {
+      throw new MoonwitnessApiError(`Request failed (${err.status})`, err.status);
+    }
+    throw err;
   }
-  return body;
 }
 
 export function resolveBindingUrl(template: string, id?: string): string {
@@ -159,7 +172,7 @@ export function mapRuntimeViewToAutoDescriptor(
     Pick<AutoModelViewDescriptor, "title" | "description" | "domainIcon" | "cutoutId">
   > = {},
 ): AutoModelViewDescriptor {
-  const fields: AutoModelFieldSpec[] = view.fields
+  const fields: AutoModelFieldSpec[] = (view.fields ?? [])
     .filter((f) => !f.deprecated)
     .map((f) => ({
       name: f.field_name,
@@ -170,7 +183,7 @@ export function mapRuntimeViewToAutoDescriptor(
       selection: f.selection ?? undefined,
     }));
 
-  const primarySpec = view.views[0]?.spec ?? {};
+  const primarySpec = (view.views ?? [])[0]?.spec ?? {};
   return {
     model: view.model,
     title:
@@ -182,6 +195,9 @@ export function mapRuntimeViewToAutoDescriptor(
       overrides.domainIcon ??
       (typeof primarySpec.domainIcon === "string" ? primarySpec.domainIcon : undefined),
     cutoutId: overrides.cutoutId,
+    columns: Array.isArray(primarySpec.columns)
+      ? primarySpec.columns.filter((c): c is string => typeof c === "string")
+      : undefined,
     fields,
     acl: view.acl,
   };
@@ -193,22 +209,44 @@ export function mergeDynamicNavigation(
   plane: "creator" | "operations",
 ): NavItem[] {
   const existingHrefs = new Set(staticItems.map((item) => navHref(item)));
-  const additions = menus
+  const planeMenus = menus
     .filter((menu) => menu.plane === plane && !existingHrefs.has(menu.href))
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map<NavItem>((menu) => ({
-      id: menu.menu_key,
-      label: menu.label,
-      icon: menu.icon.startsWith("M") ? menu.icon : DEFAULT_MENU_ICON_PATH,
-      target: { kind: "route", href: menu.href },
-    }));
+    .sort((a, b) => a.sort_order - b.sort_order);
+
+  const roots = planeMenus.filter((m) => !m.parent_key);
+  const byParent = new Map<string, RuntimeNavMenuItem[]>();
+  for (const m of planeMenus) {
+    if (m.parent_key) {
+      const list = byParent.get(m.parent_key) ?? [];
+      list.push(m);
+      byParent.set(m.parent_key, list);
+    }
+  }
+
+  const ordered: RuntimeNavMenuItem[] = [];
+  for (const root of roots) {
+    ordered.push(root);
+    const children = byParent.get(root.menu_key) ?? [];
+    ordered.push(...children);
+    byParent.delete(root.menu_key);
+  }
+  for (const orphans of byParent.values()) {
+    ordered.push(...orphans);
+  }
+
+  const additions = ordered.map<NavItem>((menu) => ({
+    id: menu.menu_key,
+    label: menu.parent_key ? `↳ ${menu.label}` : menu.label,
+    icon: resolveNavIconPath(menu.icon),
+    target: { kind: "route", href: menu.href },
+  }));
 
   return [...staticItems, ...additions];
 }
 
 export async function fetchMetaNavigation(): Promise<RuntimeNavMenuItem[]> {
   try {
-    const res = await fetch("/api/v1/_meta/navigation", { credentials: "include" });
+    const res = await requestApiResponse("/api/v1/_meta/navigation", { credentials: "include" });
     if (!res.ok) return [];
     const data = (await res.json()) as { menus?: RuntimeNavMenuItem[] };
     return Array.isArray(data.menus) ? data.menus : [];
@@ -227,17 +265,59 @@ export function useMetaNavigation(
   useEffect(() => {
     if (!enabled) return;
     let active = true;
-    fetchMetaNavigation()
-      .then((menus) => {
-        if (active && menus.length > 0) setDynamicMenus(menus);
-      })
-      .catch(() => {});
+    const load = () => {
+      fetchMetaNavigation()
+        .then((menus) => {
+          if (active) setDynamicMenus(menus);
+        })
+        .catch(() => {});
+    };
+    load();
+    window.addEventListener("mw:navigation-changed", load);
     return () => {
       active = false;
+      setDynamicMenus([]);
+      window.removeEventListener("mw:navigation-changed", load);
     };
   }, [enabled]);
 
-  return mergeDynamicNavigation(staticItems, dynamicMenus, plane);
+  return mergeDynamicNavigation(staticItems, enabled ? dynamicMenus : [], plane);
+}
+
+const DEFAULT_MODEL_CATALOG = [
+  "timeline.event",
+  "witness.claim",
+  "canon.codex",
+  "probe.node",
+  "i18n.locale",
+  "audit.log",
+  "ops.event",
+] as const;
+
+export function useMetaModelsCatalog() {
+  const [models, setModels] = useState<string[]>([...DEFAULT_MODEL_CATALOG]);
+
+  useEffect(() => {
+    let active = true;
+    const load = () => {
+      moonwitnessSdk.meta
+        .getModels()
+        .then((res) => {
+          if (!active || !Array.isArray(res.models) || res.models.length === 0) return;
+          const merged = Array.from(new Set([...DEFAULT_MODEL_CATALOG, ...res.models]));
+          setModels(merged);
+        })
+        .catch(() => {});
+    };
+    load();
+    window.addEventListener("mw:navigation-changed", load);
+    return () => {
+      active = false;
+      window.removeEventListener("mw:navigation-changed", load);
+    };
+  }, []);
+
+  return models;
 }
 
 export function useMetaView(model: string) {
@@ -264,36 +344,78 @@ export function useMetaView(model: string) {
     void reload();
   }, [reload]);
 
+  useEffect(() => {
+    const onTenantChanged = () => {
+      void reload();
+    };
+    window.addEventListener("mw:tenant-changed", onTenantChanged);
+    return () => window.removeEventListener("mw:tenant-changed", onTenantChanged);
+  }, [reload]);
+
   return { view: data, loading, error, reload };
 }
 
-export function useModelRows(model: string, listUrl?: string) {
+export function useModelRows(model: string, listUrl?: string, restEnabled = true, ready = true) {
   const [rows, setRows] = useState<AutoModelRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const targetUrl = listUrl ?? `/api/v1/m/${encodeURIComponent(model)}`;
+  const targetUrl = !ready
+    ? undefined
+    : (listUrl ?? (restEnabled ? `/api/v1/m/${encodeURIComponent(model)}` : undefined));
 
   const reload = useCallback(async () => {
-    if (!listUrl) {
+    if (!ready) {
+      return;
+    }
+    if (!targetUrl) {
       setRows([]);
+      setError(null);
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const payload = await fetchApiJson<{ data?: AutoModelRow[] } | AutoModelRow[]>(targetUrl);
-      const list = Array.isArray(payload) ? payload : (payload.data ?? []);
+      const payload = await fetchApiJson<
+        | {
+            data?: AutoModelRow[];
+            users?: AutoModelRow[];
+            workflows?: AutoModelRow[];
+            alerts?: AutoModelRow[];
+            items?: AutoModelRow[];
+          }
+        | AutoModelRow[]
+      >(targetUrl);
+      const list = Array.isArray(payload)
+        ? payload
+        : model === "command.alert"
+          ? (payload.alerts ?? payload.data ?? payload.items ?? [])
+          : model === "command.workflow"
+            ? (payload.workflows ?? payload.data ?? payload.items ?? [])
+            : (payload.data ??
+              payload.users ??
+              payload.workflows ??
+              payload.alerts ??
+              payload.items ??
+              []);
       setRows(list);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load rows");
     } finally {
       setLoading(false);
     }
-  }, [listUrl, targetUrl]);
+  }, [model, ready, targetUrl]);
 
   useEffect(() => {
     void reload();
+  }, [reload]);
+
+  useEffect(() => {
+    const onTenantChanged = () => {
+      void reload();
+    };
+    window.addEventListener("mw:tenant-changed", onTenantChanged);
+    return () => window.removeEventListener("mw:tenant-changed", onTenantChanged);
   }, [reload]);
 
   return { rows, loading, error, reload };
@@ -363,4 +485,129 @@ export async function executeModelMutation(
     method,
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+}
+
+export async function fetchModelReadGroup(
+  model: string,
+  groupBy: string,
+): Promise<Array<Record<string, unknown>>> {
+  const res = await fetchApiJson<{ groups?: Array<Record<string, unknown>> }>(
+    `/api/v1/m/${encodeURIComponent(model)}/read-group?groupBy=${encodeURIComponent(groupBy)}`,
+  );
+  return res.groups ?? [];
+}
+
+export interface ChatterTrackingValue {
+  id: string;
+  field_name: string;
+  old_value: string | null;
+  new_value: string | null;
+}
+
+export interface ChatterMessageEntry {
+  id: string;
+  res_model: string;
+  res_id: string;
+  message_type: "comment" | "notification" | "tracking";
+  body: string;
+  author_id: string | null;
+  create_date?: string;
+  $tracking_values?: ChatterTrackingValue[];
+}
+
+export async function fetchRecordChatter(
+  model: string,
+  resId: string,
+): Promise<ChatterMessageEntry[]> {
+  const res = await fetchApiJson<{ data?: ChatterMessageEntry[] }>(
+    `/api/v1/m/mail.message?res_model=${encodeURIComponent(model)}&res_id=${encodeURIComponent(resId)}&with=tracking_values`,
+  );
+  return res.data ?? [];
+}
+
+export async function postRecordChatterComment(
+  model: string,
+  resId: string,
+  body: string,
+): Promise<ChatterMessageEntry> {
+  const res = await fetchApiJson<{ data: ChatterMessageEntry }>("/api/v1/m/mail.message", {
+    method: "POST",
+    body: JSON.stringify({
+      res_model: model,
+      res_id: resId,
+      message_type: "comment",
+      body,
+    }),
+  });
+  return res.data;
+}
+
+export interface CompanyCatalogItem {
+  id: string;
+  slug: string;
+  name: string;
+  default_locale: string;
+  currency: string;
+  is_active: boolean;
+}
+
+export function useCompaniesCatalog(enabled = true) {
+  const [companies, setCompanies] = useState<CompanyCatalogItem[]>([]);
+  const [activeTenant, setActiveTenantState] = useState<string>(() => getActiveTenantId());
+
+  useEffect(() => {
+    const sync = () => setActiveTenantState(getActiveTenantId());
+    window.addEventListener("mw:tenant-changed", sync);
+    return () => window.removeEventListener("mw:tenant-changed", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    fetchApiJson<{ data?: CompanyCatalogItem[] }>("/api/v1/m/res.company")
+      .then((res) => {
+        if (active && Array.isArray(res.data)) setCompanies(res.data);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+      setCompanies([]);
+    };
+  }, [enabled]);
+
+  return {
+    companies: enabled ? companies : [],
+    activeTenant,
+    setActiveTenant: (slug: string) => setActiveTenantId(slug),
+  };
+}
+
+export interface CelestialNowSummary {
+  hijri: { year: number; month: number; day: number; monthName: string };
+  lunar: { phaseName: string; illumination: number };
+  aeq4: { mode: string; formatted: string; hijriBridge: string };
+}
+
+export function useCelestialNow(enabled = true) {
+  const [data, setData] = useState<CelestialNowSummary | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    const load = () => {
+      fetchApiJson<CelestialNowSummary>("/api/v1/celestial/now")
+        .then((res) => {
+          if (active) setData(res);
+        })
+        .catch(() => {});
+    };
+    load();
+    window.addEventListener("mw:tenant-changed", load);
+    return () => {
+      active = false;
+      window.removeEventListener("mw:tenant-changed", load);
+    };
+  }, [enabled]);
+
+  return enabled ? data : null;
 }

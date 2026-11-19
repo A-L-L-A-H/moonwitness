@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
 import { artSrc } from "@/lib/art";
 
@@ -39,7 +39,7 @@ export function LandingStoryStrip() {
               className="object-cover transition-transform duration-300 group-hover:scale-105 motion-reduce:transition-none"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
-            <span className="absolute left-2 top-2 bg-[var(--yellow)] px-2 py-1 font-mono text-[9px] font-black tracking-widest text-black sm:left-3 sm:top-3">
+            <span className="absolute left-2 top-2 bg-[var(--secondary)] px-2 py-1 font-mono text-[9px] font-black tracking-widest text-[var(--secondary-foreground)] sm:left-3 sm:top-3">
               {panel.label}
             </span>
             <span className="absolute inset-x-2 bottom-2 flex items-end justify-between gap-2 font-brush text-sm text-white drop-shadow-[2px_2px_0_#111] sm:inset-x-3 sm:bottom-3 sm:text-xl">

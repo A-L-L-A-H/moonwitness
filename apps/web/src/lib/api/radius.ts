@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiJson, requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const API_BASE = "/api/v1/radius";
@@ -60,25 +61,12 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-async function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(url, {
-    credentials: "include",
-    cache: "no-store",
-    signal,
-  });
-  if (!response.ok) {
-    const body: unknown = await response.json().catch(() => null);
-    const message =
-      typeof body === "object" && body !== null && "error" in body && typeof body.error === "string"
-        ? body.error
-        : `HTTP ${response.status}`;
-    throw new Error(message);
-  }
-  return response.json() as Promise<T>;
+function fetchJson<T>(url: string, signal?: AbortSignal): Promise<T> {
+  return requestApiJson<T>(url, { signal });
 }
 
 async function mutateJson<T>(url: string, init: RequestInit): Promise<T> {
-  const response = await fetch(url, { credentials: "include", ...init });
+  const response = await requestApiResponse(url, { credentials: "include", ...init });
   const text = await response.text();
   if (!response.ok) {
     let message = `HTTP ${response.status}`;
@@ -180,10 +168,13 @@ export function useDeleteRadiusUser() {
   const invalidate = useRadiusUserInvalidation();
   return useMutation({
     mutationFn: async (username: string) => {
-      const response = await fetch(`${API_BASE}/users/${encodeURIComponent(username)}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+      const response = await requestApiResponse(
+        `${API_BASE}/users/${encodeURIComponent(username)}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        },
+      );
       if (!response.ok && response.status !== 204) {
         const text = await response.text();
         throw new Error(text.trim() || `HTTP ${response.status}`);

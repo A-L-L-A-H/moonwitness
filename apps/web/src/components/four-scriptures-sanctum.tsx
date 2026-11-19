@@ -159,19 +159,23 @@ export function FourScripturesSanctum({
               </p>
             </div>
             <div className="flex flex-col gap-2">
-              <Link
-                href="/scriptures"
-                className="btn-luxe-secondary inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-[var(--dna-text)]"
+              <DnaButton
+                asChild
+                tone="secondary"
+                className="min-h-0 inline-flex w-full items-center justify-center px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-accent)] uppercase hover:text-[var(--dna-text)]"
               >
-                {locale === "id"
-                  ? "BUKA STUDIO 4 KITAB & PENCARI AYAT ›"
-                  : "OPEN 4-SCRIPTURE PARALLEL STUDIO ›"}
-              </Link>
+                <Link href="/scriptures">
+                  {locale === "id"
+                    ? "BUKA STUDIO 4 KITAB & PENCARI AYAT ›"
+                    : "OPEN 4-SCRIPTURE PARALLEL STUDIO ›"}
+                </Link>
+              </DnaButton>
               {onInspectCorpusDoor && (
                 <DnaButton
                   type="button"
+                  tone="secondary"
                   onClick={onInspectCorpusDoor}
-                  className="btn-luxe-secondary w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-text)] uppercase hover:opacity-90 cursor-pointer"
+                  className="min-h-0 w-full px-4 py-2 font-mono text-[11px] tracking-[0.14em] text-[var(--dna-text)] uppercase hover:opacity-90"
                 >
                   INSPECT P18 CORPUS SPINE IN DOOR II &rsaquo;
                 </DnaButton>
@@ -204,6 +208,7 @@ export function FourScripturesSanctum({
               <DnaButton
                 key={theme.id}
                 type="button"
+                tone="secondary"
                 role="tab"
                 aria-selected={active}
                 onClick={() =>
@@ -211,7 +216,7 @@ export function FourScripturesSanctum({
                     setSelectedThemeId(theme.id);
                   }, quietMode)
                 }
-                className={`btn-luxe-secondary px-3.5 py-2 text-left font-mono text-[10.5px] tracking-[0.1em] uppercase cursor-pointer ${
+                className={`min-h-0 justify-start px-3.5 py-2 text-left font-mono text-[10.5px] tracking-[0.1em] uppercase ${
                   active
                     ? "text-[var(--dna-text)]"
                     : "text-[var(--dna-muted)] hover:text-[var(--dna-text)]"

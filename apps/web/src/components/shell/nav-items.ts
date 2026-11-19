@@ -1,4 +1,5 @@
 import { HUD_NAV_ICON_PATHS } from "@moonwitness/ui/icons";
+import { stripLocalePrefix } from "@/utils/i18n";
 
 export type NavTarget =
   /** Pindah route biasa. */
@@ -28,22 +29,50 @@ export function navHref(item: NavItem): string {
 
 const ACTIVE_BY_PATH: Record<string, string> = {
   "/addons": "base.addons",
+  "/apps/addons": "base.addons",
   "/dock": "archive",
+  "/apps/calendar": "archive",
+  "/memory": "memory",
+  "/apps/memory": "memory",
   "/mission-control": "dashboard",
+  "/dashboards/analytics": "analytics",
+  "/dashboards/crm": "crm",
+  "/dashboards/logistics": "logistics",
+  "/apps/invoice": "invoice",
+  "/apps/kanban": "kanban",
+  "/apps/academy": "academy",
+  "/apps/automation": "automation",
+  "/apps/observatory": "observatory",
+  "/apps/user/list": "users",
+  "/apps/roles": "roles",
+  "/apps/permissions": "permissions",
   "/intelligence": "intelligence",
+  "/apps/chat": "intelligence",
   "/control": "control",
+  "/apps/control": "control",
   "/syslog": "syslog",
   "/snmp": "snmp",
   "/radius": "radius",
   "/storage": "storage",
   "/vpn": "vpn",
   "/shadow": "settings",
+  "/login": "settings",
   "/id-lab": "id-lab",
   "/skin-lab": "skin-lab",
 };
 
-export function activeByPath(pathname: string): string {
-  return ACTIVE_BY_PATH[pathname] ?? "";
+const CONTROL_TAB_IDS = new Set(["vpn", "syslog", "snmp", "storage", "radius"]);
+
+export function activeByPath(pathname: string, tab?: string | null): string {
+  const normalized = stripLocalePrefix(pathname);
+  if (
+    (normalized === "/control" || normalized === "/apps/control") &&
+    tab &&
+    CONTROL_TAB_IDS.has(tab)
+  ) {
+    return tab;
+  }
+  return ACTIVE_BY_PATH[normalized] ?? "";
 }
 
 export const operationsNavItems: NavItem[] = [
@@ -57,31 +86,31 @@ export const operationsNavItems: NavItem[] = [
     id: "vpn",
     label: "VPN",
     icon: HUD_NAV_ICON_PATHS.vpn,
-    target: { kind: "route", href: "/vpn" },
+    target: { kind: "route", href: "/control?tab=vpn" },
   },
   {
     id: "syslog",
     label: "Syslog",
     icon: HUD_NAV_ICON_PATHS.syslog,
-    target: { kind: "route", href: "/syslog" },
+    target: { kind: "route", href: "/control?tab=syslog" },
   },
   {
     id: "snmp",
     label: "SNMP",
     icon: HUD_NAV_ICON_PATHS.snmp,
-    target: { kind: "route", href: "/snmp" },
+    target: { kind: "route", href: "/control?tab=snmp" },
   },
   {
     id: "storage",
     label: "Storage",
     icon: HUD_NAV_ICON_PATHS.storage,
-    target: { kind: "route", href: "/storage" },
+    target: { kind: "route", href: "/control?tab=storage" },
   },
   {
     id: "radius",
     label: "RADIUS",
     icon: HUD_NAV_ICON_PATHS.radius,
-    target: { kind: "route", href: "/radius" },
+    target: { kind: "route", href: "/control?tab=radius" },
   },
   {
     id: "dashboard",
@@ -163,6 +192,12 @@ export const navItems: NavItem[] = [
     label: "Archive",
     icon: HUD_NAV_ICON_PATHS.archive,
     target: { kind: "route", href: "/dock" },
+  },
+  {
+    id: "memory",
+    label: "Memory Vault",
+    icon: HUD_NAV_ICON_PATHS.missionLog,
+    target: { kind: "route", href: "/memory" },
   },
   {
     id: "settings",

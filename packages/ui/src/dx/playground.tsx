@@ -33,6 +33,7 @@ import {
 } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { NativeSelect } from "../components/ui/native-select";
 import { Progress } from "../components/ui/progress";
 import {
   Select,
@@ -152,52 +153,56 @@ export function SkinPlayground({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex min-w-0 flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
             DNA Identity
-            <select
+            <NativeSelect
+              skin={skin}
               aria-label="DNA Identity"
               value={dnaId}
               onChange={(e) => setDnaId(e.target.value as MasterDnaId)}
-              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
             >
               {MASTER_DNA_IDS.map((id) => (
                 <option key={id} value={id}>
                   {MASTER_DNA_WORLDS[id].numeral} · {MASTER_DNA_WORLDS[id].name}
                 </option>
               ))}
-            </select>
+            </NativeSelect>
           </label>
 
           <div className="flex min-w-0 flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
             <span>Theme / Density / Viewport</span>
             <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-3">
-              <select
+              <NativeSelect
+                skin={skin}
                 aria-label="Theme Mode"
                 value={mode}
                 onChange={(e) => setMode(e.target.value as CanonicalThemeMode)}
-                className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+                className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
               >
                 <option value="dark">dark</option>
                 <option value="light">light</option>
-              </select>
-              <select
+              </NativeSelect>
+              <NativeSelect
+                skin={skin}
                 aria-label="Density"
                 value={density}
                 onChange={(e) => setDensity(e.target.value as CanonicalDensity)}
-                className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+                className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
               >
                 <option value="compact">compact</option>
                 <option value="comfortable">comfortable</option>
                 <option value="spacious">spacious</option>
-              </select>
-              <select
+              </NativeSelect>
+              <NativeSelect
+                skin={skin}
                 aria-label="Viewport Preview"
                 value={viewport}
                 onChange={(e) => setViewport(e.target.value as ViewportPreset)}
-                className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+                className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
               >
                 <option value="desktop">Desktop</option>
                 <option value="tablet">Tablet (768px)</option>
                 <option value="mobile">Mobile (390px)</option>
-              </select>
+              </NativeSelect>
             </div>
           </div>
         </div>
@@ -205,11 +210,12 @@ export function SkinPlayground({
         <div className="flex min-w-0 flex-col gap-1 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
           <span>Component / Variant / Size / State</span>
           <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
-            <select
+            <NativeSelect
+              skin={skin}
               aria-label="Component Filter"
               value={componentFocus}
               onChange={(e) => setComponentFocus(e.target.value as ComponentFocus)}
-              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
             >
               <option value="all">all components</option>
               <option value="button">Button</option>
@@ -220,12 +226,13 @@ export function SkinPlayground({
               <option value="select">Select</option>
               <option value="tabs">Tabs</option>
               <option value="table">Table</option>
-            </select>
-            <select
+            </NativeSelect>
+            <NativeSelect
+              skin={skin}
               aria-label="Button Variant"
               value={variant}
               onChange={(e) => setVariant(e.target.value as ShowcaseVariant)}
-              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
             >
               <option value="default">default</option>
               <option value="secondary">secondary</option>
@@ -237,28 +244,30 @@ export function SkinPlayground({
               <option value="technical">technical</option>
               <option value="archive">archive</option>
               <option value="transmission">transmission</option>
-            </select>
-            <select
+            </NativeSelect>
+            <NativeSelect
+              skin={skin}
               aria-label="Button Size"
               value={size}
               onChange={(e) => setSize(e.target.value as "sm" | "default" | "lg")}
-              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
             >
               <option value="sm">sm</option>
               <option value="default">default</option>
               <option value="lg">lg</option>
-            </select>
-            <select
+            </NativeSelect>
+            <NativeSelect
+              skin={skin}
               aria-label="Interactive State"
               value={state}
               onChange={(e) => setState(e.target.value as InteractiveState)}
-              className="min-h-9 w-full min-w-0 border border-[var(--border)] bg-[var(--background)] px-2 text-xs text-[var(--foreground)]"
+              className="h-9 min-h-9 w-full min-w-0 px-2 py-0 text-xs"
             >
               <option value="idle">idle</option>
               <option value="disabled">disabled</option>
               <option value="loading">loading</option>
               <option value="invalid">invalid</option>
-            </select>
+            </NativeSelect>
           </div>
         </div>
       </div>

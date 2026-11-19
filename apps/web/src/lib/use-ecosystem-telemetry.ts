@@ -1,5 +1,6 @@
 "use client";
 
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useCallback, useEffect, useState } from "react";
 import type {
   CodexGovernanceSnapshot,
@@ -64,7 +65,7 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
 
     async function probe(): Promise<void> {
       try {
-        const res = await fetch("/api/ecosystem-health", {
+        const res = await requestApiResponse("/api/ecosystem-health", {
           cache: "no-store",
           signal: controller.signal,
         });
@@ -91,10 +92,14 @@ export function useEcosystemTelemetry(): EcosystemTelemetryState {
 
       try {
         const [healthRes, readyRes, statsRes, erasRes] = await Promise.all([
-          fetch("/api/v1/healthz", { signal: controller.signal }),
-          fetch("/api/v1/readyz", { signal: controller.signal }).catch(() => null),
-          fetch("/api/v1/timeline/stats", { signal: controller.signal }).catch(() => null),
-          fetch("/api/v1/timeline/eras", { signal: controller.signal }).catch(() => null),
+          requestApiResponse("/api/v1/healthz", { signal: controller.signal }),
+          requestApiResponse("/api/v1/readyz", { signal: controller.signal }).catch(() => null),
+          requestApiResponse("/api/v1/timeline/stats", { signal: controller.signal }).catch(
+            () => null,
+          ),
+          requestApiResponse("/api/v1/timeline/eras", { signal: controller.signal }).catch(
+            () => null,
+          ),
         ]);
 
         if (!healthRes.ok) {

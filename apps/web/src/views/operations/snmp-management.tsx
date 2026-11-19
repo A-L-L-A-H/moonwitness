@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button, Input } from "@moonwitness/ui";
 import {
   useCreateSnmpDevice,
   useCreateSnmpTarget,
@@ -54,14 +55,15 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
 
   if (!open) {
     return (
-      <button
+      <Button
         type="button"
+        variant="outline"
         onClick={() => setOpen(true)}
         disabled={disabled}
-        className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="min-h-11 px-4 text-sm text-[var(--accent-foreground)] bg-[var(--accent)] border-2 border-[var(--accent)] hover:bg-[var(--accent)]/90"
       >
         Add device
-      </button>
+      </Button>
     );
   }
 
@@ -92,7 +94,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
       </h4>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Labeled label="Name">
-          <input
+          <Input
             className={inputClass}
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -102,7 +104,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
           />
         </Labeled>
         <Labeled label="Host">
-          <input
+          <Input
             className={inputClass}
             value={host}
             onChange={(event) => setHost(event.target.value)}
@@ -113,7 +115,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
           />
         </Labeled>
         <Labeled label="Port">
-          <input
+          <Input
             className={inputClass}
             value={port}
             onChange={(event) => setPort(event.target.value)}
@@ -122,7 +124,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
           />
         </Labeled>
         <Labeled label="SNMP version">
-          <input
+          <Input
             className={inputClass}
             value={version}
             onChange={(event) => setVersion(event.target.value)}
@@ -130,7 +132,7 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
           />
         </Labeled>
         <Labeled label="Community (write-only, never shown back)" wide>
-          <input
+          <Input
             className={inputClass}
             value={community}
             onChange={(event) => setCommunity(event.target.value)}
@@ -141,25 +143,27 @@ function CreateDevicePanel({ disabled }: { disabled: boolean }) {
         </Labeled>
       </div>
       <div className="flex items-center gap-3">
-        <button
+        <Button
           type="submit"
+          variant="outline"
           disabled={createDevice.isPending || !name.trim() || !host.trim()}
-          className="min-h-11 px-4 text-sm text-[var(--foreground)] bg-[var(--blue)] border-2 border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-11 px-4 text-sm text-[var(--accent-foreground)] bg-[var(--accent)] border-2 border-[var(--accent)] hover:bg-[var(--accent)]/90"
         >
           {createDevice.isPending ? "Creating…" : "Create device"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="link"
           onClick={() => {
             setOpen(false);
             reset();
             createDevice.reset();
           }}
           disabled={createDevice.isPending}
-          className="min-h-11 text-xs text-[var(--muted-foreground)] underline"
+          className="min-h-11 h-auto p-0 text-xs text-[var(--muted-foreground)]"
         >
           Cancel
-        </button>
+        </Button>
         {createDevice.isSuccess && (
           <span className="text-xs text-[var(--primary)]" role="status">
             Device created.
@@ -184,14 +188,16 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
 
   if (!open) {
     return (
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         onClick={() => setOpen(true)}
         disabled={createTarget.isPending}
-        className="min-h-9 px-3 py-2 text-xs text-[var(--primary)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10 disabled:opacity-50"
+        className="min-h-9 px-3 py-2 text-xs text-[var(--primary)] border border-[var(--blue)] bg-transparent hover:bg-[var(--blue)]/10"
       >
         Add target
-      </button>
+      </Button>
     );
   }
 
@@ -226,7 +232,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
     >
       <div className="grid gap-3 sm:grid-cols-3">
         <Labeled label="Target name">
-          <input
+          <Input
             className={inputClass}
             value={name}
             onChange={(event) => setName(event.target.value)}
@@ -235,7 +241,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
           />
         </Labeled>
         <Labeled label="OID">
-          <input
+          <Input
             className={inputClass}
             value={oid}
             onChange={(event) => setOid(event.target.value)}
@@ -245,7 +251,7 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
           />
         </Labeled>
         <Labeled label="Poll interval (s, optional)">
-          <input
+          <Input
             className={inputClass}
             value={interval}
             onChange={(event) => setIntervalValue(event.target.value)}
@@ -255,21 +261,25 @@ function CreateTargetForm({ deviceId }: { deviceId: string }) {
         </Labeled>
       </div>
       <div className="flex items-center gap-3">
-        <button
+        <Button
           type="submit"
+          variant="outline"
+          size="sm"
           disabled={createTarget.isPending || !name.trim() || !oid.trim()}
-          className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--blue)] border border-[var(--blue)] hover:bg-[var(--blue)]/90 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="min-h-9 px-3 py-2 text-xs text-[var(--accent-foreground)] bg-[var(--accent)] border border-[var(--accent)] hover:bg-[var(--accent)]/90"
         >
           {createTarget.isPending ? "Creating…" : "Create target"}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={() => setOpen(false)}
           disabled={createTarget.isPending}
-          className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
+          className="min-h-9 h-auto p-0 text-xs text-[var(--muted-foreground)]"
         >
           Cancel
-        </button>
+        </Button>
         {createTarget.isError && (
           <span className="text-xs text-[var(--primary)]" role="alert">
             {(createTarget.error as Error).message}
@@ -295,38 +305,44 @@ function DeviceManagementActions({
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() =>
             void deleteDevice.mutateAsync(device.id, { onSuccess: () => setConfirming(false) })
           }
           disabled={deleteDevice.isPending}
-          className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+          className="min-h-9 px-3 py-2 text-xs text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)]"
         >
           Confirm delete device
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={() => setConfirming(false)}
           disabled={deleteDevice.isPending}
-          className="min-h-9 text-xs text-[var(--muted-foreground)] underline"
+          className="min-h-9 h-auto p-0 text-xs text-[var(--muted-foreground)]"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-end gap-2">
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         onClick={() => setConfirming(true)}
         disabled={deleteDevice.isPending}
-        className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+        className="min-h-9 text-xs text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10"
       >
         Delete
-      </button>
+      </Button>
       {deleteDevice.isError && (
         <span className="text-[10px] text-[var(--primary)]" role="alert">
           {(deleteDevice.error as Error).message}
@@ -353,38 +369,44 @@ function TargetManagementActions({
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <button
+        <Button
           type="button"
+          variant="outline"
+          size="sm"
           onClick={() =>
             void deleteTarget.mutateAsync(targetId, { onSuccess: () => setConfirming(false) })
           }
           disabled={deleteTarget.isPending}
-          className="min-h-8 px-2 py-1 text-[11px] text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)] disabled:opacity-50"
+          className="min-h-8 h-auto px-2 py-1 text-[11px] text-[var(--foreground)] bg-[var(--yellow)]/20 border border-[var(--yellow)]"
         >
           Confirm delete {targetName}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="link"
+          size="sm"
           onClick={() => setConfirming(false)}
           disabled={deleteTarget.isPending}
-          className="text-[11px] text-[var(--muted-foreground)] underline"
+          className="min-h-0 h-auto p-0 text-[11px] text-[var(--muted-foreground)]"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-end gap-1">
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         onClick={() => setConfirming(true)}
         disabled={deleteTarget.isPending}
-        className="min-h-8 text-[11px] text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10 disabled:opacity-50"
+        className="min-h-8 h-auto px-2 py-1 text-[11px] text-[var(--primary)] border border-[var(--yellow)] bg-transparent hover:bg-[var(--yellow)]/10"
       >
         Delete
-      </button>
+      </Button>
       {deleteTarget.isError && (
         <span className="text-[10px] text-[var(--primary)]" role="alert">
           {(deleteTarget.error as Error).message}

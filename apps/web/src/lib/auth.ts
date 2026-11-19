@@ -1,3 +1,4 @@
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 export type CrewRole = "admin" | "editor" | "viewer";
 
 export interface CrewAccount {
@@ -22,7 +23,7 @@ export async function authenticate(identifier: string, password: string): Promis
   }
 
   try {
-    const response = await fetch("/api/v1/auth/login", {
+    const response = await requestApiResponse("/api/v1/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

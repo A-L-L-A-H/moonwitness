@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { CassetteRecorderArt, SkinOrnament } from "@moonwitness/ui";
+import { Button, CassetteRecorderArt, Input, SkinOrnament, ZineButton } from "@moonwitness/ui";
 import { MemoryTapeNode } from "@moonwitness/ui/icons";
 import {
   formatMemoryContextPrompt,
@@ -55,7 +55,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           <div className="flex flex-wrap items-center gap-2">
             <MemoryTapeNode className="h-4 w-4 text-[var(--primary)]" />
             <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
-              SOVEREIGN KNOWLEDGE BRIDGE · PORT 8000 / 3005
+              SOVEREIGN KNOWLEDGE BRIDGE · /MEMORY VAULT
             </p>
             <SkinOrnament slot="tag" label="MEMORY BRIDGE" />
           </div>
@@ -116,13 +116,15 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           <p className="text-xs text-[var(--primary)]">
             {status.data?.error ?? "Archive memory backend is offline."}
           </p>
-          <button
+          <Button
             type="button"
+            variant="outline"
+            size="sm"
             onClick={() => void status.refetch()}
-            className="min-h-11 border border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-wider text-[var(--foreground)] hover:border-[var(--blue)]"
+            className="min-h-11 px-3 py-2 font-mono text-[10px] tracking-wider hover:border-[var(--blue)]"
           >
             RETRY BRIDGE
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="mt-4 space-y-4">
@@ -170,7 +172,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
             className="flex flex-wrap items-center gap-2"
             aria-label="Search archive knowledge"
           >
-            <input
+            <Input
               type="search"
               value={searchInput}
               onChange={(event) => setSearchInput(event.target.value)}
@@ -178,24 +180,27 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
               aria-label="Search archive knowledge"
               className="min-h-11 min-w-0 flex-1 border-2 border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:border-[var(--blue)] focus:outline-none"
             />
-            <button
+            <ZineButton
               type="submit"
+              tone="blue"
               disabled={knowledge.isFetching}
-              className="btn-zine btn-blue min-h-11 px-4 py-2 text-xs disabled:opacity-50"
+              className="min-h-11 px-4 py-2 text-xs disabled:opacity-50"
             >
               {knowledge.isFetching ? "SEARCHING..." : "SEARCH MEMORY"}
-            </button>
+            </ZineButton>
             {submittedQuery && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setSearchInput("");
                   setSubmittedQuery("");
                 }}
-                className="min-h-11 border border-[var(--border)] px-3 py-2 font-mono text-[10px] tracking-wider text-[var(--foreground)] hover:border-[var(--primary)]"
+                className="min-h-11 px-3 py-2 font-mono text-[10px] tracking-wider hover:border-[var(--primary)]"
               >
                 CLEAR
-              </button>
+              </Button>
             )}
           </form>
 
@@ -253,13 +258,15 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
                     )}
                   </div>
                   <div className="flex items-center justify-end">
-                    <button
+                    <Button
                       type="button"
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleAttach(record)}
-                      className="min-h-11 border border-[var(--border)] px-3 py-1.5 font-mono text-[10px] tracking-wider text-[var(--foreground)] transition-colors hover:border-[var(--pink)] hover:text-[var(--foreground)]"
+                      className="min-h-11 px-3 py-1.5 font-mono text-[10px] tracking-wider hover:border-[var(--pink)] hover:text-[var(--foreground)]"
                     >
                       {attachedId === record.id ? "ATTACHED TO PROMPT" : "ATTACH TO PROMPT"}
-                    </button>
+                    </Button>
                   </div>
                 </li>
               ))}

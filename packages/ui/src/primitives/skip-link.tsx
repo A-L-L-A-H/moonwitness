@@ -17,8 +17,8 @@ export function SkipLink({
       href={href}
       className={cn(
         "sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]",
-        "focus:rounded-md focus:bg-[var(--yellow)] focus:px-4 focus:py-3",
-        "focus:font-brush focus:text-black focus:shadow-[4px_4px_0_rgba(0,0,0,0.6)]",
+        "focus:rounded-md focus:bg-[var(--secondary)] focus:px-4 focus:py-3",
+        "focus:font-brush focus:text-[var(--secondary-foreground)] focus:shadow-[4px_4px_0_rgba(0,0,0,0.6)]",
         className,
       )}
       {...props}

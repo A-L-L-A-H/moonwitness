@@ -5,7 +5,7 @@ Artwork manifest (`src/catalogue.json`), responsive AVIF/WebP derivative helpers
 ## Exports & Source
 
 - `.` -> `./src/index.ts` (`HERO_LAYERS`, `ArtEntry`, responsive width/srcSet utilities consuming `src/catalogue.json` and `src/optimize.ts`)
-- Dependencies: `@moonwitness/types`
+- Dependencies: `@moonwitness/contracts`
 
 ## Scripts
 

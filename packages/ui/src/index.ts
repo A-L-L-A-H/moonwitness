@@ -177,6 +177,7 @@ export {
 } from "./components/ui/sheet";
 export { Switch } from "./components/ui/switch";
 export { Textarea, type TextareaProps } from "./components/ui/textarea";
+export { NativeSelect, type NativeSelectProps } from "./components/ui/native-select";
 export {
   Select,
   SelectGroup,
@@ -666,6 +667,7 @@ export {
   SkinPalette,
 } from "./icons/modules";
 export { HUD_NAV_ICON_PATHS, type HudNavIconPathKey } from "./icons/nav-paths";
+export { resolveNavIconPath } from "./lib/nav-icons";
 
 /* Artwork System */
 export * from "./artwork/vector";
@@ -675,6 +677,7 @@ export * from "./artwork/logos";
 export * from "./artwork/cutouts";
 export * from "./artwork/backdrop";
 export * from "./artwork/skin-artwork-frame";
+export * from "./artwork/rocksoul";
 
 /* Schema-Driven Composite View */
 export {
@@ -683,6 +686,7 @@ export {
   type AutoModelFieldSpec,
   type AutoModelAcl,
   type AutoModelCustomAction,
+  type AutoModelHistoryEntry,
   type AutoModelViewDescriptor,
   type AutoModelRow,
   type AutoModelViewProps,

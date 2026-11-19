@@ -502,6 +502,49 @@ def link_claims(
     }
 
 
+def list_claims(
+    db: sqlite3.Connection,
+    *,
+    epistemic_type: str | None = None,
+    status: str | None = None,
+    q: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
+    """List Witness Ledger claims with optional filtering and provenance counts."""
+    clauses: list[str] = []
+    params: list[Any] = []
+    if epistemic_type:
+        clauses.append("c.epistemic_type = ?")
+        params.append(_validate_epistemic_type(epistemic_type))
+    if status:
+        clauses.append("c.status = ?")
+        params.append(_validate_status(status))
+    clean_q = q.strip().lower() if isinstance(q, str) else ""
+    if clean_q:
+        clauses.append("LOWER(c.statement) LIKE ?")
+        params.append(f"%{clean_q}%")
+
+    where = f" WHERE {' AND '.join(clauses)}" if clauses else ""
+    bounded_limit = max(1, min(int(limit), 500))
+    bounded_offset = max(0, int(offset))
+    rows = db.execute(
+        f"""
+        SELECT
+            c.*,
+            (SELECT COUNT(*) FROM claim_sources s WHERE s.claim_id = c.id) AS source_count,
+            (SELECT COUNT(*) FROM claim_revisions r WHERE r.claim_id = c.id) AS revision_count,
+            (SELECT COUNT(*) FROM claim_relations rel
+                WHERE rel.source_claim_id = c.id OR rel.target_claim_id = c.id) AS relation_count
+        FROM claims c{where}
+        ORDER BY c.updated_at DESC, c.rowid DESC
+        LIMIT ? OFFSET ?
+        """,
+        (*params, bounded_limit, bounded_offset),
+    ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def trace_claim_provenance(db: sqlite3.Connection, claim_id: str) -> dict[str, Any] | None:
     """Resolve a claim to its revisions, relations, exact source excerpts, and messages."""
     claim = _query_one(db, "SELECT * FROM claims WHERE id=?", (claim_id,))

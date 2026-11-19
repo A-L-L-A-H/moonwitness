@@ -65,8 +65,7 @@ jobs:
           '
 
       - name: Build web
-        working-directory: ./apps/web
-        run: pnpm build
+        run: pnpm --filter @moonwitness/api build && pnpm --filter @moonwitness/web build
 
       - name: Run Playwright tests
         working-directory: ./apps/web

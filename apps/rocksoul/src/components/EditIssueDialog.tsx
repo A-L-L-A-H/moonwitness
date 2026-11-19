@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { NativeSelect } from "@moonwitness/ui";
+import { X } from "@moonwitness/ui/icons";
 import type { Issue, IssuePriority, Project, Repository, UpdateIssueArgs } from "../lib/contracts";
 
 export interface EditIssueDialogProps {
@@ -85,7 +86,7 @@ export default function EditIssueDialog({
         </label>
         <label className="field-label" htmlFor="edit-issue-priority">
           PRIORITY
-          <select
+          <NativeSelect
             id="edit-issue-priority"
             name="priority"
             value={priority}
@@ -94,11 +95,11 @@ export default function EditIssueDialog({
             {(["P0", "P1", "P2", "P3"] as const).map((value) => (
               <option key={value}>{value}</option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="field-label" htmlFor="edit-issue-project">
           PROJECT
-          <select
+          <NativeSelect
             id="edit-issue-project"
             name="projectId"
             value={projectId}
@@ -110,11 +111,11 @@ export default function EditIssueDialog({
                 {project.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="field-label" htmlFor="edit-issue-repository">
           REPOSITORY
-          <select
+          <NativeSelect
             id="edit-issue-repository"
             name="repositoryId"
             value={repositoryId}
@@ -126,7 +127,7 @@ export default function EditIssueDialog({
                 {repository.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         {error && (
           <p className="inline-notice" role="alert">

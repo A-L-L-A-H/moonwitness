@@ -4,6 +4,7 @@ vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
 
 import { invoke } from "@tauri-apps/api/core";
 import { call, isDesktop } from "./api";
+import type { IssuePriority, IssueStatus } from "./contracts";
 
 const storage = new Map<string, string>();
 
@@ -79,7 +80,9 @@ describe("ROCKSOUL browser-preview workflow", () => {
     await expect(call("create_issue", { title: "   " })).rejects.toMatchObject({
       message: "Issue title cannot be empty.",
     });
-    await expect(call("create_issue", { title: "Valid title", priority: "P9" as any })).rejects.toMatchObject({
+    await expect(
+      call("create_issue", { title: "Valid title", priority: "P9" as unknown as IssuePriority }),
+    ).rejects.toMatchObject({
       message: "Priority must be P0, P1, P2, or P3.",
     });
     await expect(call("create_issue", { title: "Valid title", projectId: "missing" })).rejects.toMatchObject({
@@ -133,7 +136,9 @@ describe("ROCKSOUL browser-preview workflow", () => {
   it("rejects unknown issue statuses and records valid status history", async () => {
     const issue = await call("create_issue", { title: "Audit a state change" });
     for (const status of ["ship-it", "running", "review"]) {
-      await expect(call("set_issue_status", { issueId: issue.id, status: status as any })).rejects.toMatchObject({
+      await expect(
+        call("set_issue_status", { issueId: issue.id, status: status as unknown as IssueStatus }),
+      ).rejects.toMatchObject({
         message: "Unsupported issue status.",
       });
     }

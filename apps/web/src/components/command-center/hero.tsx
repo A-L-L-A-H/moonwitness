@@ -14,7 +14,7 @@ import {
   Gauge,
   useSkin,
 } from "@moonwitness/ui";
-import type { Project } from "@moonwitness/types";
+import type { Project } from "@moonwitness/contracts/types";
 import { AtmosphereField } from "@/components/atmosphere";
 
 export function CommandHero({ project }: { project: Project }) {

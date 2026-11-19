@@ -18,6 +18,7 @@ import {
   useSkin,
   type BrandLogoId,
 } from "@moonwitness/ui";
+import { useMetaModelsCatalog } from "@/lib/api/meta-views";
 import { navHref, navItems, operationsNavItems } from "./shell/nav-items";
 
 export interface ConsoleCommandPaletteProps {
@@ -39,6 +40,7 @@ export function ConsoleCommandPalette({
   const { skin, setSkin, dnaId, setDna, mode, setMode, density, setDensity } = useSkin();
   const presets = useMemo(() => listPresets(), []);
   const worlds = useMemo(() => listDnaWorlds(), []);
+  const catalog = useMetaModelsCatalog();
   const routes = useMemo(() => {
     if (plane === "creator") return navItems;
     if (plane === "operations") return operationsNavItems;
@@ -85,6 +87,27 @@ export function ConsoleCommandPalette({
                 }}
               >
                 <span>{item.label}</span>
+                <CommandShortcut>{href}</CommandShortcut>
+              </CommandItem>
+            );
+          })}
+        </CommandGroup>
+
+        <CommandSeparator />
+
+        <CommandGroup heading="Live ORM Models">
+          {catalog.map((model) => {
+            const href = `/addons?model=${encodeURIComponent(model)}`;
+            return (
+              <CommandItem
+                key={`model-${model}`}
+                value={`model ${model}`}
+                onSelect={() => {
+                  setOpen(false);
+                  router.push(href);
+                }}
+              >
+                <span>{model}</span>
                 <CommandShortcut>{href}</CommandShortcut>
               </CommandItem>
             );
@@ -170,20 +193,70 @@ export function ConsoleCommandPalette({
             { label: "Identity & Avatar Studio", href: "/id-lab", tag: "ID LAB" },
             {
               label: "Model Inspector: Timeline Event",
-              href: "/models/timeline.event",
+              href: "/addons?model=timeline.event",
               tag: "MODEL",
             },
             {
-              label: "Model Inspector: Witness Profile",
-              href: "/models/witness.profile",
+              label: "Model Inspector: Witness Claim",
+              href: "/addons?model=witness.claim",
               tag: "MODEL",
             },
+            {
+              label: "Model Inspector: CRM Lead",
+              href: "/addons?model=crm.lead",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: Stock Move",
+              href: "/addons?model=stock.move",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: Account Move",
+              href: "/addons?model=account.move",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: CAB Request",
+              href: "/addons?model=cab.request",
+              tag: "MODEL",
+            },
+            {
+              label: "Enterprise Analytics Dashboard",
+              href: "/en/dashboards/analytics",
+              tag: "DASHBOARD",
+            },
+            {
+              label: "Enterprise CRM Workspace",
+              href: "/en/dashboards/crm",
+              tag: "DASHBOARD",
+            },
+            {
+              label: "Enterprise Logistics & Geo",
+              href: "/en/dashboards/logistics",
+              tag: "DASHBOARD",
+            },
+            {
+              label: "Double-Entry Accounting & Ledger",
+              href: "/en/apps/invoice",
+              tag: "APP",
+            },
+            {
+              label: "Witness 9-Module & Mizan Lab",
+              href: "/en/apps/academy",
+              tag: "APP",
+            },
+            {
+              label: "Celestial & M-Time Observatory",
+              href: "/en/apps/observatory",
+              tag: "APP",
+            },
             { label: "ARSY Control Plane", href: "/control", tag: "OPS" },
-            { label: "VPN & Mesh Tunnel", href: "/vpn", tag: "OPS" },
-            { label: "SNMP Telemetry Probes", href: "/snmp", tag: "OPS" },
-            { label: "Syslog Stream", href: "/syslog", tag: "OPS" },
-            { label: "RADIUS Access Control", href: "/radius", tag: "OPS" },
-            { label: "Storage Browser", href: "/storage", tag: "OPS" },
+            { label: "VPN & Mesh Tunnel", href: "/control?tab=vpn", tag: "OPS" },
+            { label: "SNMP Telemetry Probes", href: "/control?tab=snmp", tag: "OPS" },
+            { label: "Syslog Stream", href: "/control?tab=syslog", tag: "OPS" },
+            { label: "RADIUS Access Control", href: "/control?tab=radius", tag: "OPS" },
+            { label: "Storage Browser", href: "/control?tab=storage", tag: "OPS" },
           ].map((entry) => (
             <CommandItem
               key={`jump-${entry.href}`}
