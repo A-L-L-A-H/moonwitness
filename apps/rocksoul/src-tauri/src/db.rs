@@ -346,11 +346,49 @@ pub fn resolve_rocksoul_postgres_url() -> Option<String> {
     Some(trimmed.to_string())
 }
 
+/// Non-destructively exports table row counts from the local SQLite database for
+/// source-to-target PostgreSQL migration reconciliation without modifying or deleting the source DB.
+#[allow(dead_code)]
+pub fn export_sqlite_reconciliation_manifest(
+    connection: &Connection,
+) -> Result<serde_json::Value, String> {
+    const TABLES: [&str; 11] = [
+        "workspaces",
+        "projects",
+        "repositories",
+        "issues",
+        "approvals",
+        "agent_runs",
+        "agent_execution_steps",
+        "agent_supervisors",
+        "orchestration_plans",
+        "orchestration_tasks",
+        "events",
+    ];
+    let mut counts = serde_json::Map::new();
+    let mut total_rows: i64 = 0;
+
+    for table in TABLES {
+        let query = format!("SELECT COUNT(*) FROM {table}");
+        let count: i64 = connection
+            .query_row(&query, [], |row| row.get(0))
+            .map_err(|error| format!("Failed counting table {table}: {error}"))?;
+        total_rows += count;
+        counts.insert(table.to_string(), serde_json::json!(count));
+    }
+
+    Ok(serde_json::json!({
+        "engine": "sqlite-source-snapshot",
+        "tables": counts,
+        "total_rows": total_rows,
+    }))
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        backup_connection, migrate, remove_database_files, resolve_rocksoul_postgres_url,
-        validate_private_postgres_url, verify_integrity,
+        backup_connection, export_sqlite_reconciliation_manifest, migrate, remove_database_files,
+        resolve_rocksoul_postgres_url, validate_private_postgres_url, verify_integrity,
     };
     use rusqlite::Connection;
     use std::{fs, path::PathBuf};
@@ -663,5 +701,30 @@ mod tests {
             resolve_rocksoul_postgres_url().as_deref(),
             Some("postgresql://localhost:5432/rocksoul")
         );
+    }
+
+    #[test]
+    fn export_sqlite_reconciliation_manifest_preserves_source_rows() {
+        let connection = Connection::open_in_memory().expect("in-memory SQLite should open");
+        migrate(&connection).expect("migrations should apply");
+        connection
+            .execute(
+                "INSERT INTO workspaces (id, name) VALUES ('local', 'Local')",
+                [],
+            )
+            .expect("workspace insert should succeed");
+        connection
+            .execute(
+                "INSERT INTO issues (id, issue_key, title) VALUES ('i1', 'MW-288', 'PG migration')",
+                [],
+            )
+            .expect("issue insert should succeed");
+
+        let manifest = export_sqlite_reconciliation_manifest(&connection)
+            .expect("reconciliation manifest should succeed");
+        assert_eq!(manifest["engine"], "sqlite-source-snapshot");
+        assert_eq!(manifest["tables"]["workspaces"], 1);
+        assert_eq!(manifest["tables"]["issues"], 1);
+        assert_eq!(manifest["total_rows"], 2);
     }
 }

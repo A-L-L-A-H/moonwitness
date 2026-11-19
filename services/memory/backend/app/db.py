@@ -93,6 +93,35 @@ def get_postgres_schema_sql() -> str:
     return "\n\n".join(POSTGRES_SCHEMA_STATEMENTS)
 
 
+def export_sqlite_reconciliation_counts(
+    db_conn: sqlite3.Connection | None = None,
+) -> dict[str, int]:
+    """Return non-destructive SQLite row counts for PostgreSQL migration reconciliation.
+
+    Preserves raw archive binaries and source SQLite records intact.
+    """
+    tables = ("archives", "jobs", "messages", "knowledge", "chunks", "entities")
+
+    def _read(conn: sqlite3.Connection) -> dict[str, int]:
+        present = {
+            row[0]
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        return {
+            table: int(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0])
+            if table in present
+            else 0
+            for table in tables
+        }
+
+    if db_conn is not None:
+        return _read(db_conn)
+    with connection() as db:
+        return _read(db)
+
+
 def utc_now() -> str:
     return datetime.now(UTC).isoformat()
 

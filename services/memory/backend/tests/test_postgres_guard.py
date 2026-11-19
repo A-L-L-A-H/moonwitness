@@ -1,7 +1,9 @@
-import pytest
+import sqlite3
 
+import pytest
 from app.db import (
     POSTGRES_SCHEMA_STATEMENTS,
+    export_sqlite_reconciliation_counts,
     get_postgres_schema_sql,
     validate_private_postgres_url,
 )
@@ -71,3 +73,21 @@ def test_postgres_schema_defines_pgvector_and_metadata_tables() -> None:
     assert "CREATE TABLE IF NOT EXISTS chunks" in ddl
     assert "embedding vector(" in ddl
     assert "CREATE TABLE IF NOT EXISTS entities" in ddl
+
+
+def test_export_sqlite_reconciliation_counts_non_destructive() -> None:
+    conn = sqlite3.connect(":memory:")
+    conn.executescript(
+        """
+        CREATE TABLE archives (id TEXT PRIMARY KEY);
+        CREATE TABLE jobs (id TEXT PRIMARY KEY);
+        INSERT INTO archives (id) VALUES ('arch-1'), ('arch-2');
+        INSERT INTO jobs (id) VALUES ('job-1');
+        """
+    )
+    counts = export_sqlite_reconciliation_counts(conn)
+    assert counts["archives"] == 2
+    assert counts["jobs"] == 1
+    assert counts["chunks"] == 0
+    assert counts["entities"] == 0
+    conn.close()
