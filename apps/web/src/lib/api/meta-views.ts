@@ -97,6 +97,29 @@ export interface RuntimeViewDescriptorResponse {
   actionBindings: RuntimeActionBindings;
 }
 
+const TENANT_STORAGE_KEY = "mw_active_tenant";
+
+export function getActiveTenantId(): string {
+  if (typeof window === "undefined") return "default";
+  try {
+    const val = window.localStorage.getItem(TENANT_STORAGE_KEY)?.trim();
+    return val || "default";
+  } catch {
+    return "default";
+  }
+}
+
+export function setActiveTenantId(slug: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const next = slug.trim() || "default";
+    window.localStorage.setItem(TENANT_STORAGE_KEY, next);
+    window.dispatchEvent(new Event("mw:tenant-changed"));
+  } catch {
+    // ignore storage failures
+  }
+}
+
 function getCsrfHeaders(): Record<string, string> {
   if (typeof document === "undefined") return {};
   const match = document.cookie.match(/(?:^|;\s*)mw_csrf=([^;]+)/);
@@ -105,11 +128,13 @@ function getCsrfHeaders(): Record<string, string> {
 }
 
 async function fetchApiJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const tenantId = getActiveTenantId();
   try {
     return await requestApiJson<T>(url, {
       ...init,
       headers: {
         ...getCsrfHeaders(),
+        ...(tenantId && tenantId !== "default" ? { "x-tenant-id": tenantId } : {}),
         ...(init?.headers as Record<string, string> | undefined),
       },
     });
@@ -433,4 +458,122 @@ export async function executeModelMutation(
     method,
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+}
+
+export async function fetchModelReadGroup(
+  model: string,
+  groupBy: string,
+): Promise<Array<Record<string, unknown>>> {
+  const res = await fetchApiJson<{ groups?: Array<Record<string, unknown>> }>(
+    `/api/v1/m/${encodeURIComponent(model)}/read-group?groupBy=${encodeURIComponent(groupBy)}`,
+  );
+  return res.groups ?? [];
+}
+
+export interface ChatterTrackingValue {
+  id: string;
+  field_name: string;
+  old_value: string | null;
+  new_value: string | null;
+}
+
+export interface ChatterMessageEntry {
+  id: string;
+  res_model: string;
+  res_id: string;
+  message_type: "comment" | "notification" | "tracking";
+  body: string;
+  author_id: string | null;
+  create_date?: string;
+  $tracking_values?: ChatterTrackingValue[];
+}
+
+export async function fetchRecordChatter(
+  model: string,
+  resId: string,
+): Promise<ChatterMessageEntry[]> {
+  const res = await fetchApiJson<{ data?: ChatterMessageEntry[] }>(
+    `/api/v1/m/mail.message?res_model=${encodeURIComponent(model)}&res_id=${encodeURIComponent(resId)}&with=tracking_values`,
+  );
+  return res.data ?? [];
+}
+
+export async function postRecordChatterComment(
+  model: string,
+  resId: string,
+  body: string,
+): Promise<ChatterMessageEntry> {
+  const res = await fetchApiJson<{ data: ChatterMessageEntry }>("/api/v1/m/mail.message", {
+    method: "POST",
+    body: JSON.stringify({
+      res_model: model,
+      res_id: resId,
+      message_type: "comment",
+      body,
+    }),
+  });
+  return res.data;
+}
+
+export interface CompanyCatalogItem {
+  id: string;
+  slug: string;
+  name: string;
+  default_locale: string;
+  currency: string;
+  is_active: boolean;
+}
+
+export function useCompaniesCatalog(enabled = true) {
+  const [companies, setCompanies] = useState<CompanyCatalogItem[]>([]);
+  const [activeTenant, setActiveTenantState] = useState<string>(() => getActiveTenantId());
+
+  useEffect(() => {
+    const sync = () => setActiveTenantState(getActiveTenantId());
+    window.addEventListener("mw:tenant-changed", sync);
+    return () => window.removeEventListener("mw:tenant-changed", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
+    let active = true;
+    fetchApiJson<{ data?: CompanyCatalogItem[] }>("/api/v1/m/res.company")
+      .then((res) => {
+        if (active && Array.isArray(res.data)) setCompanies(res.data);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [enabled]);
+
+  return {
+    companies,
+    activeTenant,
+    setActiveTenant: (slug: string) => setActiveTenantId(slug),
+  };
+}
+
+export interface CelestialNowSummary {
+  hijri: { year: number; month: number; day: number; monthName: string };
+  lunar: { phaseName: string; illumination: number };
+  aeq4: { mode: string; formatted: string; hijriBridge: string };
+}
+
+export function useCelestialNow() {
+  const [data, setData] = useState<CelestialNowSummary | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    fetchApiJson<CelestialNowSummary>("/api/v1/celestial/now")
+      .then((res) => {
+        if (active) setData(res);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return data;
 }

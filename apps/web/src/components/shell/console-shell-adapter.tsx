@@ -4,11 +4,15 @@ import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { ConsoleShell, Input, type HudNavItem } from "@moonwitness/ui";
+import { ConsoleShell, Input, NativeSelect, type HudNavItem } from "@moonwitness/ui";
 import { Crown, SearchIcon } from "@moonwitness/ui/icons";
 import { ConsoleCommandPalette } from "@/components/console-command-palette";
 import { useSavedAvatar } from "@/lib/avatar-store";
-import { useMetaNavigation } from "@/lib/api/meta-views";
+import {
+  useCelestialNow,
+  useCompaniesCatalog,
+  useMetaNavigation,
+} from "@/lib/api/meta-views";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { useCurrentIdentity } from "@/lib/session";
 import { SkinSwitcher } from "@/components/skin-switcher";
@@ -51,6 +55,8 @@ export function ConsoleShellAdapter({
   const identity = session?.identity ?? "Creator // Empire";
   const role = session?.role ?? "Empire crew";
   const { seed: avatarSeed } = useSavedAvatar(identity);
+  const { companies, activeTenant, setActiveTenant } = useCompaniesCatalog(Boolean(session));
+  const celestial = useCelestialNow();
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -113,7 +119,33 @@ export function ConsoleShellAdapter({
         </div>
       }
       headerActions={
-        <div ref={popRef} className="relative flex items-center gap-1">
+        <div ref={popRef} className="relative flex items-center gap-1.5">
+          {celestial ? (
+            <span
+              title={celestial.aeq4.formatted}
+              className="hidden xl:inline-flex items-center border border-[var(--border)] px-2 py-1 font-mono text-[10px] text-[var(--muted-foreground)]"
+            >
+              {celestial.hijri.day} {celestial.hijri.monthName} {celestial.hijri.year}H ·{" "}
+              {celestial.lunar.illumination}%
+            </span>
+          ) : null}
+          {companies.length > 0 ? (
+            <NativeSelect
+              aria-label="Active Company Tenant"
+              value={activeTenant}
+              onChange={(e) => {
+                setActiveTenant(e.target.value);
+                window.dispatchEvent(new Event("mw:navigation-changed"));
+              }}
+              className="h-8 max-w-[140px] font-mono text-[11px]"
+            >
+              {companies.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {c.name}
+                </option>
+              ))}
+            </NativeSelect>
+          ) : null}
           <SkinSwitcher />
           <Notifications
             open={notifOpen}
