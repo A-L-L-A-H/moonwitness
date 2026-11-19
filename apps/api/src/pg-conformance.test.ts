@@ -120,12 +120,12 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     const cleanups: Array<() => Promise<void>> = [];
 
     afterEach(async () => {
-      await closeDbAsync();
       modelRegistry.clearHookErrors();
       while (cleanups.length > 0) {
         const cleanup = cleanups.pop()!;
         await cleanup().catch(() => {});
       }
+      await closeDbAsync();
     });
 
     afterAll(async () => {
