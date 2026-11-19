@@ -1150,8 +1150,10 @@ export class AddonRuntimeController {
       runSeeds?: boolean;
       legacyBackfillTables?: Set<string>;
       signingPolicy?: AddonSigningPolicy;
+      mode?: "full" | "edge";
     } = {},
   ): Promise<{ order: string[]; syncReport: SyncReport }> {
+    const mode = options.mode ?? "full";
     this.definitions.clear();
     this.enabled.clear();
     this.modelOwners.clear();
@@ -1190,6 +1192,96 @@ export class AddonRuntimeController {
           `Addon '${name}' rejected by strict signature policy (${verification.status}${verification.reason ? `: ${verification.reason}` : ""}).`,
         );
       }
+    }
+
+    if (mode === "edge") {
+      const edgeModelNames = new Set<string>([irAddonModel.name]);
+      for (const name of order) {
+        const entry = this.definitions.get(name)!;
+        for (const model of entry.def.models ?? []) {
+          edgeModelNames.add(model.name);
+        }
+      }
+      const report = await syncModels([...edgeModelNames]);
+      const existingRows = await irAddonModel.repository.find();
+      const existingByName = new Map(existingRows.map((row) => [row.name, row]));
+      const loadedSoFar: string[] = [];
+      const registryState = emptyRegistryState();
+
+      for (const name of order) {
+        const entry = this.definitions.get(name)!;
+        const existing = existingByName.get(name);
+        const sigMeta = this.signingMetadata.get(name) ?? {
+          status: "unsigned" as const,
+          keyId: null,
+        };
+        const wantsActive =
+          existing !== undefined
+            ? existing.state !== "disabled"
+            : entry.def.shouldAutoEnable
+              ? entry.def.shouldAutoEnable()
+              : entry.manifest.autoInstall || entry.manifest.defaultEnabled;
+
+        if (!wantsActive) {
+          this.enabled.set(name, false);
+          continue;
+        }
+
+        if (entry.def.migrations && entry.def.migrations.length > 0) {
+          await applyAddonOwnedMigrations(name, entry.def.migrations);
+        }
+        claimIntoRegistryState(registryState, entry.manifest, entry.def);
+        if (entry.def.register) {
+          await entry.def.register({ loaded: [...loadedSoFar], state: registryState });
+        }
+        const addonSchemaHash = this.computeAddonHash(
+          entry.manifest,
+          entry.def,
+          report.schemaHashes,
+        );
+        if (
+          !existing ||
+          existing.addon_version !== entry.manifest.version ||
+          existing.schema_hash !== addonSchemaHash ||
+          existing.state !== "installed"
+        ) {
+          await irAddonModel.repository.upsert(
+            { name },
+            {
+              name,
+              addon_version: entry.manifest.version,
+              description: entry.manifest.description ?? "",
+              category: entry.manifest.category ?? "general",
+              depends_json: JSON.stringify(entry.manifest.depends),
+              provides_json: JSON.stringify(entry.manifest.provides),
+              capabilities_json: JSON.stringify(entry.manifest.capabilities),
+              schema_hash: addonSchemaHash,
+              state: "installed",
+              signature_status: sigMeta.status,
+              signature_key_id: sigMeta.keyId,
+              auto_install: entry.manifest.autoInstall,
+              failed_phase: null,
+              last_error: null,
+            },
+            SYSTEM_ACTOR,
+          );
+        }
+        this.enabled.set(name, true);
+        loadedSoFar.push(name);
+      }
+
+      if (fastify) {
+        for (const name of order) {
+          const entry = this.definitions.get(name)!;
+          if (!entry.def.registerRoutes) continue;
+          await fastify.register(async (scope) => {
+            scope.addHook("preHandler", this.requireAddonEnabled(name));
+            await entry.def.registerRoutes!(scope);
+          });
+        }
+      }
+
+      return { order, syncReport: report };
     }
 
     await syncModels([...irSystemModels, opsJobModel]);

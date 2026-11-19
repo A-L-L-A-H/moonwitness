@@ -1,0 +1,19 @@
+{
+  "name": "project",
+  "version": "1.0.0",
+  "description": "Centralized Project & Task Management Kanban Board with GitHub Issues Synchronization",
+  "category": "operations",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["project.portfolio", "project.kanban", "github.issue_sync"],
+  "provides": {
+    "routes": [
+      "/api/v1/project/summary",
+      "/api/v1/project/sync/github",
+      "/api/v1/project/webhooks/github"
+    ],
+    "models": ["project.project", "project.task", "project.sync_log"],
+    "auditActions": ["project.task.move_stage", "project.task.mark_done", "project.github.sync"]
+  }
+}

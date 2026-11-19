@@ -53,12 +53,12 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(existsSync(envExamplePath)).toBe(true);
   });
 
-  it("enforces three-app workspace topology under apps/ (MW-0101)", () => {
+  it("enforces canonical app workspace topology under apps/ (MW-0101 + edge)", () => {
     const appDirs = readdirSync(resolve(repoRoot, "apps"), { withFileTypes: true })
       .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
       .map((entry) => entry.name)
       .sort();
-    expect(appDirs).toEqual(["api", "rocksoul", "web"]);
+    expect(appDirs).toEqual(["api", "edge", "rocksoul", "web"]);
   });
 
   it("validates Caddy reverse proxy routing and security headers", () => {
@@ -115,6 +115,11 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
       expect(rawCompose).toContain("snmp-poller:");
       expect(rawCompose).toContain("syslog:");
       expect(rawCompose).toContain("storage:");
+      expect(rawCompose).not.toContain("sqlite:/data/");
+      expect(rawCompose).toContain("@postgres:5432/${RADIUS_POSTGRES_DB:-radius}");
+      expect(rawCompose).toContain("@postgres:5432/${SNMP_POSTGRES_DB:-snmp}");
+      expect(rawCompose).toContain("@postgres:5432/${SYSLOG_POSTGRES_DB:-syslog}");
+      expect(rawCompose).toContain("@postgres:5432/${STORAGE_POSTGRES_DB:-storage}");
       return;
     }
 
@@ -236,12 +241,17 @@ describe("VPS Topology & Compose Architecture (MW-0035)", () => {
     expect(api.networks).toHaveProperty("moonwitness-public");
     expect(api.networks).toHaveProperty("moonwitness-internal");
 
-    // 4. Service-to-Service DNS Resolution
+    // 4. Service-to-Service DNS Resolution & Per-Service PostgreSQL Isolation
     expect(api.environment?.RADIUS_URL).toBe("http://radius:8090");
     expect(api.environment?.STORAGE_URL).toBe("http://storage:8091");
     expect(api.environment?.SNMP_POLLER_URL).toBe("http://snmp-poller:8094");
     expect(api.environment?.SYSLOG_URL).toBe("http://syslog:8093");
     expect(web.environment?.API_INTERNAL_URL).toBe("http://api:3002");
+
+    expect(radius.environment?.DATABASE_URL).toMatch(/^postgresql:\/\/.*@postgres:5432\/radius$/);
+    expect(snmp.environment?.DATABASE_URL).toMatch(/^postgresql:\/\/.*@postgres:5432\/snmp$/);
+    expect(syslog.environment?.DATABASE_URL).toMatch(/^postgresql:\/\/.*@postgres:5432\/syslog$/);
+    expect(storage.environment?.DATABASE_URL).toMatch(/^postgresql:\/\/.*@postgres:5432\/storage$/);
 
     // 5. Stateful Persistence Volumes
     expect(volumes).toHaveProperty("moonwitness-data");

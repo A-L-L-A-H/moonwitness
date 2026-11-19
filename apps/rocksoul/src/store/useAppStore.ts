@@ -146,8 +146,11 @@ export const useAppStore = create<AppState>((setState, getState) => ({
     if (getState().loading) return;
     setState({ loading: true, error: "" });
     try {
-      const dashboard = await call("get_dashboard");
-      const [projects, milestones] = await Promise.all([call("list_projects"), call("list_milestones")]);
+      const [dashboard, projects, milestones] = await Promise.all([
+        call("get_dashboard"),
+        call("list_projects"),
+        call("list_milestones"),
+      ]);
       setState({
         stats: dashboard?.stats ?? { active: 0, blocked: 0, completed: 0 },
         issues: dashboard?.issues ?? [],

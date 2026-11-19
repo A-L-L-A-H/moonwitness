@@ -17,7 +17,7 @@ import { DistressedSticker, Grain, SkinArtworkFrame, ZineButton, useSkin } from 
 import { AtmosphereField } from "@/components/atmosphere";
 import { useParallax } from "@/lib/motion/use-parallax";
 import { useHeroIntro } from "@/lib/motion/use-hero-intro";
-import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 import { artSrc } from "@/lib/art";
 
@@ -25,7 +25,7 @@ export function Hero() {
   const root = useHeroIntro();
   const pathname = usePathname() ?? "";
   const pathLocale = getLocaleFromPath(pathname);
-  const { locale } = useSanctuaryLocale();
+  const { dictionary } = useTranslation();
   const { skin } = useSkin();
   const characterParallax = useParallax(0.12);
   const moonParallax = useParallax(0.08);
@@ -93,25 +93,15 @@ export function Hero() {
         <div className="hero-heading-placement">
           <div data-hero-headline>
             <DistressedSticker variant="classified" className="mb-2" />
-            <p className="hero-frequency font-mono">UNDERGROUND BROADCAST // 1420.4 MHz</p>
+            <p className="hero-frequency font-mono">
+              {dictionary.chronicle.landing.hero.frequency}
+            </p>
             <div className="hero-title-paper">
               <Crown aria-hidden="true" className="hero-crown" />
               <h1 className="font-brush">MOONWITNESS</h1>
             </div>
-            <p className="hero-tagline font-hand">
-              {locale === "id"
-                ? "MANUSIA. TEMPAT. KISAH."
-                : locale === "ar"
-                  ? "أناس. أماكن. حكايات."
-                  : "PEOPLE. PLACES. STORIES."}
-            </p>
-            <p className="hero-subline font-hand">
-              {locale === "id"
-                ? "SISI LAIN DARI REALITAS."
-                : locale === "ar"
-                  ? "الجانب الآخر من الواقع."
-                  : "ANOTHER SIDE OF REALITY."}
-            </p>
+            <p className="hero-tagline font-hand">{dictionary.chronicle.landing.hero.tagline}</p>
+            <p className="hero-subline font-hand">{dictionary.chronicle.landing.hero.subline}</p>
           </div>
         </div>
         <div className="hero-stage" aria-hidden="true">
@@ -144,56 +134,35 @@ export function Hero() {
         </div>
         <div className="hero-copy-placement">
           <div className="hero-copy-paper">
-            {locale === "id" ? (
-              <p className="font-hand">
-                Jejaring kisah global bagi pencari makna.
-                <br />
-                Berbeda manusia. Satu bulan yang sama.
-                <br />
-                <strong>Perspektif lebih luas.</strong>
-              </p>
-            ) : locale === "ar" ? (
-              <p className="font-hand">
-                شبكة قصص عالمية لأهل التساؤل والشهود.
-                <br />
-                أناسٌ مختلفون تحت قمرٍ واحد.
-                <br />
-                <strong>آفاقٌ أوسع.</strong>
-              </p>
-            ) : (
-              <p className="font-hand">
-                A global story network for curious humans.
-                <br />
-                Different people. Same moon.
-                <br />
-                <strong>Bigger perspectives.</strong>
-              </p>
-            )}
+            <p
+              className="font-hand"
+              dangerouslySetInnerHTML={{
+                __html: dictionary.chronicle.landing.hero.copy.replace(/\n/g, "<br />"),
+              }}
+            />
           </div>
           <ZineButton asChild className="hero-cta">
             <Link data-hero-cta href={dockHref}>
-              {locale === "id"
-                ? "JELAJAHI SINYAL"
-                : locale === "ar"
-                  ? "استكشف الإشارات"
-                  : "EXPLORE THE SIGNALS"}{" "}
+              {dictionary.chronicle.landing.hero.cta}{" "}
               <ArrowRight aria-hidden="true" className="h-5 w-5" />
             </Link>
           </ZineButton>
         </div>
         <div className="hero-note-placement" aria-hidden="true">
           <div data-hero-annotations className="hero-notes font-hand">
-            <p className="hero-note-paper">
-              LOOK FURTHER
-              <br />
-              THAN WE DO.
-            </p>
+            <p
+              className="hero-note-paper"
+              dangerouslySetInnerHTML={{
+                __html: dictionary.chronicle.landing.hero.notePaper.replace(/\n/g, "<br />"),
+              }}
+            />
             <Bolt className="hero-bolt" />
-            <p className="hero-note-ink">
-              SAME MOON.
-              <br />
-              DIFFERENT WITNESSES.
-            </p>
+            <p
+              className="hero-note-ink"
+              dangerouslySetInnerHTML={{
+                __html: dictionary.chronicle.landing.hero.noteInk.replace(/\n/g, "<br />"),
+              }}
+            />
           </div>
         </div>
       </div>

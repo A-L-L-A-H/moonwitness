@@ -17,6 +17,7 @@ pub async fn init_postgres_pool(url: &str) -> anyhow::Result<sqlx::PgPool> {
         .max_connections(5)
         .connect(url)
         .await?;
+    sqlx::migrate!("./migrations").run(&pool).await?;
     Ok(pool)
 }
 
@@ -66,5 +67,14 @@ mod tests {
             .join("radius.db");
         let url = format!("sqlite:{}?mode=rwc", missing.display());
         assert!(init_db(&url).await.is_err());
+    }
+
+    #[test]
+    fn is_postgres_url_detects_postgres_schemes() {
+        assert!(is_postgres_url(
+            "postgres://radius:pass@postgres:5432/radius"
+        ));
+        assert!(is_postgres_url("postgresql://postgres:5432/radius"));
+        assert!(!is_postgres_url("sqlite:/data/radius.db?mode=rwc"));
     }
 }

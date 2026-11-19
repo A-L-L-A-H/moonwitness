@@ -365,7 +365,7 @@ function stepCommitMessages(gate) {
   }
 }
 
-const EXPECTED_APP_WORKSPACES = ["api", "rocksoul", "web"];
+const EXPECTED_APP_WORKSPACES = ["api", "edge", "rocksoul", "web"];
 
 function stepAppTopology(gate) {
   const appsDir = join(ROOT, "apps");

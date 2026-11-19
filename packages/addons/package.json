@@ -29,7 +29,8 @@
     "./stock": "./src/stock/index.ts",
     "./crm": "./src/crm/index.ts",
     "./performance": "./src/performance/index.ts",
-    "./observatory": "./src/observatory/index.ts"
+    "./observatory": "./src/observatory/index.ts",
+    "./project": "./src/project/index.ts"
   },
   "scripts": {
     "build": "echo \"addons: no build output\"",
