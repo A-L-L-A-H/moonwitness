@@ -1,25 +1,29 @@
 import type { ChatRequest, OllamaAdapter } from "@moonwitness/ai";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import type { createRateLimiter } from "../../infrastructure/rate-limit";
-import { env } from "../../shared/env";
-import type { InferenceUsage } from "./riot-ai.audit";
-import { getProviderConfig } from "./riot-ai.persistence";
+import {
+  resolveActorTenantFromBridge,
+  type BaseAddonAuthBridge,
+  type FastifyPreHandler,
+} from "@moonwitness/addon-runtime";
+import type { InferenceUsage } from "./audit.js";
+import { getProviderConfig } from "./persistence.js";
 import {
   chatResponseSchema,
   isAuditPersistenceFailure,
   mapRiotAiError,
-  parseRiotAiClientAddress,
   requestSchema,
   setNoStore,
   streamingEventSchema,
-} from "./riot-ai.schemas";
+  type ResolvedRiotAiRuntime,
+} from "./schemas.js";
 
 export interface RiotAiChatRouteDeps {
+  readonly auth: BaseAddonAuthBridge;
   readonly authorize: (request: FastifyRequest, reply: FastifyReply) => Promise<void> | void;
   readonly adapter: OllamaAdapter | null;
   readonly misconfigured: boolean;
-  readonly configuredModelId: string | undefined;
-  readonly requestLimit: ReturnType<typeof createRateLimiter>;
+  readonly runtime: ResolvedRiotAiRuntime;
+  readonly rateLimitPreHandler: FastifyPreHandler;
   readonly recordAudit: (
     request: FastifyRequest,
     model: string,
@@ -31,7 +35,16 @@ export interface RiotAiChatRouteDeps {
 }
 
 export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiChatRouteDeps): void {
-  const { authorize, adapter, misconfigured, configuredModelId, requestLimit, recordAudit } = deps;
+  const {
+    auth,
+    authorize,
+    adapter,
+    misconfigured,
+    runtime,
+    rateLimitPreHandler,
+    recordAudit,
+  } = deps;
+  const configuredModelId = runtime.RIOT_AI_MODEL;
 
   fastify.post(
     "/riot-ai/chat",
@@ -39,17 +52,9 @@ export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiCh
       preHandler: async (request, reply) => {
         await authorize(request, reply);
         if (reply.sent) return;
-        const result = requestLimit.check(parseRiotAiClientAddress(request));
-        reply.header("x-ratelimit-limit", env.RIOT_AI_RATE_LIMIT_MAX);
-        reply.header("x-ratelimit-remaining", result.remaining);
-        if (!result.allowed) {
-          reply.header("retry-after", Math.ceil(result.retryAfterMs / 1000));
-          return reply
-            .code(429)
-            .send({ error: "too many inference requests", code: "RATE_LIMITED" });
-        }
+        await rateLimitPreHandler(request, reply);
       },
-      bodyLimit: env.RIOT_AI_MAX_REQUEST_BYTES,
+      bodyLimit: runtime.RIOT_AI_MAX_REQUEST_BYTES,
     },
     async (request, reply) => {
       setNoStore(reply);
@@ -61,13 +66,15 @@ export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiCh
           .send({ error: "invalid inference request", code: "INVALID_REQUEST" });
       }
       const { stream, ...chatRequest } = parsed.data;
-      const providerConfig = await getProviderConfig("default");
+      const actorRole = auth.getActorRole(request);
+      const tenantId = resolveActorTenantFromBridge(auth, request);
+      const providerConfig = await getProviderConfig("default", tenantId);
       if (!adapter || !providerConfig?.enabled) {
         return reply.code(503).send({
           error:
             providerConfig && !providerConfig.enabled
               ? "local inference is disabled by the operator"
-              : request.user?.role === "admin"
+              : actorRole === "admin"
                 ? misconfigured
                   ? "local inference runtime configuration is invalid"
                   : "local inference runtime is not configured"
@@ -78,8 +85,8 @@ export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiCh
         return reply.code(503).send({ error: "no preferred inference model is configured" });
       }
       const selectedModel =
-        chatRequest.model ?? providerConfig?.preferred_model ?? env.RIOT_AI_MODEL ?? "";
-      if (request.user?.role !== "admin" && !providerConfig?.preferred_model) {
+        chatRequest.model ?? providerConfig?.preferred_model ?? configuredModelId ?? "";
+      if (actorRole !== "admin" && !providerConfig?.preferred_model) {
         return reply.code(503).send({ error: "no inference model is approved for this operator" });
       }
       if (!selectedModel) {
@@ -87,7 +94,7 @@ export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiCh
           .code(400)
           .send({ error: "no inference model is configured", code: "INVALID_REQUEST" });
       }
-      if (request.user?.role !== "admin" && selectedModel !== providerConfig.preferred_model) {
+      if (actorRole !== "admin" && selectedModel !== providerConfig.preferred_model) {
         return reply.code(400).send({ error: "model is not the selected operator preference" });
       }
       const approvedModelIds = new Set(
@@ -114,7 +121,7 @@ export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiCh
       const options: ChatRequest = {
         ...chatRequest,
         model: selectedModel,
-        timeoutMs: env.RIOT_AI_TIMEOUT_MS,
+        timeoutMs: runtime.RIOT_AI_TIMEOUT_MS,
         signal: requestController.signal,
       };
       const inferenceStartedAt = Date.now();

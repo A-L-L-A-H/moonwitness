@@ -3,6 +3,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
+import { closeDb, initDb, syncModels } from "@moonwitness/orm";
+import {
+  defaultFailClosedAuthBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { memoryRecordModel, registerMemoryRoutes } from "@moonwitness/addons/ai";
 
 const tempDirs: string[] = [];
 let activeCloseDb: (() => void) | null = null;
@@ -38,8 +44,9 @@ async function loadMemoryApp(
     role: options?.role ?? "admin",
   };
 
-  vi.doMock("../../middleware/auth", () => ({
-    requireAuth: () => async (request: FastifyRequest, reply: FastifyReply) => {
+  const bridge: BaseAddonAuthBridge = {
+    ...defaultFailClosedAuthBridge,
+    authenticate: async (request: FastifyRequest, reply: FastifyReply) => {
       if (!auth.authenticated) {
         return reply.code(401).send({ error: "Not authenticated" });
       }
@@ -68,19 +75,20 @@ async function loadMemoryApp(
           displayName: "Operator",
         };
       },
-  }));
+  };
 
-  vi.resetModules();
   if (options?.dbPath) {
-    const orm = await import("@moonwitness/orm");
-    const aiAddon = await import("@moonwitness/addons/ai");
-    await orm.initDb(options.dbPath);
-    await orm.syncModels([aiAddon.memoryRecordModel]);
-    activeCloseDb = () => orm.closeDb();
+    await initDb(options.dbPath);
+    await syncModels([memoryRecordModel]);
+    activeCloseDb = () => closeDb();
   }
-  const { memoryRoutes } = await import("./memory.routes");
   const app = Fastify({ logger: false });
-  await app.register(memoryRoutes, { prefix: "/api/v1" });
+  await app.register(
+    async (scope) => {
+      await registerMemoryRoutes(scope, { auth: bridge });
+    },
+    { prefix: "/api/v1" },
+  );
   await app.ready();
   return { app, auth };
 }
@@ -95,7 +103,6 @@ describe("memory bridge routes", () => {
     activeCloseDb = null;
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
-    vi.doUnmock("../../middleware/auth");
   });
 
   afterAll(async () => {

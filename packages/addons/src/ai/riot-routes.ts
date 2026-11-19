@@ -1,37 +1,84 @@
 import { z } from "zod";
-import { createActorContext } from "@moonwitness/orm";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { createRateLimiter } from "../../infrastructure/rate-limit";
-import { requireRole } from "../../middleware/auth";
-import { env } from "../../shared/env";
+import {
+  defaultFailClosedAuthBridge,
+  resolveActorContextFromBridge,
+  resolveActorTenantFromBridge,
+  type BaseAddonAuthBridge,
+  type FastifyPreHandler,
+  type HostRateLimitFactory,
+} from "@moonwitness/addon-runtime";
 import {
   persistInferenceAudit,
   type InferenceAuditRecord,
   type InferenceUsage,
-} from "./riot-ai.audit";
+} from "./audit.js";
+import { registerRiotAiChatRoute } from "./chat.js";
 import {
   getProviderConfig,
-  listProviderConfigHistory,
-  initializeRiotAiPersistence,
   listOperatorUsageSummary,
+  listProviderConfigHistory,
   maintainUsageRetention,
   upsertProviderConfig,
-} from "./riot-ai.persistence";
-import { registerRiotAiChatRoute } from "./riot-ai.chat";
+} from "./persistence.js";
 import {
   getRiotAiAdapterState,
   getUsageOverview,
   mapRiotAiError,
+  parseRiotAiClientAddress,
+  resolveRiotAiRuntime,
   setNoStore,
-} from "./riot-ai.schemas";
+  type RiotAiRuntimeConfig,
+} from "./schemas.js";
 
-export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
-  await initializeRiotAiPersistence();
-  const authorize = requireRole("admin", "editor");
-  const adapterState = getRiotAiAdapterState();
+export interface RiotAiRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+  rateLimit?: HostRateLimitFactory;
+  runtime?: Partial<RiotAiRuntimeConfig>;
+}
+
+function createInMemoryChatRateLimiter(
+  max: number,
+  windowMs: number,
+  trustedProxyCount: number,
+): { preHandler: FastifyPreHandler; reset: () => void } {
+  const buckets = new Map<string, { count: number; resetAt: number }>();
+  return {
+    preHandler: async (request, reply) => {
+      const now = Date.now();
+      const key = parseRiotAiClientAddress(request, trustedProxyCount);
+      let bucket = buckets.get(key);
+      if (!bucket || bucket.resetAt <= now) {
+        bucket = { count: 0, resetAt: now + windowMs };
+        buckets.set(key, bucket);
+      }
+      bucket.count += 1;
+      reply.header("x-ratelimit-limit", max);
+      reply.header("x-ratelimit-remaining", Math.max(0, max - bucket.count));
+      if (bucket.count > max) {
+        reply.header("retry-after", Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)));
+        return reply.code(429).send({ error: "too many inference requests", code: "RATE_LIMITED" });
+      }
+      return undefined;
+    },
+    reset: () => {
+      buckets.clear();
+    },
+  };
+}
+
+export async function registerRiotAiRoutes(
+  fastify: FastifyInstance,
+  options: RiotAiRoutesOptions = {},
+): Promise<void> {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const authorize = auth.requireRole("admin", "editor");
+  const adminOnly = auth.requireRole("admin");
+  const runtime = resolveRiotAiRuntime(options.runtime);
+  const adapterState = getRiotAiAdapterState(options.runtime);
   const adapter = adapterState.adapter;
-  const configuredModelId = env.RIOT_AI_MODEL;
-  const configuredBaseUrl = env.RIOT_AI_BASE_URL;
+  const configuredModelId = runtime.RIOT_AI_MODEL;
+  const configuredBaseUrl = runtime.RIOT_AI_BASE_URL;
 
   const respondWithError = (request: FastifyRequest, reply: FastifyReply, error: unknown) => {
     const mapped = mapRiotAiError(error);
@@ -49,8 +96,9 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
   ): Promise<boolean> => {
     let auditEventWritten = false;
     try {
+      const tenantId = resolveActorTenantFromBridge(auth, request);
       const record: InferenceAuditRecord = {
-        actorId: request.user ? String(request.user.id) : "unknown",
+        actorId: auth.getActorId(request) ?? "unknown",
         requestId: request.id,
         provider: "ollama",
         model,
@@ -58,7 +106,7 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
         durationMs: Date.now() - startedAt,
         usage,
         ...(errorCode ? { errorCode } : {}),
-        ...(request.tenantId ? { tenantId: request.tenantId } : {}),
+        tenantId,
       };
       await persistInferenceAudit(record);
       auditEventWritten = true;
@@ -71,18 +119,27 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
     }
   };
 
-  const requestLimit = createRateLimiter({
-    max: env.RIOT_AI_RATE_LIMIT_MAX,
-    windowMs: env.RIOT_AI_RATE_LIMIT_WINDOW_MS,
-  });
+  const fallbackRateLimiter = createInMemoryChatRateLimiter(
+    runtime.RIOT_AI_RATE_LIMIT_MAX,
+    runtime.RIOT_AI_RATE_LIMIT_WINDOW_MS,
+    runtime.TRUSTED_PROXY_COUNT,
+  );
+  const rateLimitPreHandler = options.rateLimit
+    ? options.rateLimit({
+        max: runtime.RIOT_AI_RATE_LIMIT_MAX,
+        windowMs: runtime.RIOT_AI_RATE_LIMIT_WINDOW_MS,
+        scope: "riot-ai",
+        message: "too many inference requests",
+      })
+    : fallbackRateLimiter.preHandler;
 
   fastify.addHook("onClose", async () => {
-    requestLimit.reset();
+    fallbackRateLimiter.reset();
   });
 
   fastify.addHook("onReady", async () => {
     try {
-      await maintainUsageRetention(env.RIOT_AI_USAGE_RETENTION_DAYS);
+      await maintainUsageRetention(runtime.RIOT_AI_USAGE_RETENTION_DAYS);
     } catch (error) {
       fastify.log.error({ err: error }, "RIOT inference usage retention failed");
     }
@@ -90,8 +147,9 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
 
   fastify.get("/riot-ai/health", { preHandler: authorize }, async (request, reply) => {
     setNoStore(reply);
-    const providerConfig = await getProviderConfig("default");
-    if (request.user?.role !== "admin") {
+    const tenantId = resolveActorTenantFromBridge(auth, request);
+    const providerConfig = await getProviderConfig("default", tenantId);
+    if (auth.getActorRole(request) !== "admin") {
       if (!providerConfig?.enabled) {
         return reply.code(503).send({ status: "unconfigured", provider: "ollama" });
       }
@@ -115,7 +173,7 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
       ...health,
       status: providerConfig?.enabled
         ? health.status
-        : env.RIOT_AI_BASE_URL
+        : runtime.RIOT_AI_BASE_URL
           ? "unhealthy"
           : "unconfigured",
       ...(!providerConfig?.enabled
@@ -128,8 +186,9 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
 
   fastify.get("/riot-ai/models", { preHandler: authorize }, async (request, reply) => {
     setNoStore(reply);
-    const providerConfig = await getProviderConfig("default");
-    if (request.user?.role !== "admin") {
+    const tenantId = resolveActorTenantFromBridge(auth, request);
+    const providerConfig = await getProviderConfig("default", tenantId);
+    if (auth.getActorRole(request) !== "admin") {
       if (!providerConfig?.enabled || !adapter) {
         return reply.code(503).send({ error: "local inference is unavailable" });
       }
@@ -181,8 +240,9 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
 
   fastify.get("/riot-ai/config", { preHandler: authorize }, async (request, reply) => {
     setNoStore(reply);
-    const config = await getProviderConfig("default");
-    const operator = request.user?.role === "admin";
+    const tenantId = resolveActorTenantFromBridge(auth, request);
+    const config = await getProviderConfig("default", tenantId);
+    const operator = auth.getActorRole(request) === "admin";
     return reply.send({
       config: config
         ? {
@@ -198,14 +258,14 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
             label: "Local inference",
             provider: "ollama",
             enabled: false,
-            preferredModel: operator ? (env.RIOT_AI_MODEL ?? null) : null,
+            preferredModel: operator ? (configuredModelId ?? null) : null,
             canEditConfig: operator,
           },
       endpoint: configuredBaseUrl ? "server-configured" : "not-configured",
     });
   });
 
-  fastify.put("/riot-ai/config", { preHandler: requireRole("admin") }, async (request, reply) => {
+  fastify.put("/riot-ai/config", { preHandler: adminOnly }, async (request, reply) => {
     setNoStore(reply);
     const body = z
       .object({
@@ -218,9 +278,10 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
     if (!body.success) {
       return reply.code(400).send({ error: "invalid inference configuration" });
     }
-    const current = await getProviderConfig("default");
+    const actor = resolveActorContextFromBridge(auth, request, "api");
+    const current = await getProviderConfig("default", actor.tenantId);
     const { enabled, preferredModel, label } = body.data;
-    if (enabled && !env.RIOT_AI_BASE_URL) {
+    if (enabled && !runtime.RIOT_AI_BASE_URL) {
       return reply.code(409).send({ error: "configure the runtime endpoint on the API first" });
     }
     if (preferredModel && configuredModelId && preferredModel !== configuredModelId) {
@@ -256,12 +317,7 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
     }
     const config = await upsertProviderConfig(
       { profileKey: "default", label, enabled, preferredModel },
-      createActorContext(
-        request.user ? String(request.user.id) : null,
-        "api",
-        request.id,
-        request.tenantId,
-      ),
+      actor,
     );
     return reply.send({
       config: {
@@ -275,7 +331,7 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
     });
   });
 
-  fastify.get("/riot-ai/usage", { preHandler: requireRole("admin") }, async (request, reply) => {
+  fastify.get("/riot-ai/usage", { preHandler: adminOnly }, async (request, reply) => {
     setNoStore(reply);
     const query = z
       .object({
@@ -286,36 +342,35 @@ export async function riotAiRoutes(fastify: FastifyInstance): Promise<void> {
     if (!query.success) {
       return reply.code(400).send({ error: "invalid usage summary query" });
     }
+    const tenantId = resolveActorTenantFromBridge(auth, request);
     const since = new Date(Date.now() - query.data.days * 24 * 60 * 60 * 1000).toISOString();
     const entries = await listOperatorUsageSummary({
       limit: query.data.limit + 1,
       since,
-      tenantId: request.tenantId,
+      tenantId,
     });
     const truncated = entries.length > query.data.limit;
     return reply.send({
       entries: truncated ? entries.slice(0, query.data.limit) : entries,
-      summary: await getUsageOverview(query.data.days, query.data.limit, request.tenantId),
+      summary: await getUsageOverview(query.data.days, query.data.limit, tenantId),
     });
   });
 
-  fastify.get(
-    "/riot-ai/config/history",
-    { preHandler: requireRole("admin") },
-    async (request, reply) => {
-      setNoStore(reply);
-      return reply.send({
-        history: await listProviderConfigHistory("default", request.tenantId),
-      });
-    },
-  );
+  fastify.get("/riot-ai/config/history", { preHandler: adminOnly }, async (request, reply) => {
+    setNoStore(reply);
+    const tenantId = resolveActorTenantFromBridge(auth, request);
+    return reply.send({
+      history: await listProviderConfigHistory("default", tenantId),
+    });
+  });
 
   registerRiotAiChatRoute(fastify, {
+    auth,
     authorize,
     adapter,
     misconfigured: adapterState.misconfigured,
-    configuredModelId,
-    requestLimit,
+    runtime,
+    rateLimitPreHandler,
     recordAudit,
   });
 }

@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@moonwitness/addon-runtime": "workspace:*",
+    "@moonwitness/ai": "workspace:*",
     "@moonwitness/canon": "workspace:*",
     "@moonwitness/contracts": "workspace:*",
     "@moonwitness/core": "workspace:*",

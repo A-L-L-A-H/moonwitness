@@ -16,21 +16,7 @@ import {
   type BaseAddonAuthBridge,
   type HostRateLimitFactory,
 } from "@moonwitness/addon-runtime";
-import { createI18nAddon } from "@moonwitness/addons/i18n";
-import { createAuditAddon } from "@moonwitness/addons/audit";
-import { createAuthAddon } from "@moonwitness/addons/auth";
-import { createTimelineAddon } from "@moonwitness/addons/timeline";
-import { createControlAddon } from "@moonwitness/addons/control";
-import { createCommandCenterAddon } from "@moonwitness/addons/command-center";
-import { createProbesAddon } from "@moonwitness/addons/probes";
-import { createAiAddon } from "@moonwitness/addons/ai";
-import { createStorageAddon } from "@moonwitness/addons/storage";
-import { createSnmpAddon } from "@moonwitness/addons/snmp";
-import { createSyslogAddon } from "@moonwitness/addons/syslog";
-import { createRadiusAddon } from "@moonwitness/addons/radius";
-import { createCanonLoreAddon } from "@moonwitness/addons/canon-lore";
-import { createWitnessResearchAddon } from "@moonwitness/addons/witness-research";
-import { createEpistemicAddon } from "@moonwitness/addons/epistemic";
+import { createPlatformAddons } from "@moonwitness/addons";
 import { env, parseCorsOrigins } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 import {
@@ -41,8 +27,6 @@ import {
 } from "./infrastructure/rate-limit";
 import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
 import { createApiMetricsCollector } from "./interface/routes/metrics";
-import { memoryRoutes } from "./interface/routes/memory.routes";
-import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
 import {
   optionalAuth,
   requireAuth,
@@ -187,26 +171,7 @@ async function registerAddonTree(
         });
       },
     },
-    createI18nAddon({ prefix, auth: host.auth }),
-    createAuditAddon({ prefix, auth: host.auth }),
-    createAuthAddon(host),
-    createTimelineAddon(host),
-    createControlAddon(host),
-    createCommandCenterAddon(host),
-    createProbesAddon(host),
-    createAiAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(riotAiRoutes, prefix ? { prefix } : {});
-        await scope.register(memoryRoutes, prefix ? { prefix } : {});
-      },
-    }),
-    createStorageAddon(host),
-    createSnmpAddon(host),
-    createSyslogAddon(host),
-    createRadiusAddon(host),
-    createCanonLoreAddon({ prefix, auth: host.auth }),
-    createWitnessResearchAddon({ prefix, auth: host.auth }),
-    createEpistemicAddon({ prefix, auth: host.auth }),
+    ...createPlatformAddons(host),
   ];
 
   await runtime.syncAll(addons, target, {

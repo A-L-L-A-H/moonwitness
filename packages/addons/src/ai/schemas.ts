@@ -1,9 +1,124 @@
 import { z } from "zod";
 import { OllamaAdapter } from "@moonwitness/ai";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { resolveRateLimitKey } from "../../infrastructure/rate-limit";
-import { env, validateRiotAiRuntimeConfig } from "../../shared/env";
-import { listOperatorUsageSummary } from "./riot-ai.persistence";
+import { validateRiotAiRuntimeConfig } from "@moonwitness/addon-runtime";
+import { listOperatorUsageSummary } from "./persistence.js";
+
+export interface RiotAiRuntimeConfig {
+  RIOT_AI_BASE_URL?: string;
+  RIOT_AI_MODEL?: string;
+  RIOT_AI_TIMEOUT_MS?: number;
+  RIOT_AI_MAX_REQUEST_BYTES?: number;
+  RIOT_AI_RATE_LIMIT_MAX?: number;
+  RIOT_AI_RATE_LIMIT_WINDOW_MS?: number;
+  RIOT_AI_USAGE_RETENTION_DAYS?: number;
+  TRUSTED_PROXY_COUNT?: number;
+  MEMORY_API_URL?: string;
+  MEMORY_API_TIMEOUT_MS?: number;
+  MOONWITNESS_SYNC_TOKEN?: string;
+}
+
+export interface ResolvedRiotAiRuntime {
+  RIOT_AI_BASE_URL?: string;
+  RIOT_AI_MODEL?: string;
+  RIOT_AI_TIMEOUT_MS: number;
+  RIOT_AI_MAX_REQUEST_BYTES: number;
+  RIOT_AI_RATE_LIMIT_MAX: number;
+  RIOT_AI_RATE_LIMIT_WINDOW_MS: number;
+  RIOT_AI_USAGE_RETENTION_DAYS: number;
+  TRUSTED_PROXY_COUNT: number;
+  MEMORY_API_URL?: string;
+  MEMORY_API_TIMEOUT_MS: number;
+  MOONWITNESS_SYNC_TOKEN?: string;
+}
+
+function readPositiveInt(
+  override: number | undefined,
+  envValue: string | undefined,
+  fallback: number,
+  max?: number,
+): number {
+  const candidate =
+    typeof override === "number"
+      ? override
+      : envValue !== undefined && envValue !== ""
+        ? Number(envValue)
+        : fallback;
+  if (!Number.isInteger(candidate) || candidate <= 0) return fallback;
+  return max !== undefined ? Math.min(candidate, max) : candidate;
+}
+
+export function resolveRiotAiRuntime(
+  runtime?: Partial<RiotAiRuntimeConfig>,
+): ResolvedRiotAiRuntime {
+  const baseUrl =
+    runtime && "RIOT_AI_BASE_URL" in runtime
+      ? runtime.RIOT_AI_BASE_URL?.trim() || undefined
+      : process.env.RIOT_AI_BASE_URL?.trim() || undefined;
+  const model =
+    runtime && "RIOT_AI_MODEL" in runtime
+      ? runtime.RIOT_AI_MODEL?.trim() || undefined
+      : process.env.RIOT_AI_MODEL?.trim() || undefined;
+  const memoryUrl =
+    runtime && "MEMORY_API_URL" in runtime
+      ? runtime.MEMORY_API_URL?.trim() || undefined
+      : process.env.MEMORY_API_URL?.trim() || undefined;
+  const syncToken =
+    runtime && "MOONWITNESS_SYNC_TOKEN" in runtime
+      ? runtime.MOONWITNESS_SYNC_TOKEN?.trim() || undefined
+      : process.env.MOONWITNESS_SYNC_TOKEN?.trim() || undefined;
+  const rawProxyCount =
+    runtime?.TRUSTED_PROXY_COUNT ??
+    (process.env.TRUSTED_PROXY_COUNT ? Number(process.env.TRUSTED_PROXY_COUNT) : 0);
+  const trustedProxyCount =
+    Number.isInteger(rawProxyCount) && rawProxyCount >= 0 && rawProxyCount <= 5
+      ? rawProxyCount
+      : 0;
+
+  return {
+    RIOT_AI_BASE_URL: baseUrl,
+    RIOT_AI_MODEL: model,
+    RIOT_AI_TIMEOUT_MS: readPositiveInt(
+      runtime?.RIOT_AI_TIMEOUT_MS,
+      process.env.RIOT_AI_TIMEOUT_MS,
+      30_000,
+      600_000,
+    ),
+    RIOT_AI_MAX_REQUEST_BYTES: readPositiveInt(
+      runtime?.RIOT_AI_MAX_REQUEST_BYTES,
+      process.env.RIOT_AI_MAX_REQUEST_BYTES,
+      65_536,
+      1_048_576,
+    ),
+    RIOT_AI_RATE_LIMIT_MAX: readPositiveInt(
+      runtime?.RIOT_AI_RATE_LIMIT_MAX,
+      process.env.RIOT_AI_RATE_LIMIT_MAX,
+      20,
+      10_000,
+    ),
+    RIOT_AI_RATE_LIMIT_WINDOW_MS: readPositiveInt(
+      runtime?.RIOT_AI_RATE_LIMIT_WINDOW_MS,
+      process.env.RIOT_AI_RATE_LIMIT_WINDOW_MS,
+      60_000,
+      3_600_000,
+    ),
+    RIOT_AI_USAGE_RETENTION_DAYS: readPositiveInt(
+      runtime?.RIOT_AI_USAGE_RETENTION_DAYS,
+      process.env.RIOT_AI_USAGE_RETENTION_DAYS,
+      90,
+      3_650,
+    ),
+    TRUSTED_PROXY_COUNT: trustedProxyCount,
+    MEMORY_API_URL: memoryUrl,
+    MEMORY_API_TIMEOUT_MS: readPositiveInt(
+      runtime?.MEMORY_API_TIMEOUT_MS,
+      process.env.MEMORY_API_TIMEOUT_MS,
+      10_000,
+      120_000,
+    ),
+    MOONWITNESS_SYNC_TOKEN: syncToken,
+  };
+}
 
 export const requestToolCallSchema = z
   .object({
@@ -251,27 +366,44 @@ export async function getUsageOverview(days = 30, limit = 5000, tenantId?: strin
   };
 }
 
-export function getRiotAiAdapterState(): { adapter: OllamaAdapter | null; misconfigured: boolean } {
-  const baseUrl = env.RIOT_AI_BASE_URL;
+export function getRiotAiAdapterState(runtime?: Partial<RiotAiRuntimeConfig>): {
+  adapter: OllamaAdapter | null;
+  misconfigured: boolean;
+} {
+  const resolved = resolveRiotAiRuntime(runtime);
+  const baseUrl = resolved.RIOT_AI_BASE_URL;
   if (!baseUrl) return { adapter: null, misconfigured: false };
   const problems = validateRiotAiRuntimeConfig({ RIOT_AI_BASE_URL: baseUrl });
   if (problems.length > 0) return { adapter: null, misconfigured: true };
   return {
     adapter: new OllamaAdapter({
       baseUrl,
-      defaultModel: env.RIOT_AI_MODEL,
-      timeoutMs: env.RIOT_AI_TIMEOUT_MS,
+      defaultModel: resolved.RIOT_AI_MODEL,
+      timeoutMs: resolved.RIOT_AI_TIMEOUT_MS,
     }),
     misconfigured: false,
   };
 }
 
-export function parseRiotAiClientAddress(request: FastifyRequest): string {
-  return resolveRateLimitKey(
-    request.ip,
-    request.headers["x-forwarded-for"],
-    env.TRUSTED_PROXY_COUNT,
-  );
+export function parseRiotAiClientAddress(
+  request: FastifyRequest,
+  trustedProxyCount = 0,
+): string {
+  const peer = request.ip;
+  if (!Number.isInteger(trustedProxyCount) || trustedProxyCount <= 0) return peer;
+  const forwardedFor = request.headers["x-forwarded-for"];
+  const header = Array.isArray(forwardedFor)
+    ? forwardedFor.join(",")
+    : typeof forwardedFor === "string"
+      ? forwardedFor
+      : "";
+  const hops = header
+    .split(",")
+    .map((hop) => hop.trim())
+    .filter((hop) => hop.length > 0);
+  if (hops.length < trustedProxyCount) return peer;
+  const client = hops[hops.length - trustedProxyCount];
+  return client && client.length > 0 ? client : peer;
 }
 
 export function setNoStore(reply: FastifyReply): void {

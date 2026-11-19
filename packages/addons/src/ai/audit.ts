@@ -1,4 +1,4 @@
-import { writeUsageSummary } from "./riot-ai.persistence";
+import { writeUsageSummary } from "./persistence.js";
 
 export interface InferenceUsage {
   promptTokens: number | null;

@@ -1,15 +1,26 @@
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { ConflictError, createActorContext } from "@moonwitness/orm";
+import { ConflictError } from "@moonwitness/orm";
 import { z } from "@moonwitness/core";
 import {
   MemorySyncBatchPayloadSchema,
   type MemorySyncRecordPayload,
 } from "@moonwitness/contracts/continuity";
-import { memoryRecordModel } from "@moonwitness/addons/ai";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
-import { env, validateMemoryRuntimeConfig } from "../../shared/env";
-import { getUpstreamBridgeHeaders } from "../../shared/upstream";
+import {
+  defaultFailClosedAuthBridge,
+  getUpstreamBridgeHeaders,
+  resolveActorContextFromBridge,
+  resolveActorTenantFromBridge,
+  validateMemoryRuntimeConfig,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { memoryRecordModel } from "./models.js";
+import { resolveRiotAiRuntime, type RiotAiRuntimeConfig } from "./schemas.js";
+
+export interface MemoryRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+  runtime?: Partial<RiotAiRuntimeConfig>;
+}
 
 const memorySystemSchema = z.object({
   mode: z.string(),
@@ -90,12 +101,9 @@ type MemoryBridgeResolution =
   | { configured: boolean; baseUrl: null; error?: string }
   | { configured: true; baseUrl: string; error?: string };
 
-function resolveMemoryBridge(): MemoryBridgeResolution {
-  const envValue =
-    typeof process !== "undefined" && process.env.MEMORY_API_URL !== undefined
-      ? process.env.MEMORY_API_URL
-      : env.MEMORY_API_URL;
-  const rawUrl = envValue?.trim();
+function resolveMemoryBridge(runtimeOverride?: Partial<RiotAiRuntimeConfig>): MemoryBridgeResolution {
+  const resolved = resolveRiotAiRuntime(runtimeOverride);
+  const rawUrl = resolved.MEMORY_API_URL?.trim();
   if (!rawUrl) {
     return { configured: false, baseUrl: null };
   }
@@ -154,16 +162,11 @@ function toMemoryRecordData(item: MemorySyncRecordPayload, ownerIdFallback: stri
   };
 }
 
-function resolveConfiguredSyncToken(): string {
-  const raw =
-    typeof process !== "undefined" && process.env.MOONWITNESS_SYNC_TOKEN !== undefined
-      ? process.env.MOONWITNESS_SYNC_TOKEN
-      : env.MOONWITNESS_SYNC_TOKEN;
-  return raw?.trim() ?? "";
-}
-
-function matchesSyncBearerToken(request: FastifyRequest): boolean {
-  const configured = resolveConfiguredSyncToken();
+function matchesSyncBearerToken(
+  request: FastifyRequest,
+  runtimeOverride?: Partial<RiotAiRuntimeConfig>,
+): boolean {
+  const configured = resolveRiotAiRuntime(runtimeOverride).MOONWITNESS_SYNC_TOKEN?.trim() ?? "";
   if (!configured) return false;
   const authHeader = request.headers.authorization;
   if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
@@ -177,13 +180,13 @@ function matchesSyncBearerToken(request: FastifyRequest): boolean {
 }
 
 async function mirrorMemoryRecords(
+  auth: BaseAddonAuthBridge,
   request: FastifyRequest,
   records: z.infer<typeof memoryKnowledgeListSchema>,
 ): Promise<void> {
   try {
-    const authUser = (request as AuthenticatedRequest).user;
-    const ownerId = authUser ? String(authUser.id) : null;
-    const actor = createActorContext(ownerId, "api", request.id);
+    const actor = resolveActorContextFromBridge(auth, request, "api");
+    const ownerId = auth.getActorId(request);
     for (const item of records.slice(0, 25)) {
       const payload = toMemoryRecordData(item, ownerId);
       if (!payload.record_key) continue;
@@ -194,16 +197,21 @@ async function mirrorMemoryRecords(
   }
 }
 
-export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
-  const authenticate = requireAuth();
-  const requireWriteRole = requireRole("admin", "editor");
+export async function registerMemoryRoutes(
+  fastify: FastifyInstance,
+  options: MemoryRoutesOptions = {},
+): Promise<void> {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const authenticate = auth.authenticate;
+  const requireWriteRole = auth.requireRole("admin", "editor");
+  const resolvedRuntime = resolveRiotAiRuntime(options.runtime);
 
   fastify.get(
     "/memory/status",
     { preHandler: authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
       reply.header("cache-control", "no-store");
-      const bridge = resolveMemoryBridge();
+      const bridge = resolveMemoryBridge(options.runtime);
       if (!bridge.configured || !bridge.baseUrl) {
         return reply.code(200).send({
           configured: bridge.configured,
@@ -215,7 +223,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
       }
 
       try {
-        const timeoutMs = env.MEMORY_API_TIMEOUT_MS;
+        const timeoutMs = resolvedRuntime.MEMORY_API_TIMEOUT_MS;
         const [system, counts] = await Promise.all([
           fetchMemoryJson(new URL("/api/system", bridge.baseUrl), memorySystemSchema, timeoutMs),
           fetchMemoryJson(new URL("/api/dashboard", bridge.baseUrl), memoryCountsSchema, timeoutMs),
@@ -246,7 +254,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
     { preHandler: authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
       reply.header("cache-control", "no-store");
-      const bridge = resolveMemoryBridge();
+      const bridge = resolveMemoryBridge(options.runtime);
       if (!bridge.configured || !bridge.baseUrl) {
         return reply.code(503).send({
           error: bridge.error ?? "Archive memory bridge is not configured",
@@ -274,9 +282,9 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         const records = await fetchMemoryJson(
           upstreamUrl,
           memoryKnowledgeListSchema,
-          env.MEMORY_API_TIMEOUT_MS,
+          resolvedRuntime.MEMORY_API_TIMEOUT_MS,
         );
-        await mirrorMemoryRecords(request, records);
+        await mirrorMemoryRecords(auth, request, records);
         return reply.code(200).send({
           configured: true,
           query: trimmedQuery,
@@ -299,7 +307,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
     { preHandler: authenticate },
     async (request: FastifyRequest, reply: FastifyReply) => {
       reply.header("cache-control", "no-store");
-      const bridge = resolveMemoryBridge();
+      const bridge = resolveMemoryBridge(options.runtime);
       if (!bridge.configured || !bridge.baseUrl) {
         return reply.code(503).send({
           error: bridge.error ?? "Archive memory bridge is not configured",
@@ -311,7 +319,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         const upstream = await fetch(upstreamUrl, {
           method: "GET",
           headers: getUpstreamBridgeHeaders({}, request),
-          signal: AbortSignal.timeout(env.MEMORY_API_TIMEOUT_MS),
+          signal: AbortSignal.timeout(resolvedRuntime.MEMORY_API_TIMEOUT_MS),
         });
         if (!upstream.ok) {
           return reply.code(502).send({
@@ -341,6 +349,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         });
       }
 
+      const tenantId = resolveActorTenantFromBridge(auth, request);
       const { q, kind, scope, limit, offset } = parsed.data;
       const filters: Record<string, unknown> = {};
       if (kind?.trim()) filters.kind = kind.trim();
@@ -353,8 +362,9 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
             limit,
             offset,
             orderBy: [{ field: "write_date", direction: "DESC" }],
+            tenantId,
           }),
-          memoryRecordModel.repository.count(filters),
+          memoryRecordModel.repository.count(filters, { tenantId }),
         ]);
         return reply.code(200).send({ data, total, limit, offset });
       }
@@ -362,6 +372,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
       const candidates = await memoryRecordModel.repository.find(filters, {
         limit: 500,
         orderBy: [{ field: "write_date", direction: "DESC" }],
+        tenantId,
       });
       const matched = candidates.filter((entry) => {
         const haystack = [
@@ -395,9 +406,8 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         });
       }
 
-      const authUser = (request as AuthenticatedRequest).user;
-      const ownerId = authUser ? String(authUser.id) : null;
-      const actor = createActorContext(ownerId, "api", request.id);
+      const actor = resolveActorContextFromBridge(auth, request, "api");
+      const ownerId = auth.getActorId(request);
       const body = parsed.data;
       const recordKey = (body.record_key ?? `mem-${randomUUID()}`).trim().slice(0, 200);
 
@@ -441,8 +451,8 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
     "/memory/sync",
     {
       preHandler: async (request: FastifyRequest, reply: FastifyReply) => {
-        if (matchesSyncBearerToken(request)) {
-          (request as AuthenticatedRequest).user = {
+        if (matchesSyncBearerToken(request, options.runtime)) {
+          (request as { user?: unknown }).user = {
             id: "sync-worker",
             username: "memory-sync",
             email: "sync@moonwitness.local",
@@ -462,12 +472,7 @@ export async function memoryRoutes(fastify: FastifyInstance): Promise<void> {
         });
       }
 
-      const authUser = (request as AuthenticatedRequest).user;
-      const actor = createActorContext(
-        authUser ? String(authUser.id) : `sync:${parsed.data.source}`,
-        "api",
-        request.id,
-      );
+      const actor = resolveActorContextFromBridge(auth, request, "api");
 
       const syncedKeys: string[] = [];
       for (const item of parsed.data.records) {

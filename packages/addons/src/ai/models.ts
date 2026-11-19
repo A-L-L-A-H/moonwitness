@@ -15,7 +15,7 @@ export const providerConfigModel = defineModel({
   schema: providerConfigSchema,
   restEnabled: false,
   publicFields: ["profile_key", "label", "provider", "enabled", "preferred_model"],
-  indexes: [{ fields: ["profile_key"], unique: true }],
+  indexes: [{ fields: ["tenant_id", "profile_key"], unique: true }],
 });
 
 export const usageSummarySchema = z.object({
@@ -62,7 +62,7 @@ export const memoryRecordModel = defineModel({
   restEnabled: true,
   publicFields: ["record_key", "kind", "title", "scope"],
   indexes: [
-    { fields: ["record_key"], unique: true },
+    { fields: ["tenant_id", "record_key"], unique: true },
     { fields: ["owner_id", "scope"] },
     { fields: ["kind"] },
     { fields: ["expires_at"] },

@@ -39,7 +39,7 @@ describe("RIOT Intelligence persistence", () => {
 
   it("syncs models idempotently and preserves provider configuration audit and outbox hooks", async () => {
     await initDb(nextDbPath());
-    const persistence = await import("./riot-ai.persistence");
+    const persistence = await import("@moonwitness/addons/ai");
     await persistence.initializeRiotAiPersistence();
     await persistence.initializeRiotAiPersistence();
 
@@ -100,7 +100,7 @@ describe("RIOT Intelligence persistence", () => {
 
   it("stores usage per actor/tenant and applies ORM soft-delete retention", async () => {
     await initDb(nextDbPath());
-    const persistence = await import("./riot-ai.persistence");
+    const persistence = await import("@moonwitness/addons/ai");
     await persistence.initializeRiotAiPersistence();
     const now = new Date();
     await persistence.writeUsageSummary({

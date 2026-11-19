@@ -8,7 +8,7 @@ import {
   providerConfigSchema,
   usageSummaryModel,
   usageSummarySchema,
-} from "@moonwitness/addons/ai";
+} from "./models.js";
 
 export { providerConfigSchema, usageSummarySchema };
 
