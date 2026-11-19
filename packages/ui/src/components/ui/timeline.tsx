@@ -70,26 +70,26 @@ const Timeline = React.forwardRef<HTMLDivElement, TimelineProps>(
                 <li key={item.id} className="flex min-w-0 gap-3">
                   <span
                     aria-hidden="true"
-                    className="relative flex w-3 shrink-0 justify-center"
+                    className="relative flex w-3 shrink-0 self-stretch justify-center"
                   >
                     <span
                       className={cn(
-                        "mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--primary)] bg-[var(--background)]",
-                        isLast ? "relative" : "absolute start-0",
+                        "relative z-10 mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full border-2 border-[var(--primary)] bg-[var(--background)]",
                       )}
                     />
                     {!isLast ? (
                       <span
-                        className="absolute bottom-[-1.25rem] top-4 w-px bg-[var(--border)]"
-                        style={{ insetBlockEnd: isCompact ? "-0.75rem" : "-1.25rem" }}
+                        className={cn(
+                          "absolute bottom-[-1.25rem] top-4 w-px bg-[var(--border)]",
+                          isCompact && "bottom-[-0.75rem]",
+                        )}
                       />
                     ) : null}
                   </span>
                   <div className={cn("min-w-0 flex-1", isCompact ? "pb-0" : "pb-1")}>
                     <div
                       className={cn(
-                        "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1",
-                        isCompact ? "text-sm" : "text-sm",
+                        "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm",
                       )}
                     >
                       <span className="min-w-0 font-semibold text-[var(--foreground)]">
