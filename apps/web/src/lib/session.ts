@@ -40,16 +40,39 @@ function parseSessionPayload(data: unknown): Session | null {
   };
 }
 
+function isDevSessionFallbackEnabled(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+  const isDev = process.env.NODE_ENV === "development";
+  const explicitBypass = process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "1";
+  if (!isDev && !explicitBypass) {
+    return false;
+  }
+  try {
+    return window.localStorage.getItem("mw_dev_user") !== "0";
+  } catch {
+    return true;
+  }
+}
+
+const DEV_OPERATOR_SESSION: Session = {
+  identity: "Dev Operator",
+  role: "admin",
+  username: "dev",
+  id: "dev-local",
+};
+
 async function fetchCurrentSession(): Promise<Session | null> {
   try {
     const response = await requestApiResponse("/api/v1/auth/me", buildAuthFetchInit());
     if (!response.ok) {
-      return null;
+      return isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null;
     }
     const data = (await response.json()) as unknown;
-    return parseSessionPayload(data);
+    return parseSessionPayload(data) ?? (isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null);
   } catch {
-    return null;
+    return isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null;
   }
 }
 
