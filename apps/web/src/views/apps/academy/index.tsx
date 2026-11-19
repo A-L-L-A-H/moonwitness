@@ -172,11 +172,11 @@ export function AcademyWitnessMizanView() {
     >
       <div className="space-y-4">
         <Card className="relative overflow-hidden">
-          <SkinOrnament slot="corner" className="left-2 top-2" />
+          <SkinOrnament slot="corner" className="start-2 top-2" />
           <CutoutArtwork
             id="witness-silhouette"
             decorative
-            className="pointer-events-none absolute -right-4 -top-2 hidden h-24 w-24 opacity-20 sm:block"
+            className="pointer-events-none absolute -top-2 hidden h-24 w-24 opacity-20 sm:block ltr:-right-4 rtl:-left-4"
           />
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">

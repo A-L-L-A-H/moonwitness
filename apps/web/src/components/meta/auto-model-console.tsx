@@ -130,7 +130,7 @@ export function AutoModelConsole({
   if (viewError || !view || !view.actionBindings) {
     return (
       <Card className="relative overflow-hidden">
-        <SkinOrnament slot="corner" className="right-2 top-2" />
+        <SkinOrnament slot="corner" className="end-2 top-2" />
         <CardHeader className="flex flex-col items-center py-8 text-center">
           <CutoutArtwork
             id={cutoutId ?? "rooftop-antenna"}

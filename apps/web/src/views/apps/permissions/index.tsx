@@ -33,30 +33,27 @@ export function PermissionsView() {
     >
       <div className="space-y-4">
         <Card className="relative overflow-hidden">
-          <SkinOrnament slot="corner" className="left-2 top-2" />
+          <SkinOrnament slot="corner" className="start-2 top-2" />
           <CutoutArtwork
             id="hardware-key"
             decorative
-            className="pointer-events-none absolute -right-4 -top-2 hidden h-24 w-24 opacity-20 sm:block"
+            className="pointer-events-none absolute -top-2 hidden h-24 w-24 opacity-20 sm:block ltr:-right-4 rtl:-left-4"
           />
           <CardHeader>
             <Badge variant="outline" className="w-fit">
-              MODEL ACL & RECORD RULES
+              {dictionary.apps.permissionsBadge}
             </Badge>
             <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
               {dictionary.apps.permissionsTitle}
             </h1>
-            <CardDescription>
-              Row-level record rules (<code>ir.rule</code>), RBAC group clearances (
-              <code>res.groups</code>), and immutable security logs (<code>audit.log</code>).
-            </CardDescription>
+            <CardDescription>{dictionary.apps.permissionsSubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {(
               [
-                { id: "ir.rule", label: "Row-Level Record Rules (ir.rule)" },
-                { id: "res.groups", label: "RBAC Security Groups (res.groups)" },
-                { id: "audit.log", label: "Security Audit Log (audit.log)" },
+                { id: "ir.rule", label: dictionary.apps.permissionsRuleBtn },
+                { id: "res.groups", label: dictionary.apps.permissionsGroupsBtn },
+                { id: "audit.log", label: dictionary.apps.permissionsAuditBtn },
               ] as const
             ).map((m) => (
               <Button

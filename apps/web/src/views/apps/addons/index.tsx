@@ -136,12 +136,12 @@ function AddonsStudioContent() {
         search={{
           value: search,
           onChange: setSearch,
-          placeholder: `Filter ${selectedModel} view…`,
+          placeholder: dictionary.addons.filterModelPlaceholder,
         }}
       >
         <div className="space-y-4">
           <Card className="relative overflow-hidden">
-            <SkinOrnament slot="corner" className="left-2 top-2" />
+            <SkinOrnament slot="corner" className="start-2 top-2" />
             <CardContent className="space-y-3 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -153,7 +153,9 @@ function AddonsStudioContent() {
                   </h1>
                   <Badge variant="outline">{dictionary.addons.modelExplorer}</Badge>
                   <Badge variant="secondary">{visuals.category}</Badge>
-                  <Badge variant="outline">{catalog.length} MODELS</Badge>
+                  <Badge variant="outline">
+                    {catalog.length} {dictionary.addons.modelsLabel}
+                  </Badge>
                 </div>
                 <Button asChild size="sm" variant="ghost">
                   <Link href={baseAddonsPath}>← {dictionary.addons.title}</Link>
@@ -166,7 +168,7 @@ function AddonsStudioContent() {
                   variant={categoryFilter === "all" ? "default" : "outline"}
                   onClick={() => setCategoryFilter("all")}
                 >
-                  All ({catalog.length})
+                  {dictionary.addons.allModels} ({catalog.length})
                 </Button>
                 {modelCategories.map(([cat, models]) => (
                   <Button
@@ -251,7 +253,7 @@ function AddonsStudioContent() {
       search={{
         value: search,
         onChange: setSearch,
-        placeholder: "Filter installed addons…",
+        placeholder: dictionary.addons.filterPlaceholder,
       }}
     >
       <div className="space-y-4">
@@ -279,8 +281,7 @@ function AddonsStudioContent() {
                   {dictionary.addons.title}
                 </h1>
                 <CardDescription className="text-xs">
-                  {dictionary.addons.subtitle} Schema tables sync via{" "}
-                  <code dir="ltr">syncModels()</code>.
+                  {dictionary.addons.subtitle} {dictionary.addons.schemaSyncHint}
                 </CardDescription>
               </div>
             </div>
@@ -295,7 +296,9 @@ function AddonsStudioContent() {
                 {dictionary.addons.off}: {disabledCount}
               </Badge>
               <Button asChild size="sm" variant="outline">
-                <Link href={`${baseAddonsPath}?model=timeline.event`}>AutoModel Workbench ↗</Link>
+                <Link href={`${baseAddonsPath}?model=timeline.event`}>
+                  {dictionary.addons.workbenchCta} ↗
+                </Link>
               </Button>
             </div>
           </CardHeader>
@@ -310,7 +313,7 @@ function AddonsStudioContent() {
         {loading ? (
           <Card>
             <CardContent className="py-10 text-center font-mono text-xs text-[var(--muted-foreground)]">
-              Loading ir_addons registry…
+              {dictionary.common.loading}
             </CardContent>
           </Card>
         ) : error ? (
@@ -318,7 +321,7 @@ function AddonsStudioContent() {
             <SkinOrnament slot="corner" className="end-2 top-2" />
             <CardHeader className="flex flex-col items-center py-8 text-center">
               <CutoutArtwork id="cable-coil" decorative className="mb-2 h-20 w-20 opacity-80" />
-              <CardTitle>Admin Access Required</CardTitle>
+              <CardTitle>{dictionary.addons.adminRequiredTitle}</CardTitle>
               <CardDescription className="max-w-md">{error}</CardDescription>
             </CardHeader>
           </Card>
@@ -327,10 +330,10 @@ function AddonsStudioContent() {
             <CardContent className="flex flex-col items-center gap-3 py-10 text-center">
               <CutoutArtwork id="lunar-disc" decorative className="h-20 w-20 opacity-75" />
               <p className="font-mono text-xs text-[var(--muted-foreground)]">
-                No addons match “{search.trim()}”.
+                {dictionary.addons.emptyFilter}
               </p>
               <Button type="button" size="sm" variant="outline" onClick={() => setSearch("")}>
-                Reset Filter
+                {dictionary.common.reset}
               </Button>
             </CardContent>
           </Card>
@@ -395,7 +398,7 @@ function AddonsStudioContent() {
                     ) : null}
                   </div>
                   <CardDescription className="text-xs">
-                    {addon.description || "Workspace module managed by AddonRuntimeController."}
+                    {addon.description || dictionary.addons.defaultDescription}
                   </CardDescription>
                   {addon.last_error ? (
                     <p className="border border-[var(--destructive)]/50 bg-[var(--destructive)]/10 px-2.5 py-1 font-mono text-[11px] text-[var(--destructive)]">
