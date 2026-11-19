@@ -40,10 +40,6 @@ The current count is not a repository-wide count of every hexadecimal string. It
 - `rocksoul` is also in `STRICT_TOKEN_APPS`, so CSS and TSX palette literals must be zero; `LEGACY_HEX_CEILINGS.rocksoul` is independently set to zero.
 - Re-run with `pnpm --filter @moonwitness/ui test -- src/dx/architecture.test.ts` (or as part of the workspace `pnpm test` / `pnpm gate:local`). Do not compare the old 456 figure to a differently scoped scan.
 
-### Other tracked duplication
-
-- `apps/memory/frontend` remains a separate standalone dashboard and does not consume `@moonwitness/ui`; it is not included in the `apps/rocksoul` palette-literal count.
-
 ## Verification evidence
 
 The 2026-11-17 local verification record below is historical evidence for that checkout; it is not a claim that those commands were rerun on the 2026-11-20 `dev` snapshot.
