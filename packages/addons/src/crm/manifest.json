@@ -1,0 +1,15 @@
+{
+  "name": "crm",
+  "version": "1.0.0",
+  "description": "CRM Lead Pipeline, Stage Conversion, and Scheduled Mail Activities",
+  "category": "erp",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["crm.pipeline", "mail.activity"],
+  "provides": {
+    "routes": ["/api/v1/crm/summary"],
+    "models": ["crm.stage", "crm.lead", "mail.activity"],
+    "auditActions": ["crm.lead.won", "mail.activity.done"]
+  }
+}

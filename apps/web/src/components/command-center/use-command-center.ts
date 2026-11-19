@@ -13,7 +13,7 @@ import type {
   QuickAction,
   WorkspaceItem,
   Workflow,
-} from "@moonwitness/types";
+} from "@moonwitness/contracts/types";
 import {
   collections,
   feedItems,
@@ -101,9 +101,13 @@ export function useCommandCenter(): CommandCenterState {
       fetchCommandCenterStats(controller.signal),
     ])
       .then(([snapshot, statsSnapshot]) => {
-        setWorkflows(snapshot.workflows);
-        setAlerts(snapshot.alerts);
-        if (Array.isArray(snapshot.feed) && snapshot.feed.length > 0) {
+        if (Array.isArray(snapshot?.workflows)) {
+          setWorkflows(snapshot.workflows);
+        }
+        if (Array.isArray(snapshot?.alerts)) {
+          setAlerts(snapshot.alerts);
+        }
+        if (Array.isArray(snapshot?.feed) && snapshot.feed.length > 0) {
           setFeed(
             snapshot.feed.map((entry, idx) => ({
               id: `live-feed-${idx}-${entry.tag}`,
@@ -113,8 +117,12 @@ export function useCommandCenter(): CommandCenterState {
             })),
           );
         }
-        setStats(statsSnapshot);
-        setStatsStatus("live");
+        if (statsSnapshot && typeof statsSnapshot.workflows === "number") {
+          setStats(statsSnapshot);
+          setStatsStatus("live");
+        } else {
+          setStatsStatus("offline");
+        }
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;

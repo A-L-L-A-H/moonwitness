@@ -1,7 +1,8 @@
 "use client";
 
-import { requestApiJson } from "@moonwitness/contracts/sdk";
+import { buildCsrfLogoutInit, requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notifySessionChange } from "@/lib/session";
 
 const API_BASE = "/api/v1/control";
 
@@ -76,6 +77,7 @@ export function useCreateSuperuser() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["control", "setup"] });
       queryClient.invalidateQueries({ queryKey: ["control", "auth"] });
+      notifySessionChange();
     },
   });
 }
@@ -90,6 +92,7 @@ export function useLogin() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["control"] });
+      notifySessionChange();
     },
   });
 }
@@ -97,9 +100,11 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => requestJson<{ ok: boolean }>(`${API_BASE}/auth/logout`, { method: "POST" }),
+    mutationFn: () =>
+      requestJson<{ ok: boolean }>(`${API_BASE}/auth/logout`, buildCsrfLogoutInit()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["control"] });
+      notifySessionChange();
     },
   });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 import { Button, Sheet, SheetContent, SheetHeader, SheetTitle, ZineImage } from "@moonwitness/ui";
 
 export interface ItemDrawerDetail {

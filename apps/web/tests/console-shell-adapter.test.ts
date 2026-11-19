@@ -103,7 +103,7 @@ describe("ConsoleShellAdapter", () => {
     await render({ plane: "operations" });
     const navigation = container.querySelector('nav[aria-label="Operations"]');
     expect(navigation).not.toBeNull();
-    expect(navigation?.querySelector('a[href="/radius"]')).not.toBeNull();
+    expect(navigation?.querySelector('a[href="/control?tab=radius"]')).not.toBeNull();
     expect(navigation?.querySelector('a[href="/dock"]')).toBeNull();
     expect(navigation?.querySelector('[aria-current="page"]')?.getAttribute("href")).toBe(
       "/control",
@@ -228,5 +228,28 @@ describe("ConsoleShellAdapter", () => {
     await click(button("Notifications"));
     act(() => document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true })));
     expect(button("Notifications").getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("handles partial or empty celestial/now payloads without crashing when authenticated", async () => {
+    fetchRequest.mockImplementation(async (url) => {
+      if (url === "/api/v1/auth/me") {
+        return Response.json({
+          user: { id: 42, displayName: "Pilot Crew", username: "pilot", role: "creator" },
+        });
+      }
+      if (url === "/api/v1/celestial/now") {
+        return Response.json({});
+      }
+      if (url === "/api/v1/_meta/navigation") {
+        return Response.json({ menus: [] });
+      }
+      if (url === "/api/v1/m/res.company") {
+        return Response.json({ data: [] });
+      }
+      return Response.json({});
+    });
+    await render();
+    expect(button("Profile menu").textContent).toContain("Pilot Crew");
+    expect(container.querySelector("h1")?.textContent).toBe("Mission control");
   });
 });

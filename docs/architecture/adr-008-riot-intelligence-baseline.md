@@ -2,7 +2,7 @@
 
 > [!NOTE]
 > **Namespace & Implementation Reconciliation (`2026-11-18`, `DOC-ADR-003`):**
-> Renumbered cleanly from `docs/architecture/decisions/2026-11-12-riot-intelligence-baseline.md` to `adr-008-riot-intelligence-baseline.md`. Original `2026-11-13` text below is preserved intact: when authored, RIOT API routes were not yet delivered; subsequent work on `dev` added [apps/api/src/interface/routes/riot-ai.routes.ts](../../apps/api/src/interface/routes/riot-ai.routes.ts) (`riot-ai.audit.ts`, `riot-ai.persistence.ts`, `riot-ai.usage.ts`) and [packages/ai/README.md](../../packages/ai/README.md) (Ollama adapter & eval harness). Treat the boundary rules below as active, and verify implementation status strictly via `pnpm --filter @moonwitness/api test` and `pnpm --filter @moonwitness/ai test`.
+> Renumbered cleanly from `docs/architecture/decisions/2026-11-12-riot-intelligence-baseline.md` to `adr-008-riot-intelligence-baseline.md`. Original `2026-11-13` text below is preserved intact: when authored, RIOT API routes were not yet delivered; subsequent work on `dev` added [apps/api/src/interface/routes/riot-ai.routes.ts](../../packages/addons/src/ai/riot-routes.ts) (`riot-ai.audit.ts`, `riot-ai.persistence.ts`, `riot-ai.usage.ts`) and [packages/ai/README.md](../../packages/ai/README.md) (Ollama adapter & eval harness). Treat the boundary rules below as active, and verify implementation status strictly via `pnpm --filter @moonwitness/api test` and `pnpm --filter @moonwitness/ai test`.
 
 **Status:** Accepted  
 **Date:** 2026-11-13

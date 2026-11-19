@@ -1,4 +1,4 @@
-import type { MapCity } from "@moonwitness/types";
+import type { MapCity } from "@moonwitness/contracts/types";
 import type { SketchFactory } from "../use-p5";
 import { ambientSketch } from "./ambient";
 import { signalsSketch } from "./signals";

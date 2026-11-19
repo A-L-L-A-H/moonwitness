@@ -4,7 +4,7 @@ import {
   canonicalStorageQuery,
   hasCallerSignatureQuery,
   signStorageRequest,
-} from "./storage-sigv4";
+} from "@moonwitness/addons/storage";
 
 describe("Storage SigV4 helpers", () => {
   it("uses the service's canonical bucket URI and encodes object path segments", () => {

@@ -1,49 +1,52 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import Fastify, { type FastifyInstance } from "fastify";
-import { createSession } from "../../services/session";
-import { createUser, ensureAuthSchema } from "../../services/user";
+import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
+import { createSession, createUser, ensureAuthSchema } from "@moonwitness/addons/auth";
+import {
+  initializeRiotAiPersistence,
+  registerRiotAiRoutes,
+  setInferenceAuditWriterForTests,
+  upsertProviderConfig,
+  usageSummaryModel,
+  writeInferenceAudit,
+  type InferenceAuditRecord,
+} from "@moonwitness/addons/ai";
+import { initDb, closeDb, createActorContext } from "@moonwitness/orm";
+import { env } from "../../shared/env";
 
-vi.mock("../../middleware/auth", () => ({
+const testRiotAuth: BaseAddonAuthBridge = {
+  ...defaultFailClosedAuthBridge,
+  authenticate: async (request: FastifyRequest, reply: FastifyReply) => {
+    const cookieHeader = request.headers.cookie ?? "";
+    if (!cookieHeader.includes("mw_session=")) {
+      return reply.code(401).send({ error: "Not authenticated" });
+    }
+    const roleHeader = String(request.headers["x-test-role"] ?? "admin");
+    const role = roleHeader === "editor" || roleHeader === "viewer" ? roleHeader : "admin";
+    (request as { user?: { id: string; role: string } }).user = {
+      id: request.headers["x-test-actor"] === "first" ? "1" : "2",
+      role,
+    };
+  },
   requireRole:
-    (...roles: string[]) =>
+    (...roles) =>
     async (request: FastifyRequest, reply: FastifyReply) => {
       const cookieHeader = request.headers.cookie ?? "";
       if (!cookieHeader.includes("mw_session=")) {
         return reply.code(401).send({ error: "Not authenticated" });
       }
-      if (request.headers["x-test-role"] === "viewer" && roles.includes("editor")) {
+      const rawRole = String(request.headers["x-test-role"] ?? "admin");
+      const role: "admin" | "editor" | "viewer" =
+        rawRole === "editor" || rawRole === "viewer" ? rawRole : "admin";
+      if (!roles.includes(role)) {
         return reply.code(403).send({ error: "Forbidden" });
       }
-      if (
-        request.headers["x-test-role"] === "editor" &&
-        roles.length === 1 &&
-        roles.includes("admin")
-      ) {
-        return reply.code(403).send({ error: "Forbidden" });
-      }
-      request.user = {
+      (request as { user?: { id: string; role: string } }).user = {
         id: request.headers["x-test-actor"] === "first" ? "1" : "2",
-        role: request.headers["x-test-role"] ?? "admin",
-      } as unknown as FastifyRequest["user"];
+        role,
+      };
     },
-}));
-
-import type { FastifyReply, FastifyRequest } from "fastify";
-import {
-  initDb,
-  closeDb,
-  applyMigrations,
-  createActorContext,
-  defineModel,
-} from "@moonwitness/orm";
-import { z } from "zod";
-import { env } from "../../shared/env";
-import { riotAiMigrations } from "./riot-ai.persistence";
-import {
-  setInferenceAuditWriterForTests,
-  writeInferenceAudit,
-  type InferenceAuditRecord,
-} from "./riot-ai.audit";
+};
 
 describe("RIOT Intelligence inference routes", () => {
   let app: FastifyInstance | null = null;
@@ -57,22 +60,6 @@ describe("RIOT Intelligence inference routes", () => {
     limit: env.RIOT_AI_RATE_LIMIT_MAX,
   };
   const ownerHeaders = { cookie: "mw_session=test-session", "x-test-role": "admin" };
-  const usageSummaryModel = defineModel({
-    name: "riot_ai.usage_summary",
-    table: "riot_ai_usage_summaries",
-    schema: z.object({
-      actor_id: z.string(),
-      provider: z.literal("ollama"),
-      model: z.string(),
-      outcome: z.enum(["success", "failure"]),
-      duration_ms: z.number(),
-      prompt_tokens: z.number().nullable(),
-      completion_tokens: z.number().nullable(),
-      total_tokens: z.number().nullable(),
-      error_code: z.string().nullable(),
-      occurred_at: z.string(),
-    }),
-  });
   let auditOutput: { mockRestore: () => void } | null = null;
   let inferenceAuditOutput: string[] = [];
 
@@ -103,12 +90,13 @@ describe("RIOT Intelligence inference routes", () => {
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
     await ensureAuthSchema();
-    await applyMigrations([...riotAiMigrations]);
-    const { riotAiRoutes } = await import("./riot-ai.routes");
+    await initializeRiotAiPersistence();
     auditRecords.length = 0;
     setInferenceAuditWriterForTests();
     const server = Fastify({ logger: false });
-    await server.register(riotAiRoutes);
+    await server.register(async (scope) => {
+      await registerRiotAiRoutes(scope, { auth: testRiotAuth, runtime: env });
+    });
     await server.ready();
     app = server;
     return server;
@@ -123,10 +111,11 @@ describe("RIOT Intelligence inference routes", () => {
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
     await ensureAuthSchema();
-    await applyMigrations([...riotAiMigrations]);
-    const { riotAiRoutes } = await import("./riot-ai.routes");
+    await initializeRiotAiPersistence();
     const server = Fastify({ logger: false });
-    await server.register(riotAiRoutes);
+    await server.register(async (scope) => {
+      await registerRiotAiRoutes(scope, { auth: testRiotAuth, runtime: env });
+    });
     await server.ready();
     app = server;
     return server;
@@ -140,12 +129,13 @@ describe("RIOT Intelligence inference routes", () => {
     env.DATABASE_URL = databaseUrl;
     await initDb(databaseUrl);
     await ensureAuthSchema();
-    await applyMigrations([...riotAiMigrations]);
-    const { riotAiRoutes } = await import("./riot-ai.routes");
+    await initializeRiotAiPersistence();
     auditRecords.length = 0;
     setInferenceAuditWriterForTests();
     const server = Fastify({ logger: false });
-    await server.register(riotAiRoutes);
+    await server.register(async (scope) => {
+      await registerRiotAiRoutes(scope, { auth: testRiotAuth, runtime: env });
+    });
     await server.ready();
     app = server;
     return server;
@@ -164,9 +154,8 @@ describe("RIOT Intelligence inference routes", () => {
   }
 
   async function enableInference(headers: Record<string, string>): Promise<void> {
-    const config = await import("./riot-ai.persistence");
     const actorId = headers["x-test-actor"] === "first" ? "1" : "2";
-    await config.upsertProviderConfig(
+    await upsertProviderConfig(
       {
         profileKey: "default",
         label: "Local runtime",

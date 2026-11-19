@@ -9,11 +9,13 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
 
 from . import config
 from .auth import Actor, authenticate_request
 from .config import Settings, get_settings
 from .db import (
+    connection,
     create_archive,
     create_backup_job,
     dashboard_counts,
@@ -26,7 +28,19 @@ from .db import (
     update_job,
 )
 from .embeddings import search_vectors
-from .moonwitness import export_corpus
+from .moonwitness import export_corpus, sync_to_moonwitness, sync_witness_claims
+from .witness_ledger import (
+    CLAIM_STATUSES,
+    EPISTEMIC_TYPES,
+    RELATION_TYPES,
+    add_claim_source,
+    create_claim,
+    export_witness_ledger,
+    link_claims,
+    list_claims,
+    revise_claim,
+    trace_claim_provenance,
+)
 
 log = logging.getLogger(__name__)
 settings = get_settings()
@@ -237,6 +251,198 @@ def resume_job(job_id: str):
     # Preserve the checkpoint so retries do not repeat completed conversations.
     update_job(job_id, status="pending", attempts=0, error=None)
     return {"status": "queued", "job_id": job_id}
+
+
+class WitnessSourceInput(BaseModel):
+    archive_id: str = Field(min_length=1, max_length=200)
+    message_id: str = Field(min_length=1, max_length=200)
+    excerpt: str = Field(min_length=1, max_length=8000)
+    offset_start: int | None = Field(default=None, ge=0)
+    offset_end: int | None = Field(default=None, ge=0)
+    attribution: str = Field(default="", max_length=300)
+    rationale: str = Field(default="", max_length=1000)
+
+
+class WitnessClaimCreateInput(BaseModel):
+    statement: str = Field(min_length=1, max_length=4000)
+    epistemic_type: str = Field(default="testimony", min_length=1, max_length=40)
+    source: WitnessSourceInput | None = None
+    valid_from: str | None = Field(default=None, max_length=80)
+    valid_until: str | None = Field(default=None, max_length=80)
+    status: str | None = Field(default=None, max_length=40)
+
+
+class WitnessClaimReviseInput(BaseModel):
+    new_statement: str = Field(min_length=1, max_length=4000)
+    new_epistemic_type: str | None = Field(default=None, max_length=40)
+    reason: str = Field(min_length=1, max_length=1000)
+    new_status: str | None = Field(default=None, max_length=40)
+
+
+class WitnessRelationCreateInput(BaseModel):
+    source_claim_id: str = Field(min_length=1, max_length=200)
+    target_claim_id: str = Field(min_length=1, max_length=200)
+    relation_type: str = Field(min_length=1, max_length=40)
+    note: str = Field(default="", max_length=1000)
+
+
+class WitnessVerifyInput(BaseModel):
+    claim_id: str | None = Field(default=None, max_length=200)
+    action: str = Field(default="verify", pattern="^(verify|dispute|supersede|sync)$")
+    reason: str = Field(default="", max_length=1000)
+    source: WitnessSourceInput | None = None
+    archive_id: str | None = Field(default=None, max_length=200)
+    sync: bool = False
+
+
+def _witness_error(exc: ValueError) -> HTTPException:
+    detail = str(exc)
+    status_code = 404 if "not found" in detail.lower() else 400
+    return HTTPException(status_code=status_code, detail=detail)
+
+
+@api_router.get("/witness/claims")
+def witness_list_claims(
+    epistemic_type: str | None = None,
+    status: str | None = None,
+    q: str | None = None,
+    limit: int = 100,
+    offset: int = 0,
+):
+    try:
+        with connection() as db:
+            claims = list_claims(
+                db,
+                epistemic_type=epistemic_type.strip() if epistemic_type else None,
+                status=status.strip() if status else None,
+                q=q,
+                limit=limit,
+                offset=offset,
+            )
+    except ValueError as exc:
+        raise _witness_error(exc) from exc
+    return {
+        "claims": claims,
+        "epistemic_types": list(EPISTEMIC_TYPES),
+        "statuses": list(CLAIM_STATUSES),
+        "relation_types": list(RELATION_TYPES),
+    }
+
+
+@api_router.post("/witness/claims", status_code=201)
+def witness_create_claim(body: WitnessClaimCreateInput):
+    try:
+        with connection() as db:
+            return create_claim(
+                db,
+                statement=body.statement,
+                epistemic_type=body.epistemic_type,
+                source=body.source.model_dump() if body.source else None,
+                valid_from=body.valid_from,
+                valid_until=body.valid_until,
+                status=body.status,
+            )
+    except ValueError as exc:
+        raise _witness_error(exc) from exc
+
+
+@api_router.get("/witness/claims/{claim_id}/lineage")
+def witness_claim_lineage(claim_id: str):
+    with connection() as db:
+        lineage = trace_claim_provenance(db, claim_id)
+    if not lineage:
+        raise HTTPException(status_code=404, detail=f"Claim '{claim_id}' not found")
+    return lineage
+
+
+@api_router.post("/witness/claims/{claim_id}/revise")
+def witness_revise_claim(claim_id: str, body: WitnessClaimReviseInput):
+    try:
+        with connection() as db:
+            return revise_claim(
+                db,
+                claim_id,
+                new_statement=body.new_statement,
+                new_epistemic_type=body.new_epistemic_type,
+                reason=body.reason,
+                new_status=body.new_status,
+            )
+    except ValueError as exc:
+        raise _witness_error(exc) from exc
+
+
+@api_router.post("/witness/relations", status_code=201)
+def witness_link_claims(body: WitnessRelationCreateInput):
+    try:
+        with connection() as db:
+            return link_claims(
+                db,
+                body.source_claim_id,
+                body.target_claim_id,
+                body.relation_type,
+                body.note,
+            )
+    except ValueError as exc:
+        raise _witness_error(exc) from exc
+
+
+@api_router.post("/witness/verify")
+def witness_verify_claim(body: WitnessVerifyInput):
+    updated_claim: dict | None = None
+    added_source: dict | None = None
+
+    if body.action != "sync":
+        if not body.claim_id:
+            raise HTTPException(status_code=400, detail="claim_id is required")
+        next_status_map = {
+            "verify": "active",
+            "dispute": "disputed",
+            "supersede": "superseded",
+        }
+        next_status = next_status_map[body.action]
+        default_reason = f"Witness Ledger {body.action} transition"
+        try:
+            with connection() as db:
+                if body.source is not None:
+                    added_source = add_claim_source(db, body.claim_id, body.source.model_dump())
+                lineage = trace_claim_provenance(db, body.claim_id)
+                if not lineage:
+                    raise ValueError(f"Claim '{body.claim_id}' not found")
+                updated_claim = revise_claim(
+                    db,
+                    body.claim_id,
+                    new_statement=lineage["claim"]["statement"],
+                    new_epistemic_type=lineage["claim"]["epistemic_type"],
+                    reason=body.reason.strip() or default_reason,
+                    new_status=next_status,
+                )
+        except ValueError as exc:
+            raise _witness_error(exc) from exc
+
+    sync_result: dict[str, int | bool | str] = {"triggered": False, "synced": 0}
+    if body.sync or body.action == "sync":
+        active_settings = _active_settings()
+        if active_settings.moonwitness_sync_url:
+            synced = (
+                sync_to_moonwitness(body.archive_id)
+                if body.archive_id
+                else sync_witness_claims()
+            )
+            sync_result = {"triggered": True, "synced": synced}
+
+    return {
+        "ok": True,
+        "action": body.action,
+        "claim": updated_claim,
+        "source": added_source,
+        "sync": sync_result,
+    }
+
+
+@api_router.get("/witness/export.json")
+def witness_export():
+    with connection() as db:
+        return export_witness_ledger(db)
 
 
 app.include_router(api_router)

@@ -1,6 +1,6 @@
 "use client";
 
-import type { TimelineEvent } from "@moonwitness/types";
+import type { TimelineEvent } from "@moonwitness/contracts/types";
 import { Crown } from "@moonwitness/ui/icons";
 import { Button, EventCard, ZineCardRough } from "@moonwitness/ui";
 

@@ -2,12 +2,16 @@ import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance } from "fastify";
 import FastifyCors from "@fastify/cors";
-import { resolveStorageTarget, storageRoutes } from "./storage.routes";
+import { registerStorageRoutes, resolveStorageTarget } from "@moonwitness/addons/storage";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
 
-vi.mock("../../middleware/auth", () => ({
-  requireAuth: () => async () => {},
+const permissiveAuth: BaseAddonAuthBridge = {
+  ...defaultFailClosedAuthBridge,
+  authenticate: async () => {},
   requireRole: () => async () => {},
-}));
+};
+const storageRoutes = async (instance: FastifyInstance) =>
+  registerStorageRoutes(instance, { auth: permissiveAuth });
 
 describe("storage proxy", () => {
   const envBackup = { ...process.env };

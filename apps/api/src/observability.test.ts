@@ -5,7 +5,7 @@ import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app";
 import { resolveRequestTenant, type AuthenticatedRequest } from "./middleware/auth";
-import { getUpstreamBridgeHeaders } from "./shared/upstream";
+import { getUpstreamBridgeHeaders } from "@moonwitness/addon-runtime";
 
 describe("Observability, Prometheus /metrics, traceparent & tenant isolation guard", () => {
   let dbDir = "";

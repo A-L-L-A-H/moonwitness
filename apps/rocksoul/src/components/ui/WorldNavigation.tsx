@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowLeft, Settings } from "@moonwitness/ui/icons";
-import { AnarchyStarSigil, VectorBarcodeStamp } from "./RocksoulVectors";
+import { AnarchyStarSigil, VectorBarcodeStamp } from "@moonwitness/ui/artwork";
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   "aria-label": string;

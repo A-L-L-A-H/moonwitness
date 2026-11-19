@@ -29,6 +29,8 @@ impl TestServer {
             secret_key: "test-secret".to_string(),
             allow_anonymous: true,
             max_object_size: 1024 * 1024,
+            storage_backend: storage::config::StorageBackend::Filesystem,
+            google_drive: None,
         };
 
         let pool = db::init_db(&config.database_url).await.unwrap();
@@ -210,6 +212,7 @@ async fn multipart_upload_assembles_object() {
 
     let create = client
         .post(server.url("/big/stream.bin?uploads"))
+        .header("content-type", "video/mp4")
         .send()
         .await
         .unwrap();
@@ -259,6 +262,7 @@ async fn multipart_upload_assembles_object() {
         .await
         .unwrap();
     assert_eq!(get.status(), 200);
+    assert_eq!(get.headers().get("content-type").unwrap(), "video/mp4");
     assert_eq!(get.text().await.unwrap(), "aaaabbbbcccc");
 }
 

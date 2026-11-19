@@ -1,6 +1,12 @@
-import { initDb, closeDb, getDb } from "@moonwitness/orm";
-import { eras, events, seedTimeline, timelineDdl } from "@moonwitness/addon-timeline";
-import { env } from "./shared/env";
+import { initDb, closeDb, syncModels } from "@moonwitness/orm";
+import {
+  eras,
+  events,
+  seedTimeline,
+  timelineEraModel,
+  timelineEventModel,
+} from "@moonwitness/addons/timeline";
+import { env, resolveApiDatabaseUrl } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 
 function sqlString(value: string): string {
@@ -58,9 +64,9 @@ async function main() {
     process.stdout.write(`${buildD1SeedSql(new Date().toISOString())}\n`);
     return;
   }
-  const dbPath = process.env.DATABASE_URL ?? "./moonwitness.db";
+  const dbPath = resolveApiDatabaseUrl(process.env.DATABASE_URL ?? env.DATABASE_URL, env.NODE_ENV);
   await initDb(dbPath);
-  await getDb().exec(timelineDdl);
+  await syncModels([timelineEventModel, timelineEraModel]);
   await seedTimeline();
   console.log("Database seeded (idempotent)");
   closeDb();

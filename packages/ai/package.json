@@ -12,8 +12,7 @@
     "./adapters/ollama": "./src/adapters/ollama/index.ts"
   },
   "dependencies": {
-    "@moonwitness/errors": "workspace:*",
-    "@moonwitness/types": "workspace:*",
+    "@moonwitness/contracts": "workspace:*",
     "zod": "^4.6.7"
   },
   "scripts": {

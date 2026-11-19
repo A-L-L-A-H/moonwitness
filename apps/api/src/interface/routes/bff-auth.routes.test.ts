@@ -3,8 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb, getDb, initDb } from "@moonwitness/orm";
 import { encodeBase64Url, type PublicEs256Jwk } from "@moonwitness/core";
-import { createUser, ensureAuthSchema } from "../../services/user";
-import { resetMidJwksCacheForTests } from "../../middleware/mid-jwt";
+import { createUser, ensureAuthSchema, resetMidJwksCacheForTests } from "@moonwitness/addons/auth";
 
 const API_PREFIX = "/api/v1";
 const ENCODER = new TextEncoder();
@@ -96,8 +95,8 @@ describe("BFF OAuth exchange and logout routes", () => {
   });
 
   async function loadApp(): Promise<FastifyInstance> {
-    const { buildFastify } = await import("../../infrastructure/adapters/fastify.adapter");
-    const built = await buildFastify({ prefix: API_PREFIX });
+    const { buildCoreApp } = await import("../../bootstrap");
+    const built = await buildCoreApp({ prefix: API_PREFIX });
     await built.ready();
     return built;
   }

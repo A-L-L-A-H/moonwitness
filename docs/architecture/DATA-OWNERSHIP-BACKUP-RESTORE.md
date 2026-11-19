@@ -1,11 +1,11 @@
 # MoonWitness Data Ownership, Initialization, Backup and Restore Specification (MW-0036)
 
-> [!NOTE]
-> **Reconciliation Note (2026-11-18):** Originally written when Core API used SQLite/libSQL (`moonwitness.db`) across all environments. In the current repository (`docker-compose.yml`, `packages/orm`), production VPS Compose uses **PostgreSQL 16 (`postgres:16-alpine`)** via `PostgresDriver` for Core API & MID, while SQLite/libSQL (`LibSqlDriver`) remains active for local development and for each specialized Rust worker (`radius`, `snmp-poller`, `syslog`, `storage`).
+> [!IMPORTANT]
+> **Owner decision (2026-11-19): PostgreSQL is the only approved database engine** across production, development, tests, ROCKSOUL and Memory. Keep each trust zone and service database/role separate. This document retains legacy SQLite details below as historical inventory only; they are not an approved runtime or backup target. Migration of existing private data must be controlled, non-destructive and restore-verified under [#288](https://github.com/A-L-L-A-H/moonwitness/issues/288) and [#192](https://github.com/A-L-L-A-H/moonwitness/issues/192).
 
 ## 1. Executive Summary
 
-MoonWitness implements a modular persistent data architecture on a single VPS, isolating relational core state (PostgreSQL in Compose production, SQLite/libSQL in local development) from per-worker SQLite stores on the Rust ops tier:
+This specification began as an inventory of the legacy database topology. The SQLite/libSQL references in Sections 2–5 describe pre-migration state, not an approved current or target architecture. The current owner-approved target is PostgreSQL across cloud, development, tests and private local apps, with separate database ownership and credentials per trust zone. Actual conversion status must be tracked against #288; do not infer that conversion is complete from this historical inventory.
 
 - Core API and the integrated MoonWitness Identity (MID) authority (`packages/mid` mounted in `apps/api`) share the primary database configured via `DATABASE_URL` through `@moonwitness/orm`.
 - Each Rust telemetry/storage service (`--profile ops`) owns one dedicated SQLite database file on its named volume.
@@ -15,7 +15,7 @@ MoonWitness implements a modular persistent data architecture on a single VPS, i
 
 ---
 
-## 2. Service & Database Ownership Matrix
+## 2. Historical Service & Database Ownership Matrix
 
 | Service                      | Storage / DB File                           | Docker Volume Mount                      | Owning Runtime                                       | Authorized Consumers               | Primary Tables                                                                                                                                                                                                               |
 | ---------------------------- | ------------------------------------------- | ---------------------------------------- | ---------------------------------------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -29,7 +29,7 @@ MoonWitness implements a modular persistent data architecture on a single VPS, i
 
 ---
 
-## 3. Core API & MID Unified Handle Architecture
+## 3. Legacy Core API & MID Driver Notes
 
 1. **Driver Selection (`packages/orm`)**: `@moonwitness/orm` selects `PostgresDriver` when `DATABASE_URL` uses `postgres://` or `postgresql://` (the VPS Compose default) and `LibSqlDriver` for SQLite/libSQL local/test databases (`D1Driver` is also retained for Cloudflare D1 workers compatibility).
 2. **D1 Bridge Adapter**: The MID Fastify plugin receives `createD1DatabaseFromOrm(getDb())`, executing MID queries through the same `@moonwitness/orm` connection handle as Core API.
@@ -37,9 +37,9 @@ MoonWitness implements a modular persistent data architecture on a single VPS, i
 
 ---
 
-## 4. Database Engines & SQLite WAL Configuration
+## 4. Historical SQLite WAL Configuration (not an approved database target)
 
-PostgreSQL (`postgres:16-alpine`) runs as an internal network service on `moonwitness-internal`. For SQLite/libSQL services (local Core API dev/test and Rust `ops` services `sqlx::sqlite::SqliteConnectOptions`), MoonWitness enforces canonical WAL pragmas:
+Legacy reference only: the following pragmas describe how pre-existing SQLite files were configured. They do not authorize SQLite for new runtime or test databases. PostgreSQL is the only approved engine:
 
 ```sql
 PRAGMA journal_mode = WAL;
@@ -72,22 +72,14 @@ PRAGMA foreign_keys = ON;
 
 ## 6. Backup & Restore Architecture
 
-### PostgreSQL (Production Core API & MID) & SQLite Workers
+### PostgreSQL-only target
 
-- **PostgreSQL (`postgres:16-alpine` production Core API & MID):** `backupDatabase` / `restoreDatabase` / `verifyIntegrity` in `packages/orm/src/backup.ts` dispatch `pg_dump --format=custom --no-owner --no-acl`, `pg_restore --clean --if-exists --no-owner --no-acl`, and `pg_index` / `pg_constraint` system-catalog integrity checks against `POSTGRES_TEST_URL` (tested in CI `postgres-integration` job) or live Compose `postgres-data`.
-- **SQLite Workers (`services/*`) & Local libSQL Mode:** Standard filesystem copy of active SQLite databases causes corrupted snapshot states when WAL files are active. MoonWitness uses SQLite's official `VACUUM INTO`:
-  - Generates a fully consolidated, compacted, transactionally consistent single-file database.
-  - Does not block live readers or writers.
-  - Eliminates reliance on `-wal` and `-shm` sidecars in backup storage.
-
-### Encryption, Integrity Validation & CLI Utilities
-
-- **Integrity Validation:** `verifyIntegrity()` runs `pg_index` (`indisvalid`/`indisready`) & `pg_constraint` (`convalidated`) validation on PostgreSQL handles and `PRAGMA integrity_check` / `PRAGMA foreign_key_check` on SQLite handles; `listDatabaseTables()` abstracts table enumeration across both dialects.
-- **Encryption:** Both PostgreSQL custom dumps (`.pgdump.enc`) and SQLite snapshots (`.bak.enc`) are encrypted with AES-256-GCM using `MW_BACKUP_ENCRYPTION_KEY`.
-- **Signed Manifest:** Backup runs record timestamp, dialect, database names, table lists, and SHA-256 checksums.
-- **Tooling on `dev`:** Use dialect-aware [scripts/backup-db.mjs](../../scripts/backup-db.mjs) / [scripts/restore-db.mjs](../../scripts/restore-db.mjs) (handling both `postgres://` URLs and SQLite file targets) alongside SQLite suite utilities [scripts/backup-sqlite.mjs](../../scripts/backup-sqlite.mjs) (`--out`, `--key`) and [scripts/restore-sqlite.mjs](../../scripts/restore-sqlite.mjs) (`--backup`, `--target`, `--key`), backed by `@moonwitness/orm` helpers.
-
----
+- **Approved engine:** PostgreSQL for every database, including optional production services and private local ROCKSOUL/Memory data. Use separate databases/schemas and least-privilege roles for distinct owners and trust zones.
+- **Current CLI behavior:** `scripts/backup-db.mjs` reads `DATABASE_URL` and `MW_BACKUP_ENCRYPTION_KEY` from the process environment; `scripts/restore-db.mjs` requires `ISOLATED_RESTORE_DATABASE_URL`, the same key, and an explicit archive/manifest pair. Neither CLI accepts database URLs or encryption keys as command-line arguments. Restore refuses a target that matches the configured source database. The backup command creates `pg_dump --format=custom --no-owner --no-acl` archives encrypted with AES-256-GCM and a portable JSON manifest containing plaintext/encrypted SHA-256 hashes plus an HMAC-SHA-256 signature derived separately from the backup encryption key. Restore verifies the HMAC, encrypted archive hash, and decrypted plaintext hash before invoking `pg_restore --clean --if-exists --no-owner --no-acl`. Both the CLI and `@moonwitness/orm` helpers remove URL passwords from child-process arguments and pass them through `PGPASSWORD` in the child environment. Plaintext dump/restore temporary files are created with a restrictive child-process umask and mode `0600`; encrypted archives and manifests are also written with mode `0600`.
+- **Remaining manifest/operations work:** the manifest is authenticated with an HMAC using the same operator-supplied secret as the archive (through a separate derived signing key), not an asymmetric signature or external KMS. Backup-set completeness, retention, off-host handling, key rotation, backup key escrow/recovery and automated restore drills remain open under [#192](https://github.com/A-L-L-A-H/moonwitness/issues/192). A valid single-database manifest does not prove that the complete production backup set is restorable.
+- **Legacy preservation only:** `scripts/backup-sqlite.mjs` and `scripts/restore-sqlite.mjs` remain temporarily for controlled archival/recovery of pre-existing SQLite data while migration is planned. They are not an approved runtime backup path and must not be used as a substitute for PostgreSQL backups or to create new SQLite databases. Remove them after remaining consumers and legacy data conversions are verified.
+- **Private local data:** ROCKSOUL and Memory backups must stay in their owner-controlled local trust zones. No automated upload to the public VPS or cross-zone replication is permitted. Their PostgreSQL lifecycle and restore procedures are not yet proven by this CLI change.
+- **Completeness:** a production backup set is not complete until every enabled service-owned PostgreSQL database has been inventoried, backed up, independently verified and restored into isolated infrastructure. Disabled/unavailable services must be explicitly reported rather than silently omitted.
 
 ## 7. Deployment Rollback & Data Preservation
 

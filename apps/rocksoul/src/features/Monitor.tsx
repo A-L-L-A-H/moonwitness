@@ -3,7 +3,7 @@ import { Activity, RefreshCw, Server } from "@moonwitness/ui/icons";
 import { BarChart, RadialGauge } from "@moonwitness/ui";
 import { thumbSignalUrl } from "../assets/art";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
-import { AnarchyStarSigil } from "../components/ui/RocksoulVectors";
+import { AnarchyStarSigil } from "@moonwitness/ui/artwork";
 import type { DevServiceEntry, DevServiceTarget, MonitorSnapshot } from "../lib/contracts";
 import {
   formatMonitorTime,

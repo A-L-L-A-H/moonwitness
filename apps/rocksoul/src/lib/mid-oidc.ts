@@ -1,13 +1,20 @@
 import {
-  DEFAULT_MID_ISSUER_URL,
+  beginBrowserPkceRedirect,
+  buildOidcSessionFromTokens,
+  consumeStoredPkceEnvelope,
+  createCallbackDeduplicator,
   createPkceAuthorizationRequest,
-  decodeJwtParts,
+  dispatchBrowserAuthEvent,
   exchangeAuthorizationCode,
-  fetchOidcUserInfo,
+  extractOAuthCallbackParams,
   normalizeIssuerUrl,
+  readBrowserStorage,
   refreshAccessTokens,
+  removeBrowserStorage,
+  resolveBrowserOriginCallbackUrl,
   revokeOAuthToken,
-  type MidTokenResponse,
+  writeBrowserStorage,
+  DEFAULT_MID_ISSUER_URL,
   type MidUserInfo,
 } from "@moonwitness/core";
 import { call, isDesktop } from "./api";
@@ -41,56 +48,13 @@ export interface RocksoulOidcOptions {
   readonly returnHash?: string | undefined;
 }
 
-interface PendingBrowserPkce {
-  readonly issuerUrl: string;
-  readonly clientId: string;
-  readonly verifier: string;
-  readonly state: string;
-  readonly nonce: string;
-  readonly redirectUri: string;
+const dedupeCallback = createCallbackDeduplicator<{
+  readonly session: RocksoulOidcSession;
   readonly returnHash: string;
-}
-
-const inFlightCallbacks = new Map<
-  string,
-  Promise<{ readonly session: RocksoulOidcSession; readonly returnHash: string }>
->();
+}>();
 
 function currentEpochSeconds(nowEpochSec?: () => number): number {
   return (nowEpochSec ?? (() => Math.floor(Date.now() / 1000)))();
-}
-
-function readStorage(storageKind: "localStorage" | "sessionStorage", key: string): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return window[storageKind].getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeStorage(storageKind: "localStorage" | "sessionStorage", key: string, value: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    window[storageKind].setItem(key, value);
-  } catch {
-    // Ignore storage unavailability in restricted contexts
-  }
-}
-
-function removeStorage(storageKind: "localStorage" | "sessionStorage", key: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    window[storageKind].removeItem(key);
-  } catch {
-    // Ignore storage unavailability in restricted contexts
-  }
-}
-
-function dispatchAuthChange(): void {
-  if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
-    window.dispatchEvent(new CustomEvent(ROCKSOUL_MID_AUTH_EVENT));
-  }
 }
 
 function normalizeReturnHash(hash?: string): string {
@@ -108,30 +72,27 @@ export function resolveRocksoulMidIssuer(issuerUrl?: string): string {
 
 /** Resolve browser OAuth callback URI on the active web origin. */
 export function getBrowserCallbackUrl(): string {
-  if (typeof window === "undefined" || !window.location?.origin) {
-    throw new Error("Browser origin is unavailable for MoonWitness ID callback.");
-  }
-  return `${window.location.origin}/auth/callback`;
+  return resolveBrowserOriginCallbackUrl("/auth/callback");
 }
 
 /** Save an active MoonWitness ID session to localStorage and notify listeners. */
 export function persistRocksoulOidcSession(session: RocksoulOidcSession): void {
-  writeStorage("localStorage", ROCKSOUL_MID_SESSION_KEY, JSON.stringify(session));
-  dispatchAuthChange();
+  writeBrowserStorage("localStorage", ROCKSOUL_MID_SESSION_KEY, JSON.stringify(session));
+  dispatchBrowserAuthEvent(ROCKSOUL_MID_AUTH_EVENT);
 }
 
 /** Clear local MoonWitness ID session and PKCE state without revoking remotely. */
 export function clearStoredRocksoulOidcSession(): void {
-  removeStorage("localStorage", ROCKSOUL_MID_SESSION_KEY);
-  removeStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY);
-  dispatchAuthChange();
+  removeBrowserStorage("localStorage", ROCKSOUL_MID_SESSION_KEY);
+  removeBrowserStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY);
+  dispatchBrowserAuthEvent(ROCKSOUL_MID_AUTH_EVENT);
 }
 
 /** Load persisted MoonWitness ID session from localStorage if valid or refreshable. */
 export function getStoredRocksoulOidcSession(
   nowEpochSec?: () => number,
 ): RocksoulOidcSession | null {
-  const raw = readStorage("localStorage", ROCKSOUL_MID_SESSION_KEY);
+  const raw = readBrowserStorage("localStorage", ROCKSOUL_MID_SESSION_KEY);
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as Partial<RocksoulOidcSession>;
@@ -148,53 +109,13 @@ export function getStoredRocksoulOidcSession(
       return null;
     }
     if (parsed.expiresAtEpochSec <= currentEpochSeconds(nowEpochSec) && !parsed.refreshToken) {
-      removeStorage("localStorage", ROCKSOUL_MID_SESSION_KEY);
+      removeBrowserStorage("localStorage", ROCKSOUL_MID_SESSION_KEY);
       return null;
     }
     return parsed as RocksoulOidcSession;
   } catch {
     return null;
   }
-}
-
-async function buildSessionFromTokens(params: {
-  readonly issuerUrl: string;
-  readonly clientId: string;
-  readonly tokens: MidTokenResponse;
-  readonly expectedNonce?: string | undefined;
-  readonly fallbackUser?: MidUserInfo | undefined;
-  readonly fetchFn?: typeof fetch | undefined;
-  readonly nowEpochSec: number;
-}): Promise<RocksoulOidcSession> {
-  if (params.expectedNonce) {
-    const decoded = decodeJwtParts<{ alg?: string }, { nonce?: string }>(params.tokens.id_token);
-    if (decoded?.claims.nonce !== params.expectedNonce) {
-      throw new Error("ID token nonce mismatch detected during MoonWitness ID sign-in.");
-    }
-  }
-
-  let user: MidUserInfo;
-  try {
-    user = await fetchOidcUserInfo({
-      issuerUrl: params.issuerUrl,
-      accessToken: params.tokens.access_token,
-      ...(params.fetchFn ? { fetchFn: params.fetchFn } : {}),
-    });
-  } catch (error) {
-    if (!params.fallbackUser) throw error;
-    user = params.fallbackUser;
-  }
-
-  return {
-    issuerUrl: params.issuerUrl,
-    clientId: params.clientId,
-    accessToken: params.tokens.access_token,
-    idToken: params.tokens.id_token,
-    ...(params.tokens.refresh_token ? { refreshToken: params.tokens.refresh_token } : {}),
-    ...(params.tokens.scope ? { scope: params.tokens.scope } : {}),
-    expiresAtEpochSec: params.nowEpochSec + Math.max(1, params.tokens.expires_in),
-    user,
-  };
 }
 
 /**
@@ -230,7 +151,7 @@ export async function signInWithMoonWitnessId(
       codeVerifier: pkce.verifier,
       ...(options?.fetchFn ? { fetchFn: options.fetchFn } : {}),
     });
-    const session = await buildSessionFromTokens({
+    const session = await buildOidcSessionFromTokens({
       issuerUrl,
       clientId,
       tokens,
@@ -242,27 +163,19 @@ export async function signInWithMoonWitnessId(
     return session;
   }
 
-  const redirectUri = getBrowserCallbackUrl();
-  const pkce = await createPkceAuthorizationRequest({
+  await beginBrowserPkceRedirect({
     issuerUrl,
     clientId,
-    redirectUri,
+    redirectUri: getBrowserCallbackUrl(),
+    storageKey: ROCKSOUL_MID_PKCE_KEY,
     scope,
+    extraState: {
+      returnHash: normalizeReturnHash(
+        options?.returnHash ?? (typeof window !== "undefined" ? window.location.hash : undefined),
+      ),
+    },
+    ...(options?.navigateFn ? { navigateFn: options.navigateFn } : {}),
   });
-  const pending: PendingBrowserPkce = {
-    issuerUrl,
-    clientId,
-    verifier: pkce.verifier,
-    state: pkce.state,
-    nonce: pkce.nonce,
-    redirectUri,
-    returnHash: normalizeReturnHash(
-      options?.returnHash ?? (typeof window !== "undefined" ? window.location.hash : undefined),
-    ),
-  };
-  writeStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY, JSON.stringify(pending));
-  const navigate = options?.navigateFn ?? ((url: string) => window.location.assign(url));
-  navigate(pkce.authorizeUrl);
   return null;
 }
 
@@ -271,39 +184,16 @@ export async function completeBrowserOidcCallback(
   searchParams: URLSearchParams,
   options?: RocksoulOidcOptions,
 ): Promise<{ readonly session: RocksoulOidcSession; readonly returnHash: string }> {
-  const oauthError = searchParams.get("error");
-  if (oauthError) {
-    removeStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY);
-    throw new Error(searchParams.get("error_description") || oauthError);
-  }
-  const code = searchParams.get("code");
-  const state = searchParams.get("state");
-  if (!code || !state) {
-    throw new Error("Missing authorization code or state.");
-  }
+  const { code, state } = extractOAuthCallbackParams(searchParams, {
+    onError: () => removeBrowserStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY),
+  });
 
-  const inflightKey = `${code}:${state}`;
-  const existing = inFlightCallbacks.get(inflightKey);
-  if (existing) return existing;
-
-  const job = (async () => {
-    const rawPending = readStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY);
-    removeStorage("sessionStorage", ROCKSOUL_MID_PKCE_KEY);
-    if (!rawPending) {
-      throw new Error("PKCE sign-in state expired. Start MoonWitness ID sign-in again.");
-    }
-    const pending = JSON.parse(rawPending) as Partial<PendingBrowserPkce>;
-    if (
-      !pending.verifier ||
-      !pending.state ||
-      !pending.redirectUri ||
-      !pending.issuerUrl ||
-      !pending.clientId
-    ) {
+  return dedupeCallback(`${code}:${state}`, async () => {
+    const pending = consumeStoredPkceEnvelope(ROCKSOUL_MID_PKCE_KEY, state, {
+      expired: "PKCE sign-in state expired. Start MoonWitness ID sign-in again.",
+    });
+    if (!pending.redirectUri || !pending.issuerUrl || !pending.clientId) {
       throw new Error("Stored PKCE sign-in state is malformed.");
-    }
-    if (pending.state !== state) {
-      throw new Error("State mismatch detected during MoonWitness ID callback.");
     }
 
     const tokens = await exchangeAuthorizationCode({
@@ -314,7 +204,7 @@ export async function completeBrowserOidcCallback(
       codeVerifier: pending.verifier,
       ...(options?.fetchFn ? { fetchFn: options.fetchFn } : {}),
     });
-    const session = await buildSessionFromTokens({
+    const session = await buildOidcSessionFromTokens({
       issuerUrl: pending.issuerUrl,
       clientId: pending.clientId,
       tokens,
@@ -325,14 +215,9 @@ export async function completeBrowserOidcCallback(
     persistRocksoulOidcSession(session);
     return {
       session,
-      returnHash: normalizeReturnHash(pending.returnHash),
+      returnHash: normalizeReturnHash(typeof pending.returnHash === "string" ? pending.returnHash : undefined),
     };
-  })().finally(() => {
-    inFlightCallbacks.delete(inflightKey);
   });
-
-  inFlightCallbacks.set(inflightKey, job);
-  return job;
 }
 
 /** Rotate an active `offline_access` refresh token and persist updated session. */
@@ -349,7 +234,7 @@ export async function refreshRocksoulOidcSession(
     refreshToken: current.refreshToken,
     ...(options?.fetchFn ? { fetchFn: options.fetchFn } : {}),
   });
-  const next = await buildSessionFromTokens({
+  const next = await buildOidcSessionFromTokens({
     issuerUrl: current.issuerUrl,
     clientId: current.clientId,
     tokens,

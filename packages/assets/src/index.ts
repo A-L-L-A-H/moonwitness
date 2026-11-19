@@ -1,4 +1,4 @@
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 import { ART_SOURCE_WIDTHS, effectiveWidths, legacySrcSetFor, srcSetFor } from "./optimize";
 import catalogue from "./catalogue.json";
 

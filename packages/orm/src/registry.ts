@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ActorContext } from "./actor-context.js";
+import type { ModelFeatureOptions } from "./model-meta.js";
 import {
   assertIdentifier,
   compileModelDdl,
@@ -23,7 +24,7 @@ export interface ExtendModelOptions {
   indexes?: ModelIndex[];
 }
 
-export interface RegisteredModelDescriptor {
+export interface RegisteredModelDescriptor extends ModelFeatureOptions {
   name: string;
   table: string;
   baseSchema: ZodObjectLike;
@@ -66,7 +67,7 @@ const FULL_METADATA_SHAPE = {
   tenant_id: z.string().min(1).default("default"),
 };
 
-interface StoredModelBase {
+interface StoredModelBase extends ModelFeatureOptions {
   name: string;
   table: string;
   baseSchema: ZodObjectLike;
@@ -212,6 +213,14 @@ class OrmModelRegistry {
       extensible: base.extensible,
       restEnabled: base.restEnabled,
       publicFields: base.publicFields ? [...base.publicFields] : undefined,
+      searchFields: base.searchFields,
+      defaults: base.defaults,
+      constrains: base.constrains,
+      relations: base.relations,
+      retention: base.retention,
+      actions: base.actions,
+      computed: base.computed,
+      hooks: base.hooks,
       fields,
       fieldOrigins,
       indexes: mergedIndexes,

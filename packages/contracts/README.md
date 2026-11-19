@@ -7,8 +7,13 @@ Note in `src/index.ts`: write models for `works`, `signal`, and `justice` (`DEFE
 ## Exports & Dependencies
 
 - `.` -> `./src/index.ts`
+- `./errors` -> `./src/errors/index.ts`
+- `./types` -> `./src/types/index.ts`
+- `./schema` -> `./src/schema/index.ts`
+- `./schema/timeline` -> `./src/schema/timeline/index.ts`
 - `./timeline` -> `./src/timeline/index.ts`
-- Dependencies: `@moonwitness/errors`, `@moonwitness/schema`, `@moonwitness/types`, `zod`
+- `./sdk` -> `./src/sdk/index.ts`
+- Dependencies: `zod`
 
 ## Scripts
 

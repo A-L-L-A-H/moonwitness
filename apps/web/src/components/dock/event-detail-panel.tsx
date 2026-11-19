@@ -1,6 +1,6 @@
 "use client";
 
-import type { Era, TimelineEvent } from "@moonwitness/types";
+import type { Era, TimelineEvent } from "@moonwitness/contracts/types";
 import { EventDetail, Sheet, SheetContent, SheetTitle, ZineButton } from "@moonwitness/ui";
 import type { TimelineEventAuditEntry } from "@/lib/api/timeline";
 

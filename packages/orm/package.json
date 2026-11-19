@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
-    "@moonwitness/types": "workspace:*",
     "pg": "^8.18.0",
     "zod": "^4.6.7"
   },

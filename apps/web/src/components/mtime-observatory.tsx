@@ -21,6 +21,7 @@ import {
 import { MtimeHorizon } from "@moonwitness/ui/icons";
 import { DnaBadge, DnaButton, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { MTimeLiveTelemetryPanel } from "./mtime-live-telemetry";
 import { SiteSubpageHeader } from "./site-subpage-header";
 
 const HISTORICAL_DATE_PRESETS = [
@@ -404,6 +405,7 @@ export function MTimeObservatory() {
         </div>
 
         <MTimeInteractiveEngine />
+        <MTimeLiveTelemetryPanel />
       </main>
     </div>
   );

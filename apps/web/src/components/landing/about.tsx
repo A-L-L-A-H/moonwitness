@@ -2,11 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
 import { Grain, Button } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { useScrollReveal } from "@/lib/motion/use-scroll-reveal";
+import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 
 const EASE = "var(--ease-ink-out)";
 
@@ -25,6 +28,10 @@ function layerStyle(
 
 export function About() {
   const [ref, revealed] = useScrollReveal(0.2);
+  const pathname = usePathname() ?? "";
+  const pathLocale = getLocaleFromPath(pathname);
+  const { locale } = useSanctuaryLocale();
+  const toHref = (slug: string) => (pathLocale ? getLocalizedUrl(slug, pathLocale) : slug);
 
   return (
     <section
@@ -56,21 +63,38 @@ export function About() {
         >
           <Crown className="mx-auto mb-4 h-10 w-14 text-[var(--yellow)]" />
           <h2 className="font-brush text-5xl leading-tight text-[var(--pink)] drop-shadow-[3px_3px_0_rgba(0,0,0,0.9)] sm:text-7xl">
-            JOIN THE CREW
+            {locale === "id"
+              ? "GABUNG BERSAMA KRU"
+              : locale === "ar"
+                ? "انضمّ إلى الطاقم"
+                : "JOIN THE CREW"}
           </h2>
           <p className="mx-auto mt-4 max-w-xl font-hand text-2xl text-[var(--foreground)]">
-            More stories. More places. More perspectives. A brighter world.
+            {locale === "id"
+              ? "Lebih banyak kisah. Lebih banyak ruang. Perspektif lebih luas. Dunia yang lebih terang."
+              : locale === "ar"
+                ? "مزيد من الحكايات. مزيد من الآفاق. عالمٌ أكثر إشراقاً."
+                : "More stories. More places. More perspectives. A brighter world."}
           </p>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/shadow">
+          <Link href={toHref("/shadow")}>
             <Button size="lg" className="px-8 py-4 text-xl">
-              BECOME A MOONWITNESS <ArrowRight className="h-5 w-5" />
+              {locale === "id"
+                ? "JADI MOONWITNESS"
+                : locale === "ar"
+                  ? "كن شاهد القمر"
+                  : "BECOME A MOONWITNESS"}{" "}
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
-          <Link href="/mission-control">
+          <Link href={toHref("/mission-control")}>
             <Button variant="outline" size="lg" className="px-8 py-4 text-xl">
-              MISSION CONTROL
+              {locale === "id"
+                ? "KENDALI MISI"
+                : locale === "ar"
+                  ? "مركز القيادة"
+                  : "MISSION CONTROL"}
             </Button>
           </Link>
         </div>
@@ -81,7 +105,11 @@ export function About() {
           style={layerStyle(revealed, 0.45, 0.5, "rotate(-8deg) scale(0.8)")}
         >
           <div className="sticker sticker-yellow mx-auto inline-block rotate-2 px-4 py-2 font-hand text-lg font-bold">
-            STORIES KEEP ORBITING.
+            {locale === "id"
+              ? "KISAH TERUS MENGORBIT."
+              : locale === "ar"
+                ? "القصص تواصل الدوران."
+                : "STORIES KEEP ORBITING."}
           </div>
         </div>
       </div>

@@ -21,22 +21,35 @@ See [VPS-TOPOLOGY-OPERATIONS.md](../architecture/VPS-TOPOLOGY-OPERATIONS.md) and
 Runs exclusively on **GitHub-hosted `ubuntu-latest`** runners under the protected `production` environment:
 
 1. Resolves release tag from `release: published` or manual `workflow_dispatch` input.
-2. Verifies required `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` (secrets) and `VPS_DEPLOY_PATH`, `PRODUCTION_URL` (vars).
-3. Connects over SSH with `webfactory/ssh-agent`, runs remote Docker & `docker compose config --quiet` pre-flight checks.
-4. Checks out the release tag at `VPS_DEPLOY_PATH`, pulls/rebuilds services, and runs `docker compose up -d --build --remove-orphans` (never removing persistent volumes).
-5. Polls `$PRODUCTION_URL/api/health` (up to 20 × 10s = 200s) and smoke-tests root + API health HTTP 200.
-6. Rolls back to the previous release tag automatically on failure.
+2. Verifies required SSH secrets (`VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_SSH_KNOWN_HOSTS`) and deployment variables (`VPS_DEPLOY_PATH`, `PRODUCTION_URL`, `PRODUCTION_API_URL`, `PRODUCTION_IDENTITY_URL`); enforces a configurable minimum free-disk threshold.
+3. Verifies the release tag resolves to a commit reachable from `main`, then configures SSH with the pinned `VPS_SSH_KNOWN_HOSTS` Environment secret and strict host-key checking.
+4. Captures the exact previously deployed commit SHA, validates the remote Compose checkout, and confirms the VPS tag resolves to the same SHA verified by GitHub Actions.
+5. Deploys the immutable SHA, waits for every enabled Compose service (including enabled `ops` services) to become healthy, and never removes persistent volumes.
+6. Checks web root/health, Core API `/api/v1/readyz`, MID OIDC discovery and MID JWKS on their separate public origins.
+7. On failure after pre-flight, checks out the exact captured previous commit SHA and rebuilds Compose.
 
 ## Required `production` Environment Configuration
 
-| Name              | Kind     | Purpose                                                         |
-| ----------------- | -------- | --------------------------------------------------------------- |
-| `VPS_HOST`        | secret   | Target VPS hostname or IP                                       |
-| `VPS_USER`        | secret   | Non-root deploy SSH user with Docker permission                 |
-| `VPS_SSH_KEY`     | secret   | Ed25519 private key for deploy SSH access                       |
-| `VPS_DEPLOY_PATH` | variable | Absolute path of repo checkout on VPS (e.g. `/opt/moonwitness`) |
-| `PRODUCTION_URL`  | variable | Public base URL for health/smoke checks                         |
+| Name                      | Kind     | Purpose                                                          |
+| ------------------------- | -------- | ---------------------------------------------------------------- |
+| `VPS_HOST`                | secret   | Target VPS hostname or IP                                        |
+| `VPS_USER`                | secret   | Non-root deploy SSH user with Docker permission                  |
+| `VPS_SSH_KEY`             | secret   | Ed25519 private key for deploy SSH access                        |
+| `VPS_SSH_KNOWN_HOSTS`     | secret   | Independently verified known-hosts entry for the exact host/port |
+| `VPS_DEPLOY_PATH`         | variable | Absolute path of repo checkout on VPS (e.g. `/opt/moonwitness`)  |
+| `VPS_PORT`                | variable | SSH port; defaults to `22`                                       |
+| `PRODUCTION_URL`          | variable | Public web origin                                                |
+| `PRODUCTION_API_URL`      | variable | Public Core API origin                                           |
+| `PRODUCTION_IDENTITY_URL` | variable | Public MID issuer origin                                         |
+| `MIN_FREE_DISK_MB`        | variable | Minimum free disk before deploy; defaults to 1024 MiB            |
 
 ## Rollback
 
-On automated failure, `deploy.yml` checks out the prior tag and runs `docker compose up -d --remove-orphans`. For manual rollback, see [DEPLOYMENT-RUNBOOK.md#rollback-manual](../architecture/DEPLOYMENT-RUNBOOK.md#rollback-manual). Never delete or move `v*` release tags.
+On automated failure after pre-flight, `deploy.yml` checks out the exact previous commit SHA captured on the VPS and runs `docker compose up -d --build --remove-orphans`. It does not guess a prior tag and never deletes named volumes. For manual rollback, see [DEPLOYMENT-RUNBOOK.md#rollback-manual](../architecture/DEPLOYMENT-RUNBOOK.md#rollback-manual). Never delete or move `v*` release tags.
+
+## Verification boundaries
+
+- The workflow requires a pinned SSH host key and separate HTTPS origins for web, Core API and MID.
+- Enabled Compose services are checked through their container state/health checks; intentionally disabled profile services are absent from that check.
+- Backup freshness is not yet an automated deployment gate; it remains blocked on the manifest/retention contract in [MW-0036 / #192](../architecture/DATA-OWNERSHIP-BACKUP-RESTORE.md).
+- A staging deployment and deliberate failed-health rollback drill have not been evidenced. Do not describe the workflow as production-verified until both #192 and the staging drill are completed.

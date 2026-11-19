@@ -1,5 +1,5 @@
 import { ARTWORK, WORLD_ART_PLATES, type WorldPlateKey } from "@moonwitness/assets";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 
 /** Resolves an optimized responsive WebP fallback path for `next/image` consumers. */
 export function artSrc(key: ArtKey): string {

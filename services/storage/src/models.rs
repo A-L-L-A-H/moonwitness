@@ -20,6 +20,8 @@ pub struct ObjectRow {
     pub metadata_json: Option<String>,
     pub created_at: i64,
     pub is_delete_marker: bool,
+    pub storage_backend: String,
+    pub storage_ref: Option<String>,
 }
 
 #[derive(Debug, Clone, FromRow, Serialize)]

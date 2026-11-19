@@ -1,6 +1,6 @@
 import { initDb, closeDb } from "@moonwitness/orm";
 import type { FastifyInstance } from "fastify";
-import { env } from "./shared/env";
+import { env, resolveApiDatabaseUrl } from "./shared/env";
 import { buildCoreApp } from "./bootstrap";
 
 export interface BootstrapOptions {
@@ -11,7 +11,7 @@ export interface BootstrapOptions {
 }
 
 export async function buildApp(options: BootstrapOptions = {}): Promise<FastifyInstance> {
-  const dbPath = options.dbPath ?? env.DATABASE_URL ?? "./moonwitness.db";
+  const dbPath = resolveApiDatabaseUrl(env.DATABASE_URL, env.NODE_ENV, options.dbPath);
   await initDb(dbPath);
   try {
     const fastify = await buildCoreApp({

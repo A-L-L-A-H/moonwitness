@@ -1,0 +1,15 @@
+{
+  "name": "observatory",
+  "version": "1.0.0",
+  "description": "Planetary Observatory Feeds (USGS, NOAA, NASA, ISS, Open-Meteo) and Shootgun Operations",
+  "category": "operations",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["observatory.feeds", "shootgun.operations"],
+  "provides": {
+    "routes": ["/api/v1/observatory/summary", "/api/v1/observatory/refresh/:feedKey"],
+    "models": ["observatory.feed", "sg.operation"],
+    "auditActions": ["observatory.refresh"]
+  }
+}

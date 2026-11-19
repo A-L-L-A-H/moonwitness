@@ -1,4 +1,4 @@
-import type { PipelineCard, PipelineColumn } from "@moonwitness/types";
+import type { PipelineCard, PipelineColumn } from "@moonwitness/contracts/types";
 import { KanbanColumn, Grid } from "@moonwitness/ui";
 import { SectionHeading } from "./section-heading";
 

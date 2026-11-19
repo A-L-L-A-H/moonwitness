@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { ArtKey, Module } from "@moonwitness/types";
+import type { ArtKey, Module } from "@moonwitness/contracts/types";
 import { ModuleCard } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";

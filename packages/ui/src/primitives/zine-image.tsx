@@ -1,5 +1,5 @@
 import { ARTWORK, resolveArtworkEntry } from "@moonwitness/assets";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 import { cn } from "../cn";
 
 export interface ZineImageProps {

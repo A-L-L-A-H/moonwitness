@@ -11,7 +11,7 @@ import type {
   Witness,
   Workflow,
   WorkspaceItem,
-} from "@moonwitness/types";
+} from "@moonwitness/contracts/types";
 
 export const modules: Module[] = [
   {

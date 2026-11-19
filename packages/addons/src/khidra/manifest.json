@@ -1,0 +1,15 @@
+{
+  "name": "khidra",
+  "version": "1.0.0",
+  "description": "Khidra Event-Driven Automations, Webhook Mesh, and Prophetic Intelligence Ledger",
+  "category": "automation",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["khidra.automation", "khidra.webhook"],
+  "provides": {
+    "routes": ["/api/v1/khidra/summary", "/api/v1/khidra/trigger"],
+    "models": ["ir.automation", "ir.webhook", "ir.webhook.log"],
+    "auditActions": ["khidra.automation.run"]
+  }
+}

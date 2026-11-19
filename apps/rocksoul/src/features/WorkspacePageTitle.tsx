@@ -1,5 +1,5 @@
 import React from "react";
-import { AnarchyStarSigil } from "../components/ui/RocksoulVectors";
+import { AnarchyStarSigil } from "@moonwitness/ui/artwork";
 
 export interface PageTitleProps {
   kicker: string;

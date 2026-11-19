@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { getDb } from "@moonwitness/orm";
+import { irAddonModel } from "@moonwitness/addon-runtime";
 import {
   createApiMetricsCollector,
   type AddonMetricSummary,
@@ -12,7 +13,7 @@ export interface HealthRoutesOptions {
 
 async function readAddonMetricSummary(): Promise<AddonMetricSummary | undefined> {
   try {
-    const rows = await getDb().all<{ state: string }>("SELECT state FROM ir_addons");
+    const rows = await irAddonModel.repository.find();
     if (rows.length === 0) return undefined;
     let installed = 0;
     let disabled = 0;

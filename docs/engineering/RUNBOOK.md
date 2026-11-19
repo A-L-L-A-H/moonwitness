@@ -12,11 +12,9 @@
 
 Startup calls `assertProductionEnv()` and **refuses to boot** when the configuration is unsafe. Required in `NODE_ENV=production`:
 
-| Variable       | Rule                                                          |
-| -------------- | ------------------------------------------------------------- |
-| `DATABASE_URL` | Must be set to a persistent database; `:memory:` is rejected. |
-| `CORS_ORIGINS` | Comma-separated explicit origins; `*` is rejected.            |
-| `LOG_LEVEL`    | Optional; defaults to `info` in production.                   |
+- `DATABASE_URL`: valid `postgres://` or `postgresql://` URL with host and database name.
+- `CORS_ORIGINS`: comma-separated explicit origins; `*` is rejected.
+- `LOG_LEVEL`: optional; defaults to `info` in production.
 
 Development/test defaults (`127.0.0.1`, in-memory-friendly, `localhost:3000` CORS) are never used in production.
 
@@ -30,25 +28,13 @@ Every response sets `x-content-type-options: nosniff`, `x-frame-options: DENY`, 
 
 ## Backup and restore
 
-- **PostgreSQL (VPS Compose production):** `docker-compose.yml` provisions `postgres:16-alpine` on `postgres-data`. `@moonwitness/orm` (`backupDatabase`, `restoreDatabase`, `verifyIntegrity`) and CLI helpers (`node scripts/backup-db.mjs`, `node scripts/restore-db.mjs`) wrap `pg_dump --format=custom`, `pg_restore --clean --if-exists`, AES-256-GCM encryption, and `pg_index`/`pg_constraint` verification (verified in CI via `POSTGRES_TEST_URL` in `packages/orm/src/__tests__/postgres.live.test.ts`); after restore, verify `GET /api/v1/readyz`.
-- **SQLite/libSQL (local dev / single-node SQLite mode):** Use the tested helpers from `@moonwitness/orm`:
+- **PostgreSQL-only operational CLI:** provide `DATABASE_URL` and `MW_BACKUP_ENCRYPTION_KEY` through the process environment/secret manager, then run `node scripts/backup-db.mjs --out ./backups`. The CLI refuses database URLs or encryption keys passed as command-line arguments. For restore, supply a separate `ISOLATED_RESTORE_DATABASE_URL` and the same backup key through the process environment, then run `node scripts/restore-db.mjs --backup <file.pgdump.enc> --manifest <manifest.json>`. The CLI rejects SQLite/libSQL/D1 targets and refuses a restore target that matches `DATABASE_URL`.
+- **Integrity evidence:** restore requires the matching manifest, verifies the HMAC signature, encrypted archive hash and decrypted plaintext hash before invoking `pg_restore`. The signing key is derived separately from the operator-supplied backup key; key escrow/recovery, rotation, multi-database backup-set completeness, retention, off-host storage and restore drills remain open under [#192](https://github.com/A-L-L-A-H/moonwitness/issues/192). Do not describe a created archive as a verified production backup until it has been restored and checked.
+- **Restore safety:** `pg_restore --clean --if-exists` can replace objects in the target database. Do not point it at production or any database containing data to preserve. Restore into an isolated target first; destructive production restore requires an explicitly reviewed owner-approved plan.
+- **Private ROCKSOUL/Memory data:** keep local backup keys and backup destinations inside their owner-controlled trust zones. Never transfer private archives or database backups to the public VPS by default.
+- **Legacy SQLite utilities:** `scripts/backup-sqlite.mjs` and `scripts/restore-sqlite.mjs` are retained temporarily for controlled archival/recovery of pre-existing data during migration. They are not an approved runtime backup path; do not create new SQLite databases or use them instead of PostgreSQL backups. Remove them after migration and restore verification are complete.
 
-```ts
-import { backupDatabase, restoreDatabase } from "@moonwitness/orm";
-
-// Consistent online snapshot (SQLite VACUUM INTO — safe while serving reads).
-await backupDatabase("/backups/app-2026-11-11.db");
-
-// Restore into a closed target database, then start the process.
-await restoreDatabase("/backups/app-2026-11-11.db", "/var/lib/moonwitness/app.db");
-```
-
-1. Snapshot with `backupDatabase` (or copy the file plus `-wal`/`-shm` sidecars after stopping writes).
-2. Move the backup to durable, off-host storage.
-3. To restore: close the database, `restoreDatabase(...)`, start the process, confirm `GET /api/v1/readyz` returns `200`.
-4. Verify data with a representative read (e.g. `GET /api/v1/timeline/events?limit=1`).
-
-SQLite backup/restore is covered by `packages/orm/src/__tests__/orm.backup.test.ts` against a disposable temp database. Still exercise against staging data before relying on it in operations.
+`packages/orm` still contains legacy SQLite branches for compatibility and historical tests; those are not the approved persistence target. PostgreSQL integration and backup helper coverage is exercised in CI through `POSTGRES_TEST_URL` and `packages/orm/src/__tests__/postgres.live.test.ts`.
 
 ## Migration recovery
 

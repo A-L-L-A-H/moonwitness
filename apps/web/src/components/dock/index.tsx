@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import type { EraId, EventKind, TimelineEvent } from "@moonwitness/types";
+import type { EraId, EventKind, TimelineEvent } from "@moonwitness/contracts/types";
 import { ConsoleShellAdapter } from "../shell/console-shell-adapter";
 import { Star4 } from "@moonwitness/ui/icons";
 import { EraBand } from "@moonwitness/ui";

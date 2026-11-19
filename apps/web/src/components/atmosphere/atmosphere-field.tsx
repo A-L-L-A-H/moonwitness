@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
-import type { MapCity } from "@moonwitness/types";
+import type { MapCity } from "@moonwitness/contracts/types";
 import { useMotionPaused } from "@/lib/motion/motion-pause";
 import { useP5, useReducedMotion } from "./use-p5";
 import { makeFactory, type AtmosphereVariant } from "./sketches";

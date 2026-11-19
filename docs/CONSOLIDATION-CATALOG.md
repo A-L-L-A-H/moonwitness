@@ -62,3 +62,12 @@ Per [MASTER-CANON-CROSS-REPO-CODEX.md §VII.3](./MASTER-CANON-CROSS-REPO-CODEX.m
 2. **Application BFF & Telemetry Proxy:** `apps/api` (Fastify `:3002`, RBAC-gated operator routes) and `apps/a-l-l-a-h/src/lib/ecosystem-probe.ts` (`moonwitness.health/v1` contract across `allah-sanctuary`, `sovereign-codex-edge`, `rocksoul-community`, and `moonwitness-radio`).
 3. **Retained Data-Plane Workers (`services/*`):** Rust `radius`, `snmp-poller`, `storage`, `syslog` operate purely as stateless/data-plane engines under `cp/arsy` + `apps/api` governance.
 4. **Archived Legacy Forks (Read-Only Provenance):** `BRIDGE-ALLAH/ARSY-x`, `BRIDGE-ALLAH/MWX`, `BRIDGE-ALLAH/A-R-S-Y`, and standalone PocketBase `:8091` / Fastify `:3000` incarnations are retired from active deployment paths.
+
+---
+
+## 5. Runtime Simplification & Quarantine Boundaries (Waves I–N)
+
+1. **Active App Topology (`3` Workspace Apps + Python Memory Sidecar):** `@moonwitness/web`, `@moonwitness/api`, and `rocksoul-dx` form the pnpm workspace app surface; `services/memory/backend` serves archive ingest, FTS5/vector search, and the Witness Ledger REST bridge (superseding the retired `services/memory/frontend` UI).
+2. **Addon & Continuity Package Consolidation:** `16` standalone addon micro-packages were merged cleanly into [packages/addon-runtime](../packages/addon-runtime/README.md) (`@moonwitness/addon-runtime`) and [packages/addons](../packages/addons/README.md) (`@moonwitness/addons/*` across `15` subpaths). Shared Continuity schemas and RockSoul sync adapters live in `packages/contracts/src/continuity/index.ts`.
+3. **Unified Web Console Hubs:** Operations modules (`control`, `vpn`, `snmp`, `syslog`, `radius`, `storage`) share `/control?tab=...`; Addon Studio & AutoModel Inspector share `/addons?model=...`; authentication & host onboarding share `/shadow?mode=setup`, with server redirect shims preserved on legacy paths.
+4. **Read-Only `engines/*` Provenance Quarantine:** Curated evaluators reside in `packages/canon`, visual tokens and artwork reside in `packages/ui`, and `GATE-13` in `packages/ui/src/dx/architecture.test.ts` blocks any runtime import from `engines/` or inclusion in `pnpm-workspace.yaml`.

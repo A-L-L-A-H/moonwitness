@@ -5,7 +5,8 @@
   "type": "module",
   "license": "UNLICENSED",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./oidc-client": "./src/oidc-client.ts"
   },
   "scripts": {
     "lint": "eslint src",

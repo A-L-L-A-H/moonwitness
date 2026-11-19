@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { initDb, closeDb, getDb } from "@moonwitness/orm";
-import { createUser, ensureAuthSchema } from "../../services/user";
-import { getSessionCookieOptions } from "../../services/session";
+import { createUser, ensureAuthSchema, getSessionCookieOptions } from "@moonwitness/addons/auth";
 
 const API_PREFIX = "/api/v1";
 const ADMIN_USERNAME = "test-admin";
@@ -17,8 +16,8 @@ const ADMIN_PASSWORD = "test-admin-password-2026";
  * DB-schema initialization.
  */
 async function loadApp() {
-  const { buildFastify } = await import("../../infrastructure/adapters/fastify.adapter");
-  const app = await buildFastify({ prefix: API_PREFIX });
+  const { buildCoreApp } = await import("../../bootstrap");
+  const app = await buildCoreApp({ prefix: API_PREFIX });
   await app.ready();
   return app;
 }

@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import type { Era, TimelineEvent } from "@moonwitness/types";
+import type { Era, TimelineEvent } from "@moonwitness/contracts/types";
 
 const eras: Era[] = [
   {

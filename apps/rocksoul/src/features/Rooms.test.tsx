@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import ArchiveRoom from "./ArchiveRoom";
 import { SignalRoom } from "./SignalRoom";
 import { StudioRoom } from "./StudioRoom";
 
@@ -52,5 +53,47 @@ describe("RockSoul Companion Rooms", () => {
       expect(screen.getByText("Verify lunar boundary source")).toBeInTheDocument();
       expect(screen.getByText("Source: packages/canon/src/mtime-engine.ts")).toBeInTheDocument();
     });
+  });
+
+  it("exports a validated Continuity sync bundle in ArchiveRoom", async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", {
+      value: { writeText },
+      configurable: true,
+    });
+
+    render(<ArchiveRoom onReturn={vi.fn()} onCapture={vi.fn()} reducedMotion={false} />);
+
+    fireEvent.change(screen.getByLabelText("Title"), {
+      target: { value: "Midnight Signal Log" },
+    });
+    fireEvent.change(screen.getByLabelText("Content"), {
+      target: { value: "Synced across MoonWitness Continuity contract." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "SAVE MEMORY" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Midnight Signal Log")).toBeInTheDocument();
+    });
+
+    const exportButton = screen.getByRole("button", { name: "EXPORT SYNC BUNDLE" });
+    expect(exportButton).toBeEnabled();
+    fireEvent.click(exportButton);
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Prepared \d+ rocksoul-desktop record\(s\) for \/api\/v1\/memory\/sync\./),
+      ).toBeInTheDocument();
+    });
+
+    expect(writeText).toHaveBeenCalledTimes(1);
+    const serialized = writeText.mock.calls[0]?.[0];
+    expect(typeof serialized).toBe("string");
+    const payload = JSON.parse(serialized as string) as {
+      source: string;
+      records: Array<{ title: string }>;
+    };
+    expect(payload.source).toBe("rocksoul-desktop");
+    expect(payload.records.some((record) => record.title === "Midnight Signal Log")).toBe(true);
   });
 });

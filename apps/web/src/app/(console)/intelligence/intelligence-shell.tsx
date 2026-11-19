@@ -65,9 +65,9 @@ export function IntelligenceShell() {
             onSaveConfig={saveRiotAiConfig}
           />
         ) : (
-          <div className="flex min-h-[60vh] items-center justify-center font-brush text-2xl text-[var(--primary)]">
+          <h1 className="flex min-h-[60vh] items-center justify-center font-brush text-2xl text-[var(--primary)]">
             INITIALIZING RIOT INTELLIGENCE…
-          </div>
+          </h1>
         )}
       </ConsoleShellAdapter>
     </ControlGate>

@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { ART_SOURCES, ART_SOURCE_WIDTHS, effectiveWidths, outputNames } from "./optimize";
 import { ARTWORK, SKIN_ARTWORK_MAP, WORLD_ART_PLATES, resolveArtworkEntry } from "./index";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 
 const KEYS = Object.keys(ARTWORK) as ArtKey[];
 const PLATE_KEYS = Object.keys(WORLD_ART_PLATES) as (keyof typeof WORLD_ART_PLATES)[];
