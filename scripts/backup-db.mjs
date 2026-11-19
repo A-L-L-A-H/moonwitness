@@ -293,9 +293,6 @@ export function verifyBackupSetManifest({
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename ?? "")) {
   const args = process.argv.slice(2);
-  const outIdx = args.indexOf("--out");
-  const outputDir = outIdx !== -1 ? args[outIdx + 1] : "./backups";
-  const target = process.env.DATABASE_URL;
   const key = process.env.MW_BACKUP_ENCRYPTION_KEY;
 
   if (args.includes("--target") || args.includes("--key")) {
@@ -303,18 +300,45 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename
     process.exit(1);
   }
 
-  if (!target || !key) {
-    console.error("Set both environment variables; run backup-db.mjs --out DIR.");
-    process.exit(1);
-  }
-
-  backupTarget({ target, outputDir, encryptionKey: key })
-    .then(({ report, manifestPath }) => {
-      console.log("Backup complete:", report.fullPath);
-      if (manifestPath) console.log("Manifest:", manifestPath);
-    })
-    .catch((err) => {
-      console.error("Backup failed:", err);
+  const verifySetIdx = args.indexOf("--verify-set");
+  if (verifySetIdx !== -1) {
+    const manifestPath = args[verifySetIdx + 1];
+    const maxAgeIdx = args.indexOf("--max-age-hours");
+    const maxAgeHours = maxAgeIdx !== -1 ? Number(args[maxAgeIdx + 1]) : 24;
+    if (!manifestPath || !key || !Number.isFinite(maxAgeHours) || maxAgeHours <= 0) {
+      console.error(
+        "Set MW_BACKUP_ENCRYPTION_KEY and run backup-db.mjs --verify-set PATH [--max-age-hours N].",
+      );
       process.exit(1);
-    });
+    }
+    readFile(manifestPath, "utf-8")
+      .then((raw) => {
+        const setManifest = JSON.parse(raw);
+        const verified = verifyBackupSetManifest({ setManifest, encryptionKey: key, maxAgeHours });
+        console.log("Backup set verified:", verified.entries.length, "entries");
+      })
+      .catch((err) => {
+        console.error("Backup set verification failed:", err.message);
+        process.exit(1);
+      });
+  } else {
+    const outIdx = args.indexOf("--out");
+    const outputDir = outIdx !== -1 ? args[outIdx + 1] : "./backups";
+    const target = process.env.DATABASE_URL;
+
+    if (!target || !key) {
+      console.error("Set both environment variables; run backup-db.mjs --out DIR.");
+      process.exit(1);
+    }
+
+    backupTarget({ target, outputDir, encryptionKey: key })
+      .then(({ report, manifestPath }) => {
+        console.log("Backup complete:", report.fullPath);
+        if (manifestPath) console.log("Manifest:", manifestPath);
+      })
+      .catch((err) => {
+        console.error("Backup failed:", err);
+        process.exit(1);
+      });
+  }
 }

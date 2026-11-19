@@ -414,6 +414,30 @@ export function isOptionalOpsServiceEnabled(
   return true;
 }
 
+export interface DisabledOptionalOpsErrorPayload {
+  error: "SERVICE_DISABLED";
+  service: OptionalOpsServiceKey;
+  enabled: false;
+}
+
+/**
+ * Returns a deterministic 503 payload when an optional operations service is disabled
+ * by configuration (`MW_OPS_ENABLED` / `MW_OPS_<SERVICE>_ENABLED` / `MW_ADDON_<SERVICE>_DISABLED`).
+ */
+export function getDisabledOptionalOpsErrorPayload(
+  serviceKey: OptionalOpsServiceKey,
+  envSource: Record<string, string | undefined> = typeof process !== "undefined" ? process.env : {},
+): DisabledOptionalOpsErrorPayload | null {
+  if (isOptionalOpsServiceEnabled(serviceKey, envSource)) {
+    return null;
+  }
+  return {
+    error: "SERVICE_DISABLED",
+    service: serviceKey,
+    enabled: false,
+  };
+}
+
 /**
  * Probes enabled optional operations services (`/health`) with a bounded timeout while
  * reporting disabled capabilities explicitly as `{ enabled: false, status: "disabled" }`.

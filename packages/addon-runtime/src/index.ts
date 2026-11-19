@@ -132,6 +132,7 @@ export {
   validateMemoryRuntimeConfig,
   OPTIONAL_OPS_SERVICES,
   isOptionalOpsServiceEnabled,
+  getDisabledOptionalOpsErrorPayload,
   probeOptionalOpsServices,
   type EdgeLoopbackErrorPayload,
   type TraceContext,
@@ -140,6 +141,7 @@ export {
   type OptionalOpsServiceSpec,
   type OpsServiceHealthStatus,
   type OptionalOpsServiceState,
+  type DisabledOptionalOpsErrorPayload,
 } from "./upstream.js";
 export {
   opsJobSchema,

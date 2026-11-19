@@ -61,6 +61,16 @@ const envSchema = {
   MID_KEY_ENCRYPTION_SECRET: z.string().min(16).optional(),
   /** Cookie domain for MID session cookies (e.g. ".moonwitness.biz.id"). */
   MID_COOKIE_DOMAIN: z.string().optional(),
+  /** Optional operations services enablement flags (`--profile ops`). */
+  MW_OPS_ENABLED: z.string().optional(),
+  MW_OPS_RADIUS_ENABLED: z.string().optional(),
+  MW_OPS_SNMP_ENABLED: z.string().optional(),
+  MW_OPS_SYSLOG_ENABLED: z.string().optional(),
+  MW_OPS_STORAGE_ENABLED: z.string().optional(),
+  MW_ADDON_RADIUS_DISABLED: z.string().optional(),
+  MW_ADDON_SNMP_DISABLED: z.string().optional(),
+  MW_ADDON_SYSLOG_DISABLED: z.string().optional(),
+  MW_ADDON_STORAGE_DISABLED: z.string().optional(),
   /** Addon manifest signature verification policy at boot. */
   ADDON_SIGNING_MODE: z.enum(["permissive", "strict"]).default("permissive"),
 };

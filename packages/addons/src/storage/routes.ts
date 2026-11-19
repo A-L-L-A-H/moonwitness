@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
   defaultFailClosedAuthBridge,
+  getDisabledOptionalOpsErrorPayload,
   getEdgeLoopbackErrorPayload,
   resolveActorContextFromBridge,
   resolveUpstreamServiceUrl,
@@ -172,6 +173,11 @@ async function forward(
       })
     ) {
       return reply.code(400).send({ error: "invalid storage path" });
+    }
+
+    const disabledGuard = getDisabledOptionalOpsErrorPayload("storage");
+    if (disabledGuard) {
+      return reply.code(503).header("cache-control", "no-store").send(disabledGuard);
     }
 
     upstreamUrl = resolveStorageTarget(target);
