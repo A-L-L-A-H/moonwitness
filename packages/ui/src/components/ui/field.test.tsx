@@ -41,11 +41,7 @@ describe("FieldControl description references", () => {
           <FormField name="plain" label="Plain field">
             <Input data-testid="plain-control" aria-describedby="external-help" />
           </FormField>
-          <FormField
-            name="help"
-            label="Field with help"
-            description="Helpful context."
-          >
+          <FormField name="help" label="Field with help" description="Helpful context.">
             <Input data-testid="help-control" aria-describedby="external-help" />
           </FormField>
           <FormField name="errorOnly" label="Field with error">
@@ -85,7 +81,9 @@ describe("FieldControl description references", () => {
     const errorIds = getReferencedIds(errorControl);
     expect(errorControl.getAttribute("aria-invalid")).toBe("true");
     expect(errorIds).toHaveLength(1);
-    expect(document.getElementById(errorIds[0] ?? "")?.textContent).toBe("This field is required.");
+    expect(document.getElementById(errorIds[0] ?? "")?.textContent).toBe(
+      "This field is required.",
+    );
 
     const describedErrorControl = getControl("described-error-control");
     const describedErrorIds = getReferencedIds(describedErrorControl);
