@@ -138,12 +138,12 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
             );
           })}
         </svg>
-        accessibleData ? (
+        {accessibleData ? (
           <AccessibleChartTable
             ariaLabel={ariaLabel}
             rows={data.map((point) => ({ label: point.label, value: point.value }))}
           />
-        ) : null
+        ) : null}
       </>
     );
   },
@@ -234,7 +234,7 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
             </circle>
           ) : null}
         </svg>
-        accessibleData ? (
+        {accessibleData ? (
           <AccessibleChartTable
             ariaLabel={ariaLabel}
             rows={data.map((point, index) =>
@@ -243,7 +243,7 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
                 : { label: point.label, value: point.value },
             )}
           />
-        ) : null
+        ) : null}
       </>
     );
   },
@@ -376,12 +376,12 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
             </g>
           ))}
         </svg>
-        accessibleData ? (
+        {accessibleData ? (
           <AccessibleChartTable
             ariaLabel={ariaLabel}
             rows={data.map((point) => ({ label: point.label, value: point.value }))}
           />
-        ) : null
+        ) : null}
       </>
     );
   },
@@ -484,12 +484,12 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
             </text>
           ) : null}
         </svg>
-        accessibleData ? (
+        {accessibleData ? (
           <AccessibleChartTable
             ariaLabel={accessibleLabel}
             rows={[{ label: label ?? "Value", value: `${displayValue}${unit}` }]}
           />
-        ) : null
+        ) : null}
       </>
     );
   },
