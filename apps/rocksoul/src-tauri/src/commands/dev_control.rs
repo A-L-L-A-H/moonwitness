@@ -137,7 +137,9 @@ fn resolve_workspace_root(app: &AppHandle) -> Result<PathBuf, String> {
 
 fn is_port_listening(port: u16) -> bool {
     let timeout = Duration::from_millis(PROBE_TIMEOUT_MS);
-    let ipv4: SocketAddr = format!("127.0.0.1:{port}").parse().expect("valid ipv4 addr");
+    let ipv4: SocketAddr = format!("127.0.0.1:{port}")
+        .parse()
+        .expect("valid ipv4 addr");
     if TcpStream::connect_timeout(&ipv4, timeout).is_ok() {
         return true;
     }
@@ -353,7 +355,10 @@ fn start_single_target(
     configure_background_command(&mut command);
 
     let mut child = command.spawn().map_err(|error| {
-        let message = format!("Failed to start {} ({}): {error}", spec.name, spec.filter_pkg);
+        let message = format!(
+            "Failed to start {} ({}): {error}",
+            spec.name, spec.filter_pkg
+        );
         service.last_error = Some(message.clone());
         message
     })?;
@@ -371,7 +376,10 @@ fn start_single_target(
     Ok(())
 }
 
-fn stop_single_target(state: &DevServicesState, spec: &'static DevTargetSpec) -> Result<(), String> {
+fn stop_single_target(
+    state: &DevServicesState,
+    spec: &'static DevTargetSpec,
+) -> Result<(), String> {
     let mut guard = state.0.lock().map_err(|error| error.to_string())?;
     let service = guard.entry(spec.id.to_string()).or_default();
     refresh_managed_child(service);
@@ -394,10 +402,13 @@ fn stop_single_target(state: &DevServicesState, spec: &'static DevTargetSpec) ->
 }
 
 #[tauri::command]
-pub fn get_dev_services_status(
+pub async fn get_dev_services_status(
     state: State<'_, DevServicesState>,
 ) -> Result<Vec<DevServiceEntry>, String> {
-    collect_status(&state)
+    let shared_state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || collect_status(&shared_state))
+        .await
+        .map_err(|error| format!("Dev status worker failed: {error}"))?
 }
 
 #[tauri::command]
@@ -470,7 +481,13 @@ mod tests {
   TCP    127.0.0.1:3000         127.0.0.1:51000        ESTABLISHED     4444\n\
   TCP    192.168.1.50:3000      0.0.0.0:0              LISTENING       5555\n\
   TCP    127.0.0.1:3002         0.0.0.0:0              LISTENING       9999\n";
-        assert_eq!(parse_netstat_listening_pids(sample, 3000, 9999), vec![1111, 2222]);
-        assert_eq!(parse_netstat_listening_pids(sample, 3002, 9999), Vec::<u32>::new());
+        assert_eq!(
+            parse_netstat_listening_pids(sample, 3000, 9999),
+            vec![1111, 2222]
+        );
+        assert_eq!(
+            parse_netstat_listening_pids(sample, 3002, 9999),
+            Vec::<u32>::new()
+        );
     }
 }

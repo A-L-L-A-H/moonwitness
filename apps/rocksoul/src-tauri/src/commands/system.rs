@@ -34,43 +34,51 @@ pub fn query_events(connection: &rusqlite::Connection) -> Result<Vec<Event>, Str
 }
 
 #[tauri::command]
-pub fn list_events(app: AppHandle) -> Result<Vec<Event>, String> {
-    let connection = db::connect(&app)?;
-    query_events(&connection)
+pub async fn list_events(app: AppHandle) -> Result<Vec<Event>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let connection = db::connect(&app)?;
+        query_events(&connection)
+    })
+    .await
+    .map_err(|error| format!("Event worker failed: {error}"))?
 }
 
 #[tauri::command]
-pub fn get_dashboard(app: AppHandle) -> Result<Dashboard, String> {
-    let connection = db::connect(&app)?;
-    let active: i64 = connection
-        .query_row(
-            "SELECT COUNT(*) FROM issues WHERE status NOT IN ('done', 'closed')",
-            [],
-            |row| row.get(0),
-        )
-        .map_err(|error| error.to_string())?;
-    Ok(Dashboard {
-        stats: DashboardStats {
-            active,
-            blocked: connection
-                .query_row(
-                    "SELECT COUNT(*) FROM issues WHERE status = 'blocked'",
-                    [],
-                    |row| row.get(0),
-                )
-                .map_err(|error| error.to_string())?,
-            completed: connection
-                .query_row(
-                    "SELECT COUNT(*) FROM issues WHERE status IN ('done', 'closed')",
-                    [],
-                    |row| row.get(0),
-                )
-                .map_err(|error| error.to_string())?,
-        },
-        issues: query_issues(&connection)?,
-        repositories: query_repositories(&connection)?,
-        events: query_events(&connection)?,
+pub async fn get_dashboard(app: AppHandle) -> Result<Dashboard, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let connection = db::connect(&app)?;
+        let active: i64 = connection
+            .query_row(
+                "SELECT COUNT(*) FROM issues WHERE status NOT IN ('done', 'closed')",
+                [],
+                |row| row.get(0),
+            )
+            .map_err(|error| error.to_string())?;
+        Ok(Dashboard {
+            stats: DashboardStats {
+                active,
+                blocked: connection
+                    .query_row(
+                        "SELECT COUNT(*) FROM issues WHERE status = 'blocked'",
+                        [],
+                        |row| row.get(0),
+                    )
+                    .map_err(|error| error.to_string())?,
+                completed: connection
+                    .query_row(
+                        "SELECT COUNT(*) FROM issues WHERE status IN ('done', 'closed')",
+                        [],
+                        |row| row.get(0),
+                    )
+                    .map_err(|error| error.to_string())?,
+            },
+            issues: query_issues(&connection)?,
+            repositories: query_repositories(&connection)?,
+            events: query_events(&connection)?,
+        })
     })
+    .await
+    .map_err(|error| format!("Dashboard worker failed: {error}"))?
 }
 
 fn with_redirect_uri(authorize_url: &str, redirect_uri: &str) -> Result<String, String> {

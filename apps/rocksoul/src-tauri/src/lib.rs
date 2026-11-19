@@ -2,6 +2,7 @@ mod commands;
 mod db;
 mod models;
 pub mod rocksoul_contracts;
+mod tray;
 
 use crate::commands::repositories;
 use tauri::Manager;
@@ -33,8 +34,20 @@ pub fn run() {
         .manage(commands::dev_control::DevServicesState::default())
         .setup(|app| {
             db::init(app.handle()).map_err(std::io::Error::other)?;
-            let _ = repositories::ensure_default_workspace_repository(app.handle());
+            tray::init_system_tray(app.handle())?;
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn_blocking(move || {
+                let _ = repositories::ensure_default_workspace_repository(&handle);
+            });
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             commands::cloud_backup::cloud_backup_status,

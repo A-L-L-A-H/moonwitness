@@ -71,7 +71,9 @@ mod tests {
 
     #[test]
     fn is_postgres_url_detects_postgres_schemes() {
-        assert!(is_postgres_url("postgres://radius:pass@postgres:5432/radius"));
+        assert!(is_postgres_url(
+            "postgres://radius:pass@postgres:5432/radius"
+        ));
         assert!(is_postgres_url("postgresql://postgres:5432/radius"));
         assert!(!is_postgres_url("sqlite:/data/radius.db?mode=rwc"));
     }

@@ -35,8 +35,9 @@ const rustModels = [
   { rustName: "MonitorSnapshot", contractName: "MonitorSnapshot" },
   { rustName: "MidLoopbackCallback", contractName: "MidLoopbackCallback" },
 ];
-const [contracts, registration, models, ...sources] = await Promise.all([
+const [contracts, continuityContracts, registration, models, ...sources] = await Promise.all([
   readFile("src/lib/contracts.d.ts", "utf8"),
+  readFile("../../packages/contracts/src/continuity/index.ts", "utf8").catch(() => ""),
   readFile("src-tauri/src/lib.rs", "utf8"),
   readFile("src-tauri/src/models.rs", "utf8"),
   ...commandFiles.map(file => readFile(file, "utf8")),
@@ -133,7 +134,9 @@ const commandArgs = {
   update_companion_state: ["companion_state"],
 };
 const argumentInterfaces = new Map();
-for (const [, name, body] of contracts.matchAll(/export interface ([A-Za-z][A-Za-z0-9]*) \{([\s\S]*?)\n\}/g)) {
+for (const [, name, body] of `${contracts}\n${continuityContracts}`.matchAll(
+  /export interface ([A-Za-z][A-Za-z0-9]*) \{([\s\S]*?)\r?\n\}/g,
+)) {
   argumentInterfaces.set(name, [...body.matchAll(/^\s{2}([A-Za-z][A-Za-z0-9]*)\??:/gm)].map(([, field]) => field));
 }
 for (const command of declaredCommands) {

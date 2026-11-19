@@ -100,11 +100,20 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
-    Promise.all([refresh(), refreshMonitor()]).finally(() => {
+    const timer =
+      typeof window !== "undefined"
+        ? window.setTimeout(() => {
+            if (active) void refreshMonitor();
+          }, 250)
+        : null;
+    void refresh().finally(() => {
       if (active) setHasLoaded(true);
     });
     return () => {
       active = false;
+      if (timer !== null && typeof window !== "undefined") {
+        window.clearTimeout(timer);
+      }
     };
   }, [refresh, refreshMonitor]);
 
