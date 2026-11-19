@@ -1,8 +1,8 @@
 # MoonWitness Runtime, Service Ownership & Cloudflare Dependency Inventory
 
 > [!IMPORTANT]
-> **Historical Baseline / Partially Superseded (`EVIDENCE:HISTORICAL`, 2026-11-18):**
-> This inventory captures the pre-consolidation `dev` snapshot at commit `1e22fb7` (2026-11-17) and is preserved verbatim for audit provenance. Several assumptions in §1–§4 have since been **superseded** by [ADR-006](./adr-006-three-app-topology-and-trust-zones.md), [ADR-007](./adr-007-rocksoul-local-execution-and-data-boundary.md), and the active [docker-compose.yml](../../docker-compose.yml) / [Caddyfile](../../Caddyfile): (1) `apps/a-l-l-a-h` was consolidated into unified `apps/web`; (2) `apps/memory` moved to Zone C `services/memory`; (3) production Compose `api` uses `postgres:16-alpine` (`PostgresDriver`), with SQLite/libSQL for local/dev and Rust workers; and (4) `services/storage` runs in `--profile ops` (`:8091`).
+> **Historical Baseline / Partially Superseded (`EVIDENCE:HISTORICAL`, 2026-11-18; Reconciled 2026-11-19 for `#177` / `#288`):**
+> This inventory captures the pre-consolidation `dev` snapshot at commit `1e22fb7` (2026-11-17) and is preserved verbatim in §1–§4 for audit provenance. Several assumptions in §1–§4 have since been **superseded** by [ADR-006](./adr-006-three-app-topology-and-trust-zones.md), [ADR-007](./adr-007-rocksoul-local-execution-and-data-boundary.md), [POSTGRES-STANDARDIZATION-PLAN.md](./POSTGRES-STANDARDIZATION-PLAN.md) (`#288`), and the active [docker-compose.yml](../../docker-compose.yml) / [Caddyfile](../../Caddyfile): (1) `apps/a-l-l-a-h` was consolidated into unified `apps/web`; (2) `apps/memory` moved to Zone C `services/memory`; (3) production Compose `apps/api` runs on PostgreSQL (`postgres:16-alpine` / `PostgresDriver`), while PostgreSQL-only standardization across `services/*` (Wave B) and Zone C (Wave C) is tracked in [POSTGRES-STANDARDIZATION-PLAN.md](./POSTGRES-STANDARDIZATION-PLAN.md); and (4) `services/storage` plus optional `ops` services run under `--profile ops` with explicit `MW_OPS_*` readiness and `503 SERVICE_DISABLED` gates on `/api/v1/readyz`. See the [Current Reconciliation Addendum](#current-reconciliation-addendum-dev--186263f-177--288) below.
 
 **Status:** Canonical Architecture Inventory (MW-0032 / Master Issue #187)  
 **Baseline Date:** 2026-11-17  
@@ -251,3 +251,23 @@ The following items are source/configuration findings and must be verified again
 | `GET /api/status`                              | `GET /api/v1/igate/status` & `GET /api/v1/probes/nodes` + `/events` | Covered by `probes.routes.ts` (`requireAuth`)                   |
 | `POST /api/probe`                              | `POST /api/v1/igate/probe` & `POST /api/v1/probes/run`              | Covered by `probes.routes.ts` (`requireRole("admin","editor")`) |
 | Standalone Cloudflare D1 + UI HTML             | Retired (`apps/web` hosts authenticated console)                    | Standalone worker decommissioned across PR W1-B & W1-C          |
+
+---
+
+## Current Reconciliation Addendum (`dev` @ `186263f`, `#177` / `#288`)
+
+> Preserves historical §1–§4 tables above (`EVIDENCE:HISTORICAL`) while recording verified current runtime topology, optional `ops` gating, and persistence status against [POSTGRES-STANDARDIZATION-PLAN.md](./POSTGRES-STANDARDIZATION-PLAN.md) (`#288` / `MW-0805`).
+
+### Optional `ops` Feature Gates & Readiness (`#284`)
+
+- `apps/api` evaluates optional `ops` profile services (`radius`, `snmp`, `syslog`, `storage`) via `isOptionalOpsServiceEnabled` and `getDisabledOptionalOpsErrorPayload` in `packages/addon-runtime/src/upstream.ts`, honoring `MW_OPS_ENABLED`, per-service `MW_OPS_<SERVICE>_ENABLED` (`MW_OPS_RADIUS_ENABLED`, `MW_OPS_SNMP_ENABLED`, `MW_OPS_SYSLOG_ENABLED`, `MW_OPS_STORAGE_ENABLED`), and legacy `MW_ADDON_<SERVICE>_DISABLED`.
+- Disabled optional `ops` capabilities fail closed with deterministic HTTP `503` (`{ error: "SERVICE_DISABLED", service, enabled: false }`) on addon/upstream proxies instead of probing unreachable upstreams.
+- Readiness probes on `GET /api/v1/readyz` (and `/readyz`, `/health/ready` in `apps/api/src/interface/routes/health.routes.ts`) verify database connectivity and call `probeOptionalOpsServices({ timeoutMs: 250 })`, reporting disabled services explicitly as `{ enabled: false, status: "disabled" }`.
+
+### Verified Current Persistence Status (Cross-Ref: [POSTGRES-STANDARDIZATION-PLAN.md](./POSTGRES-STANDARDIZATION-PLAN.md))
+
+| Surface                                                     | Verified Current Persistence State                                                                                                                 | Standardization Target & Status                                                                                     |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Core API (`apps/api` + `packages/mid`)                      | PostgreSQL (`postgres:16-alpine`, `PostgresDriver`) enforced in production (`PR #390`); `LibSqlDriver` / `D1Driver` retained for local/test bridge | Production guard **IMPLEMENTED** (Wave A); D1/SQLite test driver retirement **PENDING** (Wave C)                    |
+| `services/*` (`radius`, `snmp-poller`, `syslog`, `storage`) | SQLite (`sqlx::sqlite`) + filesystem/S3 object payloads (`services/storage`)                                                                       | **PENDING** Wave B `sqlx::postgres` migration with isolated per-service PostgreSQL DBs and roles                    |
+| Zone C (`apps/rocksoul`, `services/memory`)                 | `apps/rocksoul`: local SQLite (`rusqlite`); `services/memory`: local `sqlite3` + LanceDB + archive files                                           | **PENDING** Wave C Windows local loopback PostgreSQL (`pgvector` for `services/memory`) lifecycle & data conversion |

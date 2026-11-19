@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
   defaultFailClosedAuthBridge,
+  getDisabledOptionalOpsErrorPayload,
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
   resolveUpstreamServiceUrl,
@@ -27,6 +28,10 @@ async function forward(
   target: string,
   method: string,
 ) {
+  const disabledGuard = getDisabledOptionalOpsErrorPayload("syslog");
+  if (disabledGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(disabledGuard);
+  }
   const baseUrl = getSyslogUrl();
   const edgeGuard = getEdgeLoopbackErrorPayload("syslog", "SYSLOG_URL", baseUrl);
   if (edgeGuard) {

@@ -79,6 +79,82 @@ describe("operational endpoints", () => {
     });
   });
 
+  it("reports disabled optional ops capabilities on /readyz and returns 503 SERVICE_DISABLED when disabled", async () => {
+    const prev = process.env.MW_OPS_RADIUS_ENABLED;
+    process.env.MW_OPS_RADIUS_ENABLED = "0";
+    try {
+      const readyRes = await app.inject({ method: "GET", url: "/api/v1/readyz" });
+      expect(readyRes.statusCode).toBe(200);
+      expect(readyRes.json()).toMatchObject({
+        status: "ready",
+        database: "ok",
+        services: { radius: { enabled: false, status: "disabled" } },
+      });
+
+      const user = await createUser({
+        username: "ops-check",
+        email: "ops@moon.world",
+        password: "ops-password-2026",
+        role: "admin",
+        displayName: "Ops Check",
+      });
+      const token = await createSession(user.id);
+
+      const proxyRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/radius/health",
+        headers: { cookie: `mw_session=${token}` },
+      });
+      expect(proxyRes.statusCode).toBe(503);
+      expect(proxyRes.json()).toEqual({
+        error: "SERVICE_DISABLED",
+        service: "radius",
+        enabled: false,
+      });
+    } finally {
+      if (prev === undefined) delete process.env.MW_OPS_RADIUS_ENABLED;
+      else process.env.MW_OPS_RADIUS_ENABLED = prev;
+    }
+  });
+
+  it("reports disabled optional ops capabilities on /readyz and returns 503 SERVICE_DISABLED when disabled", async () => {
+    const prev = process.env.MW_OPS_RADIUS_ENABLED;
+    process.env.MW_OPS_RADIUS_ENABLED = "0";
+    try {
+      const readyRes = await app.inject({ method: "GET", url: "/api/v1/readyz" });
+      expect(readyRes.statusCode).toBe(200);
+      expect(readyRes.json()).toMatchObject({
+        status: "ready",
+        database: "ok",
+        services: { radius: { enabled: false, status: "disabled" } },
+      });
+
+      const user = await createUser({
+        username: "ops-check",
+        email: "ops@moon.world",
+        password: "ops-password-2026",
+        role: "admin",
+        displayName: "Ops Check",
+      });
+      const token = await createSession(user.id);
+
+      const proxyRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/radius/health",
+        headers: { cookie: `mw_session=${token}` },
+      });
+      expect(proxyRes.statusCode).toBe(503);
+      expect(proxyRes.json()).toEqual({
+        error: "SERVICE_DISABLED",
+        service: "radius",
+        enabled: false,
+      });
+    } finally {
+      if (prev === undefined) delete process.env.MW_OPS_RADIUS_ENABLED;
+      else process.env.MW_OPS_RADIUS_ENABLED = prev;
+    }
+  });
+
   it("sets safe security headers", async () => {
     const response = await app.inject({ method: "GET", url: "/api/v1/healthz" });
     expect(response.headers["x-content-type-options"]).toBe("nosniff");

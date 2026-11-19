@@ -23,6 +23,10 @@
 
 ## 3. Controlled Migration Waves
 
-1. **Wave A (Done / In Progress):** Fail-closed `DATABASE_URL` production guard (`apps/api`), PostgreSQL backup/restore CLI + multi-DB set manifest (`scripts/backup-db.mjs`), and optional `ops` readiness reporting (`apps/api/src/interface/routes/health.routes.ts`).
-2. **Wave B (`services/*`):** Migrate `radius`, `snmp-poller`, `syslog`, `storage` from `sqlx::sqlite` to `sqlx::postgres` with isolated databases/roles in `docker-compose.yml` and CI service containers.
-3. **Wave C (Zone C Local PostgreSQL):** Validate Windows local PostgreSQL packaging/lifecycle for `apps/rocksoul` and `services/memory` (`pgvector`), convert existing SQLite/LanceDB state with source retention and checksum verification, then remove `LibSqlDriver`/`D1Driver` and `scripts/backup-sqlite.mjs`.
+1. **Wave A (Done / In Progress):**
+   - Fail-closed `DATABASE_URL` production guard (`apps/api/src/shared/env.ts`, `PR #390`) and `/api/v1/readyz` optional `ops` readiness reporting (`apps/api/src/interface/routes/health.routes.ts`).
+   - Optional `ops` service readiness & deterministic `503 SERVICE_DISABLED` gates (`packages/addon-runtime/src/upstream.ts` — `isOptionalOpsServiceEnabled`, `getDisabledOptionalOpsErrorPayload`, `probeOptionalOpsServices`, `#284`).
+   - PostgreSQL backup/restore CLI + multi-DB backup-set completeness/freshness verification (`scripts/backup-db.mjs` `--verify-set` & `verifyBackupSetManifest`, `#192`).
+   - Zone C local `apps/rocksoul` execution hardening: bounded process supervisor, `SAFE_ENV_ALLOWLIST`, and startup stale-run recovery (`apps/rocksoul/src-tauri/src/commands/agent_execution.rs` — `reconcile_stale_agent_runs`, `#282`).
+2. **Wave B (`services/*` — PENDING):** Migrate `radius`, `snmp-poller`, `syslog`, `storage` from `sqlx::sqlite` to `sqlx::postgres` with isolated databases/roles in `docker-compose.yml` and CI service containers.
+3. **Wave C (Zone C Local PostgreSQL — PENDING):** Validate Windows local PostgreSQL packaging/lifecycle for `apps/rocksoul` and `services/memory` (`pgvector`), convert existing SQLite/LanceDB state with source retention and checksum verification, then remove `LibSqlDriver`/`D1Driver` and `scripts/backup-sqlite.mjs`.

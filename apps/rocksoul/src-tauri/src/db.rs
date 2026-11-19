@@ -76,6 +76,7 @@ fn initialize_connection(connection: &Connection) -> Result<(), String> {
         .pragma_update(None, "journal_mode", "WAL")
         .map_err(|error| error.to_string())?;
     migrate(connection)?;
+    let _ = crate::commands::agent_execution::reconcile_stale_agent_runs(connection);
 
     connection.execute(
         "INSERT OR IGNORE INTO workspaces (id, name, root_path) VALUES ('local', 'LOCAL WORKSPACE', NULL)",
