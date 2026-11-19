@@ -4,9 +4,10 @@ import {
   BaseRepository,
   ConflictError,
   modelRegistry,
+  type ActorContext,
   type FindOptions,
 } from "@moonwitness/orm";
-import type { AddonRuntimeController, ModelAclFlags } from "./runtime.js";
+import type { AddonRuntimeController, CrewRoleOrPublic, ModelAclFlags } from "./runtime.js";
 import {
   defaultFailClosedAuthBridge,
   resolveActorContextFromBridge,
@@ -39,6 +40,15 @@ function handleOrmError(error: unknown, reply: FastifyReply): FastifyReply {
   return reply.code(400).send({ error: msg });
 }
 
+function mergeWithRuleDomain(
+  userFilters: Record<string, unknown>,
+  ruleDomain: Record<string, unknown> | null,
+): Record<string, unknown> {
+  if (!ruleDomain || Object.keys(ruleDomain).length === 0) return userFilters;
+  if (Object.keys(userFilters).length === 0) return ruleDomain;
+  return { $and: [userFilters, ruleDomain] };
+}
+
 async function authorizeModelAccess(
   runtime: AddonRuntimeController,
   auth: BaseAddonAuthBridge,
@@ -59,12 +69,31 @@ async function authorizeModelAccess(
     });
     return null;
   }
-  const acl = await runtime.getModelPermissions(target.desc.name, auth.getActorRole(request));
+  const role = auth.getActorRole(request);
+  const acl = await runtime.getModelPermissions(target.desc.name, role);
   if (!acl[requiredPerm]) {
     await reply.code(403).send({ error: "Forbidden" });
     return null;
   }
   return target;
+}
+
+async function ensureRecordMatchesRuleDomain(
+  runtime: AddonRuntimeController,
+  target: NonNullable<ReturnType<typeof repositoryForModel>>,
+  id: string,
+  role: CrewRoleOrPublic,
+  actor: ActorContext,
+  options: { includeDeleted?: boolean } = {},
+) {
+  const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
+  const filters = mergeWithRuleDomain({ id }, ruleDomain);
+  const rows = await target.repo.find(filters, {
+    limit: 1,
+    tenantId: actor.tenantId,
+    includeDeleted: options.includeDeleted,
+  });
+  return rows[0] ?? null;
 }
 
 export async function registerGenericModelRoutes(
@@ -89,36 +118,212 @@ export async function registerGenericModelRoutes(
       if (!target) return reply;
 
       const query = request.query ?? {};
-      const filters: Record<string, unknown> = {};
+      const userFilters: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(query)) {
         if (v === undefined) continue;
         if (["limit", "offset", "orderBy", "includeDeleted", "q"].includes(k)) continue;
         if (target.desc.fields.has(k) || k === "status") {
-          filters[k] = v;
+          userFilters[k] = v;
         }
       }
 
-      const tenantId = resolveActorTenantFromBridge(auth, request);
+      const actor = resolveActorContextFromBridge(auth, request);
+      const role = auth.getActorRole(request);
+      const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
+      const filters = mergeWithRuleDomain(userFilters, ruleDomain);
+
+      const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);
       const limit = query.limit ? Math.min(200, Math.max(1, Number(query.limit))) : 50;
       const offset = query.offset ? Math.max(0, Number(query.offset)) : 0;
+      const q = query.q?.trim();
       const opts: FindOptions = {
         limit,
         offset,
         tenantId,
         includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
         ...(query.orderBy ? { orderBy: query.orderBy } : {}),
+        ...(q ? { q } : {}),
       };
 
       const rows = await target.repo.find(filters, opts);
       let filtered = rows as unknown as Array<Record<string, unknown>>;
-      if (query.q?.trim()) {
-        const needle = query.q.trim().toLowerCase();
+      let total: number;
+      if (q && (target.desc.searchFields?.length ?? 0) === 0) {
+        const needle = q.toLowerCase();
         filtered = filtered.filter((row) => JSON.stringify(row).toLowerCase().includes(needle));
+        total = filtered.length;
+      } else {
+        total = await target.repo.count(filters, {
+          includeDeleted: opts.includeDeleted,
+          tenantId,
+          ...(q ? { q } : {}),
+        });
       }
-      const total = query.q?.trim()
-        ? filtered.length
-        : await target.repo.count(filters, { includeDeleted: opts.includeDeleted, tenantId });
       return reply.send({ data: filtered, total });
+    },
+  );
+
+  fastify.get<{ Params: { model: string }; Querystring: Record<string, string | undefined> }>(
+    "/m/:model/read-group",
+    { preHandler },
+    async (request, reply) => {
+      const target = await authorizeModelAccess(
+        runtime,
+        auth,
+        request,
+        reply,
+        request.params.model,
+        "canRead",
+      );
+      if (!target) return reply;
+
+      const query = request.query ?? {};
+      const groupByRaw = query.groupBy ?? "";
+      const groupBy = groupByRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (groupBy.length === 0) {
+        return reply.code(400).send({ error: "Query parameter 'groupBy' is required" });
+      }
+
+      const userFilters: Record<string, unknown> = {};
+      for (const [k, v] of Object.entries(query)) {
+        if (v === undefined) continue;
+        if (["groupBy", "orderBy", "includeDeleted", "q"].includes(k)) continue;
+        if (target.desc.fields.has(k) || k === "status") {
+          userFilters[k] = v;
+        }
+      }
+
+      const actor = resolveActorContextFromBridge(auth, request);
+      const role = auth.getActorRole(request);
+      const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
+      const filters = mergeWithRuleDomain(userFilters, ruleDomain);
+      const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);
+
+      try {
+        const groups = await target.repo.readGroup({
+          filters,
+          groupBy,
+          tenantId,
+          includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
+          ...(query.q?.trim() ? { q: query.q.trim() } : {}),
+          ...(query.orderBy ? { orderBy: query.orderBy } : {}),
+        });
+        return reply.send({ groups });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
+    },
+  );
+
+  fastify.post<{ Params: { model: string; action: string }; Body: unknown }>(
+    "/m/:model/call/:action",
+    { preHandler },
+    async (request, reply) => {
+      const target = repositoryForModel(request.params.model);
+      if (!target) {
+        return reply
+          .code(404)
+          .send({ error: `Model '${request.params.model}' is not REST-enabled` });
+      }
+      if (!runtime.isModelEnabled(target.desc.name)) {
+        return reply.code(503).send({
+          error: `Addon for model '${target.desc.name}' is disabled`,
+          code: "ADDON_DISABLED",
+        });
+      }
+
+      const actionDef = target.desc.actions?.[request.params.action];
+      if (!actionDef || (actionDef.scope ?? "record") !== "model") {
+        return reply
+          .code(404)
+          .send({ error: `Model action '${request.params.action}' not found` });
+      }
+
+      const role = auth.getActorRole(request);
+      const allowedRoles = actionDef.roles ?? ["editor", "admin"];
+      if (!allowedRoles.includes(role)) {
+        return reply.code(403).send({ error: "Forbidden" });
+      }
+
+      try {
+        const actor = resolveActorContextFromBridge(auth, request);
+        const parsedInput = actionDef.input
+          ? actionDef.input.parse(request.body ?? {})
+          : (request.body ?? {});
+        const result = await actionDef.handler({
+          model: target.desc.name,
+          record: null,
+          input: parsedInput,
+          actor,
+          repository: target.repo,
+        });
+        return reply.send({ data: result });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
+    },
+  );
+
+  fastify.post<{ Params: { model: string; id: string; action: string }; Body: unknown }>(
+    "/m/:model/:id/call/:action",
+    { preHandler },
+    async (request, reply) => {
+      const target = repositoryForModel(request.params.model);
+      if (!target) {
+        return reply
+          .code(404)
+          .send({ error: `Model '${request.params.model}' is not REST-enabled` });
+      }
+      if (!runtime.isModelEnabled(target.desc.name)) {
+        return reply.code(503).send({
+          error: `Addon for model '${target.desc.name}' is disabled`,
+          code: "ADDON_DISABLED",
+        });
+      }
+
+      const actionDef = target.desc.actions?.[request.params.action];
+      if (!actionDef || (actionDef.scope ?? "record") !== "record") {
+        return reply
+          .code(404)
+          .send({ error: `Record action '${request.params.action}' not found` });
+      }
+
+      const role = auth.getActorRole(request);
+      const allowedRoles = actionDef.roles ?? ["editor", "admin"];
+      if (!allowedRoles.includes(role)) {
+        return reply.code(403).send({ error: "Forbidden" });
+      }
+
+      const actor = resolveActorContextFromBridge(auth, request);
+      const record = await ensureRecordMatchesRuleDomain(
+        runtime,
+        target,
+        request.params.id,
+        role,
+        actor,
+      );
+      if (!record) {
+        return reply.code(404).send({ error: "Not found" });
+      }
+
+      try {
+        const parsedInput = actionDef.input
+          ? actionDef.input.parse(request.body ?? {})
+          : (request.body ?? {});
+        const result = await actionDef.handler({
+          model: target.desc.name,
+          record,
+          input: parsedInput,
+          actor,
+          repository: target.repo,
+        });
+        return reply.send({ data: result });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
     },
   );
 
@@ -136,8 +341,15 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const tenantId = resolveActorTenantFromBridge(auth, request);
-      const row = await target.repo.findOne(request.params.id, { tenantId });
+      const actor = resolveActorContextFromBridge(auth, request);
+      const role = auth.getActorRole(request);
+      const row = await ensureRecordMatchesRuleDomain(
+        runtime,
+        target,
+        request.params.id,
+        role,
+        actor,
+      );
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
     },
@@ -183,6 +395,15 @@ export async function registerGenericModelRoutes(
 
       try {
         const actor = resolveActorContextFromBridge(auth, request);
+        const role = auth.getActorRole(request);
+        const current = await ensureRecordMatchesRuleDomain(
+          runtime,
+          target,
+          request.params.id,
+          role,
+          actor,
+        );
+        if (!current) return reply.code(404).send({ error: "Not found" });
         const updated = await target.repo.update(request.params.id, request.body ?? {}, actor);
         if (!updated) return reply.code(404).send({ error: "Not found" });
         return reply.send({ data: updated });
@@ -207,6 +428,15 @@ export async function registerGenericModelRoutes(
       if (!target) return reply;
 
       const actor = resolveActorContextFromBridge(auth, request);
+      const role = auth.getActorRole(request);
+      const current = await ensureRecordMatchesRuleDomain(
+        runtime,
+        target,
+        request.params.id,
+        role,
+        actor,
+      );
+      if (!current) return reply.code(404).send({ error: "Not found" });
       const row = await target.repo.archive(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -228,6 +458,16 @@ export async function registerGenericModelRoutes(
       if (!target) return reply;
 
       const actor = resolveActorContextFromBridge(auth, request);
+      const role = auth.getActorRole(request);
+      const current = await ensureRecordMatchesRuleDomain(
+        runtime,
+        target,
+        request.params.id,
+        role,
+        actor,
+        { includeDeleted: true },
+      );
+      if (!current) return reply.code(404).send({ error: "Not found" });
       const row = await target.repo.restore(request.params.id, actor);
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });
@@ -248,10 +488,23 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const row = await target.repo.delete(request.params.id, actor);
-      if (!row) return reply.code(404).send({ error: "Not found" });
-      return reply.send({ data: row });
+      try {
+        const actor = resolveActorContextFromBridge(auth, request);
+        const role = auth.getActorRole(request);
+        const current = await ensureRecordMatchesRuleDomain(
+          runtime,
+          target,
+          request.params.id,
+          role,
+          actor,
+        );
+        if (!current) return reply.code(404).send({ error: "Not found" });
+        const row = await target.repo.delete(request.params.id, actor);
+        if (!row) return reply.code(404).send({ error: "Not found" });
+        return reply.send({ data: row });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
     },
   );
 
@@ -269,11 +522,16 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const tenantId = resolveActorTenantFromBridge(auth, request);
-      const row = await target.repo.findOne(request.params.id, {
-        includeDeleted: true,
-        tenantId,
-      });
+      const actor = resolveActorContextFromBridge(auth, request);
+      const role = auth.getActorRole(request);
+      const row = await ensureRecordMatchesRuleDomain(
+        runtime,
+        target,
+        request.params.id,
+        role,
+        actor,
+        { includeDeleted: true },
+      );
       if (!row) return reply.code(404).send({ error: "Not found" });
       const entries = await target.repo.history(request.params.id);
       return reply.send({ data: entries });

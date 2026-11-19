@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defineModel } from "@moonwitness/orm";
+import { defineModel, SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
 
 export const irAddonSchema = z.object({
   name: z.string().min(1).max(80),
@@ -76,6 +76,7 @@ export const irRuleSchema = z.object({
   can_create: z.boolean().default(false),
   can_update: z.boolean().default(false),
   can_delete: z.boolean().default(false),
+  domain_json: z.string().nullable().default(null),
 });
 
 export const irRuleModel = defineModel({
@@ -126,6 +127,256 @@ export const irMenuModel = defineModel({
   indexes: [{ fields: ["menu_key"], unique: true }, { fields: ["addon"] }],
 });
 
+// ============================================================================
+// Constitutional Odoo-Grade __base Models (res.* & ir.*)
+// ============================================================================
+
+export const resCompanySchema = z.object({
+  slug: z.string().min(1).max(64),
+  name: z.string().min(1).max(160),
+  parent_id: z.string().max(120).nullable().default(null),
+  domain: z.string().max(200).nullable().default(null),
+  default_locale: z.string().min(2).max(16).default("en"),
+  timezone: z.string().min(1).max(64).default("UTC"),
+  currency: z.string().min(3).max(8).default("USD"),
+  is_active: z.boolean().default(true),
+  settings_json: z.string().default("{}"),
+});
+
+export const resCompanyModel = defineModel({
+  name: "res.company",
+  table: "res_companies",
+  schema: resCompanySchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["slug", "name", "domain"],
+  indexes: [{ fields: ["slug"], unique: true }, { fields: ["is_active"] }],
+});
+
+export const resTenantModel = resCompanyModel;
+
+export const resGroupsSchema = z.object({
+  group_key: z.string().min(1).max(120),
+  name: z.string().min(1).max(160),
+  category: z.string().max(80).default("base"),
+  implied_ids_json: z.string().default("[]"),
+  users_json: z.string().default("[]"),
+  comment: z.string().max(400).default(""),
+});
+
+export const resGroupsModel = defineModel({
+  name: "res.groups",
+  table: "res_groups",
+  schema: resGroupsSchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["group_key", "name", "category"],
+  indexes: [{ fields: ["group_key"], unique: true }, { fields: ["category"] }],
+});
+
+export const resPartnerSchema = z.object({
+  partner_key: z.string().min(1).max(120),
+  name: z.string().min(1).max(200),
+  partner_type: z
+    .enum(["human", "agent", "service", "organization", "probe"])
+    .default("human"),
+  email: z.string().max(200).nullable().default(null),
+  company_slug: z.string().max(64).default("default"),
+  locale: z.string().max(16).default("en"),
+  timezone: z.string().max(64).default("UTC"),
+  active: z.boolean().default(true),
+  metadata_json: z.string().default("{}"),
+});
+
+export const resPartnerModel = defineModel({
+  name: "res.partner",
+  table: "res_partners",
+  schema: resPartnerSchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["partner_key", "name", "email", "partner_type"],
+  indexes: [
+    { fields: ["tenant_id", "partner_key"], unique: true },
+    { fields: ["partner_type"] },
+  ],
+});
+
+export const resLangSchema = z.object({
+  code: z.string().min(2).max(16),
+  iso_code: z.string().min(2).max(16),
+  name: z.string().min(1).max(120),
+  direction: z.enum(["ltr", "rtl"]).default("ltr"),
+  date_format: z.string().max(40).default("YYYY-MM-DD"),
+  active: z.boolean().default(true),
+  is_default: z.boolean().default(false),
+});
+
+export const resLangModel = defineModel({
+  name: "res.lang",
+  table: "res_langs",
+  schema: resLangSchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["code", "name"],
+  indexes: [{ fields: ["code"], unique: true }, { fields: ["active"] }],
+});
+
+export const irModelDataSchema = z.object({
+  module: z.string().min(1).max(80),
+  name: z.string().min(1).max(160),
+  model: z.string().min(1).max(120),
+  res_id: z.string().min(1).max(120),
+  noupdate: z.boolean().default(true),
+});
+
+export const irModelDataModel = defineModel({
+  name: "ir.model.data",
+  table: "ir_model_data",
+  schema: irModelDataSchema,
+  softDelete: false,
+  indexes: [
+    { fields: ["module", "name"], unique: true },
+    { fields: ["model", "res_id"] },
+  ],
+});
+
+export const irConfigParameterSchema = z.object({
+  key: z.string().min(1).max(160),
+  value: z.string().max(8000),
+  is_secret: z.boolean().default(false),
+  description: z.string().max(400).default(""),
+});
+
+export const irConfigParameterModel = defineModel({
+  name: "ir.config_parameter",
+  table: "ir_config_parameters",
+  schema: irConfigParameterSchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["key", "description"],
+  indexes: [{ fields: ["tenant_id", "key"], unique: true }],
+});
+
+export const irSequenceSchema = z.object({
+  code: z.string().min(1).max(120),
+  name: z.string().min(1).max(160),
+  prefix: z.string().max(40).default(""),
+  suffix: z.string().max(40).default(""),
+  padding: z.number().int().min(0).max(20).default(4),
+  number_next: z.number().int().min(1).default(1),
+  number_increment: z.number().int().min(1).default(1),
+  active: z.boolean().default(true),
+});
+
+export const irSequenceModel = defineModel({
+  name: "ir.sequence",
+  table: "ir_sequences",
+  schema: irSequenceSchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["code", "name"],
+  indexes: [{ fields: ["tenant_id", "code"], unique: true }],
+});
+
+export const irCronSchema = z.object({
+  cron_key: z.string().min(1).max(120),
+  name: z.string().min(1).max(160),
+  addon: z.string().min(1).max(80),
+  model_name: z.string().min(1).max(120),
+  action_name: z.string().min(1).max(120),
+  interval_sec: z.number().int().min(1).default(300),
+  active: z.boolean().default(true),
+  last_run_at: z.string().nullable().default(null),
+  next_run_at: z.string().nullable().default(null),
+  payload_json: z.string().default("{}"),
+});
+
+export const irCronModel = defineModel({
+  name: "ir.cron",
+  table: "ir_crons",
+  schema: irCronSchema,
+  softDelete: false,
+  restEnabled: true,
+  searchFields: ["cron_key", "name", "model_name"],
+  indexes: [{ fields: ["cron_key"], unique: true }, { fields: ["active"] }],
+});
+
+export async function getConfigParam(
+  key: string,
+  tenantId = "default",
+): Promise<string | null> {
+  const rows = await irConfigParameterModel.repository.find({ key }, { tenantId, limit: 1 });
+  return rows[0]?.value ?? null;
+}
+
+export async function setConfigParam(
+  key: string,
+  value: string,
+  options: { isSecret?: boolean; description?: string; actor?: ActorContext } = {},
+): Promise<void> {
+  const actor = options.actor ?? SYSTEM_ACTOR;
+  await irConfigParameterModel.repository.upsert(
+    { key },
+    {
+      key,
+      value,
+      is_secret: options.isSecret ?? false,
+      description: options.description ?? "",
+    },
+    actor,
+  );
+}
+
+export async function nextSequenceByCode(
+  code: string,
+  options: {
+    prefix?: string;
+    suffix?: string;
+    padding?: number;
+    step?: number;
+    name?: string;
+    actor?: ActorContext;
+  } = {},
+): Promise<string> {
+  const actor = options.actor ?? SYSTEM_ACTOR;
+  const tenantId = actor.tenantId ?? "default";
+  const existingRows = await irSequenceModel.repository.find(
+    { code },
+    { tenantId, limit: 1 },
+  );
+
+  let row = existingRows[0];
+  if (!row) {
+    row = await irSequenceModel.repository.create(
+      {
+        code,
+        name: options.name ?? code,
+        prefix: options.prefix ?? "",
+        suffix: options.suffix ?? "",
+        padding: options.padding ?? 4,
+        number_next: 1,
+        number_increment: options.step ?? 1,
+        active: true,
+      },
+      actor,
+    );
+  }
+
+  const currentNumber = row.number_next;
+  const nextNumber = currentNumber + row.number_increment;
+  await irSequenceModel.repository.update(
+    row.id,
+    { number_next: nextNumber },
+    actor,
+  );
+
+  const padded =
+    row.padding > 0
+      ? String(currentNumber).padStart(row.padding, "0")
+      : String(currentNumber);
+  return `${row.prefix}${padded}${row.suffix}`;
+}
+
 export const irSystemModels = [
   irAddonModel,
   irModelRecord,
@@ -133,4 +384,12 @@ export const irSystemModels = [
   irRuleModel,
   irViewModel,
   irMenuModel,
+  resCompanyModel,
+  resGroupsModel,
+  resPartnerModel,
+  resLangModel,
+  irModelDataModel,
+  irConfigParameterModel,
+  irSequenceModel,
+  irCronModel,
 ];

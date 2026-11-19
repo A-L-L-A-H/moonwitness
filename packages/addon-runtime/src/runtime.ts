@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
+  BaseRepository,
   extendModel,
   modelRegistry,
   syncModels,
@@ -14,10 +15,13 @@ import {
 } from "@moonwitness/orm";
 import {
   irAddonModel,
+  irCronModel,
   irMenuModel,
+  irModelDataModel,
   irModelFieldModel,
   irModelRecord,
   irRuleModel,
+  irSequenceModel,
   irSystemModels,
   irViewModel,
 } from "./ir-models.js";
@@ -41,6 +45,35 @@ export interface IrRuleInput {
   can_create?: boolean;
   can_update?: boolean;
   can_delete?: boolean;
+  domain?: Record<string, unknown>;
+}
+
+export interface AddonDataRecord {
+  id: string;
+  model: string;
+  key?: Record<string, unknown>;
+  noupdate?: boolean;
+  values: Record<string, unknown>;
+}
+
+export interface IrCronInput {
+  cron_key: string;
+  name: string;
+  model_name: string;
+  action_name: string;
+  interval_sec?: number;
+  active?: boolean;
+  payload?: Record<string, unknown>;
+}
+
+export interface IrSequenceInput {
+  code: string;
+  name: string;
+  prefix?: string;
+  suffix?: string;
+  padding?: number;
+  number_next?: number;
+  number_increment?: number;
 }
 
 export interface CustomActionSpec {
@@ -92,6 +125,9 @@ export interface AddonDefinition {
   rules?: IrRuleInput[];
   views?: IrViewInput[];
   menus?: IrMenuInput[];
+  data?: AddonDataRecord[];
+  crons?: IrCronInput[];
+  sequences?: IrSequenceInput[];
   shouldAutoEnable?: () => boolean;
   register?: (ctx: AddonContext) => Promise<void> | void;
   registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
@@ -144,6 +180,105 @@ const ROLE_RANK: Record<CrewRoleOrPublic, number> = {
   admin: 3,
 };
 
+const CONSTITUTIONAL_BASE_DATA: AddonDataRecord[] = [
+  {
+    id: "company_default",
+    model: "res.company",
+    key: { slug: "default" },
+    noupdate: true,
+    values: {
+      slug: "default",
+      name: "Default Tenant",
+      default_locale: "en",
+      timezone: "UTC",
+      currency: "USD",
+      is_active: true,
+    },
+  },
+  {
+    id: "group_public",
+    model: "res.groups",
+    key: { group_key: "base.group_public" },
+    noupdate: true,
+    values: {
+      group_key: "base.group_public",
+      name: "Public Reader",
+      category: "base",
+      implied_ids_json: "[]",
+      comment: "Anonymous or unauthenticated public visitors",
+    },
+  },
+  {
+    id: "group_viewer",
+    model: "res.groups",
+    key: { group_key: "base.group_viewer" },
+    noupdate: true,
+    values: {
+      group_key: "base.group_viewer",
+      name: "Crew Viewer",
+      category: "base",
+      implied_ids_json: '["base.group_public"]',
+      comment: "Authenticated read-only operator",
+    },
+  },
+  {
+    id: "group_editor",
+    model: "res.groups",
+    key: { group_key: "base.group_editor" },
+    noupdate: true,
+    values: {
+      group_key: "base.group_editor",
+      name: "Crew Editor",
+      category: "base",
+      implied_ids_json: '["base.group_viewer"]',
+      comment: "Editorial and operational contributor",
+    },
+  },
+  {
+    id: "group_system",
+    model: "res.groups",
+    key: { group_key: "base.group_system" },
+    noupdate: true,
+    values: {
+      group_key: "base.group_system",
+      name: "System Administrator",
+      category: "base",
+      implied_ids_json: '["base.group_editor"]',
+      comment: "Full administrative access",
+    },
+  },
+  {
+    id: "lang_en",
+    model: "res.lang",
+    key: { code: "en" },
+    noupdate: true,
+    values: {
+      code: "en",
+      iso_code: "en-US",
+      name: "English",
+      direction: "ltr",
+      date_format: "YYYY-MM-DD",
+      active: true,
+      is_default: true,
+    },
+  },
+  {
+    id: "lang_id",
+    model: "res.lang",
+    key: { code: "id" },
+    noupdate: true,
+    values: {
+      code: "id",
+      iso_code: "id-ID",
+      name: "Bahasa Indonesia",
+      direction: "ltr",
+      date_format: "YYYY-MM-DD",
+      active: true,
+      is_default: false,
+    },
+  },
+];
+
 function defaultWidgetForField(type: string, selection: string[] | null): string {
   if (selection && selection.length > 0) return "select";
   switch (type) {
@@ -163,6 +298,27 @@ function defaultWidgetForField(type: string, selection: string[] | null): string
 
 function humanizeLabel(fieldName: string): string {
   return fieldName.replace(/_/g, " ").replace(/\b\w/g, (ch) => ch.toUpperCase());
+}
+
+function resolveRuleDomainPlaceholders(
+  value: unknown,
+  actor: ActorContext,
+  role: CrewRoleOrPublic,
+): unknown {
+  if (value === "$actor.id") return actor.actorId ?? "";
+  if (value === "$actor.tenantId") return actor.tenantId ?? "default";
+  if (value === "$actor.role") return role;
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveRuleDomainPlaceholders(item, actor, role));
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = resolveRuleDomainPlaceholders(v, actor, role);
+    }
+    return out;
+  }
+  return value;
 }
 
 export class AddonRuntimeController {
@@ -249,6 +405,7 @@ export class AddonRuntimeController {
     }
 
     await syncModels([...irSystemModels, opsJobModel]);
+    await this.syncAddonDeclarativeData("__base", CONSTITUTIONAL_BASE_DATA);
 
     const existingRows = await irAddonModel.repository.find();
     const existingByName = new Map(existingRows.map((row) => [row.name, row]));
@@ -396,6 +553,64 @@ export class AddonRuntimeController {
     return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
   }
 
+  private async syncAddonDeclarativeData(
+    addonName: string,
+    records: AddonDataRecord[],
+  ): Promise<void> {
+    for (const record of records) {
+      const desc = modelRegistry.get(record.model);
+      if (!desc) continue;
+      const repo = new BaseRepository(
+        desc.name,
+        desc.table,
+        desc.fullSchema,
+        desc.softDelete,
+        desc.fields,
+      );
+      const noupdate = record.noupdate ?? true;
+      const existingData = (
+        await irModelDataModel.repository.find({
+          module: addonName,
+          name: record.id,
+        })
+      )[0];
+
+      if (existingData) {
+        const currentTarget = await repo.findOne(existingData.res_id, {
+          includeDeleted: true,
+        });
+        if (currentTarget && existingData.noupdate) {
+          continue;
+        }
+        if (currentTarget && !existingData.noupdate) {
+          await repo.update(existingData.res_id, record.values, SYSTEM_ACTOR);
+          continue;
+        }
+      }
+
+      let savedId: string;
+      if (record.key && Object.keys(record.key).length > 0) {
+        const saved = await repo.upsert(record.key, record.values, SYSTEM_ACTOR);
+        savedId = String((saved as { id: unknown }).id);
+      } else {
+        const created = await repo.create(record.values, SYSTEM_ACTOR);
+        savedId = String((created as { id: unknown }).id);
+      }
+
+      await irModelDataModel.repository.upsert(
+        { module: addonName, name: record.id },
+        {
+          module: addonName,
+          name: record.id,
+          model: record.model,
+          res_id: savedId,
+          noupdate,
+        },
+        SYSTEM_ACTOR,
+      );
+    }
+  }
+
   private async syncAddonIrMetadata(
     addonName: string,
     def: AddonDefinition,
@@ -424,6 +639,8 @@ export class AddonRuntimeController {
           schema_json: JSON.stringify({
             publicFields: desc.publicFields ?? [],
             indexes: desc.indexes,
+            searchFields: desc.searchFields ?? [],
+            actions: Object.keys(desc.actions ?? {}),
           }),
         },
         SYSTEM_ACTOR,
@@ -444,7 +661,13 @@ export class AddonRuntimeController {
             model_name: desc.name,
             field_name: fieldName,
             field_type: spec.zodTypeLabel as
-              "text" | "integer" | "real" | "boolean" | "date" | "json" | "selection",
+              | "text"
+              | "integer"
+              | "real"
+              | "boolean"
+              | "date"
+              | "json"
+              | "selection",
             nullable: spec.nullable,
             required: !spec.nullable && !spec.optional,
             deprecated: deprecatedByTable.has(`${desc.table}.${fieldName}`),
@@ -471,6 +694,7 @@ export class AddonRuntimeController {
           can_create: rule.can_create ?? false,
           can_update: rule.can_update ?? false,
           can_delete: rule.can_delete ?? false,
+          domain_json: rule.domain ? JSON.stringify(rule.domain) : null,
         },
         SYSTEM_ACTOR,
       );
@@ -507,6 +731,46 @@ export class AddonRuntimeController {
         },
         SYSTEM_ACTOR,
       );
+    }
+
+    for (const seq of def.sequences ?? []) {
+      const existingSeq = (await irSequenceModel.repository.find({ code: seq.code }))[0];
+      if (!existingSeq) {
+        await irSequenceModel.repository.create(
+          {
+            code: seq.code,
+            name: seq.name,
+            prefix: seq.prefix ?? "",
+            suffix: seq.suffix ?? "",
+            padding: seq.padding ?? 4,
+            number_next: seq.number_next ?? 1,
+            number_increment: seq.number_increment ?? 1,
+            active: true,
+          },
+          SYSTEM_ACTOR,
+        );
+      }
+    }
+
+    for (const cron of def.crons ?? []) {
+      await irCronModel.repository.upsert(
+        { cron_key: cron.cron_key },
+        {
+          cron_key: cron.cron_key,
+          name: cron.name,
+          addon: addonName,
+          model_name: cron.model_name,
+          action_name: cron.action_name,
+          interval_sec: cron.interval_sec ?? 300,
+          active: cron.active ?? true,
+          payload_json: JSON.stringify(cron.payload ?? {}),
+        },
+        SYSTEM_ACTOR,
+      );
+    }
+
+    if (def.data && def.data.length > 0) {
+      await this.syncAddonDeclarativeData(addonName, def.data);
     }
   }
 
@@ -725,6 +989,32 @@ export class AddonRuntimeController {
     };
   }
 
+  async getModelRuleDomain(
+    modelName: string,
+    role: CrewRoleOrPublic,
+    actor: ActorContext,
+  ): Promise<Record<string, unknown> | null> {
+    const rules = await irRuleModel.repository.find({ model_name: modelName });
+    if (rules.length === 0) return null;
+    const exact = rules.find((r) => r.role === role);
+    if (exact) {
+      if (!exact.domain_json) return null;
+      const parsed = JSON.parse(exact.domain_json) as Record<string, unknown>;
+      return resolveRuleDomainPlaceholders(parsed, actor, role) as Record<string, unknown>;
+    }
+    if (role === "admin") {
+      return null;
+    }
+    const userRank = ROLE_RANK[role] ?? 0;
+    const eligible = rules
+      .filter((r) => (ROLE_RANK[r.role] ?? 99) <= userRank)
+      .sort((a, b) => (ROLE_RANK[b.role] ?? 0) - (ROLE_RANK[a.role] ?? 0));
+    const highestWithDomain = eligible.find((r) => Boolean(r.domain_json));
+    if (!highestWithDomain?.domain_json) return null;
+    const parsed = JSON.parse(highestWithDomain.domain_json) as Record<string, unknown>;
+    return resolveRuleDomainPlaceholders(parsed, actor, role) as Record<string, unknown>;
+  }
+
   async getViewDescriptor(
     modelName: string,
     role: CrewRoleOrPublic,
@@ -766,6 +1056,21 @@ export class AddonRuntimeController {
       { orderBy: "priority ASC" },
     );
     const activeViews = viewRows.filter((v) => this.isEnabled(v.addon));
+    const modelCustomActions: CustomActionSpec[] = Object.entries(desc.actions ?? {}).map(
+      ([actionId, actionDef]) => ({
+        id: actionId,
+        label: actionDef.label ?? humanizeLabel(actionId),
+        method: "POST",
+        urlTemplate:
+          (actionDef.scope ?? "record") === "model"
+            ? `/api/v1/m/${encodeURIComponent(modelName)}/call/${encodeURIComponent(actionId)}`
+            : `/api/v1/m/${encodeURIComponent(modelName)}/{id}/call/${encodeURIComponent(actionId)}`,
+        roles: (actionDef.roles ?? ["editor", "admin"]).filter(
+          (r): r is "admin" | "editor" | "viewer" => r !== "public",
+        ),
+      }),
+    );
+
     let actionBindings: ActionBindingsSpec = desc.restEnabled
       ? {
           listUrl: `/api/v1/m/${encodeURIComponent(modelName)}`,
@@ -775,6 +1080,7 @@ export class AddonRuntimeController {
           restoreUrl: `/api/v1/m/${encodeURIComponent(modelName)}/{id}/restore`,
           deleteUrl: `/api/v1/m/${encodeURIComponent(modelName)}/{id}`,
           historyUrl: `/api/v1/m/${encodeURIComponent(modelName)}/{id}/history`,
+          ...(modelCustomActions.length > 0 ? { customActions: modelCustomActions } : {}),
         }
       : {};
 
