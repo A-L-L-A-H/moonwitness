@@ -1,19 +1,24 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { getDb } from "@moonwitness/orm";
-import { resolveRequestIdentity } from "../../middleware/auth";
 import {
+  clearReplyCookie,
+  getEdgeLoopbackErrorPayload,
+  getRequestCookie,
+  setReplyCookie,
+} from "@moonwitness/addon-runtime";
+import {
+  authUserModel,
   createSession,
   createUser,
   findUserByEmail,
   findUserById,
   findUserByUsername,
   getSessionCookieOptions,
+  resolveAuthIdentityFromRequest,
   revokeSession,
   SESSION_COOKIE_NAME,
   verifyUserPassword,
-} from "@moonwitness/addons/auth";
-import { getEdgeLoopbackErrorPayload } from "../../shared/upstream";
-import { getArsyUrl } from "./control.upstream";
+} from "../auth/index.js";
+import { getArsyUrl } from "./upstream.js";
 
 export function isNativeSetupEnabled(): boolean {
   if (process.env.CONTROL_NATIVE_SETUP === "1") return true;
@@ -37,6 +42,9 @@ function getControlSessionCookieOptions(request: FastifyRequest) {
 }
 
 function toIsoTimestamp(raw: unknown): string | undefined {
+  if (raw instanceof Date) {
+    return Number.isNaN(raw.getTime()) ? undefined : raw.toISOString();
+  }
   if (typeof raw === "number" && Number.isFinite(raw)) {
     return new Date(raw < 1e12 ? raw * 1000 : raw).toISOString();
   }
@@ -59,16 +67,18 @@ function formatControlUser(user: {
   email: string;
   role: string;
   createdAt?: Date | string | number;
+  create_date?: Date | string | number;
 }) {
+  const rawCreated = user.createdAt ?? user.create_date;
   return {
     id: String(user.id),
     name: user.displayName,
     email: user.email,
     role: user.role === "admin" ? "superadmin" : "readonly",
     created_at:
-      user.createdAt instanceof Date
-        ? user.createdAt.toISOString()
-        : (toIsoTimestamp(user.createdAt) ?? new Date().toISOString()),
+      rawCreated instanceof Date
+        ? rawCreated.toISOString()
+        : (toIsoTimestamp(rawCreated) ?? new Date().toISOString()),
   };
 }
 
@@ -77,11 +87,12 @@ export function sendNoStoreJson(reply: FastifyReply, statusCode: number, payload
 }
 
 export async function handleNativeSetupStatus(reply: FastifyReply) {
-  const row = await getDb().get<{ count: number; initialized_at: string | number | null }>(
-    "SELECT COUNT(*) as count, MIN(create_date) as initialized_at FROM auth_users",
-  );
-  const initialized = (row?.count ?? 0) > 0;
-  const initializedAt = initialized ? toIsoTimestamp(row?.initialized_at) : undefined;
+  const userCount = await authUserModel.repository.count();
+  const initialized = userCount > 0;
+  const firstUsers = initialized
+    ? await authUserModel.repository.find({}, { orderBy: "create_date ASC", limit: 1 })
+    : [];
+  const initializedAt = initialized ? toIsoTimestamp(firstUsers[0]?.create_date) : undefined;
   return sendNoStoreJson(reply, 200, {
     initialized,
     version: "0.1.0",
@@ -134,8 +145,8 @@ export async function handleNativeCreateSuperuser(request: FastifyRequest, reply
     return sendNoStoreJson(reply, 400, { error: "Password harus 12–72 karakter" });
   }
 
-  const existing = await getDb().get<{ count: number }>("SELECT COUNT(*) as count FROM auth_users");
-  if ((existing?.count ?? 0) > 0) {
+  const existingCount = await authUserModel.repository.count();
+  if (existingCount > 0) {
     return sendNoStoreJson(reply, 409, { error: "instance sudah diinisialisasi" });
   }
 
@@ -152,10 +163,8 @@ export async function handleNativeCreateSuperuser(request: FastifyRequest, reply
       displayName: name,
     });
   } catch (error) {
-    const afterRace = await getDb().get<{ count: number }>(
-      "SELECT COUNT(*) as count FROM auth_users",
-    );
-    if ((afterRace?.count ?? 0) > 0) {
+    const afterRaceCount = await authUserModel.repository.count();
+    if (afterRaceCount > 0) {
       return sendNoStoreJson(reply, 409, { error: "instance sudah diinisialisasi" });
     }
     throw error;
@@ -166,7 +175,7 @@ export async function handleNativeCreateSuperuser(request: FastifyRequest, reply
   }
 
   const sessionId = await createSession(user.id);
-  reply.setCookie(SESSION_COOKIE_NAME, sessionId, getControlSessionCookieOptions(request));
+  setReplyCookie(reply, SESSION_COOKIE_NAME, sessionId, getControlSessionCookieOptions(request));
 
   await syncSuperuserToArsyBestEffort({
     name,
@@ -201,7 +210,7 @@ export async function handleNativeAuthLogin(request: FastifyRequest, reply: Fast
   }
 
   const sessionId = await createSession(user.id);
-  reply.setCookie(SESSION_COOKIE_NAME, sessionId, getControlSessionCookieOptions(request));
+  setReplyCookie(reply, SESSION_COOKIE_NAME, sessionId, getControlSessionCookieOptions(request));
 
   return sendNoStoreJson(reply, 200, {
     user: formatControlUser(user),
@@ -209,10 +218,10 @@ export async function handleNativeAuthLogin(request: FastifyRequest, reply: Fast
 }
 
 export async function handleNativeAuthMe(request: FastifyRequest, reply: FastifyReply) {
-  const { user, expiredSessionCookie } = await resolveRequestIdentity(request);
+  const { user, expiredSessionCookie } = await resolveAuthIdentityFromRequest(request);
   if (!user) {
     if (expiredSessionCookie) {
-      reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+      clearReplyCookie(reply, SESSION_COOKIE_NAME, { path: "/" });
     }
     return sendNoStoreJson(reply, 401, { error: "Not authenticated" });
   }
@@ -223,10 +232,10 @@ export async function handleNativeAuthMe(request: FastifyRequest, reply: Fastify
 }
 
 export async function handleNativeAuthLogout(request: FastifyRequest, reply: FastifyReply) {
-  const sessionToken = request.cookies?.[SESSION_COOKIE_NAME];
+  const sessionToken = getRequestCookie(request, SESSION_COOKIE_NAME);
   if (sessionToken) {
     await revokeSession(sessionToken);
   }
-  reply.clearCookie(SESSION_COOKIE_NAME, { path: "/" });
+  clearReplyCookie(reply, SESSION_COOKIE_NAME, { path: "/" });
   return sendNoStoreJson(reply, 200, { ok: true });
 }

@@ -2,11 +2,24 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { closeDb, initDb, modelRegistry } from "@moonwitness/orm";
-import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
+import Fastify from "fastify";
+import { closeDb, createActorContext, initDb, modelRegistry } from "@moonwitness/orm";
+import {
+  AddonRuntimeController,
+  baseManifest,
+  defaultFailClosedAuthBridge,
+  opsJobModel,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
 import { auditAddon } from "../audit";
-import { authAddon } from "../auth";
-import { controlAddon, createControlScheduler, processControlSchedulerJob } from "./index.js";
+import { authAddon, createUser } from "../auth";
+import {
+  controlAddon,
+  controlCommandModel,
+  createControlAddon,
+  createControlScheduler,
+  processControlSchedulerJob,
+} from "./index.js";
 
 describe("../control", () => {
   const dirs: string[] = [];
@@ -93,5 +106,110 @@ describe("../control", () => {
     });
     expect(processed).toBe(true);
     expect(executed).toEqual(["apply:dockercompose:/srv/moonwitness"]);
+  });
+
+  it("dispatches POST /api/v1/control/plan into DurableQueueSchedulerAdapter (202 + ops.job) when CONTROL_SCHEDULER=queue", async () => {
+    const prevScheduler = process.env.CONTROL_SCHEDULER;
+    process.env.CONTROL_SCHEDULER = "queue";
+    const app = Fastify({ logger: false });
+    try {
+      const testAuth: BaseAddonAuthBridge = {
+        ...defaultFailClosedAuthBridge,
+        authenticate: async (request) => {
+          (request as { user?: { id: string; role: string } }).user = { id: "1", role: "admin" };
+        },
+        requireRole: () => async () => undefined,
+        getActorId: () => "1",
+        getActorRole: () => "admin",
+        getActorTenant: (request) => String(request.headers["x-tenant-id"] ?? "default"),
+        resolveActorContext: (request, source = "api") =>
+          createActorContext(
+            "1",
+            source,
+            request.id,
+            String(request.headers["x-tenant-id"] ?? "default"),
+          ),
+      };
+
+      const runtime = new AddonRuntimeController();
+      await runtime.syncAll(
+        [
+          { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+          auditAddon,
+          authAddon,
+          createControlAddon({ prefix: "/api/v1", auth: testAuth }),
+        ],
+        app,
+      );
+      await app.ready();
+
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/v1/control/plan",
+        headers: { "x-tenant-id": "tenant-alpha" },
+        payload: {
+          version: 1,
+          resources: [{ kind: "files", name: "hosts" }],
+        },
+      });
+      expect(res.statusCode).toBe(202);
+      const body = res.json();
+      expect(body.backend).toBe("queue");
+      expect(body.accepted).toBe(true);
+      expect(body.jobId).toBeTruthy();
+
+      const jobs = await opsJobModel.repository.find({ id: body.jobId });
+      expect(jobs).toHaveLength(1);
+      expect(jobs[0]?.job_type).toBe("control.plan");
+
+      const commands = await controlCommandModel.repository.find({ tenant_id: "tenant-alpha" });
+      expect(commands).toHaveLength(1);
+      expect(commands[0]?.tenant_id).toBe("tenant-alpha");
+      expect(commands[0]?.target_path).toBe("plan");
+    } finally {
+      await app.close();
+      if (prevScheduler === undefined) delete process.env.CONTROL_SCHEDULER;
+      else process.env.CONTROL_SCHEDULER = prevScheduler;
+    }
+  });
+
+  it("checks setup status via authUserModel.repository in native setup mode", async () => {
+    const prevNative = process.env.CONTROL_NATIVE_SETUP;
+    process.env.CONTROL_NATIVE_SETUP = "1";
+    const app = Fastify({ logger: false });
+    try {
+      const runtime = new AddonRuntimeController();
+      await runtime.syncAll(
+        [
+          { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+          auditAddon,
+          authAddon,
+          createControlAddon({ prefix: "/api/v1" }),
+        ],
+        app,
+      );
+      await app.ready();
+
+      const before = await app.inject({ method: "GET", url: "/api/v1/control/setup/status" });
+      expect(before.statusCode).toBe(200);
+      expect(before.json().initialized).toBe(false);
+
+      await createUser({
+        username: "native-admin",
+        email: "native@example.com",
+        password: "PasswordLongEnough123!",
+        role: "admin",
+        displayName: "Native Admin",
+      });
+
+      const after = await app.inject({ method: "GET", url: "/api/v1/control/setup/status" });
+      expect(after.statusCode).toBe(200);
+      expect(after.json().initialized).toBe(true);
+      expect(after.json().instance.initialized_at).toBeTruthy();
+    } finally {
+      await app.close();
+      if (prevNative === undefined) delete process.env.CONTROL_NATIVE_SETUP;
+      else process.env.CONTROL_NATIVE_SETUP = prevNative;
+    }
   });
 });

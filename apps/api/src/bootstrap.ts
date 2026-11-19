@@ -41,7 +41,6 @@ import {
 } from "./infrastructure/rate-limit";
 import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
 import { createApiMetricsCollector } from "./interface/routes/metrics";
-import { controlRoutes } from "./interface/routes/control.routes";
 import { memoryRoutes } from "./interface/routes/memory.routes";
 import { radiusRoutes } from "./interface/routes/radius.routes";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
@@ -196,11 +195,7 @@ async function registerAddonTree(
     createAuditAddon({ prefix, auth: host.auth }),
     createAuthAddon(host),
     createTimelineAddon(host),
-    createControlAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(controlRoutes, prefix ? { prefix } : {});
-      },
-    }),
+    createControlAddon(host),
     createCommandCenterAddon(host),
     createProbesAddon(host),
     createAiAddon({

@@ -1,8 +1,12 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { createActorContext } from "@moonwitness/orm";
-import { controlCommandModel } from "@moonwitness/addons/control";
-import { type AuthenticatedRequest } from "../../middleware/auth";
-import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
+import {
+  defaultFailClosedAuthBridge,
+  getEdgeLoopbackErrorPayload,
+  resolveActorContextFromBridge,
+  resolveUpstreamServiceUrl,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { controlCommandModel } from "./models.js";
 
 export const ARSY_V1_SUPPORTED_RESOURCE_KINDS = new Set([
   "files",
@@ -128,15 +132,18 @@ function sanitizeControlRequestBody(body: unknown): string | null {
   return JSON.stringify(redacted).slice(0, 2000);
 }
 
-async function recordControlCommand(
+export async function recordControlCommand(
   request: FastifyRequest,
   subPath: string,
   targetUrl: string,
   responseStatus: number,
+  auth: BaseAddonAuthBridge = defaultFailClosedAuthBridge,
 ): Promise<void> {
   if (["GET", "HEAD", "OPTIONS"].includes(request.method.toUpperCase())) return;
   try {
-    const authUser = (request as AuthenticatedRequest).user;
+    const actor = resolveActorContextFromBridge(auth, request, "api");
+    const actorId = auth.getActorId(request);
+    const actorRole = actorId ? auth.getActorRole(request) : null;
     const outcome =
       responseStatus === 401 || responseStatus === 403
         ? "denied"
@@ -146,8 +153,8 @@ async function recordControlCommand(
     const correlationHeader = request.headers["x-correlation-id"];
     await controlCommandModel.repository.create(
       {
-        actor_id: authUser ? String(authUser.id) : null,
-        actor_role: authUser?.role ?? null,
+        actor_id: actorId,
+        actor_role: actorRole,
         target_path: subPath.slice(0, 300),
         method: request.method.toUpperCase().slice(0, 16),
         upstream_url: targetUrl.slice(0, 1000),
@@ -158,7 +165,7 @@ async function recordControlCommand(
           typeof correlationHeader === "string" ? correlationHeader.slice(0, 200) : null,
         executed_at: new Date().toISOString(),
       },
-      createActorContext(authUser ? String(authUser.id) : null, "api", request.id),
+      actor,
     );
   } catch {
     // Best-effort audit persistence when control ledger table exists.
@@ -173,6 +180,7 @@ async function dispatchControlProxy(
     readonly includeAuthCookieOnly: boolean;
     readonly timeoutMs: number;
     readonly audit: boolean;
+    readonly auth?: BaseAddonAuthBridge;
   },
 ) {
   const query = request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
@@ -199,7 +207,7 @@ async function dispatchControlProxy(
     });
   } catch (error) {
     request.log.warn({ err: error, target }, "arsy tidak dapat dihubungi");
-    if (options.audit) await recordControlCommand(request, subPath, target, 502);
+    if (options.audit) await recordControlCommand(request, subPath, target, 502, options.auth);
     return reply
       .code(502)
       .send(
@@ -211,7 +219,9 @@ async function dispatchControlProxy(
 
   const text = await upstream.text();
   forwardCookies(reply, upstream);
-  if (options.audit) await recordControlCommand(request, subPath, target, upstream.status);
+  if (options.audit) {
+    await recordControlCommand(request, subPath, target, upstream.status, options.auth);
+  }
   return reply
     .code(upstream.status)
     .header("content-type", "application/json; charset=utf-8")
@@ -231,10 +241,12 @@ export function forwardControlRequest(
   request: FastifyRequest,
   reply: FastifyReply,
   subPath: string,
+  auth?: BaseAddonAuthBridge,
 ) {
   return dispatchControlProxy(request, reply, subPath, {
     includeAuthCookieOnly: true,
     timeoutMs: 30_000,
     audit: true,
+    auth,
   });
 }

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type {
   AddonDefinition,
+  AddonHostContext,
   AddonManifestInput,
   IrMenuInput,
   IrRuleInput,
@@ -8,9 +9,16 @@ import type {
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { controlCommandModel } from "./models.js";
+import { registerControlRoutes } from "./routes.js";
 
 export const controlManifest = manifestData as AddonManifestInput;
 export { controlCommandModel, controlCommandSchema } from "./models.js";
+export {
+  ARSY_V1_DEFERRED_RESOURCE_KINDS,
+  ARSY_V1_SUPPORTED_RESOURCE_KINDS,
+  registerControlRoutes,
+  type ControlRoutesOptions,
+} from "./routes.js";
 export {
   ArsyHttpSchedulerAdapter,
   DurableQueueSchedulerAdapter,
@@ -56,15 +64,38 @@ export const controlMenus: IrMenuInput[] = [
 ];
 
 export function createControlAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+
   return {
     manifest: controlManifest,
     models: [controlCommandModel],
     rules: controlRules,
     views: controlViews,
     menus: controlMenus,
-    registerRoutes: options.registerRoutes,
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerControlRoutes(scoped, {
+                auth: options.auth,
+                rateLimit: options.rateLimit,
+              });
+            },
+            { prefix },
+          );
+        } else {
+          await registerControlRoutes(scope, {
+            auth: options.auth,
+            rateLimit: options.rateLimit,
+          });
+        }
+      }),
   };
 }
 

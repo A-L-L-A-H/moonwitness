@@ -4,10 +4,14 @@ import FastifyCors from "@fastify/cors";
 import { initDb, closeDb } from "@moonwitness/orm";
 
 async function loadRoutes(max: string) {
-  vi.resetModules();
   process.env.ARSY_AUTH_RATE_MAX = max;
   process.env.ARSY_AUTH_RATE_WINDOW_MS = "60000";
-  return import("./control.routes");
+  const { registerControlRoutes } = await import("@moonwitness/addons/control");
+  const { authBridge } = await import("../../bootstrap");
+  return {
+    controlRoutes: async (instance: FastifyInstance) =>
+      registerControlRoutes(instance, { auth: authBridge }),
+  };
 }
 
 describe("control routes auth rate limiting", () => {
@@ -129,8 +133,6 @@ describe("control routes auth rate limiting", () => {
     process.env.ARSY_TOKEN_ADMIN = "adm-secret-token";
 
     const { controlRoutes } = await loadRoutes("5");
-    const orm = await import("@moonwitness/orm");
-    await orm.initDb("file::memory:?cache=shared");
     const authSvc = await import("@moonwitness/addons/auth");
     await authSvc.ensureAuthSchema();
     const created = await authSvc.createUser({
@@ -181,8 +183,6 @@ describe("control routes auth rate limiting", () => {
     process.env.ARSY_TOKEN_ADMIN = "adm-secret-token";
 
     const { controlRoutes } = await loadRoutes("5");
-    const orm = await import("@moonwitness/orm");
-    await orm.initDb("file::memory:?cache=shared");
     const authSvc = await import("@moonwitness/addons/auth");
     await authSvc.ensureAuthSchema();
     const admin = await authSvc.createUser({

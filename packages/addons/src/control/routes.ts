@@ -1,7 +1,12 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import rateLimit from "@fastify/rate-limit";
-import { requireAuth, requireRole } from "../../middleware/auth";
-import { getEdgeLoopbackErrorPayload } from "../../shared/upstream";
+import {
+  defaultFailClosedAuthBridge,
+  getEdgeLoopbackErrorPayload,
+  resolveActorContextFromBridge,
+  type BaseAddonAuthBridge,
+  type FastifyPreHandler,
+  type HostRateLimitFactory,
+} from "@moonwitness/addon-runtime";
 import {
   handleNativeAuthLogin,
   handleNativeAuthLogout,
@@ -10,7 +15,8 @@ import {
   handleNativeSetupStatus,
   isNativeSetupEnabled,
   sendNoStoreJson,
-} from "./control.native-auth";
+} from "./native-auth.js";
+import { createControlScheduler } from "./scheduler.js";
 import {
   ARSY_V1_DEFERRED_RESOURCE_KINDS,
   ARSY_V1_SUPPORTED_RESOURCE_KINDS,
@@ -23,34 +29,71 @@ import {
   forwardControlAuth,
   forwardControlRequest,
   getArsyUrl,
-} from "./control.upstream";
+  recordControlCommand,
+} from "./upstream.js";
 
 export { ARSY_V1_DEFERRED_RESOURCE_KINDS, ARSY_V1_SUPPORTED_RESOURCE_KINDS };
 
-const AUTH_RATE_MAX = Number(process.env.ARSY_AUTH_RATE_MAX ?? "30");
-const AUTH_RATE_WINDOW_MS = Number(process.env.ARSY_AUTH_RATE_WINDOW_MS ?? "60000");
-
-async function controlWriteRole(
-  request: FastifyRequest<{ Params: { path: string } }>,
-  reply: FastifyReply,
-) {
-  const guard = CONTROL_ADMIN_ONLY_WRITE_PATHS.has(request.params.path)
-    ? requireRole("admin")
-    : requireRole("admin", "editor");
-  return guard(request, reply);
+export interface ControlRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+  rateLimit?: HostRateLimitFactory;
 }
 
-export async function controlRoutes(fastify: FastifyInstance) {
-  await fastify.register(async (authScope) => {
-    await authScope.register(rateLimit, {
-      max: AUTH_RATE_MAX,
-      timeWindow: AUTH_RATE_WINDOW_MS,
-      keyGenerator: (request) => request.ip,
-      errorResponseBuilder: () => ({
+function createInMemoryRateLimitPreHandler(
+  max: number,
+  windowMs: number,
+  message: string,
+): FastifyPreHandler {
+  const buckets = new Map<string, { count: number; resetAt: number }>();
+  return async (request, reply) => {
+    const now = Date.now();
+    const key = request.ip || "unknown";
+    let bucket = buckets.get(key);
+    if (!bucket || bucket.resetAt <= now) {
+      bucket = { count: 0, resetAt: now + windowMs };
+      buckets.set(key, bucket);
+    }
+    bucket.count += 1;
+    const remaining = Math.max(0, max - bucket.count);
+    reply.header("x-ratelimit-limit", max);
+    reply.header("x-ratelimit-remaining", remaining);
+    if (bucket.count > max) {
+      reply.header("retry-after", Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)));
+      return reply.code(429).send({
         statusCode: 429,
         error: "Too Many Requests",
-        message: "terlalu banyak percobaan; coba lagi nanti",
-      }),
+        message,
+        code: "RATE_LIMITED",
+      });
+    }
+    return undefined;
+  };
+}
+
+export async function registerControlRoutes(
+  fastify: FastifyInstance,
+  options: ControlRoutesOptions = {},
+) {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const parsedMax = Number(process.env.ARSY_AUTH_RATE_MAX ?? "30");
+  const parsedWindowMs = Number(process.env.ARSY_AUTH_RATE_WINDOW_MS ?? "60000");
+  const authRateMax = Number.isFinite(parsedMax) && parsedMax > 0 ? parsedMax : 30;
+  const authRateWindowMs =
+    Number.isFinite(parsedWindowMs) && parsedWindowMs > 0 ? parsedWindowMs : 60_000;
+  const rateLimitMessage = "terlalu banyak percobaan; coba lagi nanti";
+  const authRateLimit = options.rateLimit
+    ? options.rateLimit({
+        max: authRateMax,
+        windowMs: authRateWindowMs,
+        scope: "control-auth",
+        message: rateLimitMessage,
+      })
+    : createInMemoryRateLimitPreHandler(authRateMax, authRateWindowMs, rateLimitMessage);
+
+  await fastify.register(async (authScope) => {
+    authScope.addHook("preHandler", async (request, reply) => {
+      if (request.method === "OPTIONS") return;
+      return authRateLimit(request, reply);
     });
 
     authScope.get<{ Params: { path: string } }>("/control/setup/:path", async (request, reply) => {
@@ -103,8 +146,22 @@ export async function controlRoutes(fastify: FastifyInstance) {
     });
   });
 
-  fastify.register(async (protectedScope) => {
-    protectedScope.addHook("preHandler", requireAuth());
+  const requireControlWriteRole = async (
+    request: FastifyRequest<{ Params: { path: string } }>,
+    reply: FastifyReply,
+  ) => {
+    const guard = CONTROL_ADMIN_ONLY_WRITE_PATHS.has(request.params.path)
+      ? auth.requireRole("admin")
+      : auth.requireRole("admin", "editor");
+    return guard(request, reply);
+  };
+  const editorOrAdmin = auth.requireRole("admin", "editor");
+
+  await fastify.register(async (protectedScope) => {
+    protectedScope.addHook("preHandler", async (request, reply) => {
+      if (request.method === "OPTIONS") return;
+      return auth.authenticate(request, reply);
+    });
 
     protectedScope.get("/control/status", async (request, reply) => {
       const arsyUrl = getArsyUrl();
@@ -138,17 +195,17 @@ export async function controlRoutes(fastify: FastifyInstance) {
     });
 
     protectedScope.get("/control/portforwards", (request, reply) =>
-      forwardControlRequest(request, reply, "portforwards"),
+      forwardControlRequest(request, reply, "portforwards", auth),
     );
     protectedScope.post(
       "/control/portforwards",
-      { preHandler: requireRole("admin", "editor") },
-      (request, reply) => forwardControlRequest(request, reply, "portforwards"),
+      { preHandler: editorOrAdmin },
+      (request, reply) => forwardControlRequest(request, reply, "portforwards", auth),
     );
     protectedScope.delete(
       "/control/portforwards",
-      { preHandler: requireRole("admin", "editor") },
-      (request, reply) => forwardControlRequest(request, reply, "portforwards"),
+      { preHandler: editorOrAdmin },
+      (request, reply) => forwardControlRequest(request, reply, "portforwards", auth),
     );
 
     protectedScope.get<{ Params: { path: string } }>("/control/:path", async (request, reply) => {
@@ -156,12 +213,12 @@ export async function controlRoutes(fastify: FastifyInstance) {
       if (!CONTROL_READ_PATHS.has(path)) {
         return reply.code(404).send({ error: `path control tidak dikenal: ${path}` });
       }
-      return forwardControlRequest(request, reply, path);
+      return forwardControlRequest(request, reply, path, auth);
     });
 
     protectedScope.post<{ Params: { path: string } }>(
       "/control/:path",
-      { preHandler: controlWriteRole },
+      { preHandler: requireControlWriteRole },
       async (request, reply) => {
         const { path } = request.params;
         if (!CONTROL_WRITE_PATHS.has(path)) {
@@ -169,7 +226,8 @@ export async function controlRoutes(fastify: FastifyInstance) {
         }
         if (path === "plan" || path === "apply") {
           const body = request.body as
-            { resources?: unknown; state?: { resources?: unknown } } | undefined;
+            | { resources?: unknown; state?: { resources?: unknown } }
+            | undefined;
           const rawResources = Array.isArray(body?.resources)
             ? body.resources
             : Array.isArray(body?.state?.resources)
@@ -196,38 +254,78 @@ export async function controlRoutes(fastify: FastifyInstance) {
               supportedKinds: Array.from(ARSY_V1_SUPPORTED_RESOURCE_KINDS),
             });
           }
+
+          if (process.env.CONTROL_SCHEDULER === "queue") {
+            const actor = resolveActorContextFromBridge(auth, request, "api");
+            const firstResource = rawResources.find(
+              (item): item is { kind?: unknown; targetPath?: unknown; name?: unknown } =>
+                Boolean(item && typeof item === "object"),
+            );
+            const traceHeader =
+              request.headers["x-correlation-id"] ?? request.headers.traceparent;
+            const scheduler = createControlScheduler({ mode: "queue" });
+            const dispatchResult = await scheduler.dispatch(
+              {
+                action: path,
+                resourceKind:
+                  typeof firstResource?.kind === "string" ? firstResource.kind : "files",
+                targetPath:
+                  typeof firstResource?.targetPath === "string"
+                    ? firstResource.targetPath
+                    : typeof firstResource?.name === "string"
+                      ? firstResource.name
+                      : undefined,
+                payload:
+                  body && typeof body === "object" ? (body as Record<string, unknown>) : {},
+                traceparent: typeof traceHeader === "string" ? traceHeader : undefined,
+              },
+              actor,
+            );
+            await recordControlCommand(
+              request,
+              path,
+              "queue://control-plane",
+              dispatchResult.statusCode,
+              auth,
+            );
+            return reply
+              .code(dispatchResult.statusCode)
+              .header("cache-control", "no-store")
+              .send(dispatchResult);
+          }
         }
-        return forwardControlRequest(request, reply, path);
+        return forwardControlRequest(request, reply, path, auth);
       },
     );
 
     protectedScope.get("/control/vpn/status", (request, reply) =>
-      forwardControlRequest(request, reply, "vpn/status"),
+      forwardControlRequest(request, reply, "vpn/status", auth),
     );
     protectedScope.get("/control/vpn/subnets", (request, reply) =>
-      forwardControlRequest(request, reply, "vpn/subnets"),
+      forwardControlRequest(request, reply, "vpn/subnets", auth),
     );
     protectedScope.post(
       "/control/vpn/subnets",
-      { preHandler: requireRole("admin", "editor") },
-      (request, reply) => forwardControlRequest(request, reply, "vpn/subnets"),
+      { preHandler: editorOrAdmin },
+      (request, reply) => forwardControlRequest(request, reply, "vpn/subnets", auth),
     );
     protectedScope.delete<{ Params: { name: string } }>(
       "/control/vpn/subnets/:name",
-      { preHandler: requireRole("admin", "editor") },
+      { preHandler: editorOrAdmin },
       (request, reply) =>
         forwardControlRequest(
           request,
           reply,
           `vpn/subnets/${encodeURIComponent(request.params.name)}`,
+          auth,
         ),
     );
 
     for (const sub of ["vpn/up", "vpn/down", "vpn/peers"] as const) {
       protectedScope.post(
         `/control/${sub}`,
-        { preHandler: requireRole("admin", "editor") },
-        (request, reply) => forwardControlRequest(request, reply, sub),
+        { preHandler: editorOrAdmin },
+        (request, reply) => forwardControlRequest(request, reply, sub, auth),
       );
     }
 
@@ -238,26 +336,29 @@ export async function controlRoutes(fastify: FastifyInstance) {
           request,
           reply,
           `vpn/peers/${encodeURIComponent(request.params.name)}/config`,
+          auth,
         ),
     );
     protectedScope.post<{ Params: { name: string } }>(
       "/control/vpn/peers/:name/quota",
-      { preHandler: requireRole("admin", "editor") },
+      { preHandler: editorOrAdmin },
       (request, reply) =>
         forwardControlRequest(
           request,
           reply,
           `vpn/peers/${encodeURIComponent(request.params.name)}/quota`,
+          auth,
         ),
     );
     protectedScope.delete<{ Params: { name: string } }>(
       "/control/vpn/peers/:name",
-      { preHandler: requireRole("admin", "editor") },
+      { preHandler: editorOrAdmin },
       (request, reply) =>
         forwardControlRequest(
           request,
           reply,
           `vpn/peers/${encodeURIComponent(request.params.name)}`,
+          auth,
         ),
     );
   });
