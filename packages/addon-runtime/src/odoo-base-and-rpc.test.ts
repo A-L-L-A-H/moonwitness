@@ -11,13 +11,19 @@ import {
 import {
   AddonRuntimeController,
   baseManifest,
+  CronRunner,
   defaultFailClosedAuthBridge,
   getConfigParam,
+  irCronLogModel,
   irCronModel,
   irModelDataModel,
+  mailMessageModel,
   nextSequenceByCode,
+  postChatterMessage,
   registerBaseAddon,
   resCompanyModel,
+  resCountryModel,
+  resCurrencyModel,
   resGroupsModel,
   resLangModel,
   setConfigParam,
@@ -58,6 +64,16 @@ describe("Odoo-grade __base (res.*/ir.*), declarative data, row-level ir.rule, r
     const langs = await resLangModel.repository.find({});
     expect(langs.map((l) => l.code)).toEqual(expect.arrayContaining(["en", "id"]));
 
+    const countries = await resCountryModel.repository.find({});
+    expect(countries.map((c) => c.code)).toEqual(
+      expect.arrayContaining(["ID", "MY", "SG", "US"]),
+    );
+
+    const currencies = await resCurrencyModel.repository.find({});
+    expect(currencies.map((c) => c.code)).toEqual(
+      expect.arrayContaining(["IDR", "USD", "MYR"]),
+    );
+
     await setConfigParam("instance.title", "MoonWitness Prime");
     expect(await getConfigParam("instance.title")).toBe("MoonWitness Prime");
 
@@ -65,6 +81,21 @@ describe("Odoo-grade __base (res.*/ir.*), declarative data, row-level ir.rule, r
     const seq2 = await nextSequenceByCode("wf.seq", { prefix: "WF-", padding: 4 });
     expect(seq1).toBe("WF-0001");
     expect(seq2).toBe("WF-0002");
+
+    // Chatter message + field tracking values + one2many hydration
+    const msg = await postChatterMessage({
+      resModel: "res.company",
+      resId: companies[0]!.id,
+      body: "Updated default locale",
+      trackingValues: [{ fieldName: "default_locale", oldValue: "en", newValue: "id" }],
+    });
+    const hydratedMsg = await mailMessageModel.repository.findOne(msg.id, {
+      with: ["tracking_values"],
+    });
+    const tracks = (hydratedMsg as unknown as Record<string, unknown>)
+      ?.$tracking_values as Array<Record<string, unknown>>;
+    expect(tracks).toHaveLength(1);
+    expect(tracks[0]?.field_name).toBe("default_locale");
   });
 
   it("processes declarative addon.data with ir.model.data (noupdate=true) and syncs crons", async () => {
@@ -291,8 +322,85 @@ describe("Odoo-grade __base (res.*/ir.*), declarative data, row-level ir.rule, r
       });
       expect(modelCall.statusCode).toBe(200);
       expect(modelCall.json().data).toEqual({ pong: "hello", count: 3 });
+
+      // Unified POST /api/v1/rpc endpoint (Odoo/Moon JSON-RPC style)
+      const unifiedRpc = await app.inject({
+        method: "POST",
+        url: "/api/v1/rpc",
+        headers: { "x-actor-id": "user-1", "x-actor-role": "editor" },
+        payload: { model: "ops.ticket", method: "bulk_ping", kwargs: { tag: "rpc-ok" } },
+      });
+      expect(unifiedRpc.statusCode).toBe(200);
+      expect(unifiedRpc.json().result).toEqual({ pong: "rpc-ok", count: 3 });
+
+      // ?domain= Odoo tuple domain query on GET /m/:model
+      const domainQuery = await app.inject({
+        method: "GET",
+        url: `/api/v1/m/ops.ticket?domain=${encodeURIComponent(JSON.stringify([["state", "=", "closed"]]))}`,
+        headers: { "x-actor-id": "user-1", "x-actor-role": "editor" },
+      });
+      expect(domainQuery.statusCode).toBe(200);
+      expect(domainQuery.json().total).toBe(1);
+
+      // Auto-generated default view descriptor (__auto) when no explicit ir.view exists
+      const viewDesc = await runtime.getViewDescriptor("ops.ticket", "editor");
+      expect(viewDesc).not.toBeNull();
+      expect(viewDesc?.views[0]?.addon).toBe("__auto");
+      expect(await runtime.validateViewContracts()).toEqual([]);
     } finally {
       await app.close();
     }
+  });
+
+  it("executes due ir.cron jobs via CronRunner and logs execution telemetry in ir.cron.log", async () => {
+    let ticks = 0;
+    const jobModel = defineModel({
+      name: "demo.cron.target",
+      table: "demo_cron_targets",
+      schema: z.object({ label: z.string() }),
+      actions: {
+        run_tick: {
+          scope: "model",
+          handler: async () => {
+            ticks += 1;
+            return { ticks };
+          },
+        },
+      },
+    });
+
+    const runtime = new AddonRuntimeController();
+    await runtime.syncAll([
+      { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+      {
+        manifest: {
+          name: "demo-cron-addon",
+          version: "1.0.0",
+          depends: ["__base"],
+          autoInstall: true,
+          defaultEnabled: true,
+          provides: { routes: [], models: ["demo.cron.target"], auditActions: [] },
+        },
+        models: [jobModel],
+        crons: [
+          {
+            cron_key: "demo.tick",
+            name: "Demo Tick",
+            model_name: "demo.cron.target",
+            action_name: "run_tick",
+            interval_sec: 300,
+          },
+        ],
+      },
+    ]);
+
+    const runner = new CronRunner();
+    const results = await runner.processDueCrons();
+    expect(results.some((r) => r.cronKey === "demo.tick" && r.success)).toBe(true);
+    expect(ticks).toBe(1);
+
+    const logs = await irCronLogModel.repository.find({ cron_key: "demo.tick" });
+    expect(logs).toHaveLength(1);
+    expect(logs[0]?.run_status).toBe("success");
   });
 });

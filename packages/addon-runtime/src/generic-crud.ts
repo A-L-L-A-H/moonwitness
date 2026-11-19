@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import {
   BaseRepository,
   ConflictError,
+  compileTupleDomainToFilter,
   modelRegistry,
   type ActorContext,
   type FindOptions,
@@ -49,6 +50,25 @@ function mergeWithRuleDomain(
   return { $and: [userFilters, ruleDomain] };
 }
 
+function parseWithParam(rawWith?: string): string[] | undefined {
+  if (!rawWith?.trim()) return undefined;
+  const list = rawWith
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+  return list.length > 0 ? list : undefined;
+}
+
+function parseDomainParam(rawDomain?: string): Record<string, unknown> | null {
+  if (!rawDomain?.trim()) return null;
+  const parsed = JSON.parse(rawDomain) as unknown;
+  if (!Array.isArray(parsed)) {
+    throw new Error("Query parameter 'domain' must be a JSON array of tuple clauses.");
+  }
+  return compileTupleDomainToFilter(parsed);
+}
+
 async function authorizeModelAccess(
   runtime: AddonRuntimeController,
   auth: BaseAddonAuthBridge,
@@ -84,7 +104,7 @@ async function ensureRecordMatchesRuleDomain(
   id: string,
   role: CrewRoleOrPublic,
   actor: ActorContext,
-  options: { includeDeleted?: boolean } = {},
+  options: { includeDeleted?: boolean; with?: string[] } = {},
 ) {
   const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
   const filters = mergeWithRuleDomain({ id }, ruleDomain);
@@ -92,6 +112,7 @@ async function ensureRecordMatchesRuleDomain(
     limit: 1,
     tenantId: actor.tenantId,
     includeDeleted: options.includeDeleted,
+    ...(options.with ? { with: options.with } : {}),
   });
   return rows[0] ?? null;
 }
@@ -121,21 +142,34 @@ export async function registerGenericModelRoutes(
       const userFilters: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(query)) {
         if (v === undefined) continue;
-        if (["limit", "offset", "orderBy", "includeDeleted", "q"].includes(k)) continue;
+        if (["limit", "offset", "orderBy", "includeDeleted", "q", "with", "domain"].includes(k)) {
+          continue;
+        }
         if (target.desc.fields.has(k) || k === "status") {
           userFilters[k] = v;
         }
       }
 
+      let domainFilter: Record<string, unknown> | null;
+      try {
+        domainFilter = parseDomainParam(query.domain);
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
+
       const actor = resolveActorContextFromBridge(auth, request);
       const role = auth.getActorRole(request);
       const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
-      const filters = mergeWithRuleDomain(userFilters, ruleDomain);
+      const filters = mergeWithRuleDomain(
+        mergeWithRuleDomain(userFilters, domainFilter),
+        ruleDomain,
+      );
 
       const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);
       const limit = query.limit ? Math.min(200, Math.max(1, Number(query.limit))) : 50;
       const offset = query.offset ? Math.max(0, Number(query.offset)) : 0;
       const q = query.q?.trim();
+      const withRels = parseWithParam(query.with);
       const opts: FindOptions = {
         limit,
         offset,
@@ -143,6 +177,7 @@ export async function registerGenericModelRoutes(
         includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
         ...(query.orderBy ? { orderBy: query.orderBy } : {}),
         ...(q ? { q } : {}),
+        ...(withRels ? { with: withRels } : {}),
       };
 
       const rows = await target.repo.find(filters, opts);
@@ -190,16 +225,26 @@ export async function registerGenericModelRoutes(
       const userFilters: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(query)) {
         if (v === undefined) continue;
-        if (["groupBy", "orderBy", "includeDeleted", "q"].includes(k)) continue;
+        if (["groupBy", "orderBy", "includeDeleted", "q", "domain"].includes(k)) continue;
         if (target.desc.fields.has(k) || k === "status") {
           userFilters[k] = v;
         }
       }
 
+      let domainFilter: Record<string, unknown> | null;
+      try {
+        domainFilter = parseDomainParam(query.domain);
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
+
       const actor = resolveActorContextFromBridge(auth, request);
       const role = auth.getActorRole(request);
       const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
-      const filters = mergeWithRuleDomain(userFilters, ruleDomain);
+      const filters = mergeWithRuleDomain(
+        mergeWithRuleDomain(userFilters, domainFilter),
+        ruleDomain,
+      );
       const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);
 
       try {
@@ -327,7 +372,101 @@ export async function registerGenericModelRoutes(
     },
   );
 
-  fastify.get<{ Params: { model: string; id: string } }>(
+  fastify.post<{
+    Body: {
+      model?: string;
+      method?: string;
+      id?: string;
+      args?: unknown[];
+      kwargs?: Record<string, unknown>;
+    };
+  }>("/rpc", { preHandler }, async (request, reply) => {
+    const body = request.body ?? {};
+    const modelName = typeof body.model === "string" ? body.model.trim() : "";
+    const methodName = typeof body.method === "string" ? body.method.trim() : "";
+    if (!modelName || !methodName) {
+      return reply.code(400).send({
+        error: "RPC body requires 'model' and 'method'",
+        code: "INVALID_REQUEST",
+      });
+    }
+
+    const target = repositoryForModel(modelName);
+    if (!target) {
+      return reply.code(404).send({
+        error: `Model '${modelName}' is not REST-enabled`,
+        code: "MODEL_NOT_FOUND",
+      });
+    }
+    if (!runtime.isModelEnabled(target.desc.name)) {
+      return reply.code(503).send({
+        error: `Addon for model '${target.desc.name}' is disabled`,
+        code: "ADDON_DISABLED",
+      });
+    }
+
+    const actionDef = target.desc.actions?.[methodName];
+    if (!actionDef) {
+      return reply.code(403).send({
+        error: `Method '${methodName}' is not registered for RPC on '${modelName}'`,
+        code: "FORBIDDEN_METHOD",
+      });
+    }
+
+    const role = auth.getActorRole(request);
+    const allowedRoles = actionDef.roles ?? ["editor", "admin"];
+    if (!allowedRoles.includes(role)) {
+      return reply.code(403).send({ error: "Forbidden", code: "AUTH_FORBIDDEN" });
+    }
+
+    const actor = resolveActorContextFromBridge(auth, request);
+    const scope = actionDef.scope ?? "record";
+    let record: Record<string, unknown> | null = null;
+    if (scope === "record") {
+      const targetId =
+        typeof body.id === "string"
+          ? body.id
+          : typeof body.args?.[0] === "string"
+            ? body.args[0]
+            : "";
+      if (!targetId) {
+        return reply.code(400).send({
+          error: `Record action '${methodName}' requires 'id' or args[0]`,
+          code: "INVALID_REQUEST",
+        });
+      }
+      record = (await ensureRecordMatchesRuleDomain(
+        runtime,
+        target,
+        targetId,
+        role,
+        actor,
+      )) as Record<string, unknown> | null;
+      if (!record) {
+        return reply.code(404).send({ error: "Not found", code: "RECORD_NOT_FOUND" });
+      }
+    }
+
+    try {
+      const rawInput = body.kwargs ?? (scope === "model" ? (body.args?.[0] ?? {}) : (body.args?.[1] ?? {}));
+      const parsedInput = actionDef.input ? actionDef.input.parse(rawInput) : rawInput;
+      const result = await actionDef.handler({
+        model: target.desc.name,
+        record,
+        input: parsedInput,
+        actor,
+        repository: target.repo,
+      });
+      return reply.send({ result });
+    } catch (error) {
+      return handleOrmError(error, reply);
+    }
+  });
+
+  fastify.get<{
+    Params: { model: string; id: string };
+    Querystring: Record<string, string | undefined>;
+  }>(
     "/m/:model/:id",
     { preHandler },
     async (request, reply) => {
@@ -349,6 +488,7 @@ export async function registerGenericModelRoutes(
         request.params.id,
         role,
         actor,
+        { with: parseWithParam(request.query?.with) },
       );
       if (!row) return reply.code(404).send({ error: "Not found" });
       return reply.send({ data: row });

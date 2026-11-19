@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
   BaseRepository,
+  compileTupleDomainToFilter,
   extendModel,
   modelRegistry,
   syncModels,
@@ -45,7 +46,7 @@ export interface IrRuleInput {
   can_create?: boolean;
   can_update?: boolean;
   can_delete?: boolean;
-  domain?: Record<string, unknown>;
+  domain?: Record<string, unknown> | unknown[];
 }
 
 export interface AddonDataRecord {
@@ -277,6 +278,112 @@ const CONSTITUTIONAL_BASE_DATA: AddonDataRecord[] = [
       is_default: false,
     },
   },
+  {
+    id: "country_id",
+    model: "res.country",
+    key: { code: "ID" },
+    noupdate: true,
+    values: {
+      code: "ID",
+      code3: "IDN",
+      name: "Indonesia",
+      native_name: "Indonesia",
+      dial_code: "+62",
+      currency_code: "IDR",
+      flag_emoji: "🇮🇩",
+      active: true,
+    },
+  },
+  {
+    id: "country_my",
+    model: "res.country",
+    key: { code: "MY" },
+    noupdate: true,
+    values: {
+      code: "MY",
+      code3: "MYS",
+      name: "Malaysia",
+      native_name: "Malaysia",
+      dial_code: "+60",
+      currency_code: "MYR",
+      flag_emoji: "🇲🇾",
+      active: true,
+    },
+  },
+  {
+    id: "country_sg",
+    model: "res.country",
+    key: { code: "SG" },
+    noupdate: true,
+    values: {
+      code: "SG",
+      code3: "SGP",
+      name: "Singapore",
+      native_name: "Singapore",
+      dial_code: "+65",
+      currency_code: "SGD",
+      flag_emoji: "🇸🇬",
+      active: true,
+    },
+  },
+  {
+    id: "country_us",
+    model: "res.country",
+    key: { code: "US" },
+    noupdate: true,
+    values: {
+      code: "US",
+      code3: "USA",
+      name: "United States",
+      native_name: "United States",
+      dial_code: "+1",
+      currency_code: "USD",
+      flag_emoji: "🇺🇸",
+      active: true,
+    },
+  },
+  {
+    id: "currency_idr",
+    model: "res.currency",
+    key: { code: "IDR" },
+    noupdate: true,
+    values: {
+      code: "IDR",
+      name: "Indonesian Rupiah",
+      symbol: "Rp",
+      decimals: 0,
+      rounding: 1,
+      active: true,
+    },
+  },
+  {
+    id: "currency_usd",
+    model: "res.currency",
+    key: { code: "USD" },
+    noupdate: true,
+    values: {
+      code: "USD",
+      name: "US Dollar",
+      symbol: "$",
+      decimals: 2,
+      rounding: 0.01,
+      active: true,
+    },
+  },
+  {
+    id: "currency_myr",
+    model: "res.currency",
+    key: { code: "MYR" },
+    noupdate: true,
+    values: {
+      code: "MYR",
+      name: "Malaysian Ringgit",
+      symbol: "RM",
+      decimals: 2,
+      rounding: 0.01,
+      active: true,
+    },
+  },
 ];
 
 function defaultWidgetForField(type: string, selection: string[] | null): string {
@@ -305,8 +412,26 @@ function resolveRuleDomainPlaceholders(
   actor: ActorContext,
   role: CrewRoleOrPublic,
 ): unknown {
-  if (value === "$actor.id") return actor.actorId ?? "";
-  if (value === "$actor.tenantId") return actor.tenantId ?? "default";
+  if (value === "$actor.id" || value === "$user.id" || value === "user.id") {
+    return actor.actorId ?? "";
+  }
+  if (
+    value === "$actor.tenantId" ||
+    value === "$user.company_id" ||
+    value === "$user.companyId" ||
+    value === "user.company_id" ||
+    value === "user.companyId"
+  ) {
+    return actor.tenantId ?? "default";
+  }
+  if (
+    value === "$user.company_ids" ||
+    value === "$user.companyIds" ||
+    value === "user.company_ids" ||
+    value === "user.companyIds"
+  ) {
+    return [actor.tenantId ?? "default"];
+  }
   if (value === "$actor.role") return role;
   if (Array.isArray(value)) {
     return value.map((item) => resolveRuleDomainPlaceholders(item, actor, role));
@@ -319,6 +444,19 @@ function resolveRuleDomainPlaceholders(
     return out;
   }
   return value;
+}
+
+function parseStoredRuleDomain(
+  domainJson: string,
+  actor: ActorContext,
+  role: CrewRoleOrPublic,
+): Record<string, unknown> {
+  const parsed = JSON.parse(domainJson) as unknown;
+  const resolved = resolveRuleDomainPlaceholders(parsed, actor, role);
+  if (Array.isArray(resolved)) {
+    return compileTupleDomainToFilter(resolved);
+  }
+  return (resolved ?? {}) as Record<string, unknown>;
 }
 
 export class AddonRuntimeController {
@@ -999,8 +1137,7 @@ export class AddonRuntimeController {
     const exact = rules.find((r) => r.role === role);
     if (exact) {
       if (!exact.domain_json) return null;
-      const parsed = JSON.parse(exact.domain_json) as Record<string, unknown>;
-      return resolveRuleDomainPlaceholders(parsed, actor, role) as Record<string, unknown>;
+      return parseStoredRuleDomain(exact.domain_json, actor, role);
     }
     if (role === "admin") {
       return null;
@@ -1011,8 +1148,51 @@ export class AddonRuntimeController {
       .sort((a, b) => (ROLE_RANK[b.role] ?? 0) - (ROLE_RANK[a.role] ?? 0));
     const highestWithDomain = eligible.find((r) => Boolean(r.domain_json));
     if (!highestWithDomain?.domain_json) return null;
-    const parsed = JSON.parse(highestWithDomain.domain_json) as Record<string, unknown>;
-    return resolveRuleDomainPlaceholders(parsed, actor, role) as Record<string, unknown>;
+    return parseStoredRuleDomain(highestWithDomain.domain_json, actor, role);
+  }
+
+  /**
+   * Harvested from `moon-orm/src/view-contract.ts`: verifies that every column
+   * referenced in registered `ir_views` exists on its target model.
+   */
+  async validateViewContracts(): Promise<
+    Array<{ model: string; viewType: string; field: string; reason: string }>
+  > {
+    const issues: Array<{ model: string; viewType: string; field: string; reason: string }> = [];
+    const viewRows = await irViewModel.repository.find({});
+    for (const v of viewRows) {
+      if (!this.isEnabled(v.addon)) continue;
+      const desc = modelRegistry.get(v.model_name);
+      if (!desc) {
+        issues.push({
+          model: v.model_name,
+          viewType: v.view_type,
+          field: "",
+          reason: "unknown-model",
+        });
+        continue;
+      }
+      const spec = JSON.parse(v.spec_json) as { columns?: string[]; groupBy?: string };
+      for (const col of spec.columns ?? []) {
+        if (!desc.fields.has(col) && col !== "id" && col !== "status") {
+          issues.push({
+            model: v.model_name,
+            viewType: v.view_type,
+            field: col,
+            reason: "unknown-field",
+          });
+        }
+      }
+      if (spec.groupBy && !desc.fields.has(spec.groupBy) && spec.groupBy !== "status") {
+        issues.push({
+          model: v.model_name,
+          viewType: v.view_type,
+          field: spec.groupBy,
+          reason: "unknown-field",
+        });
+      }
+    }
+    return issues;
   }
 
   async getViewDescriptor(
@@ -1093,6 +1273,30 @@ export class AddonRuntimeController {
       }
     }
 
+    const mappedViews: RuntimeViewDescriptor["views"] =
+      activeViews.length > 0
+        ? activeViews.map((v) => ({
+            view_type: v.view_type,
+            addon: v.addon,
+            priority: v.priority,
+            spec: JSON.parse(v.spec_json) as Record<string, unknown>,
+          }))
+        : [
+            {
+              view_type: "list",
+              addon: "__auto",
+              priority: 99,
+              spec: {
+                title: humanizeLabel(modelName.replace(/\./g, "_")),
+                columns: fields
+                  .filter((f) => f.field_type !== "json")
+                  .slice(0, 8)
+                  .map((f) => f.field_name),
+                searchKeys: desc.searchFields ?? [],
+              },
+            },
+          ];
+
     return {
       model: modelName,
       table: desc.table,
@@ -1100,12 +1304,7 @@ export class AddonRuntimeController {
       restEnabled: desc.restEnabled,
       acl,
       fields,
-      views: activeViews.map((v) => ({
-        view_type: v.view_type,
-        addon: v.addon,
-        priority: v.priority,
-        spec: JSON.parse(v.spec_json) as Record<string, unknown>,
-      })),
+      views: mappedViews,
       actionBindings,
     };
   }
