@@ -34,7 +34,9 @@ impl AppState {
 
     /// Local staging path used before a remote backend upload.
     pub fn staging_path(&self) -> PathBuf {
-        self.config.storage_root_path().join(".staging")
+        self.config
+            .storage_root_path()
+            .join(".staging")
             .join(format!("{}.upload", uuid::Uuid::new_v4()))
     }
 

@@ -90,12 +90,7 @@ impl GoogleDrive {
         Ok(token.access_token)
     }
 
-    async fn create_file(
-        &self,
-        bucket: &str,
-        key: &str,
-        content_type: &str,
-    ) -> Result<String> {
+    async fn create_file(&self, bucket: &str, key: &str, content_type: &str) -> Result<String> {
         let token = self.access_token().await?;
         let display_name = key
             .rsplit('/')
@@ -148,7 +143,10 @@ impl GoogleDrive {
         let file_id = self.create_file(bucket, key, content_type).await?;
 
         if size > 0 {
-            if let Err(error) = self.upload_content(&file_id, content_type, path, size).await {
+            if let Err(error) = self
+                .upload_content(&file_id, content_type, path, size)
+                .await
+            {
                 let _ = self.delete_file(&file_id).await;
                 return Err(error);
             }
@@ -168,10 +166,7 @@ impl GoogleDrive {
         let response = self
             .client
             .patch(format!("{DRIVE_UPLOAD_API}/files/{file_id}"))
-            .query(&[
-                ("uploadType", "resumable"),
-                ("supportsAllDrives", "true"),
-            ])
+            .query(&[("uploadType", "resumable"), ("supportsAllDrives", "true")])
             .bearer_auth(&token)
             .header(CONTENT_TYPE, "application/json; charset=UTF-8")
             .header("x-upload-content-type", content_type)

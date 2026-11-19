@@ -16,7 +16,6 @@ use crate::s3::state::{safe_component, AppState, Principal};
 use crate::xml::{self, Element};
 
 /// `PUT /{bucket}/{key}` — PutObject, or CopyObject when `x-amz-copy-source` is set.
-
 pub async fn put_object(
     State(state): State<AppState>,
     _principal: Principal,
@@ -72,7 +71,9 @@ pub async fn put_object(
 
     if let Err(error) = result {
         cleanup_new_object(&state, &storage_backend, storage_ref.as_deref()).await;
-        return Err(S3Error::internal(format!("cannot persist object metadata: {error}")));
+        return Err(S3Error::internal(format!(
+            "cannot persist object metadata: {error}"
+        )));
     }
 
     cleanup_previous_object(&state, previous, &storage_backend, storage_ref.as_deref()).await;
@@ -86,7 +87,6 @@ pub async fn put_object(
 }
 
 /// `GET /{bucket}/{key}` — GetObject, with `Range` support.
-
 pub async fn get_object(
     State(state): State<AppState>,
     _principal: Principal,
@@ -101,9 +101,10 @@ pub async fn get_object(
     let range = range_bounds(&headers, total);
 
     let (body, status) = match range {
-        Some((start, end)) => {
-            (bytes[start as usize..=end as usize].to_vec(), StatusCode::PARTIAL_CONTENT)
-        }
+        Some((start, end)) => (
+            bytes[start as usize..=end as usize].to_vec(),
+            StatusCode::PARTIAL_CONTENT,
+        ),
         None => (bytes, StatusCode::OK),
     };
     let length = body.len() as u64;
@@ -175,7 +176,6 @@ pub async fn head_object(
 }
 
 /// `DELETE /{bucket}/{key}` — DeleteObject.
-
 pub async fn delete_object(
     State(state): State<AppState>,
     _principal: Principal,
@@ -289,7 +289,6 @@ pub async fn upload_part(
 }
 
 /// `POST /{bucket}/{key}?uploadId=…` — CompleteMultipartUpload.
-
 pub async fn complete_multipart_upload(
     State(state): State<AppState>,
     _principal: Principal,
@@ -320,7 +319,9 @@ pub async fn complete_multipart_upload(
     }
 
     for part in &requested {
-        let stored = parts.iter().find(|stored| stored.part_number == part.part_number);
+        let stored = parts
+            .iter()
+            .find(|stored| stored.part_number == part.part_number);
         match stored {
             Some(stored)
                 if stored
@@ -428,7 +429,9 @@ pub async fn complete_multipart_upload(
     if let Err(error) = result {
         cleanup_new_object(&state, &storage_backend, storage_ref.as_deref()).await;
         let _ = tokio::fs::remove_file(&staging_path).await;
-        return Err(S3Error::internal(format!("cannot persist multipart metadata: {error}")));
+        return Err(S3Error::internal(format!(
+            "cannot persist multipart metadata: {error}"
+        )));
     }
 
     cleanup_previous_object(&state, previous, &storage_backend, storage_ref.as_deref()).await;
@@ -515,7 +518,6 @@ pub struct PartParams {
     pub part_number: i64,
 }
 
-
 async fn copy_object(
     state: &AppState,
     bucket: &str,
@@ -532,7 +534,10 @@ async fn copy_object(
     let row = fetch_object(state, source_bucket, source_key).await?;
     let bytes = read_stored_object(state, &row).await?;
     let previous = fetch_object_optional(state, bucket, key).await?;
-    let content_type = row.content_type.as_deref().unwrap_or("application/octet-stream");
+    let content_type = row
+        .content_type
+        .as_deref()
+        .unwrap_or("application/octet-stream");
     let (storage_backend, storage_ref) =
         persist_bytes(state, bucket, key, content_type, &bytes).await?;
 
@@ -559,7 +564,9 @@ async fn copy_object(
 
     if let Err(error) = result {
         cleanup_new_object(state, &storage_backend, storage_ref.as_deref()).await;
-        return Err(S3Error::internal(format!("cannot persist copied object metadata: {error}")));
+        return Err(S3Error::internal(format!(
+            "cannot persist copied object metadata: {error}"
+        )));
     }
     cleanup_previous_object(state, previous, &storage_backend, storage_ref.as_deref()).await;
 
@@ -670,7 +677,9 @@ async fn persist_file(
                 .ok_or_else(|| S3Error::internal("Google Drive backend is not configured"))?
                 .upload_path(bucket, key, content_type, source_path)
                 .await
-                .map_err(|error| S3Error::internal(format!("Google Drive upload failed: {error}")))?;
+                .map_err(|error| {
+                    S3Error::internal(format!("Google Drive upload failed: {error}"))
+                })?;
             Ok(("google_drive".to_string(), Some(file_id)))
         }
     }
@@ -695,7 +704,9 @@ async fn read_stored_object(state: &AppState, row: &ObjectRow) -> S3Result<Vec<u
                 .ok_or_else(|| S3Error::internal("Google Drive backend is not configured"))?
                 .download_file(file_id)
                 .await
-                .map_err(|error| S3Error::internal(format!("Google Drive download failed: {error}")))
+                .map_err(|error| {
+                    S3Error::internal(format!("Google Drive download failed: {error}"))
+                })
         }
         backend => Err(S3Error::internal(format!(
             "object uses unknown storage backend '{backend}'"
@@ -742,9 +753,7 @@ async fn cleanup_previous_object(
     let Some(previous) = previous else {
         return;
     };
-    if previous.storage_backend == new_backend
-        && previous.storage_ref.as_deref() == new_ref
-    {
+    if previous.storage_backend == new_backend && previous.storage_ref.as_deref() == new_ref {
         return;
     }
 
@@ -759,7 +768,7 @@ async fn cleanup_previous_object(
         },
         "filesystem" if new_backend != "filesystem" => state
             .object_path(&previous.bucket, &previous.key)
-            .map_err(|error| error.to_string())
+            .map_err(|error| format!("{}: {}", error.code, error.message))
             .and_then(|path| {
                 if path.exists() {
                     std::fs::remove_file(path).map_err(|error| error.to_string())
@@ -847,7 +856,10 @@ fn collect_upload_metadata(headers: &HeaderMap) -> Option<String> {
             }
         }
     }
-    if let Some(content_type) = headers.get(header::CONTENT_TYPE).and_then(|value| value.to_str().ok()) {
+    if let Some(content_type) = headers
+        .get(header::CONTENT_TYPE)
+        .and_then(|value| value.to_str().ok())
+    {
         map.insert("content-type".to_string(), content_type.to_string());
     }
     if map.is_empty() {
