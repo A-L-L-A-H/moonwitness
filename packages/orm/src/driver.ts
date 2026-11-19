@@ -74,6 +74,70 @@ export async function withQueryBudget<T>(maxQueries: number, fn: () => Promise<T
   return queryBudgetStorage.run(state, fn);
 }
 
+interface TransactionContext {
+  readonly handle: OrmDriverHandle;
+  active: boolean;
+}
+
+const transactionStorage = new AsyncLocalStorage<TransactionContext>();
+
+const EXECUTOR_METHODS = new Set<PropertyKey>(["run", "all", "get", "exec"]);
+
+function bindHandleToTransaction(base: OrmDriverHandle, tx: LibSqlExecutor): OrmDriverHandle {
+  return new Proxy(base, {
+    get(target, prop) {
+      if (EXECUTOR_METHODS.has(prop)) {
+        return (Reflect.get(tx, prop) as (...args: unknown[]) => unknown).bind(tx);
+      }
+      if (prop === "transaction") {
+        // Nested transactions join the active transaction; savepoints are intentionally unsupported.
+        return <R>(cb: (inner: LibSqlExecutor) => Promise<R>) => cb(tx);
+      }
+      if (prop === "close") {
+        return () => {
+          throw new Error("Cannot close the ORM driver from inside an active transaction.");
+        };
+      }
+      const value = Reflect.get(target, prop, target);
+      return typeof value === "function" ? value.bind(target) : value;
+    },
+  });
+}
+
+/** Wrap a driver so `transaction()` publishes the transaction-bound handle to the async context. */
+function withTransactionContext(base: OrmDriverHandle): OrmDriverHandle {
+  return new Proxy(base, {
+    get(target, prop) {
+      if (prop === "transaction") {
+        return <R>(cb: (tx: LibSqlExecutor) => Promise<R>): Promise<R> =>
+          target.transaction(async (tx) => {
+            const context: TransactionContext = {
+              handle: bindHandleToTransaction(target, tx),
+              active: true,
+            };
+            try {
+              return await transactionStorage.run(context, () => cb(tx));
+            } finally {
+              context.active = false;
+            }
+          });
+      }
+      const value = Reflect.get(target, prop, target);
+      return typeof value === "function" ? value.bind(target) : value;
+    },
+  });
+}
+
+/**
+ * Run `fn` in one database transaction. Every `getDb()` call made inside `fn` (including ORM
+ * repository operations, hooks, audit and outbox writes) is bound to the same transaction
+ * connection through async-local context. Nested calls join the outer transaction; there are no
+ * savepoints. The context is cleared on commit and rollback.
+ */
+export async function withTransaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> {
+  return getDb().transaction(fn);
+}
+
 let db: OrmDriverHandle | null = null;
 
 /** Initialize the active ORM handle using PostgreSQL (`PostgresDriver`) or local libSQL (`LibSqlDriver`). */
@@ -135,9 +199,12 @@ export function getDb(): OrmDriverHandle {
   if (!db) {
     throw new Error("Database not initialized. Call initDb() first.");
   }
+  const context = transactionStorage.getStore();
+  const base = context?.active ? context.handle : withTransactionContext(db);
+  rawHandleMap.set(base, db);
   const budget = queryBudgetStorage.getStore();
-  if (!budget) return db;
-  const wrapped = wrapExecutorWithBudget(db, budget);
+  if (!budget) return base;
+  const wrapped = wrapExecutorWithBudget(base, budget);
   rawHandleMap.set(wrapped, db);
   return wrapped;
 }

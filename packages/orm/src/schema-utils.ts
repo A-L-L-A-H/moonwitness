@@ -26,6 +26,7 @@ export interface Many2ManyJoinTableSpec {
   targetField: string;
   targetColumn: string;
   onDelete: "restrict" | "ignore";
+  foreignKeys: ForeignKeySpec[];
 }
 
 export interface ValidateAttrsOptions {
@@ -284,11 +285,27 @@ export function compileMany2ManyJoinTableDdl(spec: Many2ManyJoinTableSpec): stri
   assertIdentifier(spec.table, "join table");
   assertIdentifier(spec.sourceColumn, "join source column");
   assertIdentifier(spec.targetColumn, "join target column");
+  const fkClauses = (spec.foreignKeys ?? []).map((fk) => `  ${compileForeignKeyClause(fk)}`);
+  const columnLines = [
+    "  id TEXT PRIMARY KEY",
+    "  tenant_id TEXT NOT NULL DEFAULT 'default'",
+    `  "${spec.sourceColumn}" TEXT NOT NULL`,
+    `  "${spec.targetColumn}" TEXT NOT NULL`,
+    ...fkClauses,
+  ];
   return [
-    `CREATE TABLE IF NOT EXISTS ${spec.table} (\n  id TEXT PRIMARY KEY,\n  tenant_id TEXT NOT NULL DEFAULT 'default',\n  "${spec.sourceColumn}" TEXT NOT NULL,\n  "${spec.targetColumn}" TEXT NOT NULL\n)`,
+    `CREATE TABLE IF NOT EXISTS ${spec.table} (\n${columnLines.join(",\n")}\n)`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_${spec.table}_unique ON ${spec.table} (tenant_id, ${spec.sourceColumn}, ${spec.targetColumn})`,
     `CREATE INDEX IF NOT EXISTS idx_${spec.table}_target ON ${spec.table} (tenant_id, ${spec.targetColumn})`,
   ].join(";\n");
+}
+
+/** Compile the `FOREIGN KEY (...) REFERENCES ... ON DELETE ...` clause for a declared foreign key. */
+export function compileForeignKeyClause(fk: ForeignKeySpec): string {
+  fk.columns.forEach((col) => assertIdentifier(col, "foreign key column"));
+  assertIdentifier(fk.targetTable, "foreign key target table");
+  fk.targetColumns.forEach((col) => assertIdentifier(col, "foreign key target column"));
+  return `FOREIGN KEY (${fk.columns.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.targetTable}"(${fk.targetColumns.map((c) => `"${c}"`).join(", ")}) ON DELETE ${fk.onDelete}`;
 }
 
 export function compileModelDdl(
@@ -317,7 +334,7 @@ export function compileModelDdl(
     fk.columns.forEach((col) => assertIdentifier(col, "foreign key column"));
     assertIdentifier(fk.targetTable, "foreign key target table");
     fk.targetColumns.forEach((col) => assertIdentifier(col, "foreign key target column"));
-    return `FOREIGN KEY (${fk.columns.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.targetTable}"(${fk.targetColumns.map((c) => `"${c}"`).join(", ")}) ON DELETE ${fk.onDelete}`;
+    return compileForeignKeyClause(fk);
   });
 
   const indexDefinitions = indexes.map((idx) => {

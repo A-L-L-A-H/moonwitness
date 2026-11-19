@@ -11,6 +11,7 @@
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "doctor": "tsx src/doctor.ts",
     "clean": "rm -rf .turbo node_modules"
   },
   "dependencies": {

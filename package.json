@@ -19,6 +19,7 @@
     "api:build": "pnpm --filter @moonwitness/api build",
     "api:start": "pnpm --filter @moonwitness/api start",
     "api:test": "pnpm --filter @moonwitness/api test",
+    "orm:doctor": "pnpm --filter @moonwitness/orm --silent doctor",
     "test:conformance:pg": "node scripts/run-pg-conformance.mjs",
     "web:dev": "pnpm --filter @moonwitness/web dev",
     "web:build": "pnpm --filter @moonwitness/web build",

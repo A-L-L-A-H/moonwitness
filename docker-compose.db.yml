@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: moonwitness-postgres-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: moonwitness
+      POSTGRES_PASSWORD: moonwitness
+      POSTGRES_DB: moonwitness
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - moonwitness-postgres-local:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U moonwitness -d moonwitness"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  moonwitness-postgres-local:

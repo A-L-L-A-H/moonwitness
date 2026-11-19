@@ -492,7 +492,33 @@ class OrmModelRegistry {
           assertIdentifier(targetColumn, "join target column");
           assertIdentifier(targetField, "relation target column");
 
+          const joinOnDelete: "restrict" | "ignore" =
+            onDeleteRaw === "ignore" ? "ignore" : "restrict";
+          const joinForeignKeys: ForeignKeySpec[] = [];
           const target = this.composed.get(rel.model);
+          const ensureCompositeUnique = (indexes: ModelIndex[], col: string) => {
+            const exists = indexes.some(
+              (idx) =>
+                idx.unique === true &&
+                idx.fields.length === 2 &&
+                idx.fields[0] === "tenant_id" &&
+                idx.fields[1] === col,
+            );
+            if (!exists) {
+              indexes.push({ fields: ["tenant_id", col], unique: true });
+            }
+          };
+
+          if (joinOnDelete !== "ignore") {
+            ensureCompositeUnique(mergedIndexes, "id");
+            joinForeignKeys.push({
+              columns: ["tenant_id", sourceColumn],
+              targetTable: base.table,
+              targetColumns: ["tenant_id", "id"],
+              onDelete: "RESTRICT",
+            });
+          }
+
           if (target) {
             resolveTargetUniqueness(
               base.name,
@@ -502,6 +528,23 @@ class OrmModelRegistry {
               target.fields,
               target.indexes,
             );
+            if (joinOnDelete !== "ignore") {
+              ensureCompositeUnique(target.indexes, targetField);
+              target.ddl = compileModelDdl(
+                target.table,
+                target.fields,
+                target.indexes,
+                target.extensible,
+                target.foreignKeys,
+                target.many2manyTables,
+              );
+              joinForeignKeys.push({
+                columns: ["tenant_id", targetColumn],
+                targetTable: target.table,
+                targetColumns: ["tenant_id", targetField],
+                onDelete: "RESTRICT",
+              });
+            }
           }
           many2manyTables.push({
             relationName: relName,
@@ -513,7 +556,8 @@ class OrmModelRegistry {
             targetTable: target?.table ?? "",
             targetField,
             targetColumn,
-            onDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            onDelete: joinOnDelete,
+            foreignKeys: joinForeignKeys,
           });
           continue;
         }

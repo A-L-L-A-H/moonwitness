@@ -31,6 +31,14 @@ Reusable PostgreSQL, libSQL/SQLite, and Cloudflare D1 ORM layer for MoonWitness 
 - Deterministic and idempotent: reruns skip already-applied migrations; modified SQL for an applied id is rejected (checksum mismatch).
 - Each migration runs in a transaction; failures roll back and are not recorded.
 
+## Schema Drift Inspection & ORM Doctor CLI
+
+- `inspectSchemaDrift(models?)` executes read-only PostgreSQL catalog queries (`pg_attribute`, `pg_index`, `pg_constraint`) inside a `SET TRANSACTION READ ONLY` transaction and compares physical schema metadata against registered model descriptors (including Many2many join tables). Never executes DDL, never repairs constraints, and never reads business-row data.
+- Workspace CLI: `pnpm orm:doctor --models <module> [--model <name> ...] [--json] [--help]`
+  - **Environment:** `DATABASE_URL` is required and must use `postgres://` or `postgresql://` (never falls back to SQLite/D1).
+  - **Permissions:** Safe for production read-only roles (`SELECT` on `pg_catalog` tables in a read-only transaction).
+  - **Exit codes:** `0` = no drift, `1` = schema drift detected, `2` = invalid arguments or missing/invalid configuration, `3` = connection or runtime error (credentials and URL secrets are redacted).
+
 ## Exports
 
-Public API is exported from `src/index.ts`: `defineModel`, `BaseRepository`, `syncModels`, `modelRegistry`, `extendModel`, `onModelWrite`, `AUDIT_DDL`, `ormAuditMigrations`, `initDb`, `initD1Db`, `closeDb`, `getDb`, `PostgresDriver`, `isPostgresUrl`, `translateSqlForPostgres`, `LibSqlDriver`, `D1Driver`, `splitSqlStatements`, `createD1DatabaseFromOrm`, `applyMigrations`, `listAppliedMigrations`, `backupDatabase`, `restoreDatabase`, `verifyIntegrity`, `encryptBackupFile`, `decryptBackupFile`, `createActorContext`, `DEFAULT_TENANT_ID`, `normalizeTenantId`, `SYSTEM_ACTOR`, types, and `ConflictError`. Keep exports aligned with implementation; avoid parallel persistence abstractions.
+Public API is exported from `src/index.ts`: `defineModel`, `BaseRepository`, `syncModels`, `inspectSchemaDrift`, `normalizePgType`, `SCHEMA_DRIFT_REPORT_VERSION`, `runDoctor`, `parseDoctorArgs`, `formatDoctorReport`, `modelRegistry`, `extendModel`, `onModelWrite`, `AUDIT_DDL`, `ormAuditMigrations`, `initDb`, `initD1Db`, `initPostgresDb`, `closeDb`, `getDb`, `PostgresDriver`, `isPostgresUrl`, `translateSqlForPostgres`, `LibSqlDriver`, `D1Driver`, `splitSqlStatements`, `createD1DatabaseFromOrm`, `applyMigrations`, `listAppliedMigrations`, `backupDatabase`, `restoreDatabase`, `verifyIntegrity`, `encryptBackupFile`, `decryptBackupFile`, `createActorContext`, `DEFAULT_TENANT_ID`, `normalizeTenantId`, `SYSTEM_ACTOR`, types, and `ConflictError`. Keep exports aligned with implementation; avoid parallel persistence abstractions.

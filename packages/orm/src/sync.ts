@@ -5,7 +5,9 @@ import { ensureAuditTable, uuidv7 } from "./define-model.js";
 import { modelRegistry, type RegisteredModelDescriptor } from "./registry.js";
 import {
   assertIdentifier,
+  compileForeignKeyClause,
   compileMany2ManyJoinTableDdl,
+  type ForeignKeySpec,
   formatSqlDefaultLiteral,
   METADATA_NAMES,
 } from "./schema-utils.js";
@@ -20,7 +22,106 @@ export interface SyncReport {
   addedColumns: Array<{ table: string; column: string }>;
   deprecatedColumns: Array<{ table: string; column: string }>;
   createdIndexes: string[];
+  /** Foreign keys added to already-existing PostgreSQL tables. */
+  addedForeignKeys: Array<{ table: string; constraint: string; columns: string[] }>;
+  /** Existing foreign keys that differ from the declaration; never altered or dropped by sync. */
+  foreignKeyDrift: ForeignKeyDrift[];
   schemaHashes: Record<string, string>;
+}
+
+export interface ForeignKeyDrift {
+  model: string;
+  table: string;
+  columns: string[];
+  constraint: string;
+  reason: "different_definition" | "not_validated";
+  expected: { targetTable: string; targetColumns: string[]; onDelete: ForeignKeySpec["onDelete"] };
+  actual: { targetTable: string; targetColumns: string[]; onDelete: string; validated: boolean };
+}
+
+/** Thrown when sync must add a foreign key but existing rows violate it. No data is modified. */
+export class RelationIntegrityError extends Error {
+  readonly violations: RelationIntegrityViolation[];
+  constructor(violations: RelationIntegrityViolation[]) {
+    const summary = violations
+      .slice(0, 10)
+      .map((v) => `${v.model}.${v.relation}[${v.recordId}] (${v.kind})`)
+      .join(", ");
+    super(
+      `Cannot add declared foreign key: ${violations.length} invalid reference(s): ${summary}${violations.length > 10 ? ", ..." : ""}.`,
+    );
+    this.name = "RelationIntegrityError";
+    this.violations = violations;
+  }
+}
+
+interface CatalogForeignKey {
+  name: string;
+  columns: string[];
+  targetTable: string;
+  targetColumns: string[];
+  onDelete: string;
+  validated: boolean;
+}
+
+const PG_DELETE_ACTIONS: Record<string, string> = {
+  a: "NO ACTION",
+  r: "RESTRICT",
+  c: "CASCADE",
+  n: "SET NULL",
+  d: "SET DEFAULT",
+};
+
+async function inspectPostgresForeignKeys(
+  executor: LibSqlExecutor,
+  table: string,
+): Promise<CatalogForeignKey[]> {
+  const rows = await executor.all<{
+    name: string;
+    columns: string[];
+    target_schema: string;
+    target_table: string;
+    target_columns: string[];
+    delete_action: string;
+    validated: boolean;
+  }>(
+    `SELECT con.conname::text AS name,
+            (SELECT array_agg(a.attname::text ORDER BY k.ord)
+               FROM unnest(con.conkey) WITH ORDINALITY AS k(attnum, ord)
+               JOIN pg_attribute a ON a.attrelid = con.conrelid AND a.attnum = k.attnum) AS columns,
+            tn.nspname::text AS target_schema,
+            tc.relname::text AS target_table,
+            (SELECT array_agg(a.attname::text ORDER BY k.ord)
+               FROM unnest(con.confkey) WITH ORDINALITY AS k(attnum, ord)
+               JOIN pg_attribute a ON a.attrelid = con.confrelid AND a.attnum = k.attnum) AS target_columns,
+            con.confdeltype::text AS delete_action,
+            con.convalidated AS validated
+     FROM pg_constraint con
+     JOIN pg_class rel ON rel.oid = con.conrelid
+     JOIN pg_namespace n ON n.oid = rel.relnamespace
+     JOIN pg_class tc ON tc.oid = con.confrelid
+     JOIN pg_namespace tn ON tn.oid = tc.relnamespace
+     WHERE con.contype = 'f' AND n.nspname = 'public' AND rel.relname = ?`,
+    [table.toLowerCase()],
+  );
+  return rows.map((row) => ({
+    name: String(row.name),
+    columns: row.columns,
+    targetTable: row.target_schema === "public" ? row.target_table : `${row.target_schema}.${row.target_table}`,
+    targetColumns: row.target_columns,
+    onDelete: PG_DELETE_ACTIONS[String(row.delete_action)] ?? String(row.delete_action),
+    validated: row.validated === true,
+  }));
+}
+
+function sameList(a: string[], b: string[]): boolean {
+  return a.length === b.length && a.every((value, index) => value === b[index]);
+}
+
+function foreignKeyConstraintName(table: string, columns: string[]): string {
+  const base = `fk_${table}_${columns.join("_")}`;
+  if (base.length <= 63) return base;
+  return `fk_${createHash("sha256").update(base).digest("hex").slice(0, 40)}`;
 }
 
 export interface RelationIntegrityViolation {
@@ -110,7 +211,7 @@ function sortDescriptorsByRelationDeps(
     if (visited.has(desc.name) || visiting.has(desc.name)) return;
     visiting.add(desc.name);
     for (const rel of Object.values(desc.relations ?? {})) {
-      if (rel.type === "one2many" || rel.type === "many2many") continue;
+      if (rel.type === "one2many") continue;
       const target = byName.get(rel.model);
       if (target) visit(target);
     }
@@ -219,6 +320,32 @@ export async function preflightRelationIntegrity(
            )`,
         );
         for (const row of badJoinRows) {
+          const sourceExists = await db.get<{ tenant_id: string }>(
+            `SELECT src.tenant_id AS tenant_id FROM ${desc.table} src WHERE src.id = ? AND src.tenant_id = ?${srcDeletedFilter} LIMIT 1`,
+            [row.source_val, row.tenant_id],
+          );
+          if (!sourceExists) {
+            const crossSource = await db.get<{ tenant_id: string }>(
+              `SELECT src.tenant_id AS tenant_id FROM ${desc.table} src WHERE src.id = ?${srcDeletedFilter} LIMIT 1`,
+              [row.source_val],
+            );
+            violations.push({
+              kind:
+                crossSource && crossSource.tenant_id !== row.tenant_id ? "cross_tenant" : "orphan",
+              model: desc.name,
+              table: joinSpec.table,
+              relation: relName,
+              targetModel: desc.name,
+              targetTable: desc.table,
+              recordId: String(row.id),
+              tenantId: String(row.tenant_id),
+              ...(crossSource && crossSource.tenant_id !== row.tenant_id
+                ? { targetTenantId: String(crossSource.tenant_id) }
+                : {}),
+              value: row.source_val,
+            });
+            continue;
+          }
           const crossTenant = await db.get<{ tenant_id: string }>(
             `SELECT tgt.tenant_id AS tenant_id FROM ${target.table} tgt WHERE tgt.${joinSpec.targetField} = ?${tgtDeletedFilter} LIMIT 1`,
             [row.target_val],
@@ -330,12 +457,137 @@ export async function syncModels(
     addedColumns: [],
     deprecatedColumns: [],
     createdIndexes: [],
+    addedForeignKeys: [],
+    foreignKeyDrift: [],
     schemaHashes: {},
   };
+
+  const reconcileTableForeignKeys = async (
+    executor: LibSqlExecutor,
+    modelName: string,
+    table: string,
+    declaredForeignKeys: ForeignKeySpec[],
+    violationMatcher: (violation: RelationIntegrityViolation, missing: ForeignKeySpec[]) => boolean,
+  ): Promise<void> => {
+    if (declaredForeignKeys.length === 0) return;
+    const actual = await inspectPostgresForeignKeys(executor, table);
+    const missing: ForeignKeySpec[] = [];
+    for (const declared of declaredForeignKeys) {
+      const sameColumns = actual.filter((fk) => sameList(fk.columns, declared.columns));
+      const equivalent = sameColumns.find(
+        (fk) =>
+          fk.targetTable === declared.targetTable &&
+          sameList(fk.targetColumns, declared.targetColumns) &&
+          fk.onDelete === declared.onDelete,
+      );
+      if (equivalent) {
+        if (!equivalent.validated) {
+          report.foreignKeyDrift.push(
+            toDrift(modelName, table, declared, equivalent, "not_validated"),
+          );
+        }
+        continue;
+      }
+      if (sameColumns.length > 0) {
+        for (const conflicting of sameColumns) {
+          report.foreignKeyDrift.push(
+            toDrift(modelName, table, declared, conflicting, "different_definition"),
+          );
+        }
+        continue;
+      }
+      const targetCatalog = await inspectTableCatalog(executor, declared.targetTable, true);
+      if (targetCatalog.columns.length === 0) continue;
+      missing.push(declared);
+    }
+    if (missing.length === 0) return;
+
+    const preflight = await preflightRelationIntegrity([modelName]);
+    const violations = preflight.violations.filter((v) => violationMatcher(v, missing));
+    if (violations.length > 0) {
+      throw new RelationIntegrityError(violations);
+    }
+    for (const fk of missing) {
+      const constraint = foreignKeyConstraintName(table, fk.columns);
+      assertIdentifier(constraint, "foreign key constraint name");
+      await executor.exec(
+        `ALTER TABLE "${table}" ADD CONSTRAINT "${constraint}" ${compileForeignKeyClause(fk)}`,
+      );
+      report.addedForeignKeys.push({
+        table,
+        constraint,
+        columns: fk.columns,
+      });
+    }
+  };
+
+  const reconcileForeignKeys = async (
+    executor: LibSqlExecutor,
+    descriptor: RegisteredModelDescriptor,
+  ): Promise<void> => {
+    await reconcileTableForeignKeys(
+      executor,
+      descriptor.name,
+      descriptor.table,
+      descriptor.foreignKeys,
+      (v, missing) => {
+        const missingRelations = new Set(
+          missing.flatMap((fk) => fk.columns.filter((col) => col !== "tenant_id")),
+        );
+        return v.table === descriptor.table && missingRelations.has(v.relation);
+      },
+    );
+  };
+
+  const toDrift = (
+    model: string,
+    table: string,
+    declared: ForeignKeySpec,
+    actual: CatalogForeignKey,
+    reason: ForeignKeyDrift["reason"],
+  ): ForeignKeyDrift => ({
+    model,
+    table,
+    columns: declared.columns,
+    constraint: actual.name,
+    reason,
+    expected: {
+      targetTable: declared.targetTable,
+      targetColumns: declared.targetColumns,
+      onDelete: declared.onDelete,
+    },
+    actual: {
+      targetTable: actual.targetTable,
+      targetColumns: actual.targetColumns,
+      onDelete: actual.onDelete,
+      validated: actual.validated,
+    },
+  });
 
   const runSync = async (executor: LibSqlExecutor): Promise<void> => {
     await ensureAuditTable(executor);
     const seenJoinTables = new Set<string>();
+
+    const targetUniqueIndexSpecs: Array<{ table: string; column: string }> = [];
+    for (const descriptor of descriptors) {
+      for (const m2m of descriptor.many2manyTables) {
+        if (m2m.onDelete === "ignore" || !m2m.targetTable) continue;
+        targetUniqueIndexSpecs.push({ table: m2m.targetTable, column: m2m.targetField });
+      }
+    }
+    for (const spec of targetUniqueIndexSpecs) {
+      const tCat = await inspectTableCatalog(executor, spec.table, isPostgres);
+      if (tCat.columns.length === 0) continue;
+      const existingIndexes = new Set(tCat.indexes.map((name) => name.toLowerCase()));
+      const idxName = `idx_${spec.table}_tenant_id_${spec.column}`;
+      assertIdentifier(idxName, "index name");
+      if (!existingIndexes.has(idxName.toLowerCase())) {
+        await executor.exec(
+          `CREATE UNIQUE INDEX IF NOT EXISTS ${idxName} ON ${spec.table} (tenant_id, ${spec.column})`,
+        );
+        report.createdIndexes.push(idxName);
+      }
+    }
 
     for (const descriptor of descriptors) {
       assertIdentifier(descriptor.table, "table");
@@ -439,6 +691,10 @@ export async function syncModels(
         }
       }
 
+      if (isPostgres) {
+        await reconcileForeignKeys(executor, descriptor);
+      }
+
       for (const m2m of descriptor.many2manyTables) {
         if (seenJoinTables.has(m2m.table)) continue;
         seenJoinTables.add(m2m.table);
@@ -462,6 +718,15 @@ export async function syncModels(
               `CREATE INDEX IF NOT EXISTS ${tIdx} ON ${m2m.table} (tenant_id, ${m2m.targetColumn})`,
             );
             report.createdIndexes.push(tIdx);
+          }
+          if (isPostgres) {
+            await reconcileTableForeignKeys(
+              executor,
+              descriptor.name,
+              m2m.table,
+              m2m.foreignKeys ?? [],
+              (v) => v.table === m2m.table && v.relation === m2m.relationName,
+            );
           }
         }
       }

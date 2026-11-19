@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { unwrapDriverHandle } from "../driver.js";
 import {
   closeDb,
   D1Driver,
@@ -80,7 +81,7 @@ describe("D1Driver & initD1Db", () => {
   it("executes run, get, all, batch exec, and rebind cleanly", async () => {
     const first = createFakeD1();
     const driver = initD1Db(first.client);
-    expect(getDb()).toBe(driver);
+    expect(unwrapDriverHandle(getDb())).toBe(driver);
 
     first.setNextRunMeta({ last_row_id: 42, changes: 1 });
     const runRes = await driver.run("INSERT INTO users (id) VALUES (?)", [BigInt(42)]);

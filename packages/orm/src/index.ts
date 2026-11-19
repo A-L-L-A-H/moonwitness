@@ -39,8 +39,13 @@ export type {
   ZodObjectLike,
 } from "./schema-utils.js";
 export { validateAttrsPayload } from "./schema-utils.js";
-export { syncModels, preflightRelationIntegrity } from "./sync.js";
-export type { SyncModelsOptions, SyncReport, RelationIntegrityViolation } from "./sync.js";
+export { syncModels, preflightRelationIntegrity, RelationIntegrityError } from "./sync.js";
+export type {
+  SyncModelsOptions,
+  SyncReport,
+  RelationIntegrityViolation,
+  ForeignKeyDrift,
+} from "./sync.js";
 export type { BaseMetadata, RecordStatus, RecordSource } from "./base-metadata.js";
 export {
   createActorContext,
@@ -52,7 +57,7 @@ export {
 } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
 export { ConflictError, PolicyError, type PolicyErrorCode } from "./errors.js";
-export { initDb, initD1Db, initPostgresDb, closeDb, getDb, withQueryBudget } from "./driver.js";
+export { initDb, initD1Db, initPostgresDb, closeDb, getDb, withQueryBudget, withTransaction } from "./driver.js";
 export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
 export type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
@@ -64,7 +69,7 @@ export {
 export type { PgClientLike, PgQueryResultLike, PoolLike } from "./drivers/postgres.driver.js";
 export { D1Driver, splitSqlStatements, createD1DatabaseFromOrm } from "./drivers/d1.driver.js";
 export type { D1DatabaseLike, D1PreparedStatementLike } from "./drivers/d1.driver.js";
-export { applyMigrations, listAppliedMigrations } from "./migrations.js";
+export { applyMigrations, listAppliedMigrations, PG_MIGRATION_ADVISORY_LOCK_KEY } from "./migrations.js";
 export type { Migration } from "./migrations.js";
 export {
   backupDatabase,
@@ -105,3 +110,13 @@ export type {
   ModelWriteAction,
   StoredComputedFieldType,
 } from "./model-meta.js";
+
+export { inspectSchemaDrift, normalizePgType, SCHEMA_DRIFT_REPORT_VERSION } from "./schema-drift.js";
+export type {
+  SchemaDriftCode,
+  SchemaDriftFinding,
+  SchemaDriftModelSummary,
+  SchemaDriftObjectKind,
+  SchemaDriftReport,
+} from "./schema-drift.js";
+export { runDoctor, parseDoctorArgs, formatDoctorReport } from "./doctor-cli.js";
