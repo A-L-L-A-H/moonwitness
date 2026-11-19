@@ -560,6 +560,32 @@ describe("AddonRuntimeController", () => {
       api_token: { sensitive: true },
       classified_note: { sensitive: true },
     });
+
+    // Reject unknown group references on fieldPolicies in syncAll
+    const badFieldPolicyModel = defineModel({
+      name: "demo.bad_field_group",
+      table: "demo_bad_field_group",
+      restEnabled: true,
+      schema: z.object({ secret_col: z.string() }),
+      fieldPolicies: {
+        secret_col: { readGroups: ["nonexistent.group"] },
+      },
+    });
+    const badFieldPolicyRuntime = new AddonRuntimeController();
+    await expect(
+      badFieldPolicyRuntime.syncAll([
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
+        {
+          manifest: {
+            name: "bad_field_grp_addon",
+            version: "1.0.0",
+            depends: ["__base"],
+            provides: { models: ["demo.bad_field_group"] },
+          },
+          models: [badFieldPolicyModel],
+        },
+      ]),
+    ).rejects.toThrow(/unknown group 'nonexistent\.group'/i);
   });
 
   it("validates and applies per-addon migrations in dependency order inside syncAll() and enable() (#503)", async () => {

@@ -129,6 +129,7 @@ export function EdgeTasksApp() {
   const [newTaskStage, setNewTaskStage] = useState<ProjectTaskStatus>("todo");
 
   const [busy, setBusy] = useState(false);
+  const [pubsubState, setPubsubState] = useState<"connecting" | "live" | "polling">("connecting");
   const [notice, setNotice] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -157,6 +158,27 @@ export function EdgeTasksApp() {
     refresh().catch((err: unknown) => {
       setErrorMessage(err instanceof Error ? err.message : "Failed to load workspace");
     });
+  }, [refresh]);
+
+  useEffect(() => {
+    if (typeof EventSource === "undefined") {
+      setPubsubState("polling");
+      return;
+    }
+    const source = new EventSource("/api/pubsub/stream");
+    source.addEventListener("open", () => {
+      setPubsubState("live");
+    });
+    source.addEventListener("orm.pubsub", () => {
+      setPubsubState("live");
+      void refresh();
+    });
+    source.addEventListener("error", () => {
+      setPubsubState("polling");
+    });
+    return () => {
+      source.close();
+    };
   }, [refresh]);
 
   const projectByCode = useMemo(
@@ -295,6 +317,9 @@ export function EdgeTasksApp() {
 
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">ORM: {health?.dialect ?? "..."}</Badge>
+              <Badge variant={pubsubState === "live" ? "default" : "secondary"}>
+                PUB/SUB: {pubsubState.toUpperCase()}
+              </Badge>
               <Badge variant="secondary">ADDONS: {health?.addons?.join(" → ") ?? "loading"}</Badge>
               <NativeSelect
                 aria-label="Skin preset"

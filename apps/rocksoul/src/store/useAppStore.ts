@@ -7,6 +7,7 @@ import type {
   CreateProjectArgs,
   DevServiceEntry,
   DevServiceTarget,
+  EdgeOrmSyncStatus,
   GitView,
   Issue,
   IssueStatus,
@@ -34,6 +35,7 @@ export interface AppState {
   monitorError: string;
   autoMonitor: boolean;
   gitPresetView: GitView | null;
+  edgeOrmStatus: EdgeOrmSyncStatus | null;
   stats: { active: number; blocked: number; completed: number };
   issues: Issue[];
   repositories: Repository[];
@@ -47,8 +49,10 @@ export interface AppState {
   setProjectFilter: (projectFilter: string) => void;
   setAutoMonitor: (autoMonitor: boolean) => void;
   setGitPresetView: (gitPresetView: GitView | null) => void;
+  setEdgeOrmStatus: (edgeOrmStatus: EdgeOrmSyncStatus | null) => void;
   refresh: () => Promise<void>;
   refreshMonitor: () => Promise<void>;
+  syncEdgeOrm: () => Promise<EdgeOrmSyncStatus | null>;
   startDevService: (target: DevServiceTarget) => Promise<void>;
   stopDevService: (target: DevServiceTarget) => Promise<void>;
   openEcosystemUrl: (url: string) => Promise<void>;
@@ -78,6 +82,7 @@ export const useAppStore = create<AppState>((setState, getState) => ({
   monitorError: "",
   autoMonitor: true,
   gitPresetView: null,
+  edgeOrmStatus: null,
   stats: { active: 0, blocked: 0, completed: 0 },
   issues: [],
   repositories: [],
@@ -91,6 +96,30 @@ export const useAppStore = create<AppState>((setState, getState) => ({
   setProjectFilter: (projectFilter) => setState({ projectFilter }),
   setAutoMonitor: (autoMonitor) => setState({ autoMonitor }),
   setGitPresetView: (gitPresetView) => setState({ gitPresetView }),
+  setEdgeOrmStatus: (edgeOrmStatus) => setState({ edgeOrmStatus }),
+  syncEdgeOrm: async () => {
+    try {
+      const edgeOrmStatus = await call("sync_edge_orm");
+      setState({ edgeOrmStatus: edgeOrmStatus ?? null });
+      if (edgeOrmStatus && (edgeOrmStatus.projects_synced > 0 || edgeOrmStatus.tasks_synced > 0)) {
+        await getState().refresh();
+      }
+      return edgeOrmStatus ?? null;
+    } catch (error) {
+      const failure: EdgeOrmSyncStatus = {
+        connected: false,
+        edge_url: getState().edgeOrmStatus?.edge_url ?? "https://moonwitness-edge-tasks.bjo163.workers.dev",
+        cursor: getState().edgeOrmStatus?.cursor ?? null,
+        projects_synced: 0,
+        tasks_synced: 0,
+        outbox_pushed: 0,
+        last_synced_at: getState().edgeOrmStatus?.last_synced_at ?? null,
+        error: error instanceof Error ? error.message : String(error),
+      };
+      setState({ edgeOrmStatus: failure });
+      return failure;
+    }
+  },
   refreshMonitor: async () => {
     if (getState().monitorLoading) return;
     setState({ monitorLoading: true, monitorError: "" });

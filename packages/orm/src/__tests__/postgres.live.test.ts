@@ -15,13 +15,33 @@ import {
   extendModel,
   getDb,
   initDb,
+  isPostgresUrl,
   listDatabaseTables,
   syncModels,
   verifyIntegrity,
 } from "../index.js";
 
 const execFileAsync = promisify(execFile);
-const POSTGRES_TEST_URL = process.env.POSTGRES_TEST_URL?.trim() ?? "";
+
+function resolveLivePostgresUrl(): string {
+  const candidates = [process.env.TEST_POSTGRES_URL?.trim(), process.env.POSTGRES_TEST_URL?.trim()];
+  const requireConformance = process.env.MW_REQUIRE_POSTGRES_CONFORMANCE === "1";
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    if (!isPostgresUrl(candidate)) {
+      throw new Error("Live PostgreSQL test URL must use postgres:// or postgresql:// protocol.");
+    }
+    return candidate;
+  }
+  if (requireConformance) {
+    throw new Error(
+      "MW_REQUIRE_POSTGRES_CONFORMANCE=1 requires TEST_POSTGRES_URL or POSTGRES_TEST_URL.",
+    );
+  }
+  return "";
+}
+
+const POSTGRES_TEST_URL = resolveLivePostgresUrl();
 
 async function hasPgDumpBinary(): Promise<boolean> {
   try {
@@ -49,6 +69,9 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
     const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
     const modelName = `live.pg_widget_${suffix}`;
     const tableName = `live_pg_widget_${suffix}`;
+    const childTableName = `live_pg_child_${suffix}`;
+    const constraintName = `fk_live_pg_${suffix}`;
+    const invalidIndexName = `idx_live_pg_bad_${suffix}`;
 
     const widgetModel = defineModel({
       name: modelName,
@@ -94,6 +117,47 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
       const integrity = await verifyIntegrity();
       expect(integrity).toEqual({ ok: true, errors: [] });
 
+      // Unsupported PRAGMA statements fail closed on PostgreSQL
+      await expect(getDb().all("PRAGMA integrity_check")).rejects.toThrow(
+        /Unsupported PostgreSQL PRAGMA: integrity_check/i,
+      );
+      await expect(getDb().all("PRAGMA foreign_key_check")).rejects.toThrow(
+        /Unsupported PostgreSQL PRAGMA: foreign_key_check/i,
+      );
+      await expect(getDb().exec("PRAGMA journal_mode = WAL")).rejects.toThrow(
+        /Unsupported PostgreSQL PRAGMA statement/i,
+      );
+
+      // Verify PostgreSQL catalog integrity detection on real unvalidated constraint & invalid index
+      await getDb().exec(
+        `CREATE TABLE ${childTableName} (id TEXT PRIMARY KEY, widget_id TEXT, code TEXT)`,
+      );
+      await getDb().exec(
+        `INSERT INTO ${childTableName} (id, widget_id, code) VALUES ('c1', '${created.id}', 'dup'), ('c2', '${created.id}', 'dup')`,
+      );
+      await getDb().exec(
+        `ALTER TABLE ${childTableName} ADD CONSTRAINT ${constraintName} FOREIGN KEY (widget_id) REFERENCES ${tableName}(id) NOT VALID`,
+      );
+      await expect(
+        getDb().exec(
+          `CREATE UNIQUE INDEX CONCURRENTLY ${invalidIndexName} ON ${childTableName} (code)`,
+        ),
+      ).rejects.toThrow();
+
+      const brokenIntegrity = await verifyIntegrity();
+      expect(brokenIntegrity.ok).toBe(false);
+      expect(brokenIntegrity.errors).toContain(
+        `unvalidated postgres constraint: ${constraintName}`,
+      );
+      expect(brokenIntegrity.errors).toContain(
+        `invalid or unready postgres index: ${invalidIndexName}`,
+      );
+
+      await getDb().exec(`DROP INDEX IF EXISTS ${invalidIndexName}`);
+      await getDb().exec(`ALTER TABLE ${childTableName} VALIDATE CONSTRAINT ${constraintName}`);
+      const restoredIntegrity = await verifyIntegrity();
+      expect(restoredIntegrity).toEqual({ ok: true, errors: [] });
+
       if (await hasPgDumpBinary()) {
         const dir = await mkdtemp(join(tmpdir(), "mw-pg-backup-"));
         tempDirs.push(dir);
@@ -102,6 +166,12 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
         expect(existsSync(dumpPath)).toBe(true);
       }
     } finally {
+      await getDb()
+        .exec(`DROP INDEX IF EXISTS ${invalidIndexName}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${childTableName}`)
+        .catch(() => {});
       await getDb()
         .exec(`DROP TABLE IF EXISTS ${tableName}`)
         .catch(() => {});

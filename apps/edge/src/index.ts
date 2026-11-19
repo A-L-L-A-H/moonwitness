@@ -23,10 +23,32 @@ import {
 } from "@moonwitness/addons/project";
 import { ensureEdgeRuntime, type EdgeEnv } from "./runtime.js";
 
+const CORS_HEADERS: Record<string, string> = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, PATCH, DELETE, OPTIONS",
+  "access-control-allow-headers": "Content-Type, X-Tenant-Id, X-Actor-Id, X-Request-Id",
+};
+
+function toIsoTimestamp(value: unknown): string | null {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString();
+  }
+  if (typeof value === "string" && value.trim()) {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toISOString();
+    }
+  }
+  return null;
+}
+
 function json(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8" },
+    headers: {
+      "content-type": "application/json; charset=utf-8",
+      ...CORS_HEADERS,
+    },
   });
 }
 
@@ -121,6 +143,10 @@ export async function handleEdgeRequest(request: Request, env: EdgeEnv): Promise
         headers: { "content-type": "text/html; charset=utf-8" },
       },
     );
+  }
+
+  if (method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
   let booted;
@@ -293,6 +319,131 @@ export async function handleEdgeRequest(request: Request, env: EdgeEnv): Promise
     if (pathname === "/api/sync/logs" && method === "GET") {
       const logs = await syncLogRepo.find({}, { orderBy: "create_date DESC", limit: 25 });
       return json({ data: logs });
+    }
+
+    if (pathname === "/api/pubsub/events" || pathname === "/api/pubsub/stream") {
+      const rawSince = searchParams.get("since")?.trim() || undefined;
+      const since = rawSince ? (toIsoTimestamp(rawSince) ?? rawSince) : undefined;
+      const filter = since ? { write_date: { $gt: since } } : {};
+      const [projects, tasks, events] = await Promise.all([
+        projectRepo.find(filter, { orderBy: "write_date ASC", limit: 200 }),
+        taskRepo.find(filter, { orderBy: "write_date ASC", limit: 200 }),
+        booted.driver.all<{
+          id: string;
+          model: string;
+          entity_id: string;
+          action: string;
+          changed_by: string | null;
+          changed_at: string;
+          diff: string;
+          entity_version: number;
+          source: string;
+        }>(
+          "SELECT id, model, entity_id, action, changed_by, changed_at, diff, entity_version, source FROM _orm_audit_log WHERE model IN ('project.project', 'project.task', 'project.sync_log') AND changed_at > ? ORDER BY changed_at ASC LIMIT 100",
+          [since ?? "1970-01-01T00:00:00.000Z"],
+        ),
+      ]);
+
+      const timestamps: string[] = [];
+      for (const p of projects) {
+        const ts = toIsoTimestamp(p.write_date);
+        if (ts) timestamps.push(ts);
+      }
+      for (const t of tasks) {
+        const ts = toIsoTimestamp(t.write_date);
+        if (ts) timestamps.push(ts);
+      }
+      for (const ev of events) {
+        const ts = toIsoTimestamp(ev.changed_at);
+        if (ts) timestamps.push(ts);
+      }
+      const cursor = timestamps.sort().at(-1) ?? since ?? new Date().toISOString();
+
+      const envelope = { ok: true, cursor, projects, tasks, events };
+      if (pathname === "/api/pubsub/stream") {
+        const body = `retry: 5000\nevent: orm.pubsub\ndata: ${JSON.stringify(envelope)}\n\n`;
+        return new Response(body, {
+          status: 200,
+          headers: {
+            "content-type": "text/event-stream; charset=utf-8",
+            "cache-control": "no-cache",
+            connection: "keep-alive",
+            ...CORS_HEADERS,
+          },
+        });
+      }
+      return json(envelope);
+    }
+
+    if (pathname === "/api/pubsub/publish" && method === "POST") {
+      const body = (await request.json().catch(() => ({}))) as {
+        projects?: Array<Record<string, unknown>>;
+        tasks?: Array<Record<string, unknown>>;
+      };
+      let projectsUpserted = 0;
+      let tasksUpserted = 0;
+
+      for (const rawProject of body.projects ?? []) {
+        const normalized = normalizeProjectPayload(rawProject);
+        const code = typeof normalized.code === "string" ? normalized.code.trim() : "";
+        if (!code) continue;
+        await projectRepo.upsert({ code }, normalized);
+        projectsUpserted += 1;
+      }
+
+      for (const rawTask of body.tasks ?? []) {
+        const normalized = normalizeTaskPayload(rawTask);
+        const projectCode =
+          typeof normalized.project_code === "string" ? normalized.project_code.trim() : "";
+        const title = typeof normalized.title === "string" ? normalized.title.trim() : "";
+        if (!projectCode || !title) continue;
+
+        const ensuredProject = (await projectRepo.find({ code: projectCode }, { limit: 1 }))[0];
+        if (!ensuredProject) {
+          await projectRepo.upsert(
+            { code: projectCode },
+            { code: projectCode, name: projectCode, summary: "", project_status: "active" },
+          );
+          projectsUpserted += 1;
+        }
+
+        const githubRepo =
+          typeof normalized.github_repo === "string" ? normalized.github_repo.trim() : "";
+        const githubIssue =
+          typeof normalized.github_issue_number === "number"
+            ? normalized.github_issue_number
+            : null;
+        if (githubRepo && githubIssue !== null) {
+          await taskRepo.upsert(
+            { github_repo: githubRepo, github_issue_number: githubIssue },
+            normalized,
+          );
+          tasksUpserted += 1;
+          continue;
+        }
+
+        const existingById =
+          typeof rawTask.id === "string" && rawTask.id.trim()
+            ? await taskRepo.findOne(rawTask.id.trim())
+            : null;
+        const existingByTitle =
+          existingById ??
+          (await taskRepo.find({ project_code: projectCode, title }, { limit: 1 }))[0] ??
+          null;
+        if (existingByTitle) {
+          await taskRepo.update(existingByTitle.id, normalized);
+        } else {
+          await taskRepo.create(normalized);
+        }
+        tasksUpserted += 1;
+      }
+
+      return json({
+        ok: true,
+        projectsUpserted,
+        tasksUpserted,
+        cursor: new Date().toISOString(),
+      });
     }
 
     if (pathname === "/api/sync/github" && method === "POST") {

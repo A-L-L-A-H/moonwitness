@@ -18,6 +18,7 @@ export interface AuthenticatedRequest extends FastifyRequest {
     tenantId?: string;
     companyId?: string;
     companyIds?: string[];
+    groups?: string[];
   };
 }
 

@@ -96,7 +96,8 @@ export async function verifyIntegrity(): Promise<{ ok: boolean; errors: string[]
        FROM pg_index i
        JOIN pg_class c ON c.oid = i.indexrelid
        JOIN pg_namespace n ON n.oid = c.relnamespace
-       WHERE n.nspname = 'public' AND (NOT i.indisvalid OR NOT i.indisready)`,
+       WHERE n.nspname = 'public' AND (NOT i.indisvalid OR NOT i.indisready)
+       ORDER BY c.relname ASC`,
     );
     for (const row of invalidIndexes) {
       errors.push(`invalid or unready postgres index: ${row.index_name}`);
@@ -106,7 +107,8 @@ export async function verifyIntegrity(): Promise<{ ok: boolean; errors: string[]
       `SELECT con.conname AS constraint_name
        FROM pg_constraint con
        JOIN pg_namespace n ON n.oid = con.connamespace
-       WHERE n.nspname = 'public' AND NOT con.convalidated`,
+       WHERE n.nspname = 'public' AND NOT con.convalidated
+       ORDER BY con.conname ASC`,
     );
     for (const row of unvalidatedConstraints) {
       errors.push(`unvalidated postgres constraint: ${row.constraint_name}`);

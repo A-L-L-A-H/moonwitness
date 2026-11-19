@@ -216,6 +216,17 @@ export interface MidLoopbackCallback {
   redirect_uri: string;
 }
 
+export interface EdgeOrmSyncStatus {
+  connected: boolean;
+  edge_url: string;
+  cursor: string | null;
+  projects_synced: number;
+  tasks_synced: number;
+  outbox_pushed: number;
+  last_synced_at: string | null;
+  error: string | null;
+}
+
 export type DevServiceTarget = "web" | "api" | "all";
 
 export interface CreateIssueArgs {
@@ -327,6 +338,7 @@ export interface NativeCommands {
   create_project: { args: CreateProjectArgs; result: Project };
   update_project: { args: UpdateProjectArgs; result: void };
   delete_project: { args: { projectId: string }; result: void };
+  sync_edge_orm: { args: Record<string, never>; result: EdgeOrmSyncStatus };
   create_milestone: { args: CreateMilestoneArgs; result: Milestone };
   update_milestone: { args: UpdateMilestoneArgs; result: void };
   delete_milestone: { args: { milestoneId: string }; result: void };

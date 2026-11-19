@@ -59,13 +59,17 @@ fn validate_issue_status(status: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn list_issues(app: AppHandle) -> Result<Vec<Issue>, String> {
-    let connection = db::connect(&app)?;
-    query_issues(&connection)
+pub async fn list_issues(app: AppHandle) -> Result<Vec<Issue>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let connection = db::connect(&app)?;
+        query_issues(&connection)
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
-pub fn create_issue(
+pub async fn create_issue(
     app: AppHandle,
     title: String,
     description: Option<String>,
@@ -73,17 +77,23 @@ pub fn create_issue(
     project_id: Option<String>,
     repository_id: Option<String>,
 ) -> Result<Issue, String> {
-    let chosen_priority = priority.unwrap_or_else(|| "P2".into());
-    let mut connection = db::connect(&app)?;
-    let description = description.unwrap_or_default();
-    create_issue_with_connection(
-        &mut connection,
-        &title,
-        &description,
-        &chosen_priority,
-        project_id.as_deref(),
-        repository_id.as_deref(),
-    )
+    tauri::async_runtime::spawn_blocking(move || {
+        let chosen_priority = priority.unwrap_or_else(|| "P2".into());
+        let mut connection = db::connect(&app)?;
+        let description = description.unwrap_or_default();
+        let created = create_issue_with_connection(
+            &mut connection,
+            &title,
+            &description,
+            &chosen_priority,
+            project_id.as_deref(),
+            repository_id.as_deref(),
+        )?;
+        crate::orm::notify_edge_sync();
+        Ok(created)
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 fn create_issue_with_connection(
@@ -126,6 +136,16 @@ fn create_issue_with_connection(
             "INSERT INTO issues (id, issue_key, title, description, priority, status, project_id, repository_id) VALUES (?1, ?2, ?3, ?4, ?5, 'open', ?6, ?7)",
             params![id, issue_key, clean_title, description, priority, project_id, repository_id],
         ).map_err(|error| error.to_string())?;
+        crate::orm::mirror_legacy_issue_to_orm(
+            &transaction,
+            &id,
+            project_id,
+            clean_title,
+            description,
+            priority,
+            "open",
+            true,
+        )?;
         db::record_event(
             &transaction,
             "issue",
@@ -185,46 +205,80 @@ fn validate_optional_reference(
 }
 
 #[tauri::command]
-pub fn set_issue_status(app: AppHandle, issue_id: String, status: String) -> Result<(), String> {
-    validate_issue_status(&status)?;
-    let mut connection = db::connect(&app)?;
-    let transaction = connection
-        .transaction_with_behavior(TransactionBehavior::Immediate)
-        .map_err(|error| error.to_string())?;
-    let changed = transaction
-        .execute(
-            "UPDATE issues
-         SET status = ?1,
-             updated_at = CURRENT_TIMESTAMP,
-             closed_at = CASE
-               WHEN ?1 IN ('done', 'closed') THEN COALESCE(closed_at, CURRENT_TIMESTAMP)
-               ELSE NULL
-             END
-         WHERE id = ?2",
-            params![status, issue_id],
-        )
-        .map_err(|error| error.to_string())?;
-    if changed == 0 {
-        return Err("Issue not found.".into());
-    }
-    let issue_key: String = transaction
-        .query_row(
-            "SELECT issue_key FROM issues WHERE id = ?1",
-            [issue_id],
-            |row| row.get(0),
-        )
-        .map_err(|error| error.to_string())?;
-    db::record_event(
-        &transaction,
-        "issue",
-        &format!("{issue_key} moved to {}", status.to_uppercase()),
-        "{}",
-    )?;
-    transaction.commit().map_err(|error| error.to_string())
+pub async fn set_issue_status(
+    app: AppHandle,
+    issue_id: String,
+    status: String,
+) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        validate_issue_status(&status)?;
+        let mut connection = db::connect(&app)?;
+        let transaction = connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|error| error.to_string())?;
+        let changed = transaction
+            .execute(
+                "UPDATE issues
+             SET status = ?1,
+                 updated_at = CURRENT_TIMESTAMP,
+                 closed_at = CASE
+                   WHEN ?1 IN ('done', 'closed') THEN COALESCE(closed_at, CURRENT_TIMESTAMP)
+                   ELSE NULL
+                 END
+             WHERE id = ?2",
+                params![status, issue_id],
+            )
+            .map_err(|error| error.to_string())?;
+        if changed == 0 {
+            return Err("Issue not found.".into());
+        }
+        let (issue_key, project_id, title, description, priority): (
+            String,
+            Option<String>,
+            String,
+            String,
+            String,
+        ) = transaction
+            .query_row(
+                "SELECT issue_key, project_id, title, description, priority FROM issues WHERE id = ?1",
+                [&issue_id],
+                |row| {
+                    Ok((
+                        row.get(0)?,
+                        row.get(1)?,
+                        row.get(2)?,
+                        row.get(3)?,
+                        row.get(4)?,
+                    ))
+                },
+            )
+            .map_err(|error| error.to_string())?;
+        crate::orm::mirror_legacy_issue_to_orm(
+            &transaction,
+            &issue_id,
+            project_id.as_deref(),
+            &title,
+            &description,
+            &priority,
+            &status,
+            true,
+        )?;
+        db::record_event(
+            &transaction,
+            "issue",
+            &format!("{issue_key} moved to {}", status.to_uppercase()),
+            "{}",
+        )?;
+        transaction.commit().map_err(|error| error.to_string())?;
+        crate::orm::notify_edge_sync();
+        Ok(())
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
-pub fn update_issue(
+pub async fn update_issue(
     app: AppHandle,
     issue_id: String,
     title: String,
@@ -233,84 +287,114 @@ pub fn update_issue(
     project_id: Option<String>,
     repository_id: Option<String>,
 ) -> Result<(), String> {
-    let clean_title = title.trim();
-    if clean_title.is_empty() {
-        return Err("Issue title cannot be empty.".into());
-    }
-    if !["P0", "P1", "P2", "P3"].contains(&priority.as_str()) {
-        return Err("Priority must be P0, P1, P2, or P3.".into());
-    }
-    let mut connection = db::connect(&app)?;
-    let transaction = connection
-        .transaction_with_behavior(TransactionBehavior::Immediate)
-        .map_err(|error| error.to_string())?;
-    validate_optional_reference(&transaction, "projects", project_id.as_deref(), "project")?;
-    validate_optional_reference(
-        &transaction,
-        "repositories",
-        repository_id.as_deref(),
-        "repository",
-    )?;
-    if let Some(repository_id) = repository_id.as_deref() {
-        let repository_path: String = transaction
+    tauri::async_runtime::spawn_blocking(move || {
+        let clean_title = title.trim().to_string();
+        if clean_title.is_empty() {
+            return Err("Issue title cannot be empty.".into());
+        }
+        if !["P0", "P1", "P2", "P3"].contains(&priority.as_str()) {
+            return Err("Priority must be P0, P1, P2, or P3.".into());
+        }
+        let mut connection = db::connect(&app)?;
+        let transaction = connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|error| error.to_string())?;
+        validate_optional_reference(&transaction, "projects", project_id.as_deref(), "project")?;
+        validate_optional_reference(
+            &transaction,
+            "repositories",
+            repository_id.as_deref(),
+            "repository",
+        )?;
+        if let Some(repository_id) = repository_id.as_deref() {
+            let repository_path: String = transaction
+                .query_row(
+                    "SELECT path FROM repositories WHERE id = ?1",
+                    [repository_id],
+                    |row| row.get(0),
+                )
+                .map_err(|error| error.to_string())?;
+            if !Path::new(&repository_path).is_dir() {
+                return Err("Repository folder is unavailable.".into());
+            }
+        }
+        let changed = transaction
+            .execute(
+                "UPDATE issues
+             SET title = ?1, description = ?2, priority = ?3, project_id = ?4,
+                 repository_id = ?5, updated_at = CURRENT_TIMESTAMP
+             WHERE id = ?6",
+                params![
+                    clean_title,
+                    description,
+                    priority,
+                    project_id,
+                    repository_id,
+                    issue_id
+                ],
+            )
+            .map_err(|error| error.to_string())?;
+        if changed == 0 {
+            return Err("Issue not found.".into());
+        }
+        let current_status: String = transaction
             .query_row(
-                "SELECT path FROM repositories WHERE id = ?1",
-                [repository_id],
+                "SELECT status FROM issues WHERE id = ?1",
+                [&issue_id],
                 |row| row.get(0),
             )
             .map_err(|error| error.to_string())?;
-        if !Path::new(&repository_path).is_dir() {
-            return Err("Repository folder is unavailable.".into());
-        }
-    }
-    let changed = transaction
-        .execute(
-            "UPDATE issues
-         SET title = ?1, description = ?2, priority = ?3, project_id = ?4,
-             repository_id = ?5, updated_at = CURRENT_TIMESTAMP
-         WHERE id = ?6",
-            params![
-                clean_title,
-                description,
-                priority,
-                project_id,
-                repository_id,
-                issue_id
-            ],
-        )
-        .map_err(|error| error.to_string())?;
-    if changed == 0 {
-        return Err("Issue not found.".into());
-    }
-    db::record_event(
-        &transaction,
-        "issue",
-        &format!("Updated {clean_title}"),
-        "{}",
-    )?;
-    transaction.commit().map_err(|error| error.to_string())
+        crate::orm::mirror_legacy_issue_to_orm(
+            &transaction,
+            &issue_id,
+            project_id.as_deref(),
+            &clean_title,
+            &description,
+            &priority,
+            &current_status,
+            true,
+        )?;
+        db::record_event(
+            &transaction,
+            "issue",
+            &format!("Updated {clean_title}"),
+            "{}",
+        )?;
+        transaction.commit().map_err(|error| error.to_string())?;
+        crate::orm::notify_edge_sync();
+        Ok(())
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[tauri::command]
-pub fn delete_issue(app: AppHandle, issue_id: String) -> Result<(), String> {
-    let mut connection = db::connect(&app)?;
-    let issue_key: String = connection
-        .query_row(
-            "SELECT issue_key FROM issues WHERE id = ?1",
-            [&issue_id],
-            |row| row.get(0),
-        )
-        .optional()
-        .map_err(|error| error.to_string())?
-        .ok_or_else(|| "Issue not found.".to_string())?;
-    let transaction = connection
-        .transaction_with_behavior(TransactionBehavior::Immediate)
-        .map_err(|error| error.to_string())?;
-    transaction
-        .execute("DELETE FROM issues WHERE id = ?1", [&issue_id])
-        .map_err(|error| error.to_string())?;
-    db::record_event(&transaction, "issue", &format!("Deleted {issue_key}"), "{}")?;
-    transaction.commit().map_err(|error| error.to_string())
+pub async fn delete_issue(app: AppHandle, issue_id: String) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut connection = db::connect(&app)?;
+        let issue_key: String = connection
+            .query_row(
+                "SELECT issue_key FROM issues WHERE id = ?1",
+                [&issue_id],
+                |row| row.get(0),
+            )
+            .optional()
+            .map_err(|error| error.to_string())?
+            .ok_or_else(|| "Issue not found.".to_string())?;
+        let transaction = connection
+            .transaction_with_behavior(TransactionBehavior::Immediate)
+            .map_err(|error| error.to_string())?;
+        transaction
+            .execute("DELETE FROM issues WHERE id = ?1", [&issue_id])
+            .map_err(|error| error.to_string())?;
+        crate::orm::soft_delete_orm_task(&transaction, &issue_id)?;
+        db::record_event(&transaction, "issue", &format!("Deleted {issue_key}"), "{}")?;
+        transaction.commit().map_err(|error| error.to_string())?;
+        crate::orm::notify_edge_sync();
+        Ok(())
+    })
+    .await
+    .map_err(|error| error.to_string())?
 }
 
 #[cfg(test)]

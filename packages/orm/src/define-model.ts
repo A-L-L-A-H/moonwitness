@@ -717,6 +717,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     tenantId?: string;
     includeDeleted?: boolean;
     q?: string;
+    allowedSearchFields?: string[];
     orderBy?: string;
     limit?: number;
   }): Promise<Array<Record<string, unknown>>> {
@@ -2378,6 +2379,7 @@ export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     tenantId?: string;
     includeDeleted?: boolean;
     q?: string;
+    allowedSearchFields?: string[];
     orderBy?: string;
     limit?: number;
   }): Promise<Array<Record<string, unknown>>> {
