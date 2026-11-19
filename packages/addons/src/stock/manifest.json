@@ -1,0 +1,15 @@
+{
+  "name": "stock",
+  "version": "1.0.0",
+  "description": "Product Catalog, Warehouse Locations, Stock Quants, and Double-Entry Stock Transfers",
+  "category": "erp",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["product.catalog", "stock.transfer", "stock.quant"],
+  "provides": {
+    "routes": ["/api/v1/stock/summary", "/api/v1/stock/transfer"],
+    "models": ["product.product", "stock.location", "stock.quant", "stock.move"],
+    "auditActions": ["stock.move.reserve", "stock.move.complete", "stock.move.cancel"]
+  }
+}

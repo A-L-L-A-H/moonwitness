@@ -24,7 +24,12 @@
     "./celestial": "./src/celestial/index.ts",
     "./khidra": "./src/khidra/index.ts",
     "./cab": "./src/cab/index.ts",
-    "./geo": "./src/geo/index.ts"
+    "./geo": "./src/geo/index.ts",
+    "./account": "./src/account/index.ts",
+    "./stock": "./src/stock/index.ts",
+    "./crm": "./src/crm/index.ts",
+    "./performance": "./src/performance/index.ts",
+    "./observatory": "./src/observatory/index.ts"
   },
   "scripts": {
     "build": "echo \"addons: no build output\"",

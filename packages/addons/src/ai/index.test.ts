@@ -129,21 +129,21 @@ describe("../ai", () => {
     }
   });
 
-  it("createPlatformAddons(host) returns all 20 domain addons in valid dependency order", async () => {
+  it("createPlatformAddons(host) returns all 25 domain addons in valid dependency order", async () => {
     const host: AddonHostContext = {
       prefix: "/api/v1",
       auth: defaultFailClosedAuthBridge,
       seedDemo: false,
     };
     const addons = createPlatformAddons(host);
-    expect(addons).toHaveLength(20);
+    expect(addons).toHaveLength(25);
 
     const runtime = new AddonRuntimeController();
     const { order, syncReport } = await runtime.syncAll([
       { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
       ...addons,
     ]);
-    expect(order).toHaveLength(21);
+    expect(order).toHaveLength(26);
     expect(syncReport.createdTables.length).toBeGreaterThan(20);
   });
 });

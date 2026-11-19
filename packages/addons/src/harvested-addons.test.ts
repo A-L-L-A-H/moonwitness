@@ -14,6 +14,14 @@ import { createCelestialAddon } from "./celestial/index.js";
 import { createKhidraAddon, irAutomationModel } from "./khidra/index.js";
 import { createCabAddon } from "./cab/index.js";
 import { createGeoAddon } from "./geo/index.js";
+import { createAccountAddon } from "./account/index.js";
+import { createStockAddon, stockQuantModel } from "./stock/index.js";
+import { createCrmAddon } from "./crm/index.js";
+import { createPerformanceAddon } from "./performance/index.js";
+import { createObservatoryAddon } from "./observatory/index.js";
+import { createAuthAddon } from "./auth/index.js";
+import { createAuditAddon } from "./audit/index.js";
+import { createWitnessResearchAddon } from "./witness-research/index.js";
 
 describe("Harvested moonwitness-main domain addons: mizan, celestial, khidra, cab, geo", () => {
   beforeEach(async () => {
@@ -53,6 +61,14 @@ describe("Harvested moonwitness-main domain addons: mizan, celestial, khidra, ca
         createKhidraAddon({ prefix: "/api/v1", auth }),
         createCabAddon({ prefix: "/api/v1", auth }),
         createGeoAddon({ prefix: "/api/v1", auth }),
+        createAccountAddon({ prefix: "/api/v1", auth }),
+        createStockAddon({ prefix: "/api/v1", auth }),
+        createCrmAddon({ prefix: "/api/v1", auth }),
+        createPerformanceAddon({ prefix: "/api/v1", auth }),
+        createObservatoryAddon({ prefix: "/api/v1", auth }),
+        createAuditAddon({ prefix: "/api/v1", auth }),
+        createAuthAddon({ prefix: "/api/v1", auth, rateLimit: () => async () => undefined }),
+        createWitnessResearchAddon({ prefix: "/api/v1", auth }),
       ],
       app,
     );
@@ -157,6 +173,121 @@ describe("Harvested moonwitness-main domain addons: mizan, celestial, khidra, ca
       expect(jakartaHydrated.statusCode).toBe(200);
       expect(jakartaHydrated.json().data[0].$cities).toHaveLength(1);
       expect(jakartaHydrated.json().data[0].$cities[0].name).toContain("Jakarta Pusat");
+
+      // 6. Celestial prayer-times & hilal
+      const prayerRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/celestial/prayer-times?lat=-6.2088&lng=106.8456&convention=KEMENAG",
+      });
+      expect(prayerRes.statusCode).toBe(200);
+      expect(prayerRes.json().fajr).toMatch(/^\d{2}:\d{2}$/);
+
+      const hilalRes = await app.inject({
+        method: "GET",
+        url: "/api/v1/celestial/hilal?altitude=4.2&elongation=7.5",
+      });
+      expect(hilalRes.statusCode).toBe(200);
+      expect(hilalRes.json().mabims_criterion.passed).toBe(true);
+
+      // 7. Witness-Research 9 deterministic engines
+      const modsRes = await app.inject({ method: "GET", url: "/api/v1/witness/engine/modules" });
+      expect(modsRes.statusCode).toBe(200);
+      expect(modsRes.json().modules).toHaveLength(9);
+
+      const engRunRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/witness/engine/run",
+        payload: { moduleCode: "lexical-analysis", input: { q: "w-z-n" } },
+      });
+      expect(engRunRes.statusCode).toBe(201);
+      expect(engRunRes.json().output.findings.length).toBeGreaterThanOrEqual(1);
+
+      // 8. Account: balanced ledger post + reversal, reject unbalanced
+      const unbalanced = await app.inject({
+        method: "POST",
+        url: "/api/v1/account/ledger/post",
+        payload: {
+          move_key: "MV-BAD",
+          idempotency_key: "idem-bad",
+          lines: [
+            { account_code: "1010", debit: 100, credit: 0 },
+            { account_code: "4000", debit: 0, credit: 50 },
+          ],
+        },
+      });
+      expect(unbalanced.statusCode).toBe(400);
+
+      const posted = await app.inject({
+        method: "POST",
+        url: "/api/v1/account/ledger/post",
+        payload: {
+          move_key: "MV-001",
+          idempotency_key: "idem-001",
+          lines: [
+            { account_code: "1010", debit: 500, credit: 0 },
+            { account_code: "4000", debit: 0, credit: 500 },
+          ],
+        },
+      });
+      expect(posted.statusCode).toBe(201);
+      expect(posted.json().move.total_debit).toBe(500);
+
+      // 9. Stock: seed quant -> create move -> reserve -> complete -> check quants
+      await stockQuantModel.repository.create({
+        product_sku: "MW-NODE-01",
+        location_code: "WH-STOCK",
+        quantity: 10,
+        reserved_quantity: 0,
+      });
+      await app.inject({
+        method: "POST",
+        url: "/api/v1/m/stock.move",
+        payload: {
+          reference: "SM-001",
+          product_sku: "MW-NODE-01",
+          location_src_code: "WH-STOCK",
+          location_dest_code: "WH-OUTPUT",
+          quantity: 4,
+        },
+      });
+      const reservedMove = await app.inject({
+        method: "POST",
+        url: "/api/v1/stock/transfer",
+        payload: { reference: "SM-001", operation: "reserve" },
+      });
+      expect(reservedMove.statusCode).toBe(200);
+      expect(reservedMove.json().move.move_state).toBe("assigned");
+
+      const completedMove = await app.inject({
+        method: "POST",
+        url: "/api/v1/stock/transfer",
+        payload: { reference: "SM-001", operation: "complete" },
+      });
+      expect(completedMove.statusCode).toBe(200);
+      expect(completedMove.json().move.move_state).toBe("done");
+
+      const srcQuantAfter = await stockQuantModel.repository.find({
+        product_sku: "MW-NODE-01",
+        location_code: "WH-STOCK",
+      });
+      expect(srcQuantAfter[0]?.quantity).toBe(6);
+
+      // 10. CRM, Performance KPIs & Observatory feeds
+      const leadRes = await app.inject({
+        method: "POST",
+        url: "/api/v1/m/crm.lead",
+        payload: { lead_key: "LD-1", name: "Enterprise Node", expected_revenue: 1000, probability: 50 },
+      });
+      expect(leadRes.statusCode).toBe(201);
+      expect(leadRes.json().data.weighted_revenue).toBe(500);
+
+      const perfSummary = await app.inject({ method: "GET", url: "/api/v1/performance/summary" });
+      expect(perfSummary.statusCode).toBe(200);
+      expect(perfSummary.json().widgets.length).toBeGreaterThanOrEqual(3);
+
+      const obsSummary = await app.inject({ method: "GET", url: "/api/v1/observatory/summary" });
+      expect(obsSummary.statusCode).toBe(200);
+      expect(obsSummary.json().feeds).toBeGreaterThanOrEqual(5);
     } finally {
       await app.close();
     }

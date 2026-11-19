@@ -1,0 +1,15 @@
+{
+  "name": "account",
+  "version": "1.0.0",
+  "description": "Double-entry accounting, chart of accounts, journals, and idempotent ExactLedger",
+  "category": "erp",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["account.ledger", "account.reconciliation"],
+  "provides": {
+    "routes": ["/api/v1/account/summary", "/api/v1/account/ledger/post", "/api/v1/account/ledger/reverse"],
+    "models": ["account.account", "account.journal", "account.move"],
+    "auditActions": ["account.move.post", "account.move.reverse"]
+  }
+}

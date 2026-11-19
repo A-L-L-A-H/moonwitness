@@ -255,6 +255,177 @@ export function calculateQiblaBearing(latitude: number, longitude: number) {
   };
 }
 
+export interface DetailedPrayerTimesResult {
+  date: string;
+  latitude: number;
+  longitude: number;
+  timezone_offset: number;
+  convention: string;
+  fajr: string;
+  sunrise: string;
+  dhuhr: string;
+  asr: string;
+  maghrib: string;
+  isha: string;
+  qibla_bearing: number;
+}
+
+function hoursToTimeStr(hVal: number): string {
+  const normalized = ((hVal % 24) + 24) % 24;
+  let h = Math.floor(normalized);
+  let m = Math.round((normalized - h) * 60.0);
+  if (m >= 60) {
+    h = (h + 1) % 24;
+    m = 0;
+  }
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+export function calculateDetailedPrayerTimes(
+  latitude: number,
+  longitude: number,
+  dateStr: string = new Date().toISOString().slice(0, 10),
+  timezoneOffset = 7.0,
+  convention: "KEMENAG" | "MWL" | "ISNA" | "UMM_AL_QURA" = "KEMENAG",
+): DetailedPrayerTimesResult {
+  const parts = dateStr.split("-").map(Number);
+  const dt = new Date(Date.UTC(parts[0] || 2026, (parts[1] || 11) - 1, parts[2] || 19));
+  const startOfYear = new Date(Date.UTC(dt.getUTCFullYear(), 0, 1));
+  const dayOfYear = Math.floor((dt.getTime() - startOfYear.getTime()) / MS_PER_DAY) + 1;
+  const gamma = ((2.0 * Math.PI) / 365.25) * (dayOfYear - 1);
+
+  const eqt =
+    229.18 *
+    (0.000075 +
+      0.001868 * Math.cos(gamma) -
+      0.032077 * Math.sin(gamma) -
+      0.014615 * Math.cos(2.0 * gamma) -
+      0.040849 * Math.sin(2.0 * gamma));
+  const decl =
+    0.006918 -
+    0.399912 * Math.cos(gamma) +
+    0.070257 * Math.sin(gamma) -
+    0.006758 * Math.cos(2.0 * gamma) +
+    0.000907 * Math.sin(2.0 * gamma) -
+    0.002697 * Math.cos(3.0 * gamma) +
+    0.00148 * Math.sin(3.0 * gamma);
+
+  const phi = (latitude * Math.PI) / 180.0;
+  const solarTransit = 12.0 + (timezoneOffset * 15.0 - longitude) / 15.0 - eqt / 60.0;
+
+  const hourAngle = (alphaDeg: number): number => {
+    const alpha = (alphaDeg * Math.PI) / 180.0;
+    const raw =
+      (Math.sin(alpha) - Math.sin(phi) * Math.sin(decl)) / (Math.cos(phi) * Math.cos(decl));
+    const cosOmega = Math.max(-1.0, Math.min(1.0, raw));
+    return (Math.acos(cosOmega) * 180.0) / Math.PI;
+  };
+
+  let fajrAngle = 20.0;
+  let ishaAngle = 18.0;
+  if (convention === "MWL") {
+    fajrAngle = 18.0;
+    ishaAngle = 17.0;
+  } else if (convention === "ISNA") {
+    fajrAngle = 15.0;
+    ishaAngle = 15.0;
+  } else if (convention === "UMM_AL_QURA") {
+    fajrAngle = 18.5;
+    ishaAngle = 18.5;
+  }
+
+  const omegaSun = hourAngle(-0.833);
+  const tSunrise = solarTransit - omegaSun / 15.0;
+  const tSunset = solarTransit + omegaSun / 15.0;
+  const tFajr = solarTransit - hourAngle(-fajrAngle) / 15.0;
+  const tDhuhr = solarTransit + 2.0 / 60.0;
+  const asrAltRad = Math.atan(1.0 / (1.0 + Math.tan(Math.abs(phi - decl))));
+  const tAsr = solarTransit + hourAngle((asrAltRad * 180.0) / Math.PI) / 15.0;
+  const tMaghrib = tSunset + 2.0 / 60.0;
+  const tIsha =
+    convention === "UMM_AL_QURA" ? tMaghrib + 1.5 : solarTransit + hourAngle(-ishaAngle) / 15.0;
+
+  const qibla = calculateQiblaBearing(latitude, longitude);
+  return {
+    date: dateStr,
+    latitude: Number(latitude.toFixed(4)),
+    longitude: Number(longitude.toFixed(4)),
+    timezone_offset: Number(timezoneOffset.toFixed(2)),
+    convention,
+    fajr: hoursToTimeStr(tFajr),
+    sunrise: hoursToTimeStr(tSunrise),
+    dhuhr: hoursToTimeStr(tDhuhr),
+    asr: hoursToTimeStr(tAsr),
+    maghrib: hoursToTimeStr(tMaghrib),
+    isha: hoursToTimeStr(tIsha),
+    qibla_bearing: qibla.qibla_bearing_deg,
+  };
+}
+
+export interface HilalVisibilityEvaluation {
+  altitude_deg: number;
+  elongation_deg: number;
+  crescent_width_arcmin: number;
+  mabims_criterion: { status: "PASS" | "FAIL"; passed: boolean; description: string };
+  odeh_criterion: { category: "A" | "B" | "C" | "D"; v_value: number; description: string };
+  overall_verdict: string;
+}
+
+export function evaluateHilalVisibility(
+  altitudeDegrees: number,
+  elongationDegrees: number,
+  crescentWidthArcmin = 0.5,
+): HilalVisibilityEvaluation {
+  const alt = Number(altitudeDegrees.toFixed(2));
+  const elong = Number(elongationDegrees.toFixed(2));
+  const width = Number((crescentWidthArcmin || 0.5).toFixed(2));
+
+  const altPass = alt >= 3.0;
+  const elongPass = elong >= 6.4;
+  const mabimsPassed = altPass && elongPass;
+  const reasons: string[] = [];
+  if (!altPass) reasons.push(`Altitude ${alt}° < 3.0°`);
+  if (!elongPass) reasons.push(`Elongation ${elong}° < 6.4°`);
+  const mabimsDesc = mabimsPassed
+    ? "CRITERIA_MET (Hilal Likely Visible under MABIMS standard)"
+    : `CRITERIA_UNMET (${reasons.join(", ")})`;
+
+  const arcvArcmin = alt * 60.0;
+  const poly =
+    -0.1018 * Math.pow(elong, 3) +
+    0.7319 * Math.pow(elong, 2) -
+    6.3226 * elong +
+    7.1651;
+  const vValue = Number((arcvArcmin - poly).toFixed(2));
+
+  let odehCat: "A" | "B" | "C" | "D";
+  let odehDesc: string;
+  if (vValue >= 5.65) {
+    odehCat = "A";
+    odehDesc = "Crescent easily visible to naked eye";
+  } else if (vValue >= 2.0) {
+    odehCat = "B";
+    odehDesc = "Crescent visible to naked eye under clear skies; easily with optical aid";
+  } else if (vValue >= -0.16) {
+    odehCat = "C";
+    odehDesc = "Crescent visible only with telescope or optical aid";
+  } else {
+    odehCat = "D";
+    odehDesc = "Crescent not visible even with optical aid (Below Danjon limit)";
+  }
+
+  return {
+    altitude_deg: alt,
+    elongation_deg: elong,
+    crescent_width_arcmin: width,
+    mabims_criterion: { status: mabimsPassed ? "PASS" : "FAIL", passed: mabimsPassed, description: mabimsDesc },
+    odeh_criterion: { category: odehCat, v_value: vValue, description: odehDesc },
+    overall_verdict: mabimsPassed
+      ? `VISIBILITY_CONFIRMED: MABIMS Met (${odehCat} - ${odehDesc})`
+      : `VISIBILITY_UNLIKELY: MABIMS Unmet (${odehCat} - ${odehDesc})`,
+  };
+}
+
 export const celestialSnapshotSchema = z.object({
   snapshot_key: z.string().min(1).max(120),
   utc_iso: z.string(),
@@ -330,6 +501,50 @@ export const celestialSnapshotModel = defineModel({
         );
       },
     },
+    prayer_times: {
+      scope: "model",
+      roles: ["viewer", "editor", "admin"],
+      label: "Calculate Prayer Times",
+      input: z
+        .object({
+          lat: z.number().min(-90).max(90).default(-6.2088),
+          lng: z.number().min(-180).max(180).default(106.8456),
+          date: z.string().optional(),
+          tz: z.number().default(7),
+          convention: z.enum(["KEMENAG", "MWL", "ISNA", "UMM_AL_QURA"]).default("KEMENAG"),
+        })
+        .optional(),
+      handler: async ({ input }) => {
+        const p = (input as {
+          lat?: number;
+          lng?: number;
+          date?: string;
+          tz?: number;
+          convention?: "KEMENAG" | "MWL" | "ISNA" | "UMM_AL_QURA";
+        } | undefined) ?? {};
+        return calculateDetailedPrayerTimes(
+          p.lat ?? -6.2088,
+          p.lng ?? 106.8456,
+          p.date,
+          p.tz ?? 7,
+          p.convention ?? "KEMENAG",
+        );
+      },
+    },
+    evaluate_hilal: {
+      scope: "model",
+      roles: ["viewer", "editor", "admin"],
+      label: "Evaluate Hilal Visibility",
+      input: z.object({
+        altitude: z.number(),
+        elongation: z.number(),
+        width: z.number().optional(),
+      }),
+      handler: async ({ input }) => {
+        const p = input as { altitude: number; elongation: number; width?: number };
+        return evaluateHilalVisibility(p.altitude, p.elongation, p.width);
+      },
+    },
   },
   indexes: [{ fields: ["tenant_id", "snapshot_key"], unique: true }, { fields: ["utc_iso"] }],
 });
@@ -398,7 +613,7 @@ export function createCelestialAddon(
     views: celestialViews,
     menus: celestialMenus,
     registerRoutes: async (scope: FastifyInstance) => {
-      scope.get<{ Querystring: { lat?: string; lng?: string; utcMs?: string } }>(
+      scope.get<{ Querystring: { lat?: string; lng?: string; utcMs?: string; tz?: string } }>(
         `${prefix}/celestial/now`,
         async (request) => {
           const utcMs = request.query.utcMs ? Number(request.query.utcMs) : Date.now();
@@ -407,13 +622,56 @@ export function createCelestialAddon(
           const aeq4 = getAEQ4Timestamp(utcMs);
           const lat = request.query.lat !== undefined ? Number(request.query.lat) : undefined;
           const lng = request.query.lng !== undefined ? Number(request.query.lng) : undefined;
-          const qibla =
-            lat !== undefined && lng !== undefined && Number.isFinite(lat) && Number.isFinite(lng)
-              ? calculateQiblaBearing(lat, lng)
-              : null;
-          return { hijri, lunar, aeq4, qibla };
+          const hasCoords =
+            lat !== undefined && lng !== undefined && Number.isFinite(lat) && Number.isFinite(lng);
+          const qibla = hasCoords ? calculateQiblaBearing(lat, lng) : null;
+          const prayerTimes = hasCoords
+            ? calculateDetailedPrayerTimes(
+                lat,
+                lng,
+                new Date(utcMs).toISOString().slice(0, 10),
+                request.query.tz !== undefined ? Number(request.query.tz) : 7,
+              )
+            : null;
+          return { hijri, lunar, aeq4, qibla, prayerTimes };
         },
       );
+
+      scope.get<{
+        Querystring: {
+          lat?: string;
+          lng?: string;
+          date?: string;
+          tz?: string;
+          convention?: "KEMENAG" | "MWL" | "ISNA" | "UMM_AL_QURA";
+        };
+      }>(`${prefix}/celestial/prayer-times`, async (request, reply) => {
+        const lat = Number(request.query.lat ?? -6.2088);
+        const lng = Number(request.query.lng ?? 106.8456);
+        const tz = Number(request.query.tz ?? 7);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(tz)) {
+          return reply.code(400).send({ error: "Valid lat, lng, and tz parameters required" });
+        }
+        return calculateDetailedPrayerTimes(
+          lat,
+          lng,
+          request.query.date,
+          tz,
+          request.query.convention ?? "KEMENAG",
+        );
+      });
+
+      scope.get<{
+        Querystring: { altitude?: string; elongation?: string; width?: string };
+      }>(`${prefix}/celestial/hilal`, async (request, reply) => {
+        const alt = Number(request.query.altitude);
+        const elong = Number(request.query.elongation);
+        if (!Number.isFinite(alt) || !Number.isFinite(elong)) {
+          return reply.code(400).send({ error: "Numeric altitude and elongation parameters required" });
+        }
+        const width = request.query.width !== undefined ? Number(request.query.width) : 0.5;
+        return evaluateHilalVisibility(alt, elong, Number.isFinite(width) ? width : 0.5);
+      });
 
       scope.get<{ Querystring: { lat?: string; lng?: string } }>(
         `${prefix}/celestial/qibla`,
