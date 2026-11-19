@@ -49,7 +49,10 @@ describe("semantic token contrast matrix (token-level regression checks)", () =>
       const focusPairs = result.pairs.filter((pair) => pair.pairName.startsWith("focus "));
       const textPairs = result.pairs.filter((pair) => !pair.pairName.startsWith("focus "));
 
-      expect(focusPairs, `${result.dnaId} must expose both focus indicator pairs`).toHaveLength(2);
+      expect(
+        focusPairs,
+        `${result.dnaId} must expose both focus indicator pairs`,
+      ).toHaveLength(2);
       expect(
         focusPairs.every((pair) => pair.minimumRequired === 3.0),
         `${result.dnaId} focus/non-text pairs must use the 3:1 threshold`,
@@ -64,10 +67,8 @@ describe("semantic token contrast matrix (token-level regression checks)", () =>
   it("keeps every resolved semantic pair above its documented threshold", () => {
     for (const result of allResults) {
       const failed = result.pairs.filter((pair) => !pair.passed);
-      expect(
-        failed,
-        `${result.dnaId} (${result.dnaName}) failed semantic token contrast: ${JSON.stringify(failed)}`,
-      ).toEqual([]);
+      const failureMessage = `${result.dnaId} (${result.dnaName}) failed semantic token contrast`;
+      expect(failed, failureMessage).toEqual([]);
       expect(result.passed, `${result.dnaId} (${result.dnaName}) must pass`).toBe(true);
     }
   });
