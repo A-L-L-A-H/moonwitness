@@ -7,7 +7,11 @@ import { isPostgresUrl } from "./drivers/postgres.driver.js";
 
 const execFileAsync = promisify(execFile);
 
-export type ExternalCommandRunner = (command: string, args: string[]) => Promise<void>;
+export type ExternalCommandRunner = (
+  command: string,
+  args: string[],
+  options?: { env?: Record<string, string | undefined> },
+) => Promise<void>;
 
 export interface BackupCommandOptions {
   /** Override PostgreSQL connection URL instead of reading active driver URL. */
@@ -16,8 +20,32 @@ export interface BackupCommandOptions {
   runCommand?: ExternalCommandRunner;
 }
 
-async function defaultCommandRunner(command: string, args: string[]): Promise<void> {
-  await execFileAsync(command, args, { maxBuffer: 16 * 1024 * 1024 });
+async function defaultCommandRunner(
+  command: string,
+  args: string[],
+  options: { env?: Record<string, string | undefined> } = {},
+): Promise<void> {
+  await execFileAsync(command, args, {
+    maxBuffer: 16 * 1024 * 1024,
+    ...(options.env ? { env: options.env } : {}),
+  });
+}
+
+function preparePostgresCommandConnection(connectionString: string): {
+  connectionString: string;
+  options?: { env: Record<string, string | undefined> };
+} {
+  const url = new URL(connectionString);
+  let password = url.password ? decodeURIComponent(url.password) : "";
+  url.password = "";
+  if (url.searchParams.has("password")) {
+    if (!password) password = url.searchParams.get("password") ?? "";
+    url.searchParams.delete("password");
+  }
+  return {
+    connectionString: url.toString(),
+    ...(password ? { options: { env: { ...process.env, PGPASSWORD: password } } } : {}),
+  };
 }
 
 function getOptionalActiveDb(): OrmDriverHandle | null {
@@ -122,14 +150,19 @@ export async function backupDatabase(
       throw new Error("PostgreSQL backup requires an active postgres:// connection string");
     }
     const runner = options.runCommand ?? defaultCommandRunner;
-    await runner("pg_dump", [
-      "--format=custom",
-      "--no-owner",
-      "--no-acl",
-      "-f",
-      destination,
-      pgUrl,
-    ]);
+    const commandConnection = preparePostgresCommandConnection(pgUrl);
+    await runner(
+      "pg_dump",
+      [
+        "--format=custom",
+        "--no-owner",
+        "--no-acl",
+        "-f",
+        destination,
+        commandConnection.connectionString,
+      ],
+      commandConnection.options,
+    );
     return;
   }
 
@@ -157,15 +190,20 @@ export async function restoreDatabase(
   const pgTarget = options.connectionString?.trim() || targetPathOrUrl.trim();
   if (isPostgresUrl(pgTarget)) {
     const runner = options.runCommand ?? defaultCommandRunner;
-    await runner("pg_restore", [
-      "--clean",
-      "--if-exists",
-      "--no-owner",
-      "--no-acl",
-      "-d",
-      pgTarget,
-      backupPath,
-    ]);
+    const commandConnection = preparePostgresCommandConnection(pgTarget);
+    await runner(
+      "pg_restore",
+      [
+        "--clean",
+        "--if-exists",
+        "--no-owner",
+        "--no-acl",
+        "-d",
+        commandConnection.connectionString,
+        backupPath,
+      ],
+      commandConnection.options,
+    );
     return;
   }
 

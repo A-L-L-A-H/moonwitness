@@ -162,26 +162,33 @@ describe("backup and restore", () => {
       "unvalidated postgres constraint: fk_broken",
     ]);
 
-    const invocations: Array<{ command: string; args: string[] }> = [];
+    const invocations: Array<{
+      command: string;
+      args: string[];
+      password?: string;
+    }> = [];
     await backupDatabase("/tmp/mw.pgdump", {
-      runCommand: async (command, args) => {
-        invocations.push({ command, args });
+      runCommand: async (command, args, options) => {
+        invocations.push({ command, args, password: options?.env?.PGPASSWORD });
       },
     });
     await restoreDatabase("/tmp/mw.pgdump", pgUrl, {
-      runCommand: async (command, args) => {
-        invocations.push({ command, args });
+      runCommand: async (command, args, options) => {
+        invocations.push({ command, args, password: options?.env?.PGPASSWORD });
       },
     });
 
+    const safeUrl = "postgres://moonwitness@localhost:5432/moonwitness";
     expect(invocations).toEqual([
       {
         command: "pg_dump",
-        args: ["--format=custom", "--no-owner", "--no-acl", "-f", "/tmp/mw.pgdump", pgUrl],
+        args: ["--format=custom", "--no-owner", "--no-acl", "-f", "/tmp/mw.pgdump", safeUrl],
+        password: "secret",
       },
       {
         command: "pg_restore",
-        args: ["--clean", "--if-exists", "--no-owner", "--no-acl", "-d", pgUrl, "/tmp/mw.pgdump"],
+        args: ["--clean", "--if-exists", "--no-owner", "--no-acl", "-d", safeUrl, "/tmp/mw.pgdump"],
+        password: "secret",
       },
     ]);
   });

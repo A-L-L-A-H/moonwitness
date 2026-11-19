@@ -1,58 +1,91 @@
 #!/usr/bin/env node
 import { execFile } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import { isPostgresTarget } from "./backup-db.mjs";
+import {
+  assertPostgresTarget,
+  preparePostgresCommandConnection,
+  verifyPostgresBackupManifest,
+} from "./backup-db.mjs";
 import { safeRemove } from "./backup-sqlite.mjs";
-import { decryptBackupBytes, restoreDatabaseFile } from "./restore-sqlite.mjs";
+import { decryptBackupBytes } from "./restore-sqlite.mjs";
 
 const execFileAsync = promisify(execFile);
 
-async function defaultCommandRunner(command, args) {
-  await execFileAsync(command, args, { maxBuffer: 32 * 1024 * 1024 });
+async function defaultCommandRunner(command, args, options = {}) {
+  await execFileAsync(command, args, {
+    maxBuffer: 32 * 1024 * 1024,
+    umask: 0o077,
+    ...(options.env ? { env: options.env } : {}),
+  });
 }
 
 /**
- * Restore either an encrypted PostgreSQL `.pgdump.enc` archive via `pg_restore`
- * or an encrypted SQLite `.bak.enc` snapshot onto the target path.
+ * Restore an encrypted PostgreSQL custom-format archive via `pg_restore`.
+ * SQLite/libSQL file targets are rejected by this operational CLI.
  */
 export async function restoreTarget({
   encryptedBackupPath,
+  manifestPath,
   target,
   decryptionKey,
   expectedPlaintextHash,
   runCommand = defaultCommandRunner,
 }) {
-  if (!isPostgresTarget(target)) {
-    return restoreDatabaseFile({
-      encryptedBackupPath,
-      targetDbPath: target,
-      decryptionKey,
-      expectedPlaintextHash,
-    });
+  target = assertPostgresTarget(target, "Restore");
+  const commandConnection = preparePostgresCommandConnection(target);
+  if (!manifestPath) {
+    throw new Error("A signed PostgreSQL backup manifest is required for restore.");
   }
 
-  const payload = await readFile(encryptedBackupPath);
+  const [payload, manifestText] = await Promise.all([
+    readFile(encryptedBackupPath),
+    readFile(manifestPath, "utf-8"),
+  ]);
+  let manifest;
+  try {
+    manifest = JSON.parse(manifestText);
+  } catch {
+    throw new Error("Backup manifest is not valid JSON.");
+  }
+  verifyPostgresBackupManifest({
+    manifest,
+    payload,
+    backupPath: encryptedBackupPath,
+    encryptionKey: decryptionKey,
+  });
+
+  if (expectedPlaintextHash && expectedPlaintextHash !== manifest.plaintextHash) {
+    throw new Error("Requested plaintext hash does not match the signed backup manifest.");
+  }
   const { decryptedBytes, plaintextHash } = decryptBackupBytes(
     payload,
     decryptionKey,
-    expectedPlaintextHash,
+    manifest.plaintextHash,
   );
-  const tempDump = join(dirname(resolve(encryptedBackupPath)), `restore-${Date.now()}.tmp.pgdump`);
+  const tempDump = join(
+    dirname(resolve(encryptedBackupPath)),
+    `restore-${randomUUID()}.tmp.pgdump`,
+  );
   await mkdir(dirname(tempDump), { recursive: true });
-  await writeFile(tempDump, decryptedBytes);
+  await writeFile(tempDump, decryptedBytes, { mode: 0o600 });
 
   try {
-    await runCommand("pg_restore", [
-      "--clean",
-      "--if-exists",
-      "--no-owner",
-      "--no-acl",
-      "-d",
-      target,
-      tempDump,
-    ]);
+    await runCommand(
+      "pg_restore",
+      [
+        "--clean",
+        "--if-exists",
+        "--no-owner",
+        "--no-acl",
+        "-d",
+        commandConnection.connectionString,
+        tempDump,
+      ],
+      commandConnection.options,
+    );
     return {
       dialect: "postgres",
       plaintextHash,
@@ -66,25 +99,57 @@ export async function restoreTarget({
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename ?? "")) {
   const args = process.argv.slice(2);
   const backupIdx = args.indexOf("--backup");
-  const targetIdx = args.indexOf("--target");
-  const keyIdx = args.indexOf("--key");
+  const manifestIdx = args.indexOf("--manifest");
   const backupFile = backupIdx !== -1 ? args[backupIdx + 1] : null;
-  const target = targetIdx !== -1 ? args[targetIdx + 1] : process.env.DATABASE_URL;
-  const key = keyIdx !== -1 ? args[keyIdx + 1] : process.env.MW_BACKUP_ENCRYPTION_KEY;
+  const manifestFile = manifestIdx !== -1 ? args[manifestIdx + 1] : null;
+  const target = process.env.ISOLATED_RESTORE_DATABASE_URL;
+  const sourceTarget = process.env.DATABASE_URL;
+  const key = process.env.MW_BACKUP_ENCRYPTION_KEY;
 
-  if (!backupFile || !target || !key) {
+  if (args.includes("--target") || args.includes("--key")) {
     console.error(
-      "Usage: node restore-db.mjs --backup <file.enc> --target <postgres://...|sqlite.db> --key <secret>",
+      "Do not pass database URLs or encryption keys as CLI arguments. Set ISOLATED_RESTORE_DATABASE_URL and MW_BACKUP_ENCRYPTION_KEY in the process environment.",
     );
     process.exit(1);
   }
 
-  restoreTarget({ encryptedBackupPath: backupFile, target, decryptionKey: key })
+  if (!backupFile || !manifestFile || !target || !key) {
+    console.error(
+      "Set ISOLATED_RESTORE_DATABASE_URL and MW_BACKUP_ENCRYPTION_KEY, then run: node restore-db.mjs --backup <file.pgdump.enc> --manifest <manifest.json>",
+    );
+    process.exit(1);
+  }
+
+  if (sourceTarget && samePostgresDatabase(target, sourceTarget)) {
+    console.error(
+      "ISOLATED_RESTORE_DATABASE_URL must identify a different database from DATABASE_URL.",
+    );
+    process.exit(1);
+  }
+
+  restoreTarget({
+    encryptedBackupPath: backupFile,
+    manifestPath: manifestFile,
+    target,
+    decryptionKey: key,
+  })
     .then((res) => {
-      console.log(`Restore complete (${res.dialect ?? "sqlite"}, sha256=${res.plaintextHash}).`);
+      console.log(`PostgreSQL restore complete (sha256=${res.plaintextHash}).`);
     })
     .catch((err) => {
       console.error("Restore failed:", err);
       process.exit(1);
     });
+}
+
+export function samePostgresDatabase(left, right) {
+  const a = assertPostgresTarget(left, "Restore source");
+  const b = assertPostgresTarget(right, "Configured source");
+  const leftUrl = new URL(a);
+  const rightUrl = new URL(b);
+  return (
+    leftUrl.hostname.toLowerCase() === rightUrl.hostname.toLowerCase() &&
+    leftUrl.port === rightUrl.port &&
+    leftUrl.pathname === rightUrl.pathname
+  );
 }
