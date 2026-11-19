@@ -20,6 +20,8 @@ import {
   type WorldIdentifier,
 } from "@/data/empire-registry";
 import { CanonCodexSanctum } from "./canon-codex-sanctum";
+import { CelestialCanvas } from "./celestial-canvas";
+import { CelestialHudCapsule } from "./celestial-hud-capsule";
 import { CovenantAboutSection } from "./covenant-about-section";
 import { DockMatrixSection } from "./dock-matrix-section";
 import { EmpireNavigation } from "./empire-navigation";
@@ -46,6 +48,7 @@ export function EmpireOfLightExperience() {
   const [activeDoorId, setActiveDoorId] = useState<EntryDoorId>("story-universe");
   const [sanctuaryRadianceActive, setSanctuaryRadianceActive] = useState<boolean>(false);
   const [quietMode, setQuietMode] = useState<boolean>(false);
+  const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [searchModalOpen, setSearchModalOpen] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
@@ -74,6 +77,9 @@ export function EmpireOfLightExperience() {
 
     const updateScroll = () => {
       rafId = 0;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      setScrollProgress(Math.max(0, Math.min(1, window.scrollY / maxScroll)));
+
       const nearBottom =
         window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 40;
       if (nearBottom) {
@@ -181,6 +187,14 @@ export function EmpireOfLightExperience() {
 
   return (
     <div className="home-page relative min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] selection:bg-[var(--dna-accent)] selection:text-[var(--dna-canvas)]">
+      {sanctuaryRadianceActive && !quietMode ? (
+        <CelestialCanvas
+          sanctuaryRadianceActive={sanctuaryRadianceActive}
+          quietMode={quietMode}
+          scrollProgress={scrollProgress}
+        />
+      ) : null}
+
       <EmpireNavigation
         locale={locale}
         activeNavTab={activeNavTab}
@@ -357,6 +371,15 @@ export function EmpireOfLightExperience() {
           onReturnToGate={() => navigateToSection("the-gate")}
         />
       </main>
+
+      <CelestialHudCapsule
+        activeNavTab={activeNavTab}
+        activeWorldId={activeWorldId}
+        pageScrollFraction={scrollProgress}
+        onNavigateSection={navigateToSection}
+        onJumpToRemembrance={jumpToRemembranceSanctuary}
+        onOpenSearch={() => setSearchModalOpen(true)}
+      />
 
       <UniversalSearchModal
         isOpen={searchModalOpen}

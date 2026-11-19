@@ -1,5 +1,5 @@
 import { requestApiResponse } from "@moonwitness/contracts/sdk";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface Session {
   identity: string;
@@ -8,87 +8,112 @@ export interface Session {
   id?: string | number;
 }
 
+export interface CurrentSessionState {
+  readonly session: Session | null;
+  readonly loading: boolean;
+  readonly refresh: () => Promise<void>;
+}
+
 function buildAuthFetchInit(): RequestInit {
   return { credentials: "include" };
+}
+
+function parseSessionPayload(data: unknown): Session | null {
+  const user: unknown = (data as { user?: unknown } | null)?.user;
+  if (!user || typeof user !== "object") {
+    return null;
+  }
+  const profile = user as {
+    id?: unknown;
+    displayName?: unknown;
+    username?: unknown;
+    role?: unknown;
+  };
+  return {
+    identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
+    role: typeof profile.role === "string" ? profile.role : "viewer",
+    username: typeof profile.username === "string" ? profile.username : undefined,
+    id:
+      typeof profile.id === "string" || typeof profile.id === "number"
+        ? profile.id
+        : undefined,
+  };
+}
+
+async function fetchCurrentSession(): Promise<Session | null> {
+  try {
+    const response = await requestApiResponse("/api/v1/auth/me", buildAuthFetchInit());
+    if (!response.ok) {
+      return null;
+    }
+    const data = (await response.json()) as unknown;
+    return parseSessionPayload(data);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Hook: current session state with loading flag and manual refresh,
+ * synchronized via `mw:session-change` window events.
+ */
+export function useCurrentSessionState(): CurrentSessionState {
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const mountedRef = useRef(true);
+  const requestSeqRef = useRef(0);
+
+  const refresh = useCallback(async () => {
+    const seq = ++requestSeqRef.current;
+    if (mountedRef.current) {
+      setLoading(true);
+    }
+    const nextSession = await fetchCurrentSession();
+    if (!mountedRef.current || seq !== requestSeqRef.current) {
+      return;
+    }
+    setSession(nextSession);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    let active = true;
+
+    const loadSession = () => {
+      const seq = ++requestSeqRef.current;
+      void fetchCurrentSession().then((nextSession) => {
+        if (!active || !mountedRef.current || seq !== requestSeqRef.current) {
+          return;
+        }
+        setSession(nextSession);
+        setLoading(false);
+      });
+    };
+
+    loadSession();
+
+    const onSessionChange = () => {
+      loadSession();
+    };
+
+    window.addEventListener("mw:session-change", onSessionChange);
+    return () => {
+      active = false;
+      mountedRef.current = false;
+      requestSeqRef.current += 1;
+      window.removeEventListener("mw:session-change", onSessionChange);
+    };
+  }, []);
+
+  return { session, loading, refresh };
 }
 
 /**
  * Hook: current identity from server-side session
  */
 export function useCurrentIdentity(): Session | null {
-  const [session, setSession] = useState<Session | null>(null);
-
-  useEffect(() => {
-    async function fetchSession() {
-      try {
-        const response = await requestApiResponse("/api/v1/auth/me", buildAuthFetchInit());
-        if (response.ok) {
-          const data = await response.json();
-          const user: unknown = data?.user;
-          if (!user || typeof user !== "object") {
-            setSession(null);
-            return;
-          }
-          const profile = user as {
-            id?: unknown;
-            displayName?: unknown;
-            username?: unknown;
-            role?: unknown;
-          };
-          setSession({
-            identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
-            role: typeof profile.role === "string" ? profile.role : "viewer",
-            username: typeof profile.username === "string" ? profile.username : undefined,
-            id:
-              typeof profile.id === "string" || typeof profile.id === "number"
-                ? profile.id
-                : undefined,
-          });
-        } else {
-          setSession(null);
-        }
-      } catch {
-        setSession(null);
-      }
-    }
-
-    fetchSession();
-  }, []);
-
-  useEffect(() => {
-    function onSessionChange() {
-      requestApiResponse("/api/v1/auth/me", buildAuthFetchInit())
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          const user: unknown = data?.user;
-          if (user && typeof user === "object") {
-            const profile = user as {
-              id?: unknown;
-              displayName?: unknown;
-              username?: unknown;
-              role?: unknown;
-            };
-            setSession({
-              identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
-              role: typeof profile.role === "string" ? profile.role : "viewer",
-              username: typeof profile.username === "string" ? profile.username : undefined,
-              id:
-                typeof profile.id === "string" || typeof profile.id === "number"
-                  ? profile.id
-                  : undefined,
-            });
-          } else {
-            setSession(null);
-          }
-        })
-        .catch(() => setSession(null));
-    }
-
-    window.addEventListener("mw:session-change", onSessionChange);
-    return () => window.removeEventListener("mw:session-change", onSessionChange);
-  }, []);
-
-  return session;
+  return useCurrentSessionState().session;
 }
 
 /**

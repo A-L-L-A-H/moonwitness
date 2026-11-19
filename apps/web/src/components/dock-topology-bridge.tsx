@@ -5,8 +5,6 @@ import { DnaBadge, DnaButton } from "@moonwitness/ui/imperium";
 import { ECOSYSTEM_RUNTIME_CATALOG } from "@/data/empire-canon-codex";
 import type { useEcosystemTelemetry } from "@/lib/use-ecosystem-telemetry";
 
-const CONFIGURED_WEB_URL = process.env.NEXT_PUBLIC_WEB_URL?.replace(/\/+$/, "") ?? null;
-
 const LOCAL_WEB_ROUTES: readonly { readonly href: string; readonly label: string }[] = [
   { href: "/dock", label: "Chronicle Dock" },
   { href: "/mission-control", label: "Command Center" },
@@ -185,34 +183,18 @@ export function DockTopologyBridge({
         </DnaButton>
       </div>
 
-      {(CONFIGURED_WEB_URL ||
-        telemetry.services.find((s) => s.id === "web")?.status === "online") && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          {LOCAL_WEB_ROUTES.map((link) => {
-            const resolvedWebBase = (
-              CONFIGURED_WEB_URL ??
-              telemetry.services.find((s) => s.id === "web")?.url ??
-              "http://localhost:3000"
-            ).replace(/\/+$/, "");
-            return (
-              <DnaButton
-                key={link.href}
-                asChild
-                tone="secondary"
-                className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase hover:text-[var(--dna-text)]"
-              >
-                <a
-                  href={`${resolvedWebBase}${link.href}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {link.label} ↗
-                </a>
-              </DnaButton>
-            );
-          })}
-        </div>
-      )}
+      <div className="flex flex-wrap items-center gap-1.5">
+        {LOCAL_WEB_ROUTES.map((link) => (
+          <DnaButton
+            key={link.href}
+            asChild
+            tone="secondary"
+            className="min-h-0 inline-flex items-center px-3.5 py-1 font-mono text-[10px] tracking-[0.12em] text-[var(--dna-muted)] uppercase hover:text-[var(--dna-text)]"
+          >
+            <Link href={link.href}>{link.label} &rsaquo;</Link>
+          </DnaButton>
+        ))}
+      </div>
     </div>
   );
 }

@@ -197,9 +197,59 @@ export function ConsoleCommandPalette({
               tag: "MODEL",
             },
             {
-              label: "Model Inspector: Witness Profile",
-              href: "/addons?model=witness.profile",
+              label: "Model Inspector: Witness Claim",
+              href: "/addons?model=witness.claim",
               tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: CRM Lead",
+              href: "/addons?model=crm.lead",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: Stock Move",
+              href: "/addons?model=stock.move",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: Account Move",
+              href: "/addons?model=account.move",
+              tag: "MODEL",
+            },
+            {
+              label: "Model Inspector: CAB Request",
+              href: "/addons?model=cab.request",
+              tag: "MODEL",
+            },
+            {
+              label: "Enterprise Analytics Dashboard",
+              href: "/en/dashboards/analytics",
+              tag: "DASHBOARD",
+            },
+            {
+              label: "Enterprise CRM Workspace",
+              href: "/en/dashboards/crm",
+              tag: "DASHBOARD",
+            },
+            {
+              label: "Enterprise Logistics & Geo",
+              href: "/en/dashboards/logistics",
+              tag: "DASHBOARD",
+            },
+            {
+              label: "Double-Entry Accounting & Ledger",
+              href: "/en/apps/invoice",
+              tag: "APP",
+            },
+            {
+              label: "Witness 9-Module & Mizan Lab",
+              href: "/en/apps/academy",
+              tag: "APP",
+            },
+            {
+              label: "Celestial & M-Time Observatory",
+              href: "/en/apps/observatory",
+              tag: "APP",
             },
             { label: "ARSY Control Plane", href: "/control", tag: "OPS" },
             { label: "VPN & Mesh Tunnel", href: "/control?tab=vpn", tag: "OPS" },

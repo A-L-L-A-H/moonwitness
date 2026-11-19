@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import { Badge, Button, Card, CardContent, SkinOrnament } from "@moonwitness/ui";
 import { Download, MemoryTapeNode, RefreshCw } from "@moonwitness/ui/icons";
 import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
@@ -75,6 +76,23 @@ export function MemoryWorkspace() {
   const [claimCreating, setClaimCreating] = useState(false);
   const [claimsSyncing, setClaimsSyncing] = useState(false);
 
+  const loadFallbackWitnessClaims = useCallback(async (): Promise<WitnessClaimRecord[]> => {
+    try {
+      const res = await moonwitnessSdk.model("witness.claim").list<Record<string, unknown>>();
+      if (!Array.isArray(res.data)) return [];
+      return res.data.map((row) => ({
+        id: String(row.id ?? ""),
+        statement: String(row.claim_text ?? row.statement ?? row.title ?? ""),
+        epistemic_type: (String(row.epistemic_type ?? "testimony") as WitnessEpistemicType),
+        status: (String(row.verification_state ?? row.status ?? "unverified") as WitnessClaimRecord["status"]),
+        created_at: String(row.created_at ?? new Date().toISOString()),
+        updated_at: String(row.updated_at ?? new Date().toISOString()),
+      }));
+    } catch {
+      return [];
+    }
+  }, []);
+
   const refreshAll = useCallback(async () => {
     try {
       const [sys, dash, arc, jb, know, witness] = await Promise.all([
@@ -86,7 +104,7 @@ export function MemoryWorkspace() {
         fetchWitnessClaims({
           epistemicType: epistemicFilter === "all" ? undefined : epistemicFilter,
           limit: 100,
-        }).catch(() => ({ claims: [] as WitnessClaimRecord[] })),
+        }).catch(async () => ({ claims: await loadFallbackWitnessClaims() })),
       ]);
       setSystem(sys);
       setCounts(dash);
@@ -96,9 +114,13 @@ export function MemoryWorkspace() {
       setClaims(witness.claims);
       setOnline(true);
     } catch {
+      const fallbackClaims = await loadFallbackWitnessClaims();
+      if (fallbackClaims.length > 0) {
+        setClaims(fallbackClaims);
+      }
       setOnline(false);
     }
-  }, [epistemicFilter, submittedQuery]);
+  }, [epistemicFilter, loadFallbackWitnessClaims, submittedQuery]);
 
   useEffect(() => {
     void refreshAll();
@@ -287,6 +309,19 @@ export function MemoryWorkspace() {
       }
       await refreshAll();
     } catch (err) {
+      if (action === "verify") {
+        try {
+          await moonwitnessSdk.requestJson(
+            `/api/v1/m/witness.claim/${encodeURIComponent(claimId)}/call/verify_claim`,
+            { method: "POST" },
+          );
+          setNotice("Claim verified via Core API witness.claim addon.");
+          await refreshAll();
+          return;
+        } catch {
+          // Fall through to error notice
+        }
+      }
       setNotice(err instanceof Error ? err.message : "Claim update failed.");
     } finally {
       setClaimBusyId(null);

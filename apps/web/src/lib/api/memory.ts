@@ -2,6 +2,8 @@
 
 import {
   MoonwitnessApiError,
+  getActiveTenantFromStorage,
+  getCsrfTokenFromCookie,
   requestApiJson,
   requestApiResponse,
 } from "@moonwitness/contracts/sdk";
@@ -301,6 +303,14 @@ export async function uploadMemoryArchive(
       request.responseType = "text";
       request.setRequestHeader("Content-Type", "application/octet-stream");
       request.setRequestHeader("X-Archive-Filename", encodeURIComponent(file.name));
+      const csrfToken = getCsrfTokenFromCookie();
+      if (csrfToken) {
+        request.setRequestHeader("x-csrf-token", csrfToken);
+      }
+      const tenantId = getActiveTenantFromStorage();
+      if (tenantId) {
+        request.setRequestHeader("x-tenant-id", tenantId);
+      }
       request.upload.addEventListener("progress", (event) => {
         if (event.lengthComputable && event.total > 0) {
           onProgress(Math.max(0, Math.min(100, Math.round((event.loaded / event.total) * 100))));

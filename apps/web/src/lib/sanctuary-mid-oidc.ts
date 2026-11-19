@@ -1,3 +1,4 @@
+import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { buildCsrfLogoutInit } from "@/lib/api/auth";
 import {
   beginBrowserPkceRedirect,
@@ -122,8 +123,8 @@ export async function completeSanctuaryMidCallback(
   }
 
   const redirectUri = resolveBrowserOriginCallbackUrl("/auth/callback");
-  const fetcher = fetchFn ?? globalThis.fetch;
-  const bffResponse = await fetcher(`${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/exchange`, {
+  const bffUrl = `${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/exchange`;
+  const bffInit: RequestInit = {
     method: "POST",
     credentials: "include",
     headers: { "content-type": "application/json" },
@@ -133,7 +134,10 @@ export async function completeSanctuaryMidCallback(
       redirect_uri: redirectUri,
       client_id: ALLAH_SANCTUARY_CLIENT_ID,
     }),
-  });
+  };
+  const bffResponse = fetchFn
+    ? await fetchFn(bffUrl, bffInit)
+    : await requestApiResponse(bffUrl, bffInit);
 
   let session: SanctuaryMidSession;
   if (bffResponse.ok) {
@@ -205,8 +209,10 @@ export async function clearSanctuaryMidSession(fetchFn?: typeof fetch): Promise<
   removeBrowserStorage("sessionStorage", PKCE_STORAGE_KEY);
   removeBrowserStorage("sessionStorage", SESSION_STORAGE_KEY);
   dispatchBrowserAuthEvent(SANCTUARY_MID_AUTH_EVENT);
-  const fetcher = fetchFn ?? globalThis.fetch;
-  await fetcher(`${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/logout`, buildCsrfLogoutInit()).catch(
-    () => {},
-  );
+  const logoutUrl = `${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/logout`;
+  const logoutInit = buildCsrfLogoutInit();
+  await (fetchFn
+    ? fetchFn(logoutUrl, logoutInit)
+    : requestApiResponse(logoutUrl, logoutInit)
+  ).catch(() => {});
 }

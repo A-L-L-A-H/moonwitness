@@ -3,27 +3,45 @@
 import { moonwitnessSdk } from "@moonwitness/contracts/sdk";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { ConsoleShell, Input, NativeSelect, type HudNavItem } from "@moonwitness/ui";
 import { Crown, SearchIcon } from "@moonwitness/ui/icons";
 import { ConsoleCommandPalette } from "@/components/console-command-palette";
-import { useSavedAvatar } from "@/lib/avatar-store";
+import { LanguageDropdown } from "@/components/layout/shared/LanguageDropdown";
+import { ShortcutsDropdown } from "@/components/layout/shared/ShortcutsDropdown";
+import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
+import { SkinSwitcher } from "@/components/skin-switcher";
+import { buildEnterpriseNavItems } from "@/data/navigation/verticalMenuData";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import {
   useCelestialNow,
   useCompaniesCatalog,
   useMetaNavigation,
 } from "@/lib/api/meta-views";
+import { useSavedAvatar } from "@/lib/avatar-store";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
-import { useCurrentIdentity } from "@/lib/session";
-import { SkinSwitcher } from "@/components/skin-switcher";
-import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
-import { activeByPath, navHref, navItems, operationsNavItems } from "./nav-items";
+import { notifySessionChange, useCurrentIdentity } from "@/lib/session";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
+import { activeByPath, navHref, navItems, operationsNavItems, type NavItem } from "./nav-items";
 import { Notifications } from "./notifications";
 import { ProfileMenu } from "./profile-menu";
 import { useActiveSection } from "./use-active-section";
 
 const FOOTER_LEFT = "MOONWITNESS XV /// DIFFERENT PEOPLE. SAME SKY. MANY STORIES.";
 const FOOTER_RIGHT = "EMPIRE OF THE LIGHT";
+
+function localizeNavItems(items: NavItem[], localePrefix: string): NavItem[] {
+  if (!localePrefix) return items;
+  return items.map((item) => {
+    const href = item.target.href.startsWith(`/${localePrefix}`)
+      ? item.target.href
+      : getLocalizedUrl(item.target.href, localePrefix);
+    return {
+      ...item,
+      target: { ...item.target, href },
+    };
+  });
+}
 
 export function ConsoleShellAdapter({
   breadcrumb,
@@ -41,12 +59,31 @@ export function ConsoleShellAdapter({
   children: ReactNode;
 }) {
   const operations = plane === "operations";
-  const staticItems = operations ? operationsNavItems : navItems;
-  const session = useCurrentIdentity();
-  const items = useMetaNavigation(plane, staticItems, Boolean(session));
-  const rootHref = operations ? "/control" : "/";
   const router = useRouter();
   const pathname = usePathname();
+  const pathLocale = getLocaleFromPath(pathname);
+  const { dictionary } = useTranslation();
+  const session = useCurrentIdentity();
+
+  const staticItems = useMemo(() => {
+    if (!pathLocale) {
+      return operations ? operationsNavItems : navItems;
+    }
+    return buildEnterpriseNavItems(plane, dictionary, pathLocale, session?.role);
+  }, [dictionary, operations, pathLocale, plane, session?.role]);
+
+  const rawItems = useMetaNavigation(plane, staticItems, Boolean(session));
+  const items = useMemo(
+    () => (pathLocale ? localizeNavItems(rawItems, pathLocale) : rawItems),
+    [pathLocale, rawItems],
+  );
+
+  const rootHref = pathLocale
+    ? getLocalizedUrl(operations ? "/control" : "/", pathLocale)
+    : operations
+      ? "/control"
+      : "/";
+  const moonwitnessHref = pathLocale ? getLocalizedUrl("/moonwitness", pathLocale) : "/moonwitness";
   const active = activeOverride ?? activeByPath(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -56,7 +93,7 @@ export function ConsoleShellAdapter({
   const role = session?.role ?? "Empire crew";
   const { seed: avatarSeed } = useSavedAvatar(identity);
   const { companies, activeTenant, setActiveTenant } = useCompaniesCatalog(Boolean(session));
-  const celestial = useCelestialNow();
+  const celestial = useCelestialNow(Boolean(session));
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -71,8 +108,13 @@ export function ConsoleShellAdapter({
 
   function exitShadow() {
     clearStoredMidSession();
-    moonwitnessSdk.auth.logout().catch(() => {});
-    router.push("/");
+    moonwitnessSdk.auth
+      .logout()
+      .catch(() => {})
+      .finally(() => {
+        notifySessionChange();
+      });
+    router.push(pathLocale ? getLocalizedUrl("/", pathLocale) : "/");
   }
 
   const hudItems: HudNavItem[] = items.map((item) => ({
@@ -120,7 +162,7 @@ export function ConsoleShellAdapter({
       }
       headerActions={
         <div ref={popRef} className="relative flex items-center gap-1.5">
-          {celestial ? (
+          {celestial?.aeq4?.formatted && celestial?.hijri && celestial?.lunar ? (
             <span
               title={celestial.aeq4.formatted}
               className="hidden xl:inline-flex items-center border border-[var(--border)] px-2 py-1 font-mono text-[10px] text-[var(--muted-foreground)]"
@@ -146,9 +188,12 @@ export function ConsoleShellAdapter({
               ))}
             </NativeSelect>
           ) : null}
+          <LanguageDropdown />
+          <ShortcutsDropdown />
           <SkinSwitcher />
           <Notifications
             open={notifOpen}
+            authenticated={Boolean(session)}
             onToggle={() => {
               setNotifOpen((v) => !v);
               setProfileOpen(false);
@@ -180,7 +225,7 @@ export function ConsoleShellAdapter({
               <span aria-hidden="true">↗</span>
             </SanctuaryGateLink>
             <Link
-              href="/moonwitness"
+              href={moonwitnessHref}
               className="flex min-h-9 items-center justify-between border border-[var(--border)] px-2.5 py-1 text-[var(--foreground)] transition-colors hover:border-[var(--primary)]"
             >
               <span>MOONWITNESS</span>

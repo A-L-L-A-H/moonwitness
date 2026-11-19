@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import {
   AutoModelView,
   Badge,
@@ -86,6 +86,17 @@ export function AutoModelConsole({
   const [studioError, setStudioError] = useState<string | null>(null);
   const [savingField, setSavingField] = useState(false);
 
+  useEffect(() => {
+    setGroupField("");
+    setGroups([]);
+    setChatterId("");
+    setChatterMessages([]);
+    setChatterDraft("");
+    setImportStatus(null);
+    setStudioOpen(false);
+    setStudioError(null);
+  }, [model]);
+
   const visibleRows = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return rows;
@@ -137,11 +148,13 @@ export function AutoModelConsole({
     cutoutId,
   });
 
-  const stageFieldSpec =
+  const defaultStageFieldSpec =
     view.fields.find((f) => f.selection && f.selection.length > 0) ??
     view.fields.find((f) => /state|status|stage|era|kind|category/i.test(f.field_name)) ??
     view.fields[0];
-  const activeGroupField = groupField || stageFieldSpec?.field_name || "status";
+  const activeGroupField = groupField || defaultStageFieldSpec?.field_name || "status";
+  const stageFieldSpec =
+    view.fields.find((f) => f.field_name === activeGroupField) ?? defaultStageFieldSpec;
 
   async function loadPivotGroups(field: string) {
     if (!view?.restEnabled) return;

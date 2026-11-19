@@ -2,6 +2,7 @@
 
 import {
   MoonwitnessApiError,
+  TENANT_STORAGE_KEY,
   moonwitnessSdk,
   requestApiJson,
   requestApiResponse,
@@ -97,8 +98,6 @@ export interface RuntimeViewDescriptorResponse {
   actionBindings: RuntimeActionBindings;
 }
 
-const TENANT_STORAGE_KEY = "mw_active_tenant";
-
 export function getActiveTenantId(): string {
   if (typeof window === "undefined") return "default";
   try {
@@ -120,24 +119,9 @@ export function setActiveTenantId(slug: string): void {
   }
 }
 
-function getCsrfHeaders(): Record<string, string> {
-  if (typeof document === "undefined") return {};
-  const match = document.cookie.match(/(?:^|;\s*)mw_csrf=([^;]+)/);
-  if (!match?.[1]) return {};
-  return { "x-csrf-token": decodeURIComponent(match[1]) };
-}
-
 async function fetchApiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const tenantId = getActiveTenantId();
   try {
-    return await requestApiJson<T>(url, {
-      ...init,
-      headers: {
-        ...getCsrfHeaders(),
-        ...(tenantId && tenantId !== "default" ? { "x-tenant-id": tenantId } : {}),
-        ...(init?.headers as Record<string, string> | undefined),
-      },
-    });
+    return await requestApiJson<T>(url, init);
   } catch (err) {
     if (err instanceof MoonwitnessApiError && err.message === `HTTP ${err.status}`) {
       throw new MoonwitnessApiError(`Request failed (${err.status})`, err.status);
@@ -292,11 +276,12 @@ export function useMetaNavigation(
     window.addEventListener("mw:navigation-changed", load);
     return () => {
       active = false;
+      setDynamicMenus([]);
       window.removeEventListener("mw:navigation-changed", load);
     };
   }, [enabled]);
 
-  return mergeDynamicNavigation(staticItems, dynamicMenus, plane);
+  return mergeDynamicNavigation(staticItems, enabled ? dynamicMenus : [], plane);
 }
 
 const DEFAULT_MODEL_CATALOG = [
@@ -359,6 +344,14 @@ export function useMetaView(model: string) {
     void reload();
   }, [reload]);
 
+  useEffect(() => {
+    const onTenantChanged = () => {
+      void reload();
+    };
+    window.addEventListener("mw:tenant-changed", onTenantChanged);
+    return () => window.removeEventListener("mw:tenant-changed", onTenantChanged);
+  }, [reload]);
+
   return { view: data, loading, error, reload };
 }
 
@@ -389,6 +382,14 @@ export function useModelRows(model: string, listUrl?: string, restEnabled = true
 
   useEffect(() => {
     void reload();
+  }, [reload]);
+
+  useEffect(() => {
+    const onTenantChanged = () => {
+      void reload();
+    };
+    window.addEventListener("mw:tenant-changed", onTenantChanged);
+    return () => window.removeEventListener("mw:tenant-changed", onTenantChanged);
   }, [reload]);
 
   return { rows, loading, error, reload };
@@ -544,11 +545,12 @@ export function useCompaniesCatalog(enabled = true) {
       .catch(() => {});
     return () => {
       active = false;
+      setCompanies([]);
     };
   }, [enabled]);
 
   return {
-    companies,
+    companies: enabled ? companies : [],
     activeTenant,
     setActiveTenant: (slug: string) => setActiveTenantId(slug),
   };
@@ -560,20 +562,26 @@ export interface CelestialNowSummary {
   aeq4: { mode: string; formatted: string; hijriBridge: string };
 }
 
-export function useCelestialNow() {
+export function useCelestialNow(enabled = true) {
   const [data, setData] = useState<CelestialNowSummary | null>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
-    fetchApiJson<CelestialNowSummary>("/api/v1/celestial/now")
-      .then((res) => {
-        if (active) setData(res);
-      })
-      .catch(() => {});
+    const load = () => {
+      fetchApiJson<CelestialNowSummary>("/api/v1/celestial/now")
+        .then((res) => {
+          if (active) setData(res);
+        })
+        .catch(() => {});
+    };
+    load();
+    window.addEventListener("mw:tenant-changed", load);
     return () => {
       active = false;
+      window.removeEventListener("mw:tenant-changed", load);
     };
-  }, []);
+  }, [enabled]);
 
-  return data;
+  return enabled ? data : null;
 }
