@@ -56,6 +56,12 @@ version bump but cannot open the PR; open it manually with `gh pr create --base 
 `ci.yml` and `codeql.yml` cancel superseded runs on the same ref. `release-please.yml` does not
 cancel, because cancelling a release job mid-run can leave a half-updated manifest.
 
+## PR Preview Policy (`preview-deploy.yml`)
+
+- **Trigger scope:** Runs strictly on `pull_request` (`opened`, `synchronize`, `reopened`, `ready_for_review`) when `github.event.pull_request.draft == false`.
+- **Single-preview isolation:** Uses per-PR concurrency group `${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}` with `cancel-in-progress: true` so superseded commits cancel older preview deploys automatically.
+- **Execution boundary:** Runs on GitHub-hosted `ubuntu-latest` without production VPS credentials (`VPS_*` secrets live solely in `environment: production`).
+
 ## Required checks on `main`
 
 The `main` ruleset requires these status checks before merge:
