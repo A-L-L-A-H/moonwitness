@@ -15,6 +15,7 @@ import {
   Input,
   NativeSelect,
   SkinOrnament,
+  Textarea,
   type AutoModelCustomAction,
   type AutoModelHistoryEntry,
   type CutoutArtworkId,
@@ -615,11 +616,11 @@ export function AutoModelConsole({
           </CardHeader>
           <CardContent>
             <form onSubmit={(e) => void handleBulkImport(e)} className="space-y-3">
-              <textarea
+              <Textarea
                 value={importJson}
                 onChange={(e) => setImportJson(e.target.value)}
                 rows={6}
-                className="w-full border border-[var(--border)] bg-[var(--background)] p-2 font-mono text-xs"
+                className="font-mono text-xs"
               />
               {importStatus ? (
                 <div className="font-mono text-xs text-[var(--primary)]">{importStatus}</div>

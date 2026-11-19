@@ -420,6 +420,92 @@ describe("apps/api Thin-Host & ORM Addon Architecture Gates", () => {
     });
     expect(editorTenantA.statusCode).toBe(200);
     expect(editorTenantA.json().total).toBe(1);
+
+    // API-GATE-13: celestial prayer-times/hilal & witness-research 9 engines
+    const prayerTimes = await app.inject({
+      method: "GET",
+      url: "/api/v1/celestial/prayer-times?lat=-6.2088&lng=106.8456&convention=KEMENAG",
+    });
+    expect(prayerTimes.statusCode).toBe(200);
+    expect(prayerTimes.json().fajr).toMatch(/^\d{2}:\d{2}$/);
+
+    const hilal = await app.inject({
+      method: "GET",
+      url: "/api/v1/celestial/hilal?altitude=3.5&elongation=6.8",
+    });
+    expect(hilal.statusCode).toBe(200);
+    expect(hilal.json().mabims_criterion.passed).toBe(true);
+
+    const witnessModules = await app.inject({
+      method: "GET",
+      url: "/api/v1/witness/engine/modules",
+      headers: tenantAHeaders,
+    });
+    expect(witnessModules.statusCode).toBe(200);
+    expect(witnessModules.json().modules).toHaveLength(9);
+
+    const witnessRun = await app.inject({
+      method: "POST",
+      url: "/api/v1/witness/engine/run",
+      headers: tenantAHeaders,
+      payload: { moduleCode: "lexical-analysis", input: { q: "w-z-n" } },
+    });
+    expect(witnessRun.statusCode).toBe(201);
+    expect(witnessRun.json().run.run_status).toBe("completed");
+
+    // API-GATE-14: account double-entry ledger invariant & reversal
+    const badMove = await app.inject({
+      method: "POST",
+      url: "/api/v1/account/ledger/post",
+      headers: tenantAHeaders,
+      payload: {
+        move_key: "ARCH-BAD",
+        idempotency_key: "arch-bad",
+        lines: [
+          { account_code: "1010", debit: 200, credit: 0 },
+          { account_code: "4000", debit: 0, credit: 100 },
+        ],
+      },
+    });
+    expect(badMove.statusCode).toBe(400);
+
+    const goodMove = await app.inject({
+      method: "POST",
+      url: "/api/v1/account/ledger/post",
+      headers: tenantAHeaders,
+      payload: {
+        move_key: "ARCH-OK",
+        idempotency_key: "arch-ok",
+        lines: [
+          { account_code: "1010", debit: 250, credit: 0 },
+          { account_code: "4000", debit: 0, credit: 250 },
+        ],
+      },
+    });
+    expect(goodMove.statusCode).toBe(201);
+
+    const reversedMove = await app.inject({
+      method: "POST",
+      url: "/api/v1/account/ledger/reverse",
+      headers: tenantAHeaders,
+      payload: { move_key: "ARCH-OK", reversal_key: "ARCH-OK-REV" },
+    });
+    expect(reversedMove.statusCode).toBe(201);
+    expect(reversedMove.json().move.reversal_of_key).toBe("ARCH-OK");
+
+    // API-GATE-15: performance KPIs, observatory feeds, crm, and view contract integrity
+    const defaultAdminHeaders = { cookie: `mw_session=${sessionToken}` };
+    const [perfRes, obsRes, crmRes] = await Promise.all([
+      app.inject({ method: "GET", url: "/api/v1/performance/summary", headers: defaultAdminHeaders }),
+      app.inject({ method: "GET", url: "/api/v1/observatory/summary" }),
+      app.inject({ method: "GET", url: "/api/v1/crm/summary", headers: defaultAdminHeaders }),
+    ]);
+    expect(perfRes.statusCode).toBe(200);
+    expect(perfRes.json().widgets.length).toBeGreaterThanOrEqual(3);
+    expect(obsRes.statusCode).toBe(200);
+    expect(obsRes.json().feeds).toBeGreaterThanOrEqual(5);
+    expect(crmRes.statusCode).toBe(200);
+    expect(crmRes.json().stages).toBeGreaterThanOrEqual(4);
   });
 
   it("API-GATE-09: refactored addons eliminate raw SQL in timeline and probe retention", () => {
