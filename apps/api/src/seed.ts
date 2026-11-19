@@ -6,7 +6,7 @@ import {
   timelineEraModel,
   timelineEventModel,
 } from "@moonwitness/addons/timeline";
-import { env } from "./shared/env";
+import { env, resolveApiDatabaseUrl } from "./shared/env";
 import { assertDemoSeedAllowed } from "./shared/seed-safety";
 
 function sqlString(value: string): string {
@@ -64,7 +64,7 @@ async function main() {
     process.stdout.write(`${buildD1SeedSql(new Date().toISOString())}\n`);
     return;
   }
-  const dbPath = process.env.DATABASE_URL ?? "./moonwitness.db";
+  const dbPath = resolveApiDatabaseUrl(process.env.DATABASE_URL ?? env.DATABASE_URL, env.NODE_ENV);
   await initDb(dbPath);
   await syncModels([timelineEventModel, timelineEraModel]);
   await seedTimeline();

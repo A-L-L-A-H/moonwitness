@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   assertProductionEnv,
   parseCorsOrigins,
+  resolveApiDatabaseUrl,
   resolveApiEnvSource,
   validateMemoryRuntimeConfig,
+  validatePostgresDatabaseUrl,
   validateProductionEnv,
   validateRiotAiRuntimeConfig,
   env,
@@ -181,5 +183,33 @@ describe("resolveApiEnvSource", () => {
     const empty = resolveApiEnvSource({ PORT: "", HOST: "" });
     expect(empty.PORT).toBeUndefined();
     expect(empty.HOST).toBeUndefined();
+  });
+});
+
+describe("validatePostgresDatabaseUrl & resolveApiDatabaseUrl", () => {
+  it("validates postgres URLs including host, db pathname, and no fragment", () => {
+    expect(
+      validatePostgresDatabaseUrl("postgresql://moonwitness:secret@localhost:5432/moonwitness"),
+    ).toEqual([]);
+    expect(validatePostgresDatabaseUrl("postgresql:///moonwitness")).toContain(
+      "DATABASE_URL must include a PostgreSQL host.",
+    );
+    expect(validatePostgresDatabaseUrl("postgresql://localhost:5432/")).toContain(
+      "DATABASE_URL must include a PostgreSQL database name.",
+    );
+    expect(validatePostgresDatabaseUrl("postgresql://localhost:5432/moonwitness#frag")).toContain(
+      "DATABASE_URL must not contain a URL fragment.",
+    );
+  });
+
+  it("rejects implicit SQLite fallback when no DATABASE_URL is configured", () => {
+    expect(() => resolveApiDatabaseUrl(undefined, "development")).toThrow(
+      /DATABASE_URL is required/,
+    );
+    expect(() => resolveApiDatabaseUrl("  ", "production")).toThrow(/DATABASE_URL is required/);
+    expect(() => resolveApiDatabaseUrl("file:./moonwitness.db", "production")).toThrow(
+      /Invalid production DATABASE_URL/,
+    );
+    expect(resolveApiDatabaseUrl(undefined, "test", ":memory:")).toBe(":memory:");
   });
 });
