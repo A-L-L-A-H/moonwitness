@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { toMemorySyncPayloadFromContinuity } from "@moonwitness/contracts/continuity";
+import { NativeSelect } from "@moonwitness/ui";
 import { call } from "../lib";
 import type {
   MemoryCategory,
@@ -29,6 +31,7 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
   const [selectedSessionId, setSelectedSessionId] = useState("");
   const [resumeTitle, setResumeTitle] = useState("");
   const [resumeSummary, setResumeSummary] = useState("");
+  const [syncNotice, setSyncNotice] = useState("");
   const queryRef = useRef(query);
   queryRef.current = query;
 
@@ -144,6 +147,28 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
     }
   };
 
+  const exportContinuityBundle = async () => {
+    setError("");
+    setSyncNotice("");
+    try {
+      const bundle = toMemorySyncPayloadFromContinuity({
+        memories,
+        workSessions: sessions,
+        resumePoints,
+        experiences: [],
+        lessons: [],
+      });
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(JSON.stringify(bundle, null, 2));
+      }
+      setSyncNotice(
+        `Prepared ${bundle.records.length} rocksoul-desktop record(s) for /api/v1/memory/sync.`,
+      );
+    } catch (syncErr) {
+      setError(syncErr instanceof Error ? syncErr.message : String(syncErr));
+    }
+  };
+
   return (
     <main className="continuity-room" data-reduced-motion={reducedMotion}>
       <header className="continuity-head">
@@ -153,6 +178,14 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
         </div>
         <div className="continuity-actions">
           <button type="button" className="riot-button" onClick={onCapture}>QUICK CAPTURE</button>
+          <button
+            type="button"
+            className="outline-button"
+            disabled={memories.length === 0 && sessions.length === 0}
+            onClick={() => void exportContinuityBundle()}
+          >
+            EXPORT SYNC BUNDLE
+          </button>
           <button type="button" className="outline-button" onClick={onReturn}>RETURN TO THRESHOLD</button>
         </div>
       </header>
@@ -163,6 +196,7 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
         <button type="button" className={tab === "journal" ? "selected" : ""} onClick={() => setTab("journal")}>SOUL JOURNAL</button>
       </nav>
 
+      {syncNotice && <p className="global-notice" role="status">{syncNotice}</p>}
       {error && <p className="global-error" role="alert">{error}</p>}
 
       {tab === "memory" && (
@@ -175,14 +209,14 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
             </label>
             <label>
               <span>Category</span>
-              <select value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
+              <NativeSelect value={category} onChange={(event) => setCategory(event.target.value as MemoryCategory)}>
                 <option value="working">Working</option>
                 <option value="project">Project</option>
                 <option value="episodic">Episodic</option>
                 <option value="semantic">Semantic</option>
                 <option value="procedural">Procedural</option>
                 <option value="preference">Preference</option>
-              </select>
+              </NativeSelect>
             </label>
             <label>
               <span>Content</span>
@@ -235,11 +269,11 @@ export default function ArchiveRoom({ onReturn, onCapture, reducedMotion }: Arch
               <h2>ADD RESUME POINT</h2>
               <label>
                 <span>Session</span>
-                <select value={selectedSessionId} onChange={(event) => setSelectedSessionId(event.target.value)}>
+                <NativeSelect value={selectedSessionId} onChange={(event) => setSelectedSessionId(event.target.value)}>
                   {sessions.map((session) => (
                     <option key={session.id} value={session.id}>{session.name}</option>
                   ))}
-                </select>
+                </NativeSelect>
               </label>
               <label>
                 <span>Title</span>

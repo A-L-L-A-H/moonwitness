@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { X, Zap } from "@moonwitness/ui/icons";
 import type { CreateIssueArgs, IssuePriority, Project, Repository } from "../lib/contracts";
 
@@ -87,7 +88,7 @@ export default function CreateIssueDialog({
         </label>
         <label className="field-label" htmlFor="create-issue-priority">
           PRIORITY
-          <select
+          <NativeSelect
             id="create-issue-priority"
             name="priority"
             value={priority}
@@ -97,11 +98,11 @@ export default function CreateIssueDialog({
             <option>P1</option>
             <option>P2</option>
             <option>P3</option>
-          </select>
+          </NativeSelect>
         </label>
         <label className="field-label" htmlFor="create-issue-project">
           PROJECT
-          <select
+          <NativeSelect
             id="create-issue-project"
             name="projectId"
             value={projectId}
@@ -113,11 +114,11 @@ export default function CreateIssueDialog({
                 {project.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="field-label" htmlFor="create-issue-repository">
           REPOSITORY
-          <select
+          <NativeSelect
             id="create-issue-repository"
             name="repositoryId"
             value={repositoryId}
@@ -129,7 +130,7 @@ export default function CreateIssueDialog({
                 {repository.name}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         {error && (
           <p className="inline-notice" role="alert">

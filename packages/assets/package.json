@@ -17,7 +17,7 @@
     "clean": "rm -rf .turbo node_modules coverage"
   },
   "dependencies": {
-    "@moonwitness/types": "workspace:*"
+    "@moonwitness/contracts": "workspace:*"
   },
   "devDependencies": {
     "@moonwitness/eslint-config": "workspace:*",

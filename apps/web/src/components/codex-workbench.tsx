@@ -13,9 +13,10 @@ import { Input, RadialGauge, SkinOrnament, Slider, Textarea } from "@moonwitness
 import { ScriptureFolio } from "@moonwitness/ui/icons";
 import { DnaButton, DnaChamber, SacredCornerBrackets } from "@moonwitness/ui/imperium";
 import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { MizanLiveTabPanel, WitnessEngineLiveTabPanel } from "./codex-workbench-live-tabs";
 import { AqelTabPanel, OxDxDhgsTabPanel } from "./codex-workbench-tabs";
 
-type WorkbenchTab = "wsi" | "srgbl" | "oxdx" | "aqel";
+type WorkbenchTab = "wsi" | "srgbl" | "oxdx" | "aqel" | "wx-engine" | "mizan";
 
 const DEFAULT_AQEL_SOURCE = `# نظام التحقق المعرفي — عقد الصدق
 عرّف المعيار = "الميزان"
@@ -111,6 +112,8 @@ export function CodexWorkbench() {
     { id: "srgbl", code: "SRGBL-v8", label: "SRGBL v8 EVALUATOR" },
     { id: "oxdx", code: "OX-DX/DHGS", label: "OX-DX 49 & DHGS-13" },
     { id: "aqel", code: "AQEL-v0.1", label: "AQEL ARABIC LEXER" },
+    { id: "wx-engine", code: "WX-01..09", label: "9-MODULE WITNESS ENGINE" },
+    { id: "mizan", code: "MIZAN-MCDA", label: "MIZAN DECISION ENGINE" },
   ];
 
   const toggleDhgsStep = (code: string) => {
@@ -373,6 +376,12 @@ export function CodexWorkbench() {
           onSourceChange={setAqelSource}
         />
       )}
+
+      {/* TAB 5: 9-MODULE WITNESS ENGINE (WX-01..09) */}
+      {activeTab === "wx-engine" && <WitnessEngineLiveTabPanel />}
+
+      {/* TAB 6: MIZAN MULTI-CRITERIA DECISION ENGINE */}
+      {activeTab === "mizan" && <MizanLiveTabPanel />}
     </DnaChamber>
   );
 }

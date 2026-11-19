@@ -13,6 +13,7 @@ export interface SanctuaryWorkerEnv {
   readonly WEB_INTERNAL_URL?: string;
   readonly API_INTERNAL_URL?: string;
   readonly ARSY_URL?: string;
+  readonly MEMORY_BACKEND_URL?: string;
   readonly MEMORY_API_URL?: string;
 }
 
@@ -155,9 +156,9 @@ function buildProbeTargets(
     "http://127.0.0.1:8787",
   );
   const memoryBase = resolveServiceUrl(
-    cfEnv?.MEMORY_API_URL,
-    process.env.MEMORY_API_URL,
-    "http://127.0.0.1:8000",
+    cfEnv?.MEMORY_BACKEND_URL ?? cfEnv?.MEMORY_API_URL,
+    process.env.MEMORY_BACKEND_URL ?? process.env.MEMORY_API_URL,
+    "http://127.0.0.1:8088",
   );
 
   return [

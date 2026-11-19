@@ -4,7 +4,7 @@
  */
 
 import type { ProviderErrorCode } from "../schemas";
-import { DomainError, isDomainError } from "@moonwitness/errors";
+import { DomainError, isDomainError } from "@moonwitness/contracts/errors";
 
 // ============================================================================
 // Provider Error Base Class

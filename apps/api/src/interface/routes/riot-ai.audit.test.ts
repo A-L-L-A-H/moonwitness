@@ -5,7 +5,7 @@ import {
   writeInferenceAudit,
   type InferenceAuditRecord,
   type InferenceSummaryWriter,
-} from "./riot-ai.audit";
+} from "@moonwitness/addons/ai";
 
 describe("RIOT inference audit records", () => {
   afterEach(() => {

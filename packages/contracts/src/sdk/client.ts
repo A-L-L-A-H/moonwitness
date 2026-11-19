@@ -2,6 +2,7 @@ import { ApiErrorSchema } from "../timeline/endpoints";
 
 const WRITE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 const CSRF_COOKIE = "mw_csrf";
+export const TENANT_STORAGE_KEY = "mw_active_tenant";
 
 export class MoonwitnessApiError extends Error {
   readonly status: number;
@@ -24,6 +25,43 @@ export function getCsrfTokenFromCookie(): string | null {
   return match?.[1] ? decodeURIComponent(match[1]) : null;
 }
 
+export function getActiveTenantFromStorage(): string | null {
+  try {
+    const storage = (globalThis as { localStorage?: { getItem?: (key: string) => string | null } })
+      .localStorage;
+    const raw = storage?.getItem?.(TENANT_STORAGE_KEY)?.trim();
+    if (!raw || raw === "default") return null;
+    return raw;
+  } catch {
+    return null;
+  }
+}
+
+type RequestHeadersInit = NonNullable<RequestInit["headers"]>;
+
+function toHeaderRecord(headers: RequestHeadersInit): Record<string, string> {
+  if (typeof Headers !== "undefined" && headers instanceof Headers) {
+    const out: Record<string, string> = {};
+    headers.forEach((value, key) => {
+      out[key] = value;
+    });
+    return out;
+  }
+  if (Array.isArray(headers)) {
+    const out: Record<string, string> = {};
+    for (const [key, value] of headers) {
+      out[key] = value;
+    }
+    return out;
+  }
+  return { ...(headers as Record<string, string>) };
+}
+
+function hasHeaderIgnoreCase(headers: Record<string, string>, target: string): boolean {
+  const lower = target.toLowerCase();
+  return Object.keys(headers).some((key) => key.toLowerCase() === lower);
+}
+
 export function buildCsrfLogoutInit(): RequestInit {
   const init: RequestInit = { method: "POST", credentials: "include" };
   const token = getCsrfTokenFromCookie();
@@ -34,9 +72,25 @@ export function buildCsrfLogoutInit(): RequestInit {
 export async function requestApiResponse(url: string, init?: RequestInit): Promise<Response> {
   const method = (init?.method ?? "GET").toUpperCase();
   const token = WRITE_METHODS.has(method) ? getCsrfTokenFromCookie() : null;
-  const headers = token
-    ? { ...((init?.headers as Record<string, string> | undefined) ?? {}), "x-csrf-token": token }
-    : init?.headers;
+  const tenantId = getActiveTenantFromStorage();
+
+  let headers: RequestInit["headers"] = init?.headers;
+  if (token || tenantId) {
+    const record = init?.headers ? toHeaderRecord(init.headers) : {};
+    if (tenantId && !hasHeaderIgnoreCase(record, "x-tenant-id")) {
+      record["x-tenant-id"] = tenantId;
+    }
+    if (token) {
+      for (const key of Object.keys(record)) {
+        if (key.toLowerCase() === "x-csrf-token") {
+          delete record[key];
+        }
+      }
+      record["x-csrf-token"] = token;
+    }
+    headers = record;
+  }
+
   return fetch(url, {
     credentials: "include",
     ...init,
@@ -45,10 +99,14 @@ export async function requestApiResponse(url: string, init?: RequestInit): Promi
 }
 
 export async function requestApiJson<T>(url: string, init?: RequestInit): Promise<T> {
-  const headers =
-    typeof init?.body === "string"
-      ? { "content-type": "application/json", ...((init.headers as Record<string, string>) ?? {}) }
-      : init?.headers;
+  let headers: RequestInit["headers"] = init?.headers;
+  if (typeof init?.body === "string") {
+    const record = init.headers ? toHeaderRecord(init.headers) : {};
+    if (!hasHeaderIgnoreCase(record, "content-type")) {
+      record["content-type"] = "application/json";
+    }
+    headers = record;
+  }
   const res = await requestApiResponse(url, {
     cache: "no-store",
     ...init,
@@ -163,6 +221,19 @@ export function createMoonwitnessClient(baseUrl = "/api/v1") {
         payload?: Record<string, unknown>,
       ) => requestApiJson(url, { method, ...(payload ? { body: JSON.stringify(payload) } : {}) }),
     }),
+    rpc: {
+      call: <T = unknown>(payload: {
+        model: string;
+        method: string;
+        id?: string;
+        args?: unknown[];
+        kwargs?: Record<string, unknown>;
+      }) =>
+        requestApiJson<{ result: T }>(`${baseUrl}/rpc`, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        }),
+    },
   };
 }
 

@@ -3,7 +3,7 @@ import { ArrowUpRight, GitCommitHorizontal, Play, Plus, Radio, ShieldAlert, Squa
 import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
 import { KatanaSkyHud } from "../components/ui/KatanaSkyHud";
-import { AnarchyStarSigil, TelemetryWaveformSvg } from "../components/ui/RocksoulVectors";
+import { AnarchyStarSigil, TelemetryWaveformSvg } from "@moonwitness/ui/artwork";
 import type { ActivityEvent, DevServiceEntry, DevServiceTarget, Issue, IssueStatus, MonitorSnapshot, Repository } from "../lib/contracts";
 import type { PageRoute } from "../router/useWorldRouter";
 

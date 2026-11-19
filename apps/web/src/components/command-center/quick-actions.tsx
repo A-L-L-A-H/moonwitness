@@ -1,4 +1,4 @@
-import type { QuickAction } from "@moonwitness/types";
+import type { QuickAction } from "@moonwitness/contracts/types";
 import { QuickActionGrid } from "@moonwitness/ui";
 import { SectionHeading } from "./section-heading";
 

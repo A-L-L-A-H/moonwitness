@@ -1,7 +1,6 @@
 packages:
   - "apps/*"
   - "packages/*"
-  - "packages/addons/*"
 
 # Security floors for vulnerable transitive dependencies.
 overrides:

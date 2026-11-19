@@ -19,10 +19,18 @@ describe("Creator and Operations shell navigation separation", () => {
 
   it("registers all operations routes including /control in operationsNavItems", () => {
     const opsHrefs = operationsNavItems.map((item) => navHref(item));
-    for (const opsRoute of ["/control", "/vpn", "/syslog", "/snmp", "/storage", "/radius"]) {
+    for (const opsRoute of [
+      "/control",
+      "/control?tab=vpn",
+      "/control?tab=syslog",
+      "/control?tab=snmp",
+      "/control?tab=storage",
+      "/control?tab=radius",
+    ]) {
       expect(opsHrefs).toContain(opsRoute);
     }
     expect(activeByPath("/control")).toBe("control");
+    expect(activeByPath("/control", "vpn")).toBe("vpn");
     expect(activeByPath("/vpn")).toBe("vpn");
   });
 });

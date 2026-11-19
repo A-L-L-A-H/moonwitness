@@ -1,0 +1,59 @@
+{
+  "name": "@moonwitness/addons",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./ai": "./src/ai/index.ts",
+    "./audit": "./src/audit/index.ts",
+    "./auth": "./src/auth/index.ts",
+    "./canon-lore": "./src/canon-lore/index.ts",
+    "./command-center": "./src/command-center/index.ts",
+    "./control": "./src/control/index.ts",
+    "./epistemic": "./src/epistemic/index.ts",
+    "./i18n": "./src/i18n/index.ts",
+    "./probes": "./src/probes/index.ts",
+    "./radius": "./src/radius/index.ts",
+    "./snmp": "./src/snmp/index.ts",
+    "./storage": "./src/storage/index.ts",
+    "./syslog": "./src/syslog/index.ts",
+    "./timeline": "./src/timeline/index.ts",
+    "./witness-research": "./src/witness-research/index.ts",
+    "./mizan": "./src/mizan/index.ts",
+    "./celestial": "./src/celestial/index.ts",
+    "./khidra": "./src/khidra/index.ts",
+    "./cab": "./src/cab/index.ts",
+    "./geo": "./src/geo/index.ts",
+    "./account": "./src/account/index.ts",
+    "./stock": "./src/stock/index.ts",
+    "./crm": "./src/crm/index.ts",
+    "./performance": "./src/performance/index.ts",
+    "./observatory": "./src/observatory/index.ts"
+  },
+  "scripts": {
+    "build": "echo \"addons: no build output\"",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "clean": "rm -rf .turbo dist node_modules"
+  },
+  "dependencies": {
+    "@moonwitness/addon-runtime": "workspace:*",
+    "@moonwitness/ai": "workspace:*",
+    "@moonwitness/canon": "workspace:*",
+    "@moonwitness/contracts": "workspace:*",
+    "@moonwitness/core": "workspace:*",
+    "@moonwitness/mid": "workspace:*",
+    "@moonwitness/orm": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@moonwitness/eslint-config": "workspace:*",
+    "@moonwitness/typescript-config": "workspace:*",
+    "eslint": "^10.14.0",
+    "fastify": "^5.1.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.12"
+  }
+}

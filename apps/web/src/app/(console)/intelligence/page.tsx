@@ -7,9 +7,9 @@ export default function IntelligencePage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--primary)]">
+        <h1 className="flex min-h-screen items-center justify-center font-brush text-2xl text-[var(--primary)]">
           INITIALIZING RIOT INTELLIGENCE…
-        </div>
+        </h1>
       }
     >
       <IntelligenceShell />

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Module, Project } from "@moonwitness/types";
+import type { Module, Project } from "@moonwitness/contracts/types";
 import { Button, ModuleGlyph, Sheet, SheetContent, SheetHeader, SheetTitle } from "@moonwitness/ui";
 import { ArrowRight } from "@moonwitness/ui/icons";
 

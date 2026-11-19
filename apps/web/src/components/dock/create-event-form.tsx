@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import type { EraId, EventKind } from "@moonwitness/types";
+import type { EraId, EventKind } from "@moonwitness/contracts/types";
 import { Input, NativeSelect, Textarea, ZineButton, ZineCardRough } from "@moonwitness/ui";
 
 export interface DockCreateEventFormProps {

@@ -12,9 +12,9 @@ const nextConfig: NextConfig = {
   distDir: process.env.NEXT_DIST_DIR ?? ".next",
   transpilePackages: [
     "@moonwitness/canon",
+    "@moonwitness/contracts",
     "@moonwitness/ui",
     "@moonwitness/core",
-    "@moonwitness/types",
     "@moonwitness/assets",
     "@moonwitness/avatars",
     "@tanstack/react-query",

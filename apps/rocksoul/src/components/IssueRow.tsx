@@ -1,4 +1,5 @@
 import React from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { ArrowUpRight, Circle, Clock3, Pencil, Trash2 } from "@moonwitness/ui/icons";
 import type { Issue, IssueStatus } from "../lib/contracts";
 
@@ -37,7 +38,8 @@ export default function IssueRow({
       <span className={`priority-tag ${priorityClass[issue.priority] || "p2"}`}>{issue.priority}</span>
       <label className={`status-tag ${issue.status}`}>
         <Circle size={7} fill="currentColor" />
-        <select
+        <NativeSelect
+          className="h-auto w-auto border-0 bg-transparent p-0 text-inherit"
           aria-label={`Status for ${issue.issue_key}`}
           value={issue.status}
           onChange={(e) => {
@@ -52,7 +54,7 @@ export default function IssueRow({
               {label}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </label>
       {!compact && (
         <div className="issue-actions">

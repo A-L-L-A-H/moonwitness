@@ -11,7 +11,7 @@ Shared MoonWitness Design DNA skin engine, tokens, primitives, composites, artwo
 
 ## Dependencies
 
-- Workspace: `@moonwitness/assets`, `@moonwitness/avatars`, `@moonwitness/types`
+- Workspace: `@moonwitness/assets`, `@moonwitness/avatars`, `@moonwitness/contracts`
 - External: `20` `@radix-ui/react-*` primitive packages, `class-variance-authority`, `clsx`, `tailwind-merge`
 
 ## Scripts

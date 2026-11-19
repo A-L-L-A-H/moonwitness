@@ -1,0 +1,15 @@
+{
+  "name": "mizan",
+  "version": "1.0.0",
+  "description": "Mizan Ethical Balance, Primary/Secondary Filter Gate, and Weighted Prophetic Assessment Engine",
+  "category": "governance",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["mizan.assessment", "mizan.case"],
+  "provides": {
+    "routes": ["/api/v1/mizan/decision", "/api/v1/mizan/summary", "/api/v1/mizan/evaluate"],
+    "models": ["mizan.case", "mizan.assessment"],
+    "auditActions": ["mizan.evaluate"]
+  }
+}

@@ -58,7 +58,7 @@ export function RemembranceSanctuary({
           quietMode={quietMode}
           onNavigateToWorld={onNavigateToWorld}
         />
-        <TasbihSakinahChamber locale={locale} quietMode={quietMode} />
+        <TasbihSakinahChamber locale={locale === "id" ? "id" : "en"} quietMode={quietMode} />
       </div>
     </div>
   );

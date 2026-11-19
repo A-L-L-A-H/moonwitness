@@ -25,8 +25,8 @@ export function NocProbesPanel() {
         fetchProbeNodes(),
         fetchRecentProbeEvents(10),
       ]);
-      setNodes(nodesData.nodes);
-      setEvents(eventsData.events);
+      setNodes(Array.isArray(nodesData?.nodes) ? nodesData.nodes : []);
+      setEvents(Array.isArray(eventsData?.events) ? eventsData.events : []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load NOC probes");
     } finally {

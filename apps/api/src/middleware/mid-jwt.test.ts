@@ -2,8 +2,7 @@ import { webcrypto } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb, getDb, initDb } from "@moonwitness/orm";
-import { createUser, ensureAuthSchema } from "../services/user";
-import { resetMidJwksCacheForTests } from "./mid-jwt";
+import { createUser, ensureAuthSchema, resetMidJwksCacheForTests } from "@moonwitness/addons/auth";
 
 const ENCODER = new TextEncoder();
 
@@ -51,8 +50,8 @@ describe("moonwitness-id ES256 Bearer JWT auth", () => {
         created_at TEXT NOT NULL
       )`,
     );
-    const { buildFastify } = await import("../infrastructure/adapters/fastify.adapter");
-    app = await buildFastify({ prefix: "/api/v1" });
+    const { buildCoreApp } = await import("../bootstrap");
+    app = await buildCoreApp({ prefix: "/api/v1" });
     await app.ready();
     const tablesAfterReady = await getDb().all<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table'",

@@ -40,13 +40,13 @@ test.describe("Authentication", () => {
 
   test("should navigate to setup page", async ({ page }) => {
     await mockSetupStatus(page, false);
-    await page.goto("/setup");
+    await page.goto("/shadow?mode=setup");
     await expect(page.getByRole("heading", { name: /welcome to the shadow/i })).toBeVisible();
   });
 
   test("should show VPN page", async ({ page }) => {
     await mockControlSession(page);
-    await page.goto("/vpn");
+    await page.goto("/control?tab=vpn");
     await expect(page.getByRole("heading", { name: /vpn tunnel/i })).toBeVisible();
   });
 });
@@ -72,7 +72,7 @@ test.describe("VPN Setup Flow", () => {
         },
       }),
     );
-    await page.goto("/vpn");
+    await page.goto("/control?tab=vpn");
     await expect(page.getByRole("heading", { name: /tool belum ada/i })).toBeVisible();
   });
 });
@@ -101,8 +101,8 @@ test.describe("Navigation", () => {
     const pages = [
       { path: "/", title: /A-L-L-A-H\.COM/i },
       { path: "/moonwitness", title: /Moonwitness/i },
-      { path: "/vpn", title: /VPN/i },
-      { path: "/setup", title: /Setup/ },
+      { path: "/control?tab=vpn", title: /ARSY Control Plane/i },
+      { path: "/shadow?mode=setup", title: /A-L-L-A-H\.COM/i },
       { path: "/mission-control", title: /Shadow Command Center/i },
       { path: "/dock", title: /Dock/i },
     ];

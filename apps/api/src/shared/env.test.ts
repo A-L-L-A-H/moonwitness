@@ -35,6 +35,7 @@ const base = {
   RIOT_AI_RATE_LIMIT_WINDOW_MS: 60_000,
   RIOT_AI_USAGE_RETENTION_DAYS: 90,
   MEMORY_API_TIMEOUT_MS: 10_000,
+  ADDON_SIGNING_MODE: "permissive" as const,
 };
 
 describe("parseCorsOrigins", () => {

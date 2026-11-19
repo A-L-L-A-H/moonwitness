@@ -677,6 +677,7 @@ export * from "./artwork/logos";
 export * from "./artwork/cutouts";
 export * from "./artwork/backdrop";
 export * from "./artwork/skin-artwork-frame";
+export * from "./artwork/rocksoul";
 
 /* Schema-Driven Composite View */
 export {

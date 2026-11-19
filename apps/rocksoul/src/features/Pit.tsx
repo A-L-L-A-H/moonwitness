@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { Plus } from "@moonwitness/ui/icons";
 import { thumbRiotUrl } from "../assets/art";
 import { IssueRow } from "../components";
@@ -58,7 +59,8 @@ export function Pit({
             <b>{key === "all" ? issues.length : issues.filter((issue) => issue.status === key).length}</b>
           </button>
         ))}
-        <select
+        <NativeSelect
+          className="h-auto w-auto"
           aria-label="Filter by project"
           value={projectFilter}
           onChange={(event) => onProjectFilter(event.target.value)}
@@ -69,7 +71,7 @@ export function Pit({
               {project.name}
             </option>
           ))}
-        </select>
+        </NativeSelect>
       </div>
       <div className="large-issue-list">
         {visible.map((issue) => (

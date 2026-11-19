@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ARTWORK } from "@moonwitness/assets";
-import type { ArtKey } from "@moonwitness/types";
+import type { ArtKey } from "@moonwitness/contracts/types";
 import { SprayCan } from "@moonwitness/ui/icons";
 import {
   Halftone,

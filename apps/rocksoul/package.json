@@ -26,6 +26,7 @@
     "@fontsource/barlow-condensed": "^5.2.6",
     "@fontsource/ibm-plex-mono": "^5.2.6",
     "@moonwitness/canon": "workspace:*",
+    "@moonwitness/contracts": "workspace:*",
     "@moonwitness/core": "workspace:*",
     "@moonwitness/ui": "workspace:*",
     "@react-three/drei": "^10.7.9",
