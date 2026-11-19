@@ -48,9 +48,9 @@ describe("Field and Form description references", () => {
       <>
         <p id="external-help">Additional field guidance.</p>
         <Field error="A value is required">
-        <FieldControl>
-          <Input aria-label="Name" aria-describedby="external-help" />
-        </FieldControl>
+          <FieldControl>
+            <Input aria-label="Name" aria-describedby="external-help" />
+          </FieldControl>
           <FieldDescription>Enter your display name.</FieldDescription>
         </Field>
       </>,
@@ -65,7 +65,9 @@ describe("Field and Form description references", () => {
     expect(error).not.toBeNull();
     expect(references).toEqual(["external-help", description?.id, error?.id]);
     expect(new Set(references).size).toBe(references.length);
-    expect(references.every((id) => document.getElementById(id) !== null)).toBe(true);
+    expect(
+      references.every((id) => document.getElementById(id) !== null),
+    ).toBe(true);
     expect(input?.getAttribute("aria-invalid")).toBe("true");
   });
 
@@ -84,6 +86,8 @@ describe("Field and Form description references", () => {
     const references = input?.getAttribute("aria-describedby")?.split(/\s+/) ?? [];
 
     expect(references).toEqual([description?.id, error?.id]);
-    expect(references.every((id) => document.getElementById(id) !== null)).toBe(true);
+    expect(
+      references.every((id) => document.getElementById(id) !== null),
+    ).toBe(true);
   });
 });
