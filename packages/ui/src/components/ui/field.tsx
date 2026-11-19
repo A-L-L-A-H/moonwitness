@@ -82,9 +82,7 @@ const FieldControl = React.forwardRef<HTMLElement, { children: React.ReactElemen
       ...(ctx?.hasError ? [ctx.errorId] : []),
     ];
     const describedBy = [...new Set(describedByIds)].join(" ") || undefined;
-    const describedChild = children as React.ReactElement<
-      React.HTMLAttributes<HTMLElement>
-    >;
+    const describedChild = children as React.ReactElement<React.HTMLAttributes<HTMLElement>>;
     const childWithDescription = React.cloneElement(describedChild, {
       "aria-describedby": describedBy,
     });

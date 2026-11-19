@@ -326,7 +326,11 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
           <FormField name="plain" label="Plain field">
             <Input data-testid="plain-control" aria-describedby="external-help" />
           </FormField>
-          <FormField name="help" label="Field with help" description="Helpful context.">
+          <FormField
+            name="help"
+            label="Field with help"
+            description="Helpful context."
+          >
             <Input data-testid="help-control" aria-describedby="external-help" />
           </FormField>
           <FormField name="errorOnly" label="Field with error">
@@ -351,10 +355,8 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
       }
       return control;
     };
-    const getReferencedIds = (control: HTMLInputElement) => {
-      const describedBy = control.getAttribute("aria-describedby") ?? "";
-      return describedBy.split(/\s+/).filter(Boolean);
-    };
+    const getReferencedIds = (control: HTMLInputElement) =>
+      (control.getAttribute("aria-describedby") ?? "").split(/\s+/).filter(Boolean);
 
     const plainIds = getReferencedIds(getControl("plain-control"));
     expect(plainIds).toEqual(["external-help"]);
