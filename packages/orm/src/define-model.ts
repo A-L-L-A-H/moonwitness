@@ -42,6 +42,8 @@ export interface FindOptions {
   tenantId?: string;
   /** Declarative full-text needle matched in SQL across the model's `searchFields`. */
   q?: string;
+  /** Batch-hydrate `relations` without N+1 queries (attaches `$<relation>` onto each record). */
+  with?: string[];
 }
 
 export interface DefineModelOptions<TBusiness extends ZodObjectLike = ZodObjectLike>
@@ -520,12 +522,117 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       `SELECT * FROM ${this.table}${where}${orderClause}${paginationClause}`,
       execParams,
     );
-    return rows.map((row) => this.decodeRow<ModelRecord<TBusiness>>(row));
+    const decoded = rows.map((row) => this.decodeRow<ModelRecord<TBusiness>>(row));
+    this.applyComputedFields(decoded as unknown as Array<Record<string, unknown>>);
+    if (opts.with && opts.with.length > 0) {
+      await this.hydrateRelations(
+        decoded as unknown as Array<Record<string, unknown>>,
+        opts.with,
+        opts.tenantId,
+      );
+    }
+    return decoded;
+  }
+
+  private applyComputedFields(rows: Array<Record<string, unknown>>): void {
+    const computed = modelRegistry.get(this.name)?.computed;
+    if (!computed || rows.length === 0) return;
+    for (const row of rows) {
+      for (const [field, fn] of Object.entries(computed)) {
+        try {
+          row[field] = fn(row);
+        } catch {
+          row[field] = null;
+        }
+      }
+    }
+  }
+
+  private async hydrateRelations(
+    rows: Array<Record<string, unknown>>,
+    requested: string[],
+    tenantId?: string,
+  ): Promise<void> {
+    if (rows.length === 0 || requested.length === 0) return;
+    const relations = modelRegistry.get(this.name)?.relations;
+    if (!relations) return;
+
+    for (const relName of requested) {
+      const relation = relations[relName];
+      if (!relation) continue;
+      const targetDesc = modelRegistry.get(relation.model);
+      if (!targetDesc) continue;
+      const targetRepo = new BaseRepository(
+        targetDesc.name,
+        targetDesc.table,
+        targetDesc.fullSchema,
+        targetDesc.softDelete,
+        targetDesc.fields,
+      );
+
+      if (relation.type === "one2many") {
+        const inverseField = relation.inverseField;
+        if (!inverseField) continue;
+        const parentKeyField = relation.targetField ?? "id";
+        const parentKeys = [
+          ...new Set(
+            rows
+              .map((r) => r[parentKeyField])
+              .filter((v): v is string | number => v !== null && v !== undefined),
+          ),
+        ];
+        if (parentKeys.length === 0) {
+          for (const row of rows) row[`$${relName}`] = [];
+          continue;
+        }
+        const relatedRows = await targetRepo.find(
+          { [inverseField]: { $in: parentKeys } },
+          tenantId !== undefined ? { tenantId } : {},
+        );
+        const grouped = new Map<string, Array<Record<string, unknown>>>();
+        for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
+          const key = String(relRow[inverseField] ?? "");
+          const list = grouped.get(key) ?? [];
+          list.push(relRow);
+          grouped.set(key, list);
+        }
+        for (const row of rows) {
+          const key = String(row[parentKeyField] ?? "");
+          row[`$${relName}`] = grouped.get(key) ?? [];
+        }
+      } else {
+        const targetField = relation.targetField ?? "id";
+        const fkValues = [
+          ...new Set(
+            rows
+              .map((r) => r[relName])
+              .filter((v): v is string | number => v !== null && v !== undefined),
+          ),
+        ];
+        if (fkValues.length === 0) {
+          for (const row of rows) row[`$${relName}`] = null;
+          continue;
+        }
+        const relatedRows = await targetRepo.find(
+          { [targetField]: { $in: fkValues } },
+          tenantId !== undefined ? { tenantId } : {},
+        );
+        const map = new Map<string, Record<string, unknown>>();
+        for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
+          map.set(String(relRow[targetField] ?? ""), relRow);
+        }
+        for (const row of rows) {
+          const fk = row[relName];
+          row[`$${relName}`] =
+            fk !== null && fk !== undefined ? (map.get(String(fk)) ?? null) : null;
+        }
+      }
+    }
   }
 
   async findOne(
     id: string,
-    opts: { includeDeleted?: boolean; tenantId?: string } = {},
+    opts: { includeDeleted?: boolean; tenantId?: string; with?: string[] } = {},
   ): Promise<ModelRecord<TBusiness> | null> {
     const rows = await this.find({ id }, opts);
     return rows[0] ?? null;
@@ -611,6 +718,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     const relations = modelRegistry.get(this.name)?.relations;
     if (!relations) return;
     for (const [field, relation] of Object.entries(relations)) {
+      if (relation.type === "one2many") continue;
       const value = record[field];
       if (value === undefined || value === null) continue;
       const target = modelRegistry.get(relation.model);
@@ -641,6 +749,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   ): Promise<void> {
     for (const other of modelRegistry.list()) {
       for (const [field, relation] of Object.entries(other.relations ?? {})) {
+        if (relation.type === "one2many") continue;
         if (relation.model !== this.name || relation.onDelete === "ignore") continue;
         const targetField = relation.targetField ?? "id";
         const value = current[targetField];
@@ -688,6 +797,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   ): Promise<ModelRecord<TBusiness>> {
     await ensureAuditTable();
     const data = this.applyDefaults(rawData, actor);
+    const hooks = modelRegistry.get(this.name)?.hooks;
+    if (hooks?.beforeSave) {
+      await hooks.beforeSave({
+        model: this.name,
+        action: "CREATE",
+        before: null,
+        values: data,
+        actor,
+      });
+    }
     const { fullSchema, extensible, customFields } = this.descriptor();
     const now = new Date();
     const resolvedTenantId =
@@ -733,6 +852,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     await this.applyRetention(String(parsed.tenant_id));
 
     const decoded = this.decodeRow<ModelRecord<TBusiness>>(parsed);
+    this.applyComputedFields([decoded as unknown as Record<string, unknown>]);
+    if (hooks?.afterSave) {
+      await hooks.afterSave({
+        model: this.name,
+        action: "CREATE",
+        before: null,
+        values: decoded as unknown as Record<string, unknown>,
+        actor,
+      });
+    }
     await modelRegistry.emitWrite({
       model: this.name,
       entityId: String(parsed.id),
@@ -747,10 +876,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   async update(
     id: string,
-    data: Record<string, unknown>,
+    rawData: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
   ): Promise<ModelRecord<TBusiness> | null> {
     await ensureAuditTable();
+    const data = { ...rawData };
+    const hooks = modelRegistry.get(this.name)?.hooks;
     const { fullSchema, extensible, customFields } = this.descriptor();
 
     let beforeSnapshot: Record<string, unknown> | null = null;
@@ -774,6 +905,15 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         );
       }
       beforeSnapshot = current;
+      if (hooks?.beforeSave) {
+        await hooks.beforeSave({
+          model: this.name,
+          action: "UPDATE",
+          before: current,
+          values: data,
+          actor,
+        });
+      }
 
       const now = new Date();
       const updated: Record<string, unknown> = {
@@ -825,6 +965,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     });
 
     if (decoded) {
+      this.applyComputedFields([decoded as unknown as Record<string, unknown>]);
+      if (hooks?.afterSave) {
+        await hooks.afterSave({
+          model: this.name,
+          action: "UPDATE",
+          before: beforeSnapshot,
+          values: decoded as unknown as Record<string, unknown>,
+          actor,
+        });
+      }
       await modelRegistry.emitWrite({
         model: this.name,
         entityId: id,
@@ -1032,6 +1182,8 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     relations,
     retention,
     actions,
+    computed,
+    hooks,
   } = options;
 
   assertIdentifier(table, "table");
@@ -1056,6 +1208,8 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     relations,
     retention,
     actions,
+    computed,
+    hooks,
   });
 
   const repo = new BaseRepository<TBusiness>(

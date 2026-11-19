@@ -219,6 +219,8 @@ class OrmModelRegistry {
       relations: base.relations,
       retention: base.retention,
       actions: base.actions,
+      computed: base.computed,
+      hooks: base.hooks,
       fields,
       fieldOrigins,
       indexes: mergedIndexes,

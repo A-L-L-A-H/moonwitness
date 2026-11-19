@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   closeDb,
+  compileTupleDomainToFilter,
   createActorContext,
   defineModel,
   initDb,
@@ -161,5 +162,87 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
     const rowsA = await log.repository.find({}, { tenantId: "tenant-a", orderBy: "at ASC" });
     expect(rowsA.map((r) => r.msg)).toEqual(["m3", "m4", "m5"]);
     expect(await log.repository.count({}, { tenantId: "tenant-b" })).toBe(1);
+  });
+
+  it("supports computed fields, beforeSave/afterSave hooks, batch relation hydration (with), and Polish-notation tuple domains", async () => {
+    const afterSaved: string[] = [];
+    const team = defineModel({
+      name: "t.team",
+      table: "t_teams",
+      schema: z.object({ code: z.string(), name: z.string() }),
+      relations: {
+        members: {
+          model: "t.member",
+          type: "one2many",
+          targetField: "code",
+          inverseField: "team_code",
+        },
+      },
+    });
+    const member = defineModel({
+      name: "t.member",
+      table: "t_members",
+      schema: z.object({
+        team_code: z.string(),
+        first_name: z.string(),
+        last_name: z.string(),
+        role: z.string().default("ops"),
+      }),
+      relations: {
+        team_code: { model: "t.team", targetField: "code" },
+      },
+      computed: {
+        full_name: (r) => `${String(r.first_name)} ${String(r.last_name)}`,
+      },
+      hooks: {
+        beforeSave: ({ values }) => {
+          if (typeof values.role === "string") {
+            values.role = values.role.trim().toLowerCase();
+          }
+        },
+        afterSave: ({ values }) => {
+          afterSaved.push(String(values.full_name));
+        },
+      },
+    });
+    await syncModels([team, member]);
+
+    await team.repository.create({ code: "alpha", name: "Alpha Squad" }, actorA);
+    const m1 = await member.repository.create(
+      { team_code: "alpha", first_name: "Ada", last_name: "Lovelace", role: "  LEAD  " },
+      actorA,
+    );
+    expect(m1.role).toBe("lead");
+    expect((m1 as unknown as Record<string, unknown>).full_name).toBe("Ada Lovelace");
+    expect(afterSaved).toEqual(["Ada Lovelace"]);
+
+    await member.repository.create(
+      { team_code: "alpha", first_name: "Alan", last_name: "Turing", role: "CRYPTO" },
+      actorA,
+    );
+
+    const hydratedMembers = await member.repository.find(
+      compileTupleDomainToFilter([
+        ["team_code", "=", "alpha"],
+        "|",
+        ["role", "=", "lead"],
+        ["role", "=", "crypto"],
+      ]),
+      { tenantId: "tenant-a", with: ["team_code"], orderBy: "first_name ASC" },
+    );
+    expect(hydratedMembers).toHaveLength(2);
+    expect(
+      ((hydratedMembers[0] as unknown as Record<string, unknown>).$team_code as Record<string, unknown>)
+        ?.name,
+    ).toBe("Alpha Squad");
+
+    const hydratedTeams = await team.repository.find(
+      { code: "alpha" },
+      { tenantId: "tenant-a", with: ["members"] },
+    );
+    const membersList = (hydratedTeams[0] as unknown as Record<string, unknown>)
+      .$members as Array<Record<string, unknown>>;
+    expect(membersList).toHaveLength(2);
+    expect(membersList.map((m) => m.full_name).sort()).toEqual(["Ada Lovelace", "Alan Turing"]);
   });
 });

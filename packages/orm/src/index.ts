@@ -64,13 +64,18 @@ export {
 } from "./backup.js";
 export type { BackupCommandOptions, ExternalCommandRunner } from "./backup.js";
 
+export { compileTupleDomainToFilter } from "./model-meta.js";
 export type {
   ConstrainContext,
   ModelActionContext,
   ModelActionDef,
+  ModelComputedFieldFn,
+  ModelComputedFields,
   ModelConstraint,
   ModelDefaults,
   ModelFeatureOptions,
+  ModelHookContext,
+  ModelLifecycleHooks,
   ModelRelation,
   ModelRetention,
   ModelRole,
