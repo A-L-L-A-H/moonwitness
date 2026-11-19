@@ -8,6 +8,7 @@ export interface OrmDriverHandle extends LibSqlExecutor {
   readonly dialect?: "sqlite" | "postgres" | "d1";
   getConnectionString?(): string | null;
   close(): void;
+  closeAsync?(): Promise<void>;
   transaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T>;
 }
 
@@ -129,6 +130,18 @@ export function closeDb(): void {
     db.close();
     db = null;
   }
+}
+
+/** Close the active ORM handle and await asynchronous driver resource shutdown. */
+export async function closeDbAsync(): Promise<void> {
+  const current = db;
+  db = null;
+  if (!current) return;
+  if (current.closeAsync) {
+    await current.closeAsync();
+    return;
+  }
+  current.close();
 }
 
 export function getDb(): OrmDriverHandle {

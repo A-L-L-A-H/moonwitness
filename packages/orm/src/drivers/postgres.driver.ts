@@ -381,11 +381,15 @@ export class PostgresDriver implements OrmDriverHandle {
   }
 
   close(): void {
+    void this.closeAsync().catch(() => {});
+  }
+
+  async closeAsync(): Promise<void> {
     const current = this.pool;
     this.pool = null;
     this.connectionString = null;
     if (current) {
-      void current.end().catch(() => {});
+      await current.end();
     }
   }
 

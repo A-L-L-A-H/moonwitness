@@ -129,6 +129,36 @@ describe("PostgresDriver", () => {
     };
   }
 
+  it("awaits PostgreSQL pool shutdown and clears the handle before completion", async () => {
+    const mock = createMockPool();
+    const driver = new PostgresDriver();
+    let finishPoolEnd = () => {};
+    const poolEnd = new Promise<void>((resolve) => {
+      finishPoolEnd = resolve;
+    });
+    mock.pool.end = vi.fn(() => poolEnd);
+
+    await driver.init("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
+
+    let closeFinished = false;
+    const closing = driver.closeAsync().then(() => {
+      closeFinished = true;
+    });
+
+    await Promise.resolve();
+    expect(closeFinished).toBe(false);
+    expect(driver.getConnectionString()).toBeNull();
+    expect(() => driver.all("SELECT 1")).toThrow(
+      "Database not initialized. Call initDb() first.",
+    );
+
+    finishPoolEnd();
+    await closing;
+
+    expect(closeFinished).toBe(true);
+    expect(mock.pool.end).toHaveBeenCalledTimes(1);
+  });
+
   it("handles run() RETURNING *, all(), get() integer coercion, and exec() statement splitting", async () => {
     const mock = createMockPool();
     const driver = new PostgresDriver();
