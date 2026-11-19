@@ -313,6 +313,4 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
     expect(container.textContent).toContain("Page 1 of 2");
     expect(container.querySelector('svg[role="img"][aria-label="Bar chart"]')).not.toBeNull();
   });
-
-
 });

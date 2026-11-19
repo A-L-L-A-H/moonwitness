@@ -7,6 +7,12 @@ import { Form, FormField, Input, SkinProvider } from "../../index";
 let container: HTMLDivElement;
 let root: Root;
 
+function renderNode(node: React.ReactNode) {
+  act(() => {
+    root.render(node);
+  });
+}
+
 beforeEach(() => {
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   container = document.createElement("div");
@@ -79,9 +85,7 @@ describe("FieldControl description references", () => {
     const errorIds = getReferencedIds(errorControl);
     expect(errorControl.getAttribute("aria-invalid")).toBe("true");
     expect(errorIds).toHaveLength(1);
-    expect(document.getElementById(errorIds[0] ?? "")?.textContent).toBe(
-      "This field is required.",
-    );
+    expect(document.getElementById(errorIds[0] ?? "")?.textContent).toBe("This field is required.");
 
     const describedErrorControl = getControl("described-error-control");
     const describedErrorIds = getReferencedIds(describedErrorControl);
