@@ -649,8 +649,35 @@ mod tests {
         validate_worktree_dir, verify_action_approval, ActionApprovalBound,
     };
     use rusqlite::Connection;
-    use std::{env, path::Path, thread::sleep, time::Duration};
+    use std::{
+        env,
+        path::Path,
+        thread::sleep,
+        time::{Duration, Instant},
+    };
     use uuid::Uuid;
+
+    fn wait_for_supervised_exit_code(run_id: &str, timeout: Duration) -> i32 {
+        let deadline = Instant::now() + timeout;
+        loop {
+            match poll_supervised_process(run_id) {
+                Ok(Some(code)) => return code,
+                Ok(None) => {
+                    let remaining = deadline.saturating_duration_since(Instant::now());
+                    if remaining.is_zero() {
+                        // Give a child that exited at the deadline one final observation.
+                        if let Some(code) = poll_supervised_process(run_id).expect("final poll") {
+                            return code;
+                        }
+                        let _ = kill_supervised_process(run_id);
+                        panic!("supervised process {run_id} did not exit within {timeout:?}");
+                    }
+                    sleep(remaining.min(Duration::from_millis(25)));
+                }
+                Err(error) => panic!("failed to poll supervised process {run_id}: {error}"),
+            }
+        }
+    }
 
     #[test]
     fn rejects_non_allowlisted_shells_and_control_characters() {
@@ -781,15 +808,11 @@ mod tests {
             ],
         )
         .expect("spawn env check");
-        let mut exited = None;
-        for _ in 0..80 {
-            if let Some(code) = poll_supervised_process(&env_run_id).expect("poll env") {
-                exited = Some(code);
-                break;
-            }
-            sleep(Duration::from_millis(25));
-        }
-        assert_eq!(exited, Some(0));
+        assert_eq!(
+            wait_for_supervised_exit_code(&env_run_id, Duration::from_secs(15)),
+            0,
+            "secret-environment child must exit successfully",
+        );
         sleep(Duration::from_millis(40));
         let env_out = read_supervised_output(&env_run_id).unwrap_or_default();
         assert_eq!(env_out.trim(), "STRIPPED");
@@ -806,15 +829,11 @@ mod tests {
             ],
         )
         .expect("spawn flood check");
-        let mut flood_exit = None;
-        for _ in 0..120 {
-            if let Some(code) = poll_supervised_process(&flood_run_id).expect("poll flood") {
-                flood_exit = Some(code);
-                break;
-            }
-            sleep(Duration::from_millis(25));
-        }
-        assert_eq!(flood_exit, Some(0));
+        assert_eq!(
+            wait_for_supervised_exit_code(&flood_run_id, Duration::from_secs(30)),
+            0,
+            "large-output child must exit successfully",
+        );
         sleep(Duration::from_millis(40));
         let flood_out = read_supervised_output(&flood_run_id).unwrap_or_default();
         assert!(flood_out.contains("...[truncated]"));
