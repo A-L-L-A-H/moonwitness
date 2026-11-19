@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
   defaultFailClosedAuthBridge,
+  getDisabledOptionalOpsErrorPayload,
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
   resolveActorContextFromBridge,
@@ -34,6 +35,10 @@ async function forward(
   target: string,
   method: string,
 ) {
+  const disabledGuard = getDisabledOptionalOpsErrorPayload("radius");
+  if (disabledGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(disabledGuard);
+  }
   const baseUrl = getRadiusUrl();
   const edgeGuard = getEdgeLoopbackErrorPayload("radius", "RADIUS_URL", baseUrl);
   if (edgeGuard) {

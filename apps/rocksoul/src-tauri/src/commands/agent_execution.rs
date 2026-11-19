@@ -34,6 +34,7 @@ const MAX_CAPTURED_OUTPUT_BYTES: usize = 256 * 1024;
 struct SupervisedHandle {
     child: Child,
     output: Arc<Mutex<String>>,
+    drainers: Vec<thread::JoinHandle<()>>,
     started_at: Instant,
     timeout: Duration,
 }
@@ -44,12 +45,16 @@ fn supervised_children() -> &'static Mutex<HashMap<String, SupervisedHandle>> {
 }
 
 fn append_bounded_output(buf: &Arc<Mutex<String>>, chunk: &[u8]) {
+    const TRUNCATION_MARKER: &str = "\n...[truncated]";
+    if chunk.is_empty() {
+        return;
+    }
     let text = String::from_utf8_lossy(chunk);
     if let Ok(mut guard) = buf.lock() {
-        if guard.len() >= MAX_CAPTURED_OUTPUT_BYTES {
+        if guard.ends_with(TRUNCATION_MARKER) {
             return;
         }
-        let remaining = MAX_CAPTURED_OUTPUT_BYTES - guard.len();
+        let remaining = MAX_CAPTURED_OUTPUT_BYTES.saturating_sub(guard.len());
         if text.len() <= remaining {
             guard.push_str(&text);
         } else {
@@ -58,12 +63,15 @@ fn append_bounded_output(buf: &Arc<Mutex<String>>, chunk: &[u8]) {
                 end -= 1;
             }
             guard.push_str(&text[..end]);
-            guard.push_str("\n...[truncated]");
+            guard.push_str(TRUNCATION_MARKER);
         }
     }
 }
 
-fn spawn_pipe_drainer<R: Read + Send + 'static>(reader: R, buf: Arc<Mutex<String>>) {
+fn spawn_pipe_drainer<R: Read + Send + 'static>(
+    reader: R,
+    buf: Arc<Mutex<String>>,
+) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let mut reader = reader;
         let mut chunk = [0u8; 4096];
@@ -73,7 +81,7 @@ fn spawn_pipe_drainer<R: Read + Send + 'static>(reader: R, buf: Arc<Mutex<String
                 Ok(n) => append_bounded_output(&buf, &chunk[..n]),
             }
         }
-    });
+    })
 }
 
 fn terminate_process_tree(pid: u32, child: &mut Child) {
@@ -178,11 +186,12 @@ pub fn spawn_supervised_process_with_timeout(
         .map_err(|e| format!("Failed to spawn supervised executable '{executable}': {e}"))?;
 
     let output = Arc::new(Mutex::new(String::new()));
+    let mut drainers = Vec::new();
     if let Some(stdout) = child.stdout.take() {
-        spawn_pipe_drainer(stdout, Arc::clone(&output));
+        drainers.push(spawn_pipe_drainer(stdout, Arc::clone(&output)));
     }
     if let Some(stderr) = child.stderr.take() {
-        spawn_pipe_drainer(stderr, Arc::clone(&output));
+        drainers.push(spawn_pipe_drainer(stderr, Arc::clone(&output)));
     }
 
     let pid = child.id();
@@ -195,11 +204,26 @@ pub fn spawn_supervised_process_with_timeout(
         SupervisedHandle {
             child,
             output,
+            drainers,
             started_at: Instant::now(),
             timeout: clamped_timeout,
         },
     );
     Ok(pid)
+}
+
+fn finished_outputs() -> &'static Mutex<HashMap<String, String>> {
+    static FINISHED: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();
+    FINISHED.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn store_finished_output(run_id: &str, mut handle: SupervisedHandle) {
+    for drainer in handle.drainers.drain(..) {
+        let _ = drainer.join();
+    }
+    if let (Ok(raw_guard), Ok(mut store)) = (handle.output.lock(), finished_outputs().lock()) {
+        store.insert(run_id.to_string(), redact_secrets(&raw_guard));
+    }
 }
 
 #[allow(dead_code)]
@@ -212,13 +236,17 @@ pub fn poll_supervised_process(run_id: &str) -> Result<Option<i32>, String> {
     };
     if handle.started_at.elapsed() >= handle.timeout {
         let mut removed = guard.remove(run_id).expect("checked entry exists");
+        drop(guard);
         let pid = removed.child.id();
         terminate_process_tree(pid, &mut removed.child);
+        store_finished_output(run_id, removed);
         return Err("timed_out".to_string());
     }
     match handle.child.try_wait().map_err(|e| e.to_string())? {
         Some(status) => {
-            guard.remove(run_id);
+            let removed = guard.remove(run_id).expect("checked entry exists");
+            drop(guard);
+            store_finished_output(run_id, removed);
             Ok(Some(status.code().unwrap_or(-1)))
         }
         None => Ok(None),
@@ -227,10 +255,12 @@ pub fn poll_supervised_process(run_id: &str) -> Result<Option<i32>, String> {
 
 #[allow(dead_code)]
 pub fn read_supervised_output(run_id: &str) -> Option<String> {
-    let guard = supervised_children().lock().ok()?;
-    let handle = guard.get(run_id)?;
-    let raw = handle.output.lock().ok()?.clone();
-    Some(redact_secrets(&raw))
+    if let Ok(guard) = supervised_children().lock() {
+        if let Some(handle) = guard.get(run_id) {
+            return handle.output.lock().ok().map(|raw| redact_secrets(&raw));
+        }
+    }
+    finished_outputs().lock().ok()?.get(run_id).cloned()
 }
 
 pub fn kill_supervised_process(run_id: &str) -> Result<Option<u32>, String> {
@@ -245,7 +275,47 @@ pub fn kill_supervised_process(run_id: &str) -> Result<Option<u32>, String> {
     };
     let pid = handle.child.id();
     terminate_process_tree(pid, &mut handle.child);
+    store_finished_output(run_id, handle);
     Ok(Some(pid))
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ActionApprovalBound {
+    pub run_id: String,
+    pub executable: String,
+    pub args: Vec<String>,
+    pub worktree_path: String,
+    pub approved: bool,
+    pub expires_at_unix: u64,
+}
+
+#[allow(dead_code)]
+pub fn verify_action_approval(
+    approval: &ActionApprovalBound,
+    run_id: &str,
+    executable: &str,
+    args: &[String],
+    worktree_dir: &Path,
+    now_unix: u64,
+) -> Result<(), String> {
+    if !approval.approved {
+        return Err("Execution blocked: action approval has not been granted".to_string());
+    }
+    if approval.expires_at_unix <= now_unix {
+        return Err("Execution blocked: action approval record is expired".to_string());
+    }
+    if approval.run_id != run_id
+        || approval.executable != executable
+        || approval.args != args
+        || Path::new(&approval.worktree_path) != worktree_dir
+    {
+        return Err(
+            "Execution blocked: action parameters do not match durable approval record"
+                .to_string(),
+        );
+    }
+    Ok(())
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -577,7 +647,7 @@ mod tests {
         evaluate_agent_worktree_evidence, kill_supervised_process, poll_supervised_process,
         read_supervised_output, reconcile_stale_agent_runs, resolve_command_executable,
         spawn_supervised_process, spawn_supervised_process_with_timeout, validate_command_args,
-        validate_worktree_dir,
+        validate_worktree_dir, verify_action_approval, ActionApprovalBound,
     };
     use rusqlite::Connection;
     use std::{env, path::Path, thread::sleep, time::Duration};
@@ -689,5 +759,99 @@ mod tests {
             .expect("query sup");
         assert_eq!(run_status, "failed");
         assert_eq!(sup_status, "recovered");
+    }
+
+    #[test]
+    fn strips_secrets_drains_large_pipes_and_enforces_durable_approval() {
+        let worktree_dir = env::temp_dir();
+
+        // 1. Secret env stripping via env_clear()
+        env::set_var("MW_TEST_SECRET_TOKEN", "ghp_supersecret_value_123");
+        let env_run_id = format!("env-run-{}", Uuid::new_v4());
+        spawn_supervised_process(
+            &env_run_id,
+            &worktree_dir,
+            "node",
+            &[
+                "-e".to_string(),
+                "process.stdout.write(process.env.MW_TEST_SECRET_TOKEN || 'STRIPPED')".to_string(),
+            ],
+        )
+        .expect("spawn env check");
+        let mut exited = None;
+        for _ in 0..80 {
+            if let Some(code) = poll_supervised_process(&env_run_id).expect("poll env") {
+                exited = Some(code);
+                break;
+            }
+            sleep(Duration::from_millis(25));
+        }
+        assert_eq!(exited, Some(0));
+        sleep(Duration::from_millis(40));
+        let env_out = read_supervised_output(&env_run_id).unwrap_or_default();
+        assert_eq!(env_out.trim(), "STRIPPED");
+
+        // 2. Large (> 300 KiB) stdout drain & truncation without deadlock
+        let flood_run_id = format!("flood-run-{}", Uuid::new_v4());
+        spawn_supervised_process(
+            &flood_run_id,
+            &worktree_dir,
+            "node",
+            &[
+                "-e".to_string(),
+                "process.stdout.write('A'.repeat(320 * 1024))".to_string(),
+            ],
+        )
+        .expect("spawn flood check");
+        let mut flood_exit = None;
+        for _ in 0..120 {
+            if let Some(code) = poll_supervised_process(&flood_run_id).expect("poll flood") {
+                flood_exit = Some(code);
+                break;
+            }
+            sleep(Duration::from_millis(25));
+        }
+        assert_eq!(flood_exit, Some(0));
+        sleep(Duration::from_millis(40));
+        let flood_out = read_supervised_output(&flood_run_id).unwrap_or_default();
+        assert!(flood_out.contains("...[truncated]"));
+        assert!(flood_out.len() <= 270_000);
+
+        // 3. Durable exact-action approval binding
+        let approval = ActionApprovalBound {
+            run_id: "run-99".to_string(),
+            executable: "git".to_string(),
+            args: vec!["status".to_string()],
+            worktree_path: worktree_dir.to_string_lossy().to_string(),
+            approved: true,
+            expires_at_unix: 2000,
+        };
+        assert!(verify_action_approval(
+            &approval,
+            "run-99",
+            "git",
+            &["status".to_string()],
+            &worktree_dir,
+            1000,
+        )
+        .is_ok());
+        assert!(verify_action_approval(
+            &approval,
+            "run-99",
+            "git",
+            &["push".to_string()],
+            &worktree_dir,
+            1000,
+        )
+        .is_err());
+        assert!(verify_action_approval(
+            &approval,
+            "run-99",
+            "git",
+            &["status".to_string()],
+            &worktree_dir,
+            2500,
+        )
+        .is_err());
     }
 }

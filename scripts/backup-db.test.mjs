@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -205,7 +206,7 @@ describe("PostgreSQL-only backup & restore helpers", () => {
         /Trust-zone boundary violation/,
       );
 
-      const { setManifest } = await backupPostgresSet({
+      const { setManifest, setManifestPath } = await backupPostgresSet({
         targets: [
           {
             name: "core",
@@ -220,6 +221,15 @@ describe("PostgreSQL-only backup & restore helpers", () => {
           writeFileSync(args[args.indexOf("-f") + 1], Buffer.from("PGDMP-SET"));
         },
       });
+      const cliOut = execFileSync(
+        process.execPath,
+        ["scripts/backup-db.mjs", "--verify-set", setManifestPath, "--max-age-hours", "24"],
+        {
+          env: { ...process.env, MW_BACKUP_ENCRYPTION_KEY: "backup-secret-key" },
+          encoding: "utf-8",
+        },
+      );
+      assert.match(cliOut, /Backup set verified: 2 entries/);
       assert.equal(setManifest.entries.find((e) => e.name === "radius")?.status, "disabled");
       assert.equal(
         verifyBackupSetManifest({

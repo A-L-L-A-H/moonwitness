@@ -120,3 +120,4 @@ docker compose down
 ## Wave 0 Reconciliation Note (`MW-0006`)
 
 - **Classification:** Current baseline VPS topology, pending Wave 5 Compose core/ops profile separation and `STORAGE_URL` / `RADIUS_BIND_IP` / `DATABASE_URL` remediation tracked in [WORK_PLAN.md](../../WORK_PLAN.md) (`MW-0501`–`MW-0512`). See [ADR-006](adr-006-three-app-topology-and-trust-zones.md) and [RUNTIME-SERVICE-INVENTORY.md](RUNTIME-SERVICE-INVENTORY.md) for verified upstream state.
+- **Optional `ops` Capability Flags (`MW-0804`):** Core API `/api/v1/readyz` reports `services.{radius,snmp,syslog,storage}` explicitly (`disabled`, `healthy`, or `unhealthy`) using `MW_OPS_ENABLED` and per-service `MW_OPS_{RADIUS,SNMP,SYSLOG,STORAGE}_ENABLED` flags (`0`/`false` disables without failing API readiness HTTP 200; upstream proxies fail closed with `503 SERVICE_DISABLED`).

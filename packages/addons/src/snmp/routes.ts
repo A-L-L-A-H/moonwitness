@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import {
   defaultFailClosedAuthBridge,
+  getDisabledOptionalOpsErrorPayload,
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
   resolveActorContextFromBridge,
@@ -162,6 +163,10 @@ async function forward(
   target: string,
   method: string,
 ) {
+  const disabledGuard = getDisabledOptionalOpsErrorPayload("snmp");
+  if (disabledGuard) {
+    return reply.code(503).header("cache-control", "no-store").send(disabledGuard);
+  }
   const baseUrl = getSnmpPollerUrl();
   const edgeGuard = getEdgeLoopbackErrorPayload("snmp-poller", "SNMP_POLLER_URL", baseUrl);
   if (edgeGuard) {
