@@ -14,7 +14,9 @@ type Row = {
 let container: HTMLDivElement;
 let root: Root;
 
-function renderTable(columns: Parameters<typeof DataTable<Row>>[0]["columns"]) {
+function renderTable(
+  columns: Parameters<typeof DataTable<Row>>[0]["columns"],
+) {
   const rows: Row[] = [
     { id: "1", name: "Alpha", count: 42, status: "Ready" },
     { id: "2", name: "Beta", count: 7, status: "Pending review" },
@@ -62,7 +64,7 @@ afterEach(() => {
 });
 
 describe("DataTable search values", () => {
-  it("filters primitive text and numeric cells and uses explicit text for React nodes", () => {
+  it("searches primitive cells and explicit text for React nodes", () => {
     renderTable([
       { id: "name", header: "Name", accessor: (row) => row.name },
       { id: "count", header: "Count", accessor: (row) => row.count },
@@ -83,7 +85,7 @@ describe("DataTable search values", () => {
     expect(container.querySelector("tbody")?.textContent).not.toContain("Alpha");
   });
 
-  it("does not stringify React elements when no raw search text is provided", () => {
+  it("does not stringify React elements in implicit search", () => {
     renderTable([
       {
         id: "status",
