@@ -1211,7 +1211,7 @@ export class AddonRuntimeController {
     if (!acl.canRead) return null;
 
     const fieldRows = await irModelFieldModel.repository.find({ model_name: modelName });
-    const fields: RegisteredFieldMetadata[] = fieldRows
+    let fields: RegisteredFieldMetadata[] = fieldRows
       .filter(
         (f) => !f.deprecated && !/password_hash|encrypted_private|_secret/i.test(f.field_name),
       )
@@ -1230,6 +1230,40 @@ export class AddonRuntimeController {
         selection: f.selection_json ? (JSON.parse(f.selection_json) as string[]) : null,
         default_value: f.default_json ? JSON.parse(f.default_json) : undefined,
       }));
+
+    if (fields.length === 0) {
+      fields = [...desc.fields.entries()]
+        .filter(
+          ([fieldName]) =>
+            fieldName !== "_attrs" &&
+            !/password_hash|encrypted_private|_secret/i.test(fieldName),
+        )
+        .map(([fieldName, spec]) => {
+          const selection = spec.enumValues ? [...spec.enumValues] : null;
+          return {
+            id: `${modelName}:${fieldName}`,
+            model_name: modelName,
+            field_name: fieldName,
+            field_type: spec.zodTypeLabel as
+              | "text"
+              | "integer"
+              | "real"
+              | "boolean"
+              | "date"
+              | "json"
+              | "selection",
+            nullable: spec.nullable,
+            required: !spec.nullable && !spec.optional,
+            deprecated: false,
+            is_custom: false,
+            origin_addon: desc.fieldOrigins.get(fieldName) ?? modelMeta?.addon ?? "__base",
+            ui_widget: defaultWidgetForField(spec.zodTypeLabel, selection),
+            label: humanizeLabel(fieldName),
+            selection,
+            default_value: spec.hasDefault ? (spec.defaultValue ?? null) : undefined,
+          };
+        });
+    }
 
     const viewRows = await irViewModel.repository.find(
       { model_name: modelName },

@@ -86,8 +86,48 @@ export async function registerAuthRoutes(
       })
     : createLocalFallbackRateLimit(10, 60_000, "terlalu banyak percobaan; coba lagi nanti");
 
+  const authMeRatePreHandler = options.rateLimit
+    ? options.rateLimit({
+        max: 300,
+        windowMs: 60_000,
+        scope: "auth-me",
+        message: "terlalu banyak percobaan; coba lagi nanti",
+      })
+    : createLocalFallbackRateLimit(300, 60_000, "terlalu banyak percobaan; coba lagi nanti");
+
   await fastify.register(async (authScope) => {
-    authScope.addHook("preHandler", authRatePreHandler);
+    authScope.addHook("preHandler", async function (request, reply) {
+      const urlPath = request.url.split("?")[0] ?? "";
+      const targetHandler =
+        request.method === "GET" && urlPath.endsWith("/auth/me")
+          ? authMeRatePreHandler
+          : authRatePreHandler;
+      if (targetHandler.length >= 3) {
+        return await new Promise<void>((resolve, reject) => {
+          const maybePromise = (
+            targetHandler as unknown as (
+              this: FastifyInstance,
+              req: FastifyRequest,
+              rep: FastifyReply,
+              done: (err?: Error) => void,
+            ) => unknown
+          ).call(authScope, request, reply, (err?: Error) => {
+            if (err) reject(err);
+            else resolve();
+          });
+          if (maybePromise && typeof (maybePromise as PromiseLike<unknown>).then === "function") {
+            Promise.resolve(maybePromise).then(() => resolve(), reject);
+          }
+        });
+      }
+      return await (
+        targetHandler as unknown as (
+          this: FastifyInstance,
+          req: FastifyRequest,
+          rep: FastifyReply,
+        ) => unknown
+      ).call(authScope, request, reply);
+    });
     authScope.addHook("onSend", async (_request, reply, payload) => {
       reply.header("cache-control", "no-store");
       return payload;

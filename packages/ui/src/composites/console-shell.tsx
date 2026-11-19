@@ -65,7 +65,7 @@ export function ConsoleShell({
         />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-48">
+      <div className="flex min-w-0 flex-1 flex-col lg:ps-48">
         <TopRail
           title={title}
           brandHref={brandHref}
