@@ -649,7 +649,12 @@ mod tests {
         validate_worktree_dir, verify_action_approval, ActionApprovalBound,
     };
     use rusqlite::Connection;
-    use std::{env, path::Path, thread::sleep, time::Duration};
+    use std::{
+        env,
+        path::Path,
+        thread::sleep,
+        time::{Duration, Instant},
+    };
     use uuid::Uuid;
 
     #[test]
@@ -764,6 +769,22 @@ mod tests {
         assert_eq!(sup_status, "recovered");
     }
 
+    fn wait_for_supervised_exit(run_id: &str, timeout: Duration) -> Result<i32, String> {
+        let deadline = Instant::now() + timeout;
+        loop {
+            if let Some(code) = poll_supervised_process(run_id)? {
+                return Ok(code);
+            }
+            if Instant::now() >= deadline {
+                return Err(format!(
+                    "Supervised process '{run_id}' did not exit within {} ms",
+                    timeout.as_millis()
+                ));
+            }
+            sleep(Duration::from_millis(25));
+        }
+    }
+
     #[test]
     fn strips_secrets_drains_large_pipes_and_enforces_durable_approval() {
         let worktree_dir = env::temp_dir();
@@ -781,15 +802,9 @@ mod tests {
             ],
         )
         .expect("spawn env check");
-        let mut exited = None;
-        for _ in 0..80 {
-            if let Some(code) = poll_supervised_process(&env_run_id).expect("poll env") {
-                exited = Some(code);
-                break;
-            }
-            sleep(Duration::from_millis(25));
-        }
-        assert_eq!(exited, Some(0));
+        let env_exit = wait_for_supervised_exit(&env_run_id, Duration::from_secs(10))
+            .expect("secret environment process should exit before deadline");
+        assert_eq!(env_exit, 0);
         sleep(Duration::from_millis(40));
         let env_out = read_supervised_output(&env_run_id).unwrap_or_default();
         assert_eq!(env_out.trim(), "STRIPPED");
@@ -806,15 +821,9 @@ mod tests {
             ],
         )
         .expect("spawn flood check");
-        let mut flood_exit = None;
-        for _ in 0..120 {
-            if let Some(code) = poll_supervised_process(&flood_run_id).expect("poll flood") {
-                flood_exit = Some(code);
-                break;
-            }
-            sleep(Duration::from_millis(25));
-        }
-        assert_eq!(flood_exit, Some(0));
+        let flood_exit = wait_for_supervised_exit(&flood_run_id, Duration::from_secs(10))
+            .expect("large-output process should exit before deadline");
+        assert_eq!(flood_exit, 0);
         sleep(Duration::from_millis(40));
         let flood_out = read_supervised_output(&flood_run_id).unwrap_or_default();
         assert!(flood_out.contains("...[truncated]"));
