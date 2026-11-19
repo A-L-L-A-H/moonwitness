@@ -66,6 +66,7 @@
     var(--mw-font-component, var(--font-mono), ui-monospace, monospace)
   );
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 :where(html[data-skin="riot"]:not([data-dna="01-imperium-lumen"])) body {
@@ -108,7 +109,7 @@
 }
 :where(html:not([data-dna="01-imperium-lumen"])) ::-webkit-scrollbar-track {
   background: var(--background, var(--ink));
-  border-left: 1px solid var(--border, var(--line));
+  border-inline-start: 1px solid var(--border, var(--line));
 }
 :where(html:not([data-dna="01-imperium-lumen"])) ::-webkit-scrollbar-thumb {
   background: var(--primary, var(--pink));
@@ -423,6 +424,12 @@
   [data-scrim="bottom"] {
     --scene-direction: to top;
   }
+  [dir="rtl"] .scene-scrim {
+    --scene-direction: to left;
+  }
+  [dir="rtl"] [data-scrim="right"] {
+    --scene-direction: to right;
+  }
   :is(.scene-layer, .atlas-layer).skin-riot {
     border-color: var(--pink);
     box-shadow: 5px 5px 0 var(--ink);
@@ -496,6 +503,11 @@
       inset 2px 0 0 var(--pink),
       inset -2px 0 0 var(--blue);
   }
+  [dir="rtl"] .hud-panel.skin-riot {
+    box-shadow:
+      inset -2px 0 0 var(--pink),
+      inset 2px 0 0 var(--blue);
+  }
   .hud-panel.skin-editorial {
     --hud-accent: var(--foreground, var(--paper));
     background: var(--background, var(--panel));
@@ -567,12 +579,19 @@
   .hud-edge-right {
     border-right: 2px solid var(--hud-accent, var(--pink));
   }
+  .hud-edge-start {
+    border-inline-start: 2px solid var(--hud-accent, var(--pink));
+  }
+  .hud-edge-end {
+    border-inline-end: 2px solid var(--hud-accent, var(--pink));
+  }
   .hud-top-rail {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
+    padding-block: 0.5rem;
+    padding-inline: 0.75rem;
   }
   .hud-brand {
     min-width: 0;
@@ -580,6 +599,7 @@
   }
   .hud-top-actions {
     min-width: 0;
+    max-width: 100%;
     margin-inline-start: auto;
   }
   .hud-breadcrumb,
@@ -612,7 +632,8 @@
     overflow: auto;
     overscroll-behavior: contain;
     scroll-padding-bottom: 1.25rem;
-    padding: 0.5rem 0.5rem 1.25rem;
+    padding-block: 0.5rem 1.25rem;
+    padding-inline: 0.5rem;
   }
   .hud-nav-link {
     display: flex;
@@ -1021,8 +1042,19 @@
       transform: translateX(-50%);
     }
   }
+  @keyframes marquee-rtl {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(50%);
+    }
+  }
   .marquee-track {
     animation: marquee 28s linear infinite;
+  }
+  [dir="rtl"] .marquee-track {
+    animation-name: marquee-rtl;
   }
   .marquee-track:hover {
     animation-play-state: paused;
@@ -1237,6 +1269,47 @@
 
 ::view-transition-new(root) {
   animation: mwIrisReveal 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---- RTL logical layout, bidi isolation & popover/rail safety ---- */
+[data-radix-popper-content-wrapper] {
+  max-width: calc(100vw - 1rem);
+}
+
+[dir="rtl"] .font-mono,
+[dir="rtl"] [data-ltr="true"],
+[dir="rtl"] code,
+[dir="rtl"] kbd,
+[dir="rtl"] pre {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+[dir="rtl"] :where(h1, h2, h3, h4, h5, h6, .font-brush, .font-hand, .hud-panel, .hud-nav-link) {
+  letter-spacing: 0;
+}
+
+[dir="rtl"] .zine-input {
+  text-align: start;
+}
+
+[dir="rtl"] [role="dialog"] > button[aria-label="Close"] {
+  right: auto;
+  inset-inline-end: 0.75rem;
+}
+
+[dir="rtl"] [role="dialog"] [role="option"] {
+  text-align: start;
+}
+
+[dir="rtl"] [role="dialog"] [role="option"] .ml-auto {
+  margin-left: 0;
+  margin-inline-start: auto;
+}
+
+[dir="rtl"] [role="dialog"] .mr-2:has(+ input[role="combobox"]) {
+  margin-right: 0;
+  margin-inline-end: 0.5rem;
 }
 
 /* Unlayered dengan sengaja: harus menang atas utility supaya animasi bisa dimatikan. */

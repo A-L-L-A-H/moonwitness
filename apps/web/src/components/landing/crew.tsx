@@ -2,15 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { witnesses } from "@/lib/data";
 import { artSrc } from "@/lib/art";
+import { useTranslation } from "@/hocs/TranslationWrapper";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 import { ArrowRight, SkullCrossbonesFunky } from "@moonwitness/ui/icons";
 import { CrewConstellation, Halftone, Staple, TactileTape, Button } from "@moonwitness/ui";
 
 export function Crew() {
+  const { dictionary } = useTranslation();
+  const crew = dictionary.chronicle.landing.crew;
+  const pathname = usePathname() ?? "";
+  const pathLocale = getLocaleFromPath(pathname);
+  const toHref = (slug: string) => (pathLocale ? getLocalizedUrl(slug, pathLocale) : slug);
+
   return (
     <section
       id="crew"
+      aria-labelledby="crew-heading"
       className="relative scroll-mt-20 border-y-2 border-[var(--border)] bg-[var(--muted)]/35 py-24"
     >
       <Halftone tone="pink" className="pointer-events-none absolute inset-0 opacity-40" />
@@ -18,30 +28,32 @@ export function Crew() {
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b-2 border-dashed border-[var(--border)] pb-6">
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <SkullCrossbonesFunky className="h-5 w-5 text-[var(--primary)]" />
+              <SkullCrossbonesFunky aria-hidden="true" className="h-5 w-5 text-[var(--primary)]" />
               <span className="font-mono text-xs font-black tracking-widest text-[var(--primary)]">
-                SUBVERSIVE NETWORK // GLOBAL FREQUENCIES
+                {crew.eyebrow}
               </span>
             </div>
-            <h2 className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
-              A GLOBAL MAP OF <span className="text-[var(--accent)]">WITNESSES.</span>
+            <h2
+              id="crew-heading"
+              className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl"
+            >
+              {crew.titlePrefix} <span className="text-[var(--accent)]">{crew.titleAccent}</span>
             </h2>
             <p className="mt-2 max-w-xl font-mono text-xs text-[var(--foreground)]">
-              Same moon, different story coordinates. Select a fictional demo profile on the map or
-              in the list to read their story quote.
+              {crew.subtitle}
             </p>
           </div>
           <div className="relative hidden h-32 w-64 overflow-hidden border-2 border-[var(--border)] bg-[var(--card)] shadow-[6px_6px_0_rgba(0,0,0,0.8)] md:block rotate-1">
             <Image
               src={artSrc("crew-wall")}
-              alt="Fictional demo crew collage"
+              alt={crew.collageLabel}
               fill
               className="object-cover contrast-125"
               sizes="256px"
             />
             <TactileTape
               variant="yellow"
-              label="DEMO COLLAGE"
+              label={crew.collageLabel}
               width={110}
               className="-top-2 right-2 rotate-6 text-[9px]"
             />
@@ -52,11 +64,11 @@ export function Crew() {
           witnesses={witnesses}
           stats={[]}
           demo
-          stickerText="DEMO CHARACTERS. SAME STORY SKY."
+          stickerText={crew.sticker}
           cta={
-            <Link href="/shadow">
+            <Link href={toHref("/shadow")}>
               <Button className="px-6 py-3.5 text-base">
-                EXPLORE THE CREW <ArrowRight className="h-4 w-4" />
+                {crew.cta} <ArrowRight aria-hidden="true" className="h-4 w-4" />
               </Button>
             </Link>
           }

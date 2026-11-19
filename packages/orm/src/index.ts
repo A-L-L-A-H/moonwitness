@@ -5,8 +5,10 @@ export {
   ScopedRepository,
   matchesFilter,
   AUDIT_DDL,
+  OUTBOX_DDL,
   ormAuditMigrations,
   ensureAuditTable,
+  ensureOutboxTable,
 } from "./define-model.js";
 export type {
   DefineModelOptions,
@@ -25,15 +27,20 @@ export type {
   RegisteredModelDescriptor,
   ModelWriteEvent,
   ModelWriteHandler,
+  ModelHookError,
 } from "./registry.js";
 export type {
   ModelIndex,
   FieldSpec,
+  ForeignKeySpec,
+  Many2ManyJoinTableSpec,
   RuntimeCustomFieldSpec,
+  ValidateAttrsOptions,
   ZodObjectLike,
 } from "./schema-utils.js";
-export { syncModels } from "./sync.js";
-export type { SyncModelsOptions, SyncReport } from "./sync.js";
+export { validateAttrsPayload } from "./schema-utils.js";
+export { syncModels, preflightRelationIntegrity } from "./sync.js";
+export type { SyncModelsOptions, SyncReport, RelationIntegrityViolation } from "./sync.js";
 export type { BaseMetadata, RecordStatus, RecordSource } from "./base-metadata.js";
 export {
   createActorContext,
@@ -45,7 +52,7 @@ export {
 } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
 export { ConflictError, PolicyError, type PolicyErrorCode } from "./errors.js";
-export { initDb, initD1Db, initPostgresDb, closeDb, getDb } from "./driver.js";
+export { initDb, initD1Db, initPostgresDb, closeDb, getDb, withQueryBudget } from "./driver.js";
 export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
 export type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
@@ -63,19 +70,29 @@ export {
   backupDatabase,
   restoreDatabase,
   verifyIntegrity,
+  verifyBackupIntegrity,
   listDatabaseTables,
   encryptBackupFile,
   decryptBackupFile,
 } from "./backup.js";
 export type { BackupCommandOptions, ExternalCommandRunner } from "./backup.js";
 
-export { compileTupleDomainToFilter } from "./model-meta.js";
+export {
+  compileTupleDomainToFilter,
+  normalizeComputedFieldDef,
+  MAX_DOMAIN_CLAUSES,
+  MAX_DOMAIN_DEPTH,
+  MAX_IN_LIST_SIZE,
+  MAX_STRING_VALUE_LEN,
+} from "./model-meta.js";
 export type {
   ConstrainContext,
   FieldPolicySpec,
   ModelActionContext,
   ModelActionDef,
+  ModelComputedFieldDef,
   ModelComputedFieldFn,
+  ModelComputedFieldSpec,
   ModelComputedFields,
   ModelConstraint,
   ModelDefaults,
@@ -86,4 +103,5 @@ export type {
   ModelRetention,
   ModelRole,
   ModelWriteAction,
+  StoredComputedFieldType,
 } from "./model-meta.js";

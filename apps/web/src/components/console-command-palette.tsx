@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   CommandDialog,
   CommandEmpty,
@@ -18,8 +18,12 @@ import {
   useSkin,
   type BrandLogoId,
 } from "@moonwitness/ui";
+import { buildEnterpriseNavItems } from "@/data/navigation/verticalMenuData";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import { useMetaModelsCatalog } from "@/lib/api/meta-views";
-import { navHref, navItems, operationsNavItems } from "./shell/nav-items";
+import { useCurrentIdentity } from "@/lib/session";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
+import { navHref } from "./shell/nav-items";
 
 export interface ConsoleCommandPaletteProps {
   plane?: "creator" | "operations" | "all";
@@ -27,12 +31,26 @@ export interface ConsoleCommandPaletteProps {
   onOpenChange?: (open: boolean) => void;
 }
 
+const CREATOR_QUICK_MODELS = [
+  "timeline.event",
+  "witness.claim",
+  "crm.lead",
+  "stock.move",
+  "account.move",
+  "cab.request",
+] as const;
+
 export function ConsoleCommandPalette({
   plane = "all",
   open: controlledOpen,
   onOpenChange,
 }: ConsoleCommandPaletteProps) {
   const router = useRouter();
+  const pathname = usePathname() ?? "";
+  const urlLocale = getLocaleFromPath(pathname);
+  const { direction, dictionary } = useTranslation();
+  const session = useCurrentIdentity();
+
   const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
   const isOpen = controlledOpen ?? uncontrolledOpen;
   const setOpen = onOpenChange ?? setUncontrolledOpen;
@@ -41,16 +59,44 @@ export function ConsoleCommandPalette({
   const presets = useMemo(() => listPresets(), []);
   const worlds = useMemo(() => listDnaWorlds(), []);
   const catalog = useMetaModelsCatalog();
+
   const routes = useMemo(() => {
-    if (plane === "creator") return navItems;
-    if (plane === "operations") return operationsNavItems;
+    const localePrefix = urlLocale ?? "";
+    if (plane === "creator") {
+      return buildEnterpriseNavItems("creator", dictionary, localePrefix, session?.role);
+    }
+    if (plane === "operations") {
+      return buildEnterpriseNavItems("operations", dictionary, localePrefix, session?.role);
+    }
+    const creatorRoutes = buildEnterpriseNavItems(
+      "creator",
+      dictionary,
+      localePrefix,
+      session?.role,
+    );
+    const operationsRoutes = buildEnterpriseNavItems(
+      "operations",
+      dictionary,
+      localePrefix,
+      session?.role,
+    );
     const seen = new Set<string>();
-    return [...navItems, ...operationsNavItems].filter((item) => {
+    return [...creatorRoutes, ...operationsRoutes].filter((item) => {
       if (seen.has(item.id)) return false;
       seen.add(item.id);
       return true;
     });
-  }, [plane]);
+  }, [dictionary, plane, session?.role, urlLocale]);
+
+  const modelEntries = useMemo(() => {
+    const seeded = plane === "operations" ? catalog : [...catalog, ...CREATOR_QUICK_MODELS];
+    return Array.from(new Set(seeded)).map((model) => ({
+      model,
+      href: urlLocale
+        ? getLocalizedUrl(`/apps/addons?model=${encodeURIComponent(model)}`, urlLocale)
+        : `/addons?model=${encodeURIComponent(model)}`,
+    }));
+  }, [catalog, plane, urlLocale]);
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -67,27 +113,33 @@ export function ConsoleCommandPalette({
     <CommandDialog
       open={isOpen}
       onOpenChange={setOpen}
-      title="Sovereign Command Palette"
+      title={dictionary.operations.commandPalette.title}
       skin={skin}
     >
-      <CommandInput autoFocus placeholder="Type a command, module, skin, or DNA world…" />
-      <CommandList>
-        <CommandEmpty>No matching commands.</CommandEmpty>
+      <CommandInput
+        autoFocus
+        dir={direction}
+        placeholder={dictionary.operations.commandPalette.placeholder}
+      />
+      <CommandList dir={direction}>
+        <CommandEmpty>{dictionary.operations.commandPalette.empty}</CommandEmpty>
 
-        <CommandGroup heading="Modules & Workspaces">
+        <CommandGroup heading={dictionary.operations.commandPalette.modulesGroup}>
           {routes.map((item) => {
             const href = navHref(item);
             return (
               <CommandItem
                 key={`nav-${item.id}`}
-                value={`${item.label} ${href}`}
+                value={`${item.label} ${item.id} ${href}`}
                 onSelect={() => {
                   setOpen(false);
                   router.push(href);
                 }}
               >
                 <span>{item.label}</span>
-                <CommandShortcut>{href}</CommandShortcut>
+                <CommandShortcut dir="ltr" className="font-mono">
+                  {href}
+                </CommandShortcut>
               </CommandItem>
             );
           })}
@@ -95,28 +147,29 @@ export function ConsoleCommandPalette({
 
         <CommandSeparator />
 
-        <CommandGroup heading="Live ORM Models">
-          {catalog.map((model) => {
-            const href = `/addons?model=${encodeURIComponent(model)}`;
-            return (
-              <CommandItem
-                key={`model-${model}`}
-                value={`model ${model}`}
-                onSelect={() => {
-                  setOpen(false);
-                  router.push(href);
-                }}
-              >
-                <span>{model}</span>
-                <CommandShortcut>{href}</CommandShortcut>
-              </CommandItem>
-            );
-          })}
+        <CommandGroup heading={dictionary.operations.commandPalette.modelsGroup}>
+          {modelEntries.map(({ model, href }) => (
+            <CommandItem
+              key={`model-${model}`}
+              value={`model ${model} ${href}`}
+              onSelect={() => {
+                setOpen(false);
+                router.push(href);
+              }}
+            >
+              <span dir="ltr" className="font-mono">
+                {model}
+              </span>
+              <CommandShortcut dir="ltr" className="font-mono">
+                {href}
+              </CommandShortcut>
+            </CommandItem>
+          ))}
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Surface Skin (8-Axis Engine)">
+        <CommandGroup heading={dictionary.operations.commandPalette.skinsGroup}>
           {presets.map((key) => {
             const preset = skinPresets[key];
             return (
@@ -129,15 +182,51 @@ export function ConsoleCommandPalette({
                 }}
               >
                 <span>{preset.label}</span>
-                <CommandShortcut>{skin === key ? "ACTIVE" : key.toUpperCase()}</CommandShortcut>
+                <CommandShortcut dir="ltr" className="font-mono">
+                  {skin === key ? dictionary.addons.active : key.toUpperCase()}
+                </CommandShortcut>
               </CommandItem>
             );
           })}
+          {(["dark", "light", "system"] as const).map((nextMode) => (
+            <CommandItem
+              key={`mode-${nextMode}`}
+              value={`theme mode ${nextMode}`}
+              onSelect={() => {
+                setMode(nextMode);
+                setOpen(false);
+              }}
+            >
+              <span dir="ltr" className="font-mono">
+                theme.{nextMode}
+              </span>
+              <CommandShortcut>
+                {mode === nextMode ? dictionary.addons.active : dictionary.common.status}
+              </CommandShortcut>
+            </CommandItem>
+          ))}
+          {(["compact", "comfortable", "spacious"] as const).map((nextDensity) => (
+            <CommandItem
+              key={`density-${nextDensity}`}
+              value={`density ${nextDensity}`}
+              onSelect={() => {
+                setDensity(nextDensity);
+                setOpen(false);
+              }}
+            >
+              <span dir="ltr" className="font-mono">
+                density.{nextDensity}
+              </span>
+              <CommandShortcut>
+                {density === nextDensity ? dictionary.addons.active : dictionary.common.status}
+              </CommandShortcut>
+            </CommandItem>
+          ))}
         </CommandGroup>
 
         <CommandSeparator />
 
-        <CommandGroup heading="Master DNA Worlds">
+        <CommandGroup heading={dictionary.operations.commandPalette.worldsGroup}>
           {worlds.map((world) => (
             <CommandItem
               key={`dna-${world.id}`}
@@ -151,127 +240,24 @@ export function ConsoleCommandPalette({
                 <DnaBrandLogo id={world.id as BrandLogoId} variant="mark" size={16} decorative />
                 <span>{world.name}</span>
               </span>
-              <CommandShortcut>{dnaId === world.id ? "ACTIVE" : world.numeral}</CommandShortcut>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-
-        <CommandSeparator />
-
-        <CommandGroup heading="Mode & Density">
-          {(["dark", "light", "system"] as const).map((nextMode) => (
-            <CommandItem
-              key={`mode-${nextMode}`}
-              value={`theme mode ${nextMode}`}
-              onSelect={() => {
-                setMode(nextMode);
-                setOpen(false);
-              }}
-            >
-              <span>Theme: {nextMode.toUpperCase()}</span>
-              <CommandShortcut>{mode === nextMode ? "ACTIVE" : "SET"}</CommandShortcut>
-            </CommandItem>
-          ))}
-          {(["compact", "comfortable", "spacious"] as const).map((nextDensity) => (
-            <CommandItem
-              key={`density-${nextDensity}`}
-              value={`density ${nextDensity}`}
-              onSelect={() => {
-                setDensity(nextDensity);
-                setOpen(false);
-              }}
-            >
-              <span>Density: {nextDensity.toUpperCase()}</span>
-              <CommandShortcut>{density === nextDensity ? "ACTIVE" : "SET"}</CommandShortcut>
-            </CommandItem>
-          ))}
-        </CommandGroup>
-        <CommandGroup heading="Studios, Models & Addons">
-          {[
-            { label: "Addons Catalog & Installs", href: "/addons", tag: "ADDONS" },
-            { label: "Skin Laboratory (10-Skin Engine)", href: "/skin-lab", tag: "SKIN LAB" },
-            { label: "Identity & Avatar Studio", href: "/id-lab", tag: "ID LAB" },
-            {
-              label: "Model Inspector: Timeline Event",
-              href: "/addons?model=timeline.event",
-              tag: "MODEL",
-            },
-            {
-              label: "Model Inspector: Witness Claim",
-              href: "/addons?model=witness.claim",
-              tag: "MODEL",
-            },
-            {
-              label: "Model Inspector: CRM Lead",
-              href: "/addons?model=crm.lead",
-              tag: "MODEL",
-            },
-            {
-              label: "Model Inspector: Stock Move",
-              href: "/addons?model=stock.move",
-              tag: "MODEL",
-            },
-            {
-              label: "Model Inspector: Account Move",
-              href: "/addons?model=account.move",
-              tag: "MODEL",
-            },
-            {
-              label: "Model Inspector: CAB Request",
-              href: "/addons?model=cab.request",
-              tag: "MODEL",
-            },
-            {
-              label: "Enterprise Analytics Dashboard",
-              href: "/en/dashboards/analytics",
-              tag: "DASHBOARD",
-            },
-            {
-              label: "Enterprise CRM Workspace",
-              href: "/en/dashboards/crm",
-              tag: "DASHBOARD",
-            },
-            {
-              label: "Enterprise Logistics & Geo",
-              href: "/en/dashboards/logistics",
-              tag: "DASHBOARD",
-            },
-            {
-              label: "Double-Entry Accounting & Ledger",
-              href: "/en/apps/invoice",
-              tag: "APP",
-            },
-            {
-              label: "Witness 9-Module & Mizan Lab",
-              href: "/en/apps/academy",
-              tag: "APP",
-            },
-            {
-              label: "Celestial & M-Time Observatory",
-              href: "/en/apps/observatory",
-              tag: "APP",
-            },
-            { label: "ARSY Control Plane", href: "/control", tag: "OPS" },
-            { label: "VPN & Mesh Tunnel", href: "/control?tab=vpn", tag: "OPS" },
-            { label: "SNMP Telemetry Probes", href: "/control?tab=snmp", tag: "OPS" },
-            { label: "Syslog Stream", href: "/control?tab=syslog", tag: "OPS" },
-            { label: "RADIUS Access Control", href: "/control?tab=radius", tag: "OPS" },
-            { label: "Storage Browser", href: "/control?tab=storage", tag: "OPS" },
-          ].map((entry) => (
-            <CommandItem
-              key={`jump-${entry.href}`}
-              value={`${entry.label} ${entry.href} ${entry.tag}`}
-              onSelect={() => {
-                router.push(entry.href);
-                setOpen(false);
-              }}
-            >
-              <span>{entry.label}</span>
-              <CommandShortcut>{entry.tag}</CommandShortcut>
+              <CommandShortcut dir="ltr" className="font-mono">
+                {dnaId === world.id ? dictionary.addons.active : world.numeral}
+              </CommandShortcut>
             </CommandItem>
           ))}
         </CommandGroup>
       </CommandList>
+      <div
+        dir={direction}
+        className="flex items-center justify-between gap-2 border-t border-[var(--border)] bg-[var(--muted)]/40 px-3 py-2 font-mono text-[11px] text-[var(--muted-foreground)]"
+      >
+        <span>{dictionary.operations.commandPalette.shortcutHint}</span>
+        <span className="text-[10px] uppercase">
+          {plane === "operations"
+            ? dictionary.operations.workspace.planeLabel
+            : dictionary.shell.theEmpire}
+        </span>
+      </div>
     </CommandDialog>
   );
 }

@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { requestApiJson } from "@moonwitness/contracts/sdk";
 import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
   Badge,
   Button,
   Card,
@@ -10,12 +13,18 @@ import {
   CardDescription,
   CardHeader,
   CutoutArtwork,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
   Input,
+  Skeleton,
   SkinOrnament,
 } from "@moonwitness/ui";
 import { AutoModelConsole } from "@/components/meta/auto-model-console";
-import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { MTimeInteractiveEngine } from "@/components/mtime-observatory";
+import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
 interface CelestialNowPayload {
@@ -49,8 +58,14 @@ interface ObservatorySummaryPayload {
   operations?: number;
 }
 
+const OBSERVATORY_MODELS = [
+  { id: "observatory.feed", label: "Observatory Feeds" },
+  { id: "celestial.snapshot", label: "Celestial Snapshots" },
+  { id: "sg.operation", label: "Scripture Operations" },
+] as const;
+
 export function ObservatoryAppView() {
-  const { dictionary } = useTranslation();
+  const { direction, dictionary } = useTranslation();
   const [search, setSearch] = useState("");
   const [activeModel, setActiveModel] = useState<string>("observatory.feed");
   const [lat, setLat] = useState("-6.2088");
@@ -58,34 +73,64 @@ export function ObservatoryAppView() {
   const [prayers, setPrayers] = useState<PrayerTimesPayload | null>(null);
   const [hilal, setHilal] = useState<HilalPayload | null>(null);
   const [obsSummary, setObsSummary] = useState<ObservatorySummaryPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [unavailable, setUnavailable] = useState(false);
+  const requestSeq = useRef(0);
 
-  async function loadCelestialTelemetry(latitude: string, longitude: string) {
-    const q = `lat=${encodeURIComponent(latitude)}&lng=${encodeURIComponent(longitude)}`;
-    const [nowRes, pRes, oRes] = await Promise.all([
-      requestApiJson<CelestialNowPayload>(`/api/v1/celestial/now?${q}`).catch(() => null),
-      requestApiJson<PrayerTimesPayload>(`/api/v1/celestial/prayer-times?${q}`).catch(() => null),
-      requestApiJson<ObservatorySummaryPayload>("/api/v1/observatory/summary").catch(() => null),
-    ]);
-    const elong = Number.isFinite(nowRes?.lunar?.elongationDeg)
-      ? Number(nowRes!.lunar!.elongationDeg).toFixed(2)
-      : "6.80";
-    const hRes = await requestApiJson<HilalPayload>(
-      `/api/v1/celestial/hilal?altitude=3.50&elongation=${encodeURIComponent(elong)}&width=0.35`,
-    ).catch(() => null);
-    if (pRes) setPrayers(pRes);
-    if (hRes) setHilal(hRes);
-    if (oRes) setObsSummary(oRes);
-  }
+  const loadCelestialTelemetry = useCallback(
+    async (latitude: string, longitude: string) => {
+      const seq = ++requestSeq.current;
+      setLoading(true);
+      setError(null);
+      setUnavailable(false);
+
+      const q = `lat=${encodeURIComponent(latitude)}&lng=${encodeURIComponent(longitude)}`;
+      const [nowResult, prayerResult, obsResult] = await Promise.allSettled([
+        requestApiJson<CelestialNowPayload>(`/api/v1/celestial/now?${q}`),
+        requestApiJson<PrayerTimesPayload>(`/api/v1/celestial/prayer-times?${q}`),
+        requestApiJson<ObservatorySummaryPayload>("/api/v1/observatory/summary"),
+      ]);
+
+      if (seq !== requestSeq.current) return;
+
+      const nowRes = nowResult.status === "fulfilled" ? nowResult.value : null;
+      const pRes = prayerResult.status === "fulfilled" ? prayerResult.value : null;
+      const oRes = obsResult.status === "fulfilled" ? obsResult.value : null;
+
+      const elong = Number.isFinite(nowRes?.lunar?.elongationDeg)
+        ? Number(nowRes!.lunar!.elongationDeg).toFixed(2)
+        : "6.80";
+
+      const hRes = await requestApiJson<HilalPayload>(
+        `/api/v1/celestial/hilal?altitude=3.50&elongation=${encodeURIComponent(elong)}&width=0.35`,
+      ).catch(() => null);
+
+      if (seq !== requestSeq.current) return;
+
+      if (pRes) setPrayers(pRes);
+      if (hRes) setHilal(hRes);
+      if (oRes) setObsSummary(oRes);
+
+      if (
+        nowResult.status === "rejected" &&
+        prayerResult.status === "rejected" &&
+        obsResult.status === "rejected"
+      ) {
+        const reason = prayerResult.reason ?? nowResult.reason ?? obsResult.reason;
+        setError(reason instanceof Error ? reason.message : dictionary.errors.networkOffline);
+      } else if (!nowRes && !pRes && !oRes && !hRes) {
+        setUnavailable(true);
+      }
+
+      setLoading(false);
+    },
+    [dictionary.errors.networkOffline],
+  );
 
   useEffect(() => {
     void loadCelestialTelemetry(lat, lon);
-  }, [lat, lon]);
-
-  const models = [
-    { id: "observatory.feed", label: "Observatory Feeds" },
-    { id: "celestial.snapshot", label: "Celestial Snapshots" },
-    { id: "sg.operation", label: "Scripture Operations" },
-  ] as const;
+  }, [lat, lon, loadCelestialTelemetry]);
 
   const prayerEntries = prayers
     ? (
@@ -111,7 +156,7 @@ export function ObservatoryAppView() {
         placeholder: dictionary.shell.searchPlaceholder,
       }}
     >
-      <div className="space-y-4">
+      <div dir={direction} className="space-y-4">
         <Card className="relative overflow-hidden">
           <SkinOrnament slot="corner" className="start-2 top-2" />
           <CutoutArtwork
@@ -119,49 +164,124 @@ export function ObservatoryAppView() {
             decorative
             className="pointer-events-none absolute -top-2 hidden h-24 w-24 opacity-20 sm:block ltr:-right-4 rtl:-left-4"
           />
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline">CELESTIAL & M-TIME EPHEMERIS</Badge>
-              <Badge variant="default">
-                HILAL:{" "}
-                {hilal?.overall_verdict ??
-                  (hilal?.mabims_criterion?.passed ? "MABIMS PASS" : "BELOW THRESHOLD")}
-              </Badge>
-              <Badge variant="secondary">
-                FEEDS: {obsSummary?.feeds ?? 0} · OPS: {obsSummary?.operations ?? 0}
-              </Badge>
+          <CardHeader className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline">{dictionary.operations.workspace.planeLabel}</Badge>
+                <Badge variant="secondary">{dictionary.sanctuary.mtime.criteriaLabel}</Badge>
+                <Badge variant="default" dir="ltr" className="font-mono">
+                  HILAL:{" "}
+                  {hilal?.overall_verdict ??
+                    (hilal?.mabims_criterion?.passed ? "MABIMS PASS" : "BELOW THRESHOLD")}
+                </Badge>
+                <Badge variant="secondary" dir="ltr" className="font-mono">
+                  FEEDS: {obsSummary?.feeds ?? 0} · OPS: {obsSummary?.operations ?? 0}
+                </Badge>
+              </div>
+              <h1 className="text-lg font-semibold uppercase leading-none tracking-tight">
+                {dictionary.apps.observatoryTitle}
+              </h1>
+              <CardDescription>{dictionary.apps.observatorySubtitle}</CardDescription>
             </div>
-            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
-              {dictionary.apps.observatoryTitle}
-            </h1>
-            <CardDescription>{dictionary.apps.observatorySubtitle}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
             <div className="flex flex-wrap items-center gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={loading}
+                onClick={() => void loadCelestialTelemetry(lat, lon)}
+              >
+                {loading
+                  ? dictionary.common.loading
+                  : dictionary.operations.workspace.telemetryRefresh}
+              </Button>
+            </div>
+          </CardHeader>
+
+          <CardContent className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2 border border-[var(--border)] bg-[var(--background)] p-3">
               <Input
                 value={lat}
+                dir="ltr"
                 onChange={(e) => setLat(e.target.value)}
                 placeholder="Latitude"
                 aria-label="Observer Latitude"
-                className="max-w-[140px]"
+                className="max-w-[140px] font-mono"
               />
               <Input
                 value={lon}
+                dir="ltr"
                 onChange={(e) => setLon(e.target.value)}
                 placeholder="Longitude"
                 aria-label="Observer Longitude"
-                className="max-w-[140px]"
+                className="max-w-[140px] font-mono"
               />
-              <Button type="button" size="sm" onClick={() => void loadCelestialTelemetry(lat, lon)}>
-                Recompute Ephemeris
+              <Button
+                type="button"
+                size="sm"
+                disabled={loading}
+                onClick={() => void loadCelestialTelemetry(lat, lon)}
+              >
+                {dictionary.common.refresh}
               </Button>
               {prayers?.qibla_bearing !== undefined ? (
-                <Badge variant="outline">QIBLA AZIMUTH: {prayers.qibla_bearing}°</Badge>
+                <Badge variant="outline">
+                  {dictionary.sanctuary.mtime.azimuthLabel}:{" "}
+                  <span dir="ltr" className="ms-1 font-mono">
+                    {prayers.qibla_bearing}°
+                  </span>
+                </Badge>
               ) : null}
             </div>
 
-            {prayerEntries.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-6 font-mono text-xs">
+            {error ? (
+              <Alert variant="destructive">
+                <AlertTitle>{dictionary.errors.networkOffline}</AlertTitle>
+                <AlertDescription className="flex flex-wrap items-center justify-between gap-2">
+                  <span>{error}</span>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void loadCelestialTelemetry(lat, lon)}
+                  >
+                    {dictionary.operations.workspace.telemetryRefresh}
+                  </Button>
+                </AlertDescription>
+              </Alert>
+            ) : null}
+
+            {loading && prayerEntries.length === 0 ? (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-6" aria-busy="true">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="space-y-2 border border-[var(--border)] bg-[var(--background)] p-2.5"
+                  >
+                    <Skeleton className="h-3 w-12" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                ))}
+              </div>
+            ) : unavailable || (!loading && !error && prayerEntries.length === 0) ? (
+              <Empty className="border border-dashed border-[var(--border)] py-6">
+                <EmptyHeader>
+                  <EmptyTitle>{dictionary.common.noRecords}</EmptyTitle>
+                  <EmptyDescription>{dictionary.errors.networkOffline}</EmptyDescription>
+                </EmptyHeader>
+                <EmptyContent>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void loadCelestialTelemetry(lat, lon)}
+                  >
+                    {dictionary.operations.workspace.telemetryRefresh}
+                  </Button>
+                </EmptyContent>
+              </Empty>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 font-mono text-xs sm:grid-cols-6">
                 {prayerEntries.map(([name, time]) => (
                   <div
                     key={name}
@@ -170,11 +290,13 @@ export function ObservatoryAppView() {
                     <div className="text-[10px] uppercase text-[var(--muted-foreground)]">
                       {name}
                     </div>
-                    <div className="mt-1 font-bold">{time}</div>
+                    <div dir="ltr" className="mt-1 font-mono font-bold">
+                      {time}
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : null}
+            )}
           </CardContent>
         </Card>
 
@@ -184,19 +306,54 @@ export function ObservatoryAppView() {
           </CardContent>
         </Card>
 
-        <div className="flex flex-wrap gap-2">
-          {models.map((m) => (
-            <Button
-              key={m.id}
-              type="button"
-              size="sm"
-              variant={activeModel === m.id ? "default" : "outline"}
-              onClick={() => setActiveModel(m.id)}
-            >
-              {m.label} ({m.id})
-            </Button>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="space-y-3 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-[11px] uppercase text-[var(--muted-foreground)]">
+                  {dictionary.operations.workspace.activeModuleLabel}:
+                </span>
+                <Badge dir="ltr" variant="outline" className="font-mono">
+                  {activeModel}
+                </Badge>
+              </div>
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={dictionary.shell.searchPlaceholder}
+                  aria-label={dictionary.shell.searchPlaceholder}
+                  className="h-9 min-w-[200px] sm:w-64"
+                />
+                {search ? (
+                  <Button type="button" size="sm" variant="ghost" onClick={() => setSearch("")}>
+                    {dictionary.common.reset}
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-mono text-[11px] uppercase text-[var(--muted-foreground)]">
+                {dictionary.common.filter}:
+              </span>
+              {OBSERVATORY_MODELS.map((m) => (
+                <Button
+                  key={m.id}
+                  type="button"
+                  size="sm"
+                  variant={activeModel === m.id ? "default" : "outline"}
+                  onClick={() => setActiveModel(m.id)}
+                >
+                  <span>{m.label}</span>
+                  <span dir="ltr" className="ms-1.5 font-mono text-[11px] opacity-80">
+                    ({m.id})
+                  </span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         <AutoModelConsole
           model={activeModel}

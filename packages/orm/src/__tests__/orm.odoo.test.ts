@@ -127,6 +127,7 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
       name: "t.era",
       table: "t_eras",
       schema: z.object({ key: z.string() }),
+      indexes: [{ fields: ["tenant_id", "key"], unique: true }],
     });
     const event = defineModel({
       name: "t.event",
@@ -172,6 +173,7 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
       name: "t.team",
       table: "t_teams",
       schema: z.object({ code: z.string(), name: z.string() }),
+      indexes: [{ fields: ["tenant_id", "code"], unique: true }],
       relations: {
         members: {
           model: "t.member",

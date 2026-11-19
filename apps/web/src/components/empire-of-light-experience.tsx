@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@moonwitness/ui";
 import {
@@ -11,7 +12,8 @@ import {
   WorldTile,
 } from "@moonwitness/ui/imperium";
 import gateCrowdMoonArt from "../../public/art/gate-crowd-moon.webp";
-import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { i18n } from "@/configs/i18n";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import type { EntryDoorId } from "@/data/empire-canon-codex";
 import {
   WORLD_ART,
@@ -59,20 +61,23 @@ const WORLD_TAGLINES_AR: Readonly<Record<WorldIdentifier, string>> = {
 };
 
 export function EmpireOfLightExperience() {
-  const { locale, toggleLocale } = useSanctuaryLocale();
+  const { locale, dictionary, setLocale } = useTranslation();
+  const pathname = usePathname() ?? "";
   const handleLocaleSwitch = useCallback(() => {
+    const order = i18n.locales;
+    const next = order[(order.indexOf(locale) + 1) % order.length] ?? i18n.defaultLocale;
+    setLocale(next);
+
     if (typeof window !== "undefined") {
-      const currentPath = window.location.pathname;
+      const currentPath = pathname || window.location.pathname;
       const currentPathLocale = getLocaleFromPath(currentPath);
       if (currentPathLocale) {
-        const order = ["en", "id", "ar"] as const;
-        const next = order[(order.indexOf(locale) + 1) % order.length] ?? "en";
-        window.location.assign(getLocalizedUrl(currentPath, next));
-        return;
+        const search = window.location.search ?? "";
+        const hash = window.location.hash ?? "";
+        window.location.assign(getLocalizedUrl(`${currentPath}${search}${hash}`, next));
       }
     }
-    toggleLocale();
-  }, [locale, toggleLocale]);
+  }, [locale, pathname, setLocale]);
   const [activeNavTab, setActiveNavTab] = useState<NavigationSectionId>("the-gate");
   const [activeWorldId, setActiveWorldId] = useState<WorldIdentifier>("human-pen");
   const [activeDoorId, setActiveDoorId] = useState<EntryDoorId>("story-universe");
@@ -232,7 +237,10 @@ export function EmpireOfLightExperience() {
         quietMode={quietMode}
         mobileMenuOpen={mobileMenuOpen}
         onNavigateToSection={navigateToSection}
-        onOpenSearch={() => setSearchModalOpen(true)}
+        onOpenSearch={() => {
+          setMobileMenuOpen(false);
+          setSearchModalOpen(true);
+        }}
         onToggleRadiance={() => setSanctuaryRadianceActive((prev) => !prev)}
         onToggleLocale={handleLocaleSwitch}
         onToggleQuietMode={() => setQuietMode((prev) => !prev)}
@@ -363,15 +371,7 @@ export function EmpireOfLightExperience() {
           }
           shelf={
             <WorldExplorer
-              heading={
-                <h2>
-                  {locale === "id"
-                    ? "JELAJAHI SEMBILAN DUNIA"
-                    : locale === "ar"
-                      ? "استكشف العوالم التسعة"
-                      : "EXPLORE THE NINE WORLDS"}
-                </h2>
-              }
+              heading={<h2>{dictionary.sanctuary.worlds.heading}</h2>}
               trailing={
                 <span className="text-[var(--dna-accent-secondary)] text-xl" aria-hidden="true">
                   ✦

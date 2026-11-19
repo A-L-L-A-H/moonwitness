@@ -12,13 +12,20 @@ import { ShortcutsDropdown } from "@/components/layout/shared/ShortcutsDropdown"
 import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { SkinSwitcher } from "@/components/skin-switcher";
 import { buildEnterpriseNavItems } from "@/data/navigation/verticalMenuData";
-import { useTranslation } from "@/hocs/TranslationWrapper";
+import { useOptionalTranslation, useTranslation } from "@/hocs/TranslationWrapper";
 import { useCelestialNow, useCompaniesCatalog, useMetaNavigation } from "@/lib/api/meta-views";
 import { useSavedAvatar } from "@/lib/avatar-store";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { notifySessionChange, useCurrentIdentity } from "@/lib/session";
-import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
-import { activeByPath, navHref, navItems, operationsNavItems, type NavItem } from "./nav-items";
+import { getLocaleFromPath, getLocalizedUrl, stripLocalePrefix } from "@/utils/i18n";
+import {
+  activeByPath,
+  localizeNavItemLabels,
+  navHref,
+  navItems,
+  operationsNavItems,
+  type NavItem,
+} from "./nav-items";
 import { Notifications } from "./notifications";
 import { ProfileMenu } from "./profile-menu";
 import { useActiveSection } from "./use-active-section";
@@ -30,7 +37,7 @@ function localizeNavItems(items: NavItem[], localePrefix: string): NavItem[] {
   if (!localePrefix) return items;
   return items.map((item) => {
     const rawHref = item.target.href.startsWith("/") ? item.target.href : `/${item.target.href}`;
-    const unprefixedHref = rawHref.replace(/^\/(en|id|ar)(?=\/|$)/, "") || "/";
+    const unprefixedHref = stripLocalePrefix(rawHref) || "/";
     let mappedHref = unprefixedHref;
     if (unprefixedHref === "/control" || unprefixedHref.startsWith("/control?")) {
       mappedHref = `/apps${unprefixedHref}`;
@@ -71,30 +78,32 @@ export function ConsoleShellAdapter({
 }) {
   const operations = plane === "operations";
   const router = useRouter();
-  const pathname = usePathname();
-  const pathLocale = getLocaleFromPath(pathname);
-  const { dictionary } = useTranslation();
+  const pathname = usePathname() ?? "";
+  const urlLocale = getLocaleFromPath(pathname);
+  const { locale, dictionary } = useTranslation();
+  const hasTranslationProvider = useOptionalTranslation() !== null;
   const session = useCurrentIdentity();
 
   const staticItems = useMemo(() => {
-    if (!pathLocale) {
-      return operations ? operationsNavItems : navItems;
+    if (urlLocale) {
+      return buildEnterpriseNavItems(plane, dictionary, urlLocale, session?.role);
     }
-    return buildEnterpriseNavItems(plane, dictionary, pathLocale, session?.role);
-  }, [dictionary, operations, pathLocale, plane, session?.role]);
+    const unprefixed = operations ? operationsNavItems : navItems;
+    return hasTranslationProvider ? localizeNavItemLabels(unprefixed, dictionary) : unprefixed;
+  }, [dictionary, hasTranslationProvider, operations, plane, session?.role, urlLocale]);
 
   const rawItems = useMetaNavigation(plane, staticItems, Boolean(session));
   const items = useMemo(
-    () => (pathLocale ? localizeNavItems(rawItems, pathLocale) : rawItems),
-    [pathLocale, rawItems],
+    () => (urlLocale ? localizeNavItems(rawItems, urlLocale) : rawItems),
+    [rawItems, urlLocale],
   );
 
-  const rootHref = pathLocale
-    ? getLocalizedUrl(operations ? "/apps/control" : "/", pathLocale)
+  const rootHref = urlLocale
+    ? getLocalizedUrl(operations ? "/apps/control" : "/", urlLocale)
     : operations
       ? "/control"
       : "/";
-  const moonwitnessHref = pathLocale ? getLocalizedUrl("/moonwitness", pathLocale) : "/moonwitness";
+  const moonwitnessHref = urlLocale ? getLocalizedUrl("/moonwitness", urlLocale) : "/moonwitness";
   const active = activeOverride ?? activeByPath(pathname);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -125,7 +134,7 @@ export function ConsoleShellAdapter({
       .finally(() => {
         notifySessionChange();
       });
-    router.push(pathLocale ? getLocalizedUrl("/", pathLocale) : "/");
+    router.push(urlLocale ? getLocalizedUrl("/", urlLocale) : "/");
   }
 
   const hudItems: HudNavItem[] = items.map((item) => ({
@@ -140,8 +149,10 @@ export function ConsoleShellAdapter({
     <ConsoleShell
       title={breadcrumb}
       brandHref={rootHref}
-      subtitle={operations ? "ARSY // Operations Plane" : "Empire of the light"}
-      navLabel={operations ? "Operations" : "Empire"}
+      subtitle={
+        operations ? dictionary.operations.workspace.planeLabel : dictionary.shell.theEmpire
+      }
+      navLabel={operations ? dictionary.shell.operations : dictionary.shell.theEmpire}
       items={hudItems}
       active={active}
       activeSection={activeSection}
@@ -154,20 +165,20 @@ export function ConsoleShellAdapter({
       headerStart={
         <>
           <Link href={rootHref} className="inline-flex min-h-11 items-center hover:underline">
-            <span>{operations ? "Operations" : "The Empire"}</span>
+            <span>{operations ? dictionary.shell.operations : dictionary.shell.theEmpire}</span>
           </Link>
           <span aria-hidden>›</span>
         </>
       }
       headerSearch={
         <div className="relative min-w-0 w-full">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+          <SearchIcon className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
           <Input
             value={search.value}
             onChange={(e) => search.onChange(e.target.value)}
             placeholder={search.placeholder}
             aria-label={search.placeholder}
-            className="min-h-11 w-full pl-9"
+            className="min-h-11 w-full ps-9"
           />
         </div>
       }
@@ -178,6 +189,7 @@ export function ConsoleShellAdapter({
         >
           {celestial?.aeq4?.formatted && celestial?.hijri && celestial?.lunar ? (
             <span
+              dir="ltr"
               title={celestial.aeq4.formatted}
               className="hidden 2xl:inline-flex shrink-0 whitespace-nowrap items-center border border-[var(--border)] px-2 py-1 font-mono text-[10px] text-[var(--muted-foreground)]"
             >
@@ -187,7 +199,7 @@ export function ConsoleShellAdapter({
           ) : null}
           {companies.length > 0 ? (
             <NativeSelect
-              aria-label="Active Company Tenant"
+              aria-label={dictionary.shell.activeTenant}
               value={activeTenant}
               onChange={(e) => {
                 setActiveTenant(e.target.value);
@@ -229,32 +241,36 @@ export function ConsoleShellAdapter({
       railFooter={
         operations ? (
           <div className="font-mono text-[10px] leading-relaxed text-[var(--muted-foreground)]">
-            <strong className="text-[var(--primary)]">OPERATIONS CONSOLE</strong>
-            <div>WEB → API → ARSY PLANE</div>
+            <strong className="text-[var(--primary)]">
+              {dictionary.shell.operations.toUpperCase()}
+            </strong>
+            <div>{dictionary.operations.workspace.planeLabel}</div>
           </div>
         ) : (
           <div className="flex flex-col gap-1.5 font-mono text-[10px] tracking-wider">
             <SanctuaryGateLink className="flex min-h-9 items-center justify-between border border-[var(--border)] px-2.5 py-1 text-[var(--primary)] transition-colors hover:border-[var(--primary)] hover:text-[var(--foreground)]">
-              <span>IMPERIUM GATE</span>
+              <span>{dictionary.navigation.imperiumGate.toUpperCase()}</span>
               <span aria-hidden="true">↗</span>
             </SanctuaryGateLink>
             <Link
               href={moonwitnessHref}
               className="flex min-h-9 items-center justify-between border border-[var(--border)] px-2.5 py-1 text-[var(--foreground)] transition-colors hover:border-[var(--primary)]"
             >
-              <span>MOONWITNESS</span>
+              <span>{dictionary.navigation.moonwitnessPortal.toUpperCase()}</span>
               <span aria-hidden="true">↗</span>
             </Link>
           </div>
         )
       }
-      commandLeft={
-        operations ? "MOONWITNESS OPERATIONS /// HOST, NETWORK & STORAGE PLANE" : FOOTER_LEFT
-      }
+      commandLeft={operations ? dictionary.operations.workspace.planeLabel : FOOTER_LEFT}
       commandRight={
         <>
           <Crown className="h-3 w-5 text-[var(--primary)]" />{" "}
-          {operations ? "ARSY CONTROL PLANE" : FOOTER_RIGHT}
+          {operations
+            ? locale === "en"
+              ? "ARSY CONTROL PLANE"
+              : dictionary.navigation.controlPlane.toUpperCase()
+            : FOOTER_RIGHT}
         </>
       }
     >

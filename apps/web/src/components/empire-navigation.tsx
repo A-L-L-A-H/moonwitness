@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { MouseEvent } from "react";
+import { useCallback, useEffect, useRef, type MouseEvent } from "react";
 import { Button } from "@moonwitness/ui";
 import {
   CrescentStarIcon,
@@ -13,39 +13,15 @@ import {
   SecondaryAction,
   SiteNavigation,
 } from "@moonwitness/ui/imperium";
+import { i18n } from "@/configs/i18n";
 import { NAVIGATION_TABS, type NavigationSectionId } from "@/data/empire-registry";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import type { SanctuaryLocale } from "@/lib/sanctuary-locale";
 import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 import { SanctuaryIdentityControl } from "./sanctuary-identity-control";
 
-const NAV_TAB_LABELS: Readonly<
-  Record<SanctuaryLocale, Readonly<Record<NavigationSectionId, string>>>
-> = {
-  en: {
-    "the-gate": "THE GATE",
-    "the-worlds": "THE WORLDS",
-    "the-codex": "THE CODEX",
-    "the-dock": "THE DOCK",
-    about: "ABOUT",
-  },
-  id: {
-    "the-gate": "GERBANG",
-    "the-worlds": "SEMBILAN DUNIA",
-    "the-codex": "KODEKS",
-    "the-dock": "DERMAGA",
-    about: "TENTANG",
-  },
-  ar: {
-    "the-gate": "البوابة",
-    "the-worlds": "العوالم",
-    "the-codex": "المدوّنة",
-    "the-dock": "المنصّة",
-    about: "حول",
-  },
-};
-
 export interface EmpireNavigationProps {
-  readonly locale: SanctuaryLocale;
+  readonly locale?: SanctuaryLocale;
   readonly activeNavTab: NavigationSectionId;
   readonly sanctuaryRadianceActive: boolean;
   readonly quietMode: boolean;
@@ -53,14 +29,14 @@ export interface EmpireNavigationProps {
   readonly onNavigateToSection: (sectionId: NavigationSectionId) => void;
   readonly onOpenSearch: () => void;
   readonly onToggleRadiance: () => void;
-  readonly onToggleLocale: () => void;
+  readonly onToggleLocale?: () => void;
   readonly onToggleQuietMode: () => void;
   readonly onToggleMobileMenu: () => void;
   readonly onCloseMobileMenu: () => void;
 }
 
 export function EmpireNavigation({
-  locale,
+  locale: propLocale,
   activeNavTab,
   sanctuaryRadianceActive,
   quietMode,
@@ -73,16 +49,72 @@ export function EmpireNavigation({
   onToggleMobileMenu,
   onCloseMobileMenu,
 }: EmpireNavigationProps) {
+  const { locale: contextLocale, dictionary, setLocale } = useTranslation();
+  const locale = propLocale ?? contextLocale;
   const pathname = usePathname() ?? "";
   const pathLocale = getLocaleFromPath(pathname);
   const localizedMoonwitnessHref = pathLocale
     ? getLocalizedUrl("/moonwitness", pathLocale)
     : "/moonwitness";
-  const tabLabels = NAV_TAB_LABELS[locale];
+  const menuTriggerRef = useRef<HTMLElement>(null);
+
+  const sanctuaryNav = dictionary.sanctuary.navigation;
+  const sanctuarySubpages = dictionary.sanctuary.subpages;
+  const sanctuaryA11y = dictionary.sanctuary.a11y;
+
+  const tabLabels: Readonly<Record<NavigationSectionId, string>> = {
+    "the-gate": sanctuaryNav.gate,
+    "the-worlds": sanctuaryNav.worlds,
+    "the-codex": sanctuaryNav.codex,
+    "the-dock": dictionary.navigation.archive,
+    about: locale === "id" ? "TENTANG" : locale === "ar" ? "حول" : "ABOUT",
+  };
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCloseMobileMenu();
+        menuTriggerRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileMenuOpen, onCloseMobileMenu]);
+
+  const handleCycleLocale = useCallback(() => {
+    if (onToggleLocale) {
+      onToggleLocale();
+      return;
+    }
+    const order = i18n.locales;
+    const next = order[(order.indexOf(locale) + 1) % order.length] ?? i18n.defaultLocale;
+    setLocale(next);
+    if (typeof window !== "undefined") {
+      const currentPath = pathname || window.location.pathname;
+      if (getLocaleFromPath(currentPath) !== null) {
+        const search = window.location.search ?? "";
+        const hash = window.location.hash ?? "";
+        window.location.assign(getLocalizedUrl(`${currentPath}${search}${hash}`, next));
+      }
+    }
+  }, [locale, onToggleLocale, pathname, setLocale]);
+
+  const localeButtonAriaLabel = sanctuaryA11y.toggleLocaleLabel.replace(
+    "{locale}",
+    locale.toUpperCase(),
+  );
+  const mobileMenuAriaLabel =
+    locale === "en"
+      ? "Toggle Empire Navigation Menu"
+      : mobileMenuOpen
+        ? dictionary.chronicle.navigation.closeMenu
+        : dictionary.chronicle.navigation.openMenu;
 
   return (
     <SiteNavigation
-      navLabel="Primary Empire Navigation"
+      navLabel={sanctuaryA11y.primaryNav}
       mobileMenuOpen={mobileMenuOpen}
       brand={
         <a
@@ -90,13 +122,14 @@ export function EmpireNavigation({
           onClick={(event) => {
             event.preventDefault();
             onNavigateToSection("the-gate");
+            onCloseMobileMenu();
           }}
           className="home-header-brand group flex min-h-[44px] items-center gap-2.5 sm:gap-3"
         >
           <CrownEmblemIcon className="h-8 w-8 shrink-0 text-[var(--dna-accent)]" />
           <div className="flex flex-col leading-tight">
             <span className="home-brand-wordmark text-base sm:text-lg font-bold tracking-[0.06em] text-[var(--dna-text)]">
-              A-L-L-A-H.COM
+              {sanctuarySubpages.gateBreadcrumb}
             </span>
             <span className="home-brand-tagline text-[11px] font-bold tracking-[0.12em] text-[var(--dna-accent)] uppercase">
               {locale === "id"
@@ -131,9 +164,12 @@ export function EmpireNavigation({
           <Button
             type="button"
             variant="plain"
-            onClick={onOpenSearch}
-            aria-label="Search the Empire of the Light"
-            title="Search (Ctrl+K)"
+            onClick={() => {
+              onCloseMobileMenu();
+              onOpenSearch();
+            }}
+            aria-label={sanctuaryNav.search}
+            title={`${sanctuaryNav.search} (Ctrl+K)`}
             className="flex min-h-[44px] min-w-[44px] items-center justify-center text-[var(--dna-text)] hover:text-[var(--dna-accent)] transition-colors cursor-pointer"
           >
             <SearchLensIcon className="h-5 w-5" />
@@ -144,8 +180,20 @@ export function EmpireNavigation({
             variant="plain"
             aria-pressed={sanctuaryRadianceActive}
             onClick={onToggleRadiance}
-            aria-label="Toggle Sanctuary Radiance Mode"
-            title="Toggle Sanctuary Radiance"
+            aria-label={
+              locale === "id"
+                ? "Aktifkan/Matikan Cahaya Sanctuary"
+                : locale === "ar"
+                  ? "تبديل إشراق المحراب"
+                  : "Toggle Sanctuary Radiance Mode"
+            }
+            title={
+              locale === "id"
+                ? "Cahaya Sanctuary"
+                : locale === "ar"
+                  ? "إشراق المحراب"
+                  : "Toggle Sanctuary Radiance"
+            }
             className={`flex min-h-[44px] min-w-[44px] items-center justify-center transition-colors cursor-pointer ${
               sanctuaryRadianceActive
                 ? "text-[var(--dna-accent)]"
@@ -156,15 +204,9 @@ export function EmpireNavigation({
           </Button>
 
           <SecondaryAction
-            onClick={onToggleLocale}
-            aria-label={
-              locale === "en"
-                ? "Switch language (English / Indonesian / Arabic)"
-                : locale === "id"
-                  ? "Ganti bahasa (Indonesia / Arab / Inggris)"
-                  : "تبديل اللغة"
-            }
-            title="EN / ID / AR"
+            onClick={handleCycleLocale}
+            aria-label={localeButtonAriaLabel}
+            title={sanctuaryNav.switchLanguage}
             className="hidden sm:inline-flex font-mono text-xs"
           >
             {locale.toUpperCase()}
@@ -177,15 +219,12 @@ export function EmpireNavigation({
           <SecondaryAction
             aria-pressed={quietMode}
             onClick={onToggleQuietMode}
-            aria-label="Toggle Quiet Contemplative Motion Mode"
+            aria-label={sanctuaryNav.quietMode}
+            title={sanctuaryNav.quietMode}
             className="hidden xl:inline-flex font-mono text-xs"
           >
             {quietMode
-              ? locale === "id"
-                ? "TENANG"
-                : locale === "ar"
-                  ? "ساكن"
-                  : "QUIET"
+              ? sanctuaryNav.quietMode
               : locale === "id"
                 ? "CAHAYA"
                 : locale === "ar"
@@ -209,13 +248,16 @@ export function EmpireNavigation({
           />
 
           <SecondaryAction
+            ref={menuTriggerRef}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-sanctuary-nav"
-            aria-label="Toggle Empire Navigation Menu"
+            aria-label={mobileMenuAriaLabel}
             onClick={onToggleMobileMenu}
             className="flex min-w-[44px] px-3 lg:hidden"
           >
-            <span className="font-mono text-sm">{mobileMenuOpen ? "✕" : "☰"}</span>
+            <span className="font-mono text-sm" aria-hidden="true">
+              {mobileMenuOpen ? "✕" : "☰"}
+            </span>
           </SecondaryAction>
         </>
       }
@@ -223,8 +265,8 @@ export function EmpireNavigation({
         <div
           id="mobile-sanctuary-nav"
           role="region"
-          aria-label="Mobile Navigation"
-          className="mx-4 mb-3 border-2 border-[var(--dna-accent)] bg-[var(--dna-canvas)] p-4 shadow-[4px_4px_0_var(--dna-accent-secondary)] lg:hidden"
+          aria-label={sanctuaryA11y.primaryNav}
+          className="mx-3 mb-3 max-w-full overflow-x-hidden border-2 border-[var(--dna-accent)] bg-[var(--dna-canvas)] p-3.5 shadow-[4px_4px_0_var(--dna-accent-secondary)] sm:mx-4 sm:p-4 lg:hidden"
         >
           <div className="grid grid-cols-2 gap-2">
             {NAVIGATION_TABS.map((navTab) => {
@@ -233,8 +275,11 @@ export function EmpireNavigation({
                 <SecondaryAction
                   key={navTab.id}
                   data-active={isTabActive ? "true" : "false"}
-                  onClick={() => onNavigateToSection(navTab.id)}
-                  className="w-full justify-center"
+                  onClick={() => {
+                    onNavigateToSection(navTab.id);
+                    onCloseMobileMenu();
+                  }}
+                  className="min-w-0 w-full justify-center px-2.5 text-center text-xs leading-tight whitespace-normal break-words"
                 >
                   {tabLabels[navTab.id] ?? navTab.label}
                 </SecondaryAction>
@@ -243,7 +288,7 @@ export function EmpireNavigation({
             <DnaButton
               asChild
               tone="secondary"
-              className="mw-secondary-action inline-flex min-h-[44px] w-full items-center justify-center gap-2 px-4 py-2 text-sm font-medium uppercase"
+              className="mw-secondary-action inline-flex min-h-[44px] min-w-0 w-full items-center justify-center gap-2 px-2.5 py-2 text-center text-xs leading-tight font-medium uppercase whitespace-normal break-words"
             >
               <Link href={localizedMoonwitnessHref} onClick={onCloseMobileMenu}>
                 {locale === "ar" ? "شاهد القمر" : "MOONWITNESS"}
@@ -254,7 +299,7 @@ export function EmpireNavigation({
             <SecondaryAction
               aria-pressed={quietMode}
               onClick={onToggleQuietMode}
-              className="flex-1"
+              className="min-w-0 flex-1 px-2.5 text-xs leading-tight whitespace-normal"
             >
               {quietMode
                 ? locale === "id"
@@ -262,14 +307,19 @@ export function EmpireNavigation({
                   : locale === "ar"
                     ? "استعادة الحركة"
                     : "RESTORE MOTION"
-                : locale === "id"
-                  ? "MODE TENANG"
-                  : locale === "ar"
-                    ? "الوضع الساكن"
-                    : "QUIET MODE"}
+                : sanctuaryNav.quietMode}
             </SecondaryAction>
-            <SecondaryAction onClick={onToggleLocale}>{locale.toUpperCase()}</SecondaryAction>
-            <SanctuaryIdentityControl compact />
+            <SecondaryAction
+              onClick={handleCycleLocale}
+              aria-label={localeButtonAriaLabel}
+              title={sanctuaryNav.switchLanguage}
+              className="shrink-0 px-3 text-xs"
+            >
+              {locale.toUpperCase()}
+            </SecondaryAction>
+            <div className="min-w-0">
+              <SanctuaryIdentityControl compact />
+            </div>
           </div>
         </div>
       }

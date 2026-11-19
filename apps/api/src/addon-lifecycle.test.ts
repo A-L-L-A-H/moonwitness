@@ -69,11 +69,11 @@ describe("addon startup lifecycle", () => {
   it("fails startup on a dependency cycle", () => {
     const registry = new AddonRegistry();
     registry.add({
-      manifest: { name: "a", version: "1", depends: ["b"], provides: {} },
+      manifest: { name: "a", version: "1.0.0", depends: ["b"], provides: {} },
       register: () => {},
     });
     registry.add({
-      manifest: { name: "b", version: "1", depends: ["a"], provides: {} },
+      manifest: { name: "b", version: "1.0.0", depends: ["a"], provides: {} },
       register: () => {},
     });
 

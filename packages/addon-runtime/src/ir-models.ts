@@ -10,10 +10,13 @@ export const irAddonSchema = z.object({
   provides_json: z.string().default("{}"),
   capabilities_json: z.string().default("[]"),
   schema_hash: z.string().default(""),
-  state: z.enum(["installed", "disabled", "upgrade_pending", "error"]).default("installed"),
+  state: z
+    .enum(["discovered", "installing", "installed", "upgrade_pending", "disabled", "error"])
+    .default("installed"),
   signature_status: z.enum(["unsigned", "verified", "invalid"]).default("unsigned"),
   signature_key_id: z.string().nullable().default(null),
   auto_install: z.boolean().default(true),
+  failed_phase: z.string().nullable().default(null),
   last_error: z.string().nullable().default(null),
 });
 

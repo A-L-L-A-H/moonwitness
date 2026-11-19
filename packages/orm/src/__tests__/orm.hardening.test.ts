@@ -147,13 +147,33 @@ describe("multi-tenant isolation on BaseRepository", () => {
     expect(await noteModel.repository.delete(rowA.id, actorB)).toBeNull();
 
     // Tenant B upsert with same business title creates an isolated Tenant B copy
-    const upsertedB = await noteModel.repository.upsert(
+    const uniqueNoteModel = defineModel({
+      name: "test.unique_note",
+      table: "test_unique_notes",
+      schema: noteSchema,
+      indexes: [{ fields: ["tenant_id", "title"], unique: true }],
+    });
+    await getDb().exec(uniqueNoteModel.ddl);
+    const uRowA = await uniqueNoteModel.repository.create(
+      { title: "alpha-doc", body: "secret-a" },
+      actorA,
+    );
+    const upsertedB = await uniqueNoteModel.repository.upsert(
       { title: "alpha-doc" },
       { body: "owned-by-b" },
       actorB,
     );
-    expect(upsertedB.id).not.toBe(rowA.id);
+    expect(upsertedB.id).not.toBe(uRowA.id);
     expect(upsertedB.tenant_id).toBe("tenant-b");
+
+    // Tenant A record remains untouched
+    const reloadedU = await uniqueNoteModel.repository.findOne(uRowA.id, { tenantId: "tenant-a" });
+    expect(reloadedU?.body).toBe("secret-a");
+
+    // Non-unique selector is rejected on upsert
+    await expect(
+      noteModel.repository.upsert({ title: "alpha-doc" }, { body: "bad" }, actorB),
+    ).rejects.toThrow(/unique index/i);
 
     // Tenant A record remains untouched
     const reloadedA = await noteModel.repository.findOne(rowA.id, { tenantId: "tenant-a" });
@@ -252,6 +272,7 @@ describe("ScopedRepository and actor tenant enforcement (#491)", () => {
       name: "test.rel_parent",
       table: "test_rel_parents",
       schema: z.object({ code: z.string(), label: z.string() }),
+      indexes: [{ fields: ["tenant_id", "code"], unique: true }],
     });
     const childModel = defineModel({
       name: "test.rel_child",
