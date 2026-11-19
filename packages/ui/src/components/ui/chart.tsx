@@ -92,7 +92,7 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
           aria-hidden="true"
           focusable="false"
         >
-          {data.map((point, idx) => {}
+          {data.map((point, idx) => {
           const barHeight = Math.max(4, Math.round((point.value / max) * (height - 28)));
           const x = idx * 48 + 8;
           const y = height - 22 - barHeight;

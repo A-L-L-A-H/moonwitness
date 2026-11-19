@@ -67,7 +67,8 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(container.querySelector('svg[data-mw-chart="line"]')).not.toBeNull();
     expect(container.querySelector('svg[data-mw-chart="area"]')).not.toBeNull();
     const gauge = container.querySelector('svg[data-mw-chart="radial-gauge"]');
-    expect(gauge?.getAttribute("aria-label")).toBe("CPU 74%");
+    expect(gauge?.getAttribute("aria-hidden")).toBe("true");
+    expect(container.querySelector("table caption")?.textContent).toBe("CPU 74% data");
   });
 
   it("exposes chart values as accessible tables while hiding decorative SVGs", () => {
