@@ -1,5 +1,6 @@
 use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use std::{
+    fs,
     path::{Path, PathBuf},
     process::{Command, Output},
 };
@@ -11,6 +12,15 @@ use crate::{
     models::{GitSnapshot, Repository},
 };
 
+fn configure_hidden_git_command(command: &mut Command) {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+        command.creation_flags(CREATE_NO_WINDOW);
+    }
+}
+
 fn git_output(path: &Path, args: &[&str]) -> Result<String, String> {
     let output = run_git(path, args)?;
     if !output.status.success() {
@@ -19,13 +29,73 @@ fn git_output(path: &Path, args: &[&str]) -> Result<String, String> {
     Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
+fn git_output_readonly(path: &Path, args: &[&str]) -> Result<String, String> {
+    let output = run_git_readonly(path, args)?;
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).trim().to_string());
+    }
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
 fn run_git(path: &Path, args: &[&str]) -> Result<Output, String> {
-    Command::new("git")
-        .arg("-C")
-        .arg(path)
-        .args(args)
+    let mut command = Command::new("git");
+    command.arg("-C").arg(path).args(args);
+    configure_hidden_git_command(&mut command);
+    command
         .output()
         .map_err(|error| format!("Unable to start Git: {error}"))
+}
+
+fn run_git_readonly(path: &Path, args: &[&str]) -> Result<Output, String> {
+    let mut command = Command::new("git");
+    command
+        .arg("--no-optional-locks")
+        .arg("-C")
+        .arg(path)
+        .args(args);
+    configure_hidden_git_command(&mut command);
+    command
+        .output()
+        .map_err(|error| format!("Unable to start Git: {error}"))
+}
+
+/// Reads `.git/HEAD` directly in O(1) without spawning a child `git.exe` process.
+/// Falls back to `git --no-optional-locks branch --show-current` only on detached HEAD or unreadable metadata.
+pub fn read_current_branch_fast(root: &Path, fallback: &str) -> String {
+    let dot_git = root.join(".git");
+    let head_path = if dot_git.is_dir() {
+        Some(dot_git.join("HEAD"))
+    } else if dot_git.is_file() {
+        fs::read_to_string(&dot_git).ok().and_then(|content| {
+            let trimmed = content.trim();
+            let raw_dir = trimmed.strip_prefix("gitdir:")?.trim();
+            let git_dir = Path::new(raw_dir);
+            let resolved = if git_dir.is_absolute() {
+                git_dir.to_path_buf()
+            } else {
+                root.join(git_dir)
+            };
+            Some(resolved.join("HEAD"))
+        })
+    } else {
+        None
+    };
+
+    if let Some(head_file) = head_path {
+        if let Ok(head_contents) = fs::read_to_string(head_file) {
+            if let Some(branch_ref) = head_contents.trim().strip_prefix("ref: refs/heads/") {
+                let branch = branch_ref.trim();
+                if !branch.is_empty() {
+                    return branch.to_string();
+                }
+            }
+        }
+    }
+
+    git_output_readonly(root, &["branch", "--show-current"])
+        .ok()
+        .filter(|value| !value.is_empty())
+        .unwrap_or_else(|| fallback.to_string())
 }
 
 trait GitRunner {
@@ -90,8 +160,10 @@ fn validate_branch_name(branch: &str) -> Result<(), String> {
     if branch.trim().is_empty() || branch.starts_with('-') {
         return Err("Enter a valid branch name.".into());
     }
-    let output = Command::new("git")
-        .args(["check-ref-format", "--branch", branch])
+    let mut command = Command::new("git");
+    command.args(["check-ref-format", "--branch", branch]);
+    configure_hidden_git_command(&mut command);
+    let output = command
         .output()
         .map_err(|error| format!("Unable to start Git: {error}"))?;
     if output.status.success() {
@@ -146,8 +218,7 @@ pub fn query_repositories(connection: &Connection) -> Result<Vec<Repository>, St
     for row in rows {
         let (id, name, path, remote_url, default_branch) =
             row.map_err(|error| error.to_string())?;
-        let branch = git_output(Path::new(&path), &["branch", "--show-current"])
-            .unwrap_or_else(|_| default_branch.clone());
+        let branch = read_current_branch_fast(Path::new(&path), &default_branch);
         repositories.push(Repository {
             id,
             name,
@@ -161,13 +232,23 @@ pub fn query_repositories(connection: &Connection) -> Result<Vec<Repository>, St
 }
 
 #[tauri::command]
-pub fn list_repositories(app: AppHandle) -> Result<Vec<Repository>, String> {
-    let connection = db::connect(&app)?;
-    query_repositories(&connection)
+pub async fn list_repositories(app: AppHandle) -> Result<Vec<Repository>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let connection = db::connect(&app)?;
+        query_repositories(&connection)
+    })
+    .await
+    .map_err(|error| format!("Repository worker failed: {error}"))?
 }
 
 #[tauri::command]
-pub fn add_repository(app: AppHandle, path: String) -> Result<Repository, String> {
+pub async fn add_repository(app: AppHandle, path: String) -> Result<Repository, String> {
+    tauri::async_runtime::spawn_blocking(move || add_repository_sync(&app, &path))
+        .await
+        .map_err(|error| format!("Repository registration failed: {error}"))?
+}
+
+fn add_repository_sync(app: &AppHandle, path: &str) -> Result<Repository, String> {
     let requested = Path::new(path.trim());
     if requested.as_os_str().is_empty() || !requested.exists() || !requested.is_dir() {
         return Err("Choose an existing local directory.".into());
@@ -175,7 +256,7 @@ pub fn add_repository(app: AppHandle, path: String) -> Result<Repository, String
     let canonical = requested
         .canonicalize()
         .map_err(|error| error.to_string())?;
-    let root = git_output(&canonical, &["rev-parse", "--show-toplevel"])
+    let root = git_output_readonly(&canonical, &["rev-parse", "--show-toplevel"])
         .map_err(|_| "This directory is not inside a Git repository.".to_string())?;
     let root_path = Path::new(&root)
         .canonicalize()
@@ -188,11 +269,11 @@ pub fn add_repository(app: AppHandle, path: String) -> Result<Repository, String
         .and_then(|value| value.to_str())
         .unwrap_or("repository")
         .to_string();
-    let branch =
-        git_output(&root_path, &["branch", "--show-current"]).unwrap_or_else(|_| "HEAD".into());
-    let remote_url = git_output(&root_path, &["remote", "get-url", "origin"]).unwrap_or_default();
+    let branch = read_current_branch_fast(&root_path, "HEAD");
+    let remote_url =
+        git_output_readonly(&root_path, &["remote", "get-url", "origin"]).unwrap_or_default();
     let id = Uuid::new_v4().to_string();
-    let mut connection = db::connect(&app)?;
+    let mut connection = db::connect(app)?;
     let transaction = connection
         .transaction_with_behavior(TransactionBehavior::Immediate)
         .map_err(|error| error.to_string())?;
@@ -244,23 +325,33 @@ pub fn add_repository(app: AppHandle, path: String) -> Result<Repository, String
 }
 
 #[tauri::command]
-pub fn git_snapshot(
+pub async fn git_snapshot(
     app: AppHandle,
     repository_id: String,
     view: Option<String>,
 ) -> Result<GitSnapshot, String> {
-    let connection = db::connect(&app)?;
-    let (name, path, default_branch) = resolve_repository(&connection, &repository_id)?;
+    tauri::async_runtime::spawn_blocking(move || git_snapshot_sync(&app, &repository_id, view))
+        .await
+        .map_err(|error| format!("Git snapshot worker failed: {error}"))?
+}
+
+fn git_snapshot_sync(
+    app: &AppHandle,
+    repository_id: &str,
+    view: Option<String>,
+) -> Result<GitSnapshot, String> {
+    let connection = db::connect(app)?;
+    let (name, path, default_branch) = resolve_repository(&connection, repository_id)?;
 
     let root = Path::new(&path);
     if !root.is_dir() {
         return Err("Repository directory is no longer available.".into());
     }
-    let branch = git_output(root, &["branch", "--show-current"]).unwrap_or(default_branch);
+    let branch = read_current_branch_fast(root, &default_branch);
     let view = view.unwrap_or_else(|| "status".into());
     let output = if view == "patch" {
-        let diff = git_output(root, &["diff", "--no-color", "HEAD"])
-            .or_else(|_| git_output(root, &["diff", "--no-color"]))?;
+        let diff = git_output_readonly(root, &["diff", "--no-color", "HEAD"])
+            .or_else(|_| git_output_readonly(root, &["diff", "--no-color"]))?;
         super::monitor::truncate_utf8_patch(diff)
     } else {
         let args: &[&str] = match view.as_str() {
@@ -270,7 +361,7 @@ pub fn git_snapshot(
             "branches" => &["branch", "--all", "--no-color"],
             _ => return Err("Unsupported Git inspection view.".into()),
         };
-        git_output(root, args)?
+        git_output_readonly(root, args)?
     };
     Ok(GitSnapshot {
         name,
@@ -361,22 +452,26 @@ pub fn ensure_default_workspace_repository(app: &AppHandle) -> Result<(), String
 }
 
 #[tauri::command]
-pub fn git_execute(
+pub async fn git_execute(
     app: AppHandle,
     repository_id: String,
     operation: String,
     branch: Option<String>,
     message: Option<String>,
 ) -> Result<GitSnapshot, String> {
-    let connection = db::connect(&app)?;
-    execute_git_operation(
-        &connection,
-        &SystemGit,
-        &repository_id,
-        &operation,
-        branch.as_deref(),
-        message.as_deref(),
-    )
+    tauri::async_runtime::spawn_blocking(move || {
+        let connection = db::connect(&app)?;
+        execute_git_operation(
+            &connection,
+            &SystemGit,
+            &repository_id,
+            &operation,
+            branch.as_deref(),
+            message.as_deref(),
+        )
+    })
+    .await
+    .map_err(|error| format!("Git execution worker failed: {error}"))?
 }
 
 fn execute_git_operation(
@@ -491,7 +586,7 @@ fn execute_git_operation(
 mod tests {
     use super::{
         auto_register_workspace_with_connection, execute_git_operation, git_arguments,
-        git_metadata_path, git_output, run_git, GitRunner,
+        git_metadata_path, git_output, read_current_branch_fast, run_git, GitRunner,
     };
     use rusqlite::Connection;
     use std::{
@@ -1062,5 +1157,32 @@ mod tests {
         )
         .expect("second pass should be idempotent");
         assert!(!second);
+    }
+
+    #[test]
+    fn read_current_branch_fast_reads_git_head_directly() {
+        let dir = std::env::temp_dir().join(format!("rocksoul-fast-head-{}", Uuid::new_v4()));
+        fs::create_dir_all(dir.join(".git")).expect("git dir should create");
+        fs::write(dir.join(".git").join("HEAD"), "ref: refs/heads/dev\n")
+            .expect("HEAD should write");
+        assert_eq!(read_current_branch_fast(&dir, "main"), "dev");
+
+        // Also test gitdir worktree pointer file
+        let wt_dir = std::env::temp_dir().join(format!("rocksoul-fast-wt-{}", Uuid::new_v4()));
+        let wt_git = std::env::temp_dir().join(format!("rocksoul-fast-wtgit-{}", Uuid::new_v4()));
+        fs::create_dir_all(&wt_dir).expect("wt dir should create");
+        fs::create_dir_all(&wt_git).expect("wt git dir should create");
+        fs::write(wt_git.join("HEAD"), "ref: refs/heads/feat/tray\n")
+            .expect("wt HEAD should write");
+        fs::write(
+            wt_dir.join(".git"),
+            format!("gitdir: {}\n", wt_git.display()),
+        )
+        .expect("gitfile should write");
+        assert_eq!(read_current_branch_fast(&wt_dir, "main"), "feat/tray");
+
+        let _ = fs::remove_dir_all(&dir);
+        let _ = fs::remove_dir_all(&wt_dir);
+        let _ = fs::remove_dir_all(&wt_git);
     }
 }

@@ -311,8 +311,7 @@ pub fn verify_action_approval(
         || Path::new(&approval.worktree_path) != worktree_dir
     {
         return Err(
-            "Execution blocked: action parameters do not match durable approval record"
-                .to_string(),
+            "Execution blocked: action parameters do not match durable approval record".to_string(),
         );
     }
     Ok(())
@@ -748,7 +747,11 @@ mod tests {
         let updated = reconcile_stale_agent_runs(&conn).expect("reconcile");
         assert_eq!(updated, 1);
         let run_status: String = conn
-            .query_row("SELECT status FROM agent_runs WHERE id = 'run-1'", [], |r| r.get(0))
+            .query_row(
+                "SELECT status FROM agent_runs WHERE id = 'run-1'",
+                [],
+                |r| r.get(0),
+            )
             .expect("query run");
         let sup_status: String = conn
             .query_row(

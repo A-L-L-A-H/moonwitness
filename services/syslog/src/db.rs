@@ -38,7 +38,9 @@ mod tests {
 
     #[test]
     fn is_postgres_url_detects_postgres_schemes() {
-        assert!(is_postgres_url("postgres://syslog:pass@postgres:5432/syslog"));
+        assert!(is_postgres_url(
+            "postgres://syslog:pass@postgres:5432/syslog"
+        ));
         assert!(is_postgres_url("postgresql://localhost:5432/syslog"));
         assert!(!is_postgres_url("sqlite:/data/syslog.db?mode=rwc"));
     }

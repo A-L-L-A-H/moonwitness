@@ -492,7 +492,11 @@ fn collect_plans(repositories: &[Repository]) -> Vec<PlanTrackerEntry> {
 
 fn run_git_readonly(path: &Path, args: &[&str]) -> Option<String> {
     let mut command = Command::new("git");
-    command.arg("-C").arg(path).args(args);
+    command
+        .arg("--no-optional-locks")
+        .arg("-C")
+        .arg(path)
+        .args(args);
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
@@ -530,8 +534,8 @@ fn inspect_repository_activity(repo: &Repository) -> RepoMonitorEntry {
         };
     }
 
-    let (branch_opt, log_raw, porcelain, worktree_raw) = std::thread::scope(|scope| {
-        let branch_job = scope.spawn(|| run_git_readonly(root, &["branch", "--show-current"]));
+    let branch = crate::commands::repositories::read_current_branch_fast(root, &repo.branch);
+    let (log_raw, porcelain, worktree_raw) = std::thread::scope(|scope| {
         let log_job = scope.spawn(|| {
             run_git_readonly(root, &["log", "-8", "--format=%h\x1f%an\x1f%ar\x1f%s"])
                 .unwrap_or_default()
@@ -542,16 +546,11 @@ fn inspect_repository_activity(repo: &Repository) -> RepoMonitorEntry {
             run_git_readonly(root, &["worktree", "list", "--porcelain"]).unwrap_or_default()
         });
         (
-            branch_job.join().ok().flatten(),
             log_job.join().unwrap_or_default(),
             porcelain_job.join().unwrap_or_default(),
             worktree_job.join().unwrap_or_default(),
         )
     });
-
-    let branch = branch_opt
-        .filter(|value| !value.is_empty())
-        .unwrap_or_else(|| repo.branch.clone());
     let mut head_hash = String::new();
     let mut head_subject = String::new();
     let mut head_age = String::new();
@@ -676,13 +675,15 @@ fn collect_monitor_snapshot(repositories: Vec<Repository>) -> MonitorSnapshot {
 
 #[tauri::command]
 pub async fn get_monitor_snapshot(app: AppHandle) -> Result<MonitorSnapshot, String> {
-    let repositories = {
-        let connection = db::connect(&app)?;
-        query_repositories(&connection)?
-    };
-    tauri::async_runtime::spawn_blocking(move || collect_monitor_snapshot(repositories))
-        .await
-        .map_err(|error| format!("Monitor worker failed: {error}"))
+    tauri::async_runtime::spawn_blocking(move || {
+        let repositories = {
+            let connection = db::connect(&app)?;
+            query_repositories(&connection)?
+        };
+        Ok(collect_monitor_snapshot(repositories))
+    })
+    .await
+    .map_err(|error| format!("Monitor worker failed: {error}"))?
 }
 
 #[tauri::command]
