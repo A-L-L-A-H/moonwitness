@@ -101,4 +101,59 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(jsonOut.skin).toBe("riot");
     expect(jsonOut.variables["--primary"]).toBeDefined();
   });
+  it("exposes chart categories and values in an accessible table instead of duplicate SVG announcements", () => {
+    const series = [
+      { id: "Jan", label: "January", value: 12 },
+      { id: "Feb", label: "February", value: 28 },
+    ] as const;
+
+    renderNode(
+      <SkinProvider defaultSkin="technical" persist={false}>
+        <ChartContainer title="Deployment metrics">
+          <BarChart data={series} ariaLabel="Deployments by month" />
+          <LineChart data={series} ariaLabel="Deployment trend" />
+          <Sparkline data={[3, 8]} ariaLabel="Queue depth" />
+          <RadialGauge value={76} label="CPU" ariaLabel="CPU utilization" />
+          <BarChart data={[]} ariaLabel="Empty chart" />
+        </ChartContainer>
+      </SkinProvider>,
+    );
+
+    const charts = container.querySelectorAll("svg[role='img']");
+    expect(charts).toHaveLength(5);
+    for (const chart of charts) {
+      expect(chart.getAttribute("aria-hidden")).toBe("true");
+      expect(chart.hasAttribute("aria-label")).toBe(false);
+    }
+
+    const tables = Array.from(container.querySelectorAll("table.sr-only"));
+    expect(tables).toHaveLength(5);
+    expect(tables[0]?.querySelector("caption")?.textContent).toBe("Deployments by month");
+    expect(tables[0]?.textContent).toContain("January");
+    expect(tables[0]?.textContent).toContain("12");
+    expect(tables[0]?.textContent).toContain("February");
+    expect(tables[0]?.textContent).toContain("28");
+    expect(tables[1]?.querySelector("caption")?.textContent).toBe("Deployment trend");
+    expect(tables[2]?.textContent).toContain("Point 1");
+    expect(tables[2]?.textContent).toContain("Point 2");
+    expect(tables[3]?.textContent).toContain("CPU");
+    expect(tables[3]?.textContent).toContain("76%");
+    expect(tables[4]?.textContent).toContain("No data available");
+  });
+
+  it("can preserve the SVG image label when the accessible data table is disabled", () => {
+    renderNode(
+      <BarChart
+        data={[{ label: "Active", value: 4 }]}
+        ariaLabel="Active sessions"
+        accessibleData={false}
+      />,
+    );
+
+    const chart = container.querySelector("svg[role='img']");
+    expect(chart?.getAttribute("aria-label")).toBe("Active sessions");
+    expect(chart?.hasAttribute("aria-hidden")).toBe(false);
+    expect(container.querySelector("table.sr-only")).toBeNull();
+  });
+
 });
