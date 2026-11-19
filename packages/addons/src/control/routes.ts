@@ -197,10 +197,8 @@ export async function registerControlRoutes(
     protectedScope.get("/control/portforwards", (request, reply) =>
       forwardControlRequest(request, reply, "portforwards", auth),
     );
-    protectedScope.post(
-      "/control/portforwards",
-      { preHandler: editorOrAdmin },
-      (request, reply) => forwardControlRequest(request, reply, "portforwards", auth),
+    protectedScope.post("/control/portforwards", { preHandler: editorOrAdmin }, (request, reply) =>
+      forwardControlRequest(request, reply, "portforwards", auth),
     );
     protectedScope.delete(
       "/control/portforwards",
@@ -226,8 +224,7 @@ export async function registerControlRoutes(
         }
         if (path === "plan" || path === "apply") {
           const body = request.body as
-            | { resources?: unknown; state?: { resources?: unknown } }
-            | undefined;
+            { resources?: unknown; state?: { resources?: unknown } } | undefined;
           const rawResources = Array.isArray(body?.resources)
             ? body.resources
             : Array.isArray(body?.state?.resources)
@@ -261,8 +258,7 @@ export async function registerControlRoutes(
               (item): item is { kind?: unknown; targetPath?: unknown; name?: unknown } =>
                 Boolean(item && typeof item === "object"),
             );
-            const traceHeader =
-              request.headers["x-correlation-id"] ?? request.headers.traceparent;
+            const traceHeader = request.headers["x-correlation-id"] ?? request.headers.traceparent;
             const scheduler = createControlScheduler({ mode: "queue" });
             const dispatchResult = await scheduler.dispatch(
               {
@@ -275,8 +271,7 @@ export async function registerControlRoutes(
                     : typeof firstResource?.name === "string"
                       ? firstResource.name
                       : undefined,
-                payload:
-                  body && typeof body === "object" ? (body as Record<string, unknown>) : {},
+                payload: body && typeof body === "object" ? (body as Record<string, unknown>) : {},
                 traceparent: typeof traceHeader === "string" ? traceHeader : undefined,
               },
               actor,
@@ -304,10 +299,8 @@ export async function registerControlRoutes(
     protectedScope.get("/control/vpn/subnets", (request, reply) =>
       forwardControlRequest(request, reply, "vpn/subnets", auth),
     );
-    protectedScope.post(
-      "/control/vpn/subnets",
-      { preHandler: editorOrAdmin },
-      (request, reply) => forwardControlRequest(request, reply, "vpn/subnets", auth),
+    protectedScope.post("/control/vpn/subnets", { preHandler: editorOrAdmin }, (request, reply) =>
+      forwardControlRequest(request, reply, "vpn/subnets", auth),
     );
     protectedScope.delete<{ Params: { name: string } }>(
       "/control/vpn/subnets/:name",
@@ -322,10 +315,8 @@ export async function registerControlRoutes(
     );
 
     for (const sub of ["vpn/up", "vpn/down", "vpn/peers"] as const) {
-      protectedScope.post(
-        `/control/${sub}`,
-        { preHandler: editorOrAdmin },
-        (request, reply) => forwardControlRequest(request, reply, sub, auth),
+      protectedScope.post(`/control/${sub}`, { preHandler: editorOrAdmin }, (request, reply) =>
+        forwardControlRequest(request, reply, sub, auth),
       );
     }
 

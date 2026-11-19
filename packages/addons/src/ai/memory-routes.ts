@@ -101,7 +101,9 @@ type MemoryBridgeResolution =
   | { configured: boolean; baseUrl: null; error?: string }
   | { configured: true; baseUrl: string; error?: string };
 
-function resolveMemoryBridge(runtimeOverride?: Partial<RiotAiRuntimeConfig>): MemoryBridgeResolution {
+function resolveMemoryBridge(
+  runtimeOverride?: Partial<RiotAiRuntimeConfig>,
+): MemoryBridgeResolution {
   const resolved = resolveRiotAiRuntime(runtimeOverride);
   const rawUrl = resolved.MEMORY_API_URL?.trim();
   if (!rawUrl) {

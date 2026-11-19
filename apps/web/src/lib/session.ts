@@ -33,10 +33,7 @@ function parseSessionPayload(data: unknown): Session | null {
     identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
     role: typeof profile.role === "string" ? profile.role : "viewer",
     username: typeof profile.username === "string" ? profile.username : undefined,
-    id:
-      typeof profile.id === "string" || typeof profile.id === "number"
-        ? profile.id
-        : undefined,
+    id: typeof profile.id === "string" || typeof profile.id === "number" ? profile.id : undefined,
   };
 }
 

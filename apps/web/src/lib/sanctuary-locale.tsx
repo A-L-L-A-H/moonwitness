@@ -19,8 +19,8 @@ const LOCALE_STORAGE_KEY = "allah-sanctuary-lang-v1";
 const SanctuaryLocaleContext = createContext<SanctuaryLocaleContextValue>({
   locale: "en",
   dir: "ltr",
-  setLocale: () => { },
-  toggleLocale: () => { },
+  setLocale: () => {},
+  toggleLocale: () => {},
 });
 
 export function SanctuaryLocaleProvider({

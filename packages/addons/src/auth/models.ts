@@ -23,15 +23,7 @@ export const authUserModel = defineModel({
   softDelete: false,
   restEnabled: false,
   searchFields: ["username", "email", "display_name"],
-  publicFields: [
-    "id",
-    "username",
-    "email",
-    "role",
-    "display_name",
-    "is_active",
-    "company_id",
-  ],
+  publicFields: ["id", "username", "email", "role", "display_name", "is_active", "company_id"],
   hooks: {
     beforeSave: ({ values, before }) => {
       const companyId = String(values.company_id ?? before?.company_id ?? "default");
@@ -41,12 +33,20 @@ export const authUserModel = defineModel({
         try {
           parsedIds = JSON.parse(rawIds);
         } catch {
-          throw new Error("Validation Error: company_ids_json must be a JSON array of company slugs");
+          throw new Error(
+            "Validation Error: company_ids_json must be a JSON array of company slugs",
+          );
         }
         if (!Array.isArray(parsedIds)) {
-          throw new Error("Validation Error: company_ids_json must be a JSON array of company slugs");
+          throw new Error(
+            "Validation Error: company_ids_json must be a JSON array of company slugs",
+          );
         }
-        if (values.company_ids_json !== undefined && parsedIds.length > 0 && !parsedIds.includes(companyId)) {
+        if (
+          values.company_ids_json !== undefined &&
+          parsedIds.length > 0 &&
+          !parsedIds.includes(companyId)
+        ) {
           throw new Error(
             `Validation Error: User current company (${companyId}) must belong to user's allowed companies`,
           );

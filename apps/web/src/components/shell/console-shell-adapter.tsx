@@ -13,11 +13,7 @@ import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { SkinSwitcher } from "@/components/skin-switcher";
 import { buildEnterpriseNavItems } from "@/data/navigation/verticalMenuData";
 import { useTranslation } from "@/hocs/TranslationWrapper";
-import {
-  useCelestialNow,
-  useCompaniesCatalog,
-  useMetaNavigation,
-} from "@/lib/api/meta-views";
+import { useCelestialNow, useCompaniesCatalog, useMetaNavigation } from "@/lib/api/meta-views";
 import { useSavedAvatar } from "@/lib/avatar-store";
 import { clearStoredMidSession } from "@/lib/mid-oidc";
 import { notifySessionChange, useCurrentIdentity } from "@/lib/session";
@@ -125,7 +121,7 @@ export function ConsoleShellAdapter({
     clearStoredMidSession();
     moonwitnessSdk.auth
       .logout()
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => {
         notifySessionChange();
       });
@@ -176,7 +172,10 @@ export function ConsoleShellAdapter({
         </div>
       }
       headerActions={
-        <div ref={popRef} className="relative flex max-w-full flex-wrap items-center justify-end gap-1.5">
+        <div
+          ref={popRef}
+          className="relative flex max-w-full flex-wrap items-center justify-end gap-1.5"
+        >
           {celestial?.aeq4?.formatted && celestial?.hijri && celestial?.lunar ? (
             <span
               title={celestial.aeq4.formatted}

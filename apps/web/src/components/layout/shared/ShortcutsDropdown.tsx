@@ -77,7 +77,12 @@ export function ShortcutsDropdown() {
           <SimpulNode className="h-5 w-5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} aria-label={dictionary.shell.shortcuts} className="w-80 p-3">
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        aria-label={dictionary.shell.shortcuts}
+        className="w-80 p-3"
+      >
         <div className="mb-2 flex items-center justify-between px-1">
           <span className="font-brush text-sm text-[var(--primary)]">
             {dictionary.shell.shortcuts}

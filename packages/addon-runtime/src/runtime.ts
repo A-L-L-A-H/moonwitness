@@ -799,13 +799,7 @@ export class AddonRuntimeController {
             model_name: desc.name,
             field_name: fieldName,
             field_type: spec.zodTypeLabel as
-              | "text"
-              | "integer"
-              | "real"
-              | "boolean"
-              | "date"
-              | "json"
-              | "selection",
+              "text" | "integer" | "real" | "boolean" | "date" | "json" | "selection",
             nullable: spec.nullable,
             required: !spec.nullable && !spec.optional,
             deprecated: deprecatedByTable.has(`${desc.table}.${fieldName}`),
@@ -1235,8 +1229,7 @@ export class AddonRuntimeController {
       fields = [...desc.fields.entries()]
         .filter(
           ([fieldName]) =>
-            fieldName !== "_attrs" &&
-            !/password_hash|encrypted_private|_secret/i.test(fieldName),
+            fieldName !== "_attrs" && !/password_hash|encrypted_private|_secret/i.test(fieldName),
         )
         .map(([fieldName, spec]) => {
           const selection = spec.enumValues ? [...spec.enumValues] : null;
@@ -1245,13 +1238,7 @@ export class AddonRuntimeController {
             model_name: modelName,
             field_name: fieldName,
             field_type: spec.zodTypeLabel as
-              | "text"
-              | "integer"
-              | "real"
-              | "boolean"
-              | "date"
-              | "json"
-              | "selection",
+              "text" | "integer" | "real" | "boolean" | "date" | "json" | "selection",
             nullable: spec.nullable,
             required: !spec.nullable && !spec.optional,
             deprecated: false,

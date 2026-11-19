@@ -195,23 +195,27 @@ export function createPerformanceAddon(
       },
     ],
     registerRoutes: async (scope: FastifyInstance) => {
-      scope.get(`${prefix}/performance/summary`, { preHandler: auth.authenticate }, async (request) => {
-        const tenantId = resolveActorTenantFromBridge(auth, request);
-        const mem = process.memoryUsage();
-        const widgets = await irDashboardWidgetModel.repository.find(
-          {},
-          { orderBy: "sort_order ASC", tenantId },
-        );
-        return {
-          runtime: {
-            rssMb: Number((mem.rss / 1024 / 1024).toFixed(2)),
-            heapUsedMb: Number((mem.heapUsed / 1024 / 1024).toFixed(2)),
-            heapTotalMb: Number((mem.heapTotal / 1024 / 1024).toFixed(2)),
-            uptimeSec: Number(process.uptime().toFixed(1)),
-          },
-          widgets,
-        };
-      });
+      scope.get(
+        `${prefix}/performance/summary`,
+        { preHandler: auth.authenticate },
+        async (request) => {
+          const tenantId = resolveActorTenantFromBridge(auth, request);
+          const mem = process.memoryUsage();
+          const widgets = await irDashboardWidgetModel.repository.find(
+            {},
+            { orderBy: "sort_order ASC", tenantId },
+          );
+          return {
+            runtime: {
+              rssMb: Number((mem.rss / 1024 / 1024).toFixed(2)),
+              heapUsedMb: Number((mem.heapUsed / 1024 / 1024).toFixed(2)),
+              heapTotalMb: Number((mem.heapTotal / 1024 / 1024).toFixed(2)),
+              uptimeSec: Number(process.uptime().toFixed(1)),
+            },
+            widgets,
+          };
+        },
+      );
     },
   };
 }

@@ -138,9 +138,9 @@ describe("Wave 9 session, tenant reactivity, XHR headers, and dock links", () =>
     expect(
       fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/v1/_meta/views/")).length,
     ).toBe(viewCallsBefore + 1);
-    expect(
-      fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/v1/m/")).length,
-    ).toBe(rowCallsBefore + 1);
+    expect(fetchMock.mock.calls.filter(([u]) => String(u).startsWith("/api/v1/m/")).length).toBe(
+      rowCallsBefore + 1,
+    );
 
     await act(async () => {
       root.render(createElement(Harness, { celestialEnabled: true }));

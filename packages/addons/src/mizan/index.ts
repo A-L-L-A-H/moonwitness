@@ -93,9 +93,7 @@ export function validateMizanAssessment(input: AssessmentInput): AssessmentDecis
 
   const generalWeight = input.powerRightScore + input.powerLeftScore;
   const referenceCanContribute =
-    input.balanceSatisfied &&
-    input.internalReferenceVerified &&
-    input.propheticReferenceRelevant;
+    input.balanceSatisfied && input.internalReferenceVerified && input.propheticReferenceRelevant;
 
   if (input.generalSufficient && input.propheticReferenceWeight > 0) {
     throw new Error("Prophetic weight cannot be added when the General Method is sufficient.");
@@ -141,9 +139,7 @@ export const mizanCaseSchema = z.object({
   case_text: z.string().min(1).max(8000),
   subject_alias: z.string().max(80).nullable().default(null),
   subject_age: z.number().int().min(0).max(130).nullable().default(null),
-  case_status: z
-    .enum(["draft", "assessed", "needs_reference", "archived"])
-    .default("draft"),
+  case_status: z.enum(["draft", "assessed", "needs_reference", "archived"]).default("draft"),
 });
 
 export const mizanCaseModel = defineModel({
@@ -162,10 +158,7 @@ export const mizanCaseModel = defineModel({
       inverseField: "case_key",
     },
   },
-  indexes: [
-    { fields: ["tenant_id", "case_key"], unique: true },
-    { fields: ["case_status"] },
-  ],
+  indexes: [{ fields: ["tenant_id", "case_key"], unique: true }, { fields: ["case_status"] }],
 });
 
 export const mizanEvaluateInputSchema = z.object({

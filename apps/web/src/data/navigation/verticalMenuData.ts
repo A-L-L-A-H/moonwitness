@@ -229,5 +229,7 @@ export function buildEnterpriseNavItems(
     },
   ];
 
-  return candidates.filter((item) => !item.minRole || hasRequiredRole(role ?? "admin", item.minRole));
+  return candidates.filter(
+    (item) => !item.minRole || hasRequiredRole(role ?? "admin", item.minRole),
+  );
 }

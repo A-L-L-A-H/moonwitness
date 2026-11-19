@@ -123,7 +123,9 @@ export function ObservatoryAppView() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">CELESTIAL & M-TIME EPHEMERIS</Badge>
               <Badge variant="default">
-                HILAL: {hilal?.overall_verdict ?? (hilal?.mabims_criterion?.passed ? "MABIMS PASS" : "BELOW THRESHOLD")}
+                HILAL:{" "}
+                {hilal?.overall_verdict ??
+                  (hilal?.mabims_criterion?.passed ? "MABIMS PASS" : "BELOW THRESHOLD")}
               </Badge>
               <Badge variant="secondary">
                 FEEDS: {obsSummary?.feeds ?? 0} · OPS: {obsSummary?.operations ?? 0}
@@ -150,11 +152,7 @@ export function ObservatoryAppView() {
                 aria-label="Observer Longitude"
                 className="max-w-[140px]"
               />
-              <Button
-                type="button"
-                size="sm"
-                onClick={() => void loadCelestialTelemetry(lat, lon)}
-              >
+              <Button type="button" size="sm" onClick={() => void loadCelestialTelemetry(lat, lon)}>
                 Recompute Ephemeris
               </Button>
               {prayers?.qibla_bearing !== undefined ? (

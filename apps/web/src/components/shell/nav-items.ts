@@ -65,7 +65,11 @@ const CONTROL_TAB_IDS = new Set(["vpn", "syslog", "snmp", "storage", "radius"]);
 
 export function activeByPath(pathname: string, tab?: string | null): string {
   const normalized = stripLocalePrefix(pathname);
-  if ((normalized === "/control" || normalized === "/apps/control") && tab && CONTROL_TAB_IDS.has(tab)) {
+  if (
+    (normalized === "/control" || normalized === "/apps/control") &&
+    tab &&
+    CONTROL_TAB_IDS.has(tab)
+  ) {
     return tab;
   }
   return ACTIVE_BY_PATH[normalized] ?? "";

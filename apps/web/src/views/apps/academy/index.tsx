@@ -232,7 +232,12 @@ export function AcademyWitnessMizanView() {
                   Execute WX-01..09 Pipeline
                 </Button>
                 {runResult?.run?.run_key ? (
-                  <Button type="button" size="sm" variant="outline" onClick={() => void handleReplayRun()}>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void handleReplayRun()}
+                  >
                     Verify SHA-256 Replay ({runResult.run.run_key})
                   </Button>
                 ) : null}

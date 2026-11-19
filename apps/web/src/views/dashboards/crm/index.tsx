@@ -48,13 +48,8 @@ export function CrmDashboardView() {
   }, []);
 
   const byStage = Array.isArray(summary?.byStage) ? summary.byStage : [];
-  const wonLeads = Number(
-    byStage.find((row) => row.stage_key === "won")?.count ?? 0,
-  );
-  const totalExpectedRevenue = byStage.reduce(
-    (sum, row) => sum + Number(row.revenue ?? 0),
-    0,
-  );
+  const wonLeads = Number(byStage.find((row) => row.stage_key === "won")?.count ?? 0);
+  const totalExpectedRevenue = byStage.reduce((sum, row) => sum + Number(row.revenue ?? 0), 0);
 
   return (
     <ConsoleShellAdapter
@@ -87,7 +82,9 @@ export function CrmDashboardView() {
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL LEADS</div>
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                TOTAL LEADS
+              </div>
               <div className="mt-1 font-brush text-2xl">{summary?.leads ?? 0}</div>
             </div>
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">

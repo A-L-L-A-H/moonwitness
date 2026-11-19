@@ -71,7 +71,10 @@ async function mockAuthenticatedApi(page: Page, role: "admin" | "viewer" = "admi
               selection: ["pending", "verified", "disputed"],
             },
           ],
-          actionBindings: { listUrl: "/api/v1/m/witness.claim", createUrl: "/api/v1/m/witness.claim" },
+          actionBindings: {
+            listUrl: "/api/v1/m/witness.claim",
+            createUrl: "/api/v1/m/witness.claim",
+          },
         }),
       });
     }
@@ -292,7 +295,9 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(`${page.url()}: ${err.message} (${err.stack?.split("\n")[1]?.trim() ?? ""})`));
+    page.on("pageerror", (err) =>
+      errors.push(`${page.url()}: ${err.message} (${err.stack?.split("\n")[1]?.trim() ?? ""})`),
+    );
 
     for (const route of [
       "/",
@@ -323,7 +328,11 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
     page,
   }) => {
     await page.route("**/api/v1/auth/me", (route) =>
-      route.fulfill({ status: 401, contentType: "application/json", body: '{"error":"unauthorized"}' }),
+      route.fulfill({
+        status: 401,
+        contentType: "application/json",
+        body: '{"error":"unauthorized"}',
+      }),
     );
     await page.goto("/en/dashboards/analytics", { waitUntil: "domcontentloaded" });
     await page.waitForURL(/\/en\/shadow\?redirectTo=/);
@@ -336,7 +345,9 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
     await page.setViewportSize({ width: 1280, height: 800 });
     await mockAuthenticatedApi(page, "admin");
     const errors: string[] = [];
-    page.on("pageerror", (err) => errors.push(`${page.url()}: ${err.message} (${err.stack?.split("\n")[1]?.trim() ?? ""})`));
+    page.on("pageerror", (err) =>
+      errors.push(`${page.url()}: ${err.message} (${err.stack?.split("\n")[1]?.trim() ?? ""})`),
+    );
 
     const privateRoutes = [
       "/en/dashboards/analytics",

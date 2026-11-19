@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  buildCsrfLogoutInit,
-  getActiveTenantFromStorage,
-  getCsrfTokenFromCookie,
-} from "./client";
+import { buildCsrfLogoutInit, getActiveTenantFromStorage, getCsrfTokenFromCookie } from "./client";
 
 describe("isomorphic sdk cookie and tenant guard", () => {
   it("returns null in non-DOM runtimes without global document or localStorage", () => {

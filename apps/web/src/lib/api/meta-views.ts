@@ -392,7 +392,12 @@ export function useModelRows(model: string, listUrl?: string, restEnabled = true
           ? (payload.alerts ?? payload.data ?? payload.items ?? [])
           : model === "command.workflow"
             ? (payload.workflows ?? payload.data ?? payload.items ?? [])
-            : (payload.data ?? payload.users ?? payload.workflows ?? payload.alerts ?? payload.items ?? []);
+            : (payload.data ??
+              payload.users ??
+              payload.workflows ??
+              payload.alerts ??
+              payload.items ??
+              []);
       setRows(list);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load rows");

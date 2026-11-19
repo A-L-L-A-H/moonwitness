@@ -27,9 +27,8 @@ export function getCsrfTokenFromCookie(): string | null {
 
 export function getActiveTenantFromStorage(): string | null {
   try {
-    const storage = (
-      globalThis as { localStorage?: { getItem?: (key: string) => string | null } }
-    ).localStorage;
+    const storage = (globalThis as { localStorage?: { getItem?: (key: string) => string | null } })
+      .localStorage;
     const raw = storage?.getItem?.(TENANT_STORAGE_KEY)?.trim();
     if (!raw || raw === "default") return null;
     return raw;

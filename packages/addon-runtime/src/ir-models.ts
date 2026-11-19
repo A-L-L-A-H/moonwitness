@@ -177,9 +177,7 @@ export const resGroupsModel = defineModel({
 export const resPartnerSchema = z.object({
   partner_key: z.string().min(1).max(120),
   name: z.string().min(1).max(200),
-  partner_type: z
-    .enum(["human", "agent", "service", "organization", "probe"])
-    .default("human"),
+  partner_type: z.enum(["human", "agent", "service", "organization", "probe"]).default("human"),
   email: z.string().max(200).nullable().default(null),
   company_slug: z.string().max(64).default("default"),
   locale: z.string().max(16).default("en"),
@@ -195,10 +193,7 @@ export const resPartnerModel = defineModel({
   softDelete: false,
   restEnabled: true,
   searchFields: ["partner_key", "name", "email", "partner_type"],
-  indexes: [
-    { fields: ["tenant_id", "partner_key"], unique: true },
-    { fields: ["partner_type"] },
-  ],
+  indexes: [{ fields: ["tenant_id", "partner_key"], unique: true }, { fields: ["partner_type"] }],
 });
 
 export const resLangSchema = z.object({
@@ -234,10 +229,7 @@ export const irModelDataModel = defineModel({
   table: "ir_model_data",
   schema: irModelDataSchema,
   softDelete: false,
-  indexes: [
-    { fields: ["module", "name"], unique: true },
-    { fields: ["model", "res_id"] },
-  ],
+  indexes: [{ fields: ["module", "name"], unique: true }, { fields: ["model", "res_id"] }],
 });
 
 export const irConfigParameterSchema = z.object({
@@ -462,10 +454,7 @@ export async function postChatterMessage(input: {
   return message;
 }
 
-export async function getConfigParam(
-  key: string,
-  tenantId = "default",
-): Promise<string | null> {
+export async function getConfigParam(key: string, tenantId = "default"): Promise<string | null> {
   const rows = await irConfigParameterModel.repository.find({ key }, { tenantId, limit: 1 });
   return rows[0]?.value ?? null;
 }
@@ -501,10 +490,7 @@ export async function nextSequenceByCode(
 ): Promise<string> {
   const actor = options.actor ?? SYSTEM_ACTOR;
   const tenantId = actor.tenantId ?? "default";
-  const existingRows = await irSequenceModel.repository.find(
-    { code },
-    { tenantId, limit: 1 },
-  );
+  const existingRows = await irSequenceModel.repository.find({ code }, { tenantId, limit: 1 });
 
   let row = existingRows[0];
   if (!row) {
@@ -525,16 +511,10 @@ export async function nextSequenceByCode(
 
   const currentNumber = row.number_next;
   const nextNumber = currentNumber + row.number_increment;
-  await irSequenceModel.repository.update(
-    row.id,
-    { number_next: nextNumber },
-    actor,
-  );
+  await irSequenceModel.repository.update(row.id, { number_next: nextNumber }, actor);
 
   const padded =
-    row.padding > 0
-      ? String(currentNumber).padStart(row.padding, "0")
-      : String(currentNumber);
+    row.padding > 0 ? String(currentNumber).padStart(row.padding, "0") : String(currentNumber);
   return `${row.prefix}${padded}${row.suffix}`;
 }
 

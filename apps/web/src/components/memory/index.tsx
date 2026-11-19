@@ -83,8 +83,10 @@ export function MemoryWorkspace() {
       return res.data.map((row) => ({
         id: String(row.id ?? ""),
         statement: String(row.claim_text ?? row.statement ?? row.title ?? ""),
-        epistemic_type: (String(row.epistemic_type ?? "testimony") as WitnessEpistemicType),
-        status: (String(row.verification_state ?? row.status ?? "unverified") as WitnessClaimRecord["status"]),
+        epistemic_type: String(row.epistemic_type ?? "testimony") as WitnessEpistemicType,
+        status: String(
+          row.verification_state ?? row.status ?? "unverified",
+        ) as WitnessClaimRecord["status"],
         created_at: String(row.created_at ?? new Date().toISOString()),
         updated_at: String(row.updated_at ?? new Date().toISOString()),
       }));

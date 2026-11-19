@@ -99,7 +99,9 @@ export function WitnessEngineLiveTabPanel() {
           : "Deterministic replay verified.",
       );
     } catch {
-      setReplayNotice(`DETERMINISTIC REPLAY SEAL CONFIRMED (${runOutput.output_hash ?? "SHA-256"})`);
+      setReplayNotice(
+        `DETERMINISTIC REPLAY SEAL CONFIRMED (${runOutput.output_hash ?? "SHA-256"})`,
+      );
     } finally {
       setBusy(false);
     }

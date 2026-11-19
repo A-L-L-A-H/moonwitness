@@ -22,15 +22,7 @@ export const geoProvinceSchema = z.object({
   iso_code: z.string().max(16).default(""),
   name: z.string().min(1).max(120),
   island_group: z
-    .enum([
-      "sumatera",
-      "jawa",
-      "kalimantan",
-      "sulawesi",
-      "bali_nusa_tenggara",
-      "maluku",
-      "papua",
-    ])
+    .enum(["sumatera", "jawa", "kalimantan", "sulawesi", "bali_nusa_tenggara", "maluku", "papua"])
     .default("jawa"),
   timezone: z.enum(["WIB", "WITA", "WIT"]).default("WIB"),
   lat: z.number().nullable().default(null),

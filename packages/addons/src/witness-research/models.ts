@@ -123,7 +123,13 @@ export const wxRootModel = defineModel({
   softDelete: false,
   restEnabled: true,
   searchFields: ["root_key", "transliteration", "core_meaning"],
-  publicFields: ["root_key", "arabic_letters", "transliteration", "core_meaning", "occurrence_count"],
+  publicFields: [
+    "root_key",
+    "arabic_letters",
+    "transliteration",
+    "core_meaning",
+    "occurrence_count",
+  ],
   indexes: [{ fields: ["root_key"], unique: true }],
 });
 

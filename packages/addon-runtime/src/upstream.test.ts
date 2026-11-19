@@ -40,13 +40,11 @@ describe("addon-runtime upstream & trace helpers", () => {
 
   it("returns edge loopback error payload in Cloudflare Workers runtime", () => {
     process.env.DATABASE_URL = "d1:moonwitness";
-    expect(getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", "http://127.0.0.1:8787")).toMatchObject(
-      {
-        reachable: false,
-        configured: false,
-        mode: "cloudflare-edge",
-      },
-    );
+    expect(getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", "http://127.0.0.1:8787")).toMatchObject({
+      reachable: false,
+      configured: false,
+      mode: "cloudflare-edge",
+    });
     expect(
       getEdgeLoopbackErrorPayload("arsy", "ARSY_URL", "https://arsy.moonwitness.biz.id"),
     ).toBeNull();
@@ -68,8 +66,6 @@ describe("addon-runtime upstream & trace helpers", () => {
     expect(headers["x-moonwitness-bridge-token"]).toBe("bridge-secret");
     expect(headers["x-request-id"]).toBe("req-42");
     expect(headers.traceparent).toMatch(/^00-4bf92f3577b34da6a3ce929d0e0e4736-[0-9a-f]{16}-01$/);
-    expect(headers.traceparent).not.toBe(
-      "00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01",
-    );
+    expect(headers.traceparent).not.toBe("00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01");
   });
 });

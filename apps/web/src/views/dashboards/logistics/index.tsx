@@ -71,7 +71,9 @@ export function LogisticsDashboardView() {
           move_state: "confirmed",
         }),
       });
-      setTransferNotice(`Scheduled stock move ${reference}: ${qty} × ${productCode} (${sourceLoc} → ${destLoc}).`);
+      setTransferNotice(
+        `Scheduled stock move ${reference}: ${qty} × ${productCode} (${sourceLoc} → ${destLoc}).`,
+      );
       await loadSummaries();
     } catch (err) {
       setTransferNotice(err instanceof Error ? err.message : "Stock transfer failed.");
@@ -120,7 +122,9 @@ export function LogisticsDashboardView() {
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">STOCK MOVES</div>
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                  STOCK MOVES
+                </div>
                 <div className="mt-1 font-brush text-2xl">{stock?.moves ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
@@ -128,11 +132,15 @@ export function LogisticsDashboardView() {
                 <div className="mt-1 font-brush text-2xl">{stock?.products ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">ACTIVE QUANTS</div>
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                  ACTIVE QUANTS
+                </div>
                 <div className="mt-1 font-brush text-2xl">{stock?.quants ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">CITIES / REGENCIES</div>
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                  CITIES / REGENCIES
+                </div>
                 <div className="mt-1 font-brush text-2xl">{geo?.cities ?? 0}</div>
               </div>
             </div>

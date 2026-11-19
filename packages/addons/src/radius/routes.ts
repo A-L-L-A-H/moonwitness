@@ -129,7 +129,13 @@ export async function registerRadiusRoutes(
   );
 
   fastify.get<{ Params: { username: string } }>("/radius/users/:username", async (request, reply) =>
-    forward(auth, request, reply, `/api/users/${encodeURIComponent(request.params.username)}`, "GET"),
+    forward(
+      auth,
+      request,
+      reply,
+      `/api/users/${encodeURIComponent(request.params.username)}`,
+      "GET",
+    ),
   );
 
   fastify.post("/radius/users", { preHandler: adminOnly }, async (request, reply) => {

@@ -1,5 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import { createActorContext, onModelWrite, type ActorContext, type AuditAction } from "@moonwitness/orm";
+import {
+  createActorContext,
+  onModelWrite,
+  type ActorContext,
+  type AuditAction,
+} from "@moonwitness/orm";
 import {
   defaultFailClosedAuthBridge,
   resolveActorTenantFromBridge,
@@ -30,7 +35,12 @@ export interface RecordAuditInput {
   action: "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE" | "EXECUTE" | "ACCESS";
   actor?:
     | ActorContext
-    | { actorId?: string | null; requestId?: string | null; role?: string | null; tenantId?: string }
+    | {
+        actorId?: string | null;
+        requestId?: string | null;
+        role?: string | null;
+        tenantId?: string;
+      }
     | null;
   actorRole?: string | null;
   correlationId?: string | null;
@@ -69,12 +79,7 @@ export async function recordAuditLog(input: RecordAuditInput): Promise<void> {
       : undefined);
 
   const occurredAt = input.occurredAt ?? new Date().toISOString();
-  const ormActor = createActorContext(
-    actorId,
-    "api",
-    correlationId ?? undefined,
-    tenantId,
-  );
+  const ormActor = createActorContext(actorId, "api", correlationId ?? undefined, tenantId);
   await auditLogModel.repository.create(
     {
       domain: input.domain.slice(0, 80) || "platform",

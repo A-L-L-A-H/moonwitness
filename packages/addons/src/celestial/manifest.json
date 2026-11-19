@@ -6,9 +6,20 @@
   "depends": ["__base"],
   "autoInstall": true,
   "defaultEnabled": true,
-  "capabilities": ["celestial.aeq4", "celestial.lunar", "celestial.qibla", "celestial.prayer_times", "celestial.hilal"],
+  "capabilities": [
+    "celestial.aeq4",
+    "celestial.lunar",
+    "celestial.qibla",
+    "celestial.prayer_times",
+    "celestial.hilal"
+  ],
   "provides": {
-    "routes": ["/api/v1/celestial/now", "/api/v1/celestial/qibla", "/api/v1/celestial/prayer-times", "/api/v1/celestial/hilal"],
+    "routes": [
+      "/api/v1/celestial/now",
+      "/api/v1/celestial/qibla",
+      "/api/v1/celestial/prayer-times",
+      "/api/v1/celestial/hilal"
+    ],
     "models": ["celestial.snapshot"],
     "auditActions": ["celestial.capture"]
   }

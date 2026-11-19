@@ -135,14 +135,15 @@ describe("timeline addon (zero-migration Odoo++ pilot)", () => {
     app.addHook("preHandler", async (request) => {
       const tenantHeader = request.headers["x-tenant-id"];
       const roleHeader = request.headers["x-role"];
-      (request as { user?: { id: string; role: string; tenantId?: string }; tenantId?: string }).user =
-        roleHeader
-          ? {
-              id: "user-1",
-              role: String(roleHeader),
-              tenantId: typeof tenantHeader === "string" ? tenantHeader : "default",
-            }
-          : undefined;
+      (
+        request as { user?: { id: string; role: string; tenantId?: string }; tenantId?: string }
+      ).user = roleHeader
+        ? {
+            id: "user-1",
+            role: String(roleHeader),
+            tenantId: typeof tenantHeader === "string" ? tenantHeader : "default",
+          }
+        : undefined;
       (request as { tenantId?: string }).tenantId =
         typeof tenantHeader === "string" ? tenantHeader : "default";
     });

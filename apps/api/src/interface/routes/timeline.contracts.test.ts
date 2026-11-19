@@ -7,14 +7,8 @@ import {
   TimelineListResponseSchema,
   TimelineStatsResponseSchema,
 } from "@moonwitness/contracts";
-import {
-  defaultFailClosedAuthBridge,
-  type BaseAddonAuthBridge,
-} from "@moonwitness/addon-runtime";
-import {
-  registerTimelineRoutes,
-  type ITimelineRepository,
-} from "@moonwitness/addons/timeline";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
+import { registerTimelineRoutes, type ITimelineRepository } from "@moonwitness/addons/timeline";
 
 const testAuth: BaseAddonAuthBridge = {
   ...defaultFailClosedAuthBridge,

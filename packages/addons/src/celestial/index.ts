@@ -101,11 +101,7 @@ export function getLunarPosition(utcMs: number = Date.now()): LunarPosition {
     0.0015786 * T * T +
     (T * T * T) / 538841 -
     (T * T * T * T) / 65194000;
-  const Msun =
-    357.5291092 +
-    35999.0502909 * T -
-    0.0001536 * T * T +
-    (T * T * T) / 24490000;
+  const Msun = 357.5291092 + 35999.0502909 * T - 0.0001536 * T * T + (T * T * T) / 24490000;
   const Mmoon =
     134.9633964 +
     477198.8675055 * T +
@@ -229,8 +225,7 @@ export function calculateQiblaBearing(latitude: number, longitude: number) {
 
   const y = Math.sin(deltaLambda) * Math.cos(phi2);
   const x =
-    Math.cos(phi1) * Math.sin(phi2) -
-    Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+    Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
   const bearingDeg = (toDeg(Math.atan2(y, x)) + 360.0) % 360.0;
 
   const deltaPhi = phi2 - phi1;
@@ -242,7 +237,7 @@ export function calculateQiblaBearing(latitude: number, longitude: number) {
 
   const roundedBearing = Number(bearingDeg.toFixed(2));
   const roundedDist = Number(distanceKm.toFixed(1));
-  const compassIndex = Math.floor((((roundedBearing % 360) + 360) % 360 + 11.25) / 22.5) % 16;
+  const compassIndex = Math.floor(((((roundedBearing % 360) + 360) % 360) + 11.25) / 22.5) % 16;
   const compass = COMPASS_POINTS[compassIndex] ?? "N";
 
   return {
@@ -391,11 +386,7 @@ export function evaluateHilalVisibility(
     : `CRITERIA_UNMET (${reasons.join(", ")})`;
 
   const arcvArcmin = alt * 60.0;
-  const poly =
-    -0.1018 * Math.pow(elong, 3) +
-    0.7319 * Math.pow(elong, 2) -
-    6.3226 * elong +
-    7.1651;
+  const poly = -0.1018 * Math.pow(elong, 3) + 0.7319 * Math.pow(elong, 2) - 6.3226 * elong + 7.1651;
   const vValue = Number((arcvArcmin - poly).toFixed(2));
 
   let odehCat: "A" | "B" | "C" | "D";
@@ -418,7 +409,11 @@ export function evaluateHilalVisibility(
     altitude_deg: alt,
     elongation_deg: elong,
     crescent_width_arcmin: width,
-    mabims_criterion: { status: mabimsPassed ? "PASS" : "FAIL", passed: mabimsPassed, description: mabimsDesc },
+    mabims_criterion: {
+      status: mabimsPassed ? "PASS" : "FAIL",
+      passed: mabimsPassed,
+      description: mabimsDesc,
+    },
     odeh_criterion: { category: odehCat, v_value: vValue, description: odehDesc },
     overall_verdict: mabimsPassed
       ? `VISIBILITY_CONFIRMED: MABIMS Met (${odehCat} - ${odehDesc})`
@@ -515,13 +510,16 @@ export const celestialSnapshotModel = defineModel({
         })
         .optional(),
       handler: async ({ input }) => {
-        const p = (input as {
-          lat?: number;
-          lng?: number;
-          date?: string;
-          tz?: number;
-          convention?: "KEMENAG" | "MWL" | "ISNA" | "UMM_AL_QURA";
-        } | undefined) ?? {};
+        const p =
+          (input as
+            | {
+                lat?: number;
+                lng?: number;
+                date?: string;
+                tz?: number;
+                convention?: "KEMENAG" | "MWL" | "ISNA" | "UMM_AL_QURA";
+              }
+            | undefined) ?? {};
         return calculateDetailedPrayerTimes(
           p.lat ?? -6.2088,
           p.lng ?? 106.8456,
@@ -575,7 +573,8 @@ export const celestialViews: IrViewInput[] = [
     view_type: "list",
     spec: {
       title: "Celestial & AEQ4 Ephemeris",
-      description: "Pure-math Hijri calendar, Jean Meeus lunar phase, AEQ4 clock, and Qibla bearing.",
+      description:
+        "Pure-math Hijri calendar, Jean Meeus lunar phase, AEQ4 clock, and Qibla bearing.",
       domainIcon: "mtime",
       columns: [
         "snapshot_key",
@@ -667,7 +666,9 @@ export function createCelestialAddon(
         const alt = Number(request.query.altitude);
         const elong = Number(request.query.elongation);
         if (!Number.isFinite(alt) || !Number.isFinite(elong)) {
-          return reply.code(400).send({ error: "Numeric altitude and elongation parameters required" });
+          return reply
+            .code(400)
+            .send({ error: "Numeric altitude and elongation parameters required" });
         }
         const width = request.query.width !== undefined ? Number(request.query.width) : 0.5;
         return evaluateHilalVisibility(alt, elong, Number.isFinite(width) ? width : 0.5);

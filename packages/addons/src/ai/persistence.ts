@@ -1,8 +1,4 @@
-import {
-  createActorContext,
-  syncModels,
-  type ActorContext,
-} from "@moonwitness/orm";
+import { createActorContext, syncModels, type ActorContext } from "@moonwitness/orm";
 import {
   providerConfigModel,
   providerConfigSchema,

@@ -126,10 +126,20 @@ function compileSingleTupleClause(clause: unknown): Record<string, unknown> {
       return { [field]: { $in: value } };
     case "like":
     case "=like":
-      return { [field]: { $like: op === "like" && !String(value).includes("%") ? `%${String(value)}%` : String(value) } };
+      return {
+        [field]: {
+          $like:
+            op === "like" && !String(value).includes("%") ? `%${String(value)}%` : String(value),
+        },
+      };
     case "ilike":
     case "=ilike":
-      return { [field]: { $ilike: op === "ilike" && !String(value).includes("%") ? `%${String(value)}%` : String(value) } };
+      return {
+        [field]: {
+          $ilike:
+            op === "ilike" && !String(value).includes("%") ? `%${String(value)}%` : String(value),
+        },
+      };
     default:
       throw new Error(`Unsupported domain operator '${rawOp}'.`);
   }

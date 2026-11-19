@@ -168,8 +168,7 @@ export class TimelineRepository implements ITimelineRepository {
   }
 
   async getStats(tenantId?: string): Promise<TimelineStats> {
-    const normalizedTenant =
-      tenantId !== undefined ? normalizeTenantId(tenantId) : undefined;
+    const normalizedTenant = tenantId !== undefined ? normalizeTenantId(tenantId) : undefined;
     const groups = await this.events.readGroup({
       groupBy: ["era", "kind"],
       ...(normalizedTenant !== undefined ? { tenantId: normalizedTenant } : {}),

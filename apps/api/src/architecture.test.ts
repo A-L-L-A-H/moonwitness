@@ -126,7 +126,9 @@ describe("apps/api Thin-Host & ORM Addon Architecture Gates", () => {
   it("API-GATE-03: zero domain route files in apps/api/src (only health.routes.ts and metrics.ts)", () => {
     const routeFiles = apiNonTestFiles
       .map((file) => toPosixRelative(API_SRC_DIR, file))
-      .filter((rel) => rel.startsWith("interface/routes/") || /(?:^|\/)[^/]*\.routes\.ts$/.test(rel));
+      .filter(
+        (rel) => rel.startsWith("interface/routes/") || /(?:^|\/)[^/]*\.routes\.ts$/.test(rel),
+      );
     expect(routeFiles.sort()).toEqual([
       "interface/routes/health.routes.ts",
       "interface/routes/metrics.ts",
@@ -172,7 +174,9 @@ describe("apps/api Thin-Host & ORM Addon Architecture Gates", () => {
       let hit: RegExpExecArray | null;
       while ((hit = syncRegex.exec(content)) !== null) {
         const pos = hit.index;
-        const enclosing = [...fnMatches].reverse().find((m) => (m.index ?? 0) < pos && pos >= cursor);
+        const enclosing = [...fnMatches]
+          .reverse()
+          .find((m) => (m.index ?? 0) < pos && pos >= cursor);
         if (!enclosing || !allowedNames.test(enclosing[1]!)) {
           unexpectedServiceOffenders.push(`${rel}:${enclosing?.[1] ?? "top-level"}`);
         }
@@ -496,7 +500,11 @@ describe("apps/api Thin-Host & ORM Addon Architecture Gates", () => {
     // API-GATE-15: performance KPIs, observatory feeds, crm, and view contract integrity
     const defaultAdminHeaders = { cookie: `mw_session=${sessionToken}` };
     const [perfRes, obsRes, crmRes] = await Promise.all([
-      app.inject({ method: "GET", url: "/api/v1/performance/summary", headers: defaultAdminHeaders }),
+      app.inject({
+        method: "GET",
+        url: "/api/v1/performance/summary",
+        headers: defaultAdminHeaders,
+      }),
       app.inject({ method: "GET", url: "/api/v1/observatory/summary" }),
       app.inject({ method: "GET", url: "/api/v1/crm/summary", headers: defaultAdminHeaders }),
     ]);

@@ -8,12 +8,7 @@ import {
 } from "@moonwitness/core";
 import { getDb } from "@moonwitness/orm";
 import { getRequestCookie } from "@moonwitness/addon-runtime";
-import {
-  findUserById,
-  getSessionWithUser,
-  getUserPublic,
-  SESSION_COOKIE_NAME,
-} from "./service.js";
+import { findUserById, getSessionWithUser, getUserPublic, SESSION_COOKIE_NAME } from "./service.js";
 
 export const DEFAULT_API_ALLOWED_AUDIENCES = [
   "moonwitness-web",

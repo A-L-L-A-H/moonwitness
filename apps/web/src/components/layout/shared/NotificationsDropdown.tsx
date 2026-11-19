@@ -71,9 +71,7 @@ export function NotificationsDropdown({
   }
 
   function toggleRead(id: string) {
-    setItems((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, read: !item.read } : item)),
-    );
+    setItems((prev) => prev.map((item) => (item.id === id ? { ...item, read: !item.read } : item)));
   }
 
   function removeItem(id: string) {

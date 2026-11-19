@@ -39,17 +39,9 @@ export function ControlGate({ children }: { children: ReactNode }) {
         ? "جارٍ فحص الخادم…"
         : "CHECKING CONTROL PLANE…";
   const setupLabel =
-    locale === "id"
-      ? "MEMBUKA SETUP…"
-      : locale === "ar"
-        ? "جارٍ فتح الإعداد…"
-        : "OPENING SETUP…";
+    locale === "id" ? "MEMBUKA SETUP…" : locale === "ar" ? "جارٍ فتح الإعداد…" : "OPENING SETUP…";
   const sessionLabel =
-    locale === "id"
-      ? "MEMBUKA SESI…"
-      : locale === "ar"
-        ? "جارٍ فتح الجلسة…"
-        : "OPENING SESSION…";
+    locale === "id" ? "MEMBUKA SESI…" : locale === "ar" ? "جارٍ فتح الجلسة…" : "OPENING SESSION…";
   const offlineTitle =
     locale === "id"
       ? "ARSY TIDAK TERJANGKAU"

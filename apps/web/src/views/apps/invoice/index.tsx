@@ -108,9 +108,7 @@ export function InvoiceLedgerView() {
   }
 
   const byState = Array.isArray(summary?.byState) ? summary.byState : [];
-  const postedMoves = Number(
-    byState.find((s) => s.move_state === "posted")?.count ?? 0,
-  );
+  const postedMoves = Number(byState.find((s) => s.move_state === "posted")?.count ?? 0);
 
   return (
     <ConsoleShellAdapter
@@ -152,7 +150,9 @@ export function InvoiceLedgerView() {
                 <div className="mt-1 font-brush text-2xl">{summary?.journals ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL MOVES</div>
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                  TOTAL MOVES
+                </div>
                 <div className="mt-1 font-brush text-2xl">{summary?.moves ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">

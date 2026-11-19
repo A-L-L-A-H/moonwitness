@@ -65,11 +65,7 @@ export {
   postChatterMessage,
   irSystemModels,
 } from "./ir-models.js";
-export {
-  CronRunner,
-  globalCronRunner,
-  type CronExecutionResult,
-} from "./cron-runner.js";
+export { CronRunner, globalCronRunner, type CronExecutionResult } from "./cron-runner.js";
 export {
   AddonManifestSignatureSchema,
   AddonManifestSchema,

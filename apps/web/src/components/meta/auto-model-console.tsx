@@ -241,9 +241,9 @@ export function AutoModelConsole({
       const selection =
         fieldType === "selection"
           ? fieldSelection
-            .split(",")
-            .map((s) => s.trim())
-            .filter(Boolean)
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
           : undefined;
       await registerCustomFieldRequest(model, {
         field_name: fieldName.trim().toLowerCase(),
@@ -372,7 +372,7 @@ export function AutoModelConsole({
                   onChange={(e) =>
                     setFieldType(
                       e.target.value as
-                      "text" | "integer" | "real" | "boolean" | "date" | "selection",
+                        "text" | "integer" | "real" | "boolean" | "date" | "selection",
                     )
                   }
                 >
@@ -597,10 +597,7 @@ export function AutoModelConsole({
                       </div>
                       <div>{msg.body}</div>
                       {msg.$tracking_values?.map((tr) => (
-                        <div
-                          key={tr.id}
-                          className="font-mono text-[10px] text-[var(--primary)]"
-                        >
+                        <div key={tr.id} className="font-mono text-[10px] text-[var(--primary)]">
                           {tr.field_name}: {tr.old_value ?? "∅"} → {tr.new_value ?? "∅"}
                         </div>
                       ))}
@@ -664,45 +661,45 @@ export function AutoModelConsole({
           onCreate={
             bindings.createUrl
               ? async (values) => {
-                await executeModelMutation(bindings.createUrl!, "POST", values);
-                await reloadRows();
-              }
+                  await executeModelMutation(bindings.createUrl!, "POST", values);
+                  await reloadRows();
+                }
               : undefined
           }
           onUpdate={
             bindings.updateUrl
               ? async (id, values) => {
-                await executeModelMutation(
-                  resolveBindingUrl(bindings.updateUrl!, id),
-                  "PATCH",
-                  values,
-                );
-                await reloadRows();
-              }
+                  await executeModelMutation(
+                    resolveBindingUrl(bindings.updateUrl!, id),
+                    "PATCH",
+                    values,
+                  );
+                  await reloadRows();
+                }
               : undefined
           }
           onArchive={
             bindings.archiveUrl
               ? async (id) => {
-                await executeModelMutation(resolveBindingUrl(bindings.archiveUrl!, id), "POST");
-                await reloadRows();
-              }
+                  await executeModelMutation(resolveBindingUrl(bindings.archiveUrl!, id), "POST");
+                  await reloadRows();
+                }
               : undefined
           }
           onRestore={
             bindings.restoreUrl
               ? async (id) => {
-                await executeModelMutation(resolveBindingUrl(bindings.restoreUrl!, id), "POST");
-                await reloadRows();
-              }
+                  await executeModelMutation(resolveBindingUrl(bindings.restoreUrl!, id), "POST");
+                  await reloadRows();
+                }
               : undefined
           }
           onDelete={
             bindings.deleteUrl
               ? async (id) => {
-                await executeModelMutation(resolveBindingUrl(bindings.deleteUrl!, id), "DELETE");
-                await reloadRows();
-              }
+                  await executeModelMutation(resolveBindingUrl(bindings.deleteUrl!, id), "DELETE");
+                  await reloadRows();
+                }
               : undefined
           }
           customActions={customActions}

@@ -35,15 +35,8 @@ export interface RiotAiChatRouteDeps {
 }
 
 export function registerRiotAiChatRoute(fastify: FastifyInstance, deps: RiotAiChatRouteDeps): void {
-  const {
-    auth,
-    authorize,
-    adapter,
-    misconfigured,
-    runtime,
-    rateLimitPreHandler,
-    recordAudit,
-  } = deps;
+  const { auth, authorize, adapter, misconfigured, runtime, rateLimitPreHandler, recordAudit } =
+    deps;
   const configuredModelId = runtime.RIOT_AI_MODEL;
 
   fastify.post(

@@ -1,9 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
-import {
-  defaultFailClosedAuthBridge,
-  type BaseAddonAuthBridge,
-} from "@moonwitness/addon-runtime";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
 import { createSession, createUser, ensureAuthSchema } from "@moonwitness/addons/auth";
 import {
   initializeRiotAiPersistence,

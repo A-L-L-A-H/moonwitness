@@ -41,10 +41,7 @@ export const projectProjectModel = defineModel({
       inverseField: "project_code",
     },
   },
-  indexes: [
-    { fields: ["tenant_id", "code"], unique: true },
-    { fields: ["project_status"] },
-  ],
+  indexes: [{ fields: ["tenant_id", "code"], unique: true }, { fields: ["project_status"] }],
 });
 
 export const projectTaskSchema = z.object({

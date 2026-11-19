@@ -7,13 +7,7 @@ import themeConfig from "@/configs/themeConfig";
 import { useCurrentSessionState } from "@/lib/session";
 import { getLocalizedUrl } from "@/utils/i18n";
 
-export function GuestOnlyRoute({
-  children,
-  lang,
-}: {
-  children: ReactNode;
-  lang?: Locale;
-}) {
+export function GuestOnlyRoute({ children, lang }: { children: ReactNode; lang?: Locale }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { session, loading } = useCurrentSessionState();

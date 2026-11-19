@@ -32,6 +32,7 @@
 ## Target File Structure
 
 ### `@moonwitness/addon-runtime` (`packages/addon-runtime/src/`)
+
 - Create `fastify.d.ts` — module augmentation for `FastifyInstance.midMounted`, `FastifyRequest.{user,tenantId,cookies,traceparent}`, and `FastifyReply.{setCookie,clearCookie}` so self-hosted addons typecheck cleanly outside `apps/api`.
 - Create `host-context.ts` — `AddonHostContext`, extended `BaseAddonAuthBridge` (`optionalAuthenticate`, `resolveActorContext`), `HostRateLimitFactory`, `HostProxyBridge`, `HostMidConfig`.
 - Create `upstream.ts` — shared `resolveUpstreamServiceUrl`, `getEdgeLoopbackErrorPayload`, `getUpstreamBridgeHeaders`, `resolveTraceContext`, `buildChildTraceparent`, `isBlockedRuntimeHost`, `validateServiceEndpointUrl`, `createUpstreamForwarder`.
@@ -41,6 +42,7 @@
 - Modify `index.ts` — mount `registerMetadataRoutes` under `apiPrefix` as well as root; export new runtime helpers.
 
 ### `@moonwitness/addons` (`packages/addons/src/`)
+
 - Modify `package.json` — add `@moonwitness/core`, `@moonwitness/ai`, `fastify` (peer/dep) so all 15 addons compile cleanly standalone.
 - Modify `index.ts` — export `createPlatformAddons(host: AddonHostContext): AddonDefinition[]`.
 - Self-host routes/services + align `actionBindings` in the 10 currently hollow addons:
@@ -57,6 +59,7 @@
 - Refactor `audit/index.ts` onto `auditLogModel.repository` with `tenantId` scoping; thread `tenantId` in `i18n`, `canon-lore`, `witness-research`, `epistemic`.
 
 ### `apps/api` (`apps/api/src/` — Target ~1,050 non-test LOC)
+
 - Keep & tighten: `index.ts`, `app.ts`, `bootstrap.ts` (sole composition root), `seed.ts`, `middleware/auth.ts`, `infrastructure/rate-limit.ts`, `interface/routes/health.routes.ts`, `interface/routes/metrics.ts`, `shared/env.ts`, `shared/seed-safety.ts`, `shared/trace.ts`, `types/fastify.d.ts`.
 - Create: `architecture.test.ts` (permanent fitness gate `API-GATE-01..08`).
 - Delete: `infrastructure/adapters/fastify.adapter.ts`, `infrastructure/persistence/domain/*`, `infrastructure/audit/audit-log.ts`, `infrastructure/repositories/*`, `db/seeders/index.ts`, `domain/*`, `interface/controllers/*`, `services/*`, `shared/auth.ts`, `shared/upstream.ts`, and all 10 domain route/persistence/helper modules in `interface/routes/`.
@@ -68,6 +71,7 @@
 ### Task 1: Purge Dead Files, Ghost Models & Passthrough Barrels (`apps/api`)
 
 **Files:**
+
 - Delete:
   - `apps/api/src/infrastructure/repositories/orm-event.repository.ts`
   - `apps/api/src/infrastructure/repositories/in-memory-event.repository.ts`
@@ -94,6 +98,7 @@
   - `apps/api/src/infrastructure/persistence/domain-migrations.test.ts` (import models & audit helpers directly from `@moonwitness/addons/*`)
 
 **Interfaces:**
+
 - Consumes: existing subpath exports in `@moonwitness/addons/{auth,audit,ai,command-center,control,probes,storage,snmp,syslog,radius}`
 - Produces: `generateToken(length = 32): string` exported from `@moonwitness/addons/auth`; zero ghost `identity.*` entries in `modelRegistry`
 
@@ -127,6 +132,7 @@ git commit -m "refactor(api): purge dead repositories, ghost identity models, an
 ### Task 2: Harden `@moonwitness/addon-runtime` (Live Guard on `/m/:model`, `/api/v1/_meta/models`, Dynamic Metadata, `AddonHostContext` & Shared Proxy Helpers)
 
 **Files:**
+
 - Create: `packages/addon-runtime/src/fastify.d.ts`
 - Create: `packages/addon-runtime/src/host-context.ts`
 - Create: `packages/addon-runtime/src/upstream.ts`
@@ -137,6 +143,7 @@ git commit -m "refactor(api): purge dead repositories, ghost identity models, an
 - Test: `packages/addon-runtime/src/generic-crud.test.ts`, `packages/addon-runtime/src/metadata.test.ts`, `packages/addon-runtime/src/upstream.test.ts`
 
 **Interfaces:**
+
 - Consumes: `@moonwitness/orm` (`modelRegistry`, `createActorContext`, `DEFAULT_TENANT_ID`, `ActorContext`)
 - Produces:
   - `AddonRuntimeController.isModelEnabled(modelName: string): boolean`
@@ -169,6 +176,7 @@ git commit -m "refactor(api): purge dead repositories, ghost identity models, an
 - [ ] **Step 1: Write failing tests in `packages/addon-runtime/src/generic-crud.test.ts`, `metadata.test.ts`, and `upstream.test.ts`**
 
 Assertions to add:
+
 1. `generic-crud.test.ts` — `"returns 503 ADDON_DISABLED on /m/:model when the owning addon is disabled"`: sync addon owning `crud.item`, disable it via `runtime.disable("crud-demo")`, send `GET /m/crud.item` and `POST /m/crud.item` → both return `503` with `{ code: "ADDON_DISABLED" }`; re-enable → returns `200`.
 2. `metadata.test.ts` — `"mounts /_meta/models under apiPrefix and derives public fields from modelRegistry excluding disabled addons and sensitive fields"`: call `registerBaseAddon(fastify, { runtime, apiPrefix: "/api/v1" })`, verify `GET /api/v1/_meta/models` returns `200` with active models only, omits `password_hash`/`access_token`/`refresh_token`, and drops models of a disabled addon.
 3. `upstream.test.ts` — pins `isBlockedRuntimeHost("169.254.169.254") === true`, `validateServiceEndpointUrl`, `getEdgeLoopbackErrorPayload`, and W3C child `traceparent` generation in `getUpstreamBridgeHeaders`.
@@ -203,18 +211,21 @@ git commit -m "feat(addon-runtime): enforce addon guard on /m/:model, dynamic /_
 ### Task 3: Fix P0 SNMP Mirror Schema Drift & Rewrite `riot-ai.persistence.ts` onto `BaseRepository`
 
 **Files:**
+
 - Modify: `apps/api/src/interface/routes/snmp-poller.routes.ts:61-144`
 - Modify: `apps/api/src/interface/routes/riot-ai.persistence.ts:1-330`
 - Modify: `apps/api/src/interface/routes/riot-ai.routes.ts:27-30`
 - Test: `apps/api/src/interface/routes/snmp-poller.routes.test.ts`, `apps/api/src/interface/routes/riot-ai.persistence.test.ts`
 
 **Interfaces:**
+
 - Consumes: `snmpDeviceModel`, `snmpTargetModel` (`@moonwitness/addons/snmp`), `providerConfigModel`, `usageSummaryModel` (`@moonwitness/addons/ai`), `BaseRepository` (`upsert`, `find` with `$gte`/`$lt`, `delete`, `history`)
 - Produces: Zero raw SQL and zero `applyMigrations(model.ddl)` in `riot-ai.persistence.ts`; accurate ORM mirror writes in `snmp-poller.routes.ts`
 
 - [ ] **Step 1: Write failing tests in `snmp-poller.routes.test.ts` and `riot-ai.persistence.test.ts`**
 
 Assertions to add:
+
 1. `snmp-poller.routes.test.ts`:
    - `"mirrors SNMP v3 device and target fields accurately into snmp_devices and snmp_targets"`: mock upstream `POST /api/devices` returning `{ id: "dev-v3", name: "Core Switch", host: "10.0.0.1", port: 161, version: "v3", enabled: true }` → assert `snmpDeviceModel.repository.find({ device_key: "dev-v3" })` has `snmp_version === "v3"`.
    - Mock upstream `POST /api/devices/dev-v3/targets` returning `{ id: "tgt-1", oid: "1.3.6.1.2.1.1.3.0", name: "sysUpTime", interval_sec: 30, enabled: true }` → assert `snmpTargetModel.repository.find({ target_key: "tgt-1" })` has length 1 with `label === "sysUpTime"` and `interval_sec === 30`.
@@ -256,6 +267,7 @@ git commit -m "fix(api/orm): repair SNMP mirror fields and migrate riot-ai persi
 ### Task 4: Refactor `@moonwitness/addons/audit` onto `BaseRepository` (`tenant_id`) & Eliminate Triple Audit Writes
 
 **Files:**
+
 - Modify: `packages/addons/src/audit/index.ts`
 - Modify: `packages/addons/src/auth/service.ts`
 - Modify: `apps/api/src/interface/controllers/timeline.controller.ts`
@@ -265,6 +277,7 @@ git commit -m "fix(api/orm): repair SNMP mirror fields and migrate riot-ai persi
 - Test: `packages/addons/src/audit/index.test.ts`
 
 **Interfaces:**
+
 - Consumes: `auditLogModel.repository`, `resolveActorContextFromBridge` (`@moonwitness/addon-runtime`)
 - Produces:
   - `ListAuditLogsOptions.tenantId?: string`
@@ -274,6 +287,7 @@ git commit -m "fix(api/orm): repair SNMP mirror fields and migrate riot-ai persi
 - [ ] **Step 1: Write failing tests in `packages/addons/src/audit/index.test.ts`**
 
 Assertions to add:
+
 1. `"isolates ops_audit_logs records by tenantId across recordAuditLog and listAuditLogs"`: record 1 log for `tenant-a` and 1 for `tenant-b`, assert `listAuditLogs({ tenantId: "tenant-a" })` returns only `tenant-a`'s row.
 2. `"writes exactly one ops_audit_logs row when an ORM model is created with audit outbox attached"`: attach outbox, create a `timeline.event` / `auth.user` via repository, assert `ops_audit_logs` count for that entity is `1` (not `2`).
 
@@ -312,6 +326,7 @@ git commit -m "refactor(audit/addons): route audit persistence through BaseRepos
 ### Task 5: Collapse `fastify.adapter.ts` into Single Host `bootstrap.ts`, Remove Shadow Metadata, Stop Hot-Path `syncModels`, and Unify Rate Limiting
 
 **Files:**
+
 - Modify: `apps/api/src/bootstrap.ts`
 - Delete: `apps/api/src/infrastructure/adapters/fastify.adapter.ts`
 - Modify: `apps/api/src/infrastructure/rate-limit.ts`
@@ -322,6 +337,7 @@ git commit -m "refactor(audit/addons): route audit persistence through BaseRepos
 - Modify: `apps/api/src/interface/routes/auth.routes.test.ts`, `bff-auth.routes.test.ts`, `identity-authz-matrix.test.ts`, `mid-jwt.test.ts`, `addon-meta-runtime.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext`, `buildMetadataRegistryFromModels`, `createUpstreamProxy` (`@moonwitness/addon-runtime`), `irAddonModel` (`@moonwitness/addon-runtime`)
 - Produces:
   - Single host entrypoint `buildCoreApp(options?: CoreAppOptions): Promise<FastifyInstance>` in `apps/api/src/bootstrap.ts`
@@ -331,6 +347,7 @@ git commit -m "refactor(audit/addons): route audit persistence through BaseRepos
 - [ ] **Step 1: Write failing tests in `apps/api/src/addon-meta-runtime.test.ts`**
 
 Assertions to add:
+
 1. `"serves /api/v1/_meta/models from live modelRegistry without ghost or phantom entries"`: `GET /api/v1/_meta/models` returns `200`, contains `"auth.user"`, `"probe.node"`, `"timeline.event"`, `"canon.codex"`, and does NOT contain `"probe.target"` or `"identity.user_profile"`.
 2. `"blocks /api/v1/m/:model with 503 ADDON_DISABLED when owning addon is disabled"`: disable `canon-lore`, send `GET /api/v1/m/canon.codex` with admin cookie → expects `503` and `json().code === "ADDON_DISABLED"`.
 
@@ -369,6 +386,7 @@ git commit -m "refactor(api): unify bootstrap host, drop shadow metadata registr
 ### Task 6: Move `timeline` Routes into `@moonwitness/addons/timeline` & Eliminate Redundant Controller/UseCase Layers
 
 **Files:**
+
 - Create: `packages/addons/src/timeline/schemas.ts`
 - Create: `packages/addons/src/timeline/routes.ts`
 - Modify: `packages/addons/src/timeline/repository.ts`
@@ -385,6 +403,7 @@ git commit -m "refactor(api): unify bootstrap host, drop shadow metadata registr
 - Test: `packages/addons/src/timeline/index.test.ts`, `apps/api/src/app.test.ts`, `apps/api/src/interface/routes/timeline.contracts.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext`, `resolveActorContextFromBridge` (`@moonwitness/addon-runtime`), `TimelineRepository`
 - Produces:
   - `createTimelineAddon(host?: Partial<AddonHostContext> & { repository?: ITimelineRepository }): AddonDefinition`
@@ -394,6 +413,7 @@ git commit -m "refactor(api): unify bootstrap host, drop shadow metadata registr
 - [ ] **Step 1: Write failing tests in `packages/addons/src/timeline/index.test.ts`**
 
 Assertions to add:
+
 1. `"mounts /api/v1/timeline/* routes directly from createTimelineAddon and isolates events by tenantId"`: create event under `tenant-a` via `POST /api/v1/timeline/events`, verify `GET /api/v1/timeline/events` as `tenant-a` returns `total: 1` while `tenant-b` returns `total: 0`.
 2. `"calls TimelineRepository.listEvents only once per GET /api/v1/timeline/events request"`: spy on `repo.listEvents`, call `GET /api/v1/timeline/events` → `expect(spy).toHaveBeenCalledTimes(1)` (fixes double-query regression).
 3. `"exposes valid actionBindings for timeline.event and timeline.era"`: verify `timeline.era` `actionBindings` points `createUrl` to `"/api/v1/m/timeline.era"` (or omits non-existent `POST /api/v1/timeline/eras`).
@@ -430,6 +450,7 @@ git commit -m "refactor(timeline): co-locate routes in @moonwitness/addons/timel
 ### Task 7: Move `command-center` & `probes` Services and Routes into `@moonwitness/addons/{command-center,probes}`
 
 **Files:**
+
 - Create: `packages/addons/src/command-center/service.ts`, `packages/addons/src/command-center/routes.ts`
 - Modify: `packages/addons/src/command-center/index.ts`
 - Create: `packages/addons/src/probes/service.ts`, `packages/addons/src/probes/routes.ts`
@@ -443,6 +464,7 @@ git commit -m "refactor(timeline): co-locate routes in @moonwitness/addons/timel
 - Test: `packages/addons/src/command-center/index.test.ts`, `packages/addons/src/probes/index.test.ts`, `apps/api/src/interface/routes/command-center.routes.test.ts`, `apps/api/src/interface/routes/probes.routes.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext`, `resolveActorContextFromBridge`, `isBlockedRuntimeHost` (`@moonwitness/addon-runtime`), `listAuditLogs` (`../audit`)
 - Produces:
   - `createCommandCenterAddon(host?: Partial<AddonHostContext>): AddonDefinition`
@@ -452,6 +474,7 @@ git commit -m "refactor(timeline): co-locate routes in @moonwitness/addons/timel
 - [ ] **Step 1: Write failing tests in `packages/addons/src/command-center/index.test.ts` and `packages/addons/src/probes/index.test.ts`**
 
 Assertions to add:
+
 1. `command-center/index.test.ts`:
    - Verify `command.workflow` `actionBindings.listUrl === "/api/v1/command-center/state"` and custom action uses `PATCH /api/v1/command-center/workflows/{id}/toggle`.
    - Verify `command.alert` `actionBindings.listUrl === "/api/v1/command-center/state"` and dismiss action uses `DELETE /api/v1/command-center/alerts/{id}`.
@@ -488,6 +511,7 @@ git commit -m "refactor(addons): self-host command-center and probes routes with
 ### Task 8: Move `auth` Routes, BFF Exchange, Admin Routes, MID JWT & MID Plugin Mounting into `@moonwitness/addons/auth`
 
 **Files:**
+
 - Modify: `packages/addons/package.json` (add `"@moonwitness/core": "workspace:*"`)
 - Create: `packages/addons/src/auth/mid-jwt.ts`
 - Create: `packages/addons/src/auth/bff.ts`
@@ -503,6 +527,7 @@ git commit -m "refactor(addons): self-host command-center and probes routes with
 - Test: `packages/addons/src/auth/index.test.ts`, `apps/api/src/interface/routes/auth.routes.test.ts`, `bff-auth.routes.test.ts`, `identity-authz-matrix.test.ts`, `apps/api/src/middleware/mid-jwt.test.ts`, `apps/api/src/mid-plugin-startup.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext` (`auth`, `rateLimit`, `mid`), `@moonwitness/mid` (`midFastifyPlugin`), `@moonwitness/core` (`verifyEs256Jwt`, `normalizeIssuerUrl`, `DEFAULT_MID_ISSUER_URL`), `@moonwitness/orm` (`createD1DatabaseFromOrm`, `getDb`)
 - Produces:
   - `createAuthAddon(host?: Partial<AddonHostContext> & { runBootstrapSeed?: boolean; mountAuditRoute?: boolean }): AddonDefinition`
@@ -512,6 +537,7 @@ git commit -m "refactor(addons): self-host command-center and probes routes with
 - [ ] **Step 1: Write failing tests in `packages/addons/src/auth/index.test.ts`**
 
 Assertions to add:
+
 1. `"declares createUrl '/api/v1/auth/users' in auth.user view actionBindings"`.
 2. `"mounts /api/v1/auth/{login,logout,me,users,bff/exchange} and optional midFastifyPlugin directly from createAuthAddon(host)"`.
 
@@ -548,6 +574,7 @@ git commit -m "refactor(auth): move auth routes, BFF, MID JWT verifier, and MID 
 ### Task 9: Move `control` Routes & Native Setup into `@moonwitness/addons/control` and Wire ADR-010 `createControlScheduler`
 
 **Files:**
+
 - Create: `packages/addons/src/control/native-auth.ts`
 - Create: `packages/addons/src/control/upstream.ts`
 - Create: `packages/addons/src/control/routes.ts`
@@ -560,6 +587,7 @@ git commit -m "refactor(auth): move auth routes, BFF, MID JWT verifier, and MID 
 - Test: `packages/addons/src/control/index.test.ts`, `apps/api/src/interface/routes/control.routes.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext`, `getEdgeLoopbackErrorPayload`, `resolveUpstreamServiceUrl` (`@moonwitness/addon-runtime`), `authUserModel` & auth helpers (`../auth`), `createControlScheduler` (`./scheduler.js`)
 - Produces:
   - `createControlAddon(host?: Partial<AddonHostContext>): AddonDefinition`
@@ -568,6 +596,7 @@ git commit -m "refactor(auth): move auth routes, BFF, MID JWT verifier, and MID 
 - [ ] **Step 1: Write failing tests in `packages/addons/src/control/index.test.ts`**
 
 Assertions to add:
+
 1. `"dispatches POST /api/v1/control/plan into DurableQueueSchedulerAdapter (202 + ops.job) when CONTROL_SCHEDULER=queue"`: set `CONTROL_SCHEDULER=queue`, send valid `POST /api/v1/control/plan` with `resources: [{ kind: "files" }]` as admin → returns `202` with `{ backend: "queue", jobId }` and records both `ops_jobs` and `control_command_history` with caller's `tenant_id`.
 2. `"checks setup status via authUserModel.repository instead of raw SQL in native setup mode"`.
 
@@ -601,6 +630,7 @@ git commit -m "refactor(control): self-host control routes in @moonwitness/addon
 ### Task 10: Move `storage`, `snmp`, `syslog`, `radius` Routes & SigV4 Signer into `@moonwitness/addons/*`
 
 **Files:**
+
 - Create: `packages/addons/src/storage/sigv4.ts`, `packages/addons/src/storage/routes.ts`; modify `packages/addons/src/storage/index.ts`
 - Create: `packages/addons/src/snmp/routes.ts`; modify `packages/addons/src/snmp/index.ts`
 - Create: `packages/addons/src/syslog/routes.ts`; modify `packages/addons/src/syslog/index.ts`
@@ -616,6 +646,7 @@ git commit -m "refactor(control): self-host control routes in @moonwitness/addon
 - Test: `packages/addons/src/{storage,snmp,syslog,radius}/index.test.ts`, `apps/api/src/interface/routes/{storage,snmp-poller,radius}.routes.test.ts`, `apps/api/src/services/storage-sigv4.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext`, `resolveActorContextFromBridge`, `resolveUpstreamServiceUrl`, `getEdgeLoopbackErrorPayload`, `getUpstreamBridgeHeaders` (`@moonwitness/addon-runtime`), `tryRecordAuditLog` (`../audit`)
 - Produces:
   - Self-contained `createStorageAddon(host)`, `createSnmpAddon(host)`, `createSyslogAddon(host)`, `createRadiusAddon(host)`
@@ -655,6 +686,7 @@ git commit -m "refactor(addons): co-locate storage, snmp, syslog, and radius pro
 ### Task 11: Move `riot-ai` & `memory` into `@moonwitness/addons/ai`, Export `createPlatformAddons(host)`, and Prune `apps/api/package.json`
 
 **Files:**
+
 - Modify: `packages/addons/package.json` (add `"@moonwitness/ai": "workspace:*"`)
 - Create:
   - `packages/addons/src/ai/persistence.ts`
@@ -675,6 +707,7 @@ git commit -m "refactor(addons): co-locate storage, snmp, syslog, and radius pro
 - Test: `packages/addons/src/ai/index.test.ts`, `apps/api/src/interface/routes/riot-ai.*.test.ts`, `apps/api/src/interface/routes/memory.routes.test.ts`
 
 **Interfaces:**
+
 - Consumes: `AddonHostContext`, `resolveActorContextFromBridge`, `validateServiceEndpointUrl`, `getUpstreamBridgeHeaders` (`@moonwitness/addon-runtime`), `@moonwitness/ai` (`OllamaAdapter`), `@moonwitness/contracts/continuity` (`MemorySyncBatchPayloadSchema`)
 - Produces:
   - `createAiAddon(host?: Partial<AddonHostContext>): AddonDefinition` (with `riot_ai.provider_config` `actionBindings.listUrl === "/api/v1/riot-ai/config"`)
@@ -684,6 +717,7 @@ git commit -m "refactor(addons): co-locate storage, snmp, syslog, and radius pro
 - [ ] **Step 1: Write failing tests in `packages/addons/src/ai/index.test.ts`**
 
 Assertions to add:
+
 1. `"declares '/api/v1/riot-ai/config' for riot_ai.provider_config view actionBindings"`.
 2. `"mounts /api/v1/riot-ai/* and /api/v1/memory/* from createAiAddon(host) and scopes memory entries by tenantId"`.
 3. `"createPlatformAddons(host) returns all 15 domain addons with valid dependency order under AddonRuntimeController"`.
@@ -721,17 +755,20 @@ git commit -m "refactor(ai/api): co-locate riot-ai and memory in @moonwitness/ad
 ### Task 12: Add `apps/api/src/architecture.test.ts` Fitness Gate & Synchronize Docs
 
 **Files:**
+
 - Create: `apps/api/src/architecture.test.ts`
 - Modify: `apps/api/README.md`
 - Modify: `docs/orm-domain-backlog.md`
 
 **Interfaces:**
+
 - Consumes: `buildApp` (`./app`), `irViewModel` (`@moonwitness/addon-runtime`), `createUser`/`createSession` (`@moonwitness/addons/auth`)
 - Produces: Permanent Vitest fitness gate (`API-GATE-01..08`) running in `pnpm test` and `pnpm gate:local`
 
 - [ ] **Step 1: Write `apps/api/src/architecture.test.ts` asserting all 8 thin-host invariants**
 
 Gates to assert:
+
 - `API-GATE-01`: Zero `defineModel(` calls in non-test `apps/api/src/**/*.ts`.
 - `API-GATE-02`: Zero `getDb(` calls in non-test `apps/api/src/**/*.ts` outside `health.routes.ts` and `infrastructure/rate-limit.ts`.
 - `API-GATE-03`: Zero domain route files in `apps/api/src` — only `health.routes.ts` and `metrics.ts` allowed under `interface/routes/` (or `routes/`).
@@ -753,6 +790,7 @@ Update `apps/api/README.md` to document the thin-host architecture (`buildCoreAp
 - [ ] **Step 4: Run full monorepo verification**
 
 Run:
+
 ```bash
 pnpm --filter @moonwitness/orm test
 pnpm --filter @moonwitness/addon-runtime lint && pnpm --filter @moonwitness/addon-runtime typecheck && pnpm --filter @moonwitness/addon-runtime test
@@ -760,6 +798,7 @@ pnpm --filter @moonwitness/addons lint && pnpm --filter @moonwitness/addons type
 pnpm --filter @moonwitness/api lint && pnpm --filter @moonwitness/api typecheck && pnpm --filter @moonwitness/api test && pnpm --filter @moonwitness/api build
 pnpm --filter @moonwitness/ui exec vitest run src/dx/architecture.test.ts
 ```
+
 Expected: ALL PASS with zero errors, zero stray `.db` files in `git status`.
 
 - [ ] **Step 5: Commit**

@@ -8,11 +8,7 @@ import {
   type FastifyPreHandler,
   type HostRateLimitFactory,
 } from "@moonwitness/addon-runtime";
-import {
-  persistInferenceAudit,
-  type InferenceAuditRecord,
-  type InferenceUsage,
-} from "./audit.js";
+import { persistInferenceAudit, type InferenceAuditRecord, type InferenceUsage } from "./audit.js";
 import { registerRiotAiChatRoute } from "./chat.js";
 import {
   getProviderConfig,

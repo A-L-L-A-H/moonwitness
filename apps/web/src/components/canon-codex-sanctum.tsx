@@ -75,14 +75,22 @@ export function CanonCodexSanctum({
                 id="codex-heading"
                 className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
               >
-                {locale === "id" ? "KODEKS KANON" : locale === "ar" ? "مدوّنة القانون" : "THE CANON CODEX"}
+                {locale === "id"
+                  ? "KODEKS KANON"
+                  : locale === "ar"
+                    ? "مدوّنة القانون"
+                    : "THE CANON CODEX"}
               </h1>
             ) : (
               <h2
                 id="codex-heading"
                 className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
               >
-                {locale === "id" ? "KODEKS KANON" : locale === "ar" ? "مدوّنة القانون" : "THE CANON CODEX"}
+                {locale === "id"
+                  ? "KODEKS KANON"
+                  : locale === "ar"
+                    ? "مدوّنة القانون"
+                    : "THE CANON CODEX"}
               </h2>
             )}
             <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[var(--dna-muted)] leading-relaxed">

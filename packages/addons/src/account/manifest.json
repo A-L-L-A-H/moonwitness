@@ -8,7 +8,11 @@
   "defaultEnabled": true,
   "capabilities": ["account.ledger", "account.reconciliation"],
   "provides": {
-    "routes": ["/api/v1/account/summary", "/api/v1/account/ledger/post", "/api/v1/account/ledger/reverse"],
+    "routes": [
+      "/api/v1/account/summary",
+      "/api/v1/account/ledger/post",
+      "/api/v1/account/ledger/reverse"
+    ],
     "models": ["account.account", "account.journal", "account.move"],
     "auditActions": ["account.move.post", "account.move.reverse"]
   }

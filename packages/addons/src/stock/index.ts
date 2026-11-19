@@ -41,9 +41,7 @@ export const productProductModel = defineModel({
 export const stockLocationSchema = z.object({
   code: z.string().min(1).max(64),
   name: z.string().min(1).max(160),
-  usage: z
-    .enum(["internal", "supplier", "customer", "inventory", "transit"])
-    .default("internal"),
+  usage: z.enum(["internal", "supplier", "customer", "inventory", "transit"]).default("internal"),
 });
 
 export const stockLocationModel = defineModel({
@@ -102,9 +100,7 @@ export async function executeStockTransfer(
   actor: ActorContext = SYSTEM_ACTOR,
 ): Promise<unknown> {
   const tenantId = actor.tenantId ?? "default";
-  const move = (
-    await stockMoveModel.repository.find({ reference }, { tenantId, limit: 1 })
-  )[0];
+  const move = (await stockMoveModel.repository.find({ reference }, { tenantId, limit: 1 }))[0];
   if (!move) throw new Error(`Stock move '${reference}' not found.`);
 
   const targetState =
@@ -139,7 +135,10 @@ export async function executeStockTransfer(
       { reserved_quantity: srcQuant.reserved_quantity + move.quantity },
       actor,
     );
-  } else if (operation === "complete" || (operation === "cancel" && move.move_state === "assigned")) {
+  } else if (
+    operation === "complete" ||
+    (operation === "cancel" && move.move_state === "assigned")
+  ) {
     const srcQuant = (
       await stockQuantModel.repository.find(
         { product_sku: move.product_sku, location_code: move.location_src_code },
@@ -225,10 +224,7 @@ export const stockMoveModel = defineModel({
         executeStockTransfer(String(record!.reference), "cancel", actor),
     },
   },
-  indexes: [
-    { fields: ["tenant_id", "reference"], unique: true },
-    { fields: ["move_state"] },
-  ],
+  indexes: [{ fields: ["tenant_id", "reference"], unique: true }, { fields: ["move_state"] }],
 });
 
 export const stockData: AddonDataRecord[] = [
@@ -265,16 +261,50 @@ export const stockData: AddonDataRecord[] = [
 
 export const stockRules: IrRuleInput[] = [
   { model_name: "product.product", role: "viewer", can_read: true },
-  { model_name: "product.product", role: "editor", can_read: true, can_create: true, can_update: true },
-  { model_name: "product.product", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "product.product",
+    role: "editor",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+  },
+  {
+    model_name: "product.product",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
   { model_name: "stock.location", role: "viewer", can_read: true },
-  { model_name: "stock.location", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "stock.location",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
   { model_name: "stock.quant", role: "viewer", can_read: true },
   { model_name: "stock.quant", role: "editor", can_read: true, can_create: true, can_update: true },
-  { model_name: "stock.quant", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "stock.quant",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
   { model_name: "stock.move", role: "viewer", can_read: true },
   { model_name: "stock.move", role: "editor", can_read: true, can_create: true, can_update: true },
-  { model_name: "stock.move", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "stock.move",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
 ];
 
 export const stockViews: IrViewInput[] = [
@@ -285,7 +315,14 @@ export const stockViews: IrViewInput[] = [
       title: "Stock Transfers",
       description: "Double-entry warehouse moves with reservation and completion states.",
       domainIcon: "arsy",
-      columns: ["reference", "product_sku", "location_src_code", "location_dest_code", "quantity", "move_state"],
+      columns: [
+        "reference",
+        "product_sku",
+        "location_src_code",
+        "location_dest_code",
+        "quantity",
+        "move_state",
+      ],
     },
   },
 ];

@@ -35,7 +35,11 @@ export function resolveModelVisuals(model: string): ModelMetaProfile {
     return { domainIcon: "mtime", cutoutId: "lunar-disc", category: "Chronicle & Temporal" };
   }
   if (key.startsWith("witness.") || key.startsWith("memory.") || key.startsWith("mizan.")) {
-    return { domainIcon: "memory", cutoutId: "witness-silhouette", category: "Epistemic & Witness" };
+    return {
+      domainIcon: "memory",
+      cutoutId: "witness-silhouette",
+      category: "Epistemic & Witness",
+    };
   }
   if (key.startsWith("scripture.")) {
     return { domainIcon: "scripture", cutoutId: "crescent", category: "Scripture & Canon" };
@@ -50,7 +54,11 @@ export function resolveModelVisuals(model: string): ModelMetaProfile {
     return { domainIcon: "vpn", cutoutId: "cipher-wheel", category: "Network & Security" };
   }
   if (key.startsWith("storage.") || key.startsWith("stock.")) {
-    return { domainIcon: "storage", cutoutId: "industrial-battery", category: "Storage & Inventory" };
+    return {
+      domainIcon: "storage",
+      cutoutId: "industrial-battery",
+      category: "Storage & Inventory",
+    };
   }
   if (key.startsWith("crm.") || key.startsWith("res.partner") || key.startsWith("res.company")) {
     return { domainIcon: "crm", cutoutId: "city-block", category: "Partners & CRM" };

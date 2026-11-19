@@ -142,10 +142,7 @@ export function createAddonHostContext(prefix: string, seedDemo: boolean): Addon
   };
 }
 
-async function registerAddonTree(
-  target: FastifyInstance,
-  host: AddonHostContext,
-): Promise<void> {
+async function registerAddonTree(target: FastifyInstance, host: AddonHostContext): Promise<void> {
   const runtime = new AddonRuntimeController();
   const prefix = host.prefix;
 

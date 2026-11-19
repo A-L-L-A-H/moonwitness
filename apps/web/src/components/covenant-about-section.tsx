@@ -133,9 +133,7 @@ export function CovenantAboutSection({
               const isCenterArch = pillarIdx === 1;
               const localizedPillar =
                 locale !== "en"
-                  ? COVENANT_TRANSLATIONS[locale][
-                      pillarEntry.numeral as "I" | "II" | "III"
-                    ]
+                  ? COVENANT_TRANSLATIONS[locale][pillarEntry.numeral as "I" | "II" | "III"]
                   : undefined;
               return (
                 <SpatialTiltCard

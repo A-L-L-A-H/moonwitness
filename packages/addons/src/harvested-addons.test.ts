@@ -276,7 +276,12 @@ describe("Harvested moonwitness-main domain addons: mizan, celestial, khidra, ca
       const leadRes = await app.inject({
         method: "POST",
         url: "/api/v1/m/crm.lead",
-        payload: { lead_key: "LD-1", name: "Enterprise Node", expected_revenue: 1000, probability: 50 },
+        payload: {
+          lead_key: "LD-1",
+          name: "Enterprise Node",
+          expected_revenue: 1000,
+          probability: 50,
+        },
       });
       expect(leadRes.statusCode).toBe(201);
       expect(leadRes.json().data.weighted_revenue).toBe(500);

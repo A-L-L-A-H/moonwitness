@@ -198,11 +198,7 @@ export function EmpireNavigation({
             className="hidden 2xl:inline-flex px-3.5 py-1.5 text-xs"
           >
             <span>
-              {locale === "id"
-                ? "GABUNG KRU"
-                : locale === "ar"
-                  ? "انضمّ للطاقم"
-                  : "JOIN THE CREW"}
+              {locale === "id" ? "GABUNG KRU" : locale === "ar" ? "انضمّ للطاقم" : "JOIN THE CREW"}
             </span>
             <span aria-hidden="true">&rarr;</span>
           </PrimaryAction>

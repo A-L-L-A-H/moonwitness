@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
-import { createActorContext, getDb, syncModels, SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
+import {
+  createActorContext,
+  getDb,
+  syncModels,
+  SYSTEM_ACTOR,
+  type ActorContext,
+} from "@moonwitness/orm";
 import { listAuditLogs } from "../audit/index.js";
 import { alertModel, workflowModel } from "./models.js";
 
@@ -134,12 +140,7 @@ export async function importLegacyCommandCenter(): Promise<{
             name: String(row.name),
             detail: String(row.detail),
             workflow_status: String(row.status) as
-              | "Queued"
-              | "Running"
-              | "Paused"
-              | "Succeeded"
-              | "Failed"
-              | "Cancelled",
+              "Queued" | "Running" | "Paused" | "Succeeded" | "Failed" | "Cancelled",
             sort_order: Number(row.sort_order ?? 0),
             metadata_json: null,
           },

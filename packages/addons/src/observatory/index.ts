@@ -130,7 +130,8 @@ export const observatoryData: AddonDataRecord[] = [
       feed_key: "open_meteo",
       category: "weather",
       title: "Open-Meteo Jakarta Surface Telemetry",
-      source_url: "https://api.open-meteo.com/v1/forecast?latitude=-6.21&longitude=106.85&current_weather=true",
+      source_url:
+        "https://api.open-meteo.com/v1/forecast?latitude=-6.21&longitude=106.85&current_weather=true",
       ttl_sec: 600,
     },
   },
@@ -190,7 +191,13 @@ export const observatoryViews: IrViewInput[] = [
       title: "Cross-Scripture Operations",
       description: "Corroboration operations with scripture reference bundles.",
       domainIcon: "scripture",
-      columns: ["operation_key", "title", "classification", "corroboration_score", "operation_status"],
+      columns: [
+        "operation_key",
+        "title",
+        "classification",
+        "corroboration_score",
+        "operation_status",
+      ],
     },
   },
 ];

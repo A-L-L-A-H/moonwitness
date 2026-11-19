@@ -107,10 +107,7 @@ const AUTOMATION_EXCLUDED_MODELS = new Set([
   "audit.log",
 ]);
 
-function matchesSimpleDomain(
-  domainJson: string | null,
-  record: Record<string, unknown>,
-): boolean {
+function matchesSimpleDomain(domainJson: string | null, record: Record<string, unknown>): boolean {
   if (!domainJson?.trim()) return true;
   try {
     const parsed = JSON.parse(domainJson) as Record<string, unknown>;

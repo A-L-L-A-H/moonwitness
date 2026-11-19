@@ -16,7 +16,10 @@ export const ROLE_RANK: Record<string, number> = {
   admin: 3,
 };
 
-export function hasRequiredRole(actualRole: string | undefined | null, minRole?: RoleName): boolean {
+export function hasRequiredRole(
+  actualRole: string | undefined | null,
+  minRole?: RoleName,
+): boolean {
   if (!minRole) return true;
   if (!actualRole) return false;
   const actualRank = ROLE_RANK[actualRole.toLowerCase()] ?? 1;

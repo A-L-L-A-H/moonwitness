@@ -7,11 +7,7 @@ import { closeDb, getDb, initDb, modelRegistry } from "@moonwitness/orm";
 import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
 import { auditAddon } from "../audit";
 import { authAddon } from "../auth";
-import {
-  commandCenterAddon,
-  createCommandCenterAddon,
-  workflowModel,
-} from "./index.js";
+import { commandCenterAddon, createCommandCenterAddon, workflowModel } from "./index.js";
 
 describe("../command-center", () => {
   const dirs: string[] = [];
@@ -86,14 +82,14 @@ describe("../command-center", () => {
     const app = Fastify({ logger: false });
     app.addHook("preHandler", async (request) => {
       const tenant = request.headers["x-tenant-id"];
-      (request as { user?: { id: string; role: string; tenantId?: string }; tenantId?: string }).user =
-        {
-          id: "op-1",
-          role: "editor",
-          tenantId: typeof tenant === "string" ? tenant : "default",
-        };
-      (request as { tenantId?: string }).tenantId =
-        typeof tenant === "string" ? tenant : "default";
+      (
+        request as { user?: { id: string; role: string; tenantId?: string }; tenantId?: string }
+      ).user = {
+        id: "op-1",
+        role: "editor",
+        tenantId: typeof tenant === "string" ? tenant : "default",
+      };
+      (request as { tenantId?: string }).tenantId = typeof tenant === "string" ? tenant : "default";
     });
 
     const runtime = new AddonRuntimeController();

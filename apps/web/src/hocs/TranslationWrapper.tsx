@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { i18n, type Direction, type Locale } from "@/configs/i18n";
 import themeConfig from "@/configs/themeConfig";
 import { getDictionarySync, type Dictionary } from "@/utils/getDictionary";

@@ -249,7 +249,10 @@ async function runDeterministicWitnessEngine(
 ): Promise<{ module: string; findings: Array<Record<string, unknown>>; summary: string }> {
   const q = typeof input.q === "string" ? input.q.trim() : "";
   if (moduleCode === "lexical-analysis") {
-    const roots = await wxRootModel.repository.find({}, { tenantId, ...(q ? { q } : {}), limit: 20 });
+    const roots = await wxRootModel.repository.find(
+      {},
+      { tenantId, ...(q ? { q } : {}), limit: 20 },
+    );
     return {
       module: moduleCode,
       findings: roots.map((r) => ({ kind: "root", key: r.root_key, meaning: r.core_meaning })),
@@ -257,22 +260,35 @@ async function runDeterministicWitnessEngine(
     };
   }
   if (moduleCode === "divine-expression") {
-    const names = await wxAsmaulHusnaModel.repository.find({}, { tenantId, ...(q ? { q } : {}), limit: 20 });
+    const names = await wxAsmaulHusnaModel.repository.find(
+      {},
+      { tenantId, ...(q ? { q } : {}), limit: 20 },
+    );
     return {
       module: moduleCode,
-      findings: names.map((n) => ({ kind: "asma", order: n.number_order, name: n.transliteration })),
+      findings: names.map((n) => ({
+        kind: "asma",
+        order: n.number_order,
+        name: n.transliteration,
+      })),
       summary: `Resolved ${names.length} Divine Name occurrences.`,
     };
   }
   if (moduleCode === "figure-analysis") {
-    const figs = await wxFigureModel.repository.find({}, { tenantId, ...(q ? { q } : {}), limit: 20 });
+    const figs = await wxFigureModel.repository.find(
+      {},
+      { tenantId, ...(q ? { q } : {}), limit: 20 },
+    );
     return {
       module: moduleCode,
       findings: figs.map((f) => ({ kind: "figure", key: f.figure_key, name: f.canonical_name })),
       summary: `Evaluated ${figs.length} historical figure nodes.`,
     };
   }
-  const passages = await wxPassageModel.repository.find({}, { tenantId, ...(q ? { q } : {}), limit: 20 });
+  const passages = await wxPassageModel.repository.find(
+    {},
+    { tenantId, ...(q ? { q } : {}), limit: 20 },
+  );
   return {
     module: moduleCode,
     findings: passages.map((p) => ({
@@ -380,7 +396,9 @@ export function createWitnessResearchAddon(
           }
           const validMod = WITNESS_ENGINE_MODULES.find((m) => m.code === parsed.data.moduleCode);
           if (!validMod) {
-            return reply.code(404).send({ error: `Unknown witness engine '${parsed.data.moduleCode}'` });
+            return reply
+              .code(404)
+              .send({ error: `Unknown witness engine '${parsed.data.moduleCode}'` });
           }
           const actor = resolveActorContextFromBridge(auth, request);
           const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);

@@ -42,7 +42,12 @@ export function LanguageDropdown() {
           {locale.toUpperCase()}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={8} aria-label={dictionary.shell.language} className="w-52 p-2">
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        aria-label={dictionary.shell.language}
+        className="w-52 p-2"
+      >
         <div className="mb-1.5 px-2 font-mono text-[10px] uppercase tracking-wider text-[var(--muted-foreground)]">
           {dictionary.shell.language}
         </div>

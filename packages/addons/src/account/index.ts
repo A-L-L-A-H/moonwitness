@@ -79,10 +79,7 @@ export const accountAccountModel = defineModel({
   restEnabled: true,
   searchFields: ["code", "name", "account_type"],
   publicFields: ["code", "name", "account_type", "currency_code", "reconcile"],
-  indexes: [
-    { fields: ["tenant_id", "code"], unique: true },
-    { fields: ["account_type"] },
-  ],
+  indexes: [{ fields: ["tenant_id", "code"], unique: true }, { fields: ["account_type"] }],
 });
 
 export const accountJournalSchema = z.object({
@@ -120,7 +117,11 @@ export const accountMoveSchema = z.object({
 export const postEntryInputSchema = z.object({
   move_key: z.string().min(1).max(120),
   journal_code: z.string().min(1).max(20).default("GEN"),
-  move_date: z.string().min(8).max(32).default(() => new Date().toISOString().slice(0, 10)),
+  move_date: z
+    .string()
+    .min(8)
+    .max(32)
+    .default(() => new Date().toISOString().slice(0, 10)),
   currency_code: z.string().min(3).max(8).default("IDR"),
   idempotency_key: z.string().min(1).max(128),
   lines: z.array(ledgerLineInputSchema).min(2),
@@ -273,35 +274,65 @@ export const accountData: AddonDataRecord[] = [
     model: "account.account",
     key: { code: "1010" },
     noupdate: true,
-    values: { code: "1010", name: "Cash & Bank", account_type: "asset", currency_code: "IDR", reconcile: true },
+    values: {
+      code: "1010",
+      name: "Cash & Bank",
+      account_type: "asset",
+      currency_code: "IDR",
+      reconcile: true,
+    },
   },
   {
     id: "acc_1200_ar",
     model: "account.account",
     key: { code: "1200" },
     noupdate: true,
-    values: { code: "1200", name: "Accounts Receivable", account_type: "asset", currency_code: "IDR", reconcile: true },
+    values: {
+      code: "1200",
+      name: "Accounts Receivable",
+      account_type: "asset",
+      currency_code: "IDR",
+      reconcile: true,
+    },
   },
   {
     id: "acc_2000_ap",
     model: "account.account",
     key: { code: "2000" },
     noupdate: true,
-    values: { code: "2000", name: "Accounts Payable", account_type: "liability", currency_code: "IDR", reconcile: true },
+    values: {
+      code: "2000",
+      name: "Accounts Payable",
+      account_type: "liability",
+      currency_code: "IDR",
+      reconcile: true,
+    },
   },
   {
     id: "acc_4000_revenue",
     model: "account.account",
     key: { code: "4000" },
     noupdate: true,
-    values: { code: "4000", name: "Operating Revenue", account_type: "income", currency_code: "IDR", reconcile: false },
+    values: {
+      code: "4000",
+      name: "Operating Revenue",
+      account_type: "income",
+      currency_code: "IDR",
+      reconcile: false,
+    },
   },
   {
     id: "acc_5000_expense",
     model: "account.account",
     key: { code: "5000" },
     noupdate: true,
-    values: { code: "5000", name: "Operating Expense", account_type: "expense", currency_code: "IDR", reconcile: false },
+    values: {
+      code: "5000",
+      name: "Operating Expense",
+      account_type: "expense",
+      currency_code: "IDR",
+      reconcile: false,
+    },
   },
   {
     id: "jnl_gen",
@@ -321,13 +352,46 @@ export const accountData: AddonDataRecord[] = [
 
 export const accountRules: IrRuleInput[] = [
   { model_name: "account.account", role: "viewer", can_read: true },
-  { model_name: "account.account", role: "editor", can_read: true, can_create: true, can_update: true },
-  { model_name: "account.account", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "account.account",
+    role: "editor",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+  },
+  {
+    model_name: "account.account",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
   { model_name: "account.journal", role: "viewer", can_read: true },
-  { model_name: "account.journal", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "account.journal",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
   { model_name: "account.move", role: "viewer", can_read: true },
-  { model_name: "account.move", role: "editor", can_read: true, can_create: true, can_update: true },
-  { model_name: "account.move", role: "admin", can_read: true, can_create: true, can_update: true, can_delete: true },
+  {
+    model_name: "account.move",
+    role: "editor",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+  },
+  {
+    model_name: "account.move",
+    role: "admin",
+    can_read: true,
+    can_create: true,
+    can_update: true,
+    can_delete: true,
+  },
 ];
 
 export const accountViews: IrViewInput[] = [
@@ -338,7 +402,14 @@ export const accountViews: IrViewInput[] = [
       title: "Journal Entries (ExactLedger)",
       description: "Double-entry balanced journal moves with SHA-256 idempotency.",
       domainIcon: "arsy",
-      columns: ["move_key", "journal_code", "move_date", "total_debit", "total_credit", "move_state"],
+      columns: [
+        "move_key",
+        "journal_code",
+        "move_date",
+        "total_debit",
+        "total_credit",
+        "move_state",
+      ],
     },
   },
 ];

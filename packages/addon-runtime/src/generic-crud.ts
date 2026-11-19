@@ -282,9 +282,7 @@ export async function registerGenericModelRoutes(
 
       const actionDef = target.desc.actions?.[request.params.action];
       if (!actionDef || (actionDef.scope ?? "record") !== "model") {
-        return reply
-          .code(404)
-          .send({ error: `Model action '${request.params.action}' not found` });
+        return reply.code(404).send({ error: `Model action '${request.params.action}' not found` });
       }
 
       const role = auth.getActorRole(request);
@@ -448,7 +446,8 @@ export async function registerGenericModelRoutes(
     }
 
     try {
-      const rawInput = body.kwargs ?? (scope === "model" ? (body.args?.[0] ?? {}) : (body.args?.[1] ?? {}));
+      const rawInput =
+        body.kwargs ?? (scope === "model" ? (body.args?.[0] ?? {}) : (body.args?.[1] ?? {}));
       const parsedInput = actionDef.input ? actionDef.input.parse(rawInput) : rawInput;
       const result = await actionDef.handler({
         model: target.desc.name,
@@ -466,34 +465,30 @@ export async function registerGenericModelRoutes(
   fastify.get<{
     Params: { model: string; id: string };
     Querystring: Record<string, string | undefined>;
-  }>(
-    "/m/:model/:id",
-    { preHandler },
-    async (request, reply) => {
-      const target = await authorizeModelAccess(
-        runtime,
-        auth,
-        request,
-        reply,
-        request.params.model,
-        "canRead",
-      );
-      if (!target) return reply;
+  }>("/m/:model/:id", { preHandler }, async (request, reply) => {
+    const target = await authorizeModelAccess(
+      runtime,
+      auth,
+      request,
+      reply,
+      request.params.model,
+      "canRead",
+    );
+    if (!target) return reply;
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const role = auth.getActorRole(request);
-      const row = await ensureRecordMatchesRuleDomain(
-        runtime,
-        target,
-        request.params.id,
-        role,
-        actor,
-        { with: parseWithParam(request.query?.with) },
-      );
-      if (!row) return reply.code(404).send({ error: "Not found" });
-      return reply.send({ data: row });
-    },
-  );
+    const actor = resolveActorContextFromBridge(auth, request);
+    const role = auth.getActorRole(request);
+    const row = await ensureRecordMatchesRuleDomain(
+      runtime,
+      target,
+      request.params.id,
+      role,
+      actor,
+      { with: parseWithParam(request.query?.with) },
+    );
+    if (!row) return reply.code(404).send({ error: "Not found" });
+    return reply.send({ data: row });
+  });
 
   fastify.post<{ Params: { model: string }; Body: Record<string, unknown> }>(
     "/m/:model",

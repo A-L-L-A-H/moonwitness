@@ -232,16 +232,21 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
     );
     expect(hydratedMembers).toHaveLength(2);
     expect(
-      ((hydratedMembers[0] as unknown as Record<string, unknown>).$team_code as Record<string, unknown>)
-        ?.name,
+      (
+        (hydratedMembers[0] as unknown as Record<string, unknown>).$team_code as Record<
+          string,
+          unknown
+        >
+      )?.name,
     ).toBe("Alpha Squad");
 
     const hydratedTeams = await team.repository.find(
       { code: "alpha" },
       { tenantId: "tenant-a", with: ["members"] },
     );
-    const membersList = (hydratedTeams[0] as unknown as Record<string, unknown>)
-      .$members as Array<Record<string, unknown>>;
+    const membersList = (hydratedTeams[0] as unknown as Record<string, unknown>).$members as Array<
+      Record<string, unknown>
+    >;
     expect(membersList).toHaveLength(2);
     expect(membersList.map((m) => m.full_name).sort()).toEqual(["Ada Lovelace", "Alan Turing"]);
   });

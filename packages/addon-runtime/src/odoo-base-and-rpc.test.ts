@@ -1,13 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Fastify from "fastify";
 import { z } from "zod";
-import {
-  closeDb,
-  createActorContext,
-  defineModel,
-  initDb,
-  modelRegistry,
-} from "@moonwitness/orm";
+import { closeDb, createActorContext, defineModel, initDb, modelRegistry } from "@moonwitness/orm";
 import {
   AddonRuntimeController,
   baseManifest,
@@ -65,14 +59,10 @@ describe("Odoo-grade __base (res.*/ir.*), declarative data, row-level ir.rule, r
     expect(langs.map((l) => l.code)).toEqual(expect.arrayContaining(["en", "id"]));
 
     const countries = await resCountryModel.repository.find({});
-    expect(countries.map((c) => c.code)).toEqual(
-      expect.arrayContaining(["ID", "MY", "SG", "US"]),
-    );
+    expect(countries.map((c) => c.code)).toEqual(expect.arrayContaining(["ID", "MY", "SG", "US"]));
 
     const currencies = await resCurrencyModel.repository.find({});
-    expect(currencies.map((c) => c.code)).toEqual(
-      expect.arrayContaining(["IDR", "USD", "MYR"]),
-    );
+    expect(currencies.map((c) => c.code)).toEqual(expect.arrayContaining(["IDR", "USD", "MYR"]));
 
     await setConfigParam("instance.title", "MoonWitness Prime");
     expect(await getConfigParam("instance.title")).toBe("MoonWitness Prime");
@@ -92,8 +82,9 @@ describe("Odoo-grade __base (res.*/ir.*), declarative data, row-level ir.rule, r
     const hydratedMsg = await mailMessageModel.repository.findOne(msg.id, {
       with: ["tracking_values"],
     });
-    const tracks = (hydratedMsg as unknown as Record<string, unknown>)
-      ?.$tracking_values as Array<Record<string, unknown>>;
+    const tracks = (hydratedMsg as unknown as Record<string, unknown>)?.$tracking_values as Array<
+      Record<string, unknown>
+    >;
     expect(tracks).toHaveLength(1);
     expect(tracks[0]?.field_name).toBe("default_locale");
   });
@@ -213,7 +204,12 @@ describe("Odoo-grade __base (res.*/ir.*), declarative data, row-level ir.rule, r
         (req.headers["x-actor-role"] as "admin" | "editor" | "viewer") ?? "editor",
       getActorTenant: () => "default",
       resolveActorContext: (req, source = "api") =>
-        createActorContext(String(req.headers["x-actor-id"] ?? "user-1"), source, req.id, "default"),
+        createActorContext(
+          String(req.headers["x-actor-id"] ?? "user-1"),
+          source,
+          req.id,
+          "default",
+        ),
     };
 
     await runtime.syncAll(

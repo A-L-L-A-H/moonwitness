@@ -46,8 +46,9 @@ export interface FindOptions {
   with?: string[];
 }
 
-export interface DefineModelOptions<TBusiness extends ZodObjectLike = ZodObjectLike>
-  extends ModelFeatureOptions {
+export interface DefineModelOptions<
+  TBusiness extends ZodObjectLike = ZodObjectLike,
+> extends ModelFeatureOptions {
   name: string;
   table: string;
   schema: TBusiness;
@@ -322,7 +323,9 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       if (value === undefined) continue;
       if (key === "$or" || key === "$and") {
         if (!Array.isArray(value)) {
-          throw new Error(`Operator '${key}' on model '${this.name}' requires an array of filters.`);
+          throw new Error(
+            `Operator '${key}' on model '${this.name}' requires an array of filters.`,
+          );
         }
         const parts = value.map((sub) => {
           if (!sub || typeof sub !== "object" || Array.isArray(sub)) {
@@ -493,7 +496,6 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       return out;
     });
   }
-
 
   async find(
     filters: Record<string, unknown> = {},
@@ -693,7 +695,8 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     const merged = { ...data };
     for (const [key, value] of Object.entries(defaults)) {
       if (merged[key] !== undefined) continue;
-      merged[key] = typeof value === "function" ? (value as (a: ActorContext) => unknown)(actor) : value;
+      merged[key] =
+        typeof value === "function" ? (value as (a: ActorContext) => unknown)(actor) : value;
     }
     return merged;
   }
@@ -723,17 +726,24 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       if (value === undefined || value === null) continue;
       const target = modelRegistry.get(relation.model);
       if (!target) {
-        throw new Error(`Relation '${field}' on '${this.name}' targets unknown model '${relation.model}'.`);
+        throw new Error(
+          `Relation '${field}' on '${this.name}' targets unknown model '${relation.model}'.`,
+        );
       }
       const targetField = relation.targetField ?? "id";
       assertIdentifier(targetField, "relation target column");
       if (!METADATA_NAMES.has(targetField) && !target.fields.has(targetField)) {
-        throw new Error(`Relation '${field}' targets unknown column '${relation.model}.${targetField}'.`);
+        throw new Error(
+          `Relation '${field}' targets unknown column '${relation.model}.${targetField}'.`,
+        );
       }
       const deletedClause = target.softDelete ? " AND status != 'deleted'" : "";
       const row = await tx.get<{ ok: number }>(
         `SELECT 1 AS ok FROM ${target.table} WHERE ${targetField} = ? AND tenant_id = ?${deletedClause}`,
-        [encodeFilterValue(value), normalizeTenantId(String(record.tenant_id ?? DEFAULT_TENANT_ID))],
+        [
+          encodeFilterValue(value),
+          normalizeTenantId(String(record.tenant_id ?? DEFAULT_TENANT_ID)),
+        ],
       );
       if (!row) {
         throw new Error(

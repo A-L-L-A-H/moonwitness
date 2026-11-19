@@ -4,10 +4,7 @@ import { join } from "node:path";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import { closeDb, initDb, syncModels } from "@moonwitness/orm";
-import {
-  defaultFailClosedAuthBridge,
-  type BaseAddonAuthBridge,
-} from "@moonwitness/addon-runtime";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
 import { memoryRecordModel, registerMemoryRoutes } from "@moonwitness/addons/ai";
 
 const tempDirs: string[] = [];

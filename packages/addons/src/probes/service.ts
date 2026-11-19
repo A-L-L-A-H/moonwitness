@@ -1,4 +1,10 @@
-import { createActorContext, getDb, syncModels, SYSTEM_ACTOR, type ActorContext } from "@moonwitness/orm";
+import {
+  createActorContext,
+  getDb,
+  syncModels,
+  SYSTEM_ACTOR,
+  type ActorContext,
+} from "@moonwitness/orm";
 import { isBlockedRuntimeHost } from "@moonwitness/addon-runtime";
 import { probeEventModel, probeNodeModel } from "./models.js";
 
@@ -136,10 +142,7 @@ export async function listProbeNodes(tenantId?: string): Promise<ProbeNode[]> {
   }));
 }
 
-export async function listRecentProbeEvents(
-  limit = 25,
-  tenantId?: string,
-): Promise<ProbeEvent[]> {
+export async function listRecentProbeEvents(limit = 25, tenantId?: string): Promise<ProbeEvent[]> {
   const boundedLimit = Math.max(1, Math.min(100, limit));
   const rows = await probeEventModel.repository.find(
     {},
@@ -216,8 +219,7 @@ export async function executeProbeForNode(
   actorOrSub: ActorContext | string,
   fetchFn: typeof fetch = globalThis.fetch,
 ): Promise<ProbeEvent> {
-  const actor =
-    typeof actorOrSub === "string" ? createActorContext(actorOrSub, "api") : actorOrSub;
+  const actor = typeof actorOrSub === "string" ? createActorContext(actorOrSub, "api") : actorOrSub;
   const actorSub = actor.actorId ?? "unknown";
 
   if (!validateProbeTargetUrl(node.targetUrl)) {

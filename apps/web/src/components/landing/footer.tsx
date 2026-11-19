@@ -42,11 +42,22 @@ export function LandingFooter() {
           <Link href={toHref("/shadow")} className="hover:text-[var(--pink)] max-lg:min-h-11">
             {locale === "id" ? "Bayangan" : locale === "ar" ? "البوابة الخفية" : "The Shadow"}
           </Link>
-          <Link href={toHref("/mission-control")} className="hover:text-[var(--pink)] max-lg:min-h-11">
-            {locale === "id" ? "Kendali Misi" : locale === "ar" ? "مركز القيادة" : "Mission Control"}
+          <Link
+            href={toHref("/mission-control")}
+            className="hover:text-[var(--pink)] max-lg:min-h-11"
+          >
+            {locale === "id"
+              ? "Kendali Misi"
+              : locale === "ar"
+                ? "مركز القيادة"
+                : "Mission Control"}
           </Link>
           <a href="#home" className="hover:text-[var(--pink)] max-lg:min-h-11">
-            {locale === "id" ? "Kembali ke atas ↑" : locale === "ar" ? "العودة للأعلى ↑" : "Back to top ↑"}
+            {locale === "id"
+              ? "Kembali ke atas ↑"
+              : locale === "ar"
+                ? "العودة للأعلى ↑"
+                : "Back to top ↑"}
           </a>
         </nav>
       </div>

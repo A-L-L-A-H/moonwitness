@@ -71,9 +71,7 @@ export function resolveRiotAiRuntime(
     runtime?.TRUSTED_PROXY_COUNT ??
     (process.env.TRUSTED_PROXY_COUNT ? Number(process.env.TRUSTED_PROXY_COUNT) : 0);
   const trustedProxyCount =
-    Number.isInteger(rawProxyCount) && rawProxyCount >= 0 && rawProxyCount <= 5
-      ? rawProxyCount
-      : 0;
+    Number.isInteger(rawProxyCount) && rawProxyCount >= 0 && rawProxyCount <= 5 ? rawProxyCount : 0;
 
   return {
     RIOT_AI_BASE_URL: baseUrl,
@@ -385,10 +383,7 @@ export function getRiotAiAdapterState(runtime?: Partial<RiotAiRuntimeConfig>): {
   };
 }
 
-export function parseRiotAiClientAddress(
-  request: FastifyRequest,
-  trustedProxyCount = 0,
-): string {
+export function parseRiotAiClientAddress(request: FastifyRequest, trustedProxyCount = 0): string {
   const peer = request.ip;
   if (!Number.isInteger(trustedProxyCount) || trustedProxyCount <= 0) return peer;
   const forwardedFor = request.headers["x-forwarded-for"];

@@ -119,14 +119,7 @@ export const mailActivityModel = defineModel({
   softDelete: false,
   restEnabled: true,
   searchFields: ["res_model", "res_id", "summary", "activity_type"],
-  publicFields: [
-    "res_model",
-    "res_id",
-    "activity_type",
-    "summary",
-    "date_due",
-    "activity_state",
-  ],
+  publicFields: ["res_model", "res_id", "activity_type", "summary", "date_due", "activity_state"],
   actions: {
     mark_done: {
       scope: "record",
@@ -136,10 +129,7 @@ export const mailActivityModel = defineModel({
         repository.update(String(record!.id), { activity_state: "done" }, actor),
     },
   },
-  indexes: [
-    { fields: ["res_model", "res_id"] },
-    { fields: ["activity_state"] },
-  ],
+  indexes: [{ fields: ["res_model", "res_id"] }, { fields: ["activity_state"] }],
 });
 
 export const crmData: AddonDataRecord[] = [

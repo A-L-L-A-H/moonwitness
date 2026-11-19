@@ -16,6 +16,7 @@ Environment variables are validated at startup in `src/shared/env.ts` (`PORT` de
 ## Architecture Fitness Gate
 
 `src/architecture.test.ts` permanently enforces gates `API-GATE-01..08`:
+
 - Zero `defineModel(` calls, zero `applyMigrations(`, zero domain route files, and non-test LOC `<= 1350` inside `apps/api/src`.
 - Zero `getDb(` calls outside `health.routes.ts` and `infrastructure/rate-limit.ts`.
 - Zero `syncModels(` calls in addon route handlers.

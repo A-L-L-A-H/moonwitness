@@ -1,10 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import { closeDb, initDb } from "@moonwitness/orm";
-import {
-  defaultFailClosedAuthBridge,
-  type BaseAddonAuthBridge,
-} from "@moonwitness/addon-runtime";
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
 import { ensureProbesSchema, registerProbesRoutes } from "@moonwitness/addons/probes";
 import { registerHealthRoutes } from "./health.routes";
 

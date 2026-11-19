@@ -211,8 +211,7 @@ export async function clearSanctuaryMidSession(fetchFn?: typeof fetch): Promise<
   dispatchBrowserAuthEvent(SANCTUARY_MID_AUTH_EVENT);
   const logoutUrl = `${getSanctuaryBffBaseUrl()}/api/v1/auth/bff/logout`;
   const logoutInit = buildCsrfLogoutInit();
-  await (fetchFn
-    ? fetchFn(logoutUrl, logoutInit)
-    : requestApiResponse(logoutUrl, logoutInit)
+  await (
+    fetchFn ? fetchFn(logoutUrl, logoutInit) : requestApiResponse(logoutUrl, logoutInit)
   ).catch(() => {});
 }
