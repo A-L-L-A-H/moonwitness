@@ -353,6 +353,7 @@ async function execWithQueryable(queryable: PgQueryable, sql: string): Promise<v
  * Async PostgreSQL driver implementing `OrmDriverHandle`.
  */
 export class PostgresDriver implements OrmDriverHandle {
+  readonly kind = "postgres" as const;
   readonly dialect = "postgres" as const;
   private pool: PoolLike | null = null;
   private connectionString: string | null = null;

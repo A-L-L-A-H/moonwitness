@@ -8,6 +8,30 @@ export interface ModelIndex {
   unique?: boolean;
 }
 
+export interface ForeignKeySpec {
+  columns: string[];
+  targetTable: string;
+  targetColumns: string[];
+  onDelete: "RESTRICT" | "SET NULL";
+}
+
+export interface Many2ManyJoinTableSpec {
+  relationName: string;
+  table: string;
+  sourceModel: string;
+  sourceTable: string;
+  sourceColumn: string;
+  targetModel: string;
+  targetTable: string;
+  targetField: string;
+  targetColumn: string;
+  onDelete: "restrict" | "ignore";
+}
+
+export interface ValidateAttrsOptions {
+  allowFreeformExtra?: boolean;
+}
+
 export interface FieldSpec {
   codec: Codec;
   nullable: boolean;
@@ -185,11 +209,95 @@ export function formatSqlDefaultLiteral(spec: FieldSpec): string | null {
   }
 }
 
+export function storedComputedFieldSpec(
+  type: "text" | "integer" | "real" | "boolean" | "json",
+): FieldSpec {
+  switch (type) {
+    case "integer":
+      return {
+        codec: "integer",
+        nullable: true,
+        optional: true,
+        hasDefault: false,
+        columnType: "INTEGER",
+        zodTypeLabel: "integer",
+      };
+    case "real":
+      return {
+        codec: "real",
+        nullable: true,
+        optional: true,
+        hasDefault: false,
+        columnType: "REAL",
+        zodTypeLabel: "real",
+      };
+    case "boolean":
+      return {
+        codec: "boolean",
+        nullable: true,
+        optional: true,
+        hasDefault: false,
+        columnType: "INTEGER",
+        zodTypeLabel: "boolean",
+      };
+    case "json":
+      return {
+        codec: "json",
+        nullable: true,
+        optional: true,
+        hasDefault: false,
+        columnType: "TEXT",
+        zodTypeLabel: "json",
+      };
+    case "text":
+    default:
+      return {
+        codec: "text",
+        nullable: true,
+        optional: true,
+        hasDefault: false,
+        columnType: "TEXT",
+        zodTypeLabel: "text",
+      };
+  }
+}
+
+export function storedComputedZodSchema(
+  type: "text" | "integer" | "real" | "boolean" | "json",
+): z.ZodTypeAny {
+  switch (type) {
+    case "integer":
+      return z.number().int().nullable().optional();
+    case "real":
+      return z.number().nullable().optional();
+    case "boolean":
+      return z.boolean().nullable().optional();
+    case "json":
+      return z.unknown().nullable().optional();
+    case "text":
+    default:
+      return z.string().nullable().optional();
+  }
+}
+
+export function compileMany2ManyJoinTableDdl(spec: Many2ManyJoinTableSpec): string {
+  assertIdentifier(spec.table, "join table");
+  assertIdentifier(spec.sourceColumn, "join source column");
+  assertIdentifier(spec.targetColumn, "join target column");
+  return [
+    `CREATE TABLE IF NOT EXISTS ${spec.table} (\n  id TEXT PRIMARY KEY,\n  tenant_id TEXT NOT NULL DEFAULT 'default',\n  "${spec.sourceColumn}" TEXT NOT NULL,\n  "${spec.targetColumn}" TEXT NOT NULL\n)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_${spec.table}_unique ON ${spec.table} (tenant_id, ${spec.sourceColumn}, ${spec.targetColumn})`,
+    `CREATE INDEX IF NOT EXISTS idx_${spec.table}_target ON ${spec.table} (tenant_id, ${spec.targetColumn})`,
+  ].join(";\n");
+}
+
 export function compileModelDdl(
   table: string,
   fields: Map<string, FieldSpec>,
   indexes: ModelIndex[],
   extensible: boolean,
+  foreignKeys: ForeignKeySpec[] = [],
+  many2manyTables: Many2ManyJoinTableSpec[] = [],
 ): string {
   assertIdentifier(table, "table");
   const businessColumns: string[] = [];
@@ -205,6 +313,13 @@ export function compileModelDdl(
     );
   }
 
+  const fkConstraints = foreignKeys.map((fk) => {
+    fk.columns.forEach((col) => assertIdentifier(col, "foreign key column"));
+    assertIdentifier(fk.targetTable, "foreign key target table");
+    fk.targetColumns.forEach((col) => assertIdentifier(col, "foreign key target column"));
+    return `FOREIGN KEY (${fk.columns.map((c) => `"${c}"`).join(", ")}) REFERENCES "${fk.targetTable}"(${fk.targetColumns.map((c) => `"${c}"`).join(", ")}) ON DELETE ${fk.onDelete}`;
+  });
+
   const indexDefinitions = indexes.map((idx) => {
     const columns = idx.fields.map((field) => {
       assertIdentifier(field, "index column");
@@ -219,10 +334,12 @@ export function compileModelDdl(
     return `${kind} IF NOT EXISTS ${idxName} ON ${table} (${idx.fields.join(", ")})`;
   });
 
-  const allColumns = [...METADATA_COLUMNS, ...businessColumns];
+  const allColumns = [...METADATA_COLUMNS, ...businessColumns, ...fkConstraints];
+  const joinStatements = many2manyTables.map((spec) => compileMany2ManyJoinTableDdl(spec));
   return [
     `CREATE TABLE IF NOT EXISTS ${table} (\n  ${allColumns.join(",\n  ")}\n)`,
     ...indexDefinitions,
+    ...joinStatements,
   ].join(";\n");
 }
 
@@ -271,15 +388,20 @@ function buildCustomFieldValidator(spec: RuntimeCustomFieldSpec): z.ZodTypeAny {
 export function validateAttrsPayload(
   rawAttrs: unknown,
   customFields: RuntimeCustomFieldSpec[],
+  opts: ValidateAttrsOptions = {},
 ): Record<string, unknown> {
+  if (
+    rawAttrs !== undefined &&
+    rawAttrs !== null &&
+    (typeof rawAttrs !== "object" || Array.isArray(rawAttrs))
+  ) {
+    throw new Error("_attrs payload must be a plain object.");
+  }
+
   const attrsObj =
-    rawAttrs && typeof rawAttrs === "object" && !Array.isArray(rawAttrs)
+    rawAttrs && typeof rawAttrs === "object"
       ? ({ ...(rawAttrs as Record<string, unknown>) } as Record<string, unknown>)
       : {};
-
-  if (customFields.length === 0) {
-    return attrsObj;
-  }
 
   const shape: Record<string, z.ZodTypeAny> = {};
   for (const field of customFields) {
@@ -290,6 +412,10 @@ export function validateAttrsPayload(
     shape[field.field_name] = buildCustomFieldValidator(field);
   }
 
-  const schema = z.object(shape).passthrough();
+  if (opts.allowFreeformExtra) {
+    shape._extra = z.record(z.string(), z.unknown()).optional();
+  }
+
+  const schema = z.object(shape).strict();
   return schema.parse(attrsObj);
 }

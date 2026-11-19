@@ -16,50 +16,50 @@ export interface ShortcutItem {
 }
 
 export function ShortcutsDropdown() {
-  const pathname = usePathname();
-  const { locale, dictionary } = useTranslation();
+  const pathname = usePathname() ?? "";
+  const { direction, dictionary } = useTranslation();
   const [open, setOpen] = useState(false);
-  const hasLocalePrefix = getLocaleFromPath(pathname) !== null;
+  const urlLocale = getLocaleFromPath(pathname);
 
   function toHref(target: string, fallback: string): string {
-    return hasLocalePrefix ? getLocalizedUrl(target, locale) : fallback;
+    return urlLocale ? getLocalizedUrl(target, urlLocale) : fallback;
   }
 
   const shortcuts: readonly ShortcutItem[] = [
     {
       id: "analytics",
       title: dictionary.navigation.analytics,
-      subtitle: "Performance & CAB",
+      subtitle: dictionary.dashboards.analyticsTitle,
       href: toHref("/dashboards/analytics", "/mission-control"),
     },
     {
       id: "crm",
       title: dictionary.navigation.crm,
-      subtitle: "Partners & Leads",
+      subtitle: dictionary.dashboards.crmTitle,
       href: toHref("/dashboards/crm", "/addons?model=crm.lead"),
     },
     {
       id: "logistics",
       title: dictionary.navigation.logistics,
-      subtitle: "Stock & Geo",
+      subtitle: dictionary.dashboards.logisticsTitle,
       href: toHref("/dashboards/logistics", "/addons?model=stock.move"),
     },
     {
       id: "invoice",
       title: dictionary.navigation.invoice,
-      subtitle: "Double-Entry Ledger",
+      subtitle: dictionary.apps.invoiceTitle,
       href: toHref("/apps/invoice", "/addons?model=account.move"),
     },
     {
       id: "academy",
       title: dictionary.navigation.academy,
-      subtitle: "Witness 9-Mod & Mizan",
+      subtitle: dictionary.apps.academyTitle,
       href: toHref("/apps/academy", "/codex"),
     },
     {
       id: "addons",
       title: dictionary.navigation.addons,
-      subtitle: "25 Modules / 50+ Models",
+      subtitle: dictionary.addons.runtimeRegistry,
       href: toHref("/apps/addons", "/addons"),
     },
   ];
@@ -70,7 +70,7 @@ export function ShortcutsDropdown() {
         <Button
           type="button"
           variant="ghost"
-          aria-label="Workspace shortcuts"
+          aria-label={dictionary.shell.shortcuts}
           aria-expanded={open}
           className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] hover:bg-[var(--muted)]"
         >
@@ -80,14 +80,17 @@ export function ShortcutsDropdown() {
       <PopoverContent
         align="end"
         sideOffset={8}
+        dir={direction}
         aria-label={dictionary.shell.shortcuts}
         className="w-80 p-3"
       >
-        <div className="mb-2 flex items-center justify-between px-1">
+        <div className="mb-2 flex items-center justify-between gap-2 px-1">
           <span className="font-brush text-sm text-[var(--primary)]">
             {dictionary.shell.shortcuts}
           </span>
-          <span className="font-mono text-[10px] text-[var(--muted-foreground)]">25 ADDONS</span>
+          <span className="font-mono text-[10px] text-[var(--muted-foreground)]">
+            {dictionary.navigation.appsPages}
+          </span>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {shortcuts.map((item) => (
@@ -100,7 +103,7 @@ export function ShortcutsDropdown() {
               <div className="font-mono text-xs font-bold text-[var(--foreground)]">
                 {item.title}
               </div>
-              <div className="mt-0.5 text-[10px] text-[var(--muted-foreground)]">
+              <div className="mt-0.5 line-clamp-2 text-[10px] text-[var(--muted-foreground)]">
                 {item.subtitle}
               </div>
             </Link>

@@ -8,7 +8,8 @@ export interface Migration {
 }
 
 async function ensureMigrationsTable(): Promise<void> {
-  await getDb().exec(`
+  const db = getDb();
+  await db.exec(`
     CREATE TABLE IF NOT EXISTS _orm_schema_migrations (
       id TEXT PRIMARY KEY,
       owner TEXT,
@@ -16,10 +17,15 @@ async function ensureMigrationsTable(): Promise<void> {
       applied_at TEXT NOT NULL
     )
   `);
-  const columns = await getDb().all<{ name: string }>("PRAGMA table_info(_orm_schema_migrations)");
+  const isPostgres = (db.kind ?? db.dialect) === "postgres";
+  const columns = isPostgres
+    ? await db.all<{ name: string }>(
+        "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '_orm_schema_migrations'",
+      )
+    : await db.all<{ name: string }>("PRAGMA table_info(_orm_schema_migrations)");
   const hasOwner = columns.some((col) => String(col.name).toLowerCase() === "owner");
   if (!hasOwner) {
-    await getDb().exec("ALTER TABLE _orm_schema_migrations ADD COLUMN owner TEXT");
+    await db.exec("ALTER TABLE _orm_schema_migrations ADD COLUMN owner TEXT");
   }
 }
 

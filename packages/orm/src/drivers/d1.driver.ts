@@ -134,6 +134,7 @@ export function splitSqlStatements(sql: string): string[] {
  * Keeps existing repository, migration, and audit-model code portable onto Workers.
  */
 export class D1Driver implements LibSqlExecutor {
+  readonly kind = "d1" as const;
   readonly dialect = "d1" as const;
   private client: D1DatabaseLike | null;
 

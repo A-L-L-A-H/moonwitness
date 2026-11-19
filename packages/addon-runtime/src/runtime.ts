@@ -4,6 +4,7 @@ import {
   BaseRepository,
   compileTupleDomainToFilter,
   extendModel,
+  getDb,
   modelRegistry,
   PolicyError,
   syncModels,
@@ -11,11 +12,13 @@ import {
   type ActorContext,
   type DefineModelReturn,
   type FieldPolicySpec,
+  type Migration,
   type ModelExtensionDef,
   type RuntimeCustomFieldSpec,
   type SyncReport,
   type ZodObjectLike,
 } from "@moonwitness/orm";
+import { applyAddonOwnedMigrations } from "./addon.js";
 import {
   irAddonModel,
   irCronModel,
@@ -35,9 +38,15 @@ import {
   AddonManifestSchema,
   AddonRegistry,
   AddonRegistryError,
+  parseDependencySpec,
+  planUpgrade,
+  satisfiesSemVer,
   type AddonContext,
   type AddonManifest,
   type AddonManifestInput,
+  type InstalledAddonSnapshot,
+  type RegistryState,
+  type UpgradePlan,
 } from "./registry.js";
 import { verifyAddonManifestSignature, type AddonSigningPolicy } from "./signing.js";
 
@@ -141,9 +150,20 @@ export interface IrMenuInput {
   min_role?: CrewRoleOrPublic;
 }
 
+export type AddonInstallPhase = "schema_sync" | "migrations" | "metadata_sync" | "seed";
+
+export interface AddonReconcileResult {
+  addon: string;
+  state: "installed" | "disabled" | "error";
+  appliedMigrations: string[];
+  skippedMigrations: string[];
+  seeded: boolean;
+}
+
 export interface AddonDefinition {
   manifest: AddonManifestInput;
   models?: Array<DefineModelReturn<ZodObjectLike>>;
+  migrations?: Migration[];
   extensions?: Array<{
     target: string;
     fields: ZodObjectLike;
@@ -805,6 +825,51 @@ export function evaluateModelRecordRules(params: {
   return { allowed: true, domain: { $and: [globalDomain!, groupDomain!] } };
 }
 
+const ANSI_ESCAPE_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
+
+function sanitizeAddonError(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  const withoutAnsi = raw.replace(ANSI_ESCAPE_REGEX, "");
+  const singleLine = withoutAnsi.replace(/[\r\n\t]+/g, " ").trim();
+  const redacted = singleLine
+    .replace(/:\/\/[^:\s/]+:[^@\s]+@/g, "://***:***@")
+    .replace(/\b(password|secret|token|api[_-]?key)\s*[:=]\s*\S+/gi, "$1=[REDACTED]");
+  return redacted.slice(0, 1000) || "Unknown addon lifecycle error";
+}
+
+function emptyRegistryState(): RegistryState {
+  return {
+    routes: new Set(),
+    models: new Set(),
+    migrations: new Set(),
+    seeds: new Set(),
+    permissions: new Set(),
+    capabilities: new Set(),
+  };
+}
+
+function claimIntoRegistryState(
+  state: RegistryState,
+  manifest: AddonManifest,
+  def: AddonDefinition,
+): void {
+  for (const r of manifest.provides.routes) state.routes.add(r);
+  for (const m of manifest.provides.models) state.models.add(m);
+  for (const mig of def.migrations ?? []) state.migrations.add(mig.id);
+  for (const mig of manifest.provides.migrations) state.migrations.add(mig);
+  for (const s of manifest.provides.seeds) state.seeds.add(s);
+  for (const p of manifest.provides.permissions) state.permissions.add(p);
+  for (const c of manifest.capabilities) state.capabilities.add(c);
+}
+
+function mergeSyncReport(target: SyncReport, part: SyncReport): void {
+  target.createdTables.push(...part.createdTables);
+  target.addedColumns.push(...part.addedColumns);
+  target.deprecatedColumns.push(...part.deprecatedColumns);
+  target.createdIndexes.push(...part.createdIndexes);
+  Object.assign(target.schemaHashes, part.schemaHashes);
+}
+
 export class AddonRuntimeController {
   private readonly definitions = new Map<
     string,
@@ -812,6 +877,11 @@ export class AddonRuntimeController {
   >();
   private readonly enabled = new Map<string, boolean>();
   private readonly modelOwners = new Map<string, string>();
+  private readonly signingMetadata = new Map<
+    string,
+    { status: "verified" | "unsigned" | "invalid"; keyId: string | null }
+  >();
+  private lastLegacyBackfillTables: Set<string> | undefined;
   private order: string[] = [];
 
   isEnabled(addonName: string): boolean {
@@ -838,6 +908,241 @@ export class AddonRuntimeController {
     };
   }
 
+  async planUpgrade(
+    addons: AddonDefinition[],
+    options: { installedVersions?: Record<string, InstalledAddonSnapshot> } = {},
+  ): Promise<UpgradePlan> {
+    const dbSnapshots: Record<string, InstalledAddonSnapshot> = {};
+    try {
+      const db = getDb();
+      const rows = await db.all<{ name: string; addon_version: string; state: string }>(
+        "SELECT name, addon_version, state FROM ir_addons",
+      );
+      for (const row of rows) {
+        dbSnapshots[row.name] = { version: row.addon_version, state: row.state };
+      }
+    } catch {
+      // Database or ir_addons may not exist yet during dry-run planning.
+    }
+    return planUpgrade(addons, { ...dbSnapshots, ...options.installedVersions });
+  }
+
+  private assertDependenciesReady(addonName: string, manifest: AddonManifest, verb: string): void {
+    for (const depRaw of manifest.depends) {
+      const dep = parseDependencySpec(depRaw);
+      if (!this.isEnabled(dep.name)) {
+        throw new Error(`Cannot ${verb} '${addonName}': dependency '${dep.name}' is disabled.`);
+      }
+      if (dep.range !== null) {
+        const depVersion = this.definitions.get(dep.name)?.manifest.version;
+        if (!depVersion || !satisfiesSemVer(depVersion, dep.range)) {
+          throw new Error(
+            `Cannot ${verb} '${addonName}': dependency '${dep.name}' (${depVersion ?? "unknown"}) does not satisfy '${dep.range}'.`,
+          );
+        }
+      }
+    }
+  }
+
+  private async runAddonLifecycleTransaction(
+    addonName: string,
+    options: {
+      runSeed: boolean;
+      legacyBackfillTables?: Set<string>;
+      loadedSoFar: string[];
+      registryState: RegistryState;
+      actor?: ActorContext;
+      existingRow?: Awaited<ReturnType<typeof irAddonModel.repository.find>>[number];
+    },
+  ): Promise<{
+    syncReport: SyncReport;
+    appliedMigrations: string[];
+    skippedMigrations: string[];
+    seeded: boolean;
+  }> {
+    const entry = this.definitions.get(addonName)!;
+    const actor = options.actor ?? SYSTEM_ACTOR;
+    const existing =
+      options.existingRow ?? (await irAddonModel.repository.find({ name: addonName }))[0];
+    const sigMeta = this.signingMetadata.get(addonName) ?? {
+      status: existing?.signature_status ?? ("unsigned" as const),
+      keyId: existing?.signature_key_id ?? null,
+    };
+
+    const preState: "installing" | "upgrade_pending" =
+      !existing || existing.state === "discovered" || existing.state === "installing"
+        ? "installing"
+        : existing.state === "error" &&
+            existing.addon_version === entry.manifest.version &&
+            existing.failed_phase !== null
+          ? "installing"
+          : "upgrade_pending";
+
+    const persistedVersionBeforeCommit =
+      existing &&
+      existing.state === "installed" &&
+      existing.addon_version !== entry.manifest.version
+        ? existing.addon_version
+        : entry.manifest.version;
+
+    // Fail closed while transitioning through install/upgrade phases.
+    this.enabled.set(addonName, false);
+    await irAddonModel.repository.upsert(
+      { name: addonName },
+      {
+        name: addonName,
+        addon_version: persistedVersionBeforeCommit,
+        description: entry.manifest.description ?? "",
+        category: entry.manifest.category ?? "general",
+        depends_json: JSON.stringify(entry.manifest.depends),
+        provides_json: JSON.stringify(entry.manifest.provides),
+        capabilities_json: JSON.stringify(entry.manifest.capabilities),
+        schema_hash: existing?.schema_hash ?? "",
+        state: preState,
+        signature_status: sigMeta.status,
+        signature_key_id: sigMeta.keyId,
+        auto_install: entry.manifest.autoInstall,
+        failed_phase: null,
+        last_error: null,
+      },
+      actor,
+    );
+
+    const report: SyncReport = {
+      createdTables: [],
+      addedColumns: [],
+      deprecatedColumns: [],
+      createdIndexes: [],
+      schemaHashes: {},
+    };
+    let appliedMigrations: string[] = [];
+    let skippedMigrations: string[] = [];
+    let seeded = false;
+    let currentPhase: AddonInstallPhase = "schema_sync";
+
+    try {
+      // Phase 1: schema_sync
+      currentPhase = "schema_sync";
+      if (entry.def.extensions) {
+        entry.extensionDefs.length = 0;
+        for (const ext of entry.def.extensions) {
+          const registeredExt = extendModel(ext.target, {
+            addon: addonName,
+            fields: ext.fields,
+            indexes: ext.indexes,
+          });
+          entry.extensionDefs.push(registeredExt);
+        }
+      }
+
+      const standardModelNames: string[] = [];
+      const backfillModelNames: string[] = [];
+      for (const model of entry.def.models ?? []) {
+        if (options.legacyBackfillTables?.has(model.table)) {
+          backfillModelNames.push(model.name);
+        } else {
+          standardModelNames.push(model.name);
+        }
+      }
+      for (const ext of entry.def.extensions ?? []) {
+        const targetDesc = modelRegistry.get(ext.target);
+        if (targetDesc && options.legacyBackfillTables?.has(targetDesc.table)) {
+          backfillModelNames.push(ext.target);
+        } else {
+          standardModelNames.push(ext.target);
+        }
+      }
+
+      if (standardModelNames.length > 0) {
+        mergeSyncReport(report, await syncModels(standardModelNames));
+      }
+      if (backfillModelNames.length > 0) {
+        mergeSyncReport(report, await syncModels(backfillModelNames, { legacyBackfill: true }));
+      }
+
+      claimIntoRegistryState(options.registryState, entry.manifest, entry.def);
+      if (entry.def.register) {
+        await entry.def.register({
+          loaded: [...options.loadedSoFar],
+          state: options.registryState,
+        });
+      }
+
+      // Phase 2: migrations
+      currentPhase = "migrations";
+      if (entry.def.migrations && entry.def.migrations.length > 0) {
+        const migResult = await applyAddonOwnedMigrations(addonName, entry.def.migrations);
+        appliedMigrations = migResult.applied;
+        skippedMigrations = migResult.skipped;
+      }
+
+      // Phase 3: metadata_sync (IR models/fields/rules/views/menus/crons/sequences/declarative data)
+      currentPhase = "metadata_sync";
+      const deprecatedByTable = new Set(
+        report.deprecatedColumns.map((d) => `${d.table}.${d.column}`),
+      );
+      await this.syncAddonIrMetadata(addonName, entry.def, deprecatedByTable);
+
+      // Phase 4: seed
+      currentPhase = "seed";
+      if (options.runSeed && entry.def.seed) {
+        await entry.def.seed();
+        seeded = true;
+      }
+
+      // Commit installed state only after all phases succeed.
+      const addonSchemaHash = this.computeAddonHash(entry.manifest, entry.def, report.schemaHashes);
+      await irAddonModel.repository.upsert(
+        { name: addonName },
+        {
+          name: addonName,
+          addon_version: entry.manifest.version,
+          description: entry.manifest.description ?? "",
+          category: entry.manifest.category ?? "general",
+          depends_json: JSON.stringify(entry.manifest.depends),
+          provides_json: JSON.stringify(entry.manifest.provides),
+          capabilities_json: JSON.stringify(entry.manifest.capabilities),
+          schema_hash: addonSchemaHash,
+          state: "installed",
+          signature_status: sigMeta.status,
+          signature_key_id: sigMeta.keyId,
+          auto_install: entry.manifest.autoInstall,
+          failed_phase: null,
+          last_error: null,
+        },
+        actor,
+      );
+
+      this.enabled.set(addonName, true);
+      options.loadedSoFar.push(addonName);
+
+      return { syncReport: report, appliedMigrations, skippedMigrations, seeded };
+    } catch (error) {
+      this.enabled.set(addonName, false);
+      await irAddonModel.repository.upsert(
+        { name: addonName },
+        {
+          name: addonName,
+          addon_version: persistedVersionBeforeCommit,
+          description: entry.manifest.description ?? "",
+          category: entry.manifest.category ?? "general",
+          depends_json: JSON.stringify(entry.manifest.depends),
+          provides_json: JSON.stringify(entry.manifest.provides),
+          capabilities_json: JSON.stringify(entry.manifest.capabilities),
+          schema_hash: existing?.schema_hash ?? "",
+          state: "error",
+          signature_status: sigMeta.status,
+          signature_key_id: sigMeta.keyId,
+          auto_install: entry.manifest.autoInstall,
+          failed_phase: currentPhase,
+          last_error: sanitizeAddonError(error),
+        },
+        actor,
+      );
+      throw error;
+    }
+  }
+
   async syncAll(
     addons: AddonDefinition[],
     fastify?: FastifyInstance,
@@ -850,6 +1155,8 @@ export class AddonRuntimeController {
     this.definitions.clear();
     this.enabled.clear();
     this.modelOwners.clear();
+    this.signingMetadata.clear();
+    this.lastLegacyBackfillTables = options.legacyBackfillTables;
 
     const registry = new AddonRegistry();
     for (const def of addons) {
@@ -861,6 +1168,7 @@ export class AddonRuntimeController {
       }
       registry.add({
         manifest: def.manifest,
+        migrations: def.migrations,
         register: def.register ?? (() => {}),
       });
     }
@@ -870,14 +1178,10 @@ export class AddonRuntimeController {
 
     const signingMode = options.signingPolicy?.mode ?? "permissive";
     const trustedKeys = options.signingPolicy?.trustedKeys ?? [];
-    const signatureByName = new Map<
-      string,
-      { status: "verified" | "unsigned" | "invalid"; keyId: string | null }
-    >();
     for (const name of order) {
       const entry = this.definitions.get(name)!;
       const verification = verifyAddonManifestSignature(entry.manifest, trustedKeys);
-      signatureByName.set(name, {
+      this.signingMetadata.set(name, {
         status: verification.status,
         keyId: verification.keyId,
       });
@@ -897,45 +1201,6 @@ export class AddonRuntimeController {
     // Load custom fields saved in ir_model_fields so ModelRegistry validates _attrs immediately.
     await this.reloadAllCustomFieldsIntoRegistry();
 
-    const activeAddons: string[] = [];
-    const activeModels: Array<{ name: string; legacyBackfill?: boolean }> = [];
-    const seededAtBoot: string[] = [];
-
-    for (const name of order) {
-      const entry = this.definitions.get(name)!;
-      const existing = existingByName.get(name);
-      const isEnabled =
-        existing !== undefined
-          ? existing.state !== "disabled"
-          : entry.def.shouldAutoEnable
-            ? entry.def.shouldAutoEnable()
-            : entry.manifest.autoInstall || entry.manifest.defaultEnabled;
-
-      this.enabled.set(name, isEnabled);
-      if (isEnabled) {
-        activeAddons.push(name);
-        if (entry.def.extensions) {
-          for (const ext of entry.def.extensions) {
-            const registeredExt = extendModel(ext.target, {
-              addon: name,
-              fields: ext.fields,
-              indexes: ext.indexes,
-            });
-            entry.extensionDefs.push(registeredExt);
-          }
-        }
-        for (const model of entry.def.models ?? []) {
-          activeModels.push({
-            name: model.name,
-            legacyBackfill: options.legacyBackfillTables?.has(model.table),
-          });
-        }
-      }
-    }
-
-    const standardModelNames = activeModels.filter((m) => !m.legacyBackfill).map((m) => m.name);
-    const backfillModelNames = activeModels.filter((m) => m.legacyBackfill).map((m) => m.name);
-
     const report: SyncReport = {
       createdTables: [],
       addedColumns: [],
@@ -943,73 +1208,110 @@ export class AddonRuntimeController {
       createdIndexes: [],
       schemaHashes: {},
     };
+    const loadedSoFar: string[] = [];
+    const registryState = emptyRegistryState();
+    let firstError: unknown = null;
 
-    if (standardModelNames.length > 0) {
-      const stdReport = await syncModels(standardModelNames);
-      report.createdTables.push(...stdReport.createdTables);
-      report.addedColumns.push(...stdReport.addedColumns);
-      report.deprecatedColumns.push(...stdReport.deprecatedColumns);
-      report.createdIndexes.push(...stdReport.createdIndexes);
-      Object.assign(report.schemaHashes, stdReport.schemaHashes);
-    }
-
-    if (backfillModelNames.length > 0) {
-      const bfReport = await syncModels(backfillModelNames, { legacyBackfill: true });
-      report.createdTables.push(...bfReport.createdTables);
-      report.addedColumns.push(...bfReport.addedColumns);
-      report.deprecatedColumns.push(...bfReport.deprecatedColumns);
-      report.createdIndexes.push(...bfReport.createdIndexes);
-      Object.assign(report.schemaHashes, bfReport.schemaHashes);
-    }
-
-    const deprecatedByTable = new Set(
-      report.deprecatedColumns.map((d) => `${d.table}.${d.column}`),
-    );
-
-    // Run non-route register callbacks in dependency order.
-    await registry.load();
-
-    // Persist metadata, rules, views, menus, and run initial/upgrade seeds for active addons.
     for (const name of order) {
       const entry = this.definitions.get(name)!;
-      const isActive = this.enabled.get(name) ?? false;
       const existing = existingByName.get(name);
-      const addonSchemaHash = this.computeAddonHash(entry.manifest, entry.def, report.schemaHashes);
+      const sigMeta = this.signingMetadata.get(name) ?? {
+        status: "unsigned" as const,
+        keyId: null,
+      };
+      const wantsActive =
+        existing !== undefined
+          ? existing.state !== "disabled"
+          : entry.def.shouldAutoEnable
+            ? entry.def.shouldAutoEnable()
+            : entry.manifest.autoInstall || entry.manifest.defaultEnabled;
 
-      const sigMeta = signatureByName.get(name) ?? { status: "unsigned" as const, keyId: null };
-      await irAddonModel.repository.upsert(
-        { name },
-        {
-          name,
-          addon_version: entry.manifest.version,
-          description: entry.manifest.description ?? "",
-          category: entry.manifest.category ?? "general",
-          depends_json: JSON.stringify(entry.manifest.depends),
-          provides_json: JSON.stringify(entry.manifest.provides),
-          capabilities_json: JSON.stringify(entry.manifest.capabilities),
-          schema_hash: addonSchemaHash,
-          state: isActive ? "installed" : "disabled",
-          signature_status: sigMeta.status,
-          signature_key_id: sigMeta.keyId,
-          auto_install: entry.manifest.autoInstall,
-          last_error: null,
-        },
-        SYSTEM_ACTOR,
-      );
+      if (!wantsActive) {
+        this.enabled.set(name, false);
+        const addonSchemaHash = this.computeAddonHash(
+          entry.manifest,
+          entry.def,
+          report.schemaHashes,
+        );
+        await irAddonModel.repository.upsert(
+          { name },
+          {
+            name,
+            addon_version: entry.manifest.version,
+            description: entry.manifest.description ?? "",
+            category: entry.manifest.category ?? "general",
+            depends_json: JSON.stringify(entry.manifest.depends),
+            provides_json: JSON.stringify(entry.manifest.provides),
+            capabilities_json: JSON.stringify(entry.manifest.capabilities),
+            schema_hash: addonSchemaHash,
+            state: "disabled",
+            signature_status: sigMeta.status,
+            signature_key_id: sigMeta.keyId,
+            auto_install: entry.manifest.autoInstall,
+            failed_phase: null,
+            last_error: null,
+          },
+          SYSTEM_ACTOR,
+        );
+        continue;
+      }
 
-      if (isActive) {
-        await this.syncAddonIrMetadata(name, entry.def, deprecatedByTable);
-        const versionChanged = !existing || existing.addon_version !== entry.manifest.version;
-        const shouldSeed =
-          (options.runSeeds ?? true) && (versionChanged || existing.state === "disabled");
-        if (shouldSeed && entry.def.seed) {
-          await entry.def.seed();
-          seededAtBoot.push(name);
+      const failedDep = entry.manifest.depends
+        .map((depRaw) => parseDependencySpec(depRaw).name)
+        .find((depName) => !this.isEnabled(depName));
+
+      if (failedDep) {
+        this.enabled.set(name, false);
+        const blockedReason = `Blocked by inactive or failed dependency '${failedDep}'.`;
+        await irAddonModel.repository.upsert(
+          { name },
+          {
+            name,
+            addon_version:
+              existing && existing.state === "installed"
+                ? existing.addon_version
+                : entry.manifest.version,
+            description: entry.manifest.description ?? "",
+            category: entry.manifest.category ?? "general",
+            depends_json: JSON.stringify(entry.manifest.depends),
+            provides_json: JSON.stringify(entry.manifest.provides),
+            capabilities_json: JSON.stringify(entry.manifest.capabilities),
+            schema_hash: existing?.schema_hash ?? "",
+            state: "error",
+            signature_status: sigMeta.status,
+            signature_key_id: sigMeta.keyId,
+            auto_install: entry.manifest.autoInstall,
+            failed_phase: null,
+            last_error: blockedReason,
+          },
+          SYSTEM_ACTOR,
+        );
+        if (!firstError) {
+          firstError = new Error(`Addon '${name}' cannot start: ${blockedReason}`);
         }
+        continue;
+      }
+
+      const versionChanged = !existing || existing.addon_version !== entry.manifest.version;
+      const incompleteOrFailed =
+        !existing || existing.state !== "installed" || existing.failed_phase !== null;
+      const shouldSeed = (options.runSeeds ?? true) && (versionChanged || incompleteOrFailed);
+
+      try {
+        const result = await this.runAddonLifecycleTransaction(name, {
+          runSeed: shouldSeed,
+          legacyBackfillTables: options.legacyBackfillTables,
+          loadedSoFar,
+          registryState,
+          existingRow: existing,
+        });
+        mergeSyncReport(report, result.syncReport);
+      } catch (error) {
+        if (!firstError) firstError = error;
       }
     }
 
-    // Pre-mount ALL workspace addon routes behind live `requireAddonEnabled()` guard so toggle needs zero restart.
+    // Pre-mount ALL workspace addon routes behind live `requireAddonEnabled()` guard so toggle and fail-closed 503 need zero restart.
     if (fastify) {
       for (const name of order) {
         const entry = this.definitions.get(name)!;
@@ -1019,6 +1321,10 @@ export class AddonRuntimeController {
           await entry.def.registerRoutes!(scope);
         });
       }
+    }
+
+    if (firstError) {
+      throw firstError;
     }
 
     return { order, syncReport: report };
@@ -1325,47 +1631,70 @@ export class AddonRuntimeController {
     if (!entry) {
       throw new Error(`Unknown addon '${addonName}'.`);
     }
-    for (const dep of entry.manifest.depends) {
-      if (!this.isEnabled(dep)) {
-        throw new Error(`Cannot enable '${addonName}': dependency '${dep}' is disabled.`);
-      }
+    this.assertDependenciesReady(addonName, entry.manifest, "enable");
+
+    const loadedSoFar = [...this.enabled.entries()]
+      .filter(([, active]) => active)
+      .map(([name]) => name);
+    await this.runAddonLifecycleTransaction(addonName, {
+      runSeed: true,
+      legacyBackfillTables: this.lastLegacyBackfillTables,
+      loadedSoFar,
+      registryState: emptyRegistryState(),
+      actor,
+    });
+  }
+
+  async reconcileAddon(
+    addonName: string,
+    options: { runSeeds?: boolean; forceSeed?: boolean; enableIfDisabled?: boolean } = {},
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<AddonReconcileResult> {
+    const entry = this.definitions.get(addonName);
+    if (!entry) {
+      throw new Error(`Unknown addon '${addonName}'.`);
     }
 
-    if (entry.def.extensions && entry.extensionDefs.length === 0) {
-      for (const ext of entry.def.extensions) {
-        entry.extensionDefs.push(
-          extendModel(ext.target, {
-            addon: addonName,
-            fields: ext.fields,
-            indexes: ext.indexes,
-          }),
-        );
-      }
+    const existing = (await irAddonModel.repository.find({ name: addonName }))[0];
+    if (existing?.state === "disabled" && !options.enableIfDisabled) {
+      this.enabled.set(addonName, false);
+      return {
+        addon: addonName,
+        state: "disabled",
+        appliedMigrations: [],
+        skippedMigrations: [],
+        seeded: false,
+      };
     }
 
-    const modelNames = (entry.def.models ?? []).map((m) => m.name);
-    for (const ext of entry.def.extensions ?? []) {
-      modelNames.push(ext.target);
-    }
-    const report = modelNames.length > 0 ? await syncModels(modelNames) : undefined;
-    const deprecatedByTable = new Set(
-      (report?.deprecatedColumns ?? []).map((d) => `${d.table}.${d.column}`),
-    );
+    this.assertDependenciesReady(addonName, entry.manifest, "reconcile");
 
-    await this.syncAddonIrMetadata(addonName, entry.def, deprecatedByTable);
-    if (entry.def.seed) {
-      await entry.def.seed();
-    }
+    const versionChanged = !existing || existing.addon_version !== entry.manifest.version;
+    const incompleteOrFailed =
+      !existing || existing.state !== "installed" || existing.failed_phase !== null;
+    const shouldSeed =
+      (options.runSeeds ?? true) &&
+      (Boolean(options.forceSeed) || versionChanged || incompleteOrFailed);
 
-    const existing = await irAddonModel.repository.find({ name: addonName });
-    if (existing[0]) {
-      await irAddonModel.repository.update(
-        existing[0].id,
-        { state: "installed", last_error: null },
-        actor,
-      );
-    }
-    this.enabled.set(addonName, true);
+    const loadedSoFar = [...this.enabled.entries()]
+      .filter(([, active]) => active)
+      .map(([name]) => name);
+    const result = await this.runAddonLifecycleTransaction(addonName, {
+      runSeed: shouldSeed,
+      legacyBackfillTables: this.lastLegacyBackfillTables,
+      loadedSoFar,
+      registryState: emptyRegistryState(),
+      actor,
+      existingRow: existing,
+    });
+
+    return {
+      addon: addonName,
+      state: "installed",
+      appliedMigrations: result.appliedMigrations,
+      skippedMigrations: result.skippedMigrations,
+      seeded: result.seeded,
+    };
   }
 
   async disable(addonName: string, actor: ActorContext = SYSTEM_ACTOR): Promise<void> {
@@ -1378,7 +1707,9 @@ export class AddonRuntimeController {
     }
     for (const [otherName, otherEntry] of this.definitions) {
       if (otherName !== addonName && this.isEnabled(otherName)) {
-        if (otherEntry.manifest.depends.includes(addonName)) {
+        if (
+          otherEntry.manifest.depends.some((dep) => parseDependencySpec(dep).name === addonName)
+        ) {
           throw new Error(
             `Cannot disable '${addonName}': active addon '${otherName}' depends on it.`,
           );
@@ -1388,7 +1719,11 @@ export class AddonRuntimeController {
 
     const existing = await irAddonModel.repository.find({ name: addonName });
     if (existing[0]) {
-      await irAddonModel.repository.update(existing[0].id, { state: "disabled" }, actor);
+      await irAddonModel.repository.update(
+        existing[0].id,
+        { state: "disabled", failed_phase: null, last_error: null },
+        actor,
+      );
     }
     this.enabled.set(addonName, false);
   }

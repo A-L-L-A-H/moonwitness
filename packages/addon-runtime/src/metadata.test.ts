@@ -151,7 +151,7 @@ describe("dynamic modelRegistry metadata & apiPrefix mount", () => {
     const app = Fastify();
     await runtime.syncAll(
       [
-        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
         {
           manifest: {
             name: "meta_core",

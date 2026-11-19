@@ -56,12 +56,16 @@ function getOptionalActiveDb(): OrmDriverHandle | null {
   }
 }
 
+function isPostgresHandle(db: OrmDriverHandle | null | undefined): boolean {
+  return (db?.kind ?? db?.dialect) === "postgres";
+}
+
 /**
  * List user tables on the currently initialized database handle across SQLite and PostgreSQL.
  */
 export async function listDatabaseTables(): Promise<string[]> {
   const db = getDb();
-  if (db.dialect === "postgres") {
+  if (isPostgresHandle(db)) {
     const rows = await db.all<{ table_name: string }>(
       "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_type = 'BASE TABLE' ORDER BY table_name ASC",
     );
@@ -80,7 +84,7 @@ export async function listDatabaseTables(): Promise<string[]> {
  */
 export async function verifyIntegrity(): Promise<{ ok: boolean; errors: string[] }> {
   const db = getDb();
-  if (db.dialect === "postgres") {
+  if (isPostgresHandle(db)) {
     const errors: string[] = [];
     const ping = await db.get<{ ok: number }>("SELECT 1 AS ok");
     if (Number(ping?.ok) !== 1) {
@@ -130,6 +134,8 @@ export async function verifyIntegrity(): Promise<{ ok: boolean; errors: string[]
   };
 }
 
+export const verifyBackupIntegrity = verifyIntegrity;
+
 /**
  * Create a consistent snapshot of the live database.
  * - SQLite / libSQL: online `VACUUM INTO` snapshot without stopping readers.
@@ -145,7 +151,7 @@ export async function backupDatabase(
 
   const db = getOptionalActiveDb();
   const pgUrl = options.connectionString?.trim() || db?.getConnectionString?.()?.trim() || "";
-  if (db?.dialect === "postgres" || isPostgresUrl(pgUrl)) {
+  if (isPostgresHandle(db) || isPostgresUrl(pgUrl)) {
     if (!isPostgresUrl(pgUrl)) {
       throw new Error("PostgreSQL backup requires an active postgres:// connection string");
     }

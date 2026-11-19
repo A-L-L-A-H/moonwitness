@@ -1,4 +1,5 @@
 import { HUD_NAV_ICON_PATHS } from "@moonwitness/ui/icons";
+import type { Dictionary } from "@/utils/getDictionary";
 import { stripLocalePrefix } from "@/utils/i18n";
 
 export type NavTarget =
@@ -206,3 +207,37 @@ export const navItems: NavItem[] = [
     target: { kind: "route", href: "/shadow" },
   },
 ];
+
+const NAV_LABEL_KEY_BY_ID: Record<string, keyof Dictionary["navigation"]> = {
+  control: "controlPlane",
+  vpn: "vpn",
+  syslog: "syslog",
+  snmp: "snmp",
+  storage: "storage",
+  radius: "radius",
+  dashboard: "missionControl",
+  "story-studio": "storyStudio",
+  episodes: "episodes",
+  "poster-forge": "posterForge",
+  collections: "collections",
+  research: "research",
+  crew: "crew",
+  "mission-log": "missionLog",
+  intelligence: "intelligence",
+  "id-lab": "idLab",
+  "skin-lab": "skinLab",
+  archive: "archive",
+  memory: "memory",
+  settings: "shadowSignIn",
+};
+
+export function localizeNavItemLabels(
+  items: readonly NavItem[],
+  dictionary: Dictionary,
+): NavItem[] {
+  return items.map((item) => {
+    const key = NAV_LABEL_KEY_BY_ID[item.id];
+    const localizedLabel = key ? dictionary.navigation[key] : undefined;
+    return localizedLabel ? { ...item, label: localizedLabel } : item;
+  });
+}

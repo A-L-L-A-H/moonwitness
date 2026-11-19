@@ -73,7 +73,7 @@ describe("registerGenericModelRoutes", () => {
     const app = Fastify();
     await runtime.syncAll(
       [
-        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
         {
           manifest: {
             name: "crud_demo",
@@ -146,7 +146,7 @@ describe("registerGenericModelRoutes", () => {
     };
     await runtime.syncAll(
       [
-        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
         {
           manifest: {
             name: "crud_tenant_demo",
@@ -220,7 +220,7 @@ describe("registerGenericModelRoutes", () => {
     const app = Fastify();
     await runtime.syncAll(
       [
-        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
         {
           manifest: {
             name: "crud_toggle_demo",
@@ -349,7 +349,7 @@ describe("registerGenericModelRoutes", () => {
     const app = Fastify();
     await runtime.syncAll(
       [
-        { manifest: { name: "__base", version: "1", autoInstall: true } },
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
         {
           manifest: {
             name: "crud_policy_demo",

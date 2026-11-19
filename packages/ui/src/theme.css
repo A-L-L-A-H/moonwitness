@@ -373,3 +373,9 @@
   --mw-media-filter: saturate(1.35) contrast(1.12);
   --mw-motion-duration: 130ms;
 }
+
+/* RTL typography token overrides (preserve Arabic glyph joining without affecting LTR or skins) */
+:is([dir="rtl"], [dir="rtl"] [data-skin], [data-skin][dir="rtl"]) {
+  --mw-heading-tracking: 0em;
+  --mw-heading-transform: none;
+}

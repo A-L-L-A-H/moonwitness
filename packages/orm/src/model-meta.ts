@@ -21,13 +21,16 @@ export interface ConstrainContext {
 }
 export type ModelConstraint = (ctx: ConstrainContext) => void | Promise<void>;
 
-/** Odoo `Many2one` / `One2many`: referential integrity & batch relation hydration (`?with=`). */
+/** Odoo `Many2one` / `One2many` / `Many2many`: referential integrity & batch relation hydration (`?with=`). */
 export interface ModelRelation {
   model: string;
-  type?: "many2one" | "one2many";
+  type?: "many2one" | "one2many" | "many2many";
   targetField?: string;
   inverseField?: string;
-  onDelete?: "restrict" | "ignore";
+  onDelete?: "restrict" | "set null" | "ignore";
+  through?: string;
+  sourceKey?: string;
+  targetKey?: string;
 }
 
 /** Declarative retention replacing hand-written `DELETE ... NOT IN (...)` pruning. */
@@ -49,9 +52,35 @@ export type ModelDefaultValue =
   | { [key: string]: unknown };
 export type ModelDefaults = Record<string, ModelDefaultValue>;
 
-/** Odoo `@api.depends` / `moon-orm` computed fields evaluated on read. */
+/** Odoo `@api.depends` / `moon-orm` computed fields evaluated on read or stored on write. */
+export type StoredComputedFieldType = "text" | "integer" | "real" | "boolean" | "json";
 export type ModelComputedFieldFn = (record: Record<string, unknown>) => unknown;
-export type ModelComputedFields = Record<string, ModelComputedFieldFn>;
+export interface ModelComputedFieldSpec {
+  depends: string[];
+  compute: ModelComputedFieldFn;
+  stored?: boolean;
+  type?: StoredComputedFieldType;
+}
+export type ModelComputedFieldDef = ModelComputedFieldFn | ModelComputedFieldSpec;
+export type ModelComputedFields = Record<string, ModelComputedFieldDef>;
+
+/** Normalize function-style or object-style computed field definitions into a uniform descriptor. */
+export function normalizeComputedFieldDef(def: ModelComputedFieldDef): {
+  depends: string[];
+  compute: ModelComputedFieldFn;
+  stored: boolean;
+  type: StoredComputedFieldType;
+} {
+  if (typeof def === "function") {
+    return { depends: [], compute: def, stored: false, type: "text" };
+  }
+  return {
+    depends: [...(def.depends ?? [])],
+    compute: def.compute,
+    stored: Boolean(def.stored),
+    type: def.type ?? "text",
+  };
+}
 
 /** Lifecycle hooks harvested from `moon-orm` (`Vertex.beforeSave`/`afterSave`/`beforeDelete`/`afterDelete`). */
 export interface ModelHookContext {
@@ -65,6 +94,10 @@ export interface ModelHookContext {
 export interface ModelLifecycleHooks {
   beforeSave?: (ctx: ModelHookContext) => void | Promise<void>;
   afterSave?: (ctx: ModelHookContext) => void | Promise<void>;
+  beforeArchive?: (ctx: ModelHookContext) => void | Promise<void>;
+  afterArchive?: (ctx: ModelHookContext) => void | Promise<void>;
+  beforeRestore?: (ctx: ModelHookContext) => void | Promise<void>;
+  afterRestore?: (ctx: ModelHookContext) => void | Promise<void>;
   beforeDelete?: (ctx: ModelHookContext) => void | Promise<void>;
   afterDelete?: (ctx: ModelHookContext) => void | Promise<void>;
 }
@@ -97,6 +130,59 @@ export interface ModelFeatureOptions {
   computed?: ModelComputedFields;
   hooks?: ModelLifecycleHooks;
   fieldPolicies?: Record<string, FieldPolicySpec>;
+  allowFreeformExtra?: boolean;
+}
+
+export const MAX_DOMAIN_CLAUSES = 64;
+export const MAX_DOMAIN_DEPTH = 12;
+export const MAX_IN_LIST_SIZE = 200;
+export const MAX_STRING_VALUE_LEN = 1000;
+
+function assertSafeDomainScalar(
+  value: unknown,
+  field: string,
+  allowNull: boolean,
+): string | number | boolean | null {
+  if (value === null) {
+    if (!allowNull) {
+      throw new Error(`Domain value for field '${field}' cannot be null.`);
+    }
+    return null;
+  }
+  if (typeof value === "string") {
+    if (value.length > MAX_STRING_VALUE_LEN) {
+      throw new Error(
+        `Domain string value on field '${field}' exceeds maximum length of ${MAX_STRING_VALUE_LEN}.`,
+      );
+    }
+    return value;
+  }
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new Error(`Domain numeric value on field '${field}' must be finite.`);
+    }
+    return value;
+  }
+  if (typeof value === "boolean") {
+    return value;
+  }
+  throw new Error(
+    `Domain value on field '${field}' must be a scalar (string, number, boolean${allowNull ? ", or null" : ""}).`,
+  );
+}
+
+function formatLikePattern(value: unknown, field: string, wrapWildcards: boolean): string {
+  if (value === null || value === undefined || typeof value === "object") {
+    throw new Error(`Domain LIKE operator on field '${field}' requires a string value.`);
+  }
+  const raw = String(value);
+  const pattern = wrapWildcards && !raw.includes("%") ? `%${raw}%` : raw;
+  if (pattern.length > MAX_STRING_VALUE_LEN) {
+    throw new Error(
+      `Domain LIKE pattern on field '${field}' exceeds maximum length of ${MAX_STRING_VALUE_LEN}.`,
+    );
+  }
+  return pattern;
 }
 
 function compileSingleTupleClause(clause: unknown): Record<string, unknown> {
@@ -111,41 +197,68 @@ function compileSingleTupleClause(clause: unknown): Record<string, unknown> {
     throw new Error("Domain tuple operator must be a non-empty string.");
   }
   const field = rawField.trim();
-  const op = rawOp.trim().toLowerCase();
+  if (field.length > MAX_STRING_VALUE_LEN) {
+    throw new Error(`Domain field name exceeds maximum length of ${MAX_STRING_VALUE_LEN}.`);
+  }
+  const op = rawOp.trim().toLowerCase().replace(/\s+/g, " ");
   switch (op) {
     case "=":
     case "==":
-      return { [field]: value };
+      return { [field]: assertSafeDomainScalar(value, field, true) };
     case "!=":
     case "<>":
-      return { [field]: { $ne: value } };
+      return { [field]: { $ne: assertSafeDomainScalar(value, field, true) } };
     case ">":
-      return { [field]: { $gt: value } };
+      return { [field]: { $gt: assertSafeDomainScalar(value, field, false) } };
     case ">=":
-      return { [field]: { $gte: value } };
+      return { [field]: { $gte: assertSafeDomainScalar(value, field, false) } };
     case "<":
-      return { [field]: { $lt: value } };
+      return { [field]: { $lt: assertSafeDomainScalar(value, field, false) } };
     case "<=":
-      return { [field]: { $lte: value } };
+      return { [field]: { $lte: assertSafeDomainScalar(value, field, false) } };
     case "in":
+    case "not in": {
       if (!Array.isArray(value)) {
-        throw new Error(`Domain operator 'in' on field '${field}' requires an array value.`);
+        throw new Error(`Domain operator '${op}' on field '${field}' requires an array value.`);
       }
-      return { [field]: { $in: value } };
+      if (value.length > MAX_IN_LIST_SIZE) {
+        throw new Error(
+          `Domain operator '${op}' on field '${field}' exceeds maximum list size of ${MAX_IN_LIST_SIZE}.`,
+        );
+      }
+      const normalized = value.map((item) => assertSafeDomainScalar(item, field, true));
+      return op === "in"
+        ? { [field]: { $in: normalized } }
+        : { $not: { [field]: { $in: normalized } } };
+    }
     case "like":
     case "=like":
       return {
         [field]: {
-          $like:
-            op === "like" && !String(value).includes("%") ? `%${String(value)}%` : String(value),
+          $like: formatLikePattern(value, field, op === "like"),
+        },
+      };
+    case "not like":
+      return {
+        $not: {
+          [field]: {
+            $like: formatLikePattern(value, field, true),
+          },
         },
       };
     case "ilike":
     case "=ilike":
       return {
         [field]: {
-          $ilike:
-            op === "ilike" && !String(value).includes("%") ? `%${String(value)}%` : String(value),
+          $ilike: formatLikePattern(value, field, op === "ilike"),
+        },
+      };
+    case "not ilike":
+      return {
+        $not: {
+          [field]: {
+            $ilike: formatLikePattern(value, field, true),
+          },
         },
       };
     default:
@@ -163,8 +276,12 @@ export function compileTupleDomainToFilter(domain: unknown[]): Record<string, un
     throw new Error("Domain must be an array.");
   }
   if (domain.length === 0) return {};
+  if (domain.length > MAX_DOMAIN_CLAUSES * 4) {
+    throw new Error(`Domain exceeds maximum token budget.`);
+  }
 
-  const stack: Array<Record<string, unknown>> = [];
+  let clauseCount = 0;
+  const stack: Array<{ node: Record<string, unknown>; depth: number }> = [];
   for (let i = domain.length - 1; i >= 0; i -= 1) {
     const token = domain[i];
     if (token === "|" || token === "&") {
@@ -173,14 +290,37 @@ export function compileTupleDomainToFilter(domain: unknown[]): Record<string, un
       if (!left || !right) {
         throw new Error(`Malformed prefix operator '${token}' in domain.`);
       }
-      stack.push(token === "|" ? { $or: [left, right] } : { $and: [left, right] });
+      const depth = Math.max(left.depth, right.depth) + 1;
+      if (depth > MAX_DOMAIN_DEPTH) {
+        throw new Error(`Domain exceeds maximum nesting depth of ${MAX_DOMAIN_DEPTH}.`);
+      }
+      stack.push({
+        node: token === "|" ? { $or: [left.node, right.node] } : { $and: [left.node, right.node] },
+        depth,
+      });
     } else if (token === "!") {
-      throw new Error("Unary '!' operator is not supported in tuple domain; use '!='.");
+      const operand = stack.pop();
+      if (!operand) {
+        throw new Error("Malformed prefix operator '!' in domain.");
+      }
+      const depth = operand.depth + 1;
+      if (depth > MAX_DOMAIN_DEPTH) {
+        throw new Error(`Domain exceeds maximum nesting depth of ${MAX_DOMAIN_DEPTH}.`);
+      }
+      stack.push({ node: { $not: operand.node }, depth });
     } else {
-      stack.push(compileSingleTupleClause(token));
+      clauseCount += 1;
+      if (clauseCount > MAX_DOMAIN_CLAUSES) {
+        throw new Error(`Domain exceeds maximum clause count of ${MAX_DOMAIN_CLAUSES}.`);
+      }
+      stack.push({ node: compileSingleTupleClause(token), depth: 1 });
     }
   }
 
-  if (stack.length === 1) return stack[0]!;
-  return { $and: stack.reverse() };
+  if (stack.length === 1) return stack[0]!.node;
+  const maxDepth = Math.max(...stack.map((entry) => entry.depth)) + 1;
+  if (maxDepth > MAX_DOMAIN_DEPTH) {
+    throw new Error(`Domain exceeds maximum nesting depth of ${MAX_DOMAIN_DEPTH}.`);
+  }
+  return { $and: stack.reverse().map((entry) => entry.node) };
 }
