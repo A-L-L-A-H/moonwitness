@@ -352,7 +352,7 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
       return control;
     };
     const getReferencedIds = (control: HTMLInputElement) =>
-      (control.getAttribute("aria-describedby") ?? "").split(/\\s+/).filter(Boolean);
+      (control.getAttribute("aria-describedby") ?? "").trim().split(" ").filter(Boolean);
 
     const plainIds = getReferencedIds(getControl("plain-control"));
     expect(plainIds).toEqual(["external-help"]);
@@ -366,7 +366,9 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
     const errorIds = getReferencedIds(errorControl);
     expect(errorControl.getAttribute("aria-invalid")).toBe("true");
     expect(errorIds).toHaveLength(1);
-    expect(document.getElementById(errorIds[0] ?? "")?.textContent).toBe("This field is required.");
+    expect(document.getElementById(errorIds[0] ?? "")?.textContent).toBe(
+      "This field is required.",
+    );
 
     const describedErrorControl = getControl("described-error-control");
     const describedErrorIds = getReferencedIds(describedErrorControl);
