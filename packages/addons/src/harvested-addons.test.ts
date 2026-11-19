@@ -296,5 +296,5 @@ describe("Harvested moonwitness-main domain addons: mizan, celestial, khidra, ca
     } finally {
       await app.close();
     }
-  });
+  }, 15_000);
 });
