@@ -318,6 +318,28 @@
         "shadow": "The Shadow",
         "missionControl": "Mission Control",
         "backToTop": "Back to top ↑"
+      },
+      "hero": {
+        "frequency": "UNDERGROUND BROADCAST // 1420.4 MHz",
+        "title": "MOONWITNESS",
+        "tagline": "PEOPLE. PLACES. STORIES.",
+        "subline": "ANOTHER SIDE OF REALITY.",
+        "copy": "A global story network for curious humans.\nDifferent people. Same moon.\nBigger perspectives.",
+        "cta": "EXPLORE THE SIGNALS",
+        "notePaper": "LOOK FURTHER THAN WE DO.",
+        "noteInk": "SAME MOON.\nDIFFERENT WITNESSES."
+      },
+      "index": {
+        "pauseMotion": "PAUSE MOTION",
+        "resumeMotion": "RESUME MOTION"
+      },
+      "marquee": {
+        "item1": "SAME MOON",
+        "item2": "DIFFERENT PEOPLE",
+        "item3": "BIGGER PERSPECTIVES",
+        "item4": "ANOTHER SIDE OF REALITY",
+        "item5": "STORIES KEEP ORBITING",
+        "item6": "FOLLOW THE SIGNAL"
       }
     }
   },
