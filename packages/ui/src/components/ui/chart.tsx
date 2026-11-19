@@ -104,48 +104,48 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
   ) => {
     const max = Math.max(1, ...data.map((d) => d.value));
     const width = Math.max(120, data.length * 48);
-    return [
-      <svg
-        key="chart-svg"
-        ref={ref}
-        role="img"
-        aria-label={accessibleData ? undefined : ariaLabel}
-        aria-hidden={accessibleData || undefined}
-        viewBox={`0 0 ${width} ${height}`}
-        className={cn("w-full overflow-visible", className)}
-        {...props}
-      >
-        {data.map((point, idx) => {
-          const barHeight = Math.max(4, Math.round((point.value / max) * (height - 28)));
-          const x = idx * 48 + 8;
-          const y = height - 22 - barHeight;
-          const fill = point.colorVar ?? DEFAULT_SERIES_VARS[idx % DEFAULT_SERIES_VARS.length];
-          return (
-            <g key={point.label}>
-              <title>{`${point.label}: ${point.value}`}</title>
-              <rect x={x} y={y} width={32} height={barHeight} fill={fill} rx={2} />
-              <text
-                x={x + 16}
-                y={height - 6}
-                textAnchor="middle"
-                fill="currentColor"
-                fontSize={10}
-                opacity={0.78}
-              >
-                {point.label}
-              </text>
-            </g>
-          );
-        })}
-      </svg>,
-      accessibleData ? (
-        <AccessibleChartTable
-          key="accessible-data"
-          ariaLabel={ariaLabel}
-          rows={data.map((point) => ({ label: point.label, value: point.value }))}
-        />
-      ) : null,
-    ];
+    return (
+      <>
+        <svg
+          ref={ref}
+          role="img"
+          aria-label={accessibleData ? undefined : ariaLabel}
+          aria-hidden={accessibleData || undefined}
+          viewBox={`0 0 ${width} ${height}`}
+          className={cn("w-full overflow-visible", className)}
+          {...props}
+        >
+          {data.map((point, idx) => {
+            const barHeight = Math.max(4, Math.round((point.value / max) * (height - 28)));
+            const x = idx * 48 + 8;
+            const y = height - 22 - barHeight;
+            const fill = point.colorVar ?? DEFAULT_SERIES_VARS[idx % DEFAULT_SERIES_VARS.length];
+            return (
+              <g key={point.label}>
+                <title>{`${point.label}: ${point.value}`}</title>
+                <rect x={x} y={y} width={32} height={barHeight} fill={fill} rx={2} />
+                <text
+                  x={x + 16}
+                  y={height - 6}
+                  textAnchor="middle"
+                  fill="currentColor"
+                  fontSize={10}
+                  opacity={0.78}
+                >
+                  {point.label}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+        accessibleData ? (
+          <AccessibleChartTable
+            ariaLabel={ariaLabel}
+            rows={data.map((point) => ({ label: point.label, value: point.value }))}
+          />
+        ) : null
+      </>
+    );
   },
 );
 BarChart.displayName = "BarChart";
@@ -203,49 +203,49 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
         ? `${first.x.toFixed(1)},${height - padding} ${linePoints} ${last.x.toFixed(1)},${height - padding}`
         : "";
 
-    return [
-      <svg
-        key="chart-svg"
-        ref={ref}
-        role="img"
-        aria-label={accessibleData ? undefined : ariaLabel}
-        aria-hidden={accessibleData || undefined}
-        viewBox={`0 0 ${width} ${height}`}
-        data-mw-chart="sparkline"
-        className={cn("h-auto w-full overflow-visible", className)}
-        {...props}
-      >
-        {areaPoints ? (
-          <polygon points={areaPoints} fill={colorVar} fillOpacity={fillOpacity} />
-        ) : null}
-        {coords.length >= 2 ? (
-          <polyline
-            points={linePoints}
-            fill="none"
-            stroke={colorVar}
-            strokeWidth="var(--mw-icon-stroke, 2)"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+    return (
+      <>
+        <svg
+          ref={ref}
+          role="img"
+          aria-label={accessibleData ? undefined : ariaLabel}
+          aria-hidden={accessibleData || undefined}
+          viewBox={`0 0 ${width} ${height}`}
+          data-mw-chart="sparkline"
+          className={cn("h-auto w-full overflow-visible", className)}
+          {...props}
+        >
+          {areaPoints ? (
+            <polygon points={areaPoints} fill={colorVar} fillOpacity={fillOpacity} />
+          ) : null}
+          {coords.length >= 2 ? (
+            <polyline
+              points={linePoints}
+              fill="none"
+              stroke={colorVar}
+              strokeWidth="var(--mw-icon-stroke, 2)"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ) : null}
+          {showLastDot && last ? (
+            <circle cx={last.x} cy={last.y} r={3} fill={colorVar}>
+              <title>{String(last.val)}</title>
+            </circle>
+          ) : null}
+        </svg>
+        accessibleData ? (
+          <AccessibleChartTable
+            ariaLabel={ariaLabel}
+            rows={data.map((point, index) =>
+              typeof point === "number"
+                ? { label: `Point ${index + 1}`, value: point }
+                : { label: point.label, value: point.value },
+            )}
           />
-        ) : null}
-        {showLastDot && last ? (
-          <circle cx={last.x} cy={last.y} r={3} fill={colorVar}>
-            <title>{String(last.val)}</title>
-          </circle>
-        ) : null}
-      </svg>,
-      accessibleData ? (
-        <AccessibleChartTable
-          key="accessible-data"
-          ariaLabel={ariaLabel}
-          rows={data.map((point, index) =>
-            typeof point === "number"
-              ? { label: `Point ${index + 1}`, value: point }
-              : { label: point.label, value: point.value },
-          )}
-        />
-      ) : null,
-    ];
+        ) : null
+      </>
+    );
   },
 );
 Sparkline.displayName = "Sparkline";
@@ -301,89 +301,89 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
         ? `${first.x.toFixed(1)},${baselineY} ${linePoints} ${last.x.toFixed(1)},${baselineY}`
         : "";
 
-    return [
-      <svg
-        key="chart-svg"
-        ref={ref}
-        role="img"
-        aria-label={accessibleData ? undefined : ariaLabel}
-        aria-hidden={accessibleData || undefined}
-        viewBox={`0 0 ${width} ${height}`}
-        data-mw-chart={area ? "area" : "line"}
-        className={cn("h-auto w-full overflow-visible", className)}
-        {...props}
-      >
-        {showGrid
-          ? [0.25, 0.5, 0.75, 1].map((frac) => {
-              const y = padTop + innerH * (1 - frac);
-              return (
-                <line
-                  key={frac}
-                  x1={padX}
-                  y1={y}
-                  x2={width - padX}
-                  y2={y}
-                  stroke="var(--border)"
-                  strokeOpacity={0.35}
-                  strokeDasharray="3 3"
-                  strokeWidth={1}
-                />
-              );
-            })
-          : null}
-        <line
-          x1={padX}
-          y1={baselineY}
-          x2={width - padX}
-          y2={baselineY}
-          stroke="var(--border)"
-          strokeOpacity={0.7}
-          strokeWidth={1}
-        />
-        {areaPoints ? <polygon points={areaPoints} fill={colorVar} fillOpacity={0.18} /> : null}
-        {coords.length >= 2 ? (
-          <polyline
-            points={linePoints}
-            fill="none"
-            stroke={colorVar}
-            strokeWidth="var(--mw-icon-stroke, 2.2)"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+    return (
+      <>
+        <svg
+          ref={ref}
+          role="img"
+          aria-label={accessibleData ? undefined : ariaLabel}
+          aria-hidden={accessibleData || undefined}
+          viewBox={`0 0 ${width} ${height}`}
+          data-mw-chart={area ? "area" : "line"}
+          className={cn("h-auto w-full overflow-visible", className)}
+          {...props}
+        >
+          {showGrid
+            ? [0.25, 0.5, 0.75, 1].map((frac) => {
+                const y = padTop + innerH * (1 - frac);
+                return (
+                  <line
+                    key={frac}
+                    x1={padX}
+                    y1={y}
+                    x2={width - padX}
+                    y2={y}
+                    stroke="var(--border)"
+                    strokeOpacity={0.35}
+                    strokeDasharray="3 3"
+                    strokeWidth={1}
+                  />
+                );
+              })
+            : null}
+          <line
+            x1={padX}
+            y1={baselineY}
+            x2={width - padX}
+            y2={baselineY}
+            stroke="var(--border)"
+            strokeOpacity={0.7}
+            strokeWidth={1}
           />
-        ) : null}
-        {coords.map(({ x, y, point }) => (
-          <g key={point.label}>
-            <circle
-              cx={x}
-              cy={y}
-              r={3.2}
-              fill={point.colorVar ?? colorVar}
-              stroke="var(--background)"
-              strokeWidth={1.2}
-            >
-              <title>{`${point.label}: ${point.value}`}</title>
-            </circle>
-            <text
-              x={x}
-              y={height - 6}
-              textAnchor="middle"
-              fill="currentColor"
-              fontSize={9}
-              opacity={0.75}
-            >
-              {point.label}
-            </text>
-          </g>
-        ))}
-      </svg>,
-      accessibleData ? (
-        <AccessibleChartTable
-          key="accessible-data"
-          ariaLabel={ariaLabel}
-          rows={data.map((point) => ({ label: point.label, value: point.value }))}
-        />
-      ) : null,
-    ];
+          {areaPoints ? <polygon points={areaPoints} fill={colorVar} fillOpacity={0.18} /> : null}
+          {coords.length >= 2 ? (
+            <polyline
+              points={linePoints}
+              fill="none"
+              stroke={colorVar}
+              strokeWidth="var(--mw-icon-stroke, 2.2)"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ) : null}
+          {coords.map(({ x, y, point }) => (
+            <g key={point.label}>
+              <circle
+                cx={x}
+                cy={y}
+                r={3.2}
+                fill={point.colorVar ?? colorVar}
+                stroke="var(--background)"
+                strokeWidth={1.2}
+              >
+                <title>{`${point.label}: ${point.value}`}</title>
+              </circle>
+              <text
+                x={x}
+                y={height - 6}
+                textAnchor="middle"
+                fill="currentColor"
+                fontSize={9}
+                opacity={0.75}
+              >
+                {point.label}
+              </text>
+            </g>
+          ))}
+        </svg>
+        accessibleData ? (
+          <AccessibleChartTable
+            ariaLabel={ariaLabel}
+            rows={data.map((point) => ({ label: point.label, value: point.value }))}
+          />
+        ) : null
+      </>
+    );
   },
 );
 LineChart.displayName = "LineChart";
@@ -432,66 +432,66 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
     const displayValue = Math.round(ratio * safeMax);
     const accessibleLabel = ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`;
 
-    return [
-      <svg
-        key="chart-svg"
-        ref={ref}
-        role="img"
-        aria-label={accessibleData ? undefined : accessibleLabel}
-        aria-hidden={accessibleData || undefined}
-        viewBox="0 0 88 88"
-        width={size}
-        height={size}
-        data-mw-chart="radial-gauge"
-        className={cn("shrink-0 select-none", className)}
-        {...props}
-      >
-        <circle cx="44" cy="44" r={radius} fill="none" stroke="var(--muted)" strokeWidth="7" />
-        <circle
-          cx="44"
-          cy="44"
-          r={radius}
-          fill="none"
-          stroke={colorVar}
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          transform="rotate(-90 44 44)"
-          style={{ transition: "stroke-dashoffset var(--mw-motion-duration, 180ms) ease" }}
-        />
-        <text
-          x="44"
-          y={label ? "41" : "48"}
-          textAnchor="middle"
-          fill="var(--foreground)"
-          fontSize="16"
-          fontWeight="800"
-          fontFamily="var(--mw-font-mono, ui-monospace, monospace)"
+    return (
+      <>
+        <svg
+          ref={ref}
+          role="img"
+          aria-label={accessibleData ? undefined : accessibleLabel}
+          aria-hidden={accessibleData || undefined}
+          viewBox="0 0 88 88"
+          width={size}
+          height={size}
+          data-mw-chart="radial-gauge"
+          className={cn("shrink-0 select-none", className)}
+          {...props}
         >
-          {`${displayValue}${unit}`}
-        </text>
-        {label ? (
+          <circle cx="44" cy="44" r={radius} fill="none" stroke="var(--muted)" strokeWidth="7" />
+          <circle
+            cx="44"
+            cy="44"
+            r={radius}
+            fill="none"
+            stroke={colorVar}
+            strokeWidth="7"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            transform="rotate(-90 44 44)"
+            style={{ transition: "stroke-dashoffset var(--mw-motion-duration, 180ms) ease" }}
+          />
           <text
             x="44"
-            y="55"
+            y={label ? "41" : "48"}
             textAnchor="middle"
-            fill="var(--muted-foreground)"
-            fontSize="8"
-            fontWeight="700"
+            fill="var(--foreground)"
+            fontSize="16"
+            fontWeight="800"
+            fontFamily="var(--mw-font-mono, ui-monospace, monospace)"
           >
-            {label}
+            {`${displayValue}${unit}`}
           </text>
-        ) : null}
-      </svg>,
-      accessibleData ? (
-        <AccessibleChartTable
-          key="accessible-data"
-          ariaLabel={accessibleLabel}
-          rows={[{ label: label ?? "Value", value: `${displayValue}${unit}` }]}
-        />
-      ) : null,
-    ];
+          {label ? (
+            <text
+              x="44"
+              y="55"
+              textAnchor="middle"
+              fill="var(--muted-foreground)"
+              fontSize="8"
+              fontWeight="700"
+            >
+              {label}
+            </text>
+          ) : null}
+        </svg>
+        accessibleData ? (
+          <AccessibleChartTable
+            ariaLabel={accessibleLabel}
+            rows={[{ label: label ?? "Value", value: `${displayValue}${unit}` }]}
+          />
+        ) : null
+      </>
+    );
   },
 );
 RadialGauge.displayName = "RadialGauge";
