@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { i18n, type Direction, type Locale } from "@/configs/i18n";
 import themeConfig from "@/configs/themeConfig";
-import { isValidLocale } from "@/utils/i18n";
+import { getLocaleFromPath, isValidLocale } from "@/utils/i18n";
 
 export type SanctuaryLocale = Locale;
 
@@ -19,8 +19,8 @@ const LOCALE_STORAGE_KEY = "allah-sanctuary-lang-v1";
 const SanctuaryLocaleContext = createContext<SanctuaryLocaleContextValue>({
   locale: "en",
   dir: "ltr",
-  setLocale: () => {},
-  toggleLocale: () => {},
+  setLocale: () => { },
+  toggleLocale: () => { },
 });
 
 export function SanctuaryLocaleProvider({
@@ -39,22 +39,36 @@ export function SanctuaryLocaleProvider({
       document.documentElement.dir = i18n.langDirection[initialLocale];
       return;
     }
+    const pathLocale =
+      typeof window !== "undefined" ? getLocaleFromPath(window.location.pathname) : null;
+    if (pathLocale) {
+      setLocaleState(pathLocale);
+      document.documentElement.lang = pathLocale;
+      document.documentElement.dir = i18n.langDirection[pathLocale];
+      return;
+    }
+    let resolved: SanctuaryLocale = "en";
     try {
       const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (isValidLocale(saved)) {
-        setLocaleState(saved);
-        document.documentElement.lang = saved;
-        document.documentElement.dir = i18n.langDirection[saved];
+      if (saved === "id" || saved === "en") {
+        resolved = saved;
+      } else if (saved === "ar") {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, "en");
       }
     } catch {
       // Ignore storage access failures
     }
+    setLocaleState(resolved);
+    document.documentElement.lang = resolved;
+    document.documentElement.dir = "ltr";
   }, [initialLocale]);
 
   const setLocale = useCallback((next: SanctuaryLocale) => {
     setLocaleState(next);
     try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      if (next === "en" || next === "id") {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
+      }
       document.cookie = `${themeConfig.localeCookieName}=${encodeURIComponent(next)}; path=/; max-age=31536000; SameSite=Lax`;
       document.documentElement.lang = next;
       document.documentElement.dir = i18n.langDirection[next];

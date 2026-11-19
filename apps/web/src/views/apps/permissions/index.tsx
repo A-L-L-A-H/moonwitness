@@ -8,7 +8,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   SkinOrnament,
 } from "@moonwitness/ui";
@@ -19,9 +18,7 @@ import { useTranslation } from "@/hocs/TranslationWrapper";
 export function PermissionsView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
-  const [activeModel, setActiveModel] = useState<"ir.model.access" | "ir.rule" | "audit.log">(
-    "ir.model.access",
-  );
+  const [activeModel, setActiveModel] = useState<"ir.rule" | "res.groups" | "audit.log">("ir.rule");
 
   return (
     <ConsoleShellAdapter
@@ -46,17 +43,19 @@ export function PermissionsView() {
             <Badge variant="outline" className="w-fit">
               MODEL ACL & RECORD RULES
             </Badge>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.permissionsTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.permissionsTitle}
+            </h1>
             <CardDescription>
-              Fine-grained CRUD access matrices (<code>ir.model.access</code>) and row-level domain
-              filters (<code>ir.rule</code>).
+              Row-level record rules (<code>ir.rule</code>), RBAC group clearances (
+              <code>res.groups</code>), and immutable security logs (<code>audit.log</code>).
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {(
               [
-                { id: "ir.model.access", label: "Model Access Control (ir.model.access)" },
                 { id: "ir.rule", label: "Row-Level Record Rules (ir.rule)" },
+                { id: "res.groups", label: "RBAC Security Groups (res.groups)" },
                 { id: "audit.log", label: "Security Audit Log (audit.log)" },
               ] as const
             ).map((m) => (

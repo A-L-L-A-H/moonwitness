@@ -89,49 +89,65 @@ async function mockAuthenticatedApi(page: Page, role: "admin" | "viewer" = "admi
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ stages: [], leads: [], plannedActivities: [], byStage: {} }),
+        body: JSON.stringify({
+          stages: 4,
+          leads: 2,
+          plannedActivities: 1,
+          byStage: [{ stage_key: "won", count: 1, revenue: 120000 }],
+        }),
       });
     }
     if (url.includes("/api/v1/stock/summary")) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ products: [], locations: [], quants: [], moves: [] }),
+        body: JSON.stringify({ products: 1, locations: 2, quants: 0, moves: 0 }),
       });
     }
     if (url.includes("/api/v1/geo/summary")) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ provinces: [], cities: [] }),
+        body: JSON.stringify({ provinces: 38, cities: 514, byTimezone: [] }),
       });
     }
     if (url.includes("/api/v1/account/summary")) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ accounts: [], journals: [], moves: [], byState: {} }),
+        body: JSON.stringify({
+          accounts: 5,
+          journals: 2,
+          moves: 1,
+          byState: [{ move_state: "posted", count: 1 }],
+        }),
       });
     }
     if (url.includes("/api/v1/cab/summary")) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ projects: [], tasks: [], changes: [], tickets: [], metrics: {} }),
+        body: JSON.stringify({
+          projects: 1,
+          tasks: 2,
+          changes: 1,
+          tickets: 0,
+          metrics: { submitted: 1, approved: 1, implemented: 0 },
+        }),
       });
     }
     if (url.includes("/api/v1/khidra/summary")) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ automations: [], webhooks: [], webhookLogs: [] }),
+        body: JSON.stringify({ automations: 2, webhooks: 1, webhookLogs: 3 }),
       });
     }
     if (url.includes("/api/v1/observatory/summary")) {
       return route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ feeds: [], operations: [], byCategory: {} }),
+        body: JSON.stringify({ feeds: 4, operations: 2, byCategory: [] }),
       });
     }
     if (url.includes("/api/v1/celestial/prayer-times")) {
@@ -176,8 +192,8 @@ async function mockAuthenticatedApi(page: Page, role: "admin" | "viewer" = "admi
           altitude_deg: 4.2,
           elongation_deg: 7.1,
           crescent_width_arcmin: 0.35,
-          mabims_criterion: true,
-          odeh_criterion: "C",
+          mabims_criterion: { status: "PASS", passed: true, description: "CRITERIA_MET" },
+          odeh_criterion: { category: "C", v_value: 2.1, description: "Optical aid" },
           overall_verdict: "POSSIBLE_WITH_OPTICAL_AID",
         }),
       });
@@ -201,6 +217,69 @@ async function mockAuthenticatedApi(page: Page, role: "admin" | "viewer" = "admi
         status: 200,
         contentType: "application/json",
         body: JSON.stringify({ method: "MIZAN_STANDARD", decision: "SUFFICIENT" }),
+      });
+    }
+    if (url.includes("/api/v1/command-center/state")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ workflows: [], alerts: [], feed: [] }),
+      });
+    }
+    if (url.includes("/api/v1/command-center/stats")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          workflows: 0,
+          running: 0,
+          queued: 0,
+          paused: 0,
+          succeeded: 0,
+          failed: 0,
+          cancelled: 0,
+          alerts: 0,
+        }),
+      });
+    }
+    if (url.includes("/api/v1/probes/nodes")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ nodes: [] }),
+      });
+    }
+    if (url.includes("/api/v1/probes/events")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ events: [] }),
+      });
+    }
+    if (url.includes("/api/v1/control/setup/status")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          initialized: true,
+          version: "1.0.0",
+          instance: { id: "qa-1", name: "QA Control", version: "1.0.0" },
+        }),
+      });
+    }
+    if (url.includes("/api/v1/control/auth/me")) {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          user: {
+            id: "1",
+            name: "QA Steward",
+            email: "qa@moonwitness.local",
+            role: "superadmin",
+            created_at: "2026-01-01T00:00:00Z",
+          },
+        }),
       });
     }
     return route.fulfill({ status: 200, contentType: "application/json", body: '{"data":[]}' });
@@ -305,6 +384,33 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
         })),
       )
       .toEqual({ dir: "rtl", lang: "ar" });
+
+    // Verify zero sticky RTL leak onto unprefixed sanctuary/console routes
+    await page.goto("/moonwitness", { waitUntil: "load" });
+    await expect
+      .poll(async () =>
+        page.evaluate(() => ({
+          dir: document.documentElement.dir,
+          lang: document.documentElement.lang,
+        })),
+      )
+      .toEqual({ dir: "ltr", lang: "en" });
+
+    await page.goto("/mission-control", { waitUntil: "load" });
+    await expect
+      .poll(async () =>
+        page.evaluate(() => ({
+          dir: document.documentElement.dir,
+          lang: document.documentElement.lang,
+        })),
+      )
+      .toEqual({ dir: "ltr", lang: "en" });
+
+    // Verify tri-lingual landing pages render cleanly
+    await page.goto("/ar", { waitUntil: "load" });
+    await expect(page.getByText("مَمْلَكَةُ النُّور")).toBeVisible();
+    await page.goto("/ar/moonwitness", { waitUntil: "load" });
+    await expect(page.getByText("الجانب الآخر من الواقع.")).toBeVisible();
 
     // Mobile viewport check (390x844)
     await page.setViewportSize({ width: 390, height: 844 });

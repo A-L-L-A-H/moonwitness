@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   SkinOrnament,
 } from "@moonwitness/ui";
@@ -18,11 +17,14 @@ import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
 interface CabSummary {
-  data?: {
-    totalRequests?: number;
-    pendingApproval?: number;
-    approvedCount?: number;
-    emergencyCount?: number;
+  projects?: number;
+  tasks?: number;
+  changes?: number;
+  tickets?: number;
+  metrics?: {
+    submitted?: number;
+    approved?: number;
+    implemented?: number;
   };
 }
 
@@ -30,15 +32,21 @@ export function KanbanCabView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
   const [activeModel, setActiveModel] = useState<
-    "cab.request" | "command.directive" | "command.alert"
-  >("cab.request");
-  const [summary, setSummary] = useState<CabSummary["data"] | null>(null);
+    | "cab.change"
+    | "cab.decision"
+    | "project.project"
+    | "project.task"
+    | "helpdesk.ticket"
+    | "command.workflow"
+    | "command.alert"
+  >("cab.change");
+  const [summary, setSummary] = useState<CabSummary | null>(null);
 
   useEffect(() => {
     let active = true;
     requestApiJson<CabSummary>("/api/v1/cab/summary")
       .then((res) => {
-        if (active && res?.data) setSummary(res.data);
+        if (active && res) setSummary(res);
       })
       .catch(() => {});
     return () => {
@@ -68,17 +76,26 @@ export function KanbanCabView() {
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">CHANGE ADVISORY BOARD</Badge>
-              <Badge variant="default">APPROVED: {summary?.approvedCount ?? 0}</Badge>
-              <Badge variant="secondary">PENDING: {summary?.pendingApproval ?? 0}</Badge>
+              <Badge variant="default">APPROVED: {summary?.metrics?.approved ?? 0}</Badge>
+              <Badge variant="secondary">SUBMITTED: {summary?.metrics?.submitted ?? 0}</Badge>
+              <Badge variant="outline">
+                PROJECTS: {summary?.projects ?? 0} · TICKETS: {summary?.tickets ?? 0}
+              </Badge>
             </div>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.kanbanTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.kanbanTitle}
+            </h1>
             <CardDescription>{dictionary.apps.kanbanSubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {(
               [
-                { id: "cab.request", label: "CAB Change Requests" },
-                { id: "command.directive", label: "Command Directives" },
+                { id: "cab.change", label: "CAB Changes" },
+                { id: "cab.decision", label: "CAB Decisions" },
+                { id: "project.project", label: "Projects" },
+                { id: "project.task", label: "Project Tasks" },
+                { id: "helpdesk.ticket", label: "Helpdesk Tickets" },
+                { id: "command.workflow", label: "Command Workflows" },
                 { id: "command.alert", label: "Command Alerts" },
               ] as const
             ).map((m) => (

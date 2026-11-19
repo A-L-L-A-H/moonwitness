@@ -172,7 +172,7 @@ export function mapRuntimeViewToAutoDescriptor(
     Pick<AutoModelViewDescriptor, "title" | "description" | "domainIcon" | "cutoutId">
   > = {},
 ): AutoModelViewDescriptor {
-  const fields: AutoModelFieldSpec[] = view.fields
+  const fields: AutoModelFieldSpec[] = (view.fields ?? [])
     .filter((f) => !f.deprecated)
     .map((f) => ({
       name: f.field_name,
@@ -183,7 +183,7 @@ export function mapRuntimeViewToAutoDescriptor(
       selection: f.selection ?? undefined,
     }));
 
-  const primarySpec = view.views[0]?.spec ?? {};
+  const primarySpec = (view.views ?? [])[0]?.spec ?? {};
   return {
     model: view.model,
     title:
@@ -355,30 +355,51 @@ export function useMetaView(model: string) {
   return { view: data, loading, error, reload };
 }
 
-export function useModelRows(model: string, listUrl?: string, restEnabled = true) {
+export function useModelRows(model: string, listUrl?: string, restEnabled = true, ready = true) {
   const [rows, setRows] = useState<AutoModelRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const targetUrl = listUrl ?? (restEnabled ? `/api/v1/m/${encodeURIComponent(model)}` : undefined);
+  const targetUrl = !ready
+    ? undefined
+    : (listUrl ?? (restEnabled ? `/api/v1/m/${encodeURIComponent(model)}` : undefined));
 
   const reload = useCallback(async () => {
+    if (!ready) {
+      return;
+    }
     if (!targetUrl) {
       setRows([]);
+      setError(null);
       return;
     }
     setLoading(true);
     setError(null);
     try {
-      const payload = await fetchApiJson<{ data?: AutoModelRow[] } | AutoModelRow[]>(targetUrl);
-      const list = Array.isArray(payload) ? payload : (payload.data ?? []);
+      const payload = await fetchApiJson<
+        | {
+            data?: AutoModelRow[];
+            users?: AutoModelRow[];
+            workflows?: AutoModelRow[];
+            alerts?: AutoModelRow[];
+            items?: AutoModelRow[];
+          }
+        | AutoModelRow[]
+      >(targetUrl);
+      const list = Array.isArray(payload)
+        ? payload
+        : model === "command.alert"
+          ? (payload.alerts ?? payload.data ?? payload.items ?? [])
+          : model === "command.workflow"
+            ? (payload.workflows ?? payload.data ?? payload.items ?? [])
+            : (payload.data ?? payload.users ?? payload.workflows ?? payload.alerts ?? payload.items ?? []);
       setRows(list);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load rows");
     } finally {
       setLoading(false);
     }
-  }, [targetUrl]);
+  }, [model, ready, targetUrl]);
 
   useEffect(() => {
     void reload();

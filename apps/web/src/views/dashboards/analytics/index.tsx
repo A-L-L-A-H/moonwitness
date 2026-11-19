@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   SkinOrnament,
 } from "@moonwitness/ui";
@@ -18,30 +17,33 @@ import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
 interface PerformanceSummaryPayload {
-  data?: {
-    totalKpis?: number;
-    healthyCount?: number;
-    warningCount?: number;
-    breachedCount?: number;
-    healthScorePercent?: number;
+  runtime?: {
+    rssMb?: number;
+    heapUsedMb?: number;
+    heapTotalMb?: number;
+    uptimeSec?: number;
   };
+  widgets?: Array<Record<string, unknown>>;
 }
 
 interface CabSummaryPayload {
-  data?: {
-    totalRequests?: number;
-    pendingApproval?: number;
-    approvedCount?: number;
-    emergencyCount?: number;
+  projects?: number;
+  tasks?: number;
+  changes?: number;
+  tickets?: number;
+  metrics?: {
+    submitted?: number;
+    approved?: number;
+    implemented?: number;
   };
 }
 
 export function AnalyticsDashboardView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
-  const [activeModel, setActiveModel] = useState<string>("performance.kpi");
-  const [perf, setPerf] = useState<PerformanceSummaryPayload["data"] | null>(null);
-  const [cab, setCab] = useState<CabSummaryPayload["data"] | null>(null);
+  const [activeModel, setActiveModel] = useState<string>("px.system");
+  const [perf, setPerf] = useState<PerformanceSummaryPayload | null>(null);
+  const [cab, setCab] = useState<CabSummaryPayload | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -50,8 +52,8 @@ export function AnalyticsDashboardView() {
       requestApiJson<CabSummaryPayload>("/api/v1/cab/summary").catch(() => null),
     ]).then(([perfRes, cabRes]) => {
       if (!active) return;
-      if (perfRes?.data) setPerf(perfRes.data);
-      if (cabRes?.data) setCab(cabRes.data);
+      if (perfRes) setPerf(perfRes);
+      if (cabRes) setCab(cabRes);
     });
     return () => {
       active = false;
@@ -59,9 +61,9 @@ export function AnalyticsDashboardView() {
   }, []);
 
   const models = [
-    { id: "performance.kpi", label: "Performance KPIs" },
-    { id: "performance.sla", label: "SLA Contracts" },
-    { id: "command.directive", label: "Command Directives" },
+    { id: "px.system", label: "Runtime Snapshots" },
+    { id: "ir.dashboard.widget", label: "Dashboard Widgets" },
+    { id: "command.workflow", label: "Command Workflows" },
     { id: "command.alert", label: "Command Alerts" },
     { id: "audit.log", label: "Audit Trail" },
   ] as const;
@@ -88,29 +90,41 @@ export function AnalyticsDashboardView() {
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">ENTERPRISE TELEMETRY</Badge>
-              <Badge variant="default">SLA HEALTH: {perf?.healthScorePercent ?? 100}%</Badge>
+              <Badge variant="default">UPTIME: {perf?.runtime?.uptimeSec ?? 0}s</Badge>
             </div>
-            <CardTitle className="text-lg uppercase">{dictionary.dashboards.analyticsTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.dashboards.analyticsTitle}
+            </h1>
             <CardDescription>{dictionary.dashboards.analyticsSubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL KPIS</div>
-              <div className="mt-1 font-brush text-2xl">{perf?.totalKpis ?? 0}</div>
-            </div>
-            <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">HEALTHY / BREACHED</div>
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                HEAP / RSS (MB)
+              </div>
               <div className="mt-1 font-brush text-2xl">
-                {perf?.healthyCount ?? 0} / {perf?.breachedCount ?? 0}
+                {perf?.runtime?.heapUsedMb ?? 0} / {perf?.runtime?.rssMb ?? 0}
               </div>
             </div>
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">CAB REQUESTS</div>
-              <div className="mt-1 font-brush text-2xl">{cab?.totalRequests ?? 0}</div>
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                ACTIVE WIDGETS
+              </div>
+              <div className="mt-1 font-brush text-2xl">{perf?.widgets?.length ?? 0}</div>
             </div>
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">PENDING CAB</div>
-              <div className="mt-1 font-brush text-2xl">{cab?.pendingApproval ?? 0}</div>
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                CAB CHANGES
+              </div>
+              <div className="mt-1 font-brush text-2xl">{cab?.changes ?? 0}</div>
+            </div>
+            <div className="border border-[var(--border)] bg-[var(--background)] p-3">
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                APPROVED / SUBMITTED
+              </div>
+              <div className="mt-1 font-brush text-2xl">
+                {cab?.metrics?.approved ?? 0} / {cab?.metrics?.submitted ?? 0}
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -13,6 +13,7 @@ import {
   stripLocalePrefix,
 } from "../src/utils/i18n";
 import { resolveModelVisuals } from "../src/views/apps/addons";
+import { WORLD_DOMAINS } from "../src/data/empire-registry";
 import { activeByPath } from "../src/components/shell/nav-items";
 
 describe("Enterprise Reference Architecture Gates (WEB-GATE-01..06)", () => {
@@ -128,5 +129,10 @@ describe("Enterprise Reference Architecture Gates (WEB-GATE-01..06)", () => {
     expect(themeConfig.homePageUrl).toBe("/mission-control");
     expect(themeConfig.loginUrl).toBe("/shadow");
     expect(themeConfig.settingsCookieName).toBe("mw-enterprise-settings-v1");
+  });
+
+  it("WEB-GATE-06: WORLD_DOMAINS catalog covers all 9 worlds cleanly", () => {
+    expect(WORLD_DOMAINS).toHaveLength(9);
+    expect(WORLD_DOMAINS.some((w) => w.id === "crayon")).toBe(true);
   });
 });

@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   SkinOrnament,
 } from "@moonwitness/ui";
@@ -45,7 +44,9 @@ export function UserListView() {
             <Badge variant="outline" className="w-fit">
               IDENTITY & MULTI-TENANCY
             </Badge>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.usersTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.usersTitle}
+            </h1>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2">
             {(

@@ -40,6 +40,12 @@ function parseSessionPayload(data: unknown): Session | null {
   };
 }
 
+const SESSION_CACHE_TTL_MS = 5_000;
+
+let inFlightSessionFetch: Promise<Session | null> | null = null;
+let cachedSession: { value: Session | null; fetchedAt: number } | null = null;
+let lastKnownSession: Session | null = null;
+
 function isDevSessionFallbackEnabled(): boolean {
   if (typeof window === "undefined") {
     return false;
@@ -63,17 +69,69 @@ const DEV_OPERATOR_SESSION: Session = {
   id: "dev-local",
 };
 
-async function fetchCurrentSession(): Promise<Session | null> {
-  try {
-    const response = await requestApiResponse("/api/v1/auth/me", buildAuthFetchInit());
-    if (!response.ok) {
-      return isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null;
-    }
-    const data = (await response.json()) as unknown;
-    return parseSessionPayload(data) ?? (isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null);
-  } catch {
-    return isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null;
+function resolveFallbackSession(): Session | null {
+  return isDevSessionFallbackEnabled() ? DEV_OPERATOR_SESSION : null;
+}
+
+async function fetchCurrentSession(forceRefresh = false): Promise<Session | null> {
+  const canUseCache = process.env.NODE_ENV !== "test";
+  if (
+    !forceRefresh &&
+    canUseCache &&
+    cachedSession &&
+    Date.now() - cachedSession.fetchedAt < SESSION_CACHE_TTL_MS
+  ) {
+    return cachedSession.value;
   }
+
+  if (!forceRefresh && inFlightSessionFetch) {
+    return inFlightSessionFetch;
+  }
+
+  const requestPromise = (async (): Promise<Session | null> => {
+    try {
+      const response = await requestApiResponse("/api/v1/auth/me", buildAuthFetchInit());
+      if (!response.ok) {
+        if (response.status === 429 || response.status === 503) {
+          const preserved = lastKnownSession ?? resolveFallbackSession();
+          if (canUseCache) {
+            cachedSession = { value: preserved, fetchedAt: Date.now() };
+          }
+          return preserved;
+        }
+        lastKnownSession = null;
+        const fallback = resolveFallbackSession();
+        if (canUseCache) {
+          cachedSession = { value: fallback, fetchedAt: Date.now() };
+        }
+        return fallback;
+      }
+      const data = (await response.json()) as unknown;
+      const parsed = parseSessionPayload(data);
+      if (parsed) {
+        lastKnownSession = parsed;
+        if (canUseCache) {
+          cachedSession = { value: parsed, fetchedAt: Date.now() };
+        }
+        return parsed;
+      }
+      lastKnownSession = null;
+      const fallback = resolveFallbackSession();
+      if (canUseCache) {
+        cachedSession = { value: fallback, fetchedAt: Date.now() };
+      }
+      return fallback;
+    } catch {
+      return lastKnownSession ?? resolveFallbackSession();
+    }
+  })().finally(() => {
+    if (inFlightSessionFetch === requestPromise) {
+      inFlightSessionFetch = null;
+    }
+  });
+
+  inFlightSessionFetch = requestPromise;
+  return requestPromise;
 }
 
 /**
@@ -91,7 +149,7 @@ export function useCurrentSessionState(): CurrentSessionState {
     if (mountedRef.current) {
       setLoading(true);
     }
-    const nextSession = await fetchCurrentSession();
+    const nextSession = await fetchCurrentSession(true);
     if (!mountedRef.current || seq !== requestSeqRef.current) {
       return;
     }
@@ -143,6 +201,9 @@ export function useCurrentIdentity(): Session | null {
  * Call after login/logout to notify same-tab listeners.
  */
 export function notifySessionChange() {
+  cachedSession = null;
+  inFlightSessionFetch = null;
+  lastKnownSession = null;
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("mw:session-change"));
   }

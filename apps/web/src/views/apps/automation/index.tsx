@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   Input,
   SkinOrnament,
@@ -19,28 +18,25 @@ import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
 interface KhidraSummary {
-  data?: {
-    totalRules?: number;
-    activeRules?: number;
-    totalLogs?: number;
-    successLogs?: number;
-  };
+  automations?: number;
+  webhooks?: number;
+  webhookLogs?: number;
 }
 
 export function AutomationKhidraView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
   const [activeModel, setActiveModel] = useState<
-    "khidra.rule" | "khidra.log" | "mail.message" | "mail.tracking.value"
-  >("khidra.rule");
-  const [summary, setSummary] = useState<KhidraSummary["data"] | null>(null);
-  const [triggerEvent, setTriggerEvent] = useState("record.updated");
+    "ir.automation" | "ir.webhook" | "ir.webhook.log" | "mail.message" | "mail.tracking.value"
+  >("ir.automation");
+  const [summary, setSummary] = useState<KhidraSummary | null>(null);
+  const [triggerEvent, setTriggerEvent] = useState("on_create");
   const [triggerModel, setTriggerModel] = useState("timeline.event");
   const [triggerStatus, setTriggerStatus] = useState<string | null>(null);
 
   async function loadSummary() {
     const res = await requestApiJson<KhidraSummary>("/api/v1/khidra/summary").catch(() => null);
-    if (res?.data) setSummary(res.data);
+    if (res) setSummary(res);
   }
 
   useEffect(() => {
@@ -50,20 +46,23 @@ export function AutomationKhidraView() {
   async function handleFireTrigger(e: FormEvent) {
     e.preventDefault();
     setTriggerStatus(null);
+    const normalizedTrigger =
+      triggerEvent === "on_update" || triggerEvent === "on_time" ? triggerEvent : "on_create";
     try {
-      const res = await requestApiJson<{ data?: { matchedRules?: number } }>(
+      const res = await requestApiJson<{ executed?: number | unknown[] }>(
         "/api/v1/khidra/trigger",
         {
           method: "POST",
           body: JSON.stringify({
-            trigger_event: triggerEvent.trim(),
-            target_model: triggerModel.trim(),
-            payload: { source: "automation-studio" },
+            model: triggerModel.trim(),
+            trigger: normalizedTrigger,
+            record: { source: "automation-studio" },
           }),
         },
       );
+      const count = Array.isArray(res?.executed) ? res.executed.length : (res?.executed ?? 0);
       setTriggerStatus(
-        `Dispatched ${triggerEvent} on ${triggerModel} (matched ${res?.data?.matchedRules ?? 0} rule(s)).`,
+        `Dispatched ${normalizedTrigger} on ${triggerModel} (executed ${count} automation rule(s)).`,
       );
       await loadSummary();
     } catch (err) {
@@ -93,10 +92,14 @@ export function AutomationKhidraView() {
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">KHIDRA AUTOMATION ENGINE</Badge>
-              <Badge variant="default">ACTIVE RULES: {summary?.activeRules ?? 0}</Badge>
-              <Badge variant="secondary">EXECUTIONS: {summary?.totalLogs ?? 0}</Badge>
+              <Badge variant="default">ACTIVE RULES: {summary?.automations ?? 0}</Badge>
+              <Badge variant="secondary">
+                WEBHOOKS: {summary?.webhooks ?? 0} · LOGS: {summary?.webhookLogs ?? 0}
+              </Badge>
             </div>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.automationTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.automationTitle}
+            </h1>
             <CardDescription>{dictionary.apps.automationSubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -107,7 +110,7 @@ export function AutomationKhidraView() {
               <Input
                 value={triggerEvent}
                 onChange={(e) => setTriggerEvent(e.target.value)}
-                placeholder="Trigger Event"
+                placeholder="on_create | on_update | on_time"
                 aria-label="Trigger Event"
                 className="max-w-xs"
               />
@@ -129,8 +132,9 @@ export function AutomationKhidraView() {
             <div className="flex flex-wrap gap-2">
               {(
                 [
-                  { id: "khidra.rule", label: "Automation Rules" },
-                  { id: "khidra.log", label: "Execution Logs" },
+                  { id: "ir.automation", label: "Automation Rules" },
+                  { id: "ir.webhook", label: "Webhooks" },
+                  { id: "ir.webhook.log", label: "Webhook Logs" },
                   { id: "mail.message", label: "Chatter Messages" },
                   { id: "mail.tracking.value", label: "Field Tracking Diffs" },
                 ] as const

@@ -137,6 +137,12 @@ function AddonsStudioContent() {
             <CardContent className="space-y-3 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
+                  <h1
+                    dir="ltr"
+                    className="font-mono text-base font-bold uppercase tracking-tight text-[var(--foreground)]"
+                  >
+                    {selectedModel}
+                  </h1>
                   <Badge variant="outline">{dictionary.addons.modelExplorer}</Badge>
                   <Badge variant="secondary">{visuals.category}</Badge>
                   <Badge variant="outline">{catalog.length} MODELS</Badge>
@@ -177,7 +183,11 @@ function AddonsStudioContent() {
                     const active = item === selectedModel;
                     return (
                       <Button key={item} asChild size="sm" variant={active ? "default" : "outline"}>
-                        <Link href={`${baseAddonsPath}?model=${encodeURIComponent(item)}`}>
+                        <Link
+                          href={`${baseAddonsPath}?model=${encodeURIComponent(item)}`}
+                          dir="ltr"
+                          className="font-mono"
+                        >
                           {item}
                         </Link>
                       </Button>
@@ -238,18 +248,18 @@ function AddonsStudioContent() {
     >
       <div className="space-y-4">
         <Card className="relative overflow-hidden">
-          <SkinOrnament slot="corner" className="left-2 top-2" />
+          <SkinOrnament slot="corner" className="end-2 top-2" />
           <CutoutArtwork
             id="mixing-console"
             decorative
-            className="pointer-events-none absolute -right-4 -top-3 hidden h-28 w-28 opacity-15 sm:block"
+            className="pointer-events-none absolute -bottom-4 -end-2 hidden h-24 w-24 opacity-10 sm:block"
           />
-          <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <CardHeader className="relative z-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] text-[var(--primary)]">
                 <SimpulNode className="h-6 w-6" />
               </span>
-              <div className="space-y-1">
+              <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <DnaBrandLogo id="addon-studio" variant="lockup" size={22} decorative />
                   <DnaBrandLogo id="09-simpul-nusantara" variant="mark" size={20} decorative />
@@ -257,11 +267,12 @@ function AddonsStudioContent() {
                     {dictionary.addons.runtimeRegistry}
                   </span>
                 </div>
-                <CardTitle className="text-lg uppercase tracking-wider">
+                <h1 className="font-semibold leading-none tracking-tight text-lg uppercase tracking-wider">
                   {dictionary.addons.title}
-                </CardTitle>
+                </h1>
                 <CardDescription className="text-xs">
-                  {dictionary.addons.subtitle} Schema tables sync via <code>syncModels()</code>.
+                  {dictionary.addons.subtitle} Schema tables sync via{" "}
+                  <code dir="ltr">syncModels()</code>.
                 </CardDescription>
               </div>
             </div>
@@ -296,7 +307,7 @@ function AddonsStudioContent() {
           </Card>
         ) : error ? (
           <Card className="relative overflow-hidden">
-            <SkinOrnament slot="corner" className="right-2 top-2" />
+            <SkinOrnament slot="corner" className="end-2 top-2" />
             <CardHeader className="flex flex-col items-center py-8 text-center">
               <CutoutArtwork id="cable-coil" decorative className="mb-2 h-20 w-20 opacity-80" />
               <CardTitle>Admin Access Required</CardTitle>
@@ -319,10 +330,10 @@ function AddonsStudioContent() {
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
             {visibleAddons.map((addon) => (
               <Card key={addon.id} className="relative flex flex-col justify-between">
-                <SkinOrnament slot="corner" className="right-2 top-2 opacity-60" />
+                <SkinOrnament slot="corner" className="end-2 top-2 opacity-60" />
                 <CardHeader className="space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-start gap-2.5">
+                    <div className="flex min-w-0 items-start gap-2.5">
                       <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)] border border-[var(--border)] bg-[var(--muted)] text-[var(--primary)]">
                         {addon.name === "__base" ? (
                           <ArsyRelay className="h-4 w-4" />
@@ -330,11 +341,17 @@ function AddonsStudioContent() {
                           <SimpulNode className="h-4 w-4" />
                         )}
                       </span>
-                      <div>
-                        <CardTitle className="text-sm font-bold">{addon.name}</CardTitle>
+                      <div className="min-w-0">
+                        <CardTitle dir="ltr" className="text-sm font-bold break-all">
+                          {addon.name}
+                        </CardTitle>
                         <div className="mt-1 flex flex-wrap gap-1.5">
-                          <Badge variant="outline">v{addon.addon_version}</Badge>
-                          <Badge variant="outline">{addon.category}</Badge>
+                          <Badge dir="ltr" variant="outline">
+                            v{addon.addon_version}
+                          </Badge>
+                          <Badge dir="ltr" variant="outline">
+                            {addon.category}
+                          </Badge>
                           <Badge
                             variant={
                               addon.state === "error"

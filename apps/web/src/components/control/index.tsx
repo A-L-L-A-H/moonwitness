@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   BarChart,
   Button,
@@ -81,6 +81,7 @@ function resolveControlTab(raw: string | null): ControlTab {
 }
 
 export function ControlCenter() {
+  const pathname = usePathname() ?? "/control";
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
@@ -89,7 +90,7 @@ export function ControlCenter() {
 
   function selectTab(next: ControlTab) {
     setQuery("");
-    router.replace(next === "overview" ? "/control" : `/control?tab=${next}`);
+    router.replace(next === "overview" ? pathname : `${pathname}?tab=${next}`);
   }
 
   return (

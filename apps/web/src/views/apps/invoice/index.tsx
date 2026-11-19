@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   Input,
   SkinOrnament,
@@ -19,36 +18,31 @@ import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
 interface AccountSummaryPayload {
-  data?: {
-    totalAccounts?: number;
-    totalMoves?: number;
-    postedMoves?: number;
-    draftMoves?: number;
-    totalDebits?: number;
-    totalCredits?: number;
-    balanced?: boolean;
-  };
+  accounts?: number;
+  journals?: number;
+  moves?: number;
+  byState?: Array<{ move_state?: string; count?: number }>;
 }
 
 export function InvoiceLedgerView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
   const [activeModel, setActiveModel] = useState<
-    "account.move" | "account.move.line" | "account.account"
+    "account.move" | "account.account" | "account.journal"
   >("account.move");
-  const [summary, setSummary] = useState<AccountSummaryPayload["data"] | null>(null);
+  const [summary, setSummary] = useState<AccountSummaryPayload | null>(null);
   const [moveRef, setMoveRef] = useState("INV-2026-001");
-  const [debitAccount, setDebitAccount] = useState("1100");
+  const [debitAccount, setDebitAccount] = useState("1010");
   const [creditAccount, setCreditAccount] = useState("4000");
   const [amount, setAmount] = useState("2500");
-  const [reverseMoveId, setReverseMoveId] = useState("");
+  const [reverseMoveKey, setReverseMoveKey] = useState("");
   const [ledgerNotice, setLedgerNotice] = useState<string | null>(null);
 
   async function loadSummary() {
     const res = await requestApiJson<AccountSummaryPayload>("/api/v1/account/summary").catch(
       () => null,
     );
-    if (res?.data) setSummary(res.data);
+    if (res) setSummary(res);
   }
 
   useEffect(() => {
@@ -59,19 +53,33 @@ export function InvoiceLedgerView() {
     e.preventDefault();
     setLedgerNotice(null);
     const numericAmount = Number(amount) || 0;
+    const trimmedKey = moveRef.trim() || `INV-${Date.now()}`;
     try {
       await requestApiJson("/api/v1/account/ledger/post", {
         method: "POST",
         body: JSON.stringify({
-          reference: moveRef.trim(),
+          move_key: trimmedKey,
           journal_code: "GEN",
+          move_date: new Date().toISOString().slice(0, 10),
+          currency_code: "IDR",
+          idempotency_key: `web-${trimmedKey}-${Date.now()}`,
           lines: [
-            { account_code: debitAccount.trim(), debit: numericAmount, credit: 0 },
-            { account_code: creditAccount.trim(), debit: 0, credit: numericAmount },
+            {
+              account_code: debitAccount.trim(),
+              debit: numericAmount,
+              credit: 0,
+              description: `Debit ${trimmedKey}`,
+            },
+            {
+              account_code: creditAccount.trim(),
+              debit: 0,
+              credit: numericAmount,
+              description: `Credit ${trimmedKey}`,
+            },
           ],
         }),
       });
-      setLedgerNotice(`Posted balanced journal move ${moveRef} (${numericAmount}).`);
+      setLedgerNotice(`Posted balanced journal move ${trimmedKey} (${numericAmount}).`);
       await loadSummary();
     } catch (err) {
       setLedgerNotice(err instanceof Error ? err.message : "Failed to post journal entry.");
@@ -80,23 +88,29 @@ export function InvoiceLedgerView() {
 
   async function handleReverseEntry(e: FormEvent) {
     e.preventDefault();
-    if (!reverseMoveId.trim()) return;
+    const targetKey = reverseMoveKey.trim();
+    if (!targetKey) return;
     setLedgerNotice(null);
     try {
       await requestApiJson("/api/v1/account/ledger/reverse", {
         method: "POST",
         body: JSON.stringify({
-          move_id: reverseMoveId.trim(),
-          reason: "Operator reversal via Accounting Console",
+          move_key: targetKey,
+          reversal_key: `${targetKey}-REV-${Date.now()}`,
         }),
       });
-      setLedgerNotice(`Reversed journal move ${reverseMoveId.trim()}.`);
-      setReverseMoveId("");
+      setLedgerNotice(`Reversed journal move ${targetKey}.`);
+      setReverseMoveKey("");
       await loadSummary();
     } catch (err) {
       setLedgerNotice(err instanceof Error ? err.message : "Failed to reverse journal move.");
     }
   }
+
+  const byState = Array.isArray(summary?.byState) ? summary.byState : [];
+  const postedMoves = Number(
+    byState.find((s) => s.move_state === "posted")?.count ?? 0,
+  );
 
   return (
     <ConsoleShellAdapter
@@ -120,34 +134,32 @@ export function InvoiceLedgerView() {
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">DOUBLE-ENTRY LEDGER</Badge>
-              <Badge variant={summary?.balanced !== false ? "default" : "destructive"}>
-                {summary?.balanced !== false ? "LEDGER BALANCED" : "IMBALANCE DETECTED"}
-              </Badge>
+              <Badge variant="default">EXACTLEDGER SHA-256</Badge>
             </div>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.invoiceTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.invoiceTitle}
+            </h1>
             <CardDescription>{dictionary.apps.invoiceSubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
                 <div className="font-mono text-[10px] text-[var(--muted-foreground)]">ACCOUNTS</div>
-                <div className="mt-1 font-brush text-2xl">{summary?.totalAccounts ?? 0}</div>
+                <div className="mt-1 font-brush text-2xl">{summary?.accounts ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">POSTED MOVES</div>
-                <div className="mt-1 font-brush text-2xl">{summary?.postedMoves ?? 0}</div>
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">JOURNALS</div>
+                <div className="mt-1 font-brush text-2xl">{summary?.journals ?? 0}</div>
               </div>
               <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL DEBITS</div>
-                <div className="mt-1 font-brush text-2xl">
-                  {(summary?.totalDebits ?? 0).toLocaleString()}
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL MOVES</div>
+                <div className="mt-1 font-brush text-2xl">{summary?.moves ?? 0}</div>
+              </div>
+              <div className="border border-[var(--border)] bg-[var(--background)] p-3">
+                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                  POSTED MOVES
                 </div>
-              </div>
-              <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-                <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL CREDITS</div>
-                <div className="mt-1 font-brush text-2xl">
-                  {(summary?.totalCredits ?? 0).toLocaleString()}
-                </div>
+                <div className="mt-1 font-brush text-2xl">{postedMoves}</div>
               </div>
             </div>
 
@@ -158,7 +170,7 @@ export function InvoiceLedgerView() {
               <Input
                 value={moveRef}
                 onChange={(e) => setMoveRef(e.target.value)}
-                placeholder="Reference"
+                placeholder="Move Key"
                 aria-label="Journal Reference"
               />
               <Input
@@ -189,13 +201,13 @@ export function InvoiceLedgerView() {
               className="flex flex-wrap items-center gap-2 border border-[var(--border)] bg-[var(--background)] p-3"
             >
               <Input
-                value={reverseMoveId}
-                onChange={(e) => setReverseMoveId(e.target.value)}
-                placeholder="Move ID to reverse…"
-                aria-label="Move ID to reverse"
+                value={reverseMoveKey}
+                onChange={(e) => setReverseMoveKey(e.target.value)}
+                placeholder="Move key to reverse…"
+                aria-label="Move key to reverse"
                 className="max-w-xs"
               />
-              <Button type="submit" size="sm" variant="outline" disabled={!reverseMoveId.trim()}>
+              <Button type="submit" size="sm" variant="outline" disabled={!reverseMoveKey.trim()}>
                 Reverse Posted Move
               </Button>
             </form>
@@ -209,8 +221,8 @@ export function InvoiceLedgerView() {
           {(
             [
               { id: "account.move", label: "Journal Entries (account.move)" },
-              { id: "account.move.line", label: "Journal Lines (account.move.line)" },
               { id: "account.account", label: "Chart of Accounts (account.account)" },
+              { id: "account.journal", label: "Journals (account.journal)" },
             ] as const
           ).map((m) => (
             <Button

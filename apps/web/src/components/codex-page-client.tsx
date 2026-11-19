@@ -27,7 +27,11 @@ export function CodexPageClient() {
     <div className="min-h-screen bg-[var(--dna-canvas)] text-[var(--dna-text)] bg-girih-filigree">
       <SiteSubpageHeader activeRoute="codex" />
       <main id="main">
-        <CanonCodexSanctum activeDoorId={activeDoorId} onSelectDoor={handleSelectDoor} />
+        <CanonCodexSanctum
+          activeDoorId={activeDoorId}
+          onSelectDoor={handleSelectDoor}
+          isPageTitle
+        />
       </main>
     </div>
   );

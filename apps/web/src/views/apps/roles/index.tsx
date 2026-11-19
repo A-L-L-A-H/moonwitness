@@ -7,7 +7,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   SkinOrnament,
 } from "@moonwitness/ui";
@@ -42,7 +41,9 @@ export function RolesView() {
             <Badge variant="outline" className="w-fit">
               RBAC GROUP HIERARCHY
             </Badge>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.rolesTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.rolesTitle}
+            </h1>
             <CardDescription>
               Security groups map session roles (<code>viewer</code>, <code>editor</code>,{" "}
               <code>admin</code>) to implied ACL clearances.

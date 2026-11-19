@@ -17,42 +17,43 @@ export function buildEnterpriseNavItems(
   const p = localePrefix ? (localePrefix.startsWith("/") ? localePrefix : `/${localePrefix}`) : "";
 
   if (plane === "operations") {
+    const controlBase = p ? `${p}/apps/control` : "/control";
     return [
       {
         id: "control",
         label: dict.navigation.controlPlane,
         icon: HUD_NAV_ICON_PATHS.control,
-        target: { kind: "route", href: `${p}/control` },
+        target: { kind: "route", href: controlBase },
       },
       {
         id: "vpn",
         label: dict.navigation.vpn,
         icon: HUD_NAV_ICON_PATHS.vpn,
-        target: { kind: "route", href: `${p}/control?tab=vpn` },
+        target: { kind: "route", href: `${controlBase}?tab=vpn` },
       },
       {
         id: "syslog",
         label: dict.navigation.syslog,
         icon: HUD_NAV_ICON_PATHS.syslog,
-        target: { kind: "route", href: `${p}/control?tab=syslog` },
+        target: { kind: "route", href: `${controlBase}?tab=syslog` },
       },
       {
         id: "snmp",
         label: dict.navigation.snmp,
         icon: HUD_NAV_ICON_PATHS.snmp,
-        target: { kind: "route", href: `${p}/control?tab=snmp` },
+        target: { kind: "route", href: `${controlBase}?tab=snmp` },
       },
       {
         id: "storage",
         label: dict.navigation.storage,
         icon: HUD_NAV_ICON_PATHS.storage,
-        target: { kind: "route", href: `${p}/control?tab=storage` },
+        target: { kind: "route", href: `${controlBase}?tab=storage` },
       },
       {
         id: "radius",
         label: dict.navigation.radius,
         icon: HUD_NAV_ICON_PATHS.radius,
-        target: { kind: "route", href: `${p}/control?tab=radius` },
+        target: { kind: "route", href: `${controlBase}?tab=radius` },
       },
       {
         id: "dashboard",

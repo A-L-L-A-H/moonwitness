@@ -33,9 +33,24 @@ const FOOTER_RIGHT = "EMPIRE OF THE LIGHT";
 function localizeNavItems(items: NavItem[], localePrefix: string): NavItem[] {
   if (!localePrefix) return items;
   return items.map((item) => {
-    const href = item.target.href.startsWith(`/${localePrefix}`)
-      ? item.target.href
-      : getLocalizedUrl(item.target.href, localePrefix);
+    const rawHref = item.target.href.startsWith("/") ? item.target.href : `/${item.target.href}`;
+    const unprefixedHref = rawHref.replace(/^\/(en|id|ar)(?=\/|$)/, "") || "/";
+    let mappedHref = unprefixedHref;
+    if (unprefixedHref === "/control" || unprefixedHref.startsWith("/control?")) {
+      mappedHref = `/apps${unprefixedHref}`;
+    } else if (
+      unprefixedHref === "/syslog" ||
+      unprefixedHref === "/snmp" ||
+      unprefixedHref === "/storage" ||
+      unprefixedHref === "/radius" ||
+      unprefixedHref === "/vpn"
+    ) {
+      mappedHref = `/apps/control?tab=${unprefixedHref.slice(1)}`;
+    } else if (unprefixedHref.startsWith("/models/")) {
+      const modelSlug = decodeURIComponent(unprefixedHref.slice("/models/".length));
+      mappedHref = `/apps/addons?model=${encodeURIComponent(modelSlug)}`;
+    }
+    const href = getLocalizedUrl(mappedHref, localePrefix);
     return {
       ...item,
       target: { ...item.target, href },
@@ -79,7 +94,7 @@ export function ConsoleShellAdapter({
   );
 
   const rootHref = pathLocale
-    ? getLocalizedUrl(operations ? "/control" : "/", pathLocale)
+    ? getLocalizedUrl(operations ? "/apps/control" : "/", pathLocale)
     : operations
       ? "/control"
       : "/";
@@ -110,7 +125,7 @@ export function ConsoleShellAdapter({
     clearStoredMidSession();
     moonwitnessSdk.auth
       .logout()
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => {
         notifySessionChange();
       });
@@ -161,11 +176,11 @@ export function ConsoleShellAdapter({
         </div>
       }
       headerActions={
-        <div ref={popRef} className="relative flex items-center gap-1.5">
+        <div ref={popRef} className="relative flex max-w-full flex-wrap items-center justify-end gap-1.5">
           {celestial?.aeq4?.formatted && celestial?.hijri && celestial?.lunar ? (
             <span
               title={celestial.aeq4.formatted}
-              className="hidden xl:inline-flex items-center border border-[var(--border)] px-2 py-1 font-mono text-[10px] text-[var(--muted-foreground)]"
+              className="hidden 2xl:inline-flex shrink-0 whitespace-nowrap items-center border border-[var(--border)] px-2 py-1 font-mono text-[10px] text-[var(--muted-foreground)]"
             >
               {celestial.hijri.day} {celestial.hijri.monthName} {celestial.hijri.year}H ·{" "}
               {celestial.lunar.illumination}%
@@ -179,7 +194,7 @@ export function ConsoleShellAdapter({
                 setActiveTenant(e.target.value);
                 window.dispatchEvent(new Event("mw:navigation-changed"));
               }}
-              className="h-8 max-w-[140px] font-mono text-[11px]"
+              className="h-8 max-w-[125px] shrink-0 font-mono text-[11px] sm:min-w-[130px] sm:max-w-[160px]"
             >
               {companies.map((c) => (
                 <option key={c.slug} value={c.slug}>

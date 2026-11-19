@@ -15,10 +15,12 @@ import { CodexWorkbench } from "./codex-workbench";
 export function CanonCodexSanctum({
   activeDoorId,
   quietMode = false,
+  isPageTitle = false,
   onSelectDoor,
 }: {
   readonly activeDoorId: EntryDoorId;
   readonly quietMode?: boolean;
+  readonly isPageTitle?: boolean;
   readonly onSelectDoor: (doorId: EntryDoorId) => void;
 }) {
   const { locale } = useSanctuaryLocale();
@@ -68,12 +70,21 @@ export function CanonCodexSanctum({
               <span>A-L-L-A-H · {SUPREME_IDENTITY.fullExpansion}</span>
               <span className="h-px w-12 bg-gradient-to-l from-transparent to-[var(--dna-accent)]" />
             </div>
-            <h2
-              id="codex-heading"
-              className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
-            >
-              {locale === "id" ? "KODEKS KANON" : "THE CANON CODEX"}
-            </h2>
+            {isPageTitle ? (
+              <h1
+                id="codex-heading"
+                className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
+              >
+                {locale === "id" ? "KODEKS KANON" : locale === "ar" ? "مدوّنة القانون" : "THE CANON CODEX"}
+              </h1>
+            ) : (
+              <h2
+                id="codex-heading"
+                className="font-monument mt-4 text-3xl sm:text-5xl tracking-[0.18em] text-gold-gradient uppercase"
+              >
+                {locale === "id" ? "KODEKS KANON" : locale === "ar" ? "مدوّنة القانون" : "THE CANON CODEX"}
+              </h2>
+            )}
             <p className="mt-3 max-w-3xl font-serif text-base sm:text-lg text-[var(--dna-muted)] leading-relaxed">
               {locale === "id"
                 ? "Empat pintu galeri arsitektur yang mengorganisasi kronik MoonWitness, kajian netral lintas Taurat, Zabur, Injīl & Al-Qur’ān, etika amanah manusia tanpa kultus, dan ekosistem multi-runtime."

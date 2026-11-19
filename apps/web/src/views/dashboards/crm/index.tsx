@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   SkinOrnament,
 } from "@moonwitness/ui";
@@ -18,34 +17,44 @@ import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
 interface CrmSummaryPayload {
-  data?: {
-    totalLeads?: number;
-    openLeads?: number;
-    wonLeads?: number;
-    totalExpectedRevenue?: number;
-    weightedPipelineValue?: number;
-  };
+  stages?: number;
+  leads?: number;
+  plannedActivities?: number;
+  byStage?: Array<{
+    stage_key?: string;
+    count?: number;
+    revenue?: number;
+  }>;
 }
 
 export function CrmDashboardView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
-  const [activeModel, setActiveModel] = useState<"crm.lead" | "res.partner" | "res.company">(
-    "crm.lead",
-  );
-  const [summary, setSummary] = useState<CrmSummaryPayload["data"] | null>(null);
+  const [activeModel, setActiveModel] = useState<
+    "crm.lead" | "crm.stage" | "mail.activity" | "res.partner" | "res.company"
+  >("crm.lead");
+  const [summary, setSummary] = useState<CrmSummaryPayload | null>(null);
 
   useEffect(() => {
     let active = true;
     requestApiJson<CrmSummaryPayload>("/api/v1/crm/summary")
       .then((res) => {
-        if (active && res?.data) setSummary(res.data);
+        if (active && res) setSummary(res);
       })
       .catch(() => {});
     return () => {
       active = false;
     };
   }, []);
+
+  const byStage = Array.isArray(summary?.byStage) ? summary.byStage : [];
+  const wonLeads = Number(
+    byStage.find((row) => row.stage_key === "won")?.count ?? 0,
+  );
+  const totalExpectedRevenue = byStage.reduce(
+    (sum, row) => sum + Number(row.revenue ?? 0),
+    0,
+  );
 
   return (
     <ConsoleShellAdapter
@@ -69,30 +78,36 @@ export function CrmDashboardView() {
           <CardHeader>
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">COMMERCIAL PIPELINE</Badge>
-              <Badge variant="default">WON: {summary?.wonLeads ?? 0}</Badge>
+              <Badge variant="default">WON: {wonLeads}</Badge>
             </div>
-            <CardTitle className="text-lg uppercase">{dictionary.dashboards.crmTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.dashboards.crmTitle}
+            </h1>
             <CardDescription>{dictionary.dashboards.crmSubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
               <div className="font-mono text-[10px] text-[var(--muted-foreground)]">TOTAL LEADS</div>
-              <div className="mt-1 font-brush text-2xl">{summary?.totalLeads ?? 0}</div>
+              <div className="mt-1 font-brush text-2xl">{summary?.leads ?? 0}</div>
             </div>
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">OPEN PIPELINE</div>
-              <div className="mt-1 font-brush text-2xl">{summary?.openLeads ?? 0}</div>
-            </div>
-            <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">EXPECTED REVENUE</div>
-              <div className="mt-1 font-brush text-2xl">
-                {(summary?.totalExpectedRevenue ?? 0).toLocaleString()}
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                PIPELINE STAGES
               </div>
+              <div className="mt-1 font-brush text-2xl">{summary?.stages ?? 0}</div>
             </div>
             <div className="border border-[var(--border)] bg-[var(--background)] p-3">
-              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">WEIGHTED VALUE</div>
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                PLANNED ACTIVITIES
+              </div>
+              <div className="mt-1 font-brush text-2xl">{summary?.plannedActivities ?? 0}</div>
+            </div>
+            <div className="border border-[var(--border)] bg-[var(--background)] p-3">
+              <div className="font-mono text-[10px] text-[var(--muted-foreground)]">
+                EXPECTED REVENUE
+              </div>
               <div className="mt-1 font-brush text-2xl">
-                {(summary?.weightedPipelineValue ?? 0).toLocaleString()}
+                {totalExpectedRevenue.toLocaleString()}
               </div>
             </div>
           </CardContent>
@@ -102,6 +117,8 @@ export function CrmDashboardView() {
           {(
             [
               { id: "crm.lead", label: "CRM Leads & Opportunities" },
+              { id: "crm.stage", label: "Pipeline Stages" },
+              { id: "mail.activity", label: "Planned Activities" },
               { id: "res.partner", label: "Partner Directory" },
               { id: "res.company", label: "Tenant Companies" },
             ] as const

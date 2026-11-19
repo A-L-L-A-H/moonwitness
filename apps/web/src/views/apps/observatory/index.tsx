@@ -9,7 +9,6 @@ import {
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   CutoutArtwork,
   Input,
   SkinOrnament,
@@ -19,51 +18,63 @@ import { ConsoleShellAdapter } from "@/components/shell/console-shell-adapter";
 import { MTimeInteractiveEngine } from "@/components/mtime-observatory";
 import { useTranslation } from "@/hocs/TranslationWrapper";
 
-interface PrayerTimesPayload {
-  data?: {
-    timings?: Record<string, string>;
-    qiblaAzimuthDeg?: number;
+interface CelestialNowPayload {
+  lunar?: {
+    phaseName?: string;
+    illumination?: number;
+    elongationDeg?: number;
   };
+}
+
+interface PrayerTimesPayload {
+  date?: string;
+  fajr?: string;
+  sunrise?: string;
+  dhuhr?: string;
+  asr?: string;
+  maghrib?: string;
+  isha?: string;
+  qibla_bearing?: number;
 }
 
 interface HilalPayload {
-  data?: {
-    elongationDeg?: number;
-    moonAltitudeDeg?: number;
-    illuminatedFraction?: number;
-    mabimsPassed?: boolean;
-    verdict?: string;
-  };
+  altitude_deg?: number;
+  elongation_deg?: number;
+  mabims_criterion?: { status?: string; passed?: boolean; description?: string };
+  overall_verdict?: string;
 }
 
 interface ObservatorySummaryPayload {
-  data?: {
-    totalFeeds?: number;
-    healthyFeeds?: number;
-    totalSnapshots?: number;
-  };
+  feeds?: number;
+  operations?: number;
 }
 
 export function ObservatoryAppView() {
   const { dictionary } = useTranslation();
   const [search, setSearch] = useState("");
-  const [activeModel, setActiveModel] = useState<string>("celestial.hilal.sighting");
+  const [activeModel, setActiveModel] = useState<string>("observatory.feed");
   const [lat, setLat] = useState("-6.2088");
   const [lon, setLon] = useState("106.8456");
-  const [prayers, setPrayers] = useState<PrayerTimesPayload["data"] | null>(null);
-  const [hilal, setHilal] = useState<HilalPayload["data"] | null>(null);
-  const [obsSummary, setObsSummary] = useState<ObservatorySummaryPayload["data"] | null>(null);
+  const [prayers, setPrayers] = useState<PrayerTimesPayload | null>(null);
+  const [hilal, setHilal] = useState<HilalPayload | null>(null);
+  const [obsSummary, setObsSummary] = useState<ObservatorySummaryPayload | null>(null);
 
   async function loadCelestialTelemetry(latitude: string, longitude: string) {
-    const q = `lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`;
-    const [pRes, hRes, oRes] = await Promise.all([
+    const q = `lat=${encodeURIComponent(latitude)}&lng=${encodeURIComponent(longitude)}`;
+    const [nowRes, pRes, oRes] = await Promise.all([
+      requestApiJson<CelestialNowPayload>(`/api/v1/celestial/now?${q}`).catch(() => null),
       requestApiJson<PrayerTimesPayload>(`/api/v1/celestial/prayer-times?${q}`).catch(() => null),
-      requestApiJson<HilalPayload>(`/api/v1/celestial/hilal?${q}`).catch(() => null),
       requestApiJson<ObservatorySummaryPayload>("/api/v1/observatory/summary").catch(() => null),
     ]);
-    if (pRes?.data) setPrayers(pRes.data);
-    if (hRes?.data) setHilal(hRes.data);
-    if (oRes?.data) setObsSummary(oRes.data);
+    const elong = Number.isFinite(nowRes?.lunar?.elongationDeg)
+      ? Number(nowRes!.lunar!.elongationDeg).toFixed(2)
+      : "6.80";
+    const hRes = await requestApiJson<HilalPayload>(
+      `/api/v1/celestial/hilal?altitude=3.50&elongation=${encodeURIComponent(elong)}&width=0.35`,
+    ).catch(() => null);
+    if (pRes) setPrayers(pRes);
+    if (hRes) setHilal(hRes);
+    if (oRes) setObsSummary(oRes);
   }
 
   useEffect(() => {
@@ -71,13 +82,23 @@ export function ObservatoryAppView() {
   }, [lat, lon]);
 
   const models = [
-    { id: "celestial.hilal.sighting", label: "Hilal Sightings" },
-    { id: "celestial.observer.profile", label: "Observer Sites" },
     { id: "observatory.feed", label: "Observatory Feeds" },
-    { id: "observatory.snapshot", label: "Feed Snapshots" },
-    { id: "mtime.calendar", label: "M-Time Calendars" },
-    { id: "mtime.anchor", label: "Temporal Anchors" },
+    { id: "celestial.snapshot", label: "Celestial Snapshots" },
+    { id: "sg.operation", label: "Scripture Operations" },
   ] as const;
+
+  const prayerEntries = prayers
+    ? (
+        [
+          ["Fajr", prayers.fajr],
+          ["Sunrise", prayers.sunrise],
+          ["Dhuhr", prayers.dhuhr],
+          ["Asr", prayers.asr],
+          ["Maghrib", prayers.maghrib],
+          ["Isha", prayers.isha],
+        ] as Array<[string, string | undefined]>
+      ).filter((entry): entry is [string, string] => Boolean(entry[1]))
+    : [];
 
   return (
     <ConsoleShellAdapter
@@ -102,11 +123,15 @@ export function ObservatoryAppView() {
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline">CELESTIAL & M-TIME EPHEMERIS</Badge>
               <Badge variant="default">
-                HILAL: {hilal?.verdict ?? (hilal?.mabimsPassed ? "MABIMS PASS" : "BELOW THRESHOLD")}
+                HILAL: {hilal?.overall_verdict ?? (hilal?.mabims_criterion?.passed ? "MABIMS PASS" : "BELOW THRESHOLD")}
               </Badge>
-              <Badge variant="secondary">FEEDS: {obsSummary?.healthyFeeds ?? 0}</Badge>
+              <Badge variant="secondary">
+                FEEDS: {obsSummary?.feeds ?? 0} · OPS: {obsSummary?.operations ?? 0}
+              </Badge>
             </div>
-            <CardTitle className="text-lg uppercase">{dictionary.apps.observatoryTitle}</CardTitle>
+            <h1 className="font-semibold leading-none tracking-tight text-lg uppercase">
+              {dictionary.apps.observatoryTitle}
+            </h1>
             <CardDescription>{dictionary.apps.observatorySubtitle}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -132,14 +157,14 @@ export function ObservatoryAppView() {
               >
                 Recompute Ephemeris
               </Button>
-              {prayers?.qiblaAzimuthDeg !== undefined ? (
-                <Badge variant="outline">QIBLA AZIMUTH: {prayers.qiblaAzimuthDeg}°</Badge>
+              {prayers?.qibla_bearing !== undefined ? (
+                <Badge variant="outline">QIBLA AZIMUTH: {prayers.qibla_bearing}°</Badge>
               ) : null}
             </div>
 
-            {prayers?.timings ? (
+            {prayerEntries.length > 0 ? (
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-6 font-mono text-xs">
-                {Object.entries(prayers.timings).map(([name, time]) => (
+                {prayerEntries.map(([name, time]) => (
                   <div
                     key={name}
                     className="border border-[var(--border)] bg-[var(--background)] p-2.5"
