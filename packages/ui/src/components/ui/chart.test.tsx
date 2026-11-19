@@ -40,7 +40,7 @@ afterEach(() => {
 });
 
 describe("Telemetry charts and SkinMatrixCompare", () => {
-  it("renders Sparkline, LineChart, AreaChart, BarChart, and RadialGauge with semantic tokens", () => {
+  it("renders chart primitives with semantic tokens", () => {
     const series = [
       { label: "T1", value: 12 },
       { label: "T2", value: 28 },
@@ -101,10 +101,11 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(jsonOut.skin).toBe("riot");
     expect(jsonOut.variables["--primary"]).toBeDefined();
   });
-  it("exposes chart categories and values in an accessible table instead of duplicate SVG announcements", () => {
+
+  it("exposes chart values in accessible tables without duplicate SVG announcements", () => {
     const series = [
-      { id: "Jan", label: "January", value: 12 },
-      { id: "Feb", label: "February", value: 28 },
+      { label: "January", value: 12 },
+      { label: "February", value: 28 },
     ] as const;
 
     renderNode(
@@ -155,5 +156,4 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(chart?.hasAttribute("aria-hidden")).toBe(false);
     expect(container.querySelector("table.sr-only")).toBeNull();
   });
-
 });
