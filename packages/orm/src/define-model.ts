@@ -16,6 +16,7 @@ import {
   type ZodObjectLike,
 } from "./schema-utils.js";
 import { modelRegistry, type RegisteredModelDescriptor } from "./registry.js";
+import type { ModelFeatureOptions, ModelWriteAction } from "./model-meta.js";
 
 export type { ZodObjectLike, Codec, FieldSpec, ModelIndex };
 
@@ -39,9 +40,12 @@ export interface FindOptions {
   offset?: number;
   orderBy?: string | Array<{ field: string; direction?: "ASC" | "DESC" }>;
   tenantId?: string;
+  /** Declarative full-text needle matched in SQL across the model's `searchFields`. */
+  q?: string;
 }
 
-export interface DefineModelOptions<TBusiness extends ZodObjectLike = ZodObjectLike> {
+export interface DefineModelOptions<TBusiness extends ZodObjectLike = ZodObjectLike>
+  extends ModelFeatureOptions {
   name: string;
   table: string;
   schema: TBusiness;
@@ -307,22 +311,32 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     return ` ORDER BY ${specs.map((s) => `${s.field} ${s.direction}`).join(", ")}`;
   }
 
-  private buildWhere(
-    filters: Record<string, unknown> = {},
-    opts: { includeDeleted?: boolean; tenantId?: string } = {},
-  ): { where: string; params: unknown[] } {
-    const clauses: string[] = [];
-    const params: unknown[] = [];
-
-    if (this.softDelete && !opts.includeDeleted) {
-      clauses.push("status != 'deleted'");
-    }
-    if (opts.tenantId !== undefined) {
-      clauses.push("tenant_id = ?");
-      params.push(normalizeTenantId(opts.tenantId));
-    }
+  private compileFilters(
+    filters: Record<string, unknown>,
+    clauses: string[],
+    params: unknown[],
+  ): void {
     for (const [key, value] of Object.entries(filters)) {
       if (value === undefined) continue;
+      if (key === "$or" || key === "$and") {
+        if (!Array.isArray(value)) {
+          throw new Error(`Operator '${key}' on model '${this.name}' requires an array of filters.`);
+        }
+        const parts = value.map((sub) => {
+          if (!sub || typeof sub !== "object" || Array.isArray(sub)) {
+            throw new Error(`Operator '${key}' on model '${this.name}' requires filter objects.`);
+          }
+          const nested: string[] = [];
+          this.compileFilters(sub as Record<string, unknown>, nested, params);
+          return nested.length ? nested.join(" AND ") : "1 = 1";
+        });
+        if (parts.length === 0) {
+          clauses.push(key === "$or" ? "1 = 0" : "1 = 1");
+        } else {
+          clauses.push(`(${parts.join(key === "$or" ? " OR " : " AND ")})`);
+        }
+        continue;
+      }
       this.validateColumn(key);
       if (isOperatorFilterObject(value)) {
         for (const [op, opVal] of Object.entries(value) as Array<
@@ -369,9 +383,115 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         params.push(encoded);
       }
     }
+  }
+
+  private searchColumns(): string[] {
+    const desc = modelRegistry.get(this.name);
+    if (desc?.searchFields?.length) {
+      desc.searchFields.forEach((column) => this.validateColumn(column));
+      return desc.searchFields;
+    }
+    const { fields } = this.descriptor();
+    return [...fields.entries()]
+      .filter(([name, spec]) => spec.codec === "text" && name !== "_attrs")
+      .map(([name]) => name);
+  }
+
+  private buildWhere(
+    filters: Record<string, unknown> = {},
+    opts: { includeDeleted?: boolean; tenantId?: string; q?: string } = {},
+  ): { where: string; params: unknown[] } {
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    if (this.softDelete && !opts.includeDeleted) {
+      clauses.push("status != 'deleted'");
+    }
+    if (opts.tenantId !== undefined) {
+      clauses.push("tenant_id = ?");
+      params.push(normalizeTenantId(opts.tenantId));
+    }
+    this.compileFilters(filters, clauses, params);
+
+    const needle = opts.q?.trim();
+    if (needle) {
+      const columns = this.searchColumns();
+      if (columns.length === 0) {
+        clauses.push("1 = 0");
+      } else {
+        const escaped = needle
+          .toLowerCase()
+          .replaceAll("\\", "\\\\")
+          .replaceAll("%", "\\%")
+          .replaceAll("_", "\\_");
+        clauses.push(
+          `(${columns.map((column) => `LOWER(${column}) LIKE ? ESCAPE '\\'`).join(" OR ")})`,
+        );
+        for (let i = 0; i < columns.length; i += 1) params.push(`%${escaped}%`);
+      }
+    }
 
     return { where: clauses.length ? ` WHERE ${clauses.join(" AND ")}` : "", params };
   }
+
+  async readGroup(opts: {
+    filters?: Record<string, unknown>;
+    groupBy: string[];
+    aggregates?: Record<string, { fn: "count" | "sum" | "avg" | "min" | "max"; field?: string }>;
+    tenantId?: string;
+    includeDeleted?: boolean;
+    q?: string;
+    orderBy?: string;
+    limit?: number;
+  }): Promise<Array<Record<string, unknown>>> {
+    if (opts.groupBy.length === 0) {
+      throw new Error(`readGroup on model '${this.name}' requires at least one groupBy column.`);
+    }
+    opts.groupBy.forEach((column) => this.validateColumn(column));
+    const aggregates = opts.aggregates ?? { count: { fn: "count" } };
+    const selectParts: string[] = [...opts.groupBy];
+    for (const [alias, spec] of Object.entries(aggregates)) {
+      assertIdentifier(alias, "aggregate alias");
+      if (spec.fn === "count" && !spec.field) {
+        selectParts.push(`COUNT(*) AS ${alias}`);
+        continue;
+      }
+      if (!spec.field) {
+        throw new Error(`Aggregate '${alias}' (${spec.fn}) requires a field.`);
+      }
+      this.validateColumn(spec.field);
+      selectParts.push(`${spec.fn.toUpperCase()}(${spec.field}) AS ${alias}`);
+    }
+    const { where, params } = this.buildWhere(opts.filters ?? {}, opts);
+    const orderClause = opts.orderBy
+      ? this.buildOrderBy(opts.orderBy)
+      : ` ORDER BY ${opts.groupBy.join(", ")}`;
+    const execParams = [...params];
+    let limitClause = "";
+    if (opts.limit !== undefined) {
+      limitClause = " LIMIT ?";
+      execParams.push(Math.max(0, Math.trunc(opts.limit)));
+    }
+    const rows = await getDb().all<Record<string, unknown>>(
+      `SELECT ${selectParts.join(", ")} FROM ${this.table}${where} GROUP BY ${opts.groupBy.join(", ")}${orderClause}${limitClause}`,
+      execParams,
+    );
+    const { fields } = this.descriptor();
+    return rows.map((row) => {
+      const out: Record<string, unknown> = {};
+      for (const column of opts.groupBy) {
+        const raw = row[column] ?? row[column.toLowerCase()];
+        const spec = fields.get(column);
+        out[column] = spec ? decodeValue(raw, spec.codec) : raw;
+      }
+      for (const alias of Object.keys(aggregates)) {
+        const raw = row[alias] ?? row[alias.toLowerCase()];
+        out[alias] = raw === null || raw === undefined ? null : Number(raw);
+      }
+      return out;
+    });
+  }
+
 
   async find(
     filters: Record<string, unknown> = {},
@@ -420,7 +540,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   async count(
     filters: Record<string, unknown> = {},
-    opts: { includeDeleted?: boolean; tenantId?: string } = {},
+    opts: { includeDeleted?: boolean; tenantId?: string; q?: string } = {},
   ): Promise<number> {
     const { where, params } = this.buildWhere(filters, opts);
     const row = await getDb().get<{ total: number }>(
@@ -457,11 +577,117 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     return created;
   }
 
-  async create(
+  private applyDefaults(
     data: Record<string, unknown>,
+    actor: ActorContext,
+  ): Record<string, unknown> {
+    const defaults = modelRegistry.get(this.name)?.defaults;
+    if (!defaults) return data;
+    const merged = { ...data };
+    for (const [key, value] of Object.entries(defaults)) {
+      if (merged[key] !== undefined) continue;
+      merged[key] = typeof value === "function" ? (value as (a: ActorContext) => unknown)(actor) : value;
+    }
+    return merged;
+  }
+
+  private async runConstrains(
+    action: ModelWriteAction,
+    before: Record<string, unknown> | null,
+    after: Record<string, unknown>,
+    actor: ActorContext,
+  ): Promise<void> {
+    const constrains = modelRegistry.get(this.name)?.constrains;
+    if (!constrains) return;
+    for (const constraint of constrains) {
+      await constraint({ model: this.name, action, before, after, actor });
+    }
+  }
+
+  private async assertRelations(
+    tx: LibSqlExecutor,
+    record: Record<string, unknown>,
+  ): Promise<void> {
+    const relations = modelRegistry.get(this.name)?.relations;
+    if (!relations) return;
+    for (const [field, relation] of Object.entries(relations)) {
+      const value = record[field];
+      if (value === undefined || value === null) continue;
+      const target = modelRegistry.get(relation.model);
+      if (!target) {
+        throw new Error(`Relation '${field}' on '${this.name}' targets unknown model '${relation.model}'.`);
+      }
+      const targetField = relation.targetField ?? "id";
+      assertIdentifier(targetField, "relation target column");
+      if (!METADATA_NAMES.has(targetField) && !target.fields.has(targetField)) {
+        throw new Error(`Relation '${field}' targets unknown column '${relation.model}.${targetField}'.`);
+      }
+      const deletedClause = target.softDelete ? " AND status != 'deleted'" : "";
+      const row = await tx.get<{ ok: number }>(
+        `SELECT 1 AS ok FROM ${target.table} WHERE ${targetField} = ? AND tenant_id = ?${deletedClause}`,
+        [encodeFilterValue(value), normalizeTenantId(String(record.tenant_id ?? DEFAULT_TENANT_ID))],
+      );
+      if (!row) {
+        throw new Error(
+          `Relation '${field}' on '${this.name}' references missing ${relation.model}.${targetField}='${String(value)}'.`,
+        );
+      }
+    }
+  }
+
+  private async assertNotReferenced(
+    tx: LibSqlExecutor,
+    current: Record<string, unknown>,
+  ): Promise<void> {
+    for (const other of modelRegistry.list()) {
+      for (const [field, relation] of Object.entries(other.relations ?? {})) {
+        if (relation.model !== this.name || relation.onDelete === "ignore") continue;
+        const targetField = relation.targetField ?? "id";
+        const value = current[targetField];
+        if (value === undefined || value === null) continue;
+        const deletedClause = other.softDelete ? " AND status != 'deleted'" : "";
+        const row = await tx.get<{ ok: number }>(
+          `SELECT 1 AS ok FROM ${other.table} WHERE ${field} = ? AND tenant_id = ?${deletedClause} LIMIT 1`,
+          [encodeFilterValue(value), String(current.tenant_id)],
+        );
+        if (row) {
+          throw new ConflictError(
+            `Cannot delete '${this.name}' ${String(current.id)}: referenced by '${other.name}.${field}' (restrict).`,
+          );
+        }
+      }
+    }
+  }
+
+  private async applyRetention(tenantId: string): Promise<void> {
+    const retention = modelRegistry.get(this.name)?.retention;
+    if (!retention) return;
+    const db = getDb();
+    if (retention.maxRows !== undefined && retention.maxRows > 0) {
+      const orderField = retention.orderField ?? "create_date";
+      this.validateColumn(orderField);
+      await db.run(
+        `DELETE FROM ${this.table} WHERE tenant_id = ? AND id NOT IN (SELECT id FROM ${this.table} WHERE tenant_id = ? ORDER BY ${orderField} DESC, id DESC LIMIT ?)`,
+        [tenantId, tenantId, Math.trunc(retention.maxRows)],
+      );
+    }
+    if (retention.ttlDays !== undefined && retention.ttlDays > 0) {
+      const dateField = retention.dateField ?? "create_date";
+      this.validateColumn(dateField);
+      const cutoff = new Date(Date.now() - retention.ttlDays * 86_400_000).toISOString();
+      await db.run(`DELETE FROM ${this.table} WHERE tenant_id = ? AND ${dateField} < ?`, [
+        tenantId,
+        cutoff,
+      ]);
+    }
+  }
+
+  async create(
+    rawData: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
   ): Promise<ModelRecord<TBusiness>> {
     await ensureAuditTable();
+    const data = this.applyDefaults(rawData, actor);
     const { fullSchema, extensible, customFields } = this.descriptor();
     const now = new Date();
     const resolvedTenantId =
@@ -496,12 +722,15 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     const values = this.encodeRow(parsed);
 
     await getDb().transaction(async (tx) => {
+      await this.assertRelations(tx, parsed);
+      await this.runConstrains("CREATE", null, parsed, actor);
       await tx.run(
         `INSERT INTO ${this.table} (${cols.join(", ")}) VALUES (${placeholders})`,
         values,
       );
       await this.writeAudit(tx, parsed, "CREATE", null, actor);
     });
+    await this.applyRetention(String(parsed.tenant_id));
 
     const decoded = this.decodeRow<ModelRecord<TBusiness>>(parsed);
     await modelRegistry.emitWrite({
@@ -571,6 +800,8 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         updated._attrs = validateAttrsPayload(mergedAttrs, customFields);
       }
       const parsed = fullSchema.parse(updated) as Record<string, unknown>;
+      await this.assertRelations(tx, parsed);
+      await this.runConstrains("UPDATE", current, parsed, actor);
 
       const cols = Object.keys(parsed).filter((column) => column !== "id");
       cols.forEach((column) => this.validateColumn(column));
@@ -685,6 +916,8 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           : { deleted_uid: null, deleted_date: null }),
       };
       const parsed = fullSchema.parse(updated) as Record<string, unknown>;
+      if (action === "DELETE") await this.assertNotReferenced(tx, current);
+      await this.runConstrains(action, current, parsed, actor);
 
       const cols = ["status", "write_uid", "write_date", "version", "deleted_uid", "deleted_date"];
       const setClause = cols.map((column) => `${column} = ?`).join(", ");
@@ -793,6 +1026,12 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     restEnabled = false,
     publicFields,
     indexes = [],
+    searchFields,
+    defaults,
+    constrains,
+    relations,
+    retention,
+    actions,
   } = options;
 
   assertIdentifier(table, "table");
@@ -811,6 +1050,12 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     restEnabled,
     publicFields,
     indexes,
+    searchFields,
+    defaults,
+    constrains,
+    relations,
+    retention,
+    actions,
   });
 
   const repo = new BaseRepository<TBusiness>(

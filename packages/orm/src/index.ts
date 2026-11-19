@@ -63,3 +63,16 @@ export {
   decryptBackupFile,
 } from "./backup.js";
 export type { BackupCommandOptions, ExternalCommandRunner } from "./backup.js";
+
+export type {
+  ConstrainContext,
+  ModelActionContext,
+  ModelActionDef,
+  ModelConstraint,
+  ModelDefaults,
+  ModelFeatureOptions,
+  ModelRelation,
+  ModelRetention,
+  ModelRole,
+  ModelWriteAction,
+} from "./model-meta.js";
