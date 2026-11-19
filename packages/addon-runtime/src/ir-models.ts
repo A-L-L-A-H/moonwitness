@@ -69,9 +69,12 @@ export const irModelFieldModel = defineModel({
 });
 
 export const irRuleSchema = z.object({
+  rule_key: z.string().min(1).max(160).nullable().default(null),
   model_name: z.string().min(1).max(120),
-  role: z.enum(["admin", "editor", "viewer", "public"]),
+  role: z.enum(["admin", "editor", "viewer", "public"]).default("public"),
   addon: z.string().min(1).max(80),
+  scope: z.enum(["global", "group"]).default("group"),
+  groups_json: z.string().default("[]"),
   can_read: z.boolean().default(false),
   can_create: z.boolean().default(false),
   can_update: z.boolean().default(false),
@@ -84,7 +87,11 @@ export const irRuleModel = defineModel({
   table: "ir_rules",
   schema: irRuleSchema,
   softDelete: false,
-  indexes: [{ fields: ["model_name", "role"], unique: true }, { fields: ["addon"] }],
+  indexes: [
+    { fields: ["rule_key"], unique: true },
+    { fields: ["model_name", "role"] },
+    { fields: ["addon"] },
+  ],
 });
 
 export const irViewSchema = z.object({

@@ -1,10 +1,16 @@
 import type { z } from "zod";
 import { getDb } from "./driver.js";
 import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
-import { ConflictError } from "./errors.js";
+import { ConflictError, PolicyError } from "./errors.js";
 import type { BaseMetadata, RecordStatus } from "./base-metadata.js";
 import type { ActorContext } from "./actor-context.js";
-import { DEFAULT_TENANT_ID, normalizeTenantId, SYSTEM_ACTOR } from "./actor-context.js";
+import {
+  DEFAULT_TENANT_ID,
+  isSystemActor,
+  normalizeTenantId,
+  requireActorTenantId,
+  SYSTEM_ACTOR,
+} from "./actor-context.js";
 import {
   assertIdentifier,
   fieldSpec,
@@ -32,6 +38,12 @@ export interface QueryFilterOperators {
   $in?: unknown[];
   $like?: string;
   $ilike?: string;
+  $not?: unknown;
+}
+
+export interface WriteGuardOptions {
+  ruleDomain?: Record<string, unknown> | null;
+  createRuleDomain?: Record<string, unknown> | null;
 }
 
 export interface FindOptions {
@@ -42,6 +54,8 @@ export interface FindOptions {
   tenantId?: string;
   /** Declarative full-text needle matched in SQL across the model's `searchFields`. */
   q?: string;
+  /** Optional allowlist of columns eligible for `q` search (e.g. readable fields). */
+  allowedSearchFields?: string[];
   /** Batch-hydrate `relations` without N+1 queries (attaches `$<relation>` onto each record). */
   with?: string[];
 }
@@ -195,19 +209,164 @@ const FILTER_OPERATOR_KEYS = new Set([
   "$in",
   "$like",
   "$ilike",
+  "$not",
 ]);
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" && value !== null && !Array.isArray(value) && !(value instanceof Date)
+  );
+}
+
 function isOperatorFilterObject(value: unknown): value is QueryFilterOperators {
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    Array.isArray(value) ||
-    value instanceof Date
-  ) {
+  if (!isPlainObject(value)) {
     return false;
   }
   const keys = Object.keys(value);
   return keys.length > 0 && keys.every((key) => FILTER_OPERATOR_KEYS.has(key));
+}
+
+function likeToRegExp(pattern: string, caseInsensitive: boolean): RegExp {
+  let regex = "^";
+  for (const ch of pattern) {
+    if (ch === "%") {
+      regex += ".*";
+    } else if (ch === "_") {
+      regex += ".";
+    } else {
+      regex += ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+  }
+  regex += "$";
+  return new RegExp(regex, caseInsensitive ? "is" : "s");
+}
+
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if ((a === null || a === undefined) && (b === null || b === undefined)) {
+    return true;
+  }
+  if (a === null || a === undefined || b === null || b === undefined) {
+    return false;
+  }
+  if (a instanceof Date || b instanceof Date) {
+    const timeA = a instanceof Date ? a.getTime() : new Date(String(a)).getTime();
+    const timeB = b instanceof Date ? b.getTime() : new Date(String(b)).getTime();
+    if (Number.isNaN(timeA) || Number.isNaN(timeB)) return false;
+    return timeA === timeB;
+  }
+  if (typeof a === "object" || typeof b === "object") {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+  return a === b;
+}
+
+function compareOrdered(actual: unknown, expected: unknown): number | null {
+  if (actual === null || actual === undefined || expected === null || expected === undefined) {
+    return null;
+  }
+  if (actual instanceof Date || expected instanceof Date) {
+    const timeA = actual instanceof Date ? actual.getTime() : new Date(String(actual)).getTime();
+    const timeB =
+      expected instanceof Date ? expected.getTime() : new Date(String(expected)).getTime();
+    if (Number.isNaN(timeA) || Number.isNaN(timeB)) return null;
+    return timeA - timeB;
+  }
+  if (typeof actual === "number" && typeof expected === "number") {
+    return actual - expected;
+  }
+  const strA = String(actual);
+  const strB = String(expected);
+  return strA < strB ? -1 : strA > strB ? 1 : 0;
+}
+
+function matchesFieldCondition(actual: unknown, condition: unknown): boolean {
+  if (isOperatorFilterObject(condition)) {
+    for (const [op, opVal] of Object.entries(condition) as Array<
+      [keyof QueryFilterOperators, unknown]
+    >) {
+      if (opVal === undefined) continue;
+      if (op === "$ne") {
+        if (opVal === null) {
+          if (actual === null || actual === undefined) return false;
+        } else if (valuesEqual(actual, opVal)) {
+          return false;
+        }
+      } else if (op === "$gt") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp <= 0) return false;
+      } else if (op === "$gte") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp < 0) return false;
+      } else if (op === "$lt") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp >= 0) return false;
+      } else if (op === "$lte") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp > 0) return false;
+      } else if (op === "$in") {
+        if (!Array.isArray(opVal) || !opVal.some((entry) => valuesEqual(actual, entry))) {
+          return false;
+        }
+      } else if (op === "$like") {
+        if (
+          actual === null ||
+          actual === undefined ||
+          !likeToRegExp(String(opVal), false).test(String(actual))
+        ) {
+          return false;
+        }
+      } else if (op === "$ilike") {
+        if (
+          actual === null ||
+          actual === undefined ||
+          !likeToRegExp(String(opVal), true).test(String(actual))
+        ) {
+          return false;
+        }
+      } else if (op === "$not") {
+        if (matchesFieldCondition(actual, opVal)) return false;
+      }
+    }
+    return true;
+  }
+  if (condition === null) {
+    return actual === null || actual === undefined;
+  }
+  return valuesEqual(actual, condition);
+}
+
+/** Evaluates an ORM filter AST in memory against a decoded record. */
+export function matchesFilter(
+  record: Record<string, unknown>,
+  filter: Record<string, unknown> | null | undefined,
+): boolean {
+  if (!filter || Object.keys(filter).length === 0) return true;
+  for (const [key, value] of Object.entries(filter)) {
+    if (value === undefined) continue;
+    if (key === "$and") {
+      if (!Array.isArray(value)) return false;
+      if (!value.every((sub) => isPlainObject(sub) && matchesFilter(record, sub))) {
+        return false;
+      }
+      continue;
+    }
+    if (key === "$or") {
+      if (!Array.isArray(value) || value.length === 0) return false;
+      if (!value.some((sub) => isPlainObject(sub) && matchesFilter(record, sub))) {
+        return false;
+      }
+      continue;
+    }
+    if (key === "$not") {
+      if (!isPlainObject(value)) return false;
+      if (matchesFilter(record, value)) return false;
+      continue;
+    }
+    if (!matchesFieldCondition(record[key], value)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
@@ -342,6 +501,15 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         }
         continue;
       }
+      if (key === "$not") {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+          throw new Error(`Operator '$not' on model '${this.name}' requires a filter object.`);
+        }
+        const nested: string[] = [];
+        this.compileFilters(value as Record<string, unknown>, nested, params);
+        clauses.push(nested.length ? `NOT (${nested.join(" AND ")})` : "1 = 0");
+        continue;
+      }
       this.validateColumn(key);
       if (isOperatorFilterObject(value)) {
         for (const [op, opVal] of Object.entries(value) as Array<
@@ -376,6 +544,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           } else if (op === "$ilike") {
             clauses.push(`LOWER(${key}) LIKE LOWER(?)`);
             params.push(String(opVal));
+          } else if (op === "$not") {
+            const nested: string[] = [];
+            this.compileFilters({ [key]: opVal }, nested, params);
+            clauses.push(nested.length ? `NOT (${nested.join(" AND ")})` : "1 = 0");
           }
         }
         continue;
@@ -404,7 +576,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   private buildWhere(
     filters: Record<string, unknown> = {},
-    opts: { includeDeleted?: boolean; tenantId?: string; q?: string } = {},
+    opts: {
+      includeDeleted?: boolean;
+      tenantId?: string;
+      q?: string;
+      allowedSearchFields?: string[];
+    } = {},
   ): { where: string; params: unknown[] } {
     const clauses: string[] = [];
     const params: unknown[] = [];
@@ -420,7 +597,11 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
     const needle = opts.q?.trim();
     if (needle) {
-      const columns = this.searchColumns();
+      let columns = this.searchColumns();
+      if (opts.allowedSearchFields !== undefined) {
+        const allowed = new Set(opts.allowedSearchFields);
+        columns = columns.filter((col) => allowed.has(col));
+      }
       if (columns.length === 0) {
         clauses.push("1 = 0");
       } else {
@@ -571,6 +752,25 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         targetDesc.softDelete,
         targetDesc.fields,
       );
+      const rowTenants =
+        tenantId === undefined
+          ? [
+              ...new Set(
+                rows
+                  .map((r) => r.tenant_id)
+                  .filter((t): t is string => typeof t === "string" && t.length > 0),
+              ),
+            ]
+          : [];
+      const scopedFindOpts: FindOptions =
+        tenantId !== undefined
+          ? { tenantId }
+          : rowTenants.length === 1
+            ? { tenantId: rowTenants[0] }
+            : {};
+      const multiTenantFilter =
+        tenantId === undefined && rowTenants.length > 1 ? { tenant_id: { $in: rowTenants } } : {};
+      const compositeKey = tenantId === undefined && rowTenants.length > 1;
 
       if (relation.type === "one2many") {
         const inverseField = relation.inverseField;
@@ -588,18 +788,24 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           continue;
         }
         const relatedRows = await targetRepo.find(
-          { [inverseField]: { $in: parentKeys } },
-          tenantId !== undefined ? { tenantId } : {},
+          { [inverseField]: { $in: parentKeys }, ...multiTenantFilter },
+          scopedFindOpts,
         );
         const grouped = new Map<string, Array<Record<string, unknown>>>();
         for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
-          const key = String(relRow[inverseField] ?? "");
+          const baseKey = String(relRow[inverseField] ?? "");
+          const key = compositeKey
+            ? `${String(relRow.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
           const list = grouped.get(key) ?? [];
           list.push(relRow);
           grouped.set(key, list);
         }
         for (const row of rows) {
-          const key = String(row[parentKeyField] ?? "");
+          const baseKey = String(row[parentKeyField] ?? "");
+          const key = compositeKey
+            ? `${String(row.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
           row[`$${relName}`] = grouped.get(key) ?? [];
         }
       } else {
@@ -616,17 +822,27 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           continue;
         }
         const relatedRows = await targetRepo.find(
-          { [targetField]: { $in: fkValues } },
-          tenantId !== undefined ? { tenantId } : {},
+          { [targetField]: { $in: fkValues }, ...multiTenantFilter },
+          scopedFindOpts,
         );
         const map = new Map<string, Record<string, unknown>>();
         for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
-          map.set(String(relRow[targetField] ?? ""), relRow);
+          const baseKey = String(relRow[targetField] ?? "");
+          const key = compositeKey
+            ? `${String(relRow.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
+          map.set(key, relRow);
         }
         for (const row of rows) {
           const fk = row[relName];
-          row[`$${relName}`] =
-            fk !== null && fk !== undefined ? (map.get(String(fk)) ?? null) : null;
+          if (fk === null || fk === undefined) {
+            row[`$${relName}`] = null;
+            continue;
+          }
+          const key = compositeKey
+            ? `${String(row.tenant_id ?? DEFAULT_TENANT_ID)}\0${String(fk)}`
+            : String(fk);
+          row[`$${relName}`] = map.get(key) ?? null;
         }
       }
     }
@@ -659,29 +875,35 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     return Number(row?.total ?? 0);
   }
 
+  forActor(actor: ActorContext): ScopedRepository<TBusiness> {
+    return new ScopedRepository<TBusiness>(this, actor);
+  }
+
   async upsert(
     whereFilters: Record<string, unknown>,
     data: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness>> {
     const existing = await this.find(whereFilters, {
       limit: 1,
       ...(actor.tenantId !== undefined ? { tenantId: actor.tenantId } : {}),
     });
     if (existing[0]) {
-      const updated = await this.update(existing[0].id, data, actor);
+      const updated = await this.update(existing[0].id, data, actor, guard);
       if (updated) return updated;
     }
-    return this.create({ ...whereFilters, ...data }, actor);
+    return this.create({ ...whereFilters, ...data }, actor, guard);
   }
 
   async createMany(
     records: Record<string, unknown>[],
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness>[]> {
     const created: ModelRecord<TBusiness>[] = [];
     for (const item of records) {
-      created.push(await this.create(item, actor));
+      created.push(await this.create(item, actor, guard));
     }
     return created;
   }
@@ -804,8 +1026,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   async create(
     rawData: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness>> {
     await ensureAuditTable();
+    if (
+      actor.tenantId !== undefined &&
+      rawData.tenant_id !== undefined &&
+      normalizeTenantId(String(rawData.tenant_id)) !== normalizeTenantId(actor.tenantId)
+    ) {
+      throw new PolicyError("Cross-tenant create is forbidden", "TENANT_MISMATCH", 403);
+    }
     const data = this.applyDefaults(rawData, actor);
     const hooks = modelRegistry.get(this.name)?.hooks;
     if (hooks?.beforeSave) {
@@ -851,6 +1081,13 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     const values = this.encodeRow(parsed);
 
     await getDb().transaction(async (tx) => {
+      if (guard?.createRuleDomain && !matchesFilter(parsed, guard.createRuleDomain)) {
+        throw new PolicyError(
+          `Create on '${this.name}' violates record rule`,
+          "RULE_FORBIDDEN",
+          403,
+        );
+      }
       await this.assertRelations(tx, parsed);
       await this.runConstrains("CREATE", null, parsed, actor);
       await tx.run(
@@ -888,6 +1125,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     id: string,
     rawData: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
     await ensureAuditTable();
     const data = { ...rawData };
@@ -908,6 +1146,15 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       }
       if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
         return null;
+      }
+      if (guard?.ruleDomain && !matchesFilter(current, guard.ruleDomain)) {
+        return null;
+      }
+      if (
+        rawData.tenant_id !== undefined &&
+        normalizeTenantId(String(rawData.tenant_id)) !== String(current.tenant_id)
+      ) {
+        throw new PolicyError("Changing tenant_id is forbidden", "TENANT_MISMATCH", 403);
       }
       if (data.version !== undefined && Number(data.version) !== Number(current.version)) {
         throw new ConflictError(
@@ -950,6 +1197,13 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         updated._attrs = validateAttrsPayload(mergedAttrs, customFields);
       }
       const parsed = fullSchema.parse(updated) as Record<string, unknown>;
+      if (guard?.ruleDomain && !matchesFilter(parsed, guard.ruleDomain)) {
+        throw new PolicyError(
+          `Update on '${this.name}' violates record rule`,
+          "RULE_FORBIDDEN",
+          403,
+        );
+      }
       await this.assertRelations(tx, parsed);
       await this.runConstrains("UPDATE", current, parsed, actor);
 
@@ -1001,23 +1255,26 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   async archive(
     id: string,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
-    return this.setStatus(id, "archived", "ARCHIVE", actor);
+    return this.setStatus(id, "archived", "ARCHIVE", actor, { guard });
   }
 
   async restore(
     id: string,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
-    return this.setStatus(id, "active", "RESTORE", actor);
+    return this.setStatus(id, "active", "RESTORE", actor, { guard });
   }
 
   /** Soft delete — never issues a physical DELETE. */
   async delete(
     id: string,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
-    return this.setStatus(id, "deleted", "DELETE", actor, { setDeletedFields: true });
+    return this.setStatus(id, "deleted", "DELETE", actor, { setDeletedFields: true, guard });
   }
 
   async history(id: string, opts?: { limit?: number; offset?: number }): Promise<AuditEntry[]> {
@@ -1046,7 +1303,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     status: RecordStatus,
     action: AuditAction,
     actor: ActorContext,
-    opts: { setDeletedFields?: boolean } = {},
+    opts: { setDeletedFields?: boolean; guard?: WriteGuardOptions } = {},
   ): Promise<ModelRecord<TBusiness> | null> {
     await ensureAuditTable();
     const { fullSchema } = this.descriptor();
@@ -1061,6 +1318,9 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
       const current = this.decodeRow<Record<string, unknown>>(currentRow);
       if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
+        return null;
+      }
+      if (opts.guard?.ruleDomain && !matchesFilter(current, opts.guard.ruleDomain)) {
         return null;
       }
       beforeSnapshot = current;
@@ -1140,6 +1400,227 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   }
 }
 
+function isActorContextArg(value: unknown): value is ActorContext {
+  return typeof value === "object" && value !== null && "actorId" in value && "source" in value;
+}
+
+/** Tenant- and actor-bound wrapper around `BaseRepository`. */
+export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
+  readonly name: string;
+  readonly table: string;
+  readonly softDelete: boolean;
+  readonly resolvedTenantId: string | undefined;
+  private readonly effectiveActor: ActorContext;
+
+  constructor(
+    private readonly repo: BaseRepository<TBusiness>,
+    public readonly actor: ActorContext,
+  ) {
+    this.name = repo.name;
+    this.table = repo.table;
+    this.softDelete = repo.softDelete;
+
+    if (isSystemActor(actor)) {
+      this.resolvedTenantId =
+        actor.tenantId !== undefined ? requireActorTenantId(actor) : undefined;
+    } else {
+      this.resolvedTenantId = requireActorTenantId(actor);
+    }
+    this.effectiveActor =
+      this.resolvedTenantId !== undefined ? { ...actor, tenantId: this.resolvedTenantId } : actor;
+  }
+
+  get fullSchema(): ZodObjectLike {
+    return this.repo.fullSchema;
+  }
+
+  forActor(actor: ActorContext): ScopedRepository<TBusiness> {
+    if (this.resolvedTenantId !== undefined) {
+      const nextTenant = requireActorTenantId(actor);
+      if (nextTenant !== this.resolvedTenantId) {
+        throw new PolicyError("Cross-tenant access is forbidden", "TENANT_MISMATCH", 403);
+      }
+    }
+    return this.repo.forActor(actor);
+  }
+
+  private resolveQueryTenantId(requestedTenantId?: string): string | undefined {
+    if (this.resolvedTenantId !== undefined) {
+      if (
+        requestedTenantId !== undefined &&
+        normalizeTenantId(requestedTenantId) !== this.resolvedTenantId
+      ) {
+        throw new PolicyError("Cross-tenant access is forbidden", "TENANT_MISMATCH", 403);
+      }
+      return this.resolvedTenantId;
+    }
+    return requestedTenantId !== undefined ? normalizeTenantId(requestedTenantId) : undefined;
+  }
+
+  private resolveWriteArgs(
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): { actor: ActorContext; guard?: WriteGuardOptions } {
+    if (isActorContextArg(guardOrActor)) {
+      if (
+        this.resolvedTenantId !== undefined &&
+        guardOrActor.tenantId !== undefined &&
+        normalizeTenantId(guardOrActor.tenantId) !== this.resolvedTenantId
+      ) {
+        throw new PolicyError("Cross-tenant access is forbidden", "TENANT_MISMATCH", 403);
+      }
+      return { actor: this.effectiveActor, guard: maybeGuard };
+    }
+    return { actor: this.effectiveActor, guard: guardOrActor };
+  }
+
+  async readGroup(opts: {
+    filters?: Record<string, unknown>;
+    groupBy: string[];
+    aggregates?: Record<string, { fn: "count" | "sum" | "avg" | "min" | "max"; field?: string }>;
+    tenantId?: string;
+    includeDeleted?: boolean;
+    q?: string;
+    orderBy?: string;
+    limit?: number;
+  }): Promise<Array<Record<string, unknown>>> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.readGroup({
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async find(
+    filters: Record<string, unknown> = {},
+    opts: FindOptions = {},
+  ): Promise<ModelRecord<TBusiness>[]> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.find(filters, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async findOne(
+    id: string,
+    opts: { includeDeleted?: boolean; tenantId?: string; with?: string[] } = {},
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.findOne(id, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async list(
+    filters: Record<string, unknown> = {},
+    opts: FindOptions = {},
+  ): Promise<ModelRecord<TBusiness>[]> {
+    return this.find(filters, opts);
+  }
+
+  async count(
+    filters: Record<string, unknown> = {},
+    opts: {
+      includeDeleted?: boolean;
+      tenantId?: string;
+      q?: string;
+      allowedSearchFields?: string[];
+    } = {},
+  ): Promise<number> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.count(filters, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async upsert(
+    whereFilters: Record<string, unknown>,
+    data: Record<string, unknown>,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.upsert(whereFilters, data, actor, guard);
+  }
+
+  async createMany(
+    records: Record<string, unknown>[],
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>[]> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.createMany(records, actor, guard);
+  }
+
+  async create(
+    rawData: Record<string, unknown>,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    if (
+      this.resolvedTenantId !== undefined &&
+      rawData.tenant_id !== undefined &&
+      normalizeTenantId(String(rawData.tenant_id)) !== this.resolvedTenantId
+    ) {
+      throw new PolicyError("Cross-tenant create is forbidden", "TENANT_MISMATCH", 403);
+    }
+    return this.repo.create(rawData, actor, guard);
+  }
+
+  async update(
+    id: string,
+    rawData: Record<string, unknown>,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.update(id, rawData, actor, guard);
+  }
+
+  async archive(
+    id: string,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.archive(id, actor, guard);
+  }
+
+  async restore(
+    id: string,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.restore(id, actor, guard);
+  }
+
+  async delete(
+    id: string,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.delete(id, actor, guard);
+  }
+
+  async history(
+    id: string,
+    opts?: { limit?: number; offset?: number; tenantId?: string },
+  ): Promise<AuditEntry[]> {
+    const tenantId = this.resolveQueryTenantId(opts?.tenantId);
+    if (tenantId !== undefined) {
+      const existing = await this.repo.findOne(id, { includeDeleted: true, tenantId });
+      if (!existing) return [];
+    }
+    return this.repo.history(id, opts);
+  }
+}
+
 function auditHookFor(model: string) {
   return (
     record: Record<string, unknown>,
@@ -1194,6 +1675,7 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     actions,
     computed,
     hooks,
+    fieldPolicies,
   } = options;
 
   assertIdentifier(table, "table");
@@ -1220,6 +1702,7 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     actions,
     computed,
     hooks,
+    fieldPolicies,
   });
 
   const repo = new BaseRepository<TBusiness>(

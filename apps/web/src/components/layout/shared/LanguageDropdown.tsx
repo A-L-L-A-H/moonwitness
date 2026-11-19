@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@moonwitness/ui";
 import { type Locale } from "@/configs/i18n";
 import { useTranslation } from "@/hocs/TranslationWrapper";
-import { getLocaleFromPath, getLocalizedUrl, stripLocalePrefix } from "@/utils/i18n";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 
 const LANGUAGE_ITEMS: readonly { locale: Locale; code: string; label: string; dir: string }[] = [
   { locale: "en", code: "EN", label: "English", dir: "LTR" },
@@ -14,7 +14,7 @@ const LANGUAGE_ITEMS: readonly { locale: Locale; code: string; label: string; di
 ];
 
 export function LanguageDropdown() {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const router = useRouter();
   const { locale, setLocale, dictionary } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -22,10 +22,10 @@ export function LanguageDropdown() {
   function handleSelectLocale(nextLocale: Locale) {
     setLocale(nextLocale);
     setOpen(false);
-    const hasPrefix = getLocaleFromPath(pathname) !== null;
-    if (hasPrefix) {
-      const stripped = stripLocalePrefix(pathname);
-      router.push(getLocalizedUrl(stripped, nextLocale));
+    if (getLocaleFromPath(pathname) !== null) {
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const hash = typeof window !== "undefined" ? window.location.hash : "";
+      router.push(getLocalizedUrl(`${pathname}${search}${hash}`, nextLocale));
     }
   }
 

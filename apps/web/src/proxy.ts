@@ -41,21 +41,24 @@ export function resolveRequestHost(request: NextRequest): string {
  * unless `?sanctuary=1` is explicitly requested.
  */
 export function proxy(request: NextRequest): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-mw-pathname", request.nextUrl.pathname);
+
   if (request.nextUrl.pathname !== "/") {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
   if (request.nextUrl.searchParams.get("sanctuary") === "1") {
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers: requestHeaders } });
   }
 
   const normalizedHost = normalizeHost(resolveRequestHost(request));
   if (MOONWITNESS_HOSTS.has(normalizedHost)) {
     const target = request.nextUrl.clone();
     target.pathname = "/moonwitness";
-    return NextResponse.rewrite(target);
+    return NextResponse.rewrite(target, { request: { headers: requestHeaders } });
   }
 
-  return NextResponse.next();
+  return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
 export const config = {

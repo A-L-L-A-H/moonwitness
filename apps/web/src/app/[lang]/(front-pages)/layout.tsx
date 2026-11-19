@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { SkinRoot } from "@moonwitness/ui/imperium";
 import { imperiumLumenCssVariables } from "@moonwitness/ui/tokens";
-import { i18n, type Locale } from "@/configs/i18n";
+import { type Locale } from "@/configs/i18n";
 import { SanctuaryLocaleProvider } from "@/lib/sanctuary-locale";
-import { isValidLocale } from "@/utils/i18n";
+import { resolveRequestLocale } from "@/utils/i18n";
 
 export default async function FrontPagesLayout({
   children,
@@ -13,7 +13,7 @@ export default async function FrontPagesLayout({
   params: Promise<{ lang: string }>;
 }) {
   const { lang: rawLang } = await params;
-  const lang: Locale = isValidLocale(rawLang) ? rawLang : i18n.defaultLocale;
+  const { lang }: { lang: Locale } = resolveRequestLocale({ pathname: `/${rawLang}` });
 
   return (
     <SkinRoot

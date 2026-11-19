@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { Providers } from "@/components/providers";
-import { i18n, type Locale } from "@/configs/i18n";
+import { i18n } from "@/configs/i18n";
 import { TranslationWrapper } from "@/hocs/TranslationWrapper";
 import { getDictionarySync } from "@/utils/getDictionary";
-import { isValidLocale } from "@/utils/i18n";
+import { resolveRequestLocale } from "@/utils/i18n";
 import { SettingsProvider } from "@core/contexts/settingsContext";
 
 export async function generateStaticParams() {
@@ -18,8 +18,7 @@ export default async function LangLayout({
   params: Promise<{ lang: string }>;
 }) {
   const { lang: rawLang } = await params;
-  const lang: Locale = isValidLocale(rawLang) ? rawLang : i18n.defaultLocale;
-  const direction = i18n.langDirection[lang];
+  const { lang, dir: direction } = resolveRequestLocale({ pathname: `/${rawLang}` });
   const dictionary = getDictionarySync(lang);
 
   return (

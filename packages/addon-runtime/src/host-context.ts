@@ -20,6 +20,7 @@ export interface BaseAddonAuthBridge {
   getActorRole: (request: FastifyRequest) => CrewRoleOrPublic;
   getActorId: (request: FastifyRequest) => string | null;
   getActorTenant?: (request: FastifyRequest) => string;
+  getActorGroups?: (request: FastifyRequest) => string[];
   resolveActorContext?: (request: FastifyRequest, source?: ActorContext["source"]) => ActorContext;
 }
 
