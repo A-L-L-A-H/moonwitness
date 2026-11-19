@@ -100,6 +100,65 @@ export function parseCorsOrigins(raw: string | undefined): string[] {
     .filter(Boolean);
 }
 
+export function validatePostgresDatabaseUrl(rawUrl: string | undefined): string[] {
+  const candidate = rawUrl?.trim();
+  if (!candidate) {
+    return ["DATABASE_URL must be set to a persistent database in production."];
+  }
+  if (candidate === ":memory:") {
+    return ["DATABASE_URL must not be an in-memory database in production."];
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(candidate);
+  } catch {
+    return ["DATABASE_URL must be a valid PostgreSQL URL (postgresql:// or postgres://)."];
+  }
+  if (parsed.protocol !== "postgres:" && parsed.protocol !== "postgresql:") {
+    return [
+      "DATABASE_URL must be a PostgreSQL connection string (postgresql:// or postgres://) in production.",
+    ];
+  }
+  if (!parsed.hostname) {
+    return ["DATABASE_URL must include a PostgreSQL host."];
+  }
+  if (!parsed.pathname || parsed.pathname === "/") {
+    return ["DATABASE_URL must include a PostgreSQL database name."];
+  }
+  if (parsed.hash) {
+    return ["DATABASE_URL must not contain a URL fragment."];
+  }
+  return [];
+}
+
+/**
+ * Resolve Core API database connection without silently falling back to an
+ * implicit local SQLite file (`./moonwitness.db`).
+ */
+export function resolveApiDatabaseUrl(
+  configuredUrl: string | undefined,
+  nodeEnv: "development" | "production" | "test",
+  explicitPath?: string,
+): string {
+  const override = explicitPath?.trim();
+  if (override && nodeEnv !== "production") {
+    return override;
+  }
+  const candidate = configuredUrl?.trim();
+  if (!candidate) {
+    throw new Error(
+      "DATABASE_URL is required. Configure an explicit PostgreSQL (or test SQLite) DATABASE_URL before starting the API.",
+    );
+  }
+  if (nodeEnv === "production") {
+    const problems = validatePostgresDatabaseUrl(candidate);
+    if (problems.length > 0) {
+      throw new Error(`Invalid production DATABASE_URL:\n  - ${problems.join("\n  - ")}`);
+    }
+  }
+  return candidate;
+}
+
 /**
  * Reject production configuration that is missing required values or relies on
  * insecure development defaults. Returns a list of human-readable problems; an
@@ -108,17 +167,7 @@ export function parseCorsOrigins(raw: string | undefined): string[] {
 export function validateProductionEnv(config: typeof env): string[] {
   if (config.NODE_ENV !== "production") return [];
 
-  const problems: string[] = [];
-
-  if (!config.DATABASE_URL || config.DATABASE_URL.trim() === "") {
-    problems.push("DATABASE_URL must be set to a persistent database in production.");
-  } else if (config.DATABASE_URL === ":memory:") {
-    problems.push("DATABASE_URL must not be an in-memory database in production.");
-  } else if (!/^postgres(ql)?:\/\//i.test(config.DATABASE_URL.trim())) {
-    problems.push(
-      "DATABASE_URL must be a PostgreSQL connection string (postgresql:// or postgres://) in production.",
-    );
-  }
+  const problems: string[] = [...validatePostgresDatabaseUrl(config.DATABASE_URL)];
   if (!config.CORS_ORIGINS || parseCorsOrigins(config.CORS_ORIGINS).length === 0) {
     problems.push("CORS_ORIGINS must list explicit allowed origins in production.");
   }
