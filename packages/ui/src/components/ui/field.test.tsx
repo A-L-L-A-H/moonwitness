@@ -69,7 +69,15 @@ describe("FieldControl description references", () => {
     expect(combinedIds).toContain("external-help");
     expect(new Set(combinedIds).size).toBe(combinedIds.length);
     expect(combinedIds.every((id) => document.getElementById(id) !== null)).toBe(true);
-    expect(combinedIds.some((id) => document.getElementById(id)?.textContent?.includes("Helpful context."))).toBe(true);
-    expect(combinedIds.some((id) => document.getElementById(id)?.textContent?.includes("This value is invalid."))).toBe(true);
+    expect(
+      combinedIds.some((id) =>
+        document.getElementById(id)?.textContent?.includes("Helpful context."),
+      ),
+    ).toBe(true);
+    expect(
+      combinedIds.some((id) =>
+        document.getElementById(id)?.textContent?.includes("This value is invalid."),
+      ),
+    ).toBe(true);
   });
 });
