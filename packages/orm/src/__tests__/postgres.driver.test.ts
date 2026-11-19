@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { closeDbAsync, getDb, initPostgresDb } from "../driver.js";
 import {
   PostgresDriver,
   isPostgresUrl,
@@ -193,6 +194,37 @@ describe("PostgresDriver", () => {
 
     await Promise.all([firstClose, secondClose]);
     expect(firstSettled).toBe(true);
+  });
+
+  it("closeDbAsync clears the active handle and awaits PostgreSQL pool shutdown", async () => {
+    const mock = createMockPool();
+    await initPostgresDb("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
+
+    let finishShutdown: (() => void) | null = null;
+    mock.pool.end = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishShutdown = resolve;
+        }),
+    );
+
+    const closing = closeDbAsync();
+    expect(() => getDb()).toThrow(/Database not initialized/);
+    expect(mock.pool.end).toHaveBeenCalledTimes(1);
+
+    let settled = false;
+    void closing.then(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    if (!finishShutdown) {
+      throw new Error("Expected pool shutdown callback to be registered");
+    }
+    finishShutdown();
+    await closing;
+    expect(settled).toBe(true);
   });
 
   it("manages BEGIN/COMMIT and ROLLBACK on transaction errors", async () => {

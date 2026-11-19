@@ -128,7 +128,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
       }
     });
 
-    afterAll(() => {
+    afterAll(async () => {
       await closeDbAsync();
     });
 
