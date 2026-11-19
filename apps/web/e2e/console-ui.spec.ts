@@ -189,7 +189,7 @@ for (const viewport of viewports) {
       await screenshot(page, info, `console-${viewport.width}-footer`);
       if (viewport.width < 1024) {
         const footerBox = await box(footer);
-        const navBox = await box(page.getByRole("navigation", { name: "Empire", exact: true }));
+        const navBox = await box(page.getByRole("navigation", { name: "The Empire", exact: true }));
         expect.soft(footerBox.y).toBeGreaterThanOrEqual(0);
         expect
           .soft(footerBox.y + footerBox.height, "Footer must finish above fixed mobile navigation")
@@ -274,7 +274,7 @@ for (const viewport of viewports) {
 
     test("rail supports Tab, arrows, Home/End, section and route navigation", async ({ page }) => {
       await openConsole(page);
-      const nav = page.getByRole("navigation", { name: "Empire", exact: true });
+      const nav = page.getByRole("navigation", { name: "The Empire", exact: true });
       const dashboard = nav.getByRole("link", { name: "Dashboard", exact: true });
       const studio = nav.getByRole("link", { name: "Story Studio", exact: true });
       const episodes = nav.getByRole("link", { name: "Episodes", exact: true });
@@ -315,7 +315,7 @@ for (const viewport of viewports) {
       const switcher = page.getByRole("button", { name: "Change skin", exact: true });
       const surfaces = [
         page.getByRole("banner"),
-        page.getByRole("navigation", { name: "Empire", exact: true }),
+        page.getByRole("navigation", { name: "The Empire", exact: true }),
         page.getByRole("contentinfo"),
       ];
       const signatures = surfaces.map(() => new Set<string>());
