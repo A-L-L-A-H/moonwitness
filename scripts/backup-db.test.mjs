@@ -1,12 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import {
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -20,44 +14,41 @@ import {
 import { restoreTarget, samePostgresDatabase } from "./restore-db.mjs";
 
 describe("PostgreSQL-only backup & restore helpers", () => {
-  it(
-    "rejects SQLite, libSQL, D1 and malformed targets before invoking tools",
-    async () => {
-      for (const target of [
-        "./moonwitness.db",
-        "sqlite:./moonwitness.db",
-        "file:./moonwitness.db",
-        "libsql://db.example",
-        "d1://database",
-        "postgresql://[",
-        "postgresql://localhost:5432",
-      ]) {
-        assert.throws(() => assertPostgresTarget(target), /PostgreSQL/);
-        await assert.rejects(
-          backupTarget({
-            target,
-            outputDir: tmpdir(),
-            encryptionKey: "backup-secret-key",
-            runCommand: async () => {
-              throw new Error("backup should not run for an invalid target");
-            },
-          }),
-          /PostgreSQL/,
-        );
-        await assert.rejects(
-          restoreTarget({
-            encryptedBackupPath: join(tmpdir(), "not-read.enc"),
-            target,
-            decryptionKey: "backup-secret-key",
-            runCommand: async () => {
-              throw new Error("restore should not run for an invalid target");
-            },
-          }),
-          /PostgreSQL/,
-        );
-      }
-    },
-  );
+  it("rejects SQLite, libSQL, D1 and malformed targets before invoking tools", async () => {
+    for (const target of [
+      "./moonwitness.db",
+      "sqlite:./moonwitness.db",
+      "file:./moonwitness.db",
+      "libsql://db.example",
+      "d1://database",
+      "postgresql://[",
+      "postgresql://localhost:5432",
+    ]) {
+      assert.throws(() => assertPostgresTarget(target), /PostgreSQL/);
+      await assert.rejects(
+        backupTarget({
+          target,
+          outputDir: tmpdir(),
+          encryptionKey: "backup-secret-key",
+          runCommand: async () => {
+            throw new Error("backup should not run for an invalid target");
+          },
+        }),
+        /PostgreSQL/,
+      );
+      await assert.rejects(
+        restoreTarget({
+          encryptedBackupPath: join(tmpdir(), "not-read.enc"),
+          target,
+          decryptionKey: "backup-secret-key",
+          runCommand: async () => {
+            throw new Error("restore should not run for an invalid target");
+          },
+        }),
+        /PostgreSQL/,
+      );
+    }
+  });
 
   it("rejects restoring over the configured source database", () => {
     assert.equal(
@@ -79,10 +70,7 @@ describe("PostgreSQL-only backup & restore helpers", () => {
   it("accepts valid PostgreSQL targets", () => {
     const validUrl = "postgresql://user:secret@localhost:5432/moonwitness";
     assert.equal(assertPostgresTarget(validUrl), validUrl);
-    assert.equal(
-      isPostgresTarget("postgres://localhost:5432/moonwitness"),
-      true,
-    );
+    assert.equal(isPostgresTarget("postgres://localhost:5432/moonwitness"), true);
     assert.equal(isPostgresTarget("./moonwitness.db"), false);
   });
 
@@ -91,10 +79,7 @@ describe("PostgreSQL-only backup & restore helpers", () => {
       "postgresql://m:secret%40value@localhost/m?sslmode=require",
     );
     assert.equal(prepared.connectionString.includes("secret"), false);
-    assert.equal(
-      prepared.connectionString,
-      "postgresql://m@localhost/m?sslmode=require",
-    );
+    assert.equal(prepared.connectionString, "postgresql://m@localhost/m?sslmode=require");
     assert.equal(prepared.options.env.PGPASSWORD, "secret@value");
 
     const queryPassword = preparePostgresCommandConnection(

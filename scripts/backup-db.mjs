@@ -1,19 +1,10 @@
 #!/usr/bin/env node
 import { execFile } from "node:child_process";
-import {
-  createHash,
-  createHmac,
-  randomUUID,
-  timingSafeEqual,
-} from "node:crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import {
-  deriveBackupKey,
-  encryptBackupBytes,
-  safeRemove,
-} from "./backup-sqlite.mjs";
+import { deriveBackupKey, encryptBackupBytes, safeRemove } from "./backup-sqlite.mjs";
 
 const execFileAsync = promisify(execFile);
 
@@ -29,9 +20,7 @@ export function isPostgresTarget(target) {
 export function assertPostgresTarget(target, operation = "Database backup") {
   const candidate = String(target ?? "").trim();
   if (!isPostgresTarget(candidate)) {
-    throw new Error(
-      `${operation} requires a PostgreSQL URL (postgres:// or postgresql://).`,
-    );
+    throw new Error(`${operation} requires a PostgreSQL URL (postgres:// or postgresql://).`);
   }
 
   let parsed;
@@ -41,9 +30,7 @@ export function assertPostgresTarget(target, operation = "Database backup") {
     throw new Error(`${operation} requires a valid PostgreSQL connection URL.`);
   }
   if (!parsed.hostname || !parsed.pathname || parsed.pathname === "/") {
-    throw new Error(
-      `${operation} requires a PostgreSQL URL with a host and database name.`,
-    );
+    throw new Error(`${operation} requires a PostgreSQL URL with a host and database name.`);
   }
   if (parsed.hash) {
     throw new Error(`${operation} connection URL must not contain a fragment.`);
@@ -75,9 +62,7 @@ export function preparePostgresCommandConnection(connectionString) {
   }
   return {
     connectionString: url.toString(),
-    options: password
-      ? { env: { ...process.env, PGPASSWORD: password } }
-      : undefined,
+    options: password ? { env: { ...process.env, PGPASSWORD: password } } : undefined,
   };
 }
 
@@ -87,16 +72,12 @@ export async function backupPostgresUrl({
   encryptionKey,
   runCommand = defaultCommandRunner,
 }) {
-  connectionString = assertPostgresTarget(
-    connectionString,
-    "PostgreSQL backup",
-  );
+  connectionString = assertPostgresTarget(connectionString, "PostgreSQL backup");
   const commandConnection = preparePostgresCommandConnection(connectionString);
   await mkdir(outputDir, { recursive: true });
   const parsedUrl = new URL(connectionString);
   const dbName = parsedUrl.pathname.replace(/^\/+/, "") || "postgres";
-  const fileStem =
-    dbName.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/^\.+/, "") || "postgres";
+  const fileStem = dbName.replace(/[^a-zA-Z0-9._-]/g, "_").replace(/^\.+/, "") || "postgres";
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   const backupId = `${timestamp}-${randomUUID()}`;
   const tempDump = join(outputDir, `${fileStem}.${backupId}.tmp.pgdump`);
@@ -116,9 +97,7 @@ export async function backupPostgresUrl({
       commandConnection.options,
     );
     const plaintextBytes = await readFile(tempDump);
-    const plaintextHash = createHash("sha256")
-      .update(plaintextBytes)
-      .digest("hex");
+    const plaintextHash = createHash("sha256").update(plaintextBytes).digest("hex");
     const payload = encryptBackupBytes(plaintextBytes, encryptionKey);
     await writeFile(finalEncrypted, payload, { mode: 0o600 });
     const encryptedHash = createHash("sha256").update(payload).digest("hex");
@@ -161,12 +140,7 @@ export async function backupPostgresUrl({
  * Verify that a PostgreSQL backup manifest belongs to the encrypted archive
  * and was signed with the same secret used for AES-256-GCM encryption.
  */
-export function verifyPostgresBackupManifest({
-  manifest,
-  payload,
-  backupPath,
-  encryptionKey,
-}) {
+export function verifyPostgresBackupManifest({ manifest, payload, backupPath, encryptionKey }) {
   if (
     !manifest ||
     manifest.version !== "1.0" ||
@@ -183,9 +157,7 @@ export function verifyPostgresBackupManifest({
 
   const encryptedHash = createHash("sha256").update(payload).digest("hex");
   if (encryptedHash !== manifest.encryptedHash) {
-    throw new Error(
-      "Encrypted archive hash does not match the backup manifest.",
-    );
+    throw new Error("Encrypted archive hash does not match the backup manifest.");
   }
 
   if (
@@ -207,12 +179,7 @@ export function verifyPostgresBackupManifest({
   return manifest;
 }
 
-export async function backupTarget({
-  target,
-  outputDir,
-  encryptionKey,
-  runCommand,
-}) {
+export async function backupTarget({ target, outputDir, encryptionKey, runCommand }) {
   return backupPostgresUrl({
     connectionString: assertPostgresTarget(target, "Backup"),
     outputDir,
@@ -221,10 +188,7 @@ export async function backupTarget({
   });
 }
 
-if (
-  process.argv[1] &&
-  resolve(process.argv[1]) === resolve(import.meta.filename ?? "")
-) {
+if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename ?? "")) {
   const args = process.argv.slice(2);
   const outIdx = args.indexOf("--out");
   const outputDir = outIdx !== -1 ? args[outIdx + 1] : "./backups";
@@ -232,16 +196,12 @@ if (
   const key = process.env.MW_BACKUP_ENCRYPTION_KEY;
 
   if (args.includes("--target") || args.includes("--key")) {
-    console.error(
-      "Use DATABASE_URL and MW_BACKUP_ENCRYPTION_KEY environment variables.",
-    );
+    console.error("Use DATABASE_URL and MW_BACKUP_ENCRYPTION_KEY environment variables.");
     process.exit(1);
   }
 
   if (!target || !key) {
-    console.error(
-      "Set both environment variables; run backup-db.mjs --out DIR.",
-    );
+    console.error("Set both environment variables; run backup-db.mjs --out DIR.");
     process.exit(1);
   }
 
