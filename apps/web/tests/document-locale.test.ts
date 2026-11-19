@@ -26,6 +26,8 @@ vi.mock("next/font/local", () => ({
 
 vi.mock("@moonwitness/ui", () => ({
   SkipLink: () => React.createElement("a", { href: "#main" }, "Skip"),
+  SkinProvider: ({ children }: { children?: React.ReactNode }) =>
+    React.createElement(React.Fragment, null, children),
 }));
 
 describe("resolveRequestLocale & SSR document locale", () => {

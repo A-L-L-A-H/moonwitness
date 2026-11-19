@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useMemo, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef, type ReactNode } from "react";
 import type {
   CanonicalDensity as SkinDensity,
   MasterDnaId as DnaWorldId,
@@ -53,6 +53,8 @@ export const SettingsContext = createContext<SettingsContextProps>({
   updatePageSettings: () => () => {},
 });
 
+const SettingsMountedContext = createContext(false);
+
 export function SettingsProvider({
   children,
   settingsCookie,
@@ -62,6 +64,7 @@ export function SettingsProvider({
   settingsCookie?: Partial<Settings> | null;
   mode?: SkinMode;
 }) {
+  const alreadyMounted = useContext(SettingsMountedContext);
   const initialSettings: Settings = useMemo(
     () => ({
       ...DEFAULT_SETTINGS,
@@ -76,22 +79,28 @@ export function SettingsProvider({
     initialSettings,
   );
 
+  const settingsRef = useRef(settingsState);
+  settingsRef.current = settingsState;
+
   const updateSettings = useCallback(
     (next: Partial<Settings>, options?: UpdateSettingsOptions) => {
       const { updateCookie = true } = options ?? {};
-      if (updateCookie) {
-        setSettingsCookie((prev) => ({ ...prev, ...next }));
-      }
+      setSettingsCookie((prev) => ({ ...prev, ...next }), { updateCookie });
     },
     [setSettingsCookie],
   );
 
   const updatePageSettings = useCallback(
     (pageSettings: Partial<Settings>): (() => void) => {
+      const prevSnapshot = settingsRef.current;
+      const restorePatch: Partial<Settings> = {};
+      for (const key of Object.keys(pageSettings) as Array<keyof Settings>) {
+        (restorePatch as Record<string, unknown>)[key] = prevSnapshot[key];
+      }
       updateSettings(pageSettings, { updateCookie: false });
-      return () => updateSettings(settingsState, { updateCookie: false });
+      return () => updateSettings(restorePatch, { updateCookie: false });
     },
-    [settingsState, updateSettings],
+    [updateSettings],
   );
 
   const resetSettings = useCallback(() => {
@@ -103,17 +112,23 @@ export function SettingsProvider({
     [settingsState],
   );
 
+  if (alreadyMounted && settingsCookie === undefined && mode === undefined) {
+    return <>{children}</>;
+  }
+
   return (
-    <SettingsContext.Provider
-      value={{
-        settings: settingsState,
-        updateSettings,
-        isSettingsChanged,
-        resetSettings,
-        updatePageSettings,
-      }}
-    >
-      {children}
-    </SettingsContext.Provider>
+    <SettingsMountedContext.Provider value={true}>
+      <SettingsContext.Provider
+        value={{
+          settings: settingsState,
+          updateSettings,
+          isSettingsChanged,
+          resetSettings,
+          updatePageSettings,
+        }}
+      >
+        {children}
+      </SettingsContext.Provider>
+    </SettingsMountedContext.Provider>
   );
 }

@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { i18n } from "../src/configs/i18n";
-import { hasRequiredRole, resolveRoutePolicy } from "../src/configs/routePolicy";
+import { ROUTE_INVENTORY, hasRequiredRole, resolveRoutePolicy } from "../src/configs/routePolicy";
 import themeConfig from "../src/configs/themeConfig";
 import { buildEnterpriseNavItems } from "../src/data/navigation/verticalMenuData";
 import { getDictionarySync } from "../src/utils/getDictionary";
@@ -138,5 +140,85 @@ describe("Enterprise Reference Architecture Gates (WEB-GATE-01..06)", () => {
   it("WEB-GATE-06: WORLD_DOMAINS catalog covers all 9 worlds cleanly", () => {
     expect(WORLD_DOMAINS).toHaveLength(9);
     expect(WORLD_DOMAINS.some((w) => w.id === "crayon")).toBe(true);
+  });
+
+  it("WEB-GATE-07: ROUTE_INVENTORY matches every Next.js App Router page and valid canonical owners", () => {
+    const webRoot = path.resolve(import.meta.dirname, "..");
+    const repoRoot = path.resolve(webRoot, "../..");
+    const appDir = path.join(webRoot, "src", "app");
+
+    const pageFiles: string[] = [];
+    const walk = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walk(fullPath);
+        } else if (entry.name === "page.tsx") {
+          pageFiles.push(fullPath);
+        }
+      }
+    };
+    walk(appDir);
+
+    const discoveredRoutes = pageFiles
+      .map((filePath) => {
+        const relDir = path
+          .relative(appDir, path.dirname(filePath))
+          .split(path.sep)
+          .filter(Boolean);
+        const runtimeSegments = relDir.filter(
+          (segment) => !(segment.startsWith("(") && segment.endsWith(")")),
+        );
+        return runtimeSegments.length === 0 ? "/" : `/${runtimeSegments.join("/")}`;
+      })
+      .sort();
+
+    const inventoryPaths = ROUTE_INVENTORY.map((entry) => entry.path).sort();
+    expect(inventoryPaths).toEqual(discoveredRoutes);
+
+    for (const entry of ROUTE_INVENTORY) {
+      expect(fs.existsSync(path.join(repoRoot, entry.canonicalOwner))).toBe(true);
+    }
+  });
+
+  it("WEB-GATE-08: features/<domain> modules expose barrel indexes and enforce boundary imports", () => {
+    const webRoot = path.resolve(import.meta.dirname, "..");
+    const srcDir = path.join(webRoot, "src");
+    const pilotDomains = ["command-center", "memory"];
+
+    for (const domain of pilotDomains) {
+      for (const barrel of ["index.ts", "types/index.ts", "api/index.ts", "components/index.ts"]) {
+        expect(fs.existsSync(path.join(srcDir, "features", domain, barrel))).toBe(true);
+      }
+    }
+
+    const sourceFiles: string[] = [];
+    const collectSources = (dir: string) => {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          collectSources(fullPath);
+        } else if (/\.(ts|tsx)$/.test(entry.name)) {
+          sourceFiles.push(fullPath);
+        }
+      }
+    };
+    collectSources(srcDir);
+
+    const violations: string[] = [];
+    const deepImportPattern = /["']@\/features\/([^/"']+)\/([^"']+)["']/g;
+    for (const filePath of sourceFiles) {
+      const content = fs.readFileSync(filePath, "utf8");
+      for (const match of content.matchAll(deepImportPattern)) {
+        const domain = match[1];
+        if (!domain) continue;
+        const expectedDomainDir = path.join(srcDir, "features", domain);
+        if (!filePath.startsWith(expectedDomainDir)) {
+          violations.push(`${path.relative(srcDir, filePath)} -> ${match[0]}`);
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
   });
 });

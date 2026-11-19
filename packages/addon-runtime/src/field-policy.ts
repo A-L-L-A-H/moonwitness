@@ -283,7 +283,7 @@ export function assertReadableRelations(
           403,
         );
       }
-      const nextModel: string | undefined = currentDesc?.relations?.[seg]?.model;
+      const nextModel = currentDesc?.relations?.[seg]?.model;
       currentDesc = nextModel ? modelRegistry.get(nextModel) : undefined;
     }
   }

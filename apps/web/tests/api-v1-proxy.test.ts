@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import nextConfig from "../next.config";
+import {
+  DELETE as memoryDELETE,
+  GET as memoryGET,
+  PATCH as memoryPATCH,
+  POST as memoryPOST,
+  PUT as memoryPUT,
+} from "../src/app/api/memory/[...path]/route";
 import { DELETE, GET, HEAD, OPTIONS, PATCH, POST, PUT } from "../src/app/api/v1/[...path]/route";
 
 describe("/api/v1/[...path] reverse proxy route handler", () => {
@@ -250,5 +257,118 @@ describe("/api/v1/[...path] reverse proxy route handler", () => {
     const autoRes = await GET(new Request("https://moonwitness.biz.id/api/v1/healthz"));
     expect(autoRes.headers.get("x-request-id")).toMatch(/^[0-9a-f-]{36}$/);
     expect(autoRes.headers.get("traceparent")).toMatch(/^00-[0-9a-f]{32}-[0-9a-f]{16}-01$/);
+  });
+
+  it("strips spoofable identity headers before forwarding to upstream API", async () => {
+    process.env.API_INTERNAL_URL = "http://127.0.0.1:3002";
+    let forwardedHeaders: Headers | null = null;
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_url, init?: RequestInit) => {
+        forwardedHeaders = new Headers(init?.headers);
+        return new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }),
+    );
+
+    const res = await GET(
+      new Request("https://moonwitness.biz.id/api/v1/auth/me", {
+        headers: {
+          "x-role": "admin",
+          "x-actor-id": "spoofed-actor",
+          "x-actor-role": "admin",
+          "x-user-role": "admin",
+          "x-user-id": "1",
+          "x-groups": '["group_admin"]',
+          "x-mw-role": "admin",
+          "x-mw-actor": "spoof",
+        },
+      }),
+    );
+
+    expect(res.status).toBe(200);
+    for (const forbidden of [
+      "x-role",
+      "x-actor-id",
+      "x-actor-role",
+      "x-user-role",
+      "x-user-id",
+      "x-groups",
+      "x-mw-role",
+      "x-mw-actor",
+    ]) {
+      expect(forwardedHeaders!.get(forbidden)).toBeNull();
+    }
+  });
+
+  it("enforces fail-closed editor+ session checks on /api/memory/[...path] mutating methods while preserving GET reads", async () => {
+    process.env.API_INTERNAL_URL = "http://127.0.0.1:3002";
+
+    // Unauthenticated mutations fail immediately with 401
+    for (const handler of [memoryPOST, memoryPUT, memoryPATCH, memoryDELETE]) {
+      const unauthRes = await handler(
+        new Request("https://moonwitness.biz.id/api/memory/archives/upload", {
+          method: "POST",
+        }),
+      );
+      expect(unauthRes.status).toBe(401);
+    }
+
+    // Viewer and unknown roles fail with 403 Forbidden
+    for (const role of ["viewer", "unknown-role"]) {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(
+          async () =>
+            new Response(JSON.stringify({ user: { id: "u1", displayName: "User", role } }), {
+              status: 200,
+              headers: { "content-type": "application/json" },
+            }),
+        ),
+      );
+      const deniedRes = await memoryPOST(
+        new Request("https://moonwitness.biz.id/api/memory/archives/upload", {
+          method: "POST",
+          headers: { cookie: "mw_session=tok-low" },
+        }),
+      );
+      expect(deniedRes.status).toBe(403);
+    }
+
+    // Editor role succeeds and forwards to Memory upstream with spoofed headers stripped
+    const fetchMock = vi.fn(async (url: string | URL | Request, init?: RequestInit) => {
+      const urlStr = String(url);
+      if (urlStr.endsWith("/api/v1/auth/me")) {
+        return new Response(
+          JSON.stringify({ user: { id: "u2", displayName: "Editor", role: "editor" } }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      const upstreamHeaders = new Headers(init?.headers);
+      expect(upstreamHeaders.get("x-role")).toBeNull();
+      return new Response(JSON.stringify({ accepted: true }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const allowedPost = await memoryPOST(
+      new Request("https://moonwitness.biz.id/api/memory/archives/upload", {
+        method: "POST",
+        headers: { cookie: "mw_session=tok-editor", "x-role": "admin" },
+        body: JSON.stringify({ name: "archive.zip" }),
+      }),
+    );
+    expect(allowedPost.status).toBe(200);
+    await expect(allowedPost.json()).resolves.toEqual({ accepted: true });
+
+    const allowedGet = await memoryGET(
+      new Request("https://moonwitness.biz.id/api/memory/system", { method: "GET" }),
+    );
+    expect(allowedGet.status).toBe(200);
   });
 });

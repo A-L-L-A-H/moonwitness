@@ -1,4 +1,5 @@
 import { Providers } from "@/components/providers";
+import { AuthGuard } from "@/hocs/AuthGuard";
 import { TranslationWrapper } from "@/hocs/TranslationWrapper";
 import { SettingsProvider } from "@core/contexts/settingsContext";
 
@@ -6,7 +7,9 @@ export default function ConsoleLayout({ children }: Readonly<{ children: React.R
   return (
     <Providers>
       <SettingsProvider>
-        <TranslationWrapper>{children}</TranslationWrapper>
+        <AuthGuard enforceRedirect={false}>
+          <TranslationWrapper>{children}</TranslationWrapper>
+        </AuthGuard>
       </SettingsProvider>
     </Providers>
   );

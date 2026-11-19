@@ -1,0 +1,25 @@
+"use client";
+
+export {
+  createWitnessClaim,
+  fetchMemoryKnowledge,
+  fetchMemoryServiceArchives,
+  fetchMemoryServiceDashboard,
+  fetchMemoryServiceJobs,
+  fetchMemoryServiceKnowledge,
+  fetchMemoryServiceSources,
+  fetchMemoryServiceSystem,
+  fetchMemoryStatus,
+  fetchWitnessClaimLineage,
+  fetchWitnessClaims,
+  formatMemoryContextPrompt,
+  getMemoryExportUrl,
+  getMemoryServiceExportUrl,
+  linkWitnessClaims,
+  resumeMemoryJob,
+  triggerArchiveBackup,
+  uploadMemoryArchive,
+  useMemoryKnowledge,
+  useMemoryStatus,
+  verifyWitnessClaim,
+} from "@/lib/api/memory";

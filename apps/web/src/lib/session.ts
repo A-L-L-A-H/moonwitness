@@ -1,12 +1,18 @@
 import { requestApiResponse } from "@moonwitness/contracts/sdk";
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  assertProductionAuthSafety,
+  isDevSessionFallbackEnabled,
+  parseSessionPayload,
+  type Session,
+} from "./session-shared";
 
-export interface Session {
-  identity: string;
-  role: string;
-  username?: string;
-  id?: string | number;
-}
+export {
+  assertProductionAuthSafety,
+  isDevSessionFallbackEnabled,
+  parseSessionPayload,
+  type Session,
+};
 
 export interface CurrentSessionState {
   readonly session: Session | null;
@@ -18,46 +24,11 @@ function buildAuthFetchInit(): RequestInit {
   return { credentials: "include" };
 }
 
-function parseSessionPayload(data: unknown): Session | null {
-  const user: unknown = (data as { user?: unknown } | null)?.user;
-  if (!user || typeof user !== "object") {
-    return null;
-  }
-  const profile = user as {
-    id?: unknown;
-    displayName?: unknown;
-    username?: unknown;
-    role?: unknown;
-  };
-  return {
-    identity: typeof profile.displayName === "string" ? profile.displayName : "Operator",
-    role: typeof profile.role === "string" ? profile.role : "viewer",
-    username: typeof profile.username === "string" ? profile.username : undefined,
-    id: typeof profile.id === "string" || typeof profile.id === "number" ? profile.id : undefined,
-  };
-}
-
 const SESSION_CACHE_TTL_MS = 5_000;
 
 let inFlightSessionFetch: Promise<Session | null> | null = null;
 let cachedSession: { value: Session | null; fetchedAt: number } | null = null;
 let lastKnownSession: Session | null = null;
-
-function isDevSessionFallbackEnabled(): boolean {
-  if (typeof window === "undefined") {
-    return false;
-  }
-  const isDev = process.env.NODE_ENV === "development";
-  const explicitBypass = process.env.NEXT_PUBLIC_DEV_AUTH_BYPASS === "1";
-  if (!isDev && !explicitBypass) {
-    return false;
-  }
-  try {
-    return window.localStorage.getItem("mw_dev_user") !== "0";
-  } catch {
-    return true;
-  }
-}
 
 const DEV_OPERATOR_SESSION: Session = {
   identity: "Dev Operator",

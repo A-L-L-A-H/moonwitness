@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { CommandCenter } from "@/components/command-center";
+import { CommandCenter } from "@/features/command-center";
 
 export const metadata = { title: "Shadow Command Center" };
 
