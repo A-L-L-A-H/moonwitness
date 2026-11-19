@@ -400,6 +400,7 @@ export {
   type FormFieldProps,
 } from "./components/ui/form";
 export { DataTable, type DataTableColumn, type DataTableProps } from "./components/ui/data-table";
+export { Timeline, type TimelineItem, type TimelineProps } from "./components/ui/timeline";
 export {
   ChartContainer,
   BarChart,

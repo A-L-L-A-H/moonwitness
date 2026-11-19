@@ -9,6 +9,29 @@ Shared MoonWitness Design DNA skin engine, tokens, primitives, composites, artwo
 - **Layout, Artwork & Icons (`./layout`, `./artwork`, `./icons`):** Grid/stack/container primitives, generative/vector artwork scenes, and shared icon mappings.
 - **DX & Quality Tooling (`./docs-cli`, `src/dx/`):** Automated contrast checks (`contrast.test.ts` -> `pnpm ui:contrast`) and package architecture boundary tests (`architecture.test.ts`).
 
+## Timeline component
+
+Render caller-ordered events with the public component entry:
+
+```tsx
+import { Timeline, type TimelineItem } from "@moonwitness/ui";
+
+const activity: TimelineItem[] = [
+  { id: "deploy-1", title: "Build queued", timestamp: "09:10 UTC" },
+  {
+    id: "deploy-2",
+    title: "Build completed",
+    timestamp: "09:14 UTC",
+    description: "The artifact is ready for review.",
+    status: "awaiting-review",
+  },
+];
+
+<Timeline items={activity} ariaLabel="Deployment activity" density="compact" />;
+```
+
+The component preserves the supplied item order and renders status as neutral text. Fetching, authorization, event interpretation and sorting remain responsibilities of the consuming application.
+
 ## Dependencies
 
 - Workspace: `@moonwitness/assets`, `@moonwitness/avatars`, `@moonwitness/contracts`
