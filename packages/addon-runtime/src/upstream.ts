@@ -334,3 +334,128 @@ export function validateRiotAiRuntimeConfig(config: { RIOT_AI_BASE_URL?: string 
 export function validateMemoryRuntimeConfig(config: { MEMORY_API_URL?: string }): string[] {
   return validateServiceEndpointUrl(config.MEMORY_API_URL, "MEMORY_API_URL", false);
 }
+
+export type OptionalOpsServiceKey = "radius" | "snmp" | "syslog" | "storage";
+
+export interface OptionalOpsServiceSpec {
+  readonly key: OptionalOpsServiceKey;
+  readonly envEnableKey: string;
+  readonly legacyDisableKey: string;
+  readonly urlEnvKey: string;
+  readonly defaultUrl: string;
+}
+
+export const OPTIONAL_OPS_SERVICES: readonly OptionalOpsServiceSpec[] = [
+  {
+    key: "radius",
+    envEnableKey: "MW_OPS_RADIUS_ENABLED",
+    legacyDisableKey: "MW_ADDON_RADIUS_DISABLED",
+    urlEnvKey: "RADIUS_URL",
+    defaultUrl: "http://127.0.0.1:8090",
+  },
+  {
+    key: "snmp",
+    envEnableKey: "MW_OPS_SNMP_ENABLED",
+    legacyDisableKey: "MW_ADDON_SNMP_DISABLED",
+    urlEnvKey: "SNMP_POLLER_URL",
+    defaultUrl: "http://127.0.0.1:8094",
+  },
+  {
+    key: "syslog",
+    envEnableKey: "MW_OPS_SYSLOG_ENABLED",
+    legacyDisableKey: "MW_ADDON_SYSLOG_DISABLED",
+    urlEnvKey: "SYSLOG_URL",
+    defaultUrl: "http://127.0.0.1:8093",
+  },
+  {
+    key: "storage",
+    envEnableKey: "MW_OPS_STORAGE_ENABLED",
+    legacyDisableKey: "MW_ADDON_STORAGE_DISABLED",
+    urlEnvKey: "STORAGE_URL",
+    defaultUrl: "http://127.0.0.1:8091",
+  },
+];
+
+export type OpsServiceHealthStatus = "disabled" | "healthy" | "unhealthy";
+
+export interface OptionalOpsServiceState {
+  enabled: boolean;
+  status: OpsServiceHealthStatus;
+}
+
+function parseOptionalFlag(raw: string | undefined): boolean | undefined {
+  if (raw === undefined) return undefined;
+  const normalized = raw.trim().toLowerCase();
+  if (!normalized) return undefined;
+  if (normalized === "0" || normalized === "false" || normalized === "off" || normalized === "no") {
+    return false;
+  }
+  if (normalized === "1" || normalized === "true" || normalized === "on" || normalized === "yes") {
+    return true;
+  }
+  return undefined;
+}
+
+/**
+ * Evaluates whether an optional `ops` profile capability is enabled for this API process.
+ * Respects per-service disable/enable variables and the global `MW_OPS_ENABLED` flag.
+ */
+export function isOptionalOpsServiceEnabled(
+  serviceKey: OptionalOpsServiceKey,
+  envSource: Record<string, string | undefined> = typeof process !== "undefined" ? process.env : {},
+): boolean {
+  const spec = OPTIONAL_OPS_SERVICES.find((entry) => entry.key === serviceKey);
+  if (!spec) return false;
+  if (envSource[spec.legacyDisableKey]?.trim() === "1") return false;
+  const explicit = parseOptionalFlag(envSource[spec.envEnableKey]);
+  if (explicit !== undefined) return explicit;
+  const globalOps = parseOptionalFlag(envSource.MW_OPS_ENABLED);
+  if (globalOps !== undefined) return globalOps;
+  return true;
+}
+
+/**
+ * Probes enabled optional operations services (`/health`) with a bounded timeout while
+ * reporting disabled capabilities explicitly as `{ enabled: false, status: "disabled" }`.
+ */
+export async function probeOptionalOpsServices(
+  options: {
+    envSource?: Record<string, string | undefined>;
+    fetchImpl?: typeof fetch;
+    timeoutMs?: number;
+  } = {},
+): Promise<Record<OptionalOpsServiceKey, OptionalOpsServiceState>> {
+  const envSource = options.envSource ?? (typeof process !== "undefined" ? process.env : {});
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const timeoutMs = options.timeoutMs ?? 600;
+
+  const entries = await Promise.all(
+    OPTIONAL_OPS_SERVICES.map(
+      async (spec): Promise<[OptionalOpsServiceKey, OptionalOpsServiceState]> => {
+        if (!isOptionalOpsServiceEnabled(spec.key, envSource)) {
+          return [spec.key, { enabled: false, status: "disabled" }];
+        }
+        const rawUrl = envSource[spec.urlEnvKey]?.trim();
+        const baseUrl = (rawUrl && rawUrl.length > 0 ? rawUrl : spec.defaultUrl).replace(
+          /\/+$/,
+          "",
+        );
+        if (isCloudflareWorkersRuntime() && isLoopbackServiceUrl(baseUrl)) {
+          return [spec.key, { enabled: true, status: "unhealthy" }];
+        }
+        try {
+          const res = await fetchImpl(`${baseUrl}/health`, {
+            method: "GET",
+            signal: AbortSignal.timeout(timeoutMs),
+            headers: getUpstreamBridgeHeaders(),
+          });
+          return [spec.key, { enabled: true, status: res.ok ? "healthy" : "unhealthy" }];
+        } catch {
+          return [spec.key, { enabled: true, status: "unhealthy" }];
+        }
+      },
+    ),
+  );
+
+  return Object.fromEntries(entries) as Record<OptionalOpsServiceKey, OptionalOpsServiceState>;
+}
