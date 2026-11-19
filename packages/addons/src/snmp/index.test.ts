@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import Fastify from "fastify";
-import { closeDb, initDb, modelRegistry } from "@moonwitness/orm";
+import { closeDb, getDb, initDb, modelRegistry, syncModels } from "@moonwitness/orm";
 import {
   AddonRuntimeController,
   baseManifest,
@@ -12,7 +12,7 @@ import {
 } from "@moonwitness/addon-runtime";
 import { auditAddon } from "../audit";
 import { authAddon } from "../auth";
-import { createSnmpAddon, snmpAddon } from "./index.js";
+import { createSnmpAddon, snmpAddon, snmpTargetModel } from "./index.js";
 
 describe("../snmp", () => {
   const dirs: string[] = [];
@@ -92,5 +92,39 @@ describe("../snmp", () => {
     } finally {
       await app.close();
     }
+  });
+
+  it("syncs legacy snmp_targets tables missing label and interval_sec", async () => {
+    await getDb().exec(`
+      CREATE TABLE snmp_targets (
+        id TEXT PRIMARY KEY,
+        create_uid TEXT,
+        create_date TEXT NOT NULL,
+        write_uid TEXT,
+        write_date TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'active',
+        deleted_uid TEXT,
+        deleted_date TEXT,
+        version INTEGER NOT NULL DEFAULT 1,
+        source TEXT NOT NULL DEFAULT 'api',
+        source_ref TEXT,
+        target_key TEXT NOT NULL,
+        device_key TEXT NOT NULL,
+        oid TEXT NOT NULL,
+        name TEXT,
+        poll_interval_sec INTEGER,
+        enabled INTEGER DEFAULT 1,
+        metadata_json TEXT,
+        tenant_id TEXT NOT NULL DEFAULT 'default'
+      );
+    `);
+
+    const report = await syncModels([snmpTargetModel]);
+    expect(report.addedColumns).toEqual(
+      expect.arrayContaining([
+        { table: "snmp_targets", column: "label" },
+        { table: "snmp_targets", column: "interval_sec" },
+      ]),
+    );
   });
 });

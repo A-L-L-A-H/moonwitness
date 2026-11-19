@@ -136,6 +136,7 @@ The workflow also checks the container state of every enabled Compose service. S
 
 ## Security Notes
 
+- Every workflow in `.github/workflows/*.yml` runs on GitHub-hosted `ubuntu-latest` (zero jobs target `self-hosted` or `vps` runner labels even when host runners exist on the server). Untrusted PR CI never executes on the production VPS or shares host/environment credentials.
 - Deployment SSH key must only have access to the deploy user, not root.
 - `VPS_SSH_KEY` and `VPS_SSH_KNOWN_HOSTS` are stored as GitHub Environment secrets and never logged.
 - Verify the SSH host fingerprint against an authenticated out-of-band source before saving `VPS_SSH_KNOWN_HOSTS`; the workflow requires strict host-key checking.
