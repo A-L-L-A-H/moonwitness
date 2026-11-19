@@ -83,6 +83,10 @@ const FieldControl = React.forwardRef<HTMLElement, { children: React.ReactElemen
       ...(ctx?.hasError ? [ctx.errorId] : []),
     ];
     const describedBy = [...new Set(describedByIds)].join(" ") || undefined;
+    const childWithDescription = React.cloneElement(
+      children as React.ReactElement<React.HTMLAttributes<HTMLElement>>,
+      { "aria-describedby": describedBy },
+    );
 
     return (
       <Slot
@@ -91,7 +95,7 @@ const FieldControl = React.forwardRef<HTMLElement, { children: React.ReactElemen
         aria-describedby={describedBy}
         aria-invalid={ctx?.hasError || undefined}
       >
-        {children}
+        {childWithDescription}
       </Slot>
     );
   },
