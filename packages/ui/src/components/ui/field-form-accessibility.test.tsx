@@ -45,12 +45,15 @@ describe("Field and Form description references", () => {
 
   it("references rendered description and error nodes exactly once", () => {
     renderNode(
-      <Field error="A value is required">
+      <>
+        <p id="external-help">Additional field guidance.</p>
+        <Field error="A value is required">
         <FieldControl>
           <Input aria-label="Name" aria-describedby="external-help" />
         </FieldControl>
-        <FieldDescription>Enter your display name.</FieldDescription>
-      </Field>,
+          <FieldDescription>Enter your display name.</FieldDescription>
+        </Field>
+      </>,
     );
 
     const input = container.querySelector("input");
