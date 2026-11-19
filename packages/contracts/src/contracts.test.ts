@@ -7,6 +7,7 @@ import {
   ChronicleEraSchema,
   ChronicleEventSchema,
   ChronicleStorySchema,
+  ContinuityMemoryRecordSchema,
   DEFERRED_WRITE_MODELS,
   EpistemicKindSchema,
   KnowledgeCitationSchema,
@@ -24,7 +25,9 @@ import {
   SidraEdgeSchema,
   SidraNodeSchema,
   SidraProjectionSchema,
+  toMemorySyncPayloadFromContinuity,
   WitnessClaimSchema,
+  WitnessEpistemicRegisterSchema,
   WitnessEvidenceSchema,
   WitnessObservationSchema,
 } from "./index";
@@ -284,5 +287,73 @@ describe("publication contracts (MW-0410) & deferred models (MW-0411)", () => {
 
   it("documents deferred write models", () => {
     expect(DEFERRED_WRITE_MODELS).toEqual(["works", "signal", "justice"]);
+  });
+});
+
+describe("continuity contracts & rocksoul sync converter", () => {
+  it("validates continuity memory records and converts bundles for /api/v1/memory/sync", () => {
+    const memory = ContinuityMemoryRecordSchema.parse({
+      id: "mem-1",
+      category: "procedural",
+      title: "Stay on dev branch",
+      content: "Keep only local dev and main branches.",
+      sourceType: "owner",
+      sourceRef: "AGENTS.md",
+      confidence: "owner",
+      status: "active",
+      retention: "keep",
+      projectId: "proj-1",
+      repositoryId: null,
+      issueId: null,
+      createdAt: ISO_NOW,
+      updatedAt: ISO_NOW,
+    });
+    expect(WitnessEpistemicRegisterSchema.parse("testimony")).toBe("testimony");
+
+    const batch = toMemorySyncPayloadFromContinuity({
+      memories: [memory],
+      workSessions: [
+        {
+          id: "ws-1",
+          name: "Wave M consolidation",
+          status: "active",
+          projectId: "proj-1",
+          repositoryId: null,
+          issueId: null,
+          contextJson: "{}",
+          createdAt: ISO_NOW,
+          updatedAt: ISO_NOW,
+          closedAt: null,
+        },
+      ],
+      resumePoints: [
+        {
+          id: "rp-1",
+          workSessionId: "ws-1",
+          title: "Next checkpoint",
+          summary: "Verify Continuity contracts",
+          contextJson: "{}",
+          createdAt: ISO_NOW,
+        },
+      ],
+      experiences: [],
+      lessons: [
+        {
+          id: "ls-1",
+          experienceId: null,
+          proposal: "Always share DTO schemas via @moonwitness/contracts.",
+          status: "accepted",
+          acceptedAt: ISO_NOW,
+          createdAt: ISO_NOW,
+        },
+      ],
+    });
+    expect(batch.source).toBe("rocksoul-desktop");
+    expect(batch.schema_version).toBe(1);
+    expect(batch.records.map((r) => r.record_key)).toEqual([
+      "rocksoul:memory:mem-1",
+      "rocksoul:session:ws-1",
+      "rocksoul:lesson:ls-1",
+    ]);
   });
 });

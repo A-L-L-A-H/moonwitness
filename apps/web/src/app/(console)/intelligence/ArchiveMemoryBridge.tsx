@@ -55,7 +55,7 @@ export function ArchiveMemoryBridge({ onAttachContext }: ArchiveMemoryBridgeProp
           <div className="flex flex-wrap items-center gap-2">
             <MemoryTapeNode className="h-4 w-4 text-[var(--primary)]" />
             <p className="font-mono text-[10px] tracking-widest text-[var(--primary)]">
-              SOVEREIGN KNOWLEDGE BRIDGE · PORT 8000 / 3005
+              SOVEREIGN KNOWLEDGE BRIDGE · /MEMORY VAULT
             </p>
             <SkinOrnament slot="tag" label="MEMORY BRIDGE" />
           </div>

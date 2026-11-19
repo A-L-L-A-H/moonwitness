@@ -134,7 +134,8 @@ describe("AI Provider Errors", () => {
 
     it("wraps DomainError from @moonwitness/errors", async () => {
       // Dynamic import works in vitest
-      const { ValidationError: DomainValidationError } = await import("@moonwitness/errors");
+      const { ValidationError: DomainValidationError } =
+        await import("@moonwitness/contracts/errors");
       const domainError = new DomainValidationError("Invalid input");
       const result = createProviderError(domainError, "ollama");
       expect(result.code).toBe("INVALID_REQUEST");

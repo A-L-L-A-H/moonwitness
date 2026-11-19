@@ -1,7 +1,7 @@
 "use client";
 
 import { MoonwitnessApiError, requestApiJson } from "@moonwitness/contracts/sdk";
-import type { MissionAlert, Workflow } from "@moonwitness/types";
+import type { MissionAlert, Workflow } from "@moonwitness/contracts/types";
 
 const API_BASE = "/api/v1";
 

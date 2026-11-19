@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Project } from "@moonwitness/types";
+import type { Project } from "@moonwitness/contracts/types";
 import { artSrc } from "@/lib/art";
 import { SectionHeading } from "./section-heading";
 

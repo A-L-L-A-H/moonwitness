@@ -1,4 +1,4 @@
-import type { WorkspaceItem } from "@moonwitness/types";
+import type { WorkspaceItem } from "@moonwitness/contracts/types";
 import { WorkspaceList } from "@moonwitness/ui";
 import { SectionHeading } from "./section-heading";
 

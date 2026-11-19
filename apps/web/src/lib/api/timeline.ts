@@ -9,7 +9,13 @@ import {
   type TimelineListResponse,
   type TimelineStatsResponse,
 } from "@moonwitness/contracts";
-import type { ArtKey, EraId, EventKind, TimelineEvent, TimelineFilters } from "@moonwitness/types";
+import type {
+  ArtKey,
+  EraId,
+  EventKind,
+  TimelineEvent,
+  TimelineFilters,
+} from "@moonwitness/contracts/types";
 
 const API_BASE = "/api/v1";
 const MAX_TIMELINE_PAGE_SIZE = 100;

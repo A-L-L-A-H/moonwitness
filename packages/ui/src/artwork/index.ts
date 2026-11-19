@@ -5,3 +5,4 @@ export * from "./logos";
 export * from "./cutouts";
 export * from "./backdrop";
 export * from "./skin-artwork-frame";
+export * from "./rocksoul";

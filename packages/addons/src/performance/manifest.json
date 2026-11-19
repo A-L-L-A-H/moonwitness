@@ -1,0 +1,15 @@
+{
+  "name": "performance",
+  "version": "1.0.0",
+  "description": "APM System Telemetry Snapshots and Dynamic KPI Dashboard Widgets",
+  "category": "operations",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["performance.metrics", "performance.widgets"],
+  "provides": {
+    "routes": ["/api/v1/performance/summary"],
+    "models": ["px.system", "ir.dashboard.widget"],
+    "auditActions": []
+  }
+}

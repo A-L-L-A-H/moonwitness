@@ -1,7 +1,7 @@
 import React from "react";
 import { Activity, GitBranch, ListChecks, RadioTower, Swords } from "@moonwitness/ui/icons";
 import { Home } from "@moonwitness/ui/icons";
-import { AnarchyStarSigil } from "./ui/RocksoulVectors";
+import { AnarchyStarSigil } from "@moonwitness/ui/artwork";
 import type { PageRoute } from "../router/useWorldRouter";
 
 export interface RiotRailProps {

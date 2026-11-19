@@ -1,4 +1,5 @@
 import React from "react";
+import { NativeSelect } from "@moonwitness/ui";
 import { Pencil, Trash2 } from "@moonwitness/ui/icons";
 import type { Issue, Milestone, MilestoneStatus, Project, ProjectStatus } from "../lib/contracts";
 
@@ -79,8 +80,8 @@ export function MilestoneBoardPanel({
           {editingMilestone !== milestone.id && (
             <span className="milestone-date">{milestone.due_at || "NO TARGET"}</span>
           )}
-          <select
-            className={"milestone-status " + milestone.status}
+          <NativeSelect
+            className={"h-auto w-auto milestone-status " + milestone.status}
             aria-label={"Status for " + milestone.title}
             value={milestone.status}
             onChange={(e) => onMilestoneStatus(milestone.id, e.target.value as MilestoneStatus)}
@@ -89,7 +90,7 @@ export function MilestoneBoardPanel({
             <option value="in_progress">IN PROGRESS</option>
             <option value="blocked">BLOCKED</option>
             <option value="done">DONE</option>
-          </select>
+          </NativeSelect>
           <div className="issue-actions">
             <button
               type="button"
@@ -180,7 +181,8 @@ export function ProjectGridPanel({
                   value={editProjectDescription}
                   onChange={(event) => onEditProjectDescriptionChange(event.target.value)}
                 />
-                <select
+                <NativeSelect
+                  className="h-auto"
                   aria-label="Project status"
                   value={editProjectStatus}
                   onChange={(event) => onEditProjectStatusChange(event.target.value as ProjectStatus)}
@@ -189,7 +191,7 @@ export function ProjectGridPanel({
                   <option value="paused">PAUSED</option>
                   <option value="done">DONE</option>
                   <option value="archived">ARCHIVED</option>
-                </select>
+                </NativeSelect>
                 <button className="outline-button">SAVE</button>
                 <button type="button" className="outline-button" onClick={onCancelEditProject}>
                   CANCEL

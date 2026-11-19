@@ -33,6 +33,34 @@ import {
   SinCanConsole,
 } from "./worlds/sidra-and-canon-consoles";
 
+const SANCTUM_WORLD_TAGLINES = {
+  en: {
+    crayon: "Making Life More Colorful!",
+  },
+  id: {
+    moonwitness: "Kisah · Pengetahuan · Arsip",
+    arsy: "Radio · Teknologi · Infrastruktur",
+    "human-pen": "Pikir · Tulis · Cipta · Bagikan",
+    sidra: "Terhubung · Jelajahi · Pelajari",
+    "rocksoul-dx": "Bermain · Cipta · Bermimpi",
+    crayon: "Biar Hidup Lebih Berwarna!",
+    "sin-can": "Refleksi · Tanya · Pahami",
+    mythos: "Jelajahi · Temukan · Ingat",
+    "angel-with-shotgun": "Hukum · Keadilan · Masyarakat",
+  },
+  ar: {
+    moonwitness: "قصص · معرفة · أرشيف",
+    arsy: "إذاعة · تقنية · بنية تحتية",
+    "human-pen": "تفكّر · اكتب · أبدع · شارك",
+    sidra: "تواصل · استكشف · تعلّم",
+    "rocksoul-dx": "العب · أبدع · احلم",
+    crayon: "لتكن الحياة أكثر إشراقاً",
+    "sin-can": "تأمّل · تساءل · افهم",
+    mythos: "استكشف · اكتشف · تذكّر",
+    "angel-with-shotgun": "قانون · عدالة · مجتمع",
+  },
+} as const;
+
 export function WorldsSanctum({
   activeWorldId,
   quietMode = false,
@@ -63,12 +91,26 @@ export function WorldsSanctum({
       <MotionReveal disabled={quietMode}>
         <SectionHeading
           id="worlds-heading"
-          kicker={locale === "id" ? "SEMBILAN DUNIA EKOSISTEM" : "NINE WORLDS OF THE ECOSYSTEM"}
-          title={locale === "id" ? "JELAJAHI SEMBILAN DUNIA" : "THE NINE WORLDS"}
+          kicker={
+            locale === "id"
+              ? "SEMBILAN DUNIA EKOSISTEM"
+              : locale === "ar"
+                ? "العوالم المعرفية التسعة"
+                : "NINE WORLDS OF THE ECOSYSTEM"
+          }
+          title={
+            locale === "id"
+              ? "JELAJAHI SEMBILAN DUNIA"
+              : locale === "ar"
+                ? "العوالم التسعة"
+                : "THE NINE WORLDS"
+          }
           description={
             locale === "id"
               ? "Sembilan ruang karya terhubung mengelilingi Gerbang Utama—dari arsip kisah, siaran radio, kepenulisan, pengetahuan, permainan, hingga refleksi dan hukum."
-              : "Nine interconnected destinations rising around the Central Gate—uniting archive storytelling, radio, writing, learning, play, prismatic study, reflection, mythos, and justice."
+              : locale === "ar"
+                ? "تسعة عوالم مترابطة تحيط بالبوابة الرئيسية — تجمع بين السرد التوثيقي والإذاعة والكتابة والمعرفة والإبداع والتأمل والعدالة."
+                : "Nine interconnected destinations rising around the Central Gate—uniting archive storytelling, radio, writing, learning, play, prismatic study, reflection, mythos, and justice."
           }
           align="center"
         />
@@ -80,13 +122,21 @@ export function WorldsSanctum({
           activeId={activeWorld.id}
           onSelect={(id) => onSelectWorld(id as WorldIdentifier)}
           className="lg:grid-cols-3"
-          items={WORLD_DOMAINS.map((worldDomain) => ({
-            id: worldDomain.id,
-            title: worldDomain.name,
-            subtitle: worldDomain.tagline,
-            statusLabel: worldDomain.statusLabel,
-            emblem: <WorldEmblemById worldId={worldDomain.id} className="h-7 w-7" />,
-          }))}
+          items={WORLD_DOMAINS.map((worldDomain) => {
+            const overrideSubtitle =
+              locale === "en"
+                ? SANCTUM_WORLD_TAGLINES.en[
+                    worldDomain.id as keyof typeof SANCTUM_WORLD_TAGLINES.en
+                  ]
+                : SANCTUM_WORLD_TAGLINES[locale][worldDomain.id];
+            return {
+              id: worldDomain.id,
+              title: worldDomain.name,
+              subtitle: overrideSubtitle ?? worldDomain.tagline,
+              statusLabel: worldDomain.statusLabel,
+              emblem: <WorldEmblemById worldId={worldDomain.id} className="h-7 w-7" />,
+            };
+          })}
         />
       </div>
 

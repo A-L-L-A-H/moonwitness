@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { stripLocalePrefix } from "@/utils/i18n";
 import type { NavItem } from "./nav-items";
 
 function matchSectionFromHash(items: NavItem[], pathname: string, rawHash: string): string | null {
   const hash = rawHash.replace(/^#/, "");
   if (!hash) return null;
+  const cleanPath = stripLocalePrefix(pathname);
   const hit = items.find(
     (item) =>
       item.target.kind === "section" &&
-      item.target.href === pathname &&
+      (item.target.href === pathname || stripLocalePrefix(item.target.href) === cleanPath) &&
       item.target.anchor === hash,
   );
   return hit?.id ?? null;
@@ -24,13 +26,18 @@ export function useActiveSection(items: NavItem[], pathname: string): string | n
     return matchSectionFromHash(items, pathname, window.location.hash);
   });
   const suppressObserverUntilRef = useRef<number>(0);
+  const cleanPath = stripLocalePrefix(pathname);
 
   const sectionAnchors = useMemo(
     () =>
       items
-        .filter((i) => i.target.kind === "section" && i.target.href === pathname)
+        .filter(
+          (i) =>
+            i.target.kind === "section" &&
+            (i.target.href === pathname || stripLocalePrefix(i.target.href) === cleanPath),
+        )
         .map((i) => ({ id: i.id, anchor: (i.target as { anchor: string }).anchor })),
-    [items, pathname],
+    [cleanPath, items, pathname],
   );
 
   useEffect(() => {

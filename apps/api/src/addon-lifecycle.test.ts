@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app";
-import { AddonRegistry, AddonRegistryError } from "@moonwitness/addon-base/registry";
+import { AddonRegistry, AddonRegistryError } from "@moonwitness/addon-runtime/registry";
 
 const dirs: string[] = [];
 let dir = "";

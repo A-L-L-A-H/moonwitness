@@ -2,7 +2,7 @@ import React from "react";
 import { Archive, ArrowLeft, AudioLines, Layers3 } from "@moonwitness/ui/icons";
 import { ROOM_SCENE_ART, type ArtworkDistrictId } from "../../assets/art";
 import { IllustratedStage } from "./IllustratedStage";
-import { AnarchyStarSigil, TelemetryWaveformSvg } from "./RocksoulVectors";
+import { AnarchyStarSigil, TelemetryWaveformSvg } from "@moonwitness/ui/artwork";
 import { WorldHeader } from "./WorldNavigation";
 
 export interface PreviewRoomProps {

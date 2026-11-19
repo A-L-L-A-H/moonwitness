@@ -6,7 +6,8 @@ describe("Syslog navigation", () => {
   it("registers the Syslog route and highlights it when active", () => {
     const syslog = operationsNavItems.find((item) => item.id === "syslog");
     expect(syslog).toBeDefined();
-    expect(syslog && navHref(syslog)).toBe("/syslog");
+    expect(syslog && navHref(syslog)).toBe("/control?tab=syslog");
+    expect(activeByPath("/control", "syslog")).toBe("syslog");
     expect(activeByPath("/syslog")).toBe("syslog");
   });
 

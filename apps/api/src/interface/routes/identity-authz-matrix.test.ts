@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb, initDb } from "@moonwitness/orm";
-import { createUser, ensureAuthSchema } from "../../services/user";
-import { resetMidJwksCacheForTests } from "../../middleware/mid-jwt";
+import { createUser, ensureAuthSchema, resetMidJwksCacheForTests } from "@moonwitness/addons/auth";
 
 const API_PREFIX = "/api/v1";
 let dbCounter = 0;
@@ -71,8 +70,8 @@ describe("API identity & deny-by-default authorization matrix", () => {
       displayName: "Matrix Viewer",
     });
 
-    const { buildFastify } = await import("../../infrastructure/adapters/fastify.adapter");
-    app = await buildFastify({ prefix: API_PREFIX });
+    const { buildCoreApp } = await import("../../bootstrap");
+    app = await buildCoreApp({ prefix: API_PREFIX });
     await app.ready();
   });
 

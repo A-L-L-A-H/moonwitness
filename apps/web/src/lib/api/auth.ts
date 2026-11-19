@@ -3,6 +3,7 @@
 import { buildCsrfLogoutInit, requestApiJson } from "@moonwitness/contracts/sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { normalizeRole, type CrewRoleName } from "@/lib/roles";
+import { notifySessionChange } from "@/lib/session";
 
 export { buildCsrfLogoutInit };
 
@@ -72,6 +73,7 @@ export function useLogin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["app"] });
+      notifySessionChange();
     },
   });
 }
@@ -83,6 +85,7 @@ export function useLogout() {
       requestJson<{ ok: boolean }>(`${APP_AUTH_BASE}/logout`, buildCsrfLogoutInit()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["app"] });
+      notifySessionChange();
     },
   });
 }

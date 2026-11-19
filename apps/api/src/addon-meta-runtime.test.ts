@@ -4,8 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { FastifyInstance } from "fastify";
 import { buildApp } from "./app";
-import { createUser } from "./services/user";
-import { createSession, SESSION_COOKIE_NAME } from "./services/session";
+import { createSession, createUser, SESSION_COOKIE_NAME } from "@moonwitness/addons/auth";
 
 const dirs: string[] = [];
 
@@ -138,5 +137,36 @@ describe("API addon runtime metadata & live toggle routes", () => {
     });
     expect(enabled.statusCode).toBe(200);
     expect((await app.inject({ url: "/api/v1/timeline/events" })).statusCode).toBe(200);
+  });
+
+  it("serves dynamic /api/v1/_meta/models without ghost models and guards /api/v1/m/:model on disabled addons", async () => {
+    const adminCookie = await issueCookie("admin");
+    const prefixedModels = await app.inject({ url: "/api/v1/_meta/models" });
+    expect(prefixedModels.statusCode).toBe(200);
+    const modelNames = prefixedModels.json().models as string[];
+    expect(modelNames).toContain("timeline.event");
+    expect(modelNames).toContain("canon.codex");
+    expect(modelNames).not.toContain("identity.user_profile");
+    expect(modelNames).not.toContain("ops.metric_snapshot");
+
+    const beforeDisable = await app.inject({
+      url: "/api/v1/m/canon.codex",
+      headers: { cookie: adminCookie },
+    });
+    expect(beforeDisable.statusCode).toBe(200);
+
+    const disableCanon = await app.inject({
+      method: "POST",
+      url: "/api/v1/_meta/addons/canon-lore/disable",
+      headers: { cookie: adminCookie },
+    });
+    expect(disableCanon.statusCode).toBe(200);
+
+    const afterDisable = await app.inject({
+      url: "/api/v1/m/canon.codex",
+      headers: { cookie: adminCookie },
+    });
+    expect(afterDisable.statusCode).toBe(503);
+    expect(afterDisable.json().code).toBe("ADDON_DISABLED");
   });
 });

@@ -1,4 +1,4 @@
-import type { Collection } from "@moonwitness/types";
+import type { Collection } from "@moonwitness/contracts/types";
 import { CollectionsGrid } from "@moonwitness/ui";
 import { SectionHeading } from "./section-heading";
 

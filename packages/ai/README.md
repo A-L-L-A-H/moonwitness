@@ -12,7 +12,7 @@ Provider-neutral AI contracts, Zod validation schemas, error hierarchy, Ollama a
 
 ## Dependencies
 
-- Workspace: `@moonwitness/errors`, `@moonwitness/types`
+- Workspace: `@moonwitness/contracts`
 - External: `zod`
 
 ## Scripts

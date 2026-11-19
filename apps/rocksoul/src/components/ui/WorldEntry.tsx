@@ -10,7 +10,7 @@ import {
   SprayTagGlyph,
   TelemetryWaveformSvg,
   VectorBarcodeStamp,
-} from "./RocksoulVectors";
+} from "@moonwitness/ui/artwork";
 
 export interface DestinationCardProps {
   id: string;

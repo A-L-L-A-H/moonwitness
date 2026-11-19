@@ -415,7 +415,7 @@ function localSteps(gate) {
   stepCommand(gate, "docs-tests", "pnpm", ["docs:test"]);
   stepCommand(gate, "format", "pnpm", ["format:check"]);
   stepCommand(gate, "lint", "pnpm", ["lint"]);
-  stepCommand(gate, "typecheck", "pnpm", ["typecheck"]);
+  stepCommand(gate, "typecheck", "pnpm", ["typecheck", "--force"]);
   stepCommand(gate, "test", "pnpm", ["test"]);
   stepCommand(gate, "build", "pnpm", ["build"]);
 }

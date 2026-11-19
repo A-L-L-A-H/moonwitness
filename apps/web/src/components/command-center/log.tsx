@@ -1,4 +1,4 @@
-import type { FeedItem, MissionAlert, Workflow } from "@moonwitness/types";
+import type { FeedItem, MissionAlert, Workflow } from "@moonwitness/contracts/types";
 import { Card, Button } from "@moonwitness/ui";
 import { Bolt, Crown } from "@moonwitness/ui/icons";
 import { SectionHeading } from "./section-heading";
