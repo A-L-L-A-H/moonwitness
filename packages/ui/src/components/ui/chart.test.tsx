@@ -62,10 +62,49 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     );
 
     expect(container.querySelectorAll('svg[data-mw-chart="sparkline"]').length).toBe(2);
+    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(6);
+    expect(container.querySelectorAll("table[data-mw-chart-data-alternative='true']")).toHaveLength(6);
     expect(container.querySelector('svg[data-mw-chart="line"]')).not.toBeNull();
     expect(container.querySelector('svg[data-mw-chart="area"]')).not.toBeNull();
     const gauge = container.querySelector('svg[data-mw-chart="radial-gauge"]');
     expect(gauge?.getAttribute("aria-label")).toBe("CPU 74%");
+  });
+
+  it("exposes chart values as accessible tables while hiding decorative SVGs", () => {
+    const inbound = [
+      { label: "00:00", value: 12 },
+      { label: "00:05", value: 0 },
+    ] as const;
+    const outbound = [
+      { label: "00:00", value: 5 },
+      { label: "00:05", value: 18 },
+    ] as const;
+
+    renderNode(
+      <ChartContainer title="Network traffic">
+        <BarChart data={inbound} ariaLabel="Inbound traffic" />
+        <LineChart data={outbound} ariaLabel="Outbound traffic" />
+        <Sparkline data={[2, 0, 4]} ariaLabel="Packet samples" />
+        <RadialGauge value={74} label="CPU" ariaLabel="CPU utilisation" />
+      </ChartContainer>,
+    );
+
+    const tables = Array.from(
+      container.querySelectorAll<HTMLTableElement>("table[data-mw-chart-data-alternative='true']"),
+    );
+    expect(tables).toHaveLength(4);
+    expect(tables[0]?.caption?.textContent).toBe("Inbound traffic data");
+    expect(tables[0]?.textContent).toContain("00:05");
+    expect(tables[0]?.textContent).toContain("0");
+    expect(tables[1]?.caption?.textContent).toBe("Outbound traffic data");
+    expect(tables[1]?.textContent).toContain("18");
+    expect(tables[2]?.caption?.textContent).toBe("Packet samples data");
+    expect(tables[2]?.textContent).toContain("Point 2");
+    expect(tables[2]?.textContent).toContain("4");
+    expect(tables[3]?.caption?.textContent).toBe("CPU utilisation data");
+    expect(tables[3]?.textContent).toContain("74%");
+    expect(container.querySelectorAll("svg[role='img']")).toHaveLength(0);
+    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(4);
   });
 
   it("renders all 10 skins inside SkinMatrixCompare and formats CSS/JSON exports", () => {

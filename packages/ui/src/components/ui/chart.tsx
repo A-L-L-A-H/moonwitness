@@ -23,6 +23,34 @@ const DEFAULT_SERIES_VARS = [
   "var(--green)",
 ] as const;
 
+function AccessibleChartData({
+  label,
+  points,
+}: {
+  label: string;
+  points: readonly ChartDataPoint[];
+}) {
+  return (
+    <table className="sr-only" data-mw-chart-data-alternative="true">
+      <caption>{`${label} data`}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Category</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        {points.map((point, index) => (
+          <tr key={`${point.label}-${index}`}>
+            <th scope="row">{point.label}</th>
+            <td>{point.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 const ChartContainer = React.forwardRef<HTMLDivElement, ChartContainerProps>(
   ({ className, title, skin, children, ...props }, ref) => {
     const { skin: resolvedSkin, dnaId, recipe } = useComponentSkin(skin);
@@ -55,15 +83,16 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
     const max = Math.max(1, ...data.map((d) => d.value));
     const width = Math.max(120, data.length * 48);
     return (
-      <svg
-        ref={ref}
-        role="img"
-        aria-label={ariaLabel}
-        viewBox={`0 0 ${width} ${height}`}
+      <>
+        <svg
+          ref={ref}
+          viewBox={`0 0 ${width} ${height}`}
         className={cn("w-full overflow-visible", className)}
-        {...props}
-      >
-        {data.map((point, idx) => {
+          {...props}
+          aria-hidden="true"
+          focusable="false"
+        >
+          {data.map((point, idx) => {}
           const barHeight = Math.max(4, Math.round((point.value / max) * (height - 28)));
           const x = idx * 48 + 8;
           const y = height - 22 - barHeight;
@@ -85,7 +114,9 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
             </g>
           );
         })}
-      </svg>
+        </svg>
+        <AccessibleChartData label={ariaLabel} points={data} />
+      </>
     );
   },
 );
@@ -120,6 +151,9 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
       () => data.map((d) => (typeof d === "number" ? d : d.value)),
       [data],
     );
+    const accessiblePoints = data.map((point, index) =>
+      typeof point === "number" ? { label: `Point ${index + 1}`, value: point } : point,
+    );
     const padding = 4;
     const min = values.length ? Math.min(...values) : 0;
     const max = values.length ? Math.max(...values) : 1;
@@ -143,16 +177,17 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
         : "";
 
     return (
-      <svg
-        ref={ref}
-        role="img"
-        aria-label={ariaLabel}
-        viewBox={`0 0 ${width} ${height}`}
-        data-mw-chart="sparkline"
+      <>
+        <svg
+          ref={ref}
+          viewBox={`0 0 ${width} ${height}`}
+          data-mw-chart="sparkline"
         className={cn("h-auto w-full overflow-visible", className)}
-        {...props}
-      >
-        {areaPoints ? (
+          {...props}
+          aria-hidden="true"
+          focusable="false"
+        >
+          {areaPoints ? (
           <polygon points={areaPoints} fill={colorVar} fillOpacity={fillOpacity} />
         ) : null}
         {coords.length >= 2 ? (
@@ -170,7 +205,9 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
             <title>{String(last.val)}</title>
           </circle>
         ) : null}
-      </svg>
+        </svg>
+        <AccessibleChartData label={ariaLabel} points={accessiblePoints} />
+      </>
     );
   },
 );
@@ -226,16 +263,17 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
         : "";
 
     return (
-      <svg
-        ref={ref}
-        role="img"
-        aria-label={ariaLabel}
-        viewBox={`0 0 ${width} ${height}`}
-        data-mw-chart={area ? "area" : "line"}
+      <>
+        <svg
+          ref={ref}
+          viewBox={`0 0 ${width} ${height}`}
+          data-mw-chart={area ? "area" : "line"}
         className={cn("h-auto w-full overflow-visible", className)}
-        {...props}
-      >
-        {showGrid
+          {...props}
+          aria-hidden="true"
+          focusable="false"
+        >
+          {showGrid
           ? [0.25, 0.5, 0.75, 1].map((frac) => {
               const y = padTop + innerH * (1 - frac);
               return (
@@ -297,7 +335,9 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
             </text>
           </g>
         ))}
-      </svg>
+        </svg>
+        <AccessibleChartData label={ariaLabel} points={data} />
+      </>
     );
   },
 );
@@ -344,19 +384,21 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
     const offset = circumference * (1 - ratio);
     const displayValue = Math.round(ratio * safeMax);
 
+    const gaugeLabel = ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`;
     return (
-      <svg
-        ref={ref}
-        role="img"
-        aria-label={ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`}
-        viewBox="0 0 88 88"
+      <>
+        <svg
+          ref={ref}
+          viewBox="0 0 88 88"
         width={size}
         height={size}
         data-mw-chart="radial-gauge"
         className={cn("shrink-0 select-none", className)}
-        {...props}
-      >
-        <circle cx="44" cy="44" r={radius} fill="none" stroke="var(--muted)" strokeWidth="7" />
+          {...props}
+          aria-hidden="true"
+          focusable="false"
+        >
+          <circle cx="44" cy="44" r={radius} fill="none" stroke="var(--muted)" strokeWidth="7" />
         <circle
           cx="44"
           cy="44"
@@ -393,7 +435,20 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
             {label}
           </text>
         ) : null}
-      </svg>
+        </svg>
+        <table className="sr-only" data-mw-chart-data-alternative="true">
+          <caption>{gaugeLabel} data</caption>
+          <tbody>
+            <tr>
+              <th scope="row">{label ?? "Value"}</th>
+              <td>
+                {displayValue}
+                {unit}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </>
     );
   },
 );
