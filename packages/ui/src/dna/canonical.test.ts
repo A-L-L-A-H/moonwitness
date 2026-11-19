@@ -13,6 +13,7 @@ import {
   hexToHslString,
   resolveCanonicalTokens,
   type CanonicalDnaId,
+  type CanonicalDensity,
 } from "./index";
 import { auditPaletteContrast, measureContrastRatio } from "../dx/contrast";
 import type { SkinName } from "../skin/compositions";
@@ -72,6 +73,16 @@ describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
         }
       }
     }
+  });
+
+  it("falls back safely for inherited DNA, skin and density keys", () => {
+    const invalidDna = resolveCanonicalTokens({ dnaId: "toString" as CanonicalDnaId });
+    const invalidSkin = resolveCanonicalTokens({ skin: "constructor" as SkinName });
+    const invalidDensity = resolveCanonicalTokens({ density: "__proto__" as CanonicalDensity });
+
+    expect(invalidDna.dnaId).toBe("01-imperium-lumen");
+    expect(invalidSkin.skin).toBe("default");
+    expect(invalidDensity.density).toBe("comfortable");
   });
 
   it("produces measurably distinct component tokens across skins", () => {

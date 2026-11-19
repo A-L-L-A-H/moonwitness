@@ -39,11 +39,11 @@ export function resolveCanonicalTokens(
   options: ResolveCanonicalTokensOptions = {},
 ): CanonicalResolvedTokens {
   const dnaId: CanonicalDnaId =
-    options.dnaId && options.dnaId in MASTER_DNA_PALETTES ? options.dnaId : "01-imperium-lumen";
-  const skin: SkinName = options.skin && options.skin in SKIN_RECIPES ? options.skin : "default";
+    options.dnaId && Object.prototype.hasOwnProperty.call(MASTER_DNA_PALETTES, options.dnaId) ? options.dnaId : "01-imperium-lumen";
+  const skin: SkinName = options.skin && Object.prototype.hasOwnProperty.call(SKIN_RECIPES, options.skin) ? options.skin : "default";
   const mode: CanonicalThemeMode = options.mode === "light" ? "light" : "dark";
   const density: CanonicalDensity =
-    options.density && options.density in DENSITY_PADDING ? options.density : "comfortable";
+    options.density && Object.prototype.hasOwnProperty.call(DENSITY_PADDING, options.density) ? options.density : "comfortable";
 
   const baseDnaPalette: DnaPaletteSpec =
     mode === "light" ? MASTER_DNA_LIGHT_PALETTES[dnaId] : MASTER_DNA_PALETTES[dnaId];
