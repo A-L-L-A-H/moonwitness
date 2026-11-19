@@ -16,7 +16,7 @@ export const snmpTargetSchema = z.object({
   target_key: z.string().min(1).max(120),
   device_key: z.string().min(1).max(120),
   oid: z.string().min(1).max(200),
-  label: z.string().min(1).max(200),
+  label: z.string().max(200).default(""),
   interval_sec: z.number().int().positive().default(60),
   enabled: z.boolean().default(true),
 });
