@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type {
   AddonDefinition,
+  AddonHostContext,
   AddonManifestInput,
   IrMenuInput,
   IrRuleInput,
@@ -8,9 +9,11 @@ import type {
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { radiusClientModel, radiusSessionModel } from "./models.js";
+import { registerRadiusRoutes } from "./routes.js";
 
 export const radiusManifest = manifestData as AddonManifestInput;
 export * from "./models.js";
+export { registerRadiusRoutes, type RadiusRoutesOptions } from "./routes.js";
 
 export const radiusRules: IrRuleInput[] = [
   { model_name: "radius.client", role: "viewer", can_read: true },
@@ -37,8 +40,8 @@ export const radiusViews: IrViewInput[] = [
     model_name: "radius.client",
     view_type: "list",
     actionBindings: {
-      listUrl: "/api/v1/radius/clients",
-      createUrl: "/api/v1/radius/clients",
+      listUrl: "/api/v1/radius/users",
+      createUrl: "/api/v1/radius/users",
     },
     spec: {
       title: "RADIUS NAS Clients",
@@ -62,8 +65,12 @@ export const radiusMenus: IrMenuInput[] = [
 ];
 
 export function createRadiusAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+
   return {
     manifest: radiusManifest,
     models: [radiusClientModel, radiusSessionModel],
@@ -71,7 +78,20 @@ export function createRadiusAddon(
     views: radiusViews,
     menus: radiusMenus,
     shouldAutoEnable: () => process.env.MW_ADDON_RADIUS_DISABLED !== "1",
-    registerRoutes: options.registerRoutes,
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerRadiusRoutes(scoped, { auth: options.auth });
+            },
+            { prefix },
+          );
+        } else {
+          await registerRadiusRoutes(scope, { auth: options.auth });
+        }
+      }),
   };
 }
 

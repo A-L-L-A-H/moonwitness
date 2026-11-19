@@ -5,14 +5,13 @@ import { join } from "node:path";
 import Fastify, { type FastifyInstance } from "fastify";
 import { closeDb } from "@moonwitness/orm";
 
-/**
- * The auth middleware is mocked per-test with `vi.doMock` rather than at module
- * scope, so the authorization test exercises the real `requireRole` gate that
- * the routes install instead of a no-op stub.
- */
+import { defaultFailClosedAuthBridge, type BaseAddonAuthBridge } from "@moonwitness/addon-runtime";
+import { registerSnmpRoutes } from "@moonwitness/addons/snmp";
+
 async function loadRoutes(allowWrite: boolean) {
-  vi.doMock("../../middleware/auth", () => ({
-    requireAuth: () => async () => {},
+  const auth: BaseAddonAuthBridge = {
+    ...defaultFailClosedAuthBridge,
+    authenticate: async () => {},
     requireRole: () =>
       allowWrite
         ? async () => {}
@@ -22,10 +21,8 @@ async function loadRoutes(allowWrite: boolean) {
           ) => {
             reply.code(403).send({ error: "Forbidden: insufficient permissions" });
           },
-  }));
-  vi.resetModules();
-  const module = await import("./snmp-poller.routes");
-  return module.snmpPollerRoutes;
+  };
+  return async (instance: FastifyInstance) => registerSnmpRoutes(instance, { auth });
 }
 
 describe("SNMP poller proxy", () => {

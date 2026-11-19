@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type {
   AddonDefinition,
+  AddonHostContext,
   AddonManifestInput,
   IrMenuInput,
   IrRuleInput,
@@ -8,9 +9,16 @@ import type {
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { storageBucketModel, storageObjectModel, storageUploadSessionModel } from "./models.js";
+import { registerStorageRoutes } from "./routes.js";
 
 export const storageManifest = manifestData as AddonManifestInput;
 export * from "./models.js";
+export * from "./sigv4.js";
+export {
+  registerStorageRoutes,
+  resolveStorageTarget,
+  type StorageRoutesOptions,
+} from "./routes.js";
 
 export const storageRules: IrRuleInput[] = [
   { model_name: "storage.bucket", role: "viewer", can_read: true },
@@ -53,7 +61,6 @@ export const storageViews: IrViewInput[] = [
     view_type: "list",
     actionBindings: {
       listUrl: "/api/v1/storage/buckets",
-      createUrl: "/api/v1/storage/buckets",
     },
     spec: {
       title: "Storage Buckets",
@@ -77,8 +84,12 @@ export const storageMenus: IrMenuInput[] = [
 ];
 
 export function createStorageAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+
   return {
     manifest: storageManifest,
     models: [storageBucketModel, storageObjectModel, storageUploadSessionModel],
@@ -86,7 +97,20 @@ export function createStorageAddon(
     views: storageViews,
     menus: storageMenus,
     shouldAutoEnable: () => process.env.MW_ADDON_STORAGE_DISABLED !== "1",
-    registerRoutes: options.registerRoutes,
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerStorageRoutes(scoped, { auth: options.auth });
+            },
+            { prefix },
+          );
+        } else {
+          await registerStorageRoutes(scope, { auth: options.auth });
+        }
+      }),
   };
 }
 

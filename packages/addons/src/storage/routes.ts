@@ -1,14 +1,22 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { createActorContext } from "@moonwitness/orm";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
-import { storageBucketModel, storageObjectModel } from "@moonwitness/addons/storage";
+import {
+  defaultFailClosedAuthBridge,
+  getEdgeLoopbackErrorPayload,
+  resolveActorContextFromBridge,
+  resolveUpstreamServiceUrl,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { storageBucketModel, storageObjectModel } from "./models.js";
 import {
   encodeStoragePath,
   getStorageSigningCredentials,
   hasCallerSignatureQuery,
   signStorageRequest,
-} from "../../services/storage-sigv4";
-import { getEdgeLoopbackErrorPayload, resolveUpstreamServiceUrl } from "../../shared/upstream";
+} from "./sigv4.js";
+
+export interface StorageRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+}
 
 export function resolveStorageTarget(target: string): URL {
   const baseUrl = new URL(resolveUpstreamServiceUrl("STORAGE_URL", "http://127.0.0.1:8091"));
@@ -25,16 +33,15 @@ export function resolveStorageTarget(target: string): URL {
   return targetUrl;
 }
 
-// Allow application/octet-stream and other binary content types for storage uploads
 function configureContentTypeParsers(fastify: FastifyInstance): void {
   fastify.addContentTypeParser(
     "application/octet-stream",
     { parseAs: "buffer" },
-    (request, payload, done) => {
+    (_request, payload, done) => {
       done(null, payload);
     },
   );
-  fastify.addContentTypeParser("*/*", { parseAs: "buffer" }, (request, payload, done) => {
+  fastify.addContentTypeParser("*/*", { parseAs: "buffer" }, (_request, payload, done) => {
     done(null, payload);
   });
 }
@@ -50,12 +57,6 @@ function forwardHeaders(request: FastifyRequest): Record<string, string> {
   return headers;
 }
 
-/**
- * Parse the wildcard tail into bucket + optional key.
- * `/storage/buckets/*` captures everything after `/storage/buckets/`.
- * - `mybucket`            → bucket="mybucket", key=""
- * - `mybucket/path/to.js` → bucket="mybucket", key="path/to.js"
- */
 function parseBucketKey(wildcard: string): { bucket: string; key: string } {
   const trimmed = wildcard.replace(/^\/+/, "").split("?")[0] ?? "";
   const slash = trimmed.indexOf("/");
@@ -64,6 +65,7 @@ function parseBucketKey(wildcard: string): { bucket: string; key: string } {
 }
 
 async function mirrorStorageMutation(
+  auth: BaseAddonAuthBridge,
   request: FastifyRequest,
   target: string,
   method: string,
@@ -77,8 +79,8 @@ async function mirrorStorageMutation(
     const { bucket, key } = parseBucketKey(rawPath);
     if (!bucket) return;
 
-    const authUser = (request as AuthenticatedRequest).user;
-    const actor = createActorContext(authUser ? String(authUser.id) : null, "api", request.id);
+    const actor = resolveActorContextFromBridge(auth, request, "api");
+    const actorId = auth.getActorId(request);
 
     if (!key) {
       if (method === "PUT") {
@@ -87,7 +89,7 @@ async function mirrorStorageMutation(
           {
             name: bucket.slice(0, 255),
             region: null,
-            owner_id: authUser ? String(authUser.id) : null,
+            owner_id: actorId,
             versioning: false,
             is_public: false,
             metadata_json: null,
@@ -95,7 +97,10 @@ async function mirrorStorageMutation(
           actor,
         );
       } else if (method === "DELETE") {
-        const existing = await storageBucketModel.repository.find({ name: bucket.slice(0, 255) });
+        const existing = await storageBucketModel.repository.find(
+          { name: bucket.slice(0, 255) },
+          { tenantId: actor.tenantId },
+        );
         for (const row of existing) {
           await storageBucketModel.repository.delete(row.id, actor);
         }
@@ -122,10 +127,13 @@ async function mirrorStorageMutation(
         actor,
       );
     } else if (method === "DELETE") {
-      const existing = await storageObjectModel.repository.find({
-        bucket: bucket.slice(0, 255),
-        object_key: key.slice(0, 1024),
-      });
+      const existing = await storageObjectModel.repository.find(
+        {
+          bucket: bucket.slice(0, 255),
+          object_key: key.slice(0, 1024),
+        },
+        { tenantId: actor.tenantId },
+      );
       for (const row of existing) {
         await storageObjectModel.repository.delete(row.id, actor);
       }
@@ -136,6 +144,7 @@ async function mirrorStorageMutation(
 }
 
 async function forward(
+  auth: BaseAddonAuthBridge,
   request: FastifyRequest,
   reply: FastifyReply,
   target: string,
@@ -203,7 +212,7 @@ async function forward(
     return reply.code(502).send({ error: "storage tidak dapat dihubungi", reachable: false });
   }
 
-  await mirrorStorageMutation(request, target, method, bodyBytes, upstream);
+  await mirrorStorageMutation(auth, request, target, method, bodyBytes, upstream);
 
   const responseBody = Buffer.from(await upstream.arrayBuffer());
   return reply
@@ -221,59 +230,68 @@ function queryOf(request: FastifyRequest): string {
   return request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
 }
 
-export async function storageRoutes(fastify: FastifyInstance) {
+export async function registerStorageRoutes(
+  fastify: FastifyInstance,
+  options: StorageRoutesOptions = {},
+) {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const adminOnly = auth.requireRole("admin");
+
   configureContentTypeParsers(fastify);
-  fastify.addHook("preHandler", requireAuth());
+  fastify.addHook("preHandler", async (request, reply) => {
+    if (request.method === "OPTIONS") return;
+    return auth.authenticate(request, reply);
+  });
 
   fastify.get("/storage/health", async (request, reply) =>
-    forward(request, reply, "/health", "GET", false),
+    forward(auth, request, reply, "/health", "GET", false),
   );
 
-  fastify.get("/storage/buckets", async (request, reply) => forward(request, reply, "/", "GET"));
+  fastify.get("/storage/buckets", async (request, reply) =>
+    forward(auth, request, reply, "/", "GET"),
+  );
 
-  // All bucket/object operations share one wildcard route to avoid Fastify
-  // route conflicts between `/:bucket` and `/:bucket/*`.
   fastify.put<{ Params: WildcardParams }>(
     "/storage/buckets/*",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) => {
       const { bucket, key } = parseBucketKey(request.params["*"]);
       if (key) {
-        return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "PUT");
+        return forward(auth, request, reply, `/${bucket}/${key}${queryOf(request)}`, "PUT");
       }
-      return forward(request, reply, `/${bucket}${queryOf(request)}`, "PUT");
+      return forward(auth, request, reply, `/${bucket}${queryOf(request)}`, "PUT");
     },
   );
 
   fastify.head<{ Params: WildcardParams }>("/storage/buckets/*", async (request, reply) => {
     const { bucket, key } = parseBucketKey(request.params["*"]);
     if (key) {
-      return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "HEAD");
+      return forward(auth, request, reply, `/${bucket}/${key}${queryOf(request)}`, "HEAD");
     }
-    return forward(request, reply, `/${bucket}${queryOf(request)}`, "HEAD");
+    return forward(auth, request, reply, `/${bucket}${queryOf(request)}`, "HEAD");
   });
 
   fastify.delete<{ Params: WildcardParams }>(
     "/storage/buckets/*",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) => {
       const { bucket, key } = parseBucketKey(request.params["*"]);
       if (key) {
-        return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "DELETE");
+        return forward(auth, request, reply, `/${bucket}/${key}${queryOf(request)}`, "DELETE");
       }
-      return forward(request, reply, `/${bucket}${queryOf(request)}`, "DELETE");
+      return forward(auth, request, reply, `/${bucket}${queryOf(request)}`, "DELETE");
     },
   );
 
   fastify.post<{ Params: WildcardParams }>(
     "/storage/buckets/*",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) => {
       const { bucket, key } = parseBucketKey(request.params["*"]);
       if (key) {
-        return forward(request, reply, `/${bucket}/${key}${queryOf(request)}`, "POST");
+        return forward(auth, request, reply, `/${bucket}/${key}${queryOf(request)}`, "POST");
       }
-      return forward(request, reply, `/${bucket}${queryOf(request)}`, "POST");
+      return forward(auth, request, reply, `/${bucket}${queryOf(request)}`, "POST");
     },
   );
 
@@ -287,10 +305,8 @@ export async function storageRoutes(fastify: FastifyInstance) {
       );
 
     if (!key || isListingAlias) {
-      // Bucket listing: GET /storage/buckets/:bucket?list-type=2
-      // Also accept /storage/buckets/:bucket/objects?... used by the web client.
-      return forward(request, reply, `/${bucket}${query}`, "GET");
+      return forward(auth, request, reply, `/${bucket}${query}`, "GET");
     }
-    return forward(request, reply, `/${bucket}/${key}${query}`, "GET");
+    return forward(auth, request, reply, `/${bucket}/${key}${query}`, "GET");
   });
 }

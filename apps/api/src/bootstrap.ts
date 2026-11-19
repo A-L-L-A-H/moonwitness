@@ -42,11 +42,7 @@ import {
 import { registerHealthRoutes, registerMetricsRoute } from "./interface/routes/health.routes";
 import { createApiMetricsCollector } from "./interface/routes/metrics";
 import { memoryRoutes } from "./interface/routes/memory.routes";
-import { radiusRoutes } from "./interface/routes/radius.routes";
 import { riotAiRoutes } from "./interface/routes/riot-ai.routes";
-import { snmpPollerRoutes } from "./interface/routes/snmp-poller.routes";
-import { storageRoutes } from "./interface/routes/storage.routes";
-import { syslogRoutes } from "./interface/routes/syslog.routes";
 import {
   optionalAuth,
   requireAuth,
@@ -204,26 +200,10 @@ async function registerAddonTree(
         await scope.register(memoryRoutes, prefix ? { prefix } : {});
       },
     }),
-    createStorageAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(storageRoutes, prefix ? { prefix } : {});
-      },
-    }),
-    createSnmpAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(snmpPollerRoutes, prefix ? { prefix } : {});
-      },
-    }),
-    createSyslogAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(syslogRoutes, prefix ? { prefix } : {});
-      },
-    }),
-    createRadiusAddon({
-      registerRoutes: async (scope) => {
-        await scope.register(radiusRoutes, prefix ? { prefix } : {});
-      },
-    }),
+    createStorageAddon(host),
+    createSnmpAddon(host),
+    createSyslogAddon(host),
+    createRadiusAddon(host),
     createCanonLoreAddon({ prefix, auth: host.auth }),
     createWitnessResearchAddon({ prefix, auth: host.auth }),
     createEpistemicAddon({ prefix, auth: host.auth }),

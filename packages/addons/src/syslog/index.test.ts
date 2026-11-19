@@ -1,12 +1,18 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import Fastify from "fastify";
 import { closeDb, initDb, modelRegistry } from "@moonwitness/orm";
-import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
+import {
+  AddonRuntimeController,
+  baseManifest,
+  defaultFailClosedAuthBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
 import { auditAddon } from "../audit";
 import { authAddon } from "../auth";
-import { syslogAddon } from "./index.js";
+import { createSyslogAddon, syslogAddon } from "./index.js";
 
 describe("../syslog", () => {
   const dirs: string[] = [];
@@ -19,6 +25,7 @@ describe("../syslog", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     closeDb();
     modelRegistry.clearCustomFieldsForTests();
   });
@@ -42,5 +49,43 @@ describe("../syslog", () => {
       syslogAddon,
     ]);
     expect(syncReport.createdTables).toContain("syslog_entries");
+    const view = await runtime.getViewDescriptor("syslog.entry", "viewer");
+    expect(view?.actionBindings.listUrl).toBe("/api/v1/syslog/messages");
+  });
+
+  it("self-mounts /api/v1/syslog/messages from createSyslogAddon(host)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ messages: [] }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      ),
+    );
+    const app = Fastify({ logger: false });
+    const testAuth: BaseAddonAuthBridge = {
+      ...defaultFailClosedAuthBridge,
+      authenticate: async (req) => {
+        (req as { user?: { id: string; role: string } }).user = { id: "1", role: "viewer" };
+      },
+    };
+    const runtime = new AddonRuntimeController();
+    await runtime.syncAll(
+      [
+        { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+        auditAddon,
+        authAddon,
+        createSyslogAddon({ prefix: "/api/v1", auth: testAuth }),
+      ],
+      app,
+    );
+    await app.ready();
+    try {
+      const res = await app.inject({ method: "GET", url: "/api/v1/syslog/messages" });
+      expect(res.statusCode).toBe(200);
+    } finally {
+      await app.close();
+    }
   });
 });

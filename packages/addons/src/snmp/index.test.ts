@@ -1,12 +1,18 @@
-import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
+import Fastify from "fastify";
 import { closeDb, initDb, modelRegistry } from "@moonwitness/orm";
-import { AddonRuntimeController, baseManifest } from "@moonwitness/addon-runtime";
+import {
+  AddonRuntimeController,
+  baseManifest,
+  defaultFailClosedAuthBridge,
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
 import { auditAddon } from "../audit";
 import { authAddon } from "../auth";
-import { snmpAddon } from "./index.js";
+import { createSnmpAddon, snmpAddon } from "./index.js";
 
 describe("../snmp", () => {
   const dirs: string[] = [];
@@ -19,6 +25,7 @@ describe("../snmp", () => {
   });
 
   afterEach(() => {
+    vi.unstubAllGlobals();
     closeDb();
     modelRegistry.clearCustomFieldsForTests();
   });
@@ -46,6 +53,44 @@ describe("../snmp", () => {
     );
     const view = await runtime.getViewDescriptor("snmp.device", "editor");
     expect(view?.extensible).toBe(true);
+    expect(view?.actionBindings.listUrl).toBe("/api/v1/snmp/devices");
     expect(view?.actionBindings.createUrl).toBe("/api/v1/snmp/devices");
+  });
+
+  it("self-mounts /api/v1/snmp/devices from createSnmpAddon(host)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ devices: [] }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      ),
+    );
+    const app = Fastify({ logger: false });
+    const testAuth: BaseAddonAuthBridge = {
+      ...defaultFailClosedAuthBridge,
+      authenticate: async (req) => {
+        (req as { user?: { id: string; role: string } }).user = { id: "1", role: "admin" };
+      },
+      requireRole: () => async () => undefined,
+    };
+    const runtime = new AddonRuntimeController();
+    await runtime.syncAll(
+      [
+        { manifest: { ...baseManifest, autoInstall: true, defaultEnabled: true } },
+        auditAddon,
+        authAddon,
+        createSnmpAddon({ prefix: "/api/v1", auth: testAuth }),
+      ],
+      app,
+    );
+    await app.ready();
+    try {
+      const res = await app.inject({ method: "GET", url: "/api/v1/snmp/devices" });
+      expect(res.statusCode).toBe(200);
+    } finally {
+      await app.close();
+    }
   });
 });

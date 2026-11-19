@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type {
   AddonDefinition,
+  AddonHostContext,
   AddonManifestInput,
   IrMenuInput,
   IrRuleInput,
@@ -8,9 +9,11 @@ import type {
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { syslogEntryModel } from "./models.js";
+import { registerSyslogRoutes } from "./routes.js";
 
 export const syslogManifest = manifestData as AddonManifestInput;
 export * from "./models.js";
+export { registerSyslogRoutes, type SyslogRoutesOptions } from "./routes.js";
 
 export const syslogRules: IrRuleInput[] = [
   { model_name: "syslog.entry", role: "viewer", can_read: true },
@@ -22,7 +25,7 @@ export const syslogViews: IrViewInput[] = [
   {
     model_name: "syslog.entry",
     view_type: "list",
-    actionBindings: { listUrl: "/api/v1/syslog/entries" },
+    actionBindings: { listUrl: "/api/v1/syslog/messages" },
     spec: {
       title: "Syslog Stream",
       description: "Structured logs forwarded from the syslog daemon.",
@@ -45,8 +48,12 @@ export const syslogMenus: IrMenuInput[] = [
 ];
 
 export function createSyslogAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+
   return {
     manifest: syslogManifest,
     models: [syslogEntryModel],
@@ -54,7 +61,20 @@ export function createSyslogAddon(
     views: syslogViews,
     menus: syslogMenus,
     shouldAutoEnable: () => process.env.MW_ADDON_SYSLOG_DISABLED !== "1",
-    registerRoutes: options.registerRoutes,
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerSyslogRoutes(scoped, { auth: options.auth });
+            },
+            { prefix },
+          );
+        } else {
+          await registerSyslogRoutes(scope, { auth: options.auth });
+        }
+      }),
   };
 }
 

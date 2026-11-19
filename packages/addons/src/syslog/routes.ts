@@ -1,10 +1,15 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { requireAuth } from "../../middleware/auth";
 import {
+  defaultFailClosedAuthBridge,
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
   resolveUpstreamServiceUrl,
-} from "../../shared/upstream";
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+
+export interface SyslogRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+}
 
 function getSyslogUrl(): string {
   return resolveUpstreamServiceUrl("SYSLOG_URL", "http://127.0.0.1:8093");
@@ -52,8 +57,16 @@ async function forward(
     .send(text);
 }
 
-export async function syslogRoutes(fastify: FastifyInstance) {
-  fastify.addHook("preHandler", requireAuth());
+export async function registerSyslogRoutes(
+  fastify: FastifyInstance,
+  options: SyslogRoutesOptions = {},
+) {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+
+  fastify.addHook("preHandler", async (request, reply) => {
+    if (request.method === "OPTIONS") return;
+    return auth.authenticate(request, reply);
+  });
 
   fastify.get("/syslog/health", async (request, reply) =>
     forward(request, reply, "/health", "GET"),

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type {
   AddonDefinition,
+  AddonHostContext,
   AddonManifestInput,
   IrMenuInput,
   IrRuleInput,
@@ -8,9 +9,11 @@ import type {
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { snmpDeviceModel, snmpSampleModel, snmpTargetModel } from "./models.js";
+import { registerSnmpRoutes } from "./routes.js";
 
 export const snmpManifest = manifestData as AddonManifestInput;
 export * from "./models.js";
+export { registerSnmpRoutes, type SnmpRoutesOptions } from "./routes.js";
 
 export const snmpRules: IrRuleInput[] = [
   { model_name: "snmp.device", role: "viewer", can_read: true },
@@ -64,8 +67,12 @@ export const snmpMenus: IrMenuInput[] = [
 ];
 
 export function createSnmpAddon(
-  options: { registerRoutes?: (scope: FastifyInstance) => Promise<void> | void } = {},
+  options: Partial<AddonHostContext> & {
+    registerRoutes?: (scope: FastifyInstance) => Promise<void> | void;
+  } = {},
 ): AddonDefinition {
+  const prefix = (options.prefix ?? "/api/v1").replace(/\/+$/, "");
+
   return {
     manifest: snmpManifest,
     models: [snmpDeviceModel, snmpTargetModel, snmpSampleModel],
@@ -73,7 +80,20 @@ export function createSnmpAddon(
     views: snmpViews,
     menus: snmpMenus,
     shouldAutoEnable: () => process.env.MW_ADDON_SNMP_DISABLED !== "1",
-    registerRoutes: options.registerRoutes,
+    registerRoutes:
+      options.registerRoutes ??
+      (async (scope) => {
+        if (prefix) {
+          await scope.register(
+            async (scoped) => {
+              await registerSnmpRoutes(scoped, { auth: options.auth });
+            },
+            { prefix },
+          );
+        } else {
+          await registerSnmpRoutes(scope, { auth: options.auth });
+        }
+      }),
   };
 }
 

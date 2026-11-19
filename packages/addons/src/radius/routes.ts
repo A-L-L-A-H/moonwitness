@@ -1,18 +1,22 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { createActorContext } from "@moonwitness/orm";
-import { tryRecordAuditLog } from "@moonwitness/addons/audit";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
 import {
+  defaultFailClosedAuthBridge,
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
+  resolveActorContextFromBridge,
   resolveUpstreamServiceUrl,
-} from "../../shared/upstream";
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { tryRecordAuditLog } from "../audit/index.js";
+
+export interface RadiusRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+}
 
 function getRadiusUrl(): string {
   return resolveUpstreamServiceUrl("RADIUS_URL", "http://127.0.0.1:8090");
 }
 
-// Write endpoints dikunci di balik env, sama seperti control.routes.ts.
 function radiusProxyAdminEnabled(): boolean {
   return process.env.RADIUS_PROXY_ADMIN === "1";
 }
@@ -24,6 +28,7 @@ function forwardHeaders(request: FastifyRequest): Record<string, string> {
 }
 
 async function forward(
+  auth: BaseAddonAuthBridge,
   request: FastifyRequest,
   reply: FastifyReply,
   target: string,
@@ -57,7 +62,9 @@ async function forward(
     (method === "POST" || method === "PUT" || method === "DELETE") &&
     target.startsWith("/api/users")
   ) {
-    const authUser = (request as AuthenticatedRequest).user;
+    const actor = resolveActorContextFromBridge(auth, request, "api");
+    const actorId = auth.getActorId(request);
+    const actorRole = actorId ? auth.getActorRole(request) : null;
     const bodyObj =
       request.body && typeof request.body === "object"
         ? (request.body as Record<string, unknown>)
@@ -72,8 +79,8 @@ async function forward(
       entity: "radius_user",
       entityId,
       action,
-      actor: createActorContext(authUser ? String(authUser.id) : null, "api", request.id),
-      actorRole: authUser?.role ?? null,
+      actor,
+      actorRole,
       requestPath: request.url,
       outcome: "success",
       metadata: {
@@ -91,7 +98,7 @@ async function forward(
     .send(text);
 }
 
-function requireAdmin(reply: FastifyReply): boolean {
+function requireAdminEnvEnabled(reply: FastifyReply): boolean {
   if (!radiusProxyAdminEnabled()) {
     reply.code(403).send({
       error: "aksi tulis radius dimatikan; set RADIUS_PROXY_ADMIN=1 untuk mengaktifkan",
@@ -101,32 +108,42 @@ function requireAdmin(reply: FastifyReply): boolean {
   return true;
 }
 
-export async function radiusRoutes(fastify: FastifyInstance) {
-  fastify.addHook("preHandler", requireAuth());
+export async function registerRadiusRoutes(
+  fastify: FastifyInstance,
+  options: RadiusRoutesOptions = {},
+) {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const adminOnly = auth.requireRole("admin");
+
+  fastify.addHook("preHandler", async (request, reply) => {
+    if (request.method === "OPTIONS") return;
+    return auth.authenticate(request, reply);
+  });
 
   fastify.get("/radius/health", async (request, reply) =>
-    forward(request, reply, "/health", "GET"),
+    forward(auth, request, reply, "/health", "GET"),
   );
 
   fastify.get("/radius/users", async (request, reply) =>
-    forward(request, reply, "/api/users", "GET"),
+    forward(auth, request, reply, "/api/users", "GET"),
   );
 
   fastify.get<{ Params: { username: string } }>("/radius/users/:username", async (request, reply) =>
-    forward(request, reply, `/api/users/${encodeURIComponent(request.params.username)}`, "GET"),
+    forward(auth, request, reply, `/api/users/${encodeURIComponent(request.params.username)}`, "GET"),
   );
 
-  fastify.post("/radius/users", { preHandler: requireRole("admin") }, async (request, reply) => {
-    if (!requireAdmin(reply)) return reply;
-    return forward(request, reply, "/api/users", "POST");
+  fastify.post("/radius/users", { preHandler: adminOnly }, async (request, reply) => {
+    if (!requireAdminEnvEnabled(reply)) return reply;
+    return forward(auth, request, reply, "/api/users", "POST");
   });
 
   fastify.put<{ Params: { username: string } }>(
     "/radius/users/:username",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) => {
-      if (!requireAdmin(reply)) return reply;
+      if (!requireAdminEnvEnabled(reply)) return reply;
       return forward(
+        auth,
         request,
         reply,
         `/api/users/${encodeURIComponent(request.params.username)}`,
@@ -137,10 +154,11 @@ export async function radiusRoutes(fastify: FastifyInstance) {
 
   fastify.delete<{ Params: { username: string } }>(
     "/radius/users/:username",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) => {
-      if (!requireAdmin(reply)) return reply;
+      if (!requireAdminEnvEnabled(reply)) return reply;
       return forward(
+        auth,
         request,
         reply,
         `/api/users/${encodeURIComponent(request.params.username)}`,
@@ -151,10 +169,10 @@ export async function radiusRoutes(fastify: FastifyInstance) {
 
   fastify.get("/radius/logs", async (request, reply) => {
     const query = request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
-    return forward(request, reply, `/api/logs${query}`, "GET");
+    return forward(auth, request, reply, `/api/logs${query}`, "GET");
   });
 
   fastify.get("/radius/stats", async (request, reply) =>
-    forward(request, reply, "/api/stats", "GET"),
+    forward(auth, request, reply, "/api/stats", "GET"),
   );
 }

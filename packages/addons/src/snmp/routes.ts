@@ -1,16 +1,22 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { createActorContext } from "@moonwitness/orm";
-import { requireAuth, requireRole, type AuthenticatedRequest } from "../../middleware/auth";
-import { snmpDeviceModel, snmpTargetModel } from "@moonwitness/addons/snmp";
 import {
+  defaultFailClosedAuthBridge,
   getEdgeLoopbackErrorPayload,
   getUpstreamBridgeHeaders,
+  resolveActorContextFromBridge,
   resolveUpstreamServiceUrl,
-} from "../../shared/upstream";
+  type BaseAddonAuthBridge,
+} from "@moonwitness/addon-runtime";
+import { snmpDeviceModel, snmpTargetModel } from "./models.js";
+
+export interface SnmpRoutesOptions {
+  auth?: BaseAddonAuthBridge;
+}
 
 function getSnmpPollerUrl(): string {
   return resolveUpstreamServiceUrl("SNMP_POLLER_URL", "http://127.0.0.1:8094");
 }
+
 const SENSITIVE_FIELD =
   /community|pass(?:word|phrase)|secret|credential|access.?key|auth.?key|priv.?key|token/i;
 
@@ -41,6 +47,7 @@ function normalizeSnmpVersion(raw: unknown): "v1" | "v2c" | "v3" {
 }
 
 async function mirrorSnmpMutation(
+  auth: BaseAddonAuthBridge,
   request: FastifyRequest,
   target: string,
   method: string,
@@ -49,14 +56,7 @@ async function mirrorSnmpMutation(
 ): Promise<void> {
   if (status >= 400 || (method !== "POST" && method !== "DELETE")) return;
   try {
-    const authReq = request as AuthenticatedRequest;
-    const authUser = authReq.user;
-    const actor = createActorContext(
-      authUser ? String(authUser.id) : null,
-      "api",
-      request.id,
-      authReq.tenantId,
-    );
+    const actor = resolveActorContextFromBridge(auth, request, "api");
     const bodyObj =
       request.body && typeof request.body === "object"
         ? (request.body as Record<string, unknown>)
@@ -104,7 +104,7 @@ async function mirrorSnmpMutation(
       if (deviceKey) {
         const existing = await snmpDeviceModel.repository.find(
           { device_key: deviceKey },
-          authReq.tenantId ? { tenantId: authReq.tenantId } : undefined,
+          { tenantId: actor.tenantId },
         );
         for (const row of existing) {
           await snmpDeviceModel.repository.delete(row.id, actor);
@@ -143,7 +143,7 @@ async function mirrorSnmpMutation(
       if (targetKey) {
         const existing = await snmpTargetModel.repository.find(
           { target_key: targetKey },
-          authReq.tenantId ? { tenantId: authReq.tenantId } : undefined,
+          { tenantId: actor.tenantId },
         );
         for (const row of existing) {
           await snmpTargetModel.repository.delete(row.id, actor);
@@ -156,6 +156,7 @@ async function mirrorSnmpMutation(
 }
 
 async function forward(
+  auth: BaseAddonAuthBridge,
   request: FastifyRequest,
   reply: FastifyReply,
   target: string,
@@ -193,7 +194,7 @@ async function forward(
       return reply.code(502).send({ error: "snmp-poller returned invalid JSON" });
     }
   }
-  await mirrorSnmpMutation(request, target, method, upstream.status, text);
+  await mirrorSnmpMutation(auth, request, target, method, upstream.status, text);
   return reply
     .code(upstream.status)
     .header("content-type", contentType)
@@ -201,39 +202,63 @@ async function forward(
     .send(text);
 }
 
-export async function snmpPollerRoutes(fastify: FastifyInstance) {
-  fastify.addHook("preHandler", requireAuth());
+export async function registerSnmpRoutes(
+  fastify: FastifyInstance,
+  options: SnmpRoutesOptions = {},
+) {
+  const auth = options.auth ?? defaultFailClosedAuthBridge;
+  const adminOnly = auth.requireRole("admin");
 
-  fastify.get("/snmp/health", async (request, reply) => forward(request, reply, "/health", "GET"));
+  fastify.addHook("preHandler", async (request, reply) => {
+    if (request.method === "OPTIONS") return;
+    return auth.authenticate(request, reply);
+  });
 
-  fastify.get("/snmp/devices", async (request, reply) =>
-    forward(request, reply, "/api/devices", "GET"),
+  fastify.get("/snmp/health", async (request, reply) =>
+    forward(auth, request, reply, "/health", "GET"),
   );
 
-  fastify.post("/snmp/devices", { preHandler: requireRole("admin") }, async (request, reply) =>
-    forward(request, reply, "/api/devices", "POST"),
+  fastify.get("/snmp/devices", async (request, reply) =>
+    forward(auth, request, reply, "/api/devices", "GET"),
+  );
+
+  fastify.post("/snmp/devices", { preHandler: adminOnly }, async (request, reply) =>
+    forward(auth, request, reply, "/api/devices", "POST"),
   );
 
   fastify.get<{ Params: { id: string } }>("/snmp/devices/:id", async (request, reply) =>
-    forward(request, reply, `/api/devices/${encodeURIComponent(request.params.id)}`, "GET"),
+    forward(auth, request, reply, `/api/devices/${encodeURIComponent(request.params.id)}`, "GET"),
   );
 
   fastify.delete<{ Params: { id: string } }>(
     "/snmp/devices/:id",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) =>
-      forward(request, reply, `/api/devices/${encodeURIComponent(request.params.id)}`, "DELETE"),
+      forward(
+        auth,
+        request,
+        reply,
+        `/api/devices/${encodeURIComponent(request.params.id)}`,
+        "DELETE",
+      ),
   );
 
   fastify.get<{ Params: { id: string } }>("/snmp/devices/:id/targets", async (request, reply) =>
-    forward(request, reply, `/api/devices/${encodeURIComponent(request.params.id)}/targets`, "GET"),
+    forward(
+      auth,
+      request,
+      reply,
+      `/api/devices/${encodeURIComponent(request.params.id)}/targets`,
+      "GET",
+    ),
   );
 
   fastify.post<{ Params: { id: string } }>(
     "/snmp/devices/:id/targets",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) =>
       forward(
+        auth,
         request,
         reply,
         `/api/devices/${encodeURIComponent(request.params.id)}/targets`,
@@ -242,19 +267,26 @@ export async function snmpPollerRoutes(fastify: FastifyInstance) {
   );
 
   fastify.get<{ Params: { id: string } }>("/snmp/targets/:id", async (request, reply) =>
-    forward(request, reply, `/api/targets/${encodeURIComponent(request.params.id)}`, "GET"),
+    forward(auth, request, reply, `/api/targets/${encodeURIComponent(request.params.id)}`, "GET"),
   );
 
   fastify.delete<{ Params: { id: string } }>(
     "/snmp/targets/:id",
-    { preHandler: requireRole("admin") },
+    { preHandler: adminOnly },
     async (request, reply) =>
-      forward(request, reply, `/api/targets/${encodeURIComponent(request.params.id)}`, "DELETE"),
+      forward(
+        auth,
+        request,
+        reply,
+        `/api/targets/${encodeURIComponent(request.params.id)}`,
+        "DELETE",
+      ),
   );
 
   fastify.get<{ Params: { id: string } }>("/snmp/targets/:id/samples", async (request, reply) => {
     const query = request.url.includes("?") ? request.url.slice(request.url.indexOf("?")) : "";
     return forward(
+      auth,
       request,
       reply,
       `/api/targets/${encodeURIComponent(request.params.id)}/samples${query}`,
@@ -263,10 +295,16 @@ export async function snmpPollerRoutes(fastify: FastifyInstance) {
   });
 
   fastify.get<{ Params: { id: string } }>("/snmp/targets/:id/latest", async (request, reply) =>
-    forward(request, reply, `/api/targets/${encodeURIComponent(request.params.id)}/latest`, "GET"),
+    forward(
+      auth,
+      request,
+      reply,
+      `/api/targets/${encodeURIComponent(request.params.id)}/latest`,
+      "GET",
+    ),
   );
 
   fastify.get("/snmp/stats", async (request, reply) =>
-    forward(request, reply, "/api/stats", "GET"),
+    forward(auth, request, reply, "/api/stats", "GET"),
   );
 }
