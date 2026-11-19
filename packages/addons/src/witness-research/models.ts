@@ -31,6 +31,7 @@ export const witnessClaimModel = defineModel({
   }),
   extensible: true,
   restEnabled: true,
+  searchFields: ["claim_key", "statement", "source_key"],
   publicFields: ["claim_key", "statement", "tier", "confidence", "verdict"],
   indexes: [{ fields: ["claim_key"], unique: true }, { fields: ["verdict"] }],
 });

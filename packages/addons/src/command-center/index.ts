@@ -20,13 +20,19 @@ export * from "./service.js";
 export { registerCommandCenterRoutes } from "./routes.js";
 
 export const commandCenterRules: IrRuleInput[] = [
-  { model_name: "command.workflow", role: "viewer", can_read: true },
+  {
+    model_name: "command.workflow",
+    role: "viewer",
+    can_read: true,
+    domain: { actor_id: "$actor.id" },
+  },
   {
     model_name: "command.workflow",
     role: "editor",
     can_read: true,
     can_create: true,
     can_update: true,
+    domain: { actor_id: "$actor.id" },
   },
   {
     model_name: "command.workflow",
@@ -36,13 +42,19 @@ export const commandCenterRules: IrRuleInput[] = [
     can_update: true,
     can_delete: true,
   },
-  { model_name: "command.alert", role: "viewer", can_read: true },
+  {
+    model_name: "command.alert",
+    role: "viewer",
+    can_read: true,
+    domain: { actor_id: "$actor.id" },
+  },
   {
     model_name: "command.alert",
     role: "editor",
     can_read: true,
     can_create: true,
     can_update: true,
+    domain: { actor_id: "$actor.id" },
   },
   {
     model_name: "command.alert",

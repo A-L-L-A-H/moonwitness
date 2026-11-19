@@ -200,14 +200,6 @@ export async function recordProbeEvent(params: {
     actor,
   );
 
-  // Retain up to 1000 recent events cleanly in SQLite and Postgres alike.
-  await getDb().run(
-    `DELETE FROM orm_probe_events
-     WHERE id NOT IN (
-       SELECT id FROM orm_probe_events ORDER BY checked_at DESC LIMIT 1000
-     )`,
-  );
-
   return {
     id: created.id,
     nodeId: created.node_key,

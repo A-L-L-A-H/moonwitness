@@ -338,9 +338,13 @@ export async function getCommandCenterStats(
   const { actor, actorId } = normalizeActor(actorOrId);
   await seedActorDefaultsIfEmpty(actor);
   const tenantOpt = actor.tenantId ? { tenantId: actor.tenantId } : undefined;
-  const [workflows, activeAlerts] = await Promise.all([
-    workflowModel.repository.find({ actor_id: actorId }, tenantOpt),
-    alertModel.repository.find({ actor_id: actorId, dismissed: false }, tenantOpt),
+  const [wfGroups, activeAlertCount] = await Promise.all([
+    workflowModel.repository.readGroup({
+      filters: { actor_id: actorId },
+      groupBy: ["workflow_status"],
+      ...(actor.tenantId ? { tenantId: actor.tenantId } : {}),
+    }),
+    alertModel.repository.count({ actor_id: actorId, dismissed: false }, tenantOpt),
   ]);
   const counts: Record<WorkflowStatus, number> = {
     Queued: 0,
@@ -350,19 +354,22 @@ export async function getCommandCenterStats(
     Failed: 0,
     Cancelled: 0,
   };
-  for (const row of workflows) {
+  let totalWorkflows = 0;
+  for (const row of wfGroups) {
     const status = workflowStatusSchema.safeParse(row.workflow_status);
-    if (status.success) counts[status.data] += 1;
+    const n = Number(row.count ?? 0);
+    if (status.success) counts[status.data] += n;
+    totalWorkflows += n;
   }
   return {
-    workflows: workflows.length,
+    workflows: totalWorkflows,
     running: counts.Running,
     queued: counts.Queued,
     paused: counts.Paused,
     succeeded: counts.Succeeded,
     failed: counts.Failed,
     cancelled: counts.Cancelled,
-    alerts: activeAlerts.length,
+    alerts: activeAlertCount,
   };
 }
 

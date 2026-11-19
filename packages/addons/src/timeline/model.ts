@@ -8,6 +8,7 @@ export const timelineEventModel = defineModel({
   softDelete: true,
   extensible: true,
   restEnabled: true,
+  searchFields: ["title", "excerpt", "body", "location", "tags"],
   publicFields: ["id", "kind", "date", "era", "title", "excerpt", "tags"],
   indexes: [{ fields: ["era"] }, { fields: ["kind"] }, { fields: ["date"] }],
 });
@@ -18,6 +19,7 @@ export const timelineEraModel = defineModel({
   schema: EraSchema,
   softDelete: true,
   restEnabled: true,
+  searchFields: ["id", "name", "tagline"],
   publicFields: ["id", "name", "years", "color"],
 });
 

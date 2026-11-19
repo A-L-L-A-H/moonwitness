@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import {
   defaultFailClosedAuthBridge,
+  type AddonDataRecord,
   type AddonDefinition,
   type AddonHostContext,
   type AddonManifestInput,
@@ -12,7 +13,7 @@ import {
 import manifestData from "./manifest.json" with { type: "json" };
 import { opsEventModel, probeEventModel, probeNodeModel } from "./models.js";
 import { registerProbesRoutes } from "./routes.js";
-import { importLegacyProbes, seedDefaultProbeNodes } from "./service.js";
+import { DEFAULT_PROBE_NODES, importLegacyProbes } from "./service.js";
 
 export const probesManifest = manifestData as AddonManifestInput;
 export {
@@ -89,6 +90,21 @@ export const probesMenus: IrMenuInput[] = [
   },
 ];
 
+export const probesData: AddonDataRecord[] = DEFAULT_PROBE_NODES.map((node) => ({
+  id: `probe_node_${node.id.replace(/-/g, "_")}`,
+  model: "probe.node",
+  key: { node_key: node.id },
+  noupdate: true,
+  values: {
+    node_key: node.id,
+    name: node.name,
+    target_url: node.targetUrl,
+    category: node.category,
+    enabled: true,
+    metadata_json: null,
+  },
+}));
+
 export function createProbesAddon(
   options: Partial<AddonHostContext> & {
     auth?: BaseAddonAuthBridge;
@@ -104,11 +120,9 @@ export function createProbesAddon(
     rules: probesRules,
     views: probesViews,
     menus: probesMenus,
+    data: probesData,
     register: async () => {
       await importLegacyProbes();
-    },
-    seed: async () => {
-      await seedDefaultProbeNodes();
     },
     registerRoutes:
       options.registerRoutes ??

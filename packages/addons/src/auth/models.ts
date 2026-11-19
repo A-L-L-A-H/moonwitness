@@ -10,6 +10,10 @@ export const authUserSchema = z.object({
   display_name: z.string().min(1).max(160),
   is_active: z.boolean().default(true),
   last_login_at: z.string().nullable().default(null),
+  company_id: z.string().max(64).default("default"),
+  company_ids_json: z.string().default('["default"]'),
+  partner_id: z.string().max(120).nullable().default(null),
+  group_keys_json: z.string().default("[]"),
 });
 
 export const authUserModel = defineModel({
@@ -18,11 +22,21 @@ export const authUserModel = defineModel({
   schema: authUserSchema,
   softDelete: false,
   restEnabled: false,
-  publicFields: ["id", "username", "email", "role", "display_name", "is_active"],
+  searchFields: ["username", "email", "display_name"],
+  publicFields: [
+    "id",
+    "username",
+    "email",
+    "role",
+    "display_name",
+    "is_active",
+    "company_id",
+  ],
   indexes: [
     { fields: ["username"], unique: true },
     { fields: ["email"], unique: true },
     { fields: ["legacy_user_id"], unique: true },
+    { fields: ["company_id"] },
   ],
 });
 

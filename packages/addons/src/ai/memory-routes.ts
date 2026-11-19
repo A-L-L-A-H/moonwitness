@@ -355,43 +355,21 @@ export async function registerMemoryRoutes(
       if (kind?.trim()) filters.kind = kind.trim();
       if (scope?.trim()) filters.scope = scope.trim();
 
-      const needle = q?.trim().toLowerCase() ?? "";
-      if (!needle) {
-        const [data, total] = await Promise.all([
-          memoryRecordModel.repository.find(filters, {
-            limit,
-            offset,
-            orderBy: [{ field: "write_date", direction: "DESC" }],
-            tenantId,
-          }),
-          memoryRecordModel.repository.count(filters, { tenantId }),
-        ]);
-        return reply.code(200).send({ data, total, limit, offset });
-      }
-
-      const candidates = await memoryRecordModel.repository.find(filters, {
-        limit: 500,
-        orderBy: [{ field: "write_date", direction: "DESC" }],
-        tenantId,
-      });
-      const matched = candidates.filter((entry) => {
-        const haystack = [
-          entry.record_key,
-          entry.title,
-          entry.summary ?? "",
-          entry.content ?? "",
-          entry.tags_json ?? "",
-        ]
-          .join("\n")
-          .toLowerCase();
-        return haystack.includes(needle);
-      });
-      return reply.code(200).send({
-        data: matched.slice(offset, offset + limit),
-        total: matched.length,
-        limit,
-        offset,
-      });
+      const needle = q?.trim() ?? "";
+      const [data, total] = await Promise.all([
+        memoryRecordModel.repository.find(filters, {
+          limit,
+          offset,
+          orderBy: [{ field: "write_date", direction: "DESC" }],
+          tenantId,
+          ...(needle ? { q: needle } : {}),
+        }),
+        memoryRecordModel.repository.count(filters, {
+          tenantId,
+          ...(needle ? { q: needle } : {}),
+        }),
+      ]);
+      return reply.code(200).send({ data, total, limit, offset });
     },
   );
 

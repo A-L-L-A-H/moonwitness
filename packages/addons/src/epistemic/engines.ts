@@ -22,6 +22,7 @@ export const epistemicComputationModel = defineModel({
   }),
   softDelete: false,
   restEnabled: true,
+  searchFields: ["engine", "digest"],
   publicFields: ["engine", "digest", "output_json"],
   indexes: [{ fields: ["engine"] }, { fields: ["digest"] }],
 });

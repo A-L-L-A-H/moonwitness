@@ -1,11 +1,11 @@
 import type { Era, TimelineEvent } from "@moonwitness/contracts/types";
 import {
-  getDb,
   normalizeTenantId,
   SYSTEM_ACTOR,
   uuidv7,
   type ActorContext,
   type AuditEntry,
+  type FindOptions,
 } from "@moonwitness/orm";
 import { timelineEventModel, timelineEraModel } from "./model.js";
 
@@ -109,69 +109,53 @@ export const MAX_LIST_LIMIT = 100;
 export const DEFAULT_LIST_LIMIT = 100;
 
 /**
- * Data access owned by the timeline addon; the addon routes are its only consumer.
+ * Data access owned by the timeline addon; 100% ORM-backed via searchFields and readGroup.
  */
 export class TimelineRepository implements ITimelineRepository {
   private readonly events = timelineEventModel.repository;
   private readonly eras = timelineEraModel.repository;
 
   async listEvents(filters: TimelineFilters): Promise<{ data: TimelineEvent[]; total: number }> {
-    const db = getDb();
-    const clauses: string[] = [];
-    const params: unknown[] = [];
-
-    if (this.events.softDelete) clauses.push("status != 'deleted'");
-    if (filters.tenantId !== undefined) {
-      clauses.push("tenant_id = ?");
-      params.push(normalizeTenantId(filters.tenantId));
+    const queryFilters: Record<string, unknown> = {};
+    if (filters.era) queryFilters.era = filters.era;
+    if (filters.kind) queryFilters.kind = filters.kind;
+    if (filters.from || filters.to) {
+      const dateCond: Record<string, string> = {};
+      if (filters.from) dateCond.$gte = filters.from;
+      if (filters.to) dateCond.$lte = filters.to;
+      queryFilters.date = dateCond;
     }
-    if (filters.era) {
-      clauses.push("era = ?");
-      params.push(filters.era);
-    }
-    if (filters.kind) {
-      clauses.push("kind = ?");
-      params.push(filters.kind);
-    }
-    if (filters.from) {
-      clauses.push("date >= ?");
-      params.push(filters.from);
-    }
-    if (filters.to) {
-      clauses.push("date <= ?");
-      params.push(filters.to);
-    }
-    if (filters.q?.trim()) {
-      const escapedQuery = filters.q
-        .trim()
-        .toLowerCase()
-        .replaceAll("\\", "\\\\")
-        .replaceAll("%", "\\%")
-        .replaceAll("_", "\\_");
-      clauses.push(
-        "lower(title || ' ' || excerpt || ' ' || body || ' ' || location || ' ' || tags) LIKE ? ESCAPE '\\'",
-      );
-      params.push(`%${escapedQuery}%`);
-    }
-
-    const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-    const table = this.events.table;
-
-    const totalRow = await db.get<{ total: number }>(
-      `SELECT COUNT(*) AS total FROM ${table} ${where}`,
-      params,
-    );
 
     const limit = Math.min(Math.max(filters.limit ?? DEFAULT_LIST_LIMIT, 1), MAX_LIST_LIMIT);
     const offset = Math.max(filters.offset ?? 0, 0);
-    const orderBy = filters.sort === "newest" ? "date DESC, id DESC" : "date ASC, id ASC";
+    const direction = filters.sort === "newest" ? "DESC" : "ASC";
+    const q = filters.q?.trim();
+    const tenantId =
+      filters.tenantId !== undefined ? normalizeTenantId(filters.tenantId) : undefined;
 
-    const rows = await db.all<Record<string, unknown>>(
-      `SELECT * FROM ${table} ${where} ORDER BY ${orderBy} LIMIT ? OFFSET ?`,
-      [...params, limit, offset],
-    );
+    const findOpts: FindOptions = {
+      limit,
+      offset,
+      orderBy: [
+        { field: "date", direction },
+        { field: "id", direction },
+      ],
+      ...(tenantId !== undefined ? { tenantId } : {}),
+      ...(q ? { q } : {}),
+    };
 
-    return { data: rows.map(rowToEvent), total: Number(totalRow?.total ?? 0) };
+    const [rows, total] = await Promise.all([
+      this.events.find(queryFilters, findOpts),
+      this.events.count(queryFilters, {
+        ...(tenantId !== undefined ? { tenantId } : {}),
+        ...(q ? { q } : {}),
+      }),
+    ]);
+
+    return {
+      data: rows.map((row) => rowToEvent(row as unknown as Record<string, unknown>)),
+      total,
+    };
   }
 
   async getEvent(id: string, tenantId?: string): Promise<TimelineEvent | null> {
@@ -184,25 +168,23 @@ export class TimelineRepository implements ITimelineRepository {
   }
 
   async getStats(tenantId?: string): Promise<TimelineStats> {
-    const params: unknown[] = [];
-    const tenantClause = tenantId !== undefined ? " AND tenant_id = ?" : "";
-    if (tenantId !== undefined) {
-      params.push(normalizeTenantId(tenantId));
-    }
-    const rows = await getDb().all<Record<string, unknown>>(
-      `SELECT era, kind, COUNT(*) AS total FROM ${this.events.table}
-       WHERE status != 'deleted'${tenantClause} GROUP BY era, kind`,
-      params,
-    );
+    const normalizedTenant =
+      tenantId !== undefined ? normalizeTenantId(tenantId) : undefined;
+    const groups = await this.events.readGroup({
+      groupBy: ["era", "kind"],
+      ...(normalizedTenant !== undefined ? { tenantId: normalizedTenant } : {}),
+    });
 
     const byEra: Record<string, number> = {};
     const byKind: Record<string, number> = {};
     let total = 0;
-    for (const row of rows) {
-      const count = Number(row.total ?? 0);
+    for (const row of groups) {
+      const count = Number(row.count ?? 0);
       total += count;
-      byEra[String(row.era)] = (byEra[String(row.era)] ?? 0) + count;
-      byKind[String(row.kind)] = (byKind[String(row.kind)] ?? 0) + count;
+      const eraKey = String(row.era);
+      const kindKey = String(row.kind);
+      byEra[eraKey] = (byEra[eraKey] ?? 0) + count;
+      byKind[kindKey] = (byKind[kindKey] ?? 0) + count;
     }
     return { total, byEra, byKind };
   }

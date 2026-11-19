@@ -17,6 +17,10 @@ export const workflowModel = defineModel({
   schema: workflowSchema,
   extensible: true,
   restEnabled: false,
+  searchFields: ["workflow_key", "name", "detail"],
+  defaults: {
+    actor_id: (actor) => actor.actorId ?? "unknown",
+  },
   publicFields: ["workflow_key", "name", "detail", "workflow_status"],
   indexes: [
     { fields: ["tenant_id", "actor_id", "workflow_key"], unique: true },
@@ -40,6 +44,10 @@ export const alertModel = defineModel({
   schema: alertSchema,
   extensible: true,
   restEnabled: false,
+  searchFields: ["alert_key", "text", "level"],
+  defaults: {
+    actor_id: (actor) => actor.actorId ?? "unknown",
+  },
   publicFields: ["alert_key", "text", "level", "dismissed"],
   indexes: [
     { fields: ["tenant_id", "actor_id", "alert_key"], unique: true },

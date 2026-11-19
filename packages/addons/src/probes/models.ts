@@ -16,6 +16,7 @@ export const probeNodeModel = defineModel({
   schema: probeNodeSchema,
   extensible: true,
   restEnabled: false,
+  searchFields: ["node_key", "name", "target_url", "category"],
   publicFields: ["node_key", "name", "target_url", "category", "enabled"],
   indexes: [
     { fields: ["node_key"], unique: true },
@@ -40,6 +41,7 @@ export const probeEventModel = defineModel({
   schema: probeEventSchema,
   softDelete: false,
   restEnabled: false,
+  retention: { maxRows: 1000, orderField: "checked_at" },
   indexes: [{ fields: ["node_key", "checked_at"] }, { fields: ["checked_at"] }, { fields: ["ok"] }],
 });
 

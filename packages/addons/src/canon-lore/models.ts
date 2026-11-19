@@ -20,6 +20,7 @@ export const canonCodexModel = defineModel({
   }),
   extensible: true,
   restEnabled: true,
+  searchFields: ["slug", "title", "summary", "body"],
   publicFields: ["slug", "title", "summary", "era_key", "canon_tier"],
   indexes: [{ fields: ["slug"], unique: true }, { fields: ["era_key"] }],
 });

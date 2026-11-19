@@ -60,6 +60,7 @@ export const memoryRecordModel = defineModel({
   schema: memoryRecordSchema,
   extensible: true,
   restEnabled: true,
+  searchFields: ["record_key", "title", "summary", "content", "tags_json"],
   publicFields: ["record_key", "kind", "title", "scope"],
   indexes: [
     { fields: ["tenant_id", "record_key"], unique: true },

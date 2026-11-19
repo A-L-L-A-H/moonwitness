@@ -15,6 +15,7 @@ export const i18nLocaleModel = defineModel({
   schema: i18nLocaleSchema,
   softDelete: false,
   restEnabled: true,
+  searchFields: ["code", "name", "native_name"],
   publicFields: ["code", "name", "native_name", "rtl"],
   indexes: [{ fields: ["code"], unique: true }],
 });
@@ -32,6 +33,7 @@ export const i18nTermModel = defineModel({
   schema: i18nTermSchema,
   softDelete: false,
   restEnabled: true,
+  searchFields: ["term_key", "value", "module"],
   publicFields: ["locale_code", "term_key", "value", "module"],
   indexes: [{ fields: ["locale_code", "term_key"], unique: true }, { fields: ["locale_code"] }],
 });

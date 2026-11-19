@@ -5,6 +5,7 @@ import {
   defaultFailClosedAuthBridge,
   resolveActorContextFromBridge,
   resolveActorTenantFromBridge,
+  type AddonDataRecord,
   type AddonDefinition,
   type AddonManifestInput,
   type BaseAddonAuthBridge,
@@ -87,6 +88,29 @@ const upsertTermSchema = z.object({
   module: z.string().max(80).default("common"),
 });
 
+export const i18nData: AddonDataRecord[] = [
+  {
+    id: "locale_en",
+    model: "i18n.locale",
+    key: { code: "en" },
+    noupdate: true,
+    values: { code: "en", name: "English", native_name: "English", rtl: false, enabled: true },
+  },
+  {
+    id: "locale_id",
+    model: "i18n.locale",
+    key: { code: "id" },
+    noupdate: true,
+    values: {
+      code: "id",
+      name: "Indonesian",
+      native_name: "Bahasa Indonesia",
+      rtl: false,
+      enabled: true,
+    },
+  },
+];
+
 export function createI18nAddon(
   options: { prefix?: string; auth?: BaseAddonAuthBridge } = {},
 ): AddonDefinition {
@@ -99,7 +123,7 @@ export function createI18nAddon(
     rules: i18nRules,
     views: i18nViews,
     menus: i18nMenus,
-    seed: seedI18n,
+    data: i18nData,
     registerRoutes: async (scope: FastifyInstance) => {
       scope.get(`${prefix}/i18n/locales`, async () => {
         const locales = await i18nLocaleModel.repository.find(
