@@ -33,6 +33,30 @@ export const witnessClaimModel = defineModel({
   restEnabled: true,
   searchFields: ["claim_key", "statement", "source_key"],
   publicFields: ["claim_key", "statement", "tier", "confidence", "verdict"],
+  actions: {
+    verify_claim: {
+      scope: "record",
+      roles: ["editor", "admin"],
+      label: "Verify Witness Claim",
+      input: z
+        .object({
+          verdict: z.enum(["supported", "contested", "open"]).default("supported"),
+          confidence: z.number().min(0).max(1).optional(),
+        })
+        .optional(),
+      handler: async ({ record, input, repository, actor }) => {
+        const body = (input as { verdict?: string; confidence?: number } | undefined) ?? {};
+        return repository.update(
+          String(record!.id),
+          {
+            verdict: body.verdict ?? "supported",
+            ...(body.confidence !== undefined ? { confidence: body.confidence } : {}),
+          },
+          actor,
+        );
+      },
+    },
+  },
   indexes: [{ fields: ["claim_key"], unique: true }, { fields: ["verdict"] }],
 });
 

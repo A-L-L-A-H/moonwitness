@@ -14,6 +14,8 @@ export interface AuthUser {
   role: AuthRole;
   displayName: string;
   isActive: boolean;
+  companyId: string;
+  companyIds: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +26,8 @@ export interface CreateAuthUserInput {
   password: string;
   role: AuthRole;
   displayName: string;
+  companyId?: string;
+  companyIds?: string[];
 }
 
 export interface AuthUserPublic {
@@ -67,6 +71,8 @@ export interface AuthSessionWithUser {
   email: string;
   role: AuthRole;
   displayName: string;
+  companyId?: string;
+  companyIds?: string[];
 }
 
 export const SESSION_COOKIE_NAME = "mw_session";
@@ -99,6 +105,19 @@ export function getCsrfCookieOptions(): Record<string, unknown> {
   };
 }
 
+function parseCompanyIds(raw: string | null | undefined, fallbackCompanyId: string): string[] {
+  if (!raw) return [fallbackCompanyId];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      return parsed.map((c) => String(c));
+    }
+  } catch {
+    // fallback
+  }
+  return [fallbackCompanyId];
+}
+
 function mapUserRecord(row: {
   id: string;
   legacy_user_id: number | null;
@@ -108,9 +127,12 @@ function mapUserRecord(row: {
   role: AuthRole;
   display_name: string;
   is_active: boolean;
+  company_id?: string;
+  company_ids_json?: string;
   create_date: Date;
   write_date: Date;
 }): AuthUser {
+  const companyId = row.company_id ?? "default";
   return {
     id: row.id,
     legacyUserId: row.legacy_user_id,
@@ -120,6 +142,8 @@ function mapUserRecord(row: {
     role: row.role,
     displayName: row.display_name,
     isActive: row.is_active,
+    companyId,
+    companyIds: parseCompanyIds(row.company_ids_json, companyId),
     createdAt: row.create_date,
     updatedAt: row.write_date,
   };
@@ -278,6 +302,8 @@ export async function createUser(input: CreateAuthUserInput): Promise<AuthUserPu
       display_name: input.displayName,
       is_active: true,
       last_login_at: null,
+      ...(input.companyId ? { company_id: input.companyId } : {}),
+      ...(input.companyIds ? { company_ids_json: JSON.stringify(input.companyIds) } : {}),
     },
     actor,
   );
@@ -496,6 +522,8 @@ export async function getSessionWithUser(
     email: user.email,
     role: user.role,
     displayName: user.displayName,
+    companyId: user.companyId,
+    companyIds: user.companyIds,
   };
 }
 

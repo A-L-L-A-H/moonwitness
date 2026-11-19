@@ -84,6 +84,15 @@ export function createAuthAddon(
     rules: authRules,
     views: authViews,
     menus: authMenus,
+    crons: [
+      {
+        cron_key: "auth.cleanup_expired_sessions",
+        name: "Cleanup Expired Sessions",
+        model_name: "auth.session",
+        action_name: "cleanup_expired",
+        interval_sec: 3600,
+      },
+    ],
     register: async () => {
       await importLegacyUsersAndSessions();
     },

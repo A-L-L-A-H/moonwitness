@@ -35,5 +35,21 @@ export const i18nTermModel = defineModel({
   restEnabled: true,
   searchFields: ["term_key", "value", "module"],
   publicFields: ["locale_code", "term_key", "value", "module"],
+  actions: {
+    upsert_term: {
+      scope: "model",
+      roles: ["editor", "admin"],
+      label: "Upsert Translation Term",
+      input: i18nTermSchema,
+      handler: async ({ input, repository, actor }) => {
+        const data = input as z.infer<typeof i18nTermSchema>;
+        return repository.upsert(
+          { locale_code: data.locale_code, term_key: data.term_key },
+          data,
+          actor,
+        );
+      },
+    },
+  },
   indexes: [{ fields: ["locale_code", "term_key"], unique: true }, { fields: ["locale_code"] }],
 });

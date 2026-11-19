@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { defineModel } from "@moonwitness/orm";
+import { defineModel, getDb } from "@moonwitness/orm";
 
 export const authUserSchema = z.object({
   legacy_user_id: z.number().int().positive().nullable().default(null),
@@ -32,6 +32,35 @@ export const authUserModel = defineModel({
     "is_active",
     "company_id",
   ],
+  hooks: {
+    beforeSave: ({ values, before }) => {
+      const companyId = String(values.company_id ?? before?.company_id ?? "default");
+      const rawIds = values.company_ids_json ?? before?.company_ids_json;
+      if (typeof rawIds === "string") {
+        let parsedIds: unknown;
+        try {
+          parsedIds = JSON.parse(rawIds);
+        } catch {
+          throw new Error("Validation Error: company_ids_json must be a JSON array of company slugs");
+        }
+        if (!Array.isArray(parsedIds)) {
+          throw new Error("Validation Error: company_ids_json must be a JSON array of company slugs");
+        }
+        if (values.company_ids_json !== undefined && parsedIds.length > 0 && !parsedIds.includes(companyId)) {
+          throw new Error(
+            `Validation Error: User current company (${companyId}) must belong to user's allowed companies`,
+          );
+        }
+        if (!parsedIds.includes(companyId)) {
+          values.company_ids_json = JSON.stringify([...parsedIds, companyId]);
+        }
+      } else if (values.company_id !== undefined) {
+        values.company_ids_json = JSON.stringify(
+          companyId === "default" ? ["default"] : ["default", companyId],
+        );
+      }
+    },
+  },
   indexes: [
     { fields: ["username"], unique: true },
     { fields: ["email"], unique: true },
@@ -55,6 +84,20 @@ export const authSessionModel = defineModel({
   schema: authSessionSchema,
   softDelete: false,
   restEnabled: false,
+  actions: {
+    cleanup_expired: {
+      scope: "model",
+      roles: ["admin"],
+      label: "Cleanup Expired Sessions",
+      handler: async () => {
+        const nowIso = new Date().toISOString();
+        const result = await getDb().run("DELETE FROM auth_sessions WHERE expires_at <= ?", [
+          nowIso,
+        ]);
+        return { purged: result.rowsAffected };
+      },
+    },
+  },
   indexes: [
     { fields: ["session_token"], unique: true },
     { fields: ["user_id"] },

@@ -4,7 +4,12 @@ import { join, relative, resolve } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { closeDb } from "@moonwitness/orm";
-import { irViewModel, type ActionBindingsSpec } from "@moonwitness/addon-runtime";
+import {
+  globalCronRunner,
+  irCronLogModel,
+  irViewModel,
+  type ActionBindingsSpec,
+} from "@moonwitness/addon-runtime";
 import { createSession, createUser } from "@moonwitness/addons/auth";
 import { buildApp } from "./app";
 
@@ -365,6 +370,56 @@ describe("apps/api Thin-Host & ORM Addon Architecture Gates", () => {
     });
     expect(groupRead.statusCode).toBe(200);
     expect(groupRead.json().groups).toEqual([{ canon_tier: "canonical", count: 1 }]);
+
+    // API-GATE-11: res.country, res.currency, POST /api/v1/rpc, and CronRunner + ir.cron.log
+    const countryList = await app.inject({
+      method: "GET",
+      url: `/api/v1/m/res.country?domain=${encodeURIComponent(JSON.stringify([["code", "=", "ID"]]))}`,
+      headers: { cookie: `mw_session=${sessionToken}` },
+    });
+    expect(countryList.statusCode).toBe(200);
+    expect(countryList.json().total).toBe(1);
+
+    const rpcEval = await app.inject({
+      method: "POST",
+      url: "/api/v1/rpc",
+      headers: tenantAHeaders,
+      payload: {
+        model: "epistemic.computation",
+        method: "evaluate",
+        kwargs: { engine: "divine-text", text: "Bismillah" },
+      },
+    });
+    expect(rpcEval.statusCode).toBe(200);
+    expect(rpcEval.json().result.output.wordCount).toBe(1);
+
+    const cronResults = await globalCronRunner.processDueCrons();
+    expect(
+      cronResults.some((r) => r.cronKey === "auth.cleanup_expired_sessions" && r.success),
+    ).toBe(true);
+    const cronLogs = await irCronLogModel.repository.find({
+      cron_key: "auth.cleanup_expired_sessions",
+    });
+    expect(cronLogs.length).toBeGreaterThanOrEqual(1);
+
+    // API-GATE-12: multi-company non-admin user can switch x-tenant-id to allowed companyIds only
+    const multiEditor = await createUser({
+      username: "multi-editor",
+      email: "multi-editor@moonwitness.local",
+      password: "CorrectHorseBatteryStaple!2026",
+      role: "editor",
+      displayName: "Multi Company Editor",
+      companyId: "default",
+      companyIds: ["default", "tenant-a"],
+    });
+    const editorSession = await createSession(multiEditor.id);
+    const editorTenantA = await app.inject({
+      method: "GET",
+      url: "/api/v1/m/canon.codex",
+      headers: { cookie: `mw_session=${editorSession}`, "x-tenant-id": "tenant-a" },
+    });
+    expect(editorTenantA.statusCode).toBe(200);
+    expect(editorTenantA.json().total).toBe(1);
   });
 
   it("API-GATE-09: refactored addons eliminate raw SQL in timeline and probe retention", () => {

@@ -30,6 +30,8 @@ export interface VerifiedMidUser {
   role: "admin" | "editor" | "viewer";
   displayName: string;
   tenantId?: string;
+  companyId?: string;
+  companyIds?: string[];
 }
 
 const JWKS_CACHE_TTL_MS = 300_000;
@@ -161,6 +163,8 @@ export async function resolveAuthIdentityFromRequest(request: FastifyRequest): P
           email: session.email,
           role: session.role,
           displayName: session.displayName,
+          companyId: session.companyId,
+          companyIds: session.companyIds,
         },
         expiredSessionCookie: false,
       };
