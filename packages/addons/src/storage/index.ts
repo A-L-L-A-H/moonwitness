@@ -1,11 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import type {
-  AddonDefinition,
-  AddonHostContext,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  isOptionalOpsServiceEnabled,
+  type AddonDefinition,
+  type AddonHostContext,
+  type AddonManifestInput,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { storageBucketModel, storageObjectModel, storageUploadSessionModel } from "./models.js";
@@ -96,7 +97,7 @@ export function createStorageAddon(
     rules: storageRules,
     views: storageViews,
     menus: storageMenus,
-    shouldAutoEnable: () => process.env.MW_ADDON_STORAGE_DISABLED !== "1",
+    shouldAutoEnable: () => isOptionalOpsServiceEnabled("storage"),
     registerRoutes:
       options.registerRoutes ??
       (async (scope) => {

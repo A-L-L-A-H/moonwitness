@@ -188,6 +188,109 @@ export async function backupTarget({ target, outputDir, encryptionKey, runComman
   });
 }
 
+const PRIVATE_LOCAL_ZONES = new Set(["rocksoul", "memory"]);
+
+export function assertBackupTrustZone(trustZone, targetName) {
+  const zone = String(trustZone ?? "production-vps")
+    .trim()
+    .toLowerCase();
+  if (PRIVATE_LOCAL_ZONES.has(zone)) {
+    throw new Error(
+      `Trust-zone boundary violation: '${targetName}' (${zone}) must not be mixed into the public production backup set.`,
+    );
+  }
+}
+
+/**
+ * Backs up a declared set of PostgreSQL databases, explicitly recording
+ * disabled optional services and refusing partial completion when any enabled
+ * target fails.
+ */
+export async function backupPostgresSet({
+  targets,
+  outputDir,
+  encryptionKey,
+  runCommand = defaultCommandRunner,
+}) {
+  if (!Array.isArray(targets) || targets.length === 0) {
+    throw new Error("Backup set requires at least one declared database target.");
+  }
+
+  const entries = [];
+  for (const target of targets) {
+    assertBackupTrustZone(target.trustZone, target.name);
+    if (!target.enabled) {
+      entries.push({ name: target.name, enabled: false, status: "disabled" });
+      continue;
+    }
+    const { report, manifestPath } = await backupPostgresUrl({
+      connectionString: assertPostgresTarget(target.connectionString, `Backup (${target.name})`),
+      outputDir,
+      encryptionKey,
+      runCommand,
+    });
+    entries.push({
+      name: target.name,
+      enabled: true,
+      status: "backed_up",
+      dbName: report.dbName,
+      backupFile: report.backupFile,
+      plaintextHash: report.plaintextHash,
+      encryptedHash: report.encryptedHash,
+      createdAt: report.createdAt,
+      manifestFile: basename(manifestPath),
+    });
+  }
+
+  const setBody = {
+    version: "1.0",
+    trustZone: "production-vps",
+    complete: true,
+    createdAt: new Date().toISOString(),
+    entries,
+  };
+  const signature = createHmac("sha256", manifestSigningKey(encryptionKey))
+    .update(JSON.stringify(setBody))
+    .digest("hex");
+  const setManifest = { ...setBody, signature: { algorithm: "hmac-sha256", value: signature } };
+  const setManifestPath = join(
+    outputDir,
+    `pg-backup-set-${setBody.createdAt.replace(/[:.]/g, "-")}.json`,
+  );
+  await writeFile(setManifestPath, JSON.stringify(setManifest, null, 2), {
+    encoding: "utf-8",
+    mode: 0o600,
+  });
+  return { setManifest, setManifestPath };
+}
+
+export function verifyBackupSetManifest({
+  setManifest,
+  encryptionKey,
+  maxAgeHours = 24,
+  nowMs = Date.now(),
+}) {
+  if (!setManifest || setManifest.version !== "1.0" || !setManifest.signature?.value) {
+    throw new Error("Unsupported or unsigned PostgreSQL backup-set manifest.");
+  }
+  const { signature, ...setBody } = setManifest;
+  const expected = createHmac("sha256", manifestSigningKey(encryptionKey))
+    .update(JSON.stringify(setBody))
+    .digest();
+  const actual = Buffer.from(String(signature.value), "hex");
+  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
+    throw new Error("Backup-set manifest HMAC signature is invalid.");
+  }
+  if (!setManifest.complete) {
+    throw new Error("Backup-set manifest is incomplete.");
+  }
+  const createdMs = Date.parse(setManifest.createdAt);
+  if (!Number.isFinite(createdMs) || nowMs - createdMs > maxAgeHours * 3_600_000) {
+    throw new Error(`Backup-set manifest is stale (exceeds ${maxAgeHours}h freshness window).`);
+  }
+  return setManifest;
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === resolve(import.meta.filename ?? "")) {
   const args = process.argv.slice(2);
   const outIdx = args.indexOf("--out");

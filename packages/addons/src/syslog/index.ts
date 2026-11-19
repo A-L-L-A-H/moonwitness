@@ -1,11 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import type {
-  AddonDefinition,
-  AddonHostContext,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  isOptionalOpsServiceEnabled,
+  type AddonDefinition,
+  type AddonHostContext,
+  type AddonManifestInput,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { syslogEntryModel } from "./models.js";
@@ -60,7 +61,7 @@ export function createSyslogAddon(
     rules: syslogRules,
     views: syslogViews,
     menus: syslogMenus,
-    shouldAutoEnable: () => process.env.MW_ADDON_SYSLOG_DISABLED !== "1",
+    shouldAutoEnable: () => isOptionalOpsServiceEnabled("syslog"),
     registerRoutes:
       options.registerRoutes ??
       (async (scope) => {

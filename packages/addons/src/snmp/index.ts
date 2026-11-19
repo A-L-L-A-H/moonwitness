@@ -1,11 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import type {
-  AddonDefinition,
-  AddonHostContext,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  isOptionalOpsServiceEnabled,
+  type AddonDefinition,
+  type AddonHostContext,
+  type AddonManifestInput,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { snmpDeviceModel, snmpSampleModel, snmpTargetModel } from "./models.js";
@@ -79,7 +80,7 @@ export function createSnmpAddon(
     rules: snmpRules,
     views: snmpViews,
     menus: snmpMenus,
-    shouldAutoEnable: () => process.env.MW_ADDON_SNMP_DISABLED !== "1",
+    shouldAutoEnable: () => isOptionalOpsServiceEnabled("snmp"),
     registerRoutes:
       options.registerRoutes ??
       (async (scope) => {

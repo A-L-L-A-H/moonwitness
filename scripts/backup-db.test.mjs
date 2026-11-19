@@ -5,10 +5,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
   assertPostgresTarget,
+  backupPostgresSet,
   backupPostgresUrl,
   backupTarget,
   isPostgresTarget,
   preparePostgresCommandConnection,
+  verifyBackupSetManifest,
   verifyPostgresBackupManifest,
 } from "./backup-db.mjs";
 import { restoreTarget, samePostgresDatabase } from "./restore-db.mjs";
@@ -179,6 +181,64 @@ describe("PostgreSQL-only backup & restore helpers", () => {
         /HMAC signature is invalid/,
       );
       writeFileSync(manifestPath, signedManifest);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("verifies multi-database backup-set completeness, disabled reporting, freshness, and trust-zone isolation", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "mw-pg-set-"));
+    try {
+      await assert.rejects(
+        backupPostgresSet({
+          targets: [
+            {
+              name: "rocksoul",
+              enabled: true,
+              trustZone: "rocksoul",
+              connectionString: "postgresql://r@localhost/r",
+            },
+          ],
+          outputDir: dir,
+          encryptionKey: "backup-secret-key",
+        }),
+        /Trust-zone boundary violation/,
+      );
+
+      const { setManifest } = await backupPostgresSet({
+        targets: [
+          {
+            name: "core",
+            enabled: true,
+            connectionString: "postgresql://mw:s@localhost:5432/moonwitness",
+          },
+          { name: "radius", enabled: false },
+        ],
+        outputDir: dir,
+        encryptionKey: "backup-secret-key",
+        runCommand: async (_cmd, args) => {
+          writeFileSync(args[args.indexOf("-f") + 1], Buffer.from("PGDMP-SET"));
+        },
+      });
+      assert.equal(setManifest.entries.find((e) => e.name === "radius")?.status, "disabled");
+      assert.equal(
+        verifyBackupSetManifest({
+          setManifest,
+          encryptionKey: "backup-secret-key",
+          maxAgeHours: 24,
+        }).complete,
+        true,
+      );
+      assert.throws(
+        () =>
+          verifyBackupSetManifest({
+            setManifest,
+            encryptionKey: "backup-secret-key",
+            maxAgeHours: 1,
+            nowMs: Date.parse(setManifest.createdAt) + 2 * 3_600_000,
+          }),
+        /stale/,
+      );
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }
