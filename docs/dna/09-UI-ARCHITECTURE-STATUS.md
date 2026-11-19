@@ -28,10 +28,25 @@ Status vocabulary: SPECIFIED (documented intent) · IMPLEMENTED (code exists) ·
 
 ## Remaining duplication (tracked, ratcheted)
 
-- `apps/rocksoul` CSS: 456 hex literals (`src/design-system/tokens.css` + feature CSS).
+- `apps/rocksoul` CSS palette literals: **0 under the current architecture scanner** (reviewed 2026-11-20 against `dev` commit `645bd36ea580cb1feee78c2916451dac9715cc11`). The earlier count of 456 is a historical snapshot and is no longer current.
 - `apps/memory/frontend`: separate standalone dashboard that does not consume `@moonwitness/ui`.
 
-## Verification evidence (executed 2026-11-17, local)
+### Measurement contract
+
+The current count is not a repository-wide count of every hexadecimal string. It is produced by `packages/ui/src/dx/architecture.test.ts`:
+
+- The scanner walks `apps/rocksoul/src` for CSS files, excluding the directories in `IGNORED_DIRS` and test files.
+- It removes CSS comments, then counts 3- or 6-digit hex color literals with `HEX_LITERAL`.
+- `rocksoul` is also in `STRICT_TOKEN_APPS`, so CSS and TSX palette literals must be zero; `LEGACY_HEX_CEILINGS.rocksoul` is independently set to zero.
+- Re-run with `pnpm --filter @moonwitness/ui test -- src/dx/architecture.test.ts` (or as part of the workspace `pnpm test` / `pnpm gate:local`). Do not compare the old 456 figure to a differently scoped scan.
+
+### Other tracked duplication
+
+- `apps/memory/frontend` remains a separate standalone dashboard and does not consume `@moonwitness/ui`; it is not included in the `apps/rocksoul` palette-literal count.
+
+## Verification evidence
+
+The 2026-11-17 local verification record below is historical evidence for that checkout; it is not a claim that those commands were rerun on the 2026-11-20 `dev` snapshot.
 
 format, ui lint, ui typecheck, ui tests, `ui:contrast`, a-l-l-a-h typecheck/lint/tests, web tests, builds of a-l-l-a-h, web, rocksoul-dx, and `gate:push` (16/16 checks): all exit 0.
 Not executed: Playwright E2E (`@playwright/test` is not installed in the workspace, so `apps/a-l-l-a-h/e2e` is unrun and excluded from tsconfig).
