@@ -17,7 +17,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    include: ["tests/**/*.test.ts"],
+    include: ["tests/**/*.test.ts", "tests/locale-provider.test.tsx"],
     exclude: ["e2e/**/*", "tests/**/brush-lifecycle.spec.ts"],
   },
 });

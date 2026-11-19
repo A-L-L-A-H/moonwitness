@@ -118,8 +118,22 @@ describe("dynamic modelRegistry metadata & apiPrefix mount", () => {
         access_token: z.string(),
         refresh_token: z.string(),
         display_name: z.string(),
+        internal_notes: z.string().default(""),
+        hidden_pin: z.string().default(""),
       }),
-      publicFields: ["username", "password_hash", "access_token", "refresh_token", "display_name"],
+      fieldPolicies: {
+        internal_notes: { readRoles: ["admin"] },
+        hidden_pin: { sensitive: true },
+      },
+      publicFields: [
+        "username",
+        "password_hash",
+        "access_token",
+        "refresh_token",
+        "display_name",
+        "internal_notes",
+        "hidden_pin",
+      ],
     });
     const secretModel = defineModel({
       name: "meta.secret_only",

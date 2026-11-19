@@ -5,14 +5,29 @@ import {
   ConflictError,
   compileTupleDomainToFilter,
   modelRegistry,
-  type ActorContext,
+  PolicyError,
   type FindOptions,
+  type RegisteredModelDescriptor,
 } from "@moonwitness/orm";
-import type { AddonRuntimeController, CrewRoleOrPublic, ModelAclFlags } from "./runtime.js";
+import type {
+  AddonRuntimeController,
+  CrewRoleOrPublic,
+  ModelAclFlags,
+  RecordRuleOperation,
+} from "./runtime.js";
+import {
+  assertReadableFilterFields,
+  assertWritableBodyFields,
+  canReadField,
+  extractFilterFields,
+  parseOrderByFields,
+  sanitizeActionResultForRole,
+  sanitizeHistoryEntriesForRole,
+  sanitizeRecordForRole,
+} from "./field-policy.js";
 import {
   defaultFailClosedAuthBridge,
   resolveActorContextFromBridge,
-  resolveActorTenantFromBridge,
   type BaseAddonAuthBridge,
 } from "./host-context.js";
 
@@ -28,6 +43,9 @@ function repositoryForModel(modelName: string) {
 }
 
 function handleOrmError(error: unknown, reply: FastifyReply): FastifyReply {
+  if (error instanceof PolicyError) {
+    return reply.code(error.statusCode).send({ error: error.message, code: error.code });
+  }
   if (error instanceof ConflictError) {
     return reply.code(409).send({ error: error.message, code: "CONFLICT" });
   }
@@ -69,6 +87,15 @@ function parseDomainParam(rawDomain?: string): Record<string, unknown> | null {
   return compileTupleDomainToFilter(parsed);
 }
 
+function readableSearchFields(desc: RegisteredModelDescriptor, role: CrewRoleOrPublic): string[] {
+  const baseColumns = desc.searchFields?.length
+    ? desc.searchFields
+    : [...desc.fields.entries()]
+        .filter(([name, spec]) => spec.codec === "text" && name !== "_attrs")
+        .map(([name]) => name);
+  return baseColumns.filter((field) => canReadField(desc, field, role));
+}
+
 async function authorizeModelAccess(
   runtime: AddonRuntimeController,
   auth: BaseAddonAuthBridge,
@@ -90,7 +117,8 @@ async function authorizeModelAccess(
     return null;
   }
   const role = auth.getActorRole(request);
-  const acl = await runtime.getModelPermissions(target.desc.name, role);
+  const actorGroups = auth.getActorGroups?.(request);
+  const acl = await runtime.getModelPermissions(target.desc.name, role, actorGroups);
   if (!acl[requiredPerm]) {
     await reply.code(403).send({ error: "Forbidden" });
     return null;
@@ -98,23 +126,25 @@ async function authorizeModelAccess(
   return target;
 }
 
-async function ensureRecordMatchesRuleDomain(
+async function prepareScopedRuleContext(
   runtime: AddonRuntimeController,
+  auth: BaseAddonAuthBridge,
+  request: FastifyRequest,
   target: NonNullable<ReturnType<typeof repositoryForModel>>,
-  id: string,
-  role: CrewRoleOrPublic,
-  actor: ActorContext,
-  options: { includeDeleted?: boolean; with?: string[] } = {},
+  operation: RecordRuleOperation,
 ) {
-  const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
-  const filters = mergeWithRuleDomain({ id }, ruleDomain);
-  const rows = await target.repo.find(filters, {
-    limit: 1,
-    tenantId: actor.tenantId,
-    includeDeleted: options.includeDeleted,
-    ...(options.with ? { with: options.with } : {}),
-  });
-  return rows[0] ?? null;
+  const role = auth.getActorRole(request);
+  const actorGroups = auth.getActorGroups?.(request);
+  const actor = resolveActorContextFromBridge(auth, request);
+  const scopedRepo = target.repo.forActor(actor);
+  const evalResult = await runtime.evaluateRuleForOperation(
+    target.desc.name,
+    role,
+    actor,
+    operation,
+    actorGroups,
+  );
+  return { actor, role, actorGroups, scopedRepo, evalResult };
 }
 
 export async function registerGenericModelRoutes(
@@ -138,63 +168,73 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const query = request.query ?? {};
-      const userFilters: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(query)) {
-        if (v === undefined) continue;
-        if (["limit", "offset", "orderBy", "includeDeleted", "q", "with", "domain"].includes(k)) {
-          continue;
-        }
-        if (target.desc.fields.has(k) || k === "status") {
-          userFilters[k] = v;
-        }
-      }
-
-      let domainFilter: Record<string, unknown> | null;
       try {
-        domainFilter = parseDomainParam(query.domain);
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          "read",
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+
+        const query = request.query ?? {};
+        const userFilters: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(query)) {
+          if (v === undefined) continue;
+          if (["limit", "offset", "orderBy", "includeDeleted", "q", "with", "domain"].includes(k)) {
+            continue;
+          }
+          if (target.desc.fields.has(k) || k === "status") {
+            userFilters[k] = v;
+          }
+        }
+
+        const domainFilter = parseDomainParam(query.domain);
+        assertReadableFilterFields(target.desc, Object.keys(userFilters), role);
+        assertReadableFilterFields(target.desc, extractFilterFields(domainFilter), role);
+        assertReadableFilterFields(target.desc, parseOrderByFields(query.orderBy), role);
+
+        const filters = mergeWithRuleDomain(
+          mergeWithRuleDomain(userFilters, domainFilter),
+          evalResult.domain,
+        );
+
+        const limit = query.limit ? Math.min(200, Math.max(1, Number(query.limit))) : 50;
+        const offset = query.offset ? Math.max(0, Number(query.offset)) : 0;
+        const q = query.q?.trim();
+        const withRels = parseWithParam(query.with);
+        const allowedSearchFields = readableSearchFields(target.desc, role);
+        const opts: FindOptions = {
+          limit,
+          offset,
+          includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
+          ...(query.orderBy ? { orderBy: query.orderBy } : {}),
+          ...(q ? { q, allowedSearchFields } : {}),
+          ...(withRels ? { with: withRels } : {}),
+        };
+
+        const rows = await scopedRepo.find(filters, opts);
+        let sanitized = rows.map((row) =>
+          sanitizeRecordForRole(target.desc, row as unknown as Record<string, unknown>, role),
+        );
+        let total: number;
+        if (q && (target.desc.searchFields?.length ?? 0) === 0) {
+          const needle = q.toLowerCase();
+          sanitized = sanitized.filter((row) => JSON.stringify(row).toLowerCase().includes(needle));
+          total = sanitized.length;
+        } else {
+          total = await scopedRepo.count(filters, {
+            includeDeleted: opts.includeDeleted,
+            ...(q ? { q, allowedSearchFields } : {}),
+          });
+        }
+        return reply.send({ data: sanitized, total });
       } catch (error) {
         return handleOrmError(error, reply);
       }
-
-      const actor = resolveActorContextFromBridge(auth, request);
-      const role = auth.getActorRole(request);
-      const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
-      const filters = mergeWithRuleDomain(
-        mergeWithRuleDomain(userFilters, domainFilter),
-        ruleDomain,
-      );
-
-      const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);
-      const limit = query.limit ? Math.min(200, Math.max(1, Number(query.limit))) : 50;
-      const offset = query.offset ? Math.max(0, Number(query.offset)) : 0;
-      const q = query.q?.trim();
-      const withRels = parseWithParam(query.with);
-      const opts: FindOptions = {
-        limit,
-        offset,
-        tenantId,
-        includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
-        ...(query.orderBy ? { orderBy: query.orderBy } : {}),
-        ...(q ? { q } : {}),
-        ...(withRels ? { with: withRels } : {}),
-      };
-
-      const rows = await target.repo.find(filters, opts);
-      let filtered = rows as unknown as Array<Record<string, unknown>>;
-      let total: number;
-      if (q && (target.desc.searchFields?.length ?? 0) === 0) {
-        const needle = q.toLowerCase();
-        filtered = filtered.filter((row) => JSON.stringify(row).toLowerCase().includes(needle));
-        total = filtered.length;
-      } else {
-        total = await target.repo.count(filters, {
-          includeDeleted: opts.includeDeleted,
-          tenantId,
-          ...(q ? { q } : {}),
-        });
-      }
-      return reply.send({ data: filtered, total });
     },
   );
 
@@ -222,36 +262,41 @@ export async function registerGenericModelRoutes(
         return reply.code(400).send({ error: "Query parameter 'groupBy' is required" });
       }
 
-      const userFilters: Record<string, unknown> = {};
-      for (const [k, v] of Object.entries(query)) {
-        if (v === undefined) continue;
-        if (["groupBy", "orderBy", "includeDeleted", "q", "domain"].includes(k)) continue;
-        if (target.desc.fields.has(k) || k === "status") {
-          userFilters[k] = v;
+      try {
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          "read",
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
         }
-      }
 
-      let domainFilter: Record<string, unknown> | null;
-      try {
-        domainFilter = parseDomainParam(query.domain);
-      } catch (error) {
-        return handleOrmError(error, reply);
-      }
+        const userFilters: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(query)) {
+          if (v === undefined) continue;
+          if (["groupBy", "orderBy", "includeDeleted", "q", "domain"].includes(k)) continue;
+          if (target.desc.fields.has(k) || k === "status") {
+            userFilters[k] = v;
+          }
+        }
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const role = auth.getActorRole(request);
-      const ruleDomain = await runtime.getModelRuleDomain(target.desc.name, role, actor);
-      const filters = mergeWithRuleDomain(
-        mergeWithRuleDomain(userFilters, domainFilter),
-        ruleDomain,
-      );
-      const tenantId = actor.tenantId ?? resolveActorTenantFromBridge(auth, request);
+        const domainFilter = parseDomainParam(query.domain);
+        assertReadableFilterFields(target.desc, groupBy, role);
+        assertReadableFilterFields(target.desc, Object.keys(userFilters), role);
+        assertReadableFilterFields(target.desc, extractFilterFields(domainFilter), role);
+        assertReadableFilterFields(target.desc, parseOrderByFields(query.orderBy), role);
 
-      try {
-        const groups = await target.repo.readGroup({
+        const filters = mergeWithRuleDomain(
+          mergeWithRuleDomain(userFilters, domainFilter),
+          evalResult.domain,
+        );
+
+        const groups = await scopedRepo.readGroup({
           filters,
           groupBy,
-          tenantId,
           includeDeleted: query.includeDeleted === "1" || query.includeDeleted === "true",
           ...(query.q?.trim() ? { q: query.q.trim() } : {}),
           ...(query.orderBy ? { orderBy: query.orderBy } : {}),
@@ -293,6 +338,20 @@ export async function registerGenericModelRoutes(
 
       try {
         const actor = resolveActorContextFromBridge(auth, request);
+        const actorGroups = auth.getActorGroups?.(request);
+        const scopedRepo = target.repo.forActor(actor);
+        if (actionDef.operation) {
+          const evalResult = await runtime.evaluateRuleForOperation(
+            target.desc.name,
+            role,
+            actor,
+            actionDef.operation,
+            actorGroups,
+          );
+          if (!evalResult.allowed) {
+            return reply.code(403).send({ error: "Forbidden" });
+          }
+        }
         const parsedInput = actionDef.input
           ? actionDef.input.parse(request.body ?? {})
           : (request.body ?? {});
@@ -301,9 +360,9 @@ export async function registerGenericModelRoutes(
           record: null,
           input: parsedInput,
           actor,
-          repository: target.repo,
+          repository: scopedRepo,
         });
-        return reply.send({ data: result });
+        return reply.send({ data: sanitizeActionResultForRole(target.desc, result, role) });
       } catch (error) {
         return handleOrmError(error, reply);
       }
@@ -340,19 +399,27 @@ export async function registerGenericModelRoutes(
         return reply.code(403).send({ error: "Forbidden" });
       }
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const record = await ensureRecordMatchesRuleDomain(
-        runtime,
-        target,
-        request.params.id,
-        role,
-        actor,
-      );
-      if (!record) {
-        return reply.code(404).send({ error: "Not found" });
-      }
-
       try {
+        const actionOp = actionDef.operation ?? "update";
+        const { actor, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          actionOp,
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const rows = await scopedRepo.find(
+          mergeWithRuleDomain({ id: request.params.id }, evalResult.domain),
+          { limit: 1 },
+        );
+        const record = rows[0] as Record<string, unknown> | undefined;
+        if (!record) {
+          return reply.code(404).send({ error: "Not found" });
+        }
+
         const parsedInput = actionDef.input
           ? actionDef.input.parse(request.body ?? {})
           : (request.body ?? {});
@@ -361,9 +428,9 @@ export async function registerGenericModelRoutes(
           record,
           input: parsedInput,
           actor,
-          repository: target.repo,
+          repository: scopedRepo,
         });
-        return reply.send({ data: result });
+        return reply.send({ data: sanitizeActionResultForRole(target.desc, result, role) });
       } catch (error) {
         return handleOrmError(error, reply);
       }
@@ -417,35 +484,57 @@ export async function registerGenericModelRoutes(
       return reply.code(403).send({ error: "Forbidden", code: "AUTH_FORBIDDEN" });
     }
 
-    const actor = resolveActorContextFromBridge(auth, request);
-    const scope = actionDef.scope ?? "record";
-    let record: Record<string, unknown> | null = null;
-    if (scope === "record") {
-      const targetId =
-        typeof body.id === "string"
-          ? body.id
-          : typeof body.args?.[0] === "string"
-            ? body.args[0]
-            : "";
-      if (!targetId) {
-        return reply.code(400).send({
-          error: `Record action '${methodName}' requires 'id' or args[0]`,
-          code: "INVALID_REQUEST",
-        });
-      }
-      record = (await ensureRecordMatchesRuleDomain(
-        runtime,
-        target,
-        targetId,
-        role,
-        actor,
-      )) as Record<string, unknown> | null;
-      if (!record) {
-        return reply.code(404).send({ error: "Not found", code: "RECORD_NOT_FOUND" });
-      }
-    }
-
     try {
+      const actor = resolveActorContextFromBridge(auth, request);
+      const actorGroups = auth.getActorGroups?.(request);
+      const scopedRepo = target.repo.forActor(actor);
+      const scope = actionDef.scope ?? "record";
+      let record: Record<string, unknown> | null = null;
+      if (scope === "record") {
+        const actionOp = actionDef.operation ?? "update";
+        const evalResult = await runtime.evaluateRuleForOperation(
+          target.desc.name,
+          role,
+          actor,
+          actionOp,
+          actorGroups,
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden", code: "AUTH_FORBIDDEN" });
+        }
+        const targetId =
+          typeof body.id === "string"
+            ? body.id
+            : typeof body.args?.[0] === "string"
+              ? body.args[0]
+              : "";
+        if (!targetId) {
+          return reply.code(400).send({
+            error: `Record action '${methodName}' requires 'id' or args[0]`,
+            code: "INVALID_REQUEST",
+          });
+        }
+        const rows = await scopedRepo.find(
+          mergeWithRuleDomain({ id: targetId }, evalResult.domain),
+          { limit: 1 },
+        );
+        record = (rows[0] as Record<string, unknown> | undefined) ?? null;
+        if (!record) {
+          return reply.code(404).send({ error: "Not found", code: "RECORD_NOT_FOUND" });
+        }
+      } else if (actionDef.operation) {
+        const evalResult = await runtime.evaluateRuleForOperation(
+          target.desc.name,
+          role,
+          actor,
+          actionDef.operation,
+          actorGroups,
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden", code: "AUTH_FORBIDDEN" });
+        }
+      }
+
       const rawInput =
         body.kwargs ?? (scope === "model" ? (body.args?.[0] ?? {}) : (body.args?.[1] ?? {}));
       const parsedInput = actionDef.input ? actionDef.input.parse(rawInput) : rawInput;
@@ -454,9 +543,9 @@ export async function registerGenericModelRoutes(
         record,
         input: parsedInput,
         actor,
-        repository: target.repo,
+        repository: scopedRepo,
       });
-      return reply.send({ result });
+      return reply.send({ result: sanitizeActionResultForRole(target.desc, result, role) });
     } catch (error) {
       return handleOrmError(error, reply);
     }
@@ -476,18 +565,30 @@ export async function registerGenericModelRoutes(
     );
     if (!target) return reply;
 
-    const actor = resolveActorContextFromBridge(auth, request);
-    const role = auth.getActorRole(request);
-    const row = await ensureRecordMatchesRuleDomain(
-      runtime,
-      target,
-      request.params.id,
-      role,
-      actor,
-      { with: parseWithParam(request.query?.with) },
-    );
-    if (!row) return reply.code(404).send({ error: "Not found" });
-    return reply.send({ data: row });
+    try {
+      const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+        runtime,
+        auth,
+        request,
+        target,
+        "read",
+      );
+      if (!evalResult.allowed) {
+        return reply.code(403).send({ error: "Forbidden" });
+      }
+      const withRels = parseWithParam(request.query?.with);
+      const rows = await scopedRepo.find(
+        mergeWithRuleDomain({ id: request.params.id }, evalResult.domain),
+        { limit: 1, ...(withRels ? { with: withRels } : {}) },
+      );
+      const row = rows[0];
+      if (!row) return reply.code(404).send({ error: "Not found" });
+      return reply.send({
+        data: sanitizeRecordForRole(target.desc, row as unknown as Record<string, unknown>, role),
+      });
+    } catch (error) {
+      return handleOrmError(error, reply);
+    }
   });
 
   fastify.post<{ Params: { model: string }; Body: Record<string, unknown> }>(
@@ -505,9 +606,26 @@ export async function registerGenericModelRoutes(
       if (!target) return reply;
 
       try {
-        const actor = resolveActorContextFromBridge(auth, request);
-        const created = await target.repo.create(request.body ?? {}, actor);
-        return reply.code(201).send({ data: created });
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          "create",
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const body = request.body ?? {};
+        assertWritableBodyFields(target.desc, body, role);
+        const created = await scopedRepo.create(body, { createRuleDomain: evalResult.domain });
+        return reply.code(201).send({
+          data: sanitizeRecordForRole(
+            target.desc,
+            created as unknown as Record<string, unknown>,
+            role,
+          ),
+        });
       } catch (error) {
         return handleOrmError(error, reply);
       }
@@ -529,19 +647,29 @@ export async function registerGenericModelRoutes(
       if (!target) return reply;
 
       try {
-        const actor = resolveActorContextFromBridge(auth, request);
-        const role = auth.getActorRole(request);
-        const current = await ensureRecordMatchesRuleDomain(
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
           runtime,
+          auth,
+          request,
           target,
-          request.params.id,
-          role,
-          actor,
+          "update",
         );
-        if (!current) return reply.code(404).send({ error: "Not found" });
-        const updated = await target.repo.update(request.params.id, request.body ?? {}, actor);
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const body = request.body ?? {};
+        assertWritableBodyFields(target.desc, body, role);
+        const updated = await scopedRepo.update(request.params.id, body, {
+          ruleDomain: evalResult.domain,
+        });
         if (!updated) return reply.code(404).send({ error: "Not found" });
-        return reply.send({ data: updated });
+        return reply.send({
+          data: sanitizeRecordForRole(
+            target.desc,
+            updated as unknown as Record<string, unknown>,
+            role,
+          ),
+        });
       } catch (error) {
         return handleOrmError(error, reply);
       }
@@ -562,19 +690,27 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const role = auth.getActorRole(request);
-      const current = await ensureRecordMatchesRuleDomain(
-        runtime,
-        target,
-        request.params.id,
-        role,
-        actor,
-      );
-      if (!current) return reply.code(404).send({ error: "Not found" });
-      const row = await target.repo.archive(request.params.id, actor);
-      if (!row) return reply.code(404).send({ error: "Not found" });
-      return reply.send({ data: row });
+      try {
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          "update",
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const row = await scopedRepo.archive(request.params.id, {
+          ruleDomain: evalResult.domain,
+        });
+        if (!row) return reply.code(404).send({ error: "Not found" });
+        return reply.send({
+          data: sanitizeRecordForRole(target.desc, row as unknown as Record<string, unknown>, role),
+        });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
     },
   );
 
@@ -592,20 +728,27 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const role = auth.getActorRole(request);
-      const current = await ensureRecordMatchesRuleDomain(
-        runtime,
-        target,
-        request.params.id,
-        role,
-        actor,
-        { includeDeleted: true },
-      );
-      if (!current) return reply.code(404).send({ error: "Not found" });
-      const row = await target.repo.restore(request.params.id, actor);
-      if (!row) return reply.code(404).send({ error: "Not found" });
-      return reply.send({ data: row });
+      try {
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          "update",
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const row = await scopedRepo.restore(request.params.id, {
+          ruleDomain: evalResult.domain,
+        });
+        if (!row) return reply.code(404).send({ error: "Not found" });
+        return reply.send({
+          data: sanitizeRecordForRole(target.desc, row as unknown as Record<string, unknown>, role),
+        });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
     },
   );
 
@@ -624,19 +767,23 @@ export async function registerGenericModelRoutes(
       if (!target) return reply;
 
       try {
-        const actor = resolveActorContextFromBridge(auth, request);
-        const role = auth.getActorRole(request);
-        const current = await ensureRecordMatchesRuleDomain(
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
           runtime,
+          auth,
+          request,
           target,
-          request.params.id,
-          role,
-          actor,
+          "delete",
         );
-        if (!current) return reply.code(404).send({ error: "Not found" });
-        const row = await target.repo.delete(request.params.id, actor);
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const row = await scopedRepo.delete(request.params.id, {
+          ruleDomain: evalResult.domain,
+        });
         if (!row) return reply.code(404).send({ error: "Not found" });
-        return reply.send({ data: row });
+        return reply.send({
+          data: sanitizeRecordForRole(target.desc, row as unknown as Record<string, unknown>, role),
+        });
       } catch (error) {
         return handleOrmError(error, reply);
       }
@@ -657,19 +804,29 @@ export async function registerGenericModelRoutes(
       );
       if (!target) return reply;
 
-      const actor = resolveActorContextFromBridge(auth, request);
-      const role = auth.getActorRole(request);
-      const row = await ensureRecordMatchesRuleDomain(
-        runtime,
-        target,
-        request.params.id,
-        role,
-        actor,
-        { includeDeleted: true },
-      );
-      if (!row) return reply.code(404).send({ error: "Not found" });
-      const entries = await target.repo.history(request.params.id);
-      return reply.send({ data: entries });
+      try {
+        const { role, scopedRepo, evalResult } = await prepareScopedRuleContext(
+          runtime,
+          auth,
+          request,
+          target,
+          "read",
+        );
+        if (!evalResult.allowed) {
+          return reply.code(403).send({ error: "Forbidden" });
+        }
+        const rows = await scopedRepo.find(
+          mergeWithRuleDomain({ id: request.params.id }, evalResult.domain),
+          { limit: 1, includeDeleted: true },
+        );
+        if (!rows[0]) return reply.code(404).send({ error: "Not found" });
+        const entries = await scopedRepo.history(request.params.id);
+        return reply.send({
+          data: sanitizeHistoryEntriesForRole(target.desc, entries, role),
+        });
+      } catch (error) {
+        return handleOrmError(error, reply);
+      }
     },
   );
 }

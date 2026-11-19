@@ -89,6 +89,7 @@ export {
 } from "./signing.js";
 export {
   AddonRuntimeController,
+  evaluateModelRecordRules,
   type AddonDefinition,
   type AddonDataRecord,
   type ActionBindingsSpec,
@@ -96,13 +97,17 @@ export {
   type CrewRoleOrPublic,
   type IrCronInput,
   type IrRuleInput,
+  type IrRuleRecordLike,
   type IrSequenceInput,
   type IrViewInput,
   type IrMenuInput,
   type ModelAclFlags,
+  type RecordRuleEvaluationResult,
+  type RecordRuleOperation,
   type RegisteredFieldMetadata,
   type RuntimeViewDescriptor,
 } from "./runtime.js";
+export { canReadField, canWriteField } from "./field-policy.js";
 export { registerGenericModelRoutes } from "./generic-crud.js";
 export {
   defaultFailClosedAuthBridge,

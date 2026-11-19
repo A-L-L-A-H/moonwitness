@@ -5,10 +5,12 @@ import {
   compileTupleDomainToFilter,
   extendModel,
   modelRegistry,
+  PolicyError,
   syncModels,
   SYSTEM_ACTOR,
   type ActorContext,
   type DefineModelReturn,
+  type FieldPolicySpec,
   type ModelExtensionDef,
   type RuntimeCustomFieldSpec,
   type SyncReport,
@@ -25,7 +27,9 @@ import {
   irSequenceModel,
   irSystemModels,
   irViewModel,
+  resGroupsModel,
 } from "./ir-models.js";
+import { canReadField, getEffectiveFieldPolicies } from "./field-policy.js";
 import { opsJobModel } from "./job-queue.js";
 import {
   AddonManifestSchema,
@@ -38,15 +42,37 @@ import {
 import { verifyAddonManifestSignature, type AddonSigningPolicy } from "./signing.js";
 
 export type CrewRoleOrPublic = "admin" | "editor" | "viewer" | "public";
+export type RecordRuleOperation = "read" | "create" | "update" | "delete";
 
 export interface IrRuleInput {
+  rule_key?: string;
   model_name: string;
-  role: CrewRoleOrPublic;
+  role?: CrewRoleOrPublic;
+  scope?: "global" | "group";
+  groups?: string[];
   can_read?: boolean;
   can_create?: boolean;
   can_update?: boolean;
   can_delete?: boolean;
   domain?: Record<string, unknown> | unknown[];
+}
+
+export interface IrRuleRecordLike {
+  rule_key?: string | null;
+  model_name: string;
+  role: CrewRoleOrPublic;
+  scope?: "global" | "group" | null;
+  groups_json?: string | null;
+  can_read: boolean;
+  can_create: boolean;
+  can_update: boolean;
+  can_delete: boolean;
+  domain_json?: string | null;
+}
+
+export interface RecordRuleEvaluationResult {
+  allowed: boolean;
+  domain: Record<string, unknown> | null;
 }
 
 export interface AddonDataRecord {
@@ -172,6 +198,7 @@ export interface RuntimeViewDescriptor {
     spec: Record<string, unknown>;
   }>;
   actionBindings: ActionBindingsSpec;
+  fieldPolicies?: Record<string, FieldPolicySpec>;
 }
 
 const ROLE_RANK: Record<CrewRoleOrPublic, number> = {
@@ -446,17 +473,336 @@ function resolveRuleDomainPlaceholders(
   return value;
 }
 
+const SUPPORTED_DOMAIN_FIELD_OPS = new Set([
+  "$ne",
+  "$gt",
+  "$gte",
+  "$lt",
+  "$lte",
+  "$in",
+  "$like",
+  "$ilike",
+  "$not",
+]);
+
+function isPlainDomainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" && value !== null && !Array.isArray(value) && !(value instanceof Date)
+  );
+}
+
+function validateFieldOperatorObject(field: string, value: Record<string, unknown>): void {
+  const keys = Object.keys(value);
+  if (keys.length === 0) {
+    throw new PolicyError(
+      `Rule domain operator object for '${field}' cannot be empty`,
+      "INVALID_RULE_DOMAIN",
+      400,
+    );
+  }
+  for (const [op, opVal] of Object.entries(value)) {
+    if (!SUPPORTED_DOMAIN_FIELD_OPS.has(op)) {
+      throw new PolicyError(
+        `Unsupported rule domain operator '${op}' on field '${field}'`,
+        "INVALID_RULE_DOMAIN",
+        400,
+      );
+    }
+    if (op === "$in" && !Array.isArray(opVal)) {
+      throw new PolicyError(
+        `Rule domain operator '$in' on field '${field}' requires an array`,
+        "INVALID_RULE_DOMAIN",
+        400,
+      );
+    }
+    if ((op === "$like" || op === "$ilike") && typeof opVal !== "string") {
+      throw new PolicyError(
+        `Rule domain operator '${op}' on field '${field}' requires a string`,
+        "INVALID_RULE_DOMAIN",
+        400,
+      );
+    }
+    if (op === "$not" && isPlainDomainObject(opVal)) {
+      validateFieldOperatorObject(field, opVal);
+    }
+  }
+}
+
+function validateRuleDomainAst(filter: unknown): Record<string, unknown> {
+  if (!isPlainDomainObject(filter)) {
+    throw new PolicyError(
+      "Rule domain must resolve to a filter object or tuple array",
+      "INVALID_RULE_DOMAIN",
+      400,
+    );
+  }
+  for (const [key, value] of Object.entries(filter)) {
+    if (value === undefined) continue;
+    if (key === "$and" || key === "$or") {
+      if (!Array.isArray(value)) {
+        throw new PolicyError(
+          `Rule domain operator '${key}' requires an array`,
+          "INVALID_RULE_DOMAIN",
+          400,
+        );
+      }
+      for (const sub of value) {
+        validateRuleDomainAst(sub);
+      }
+      continue;
+    }
+    if (key === "$not") {
+      validateRuleDomainAst(value);
+      continue;
+    }
+    if (key.startsWith("$")) {
+      throw new PolicyError(
+        `Unsupported rule domain operator '${key}'`,
+        "INVALID_RULE_DOMAIN",
+        400,
+      );
+    }
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) {
+      throw new PolicyError(`Invalid rule domain field '${key}'.`, "INVALID_RULE_DOMAIN", 400);
+    }
+    if (Array.isArray(value)) {
+      throw new PolicyError(
+        `Rule domain array value on '${key}' requires '$in' operator`,
+        "INVALID_RULE_DOMAIN",
+        400,
+      );
+    }
+    if (isPlainDomainObject(value)) {
+      validateFieldOperatorObject(key, value);
+    }
+  }
+  return filter;
+}
+
 function parseStoredRuleDomain(
   domainJson: string,
   actor: ActorContext,
   role: CrewRoleOrPublic,
 ): Record<string, unknown> {
-  const parsed = JSON.parse(domainJson) as unknown;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(domainJson) as unknown;
+  } catch (err) {
+    throw new PolicyError(
+      `Malformed rule domain JSON: ${err instanceof Error ? err.message : String(err)}`,
+      "INVALID_RULE_DOMAIN",
+      400,
+    );
+  }
   const resolved = resolveRuleDomainPlaceholders(parsed, actor, role);
   if (Array.isArray(resolved)) {
-    return compileTupleDomainToFilter(resolved);
+    try {
+      const compiled = compileTupleDomainToFilter(resolved);
+      return validateRuleDomainAst(compiled);
+    } catch (err) {
+      if (err instanceof PolicyError) throw err;
+      throw new PolicyError(
+        err instanceof Error ? err.message : "Invalid tuple domain",
+        "INVALID_RULE_DOMAIN",
+        400,
+      );
+    }
   }
-  return (resolved ?? {}) as Record<string, unknown>;
+  return validateRuleDomainAst(resolved);
+}
+
+const DEFAULT_ROLE_BASE_GROUPS: Record<CrewRoleOrPublic, string[]> = {
+  public: ["base.group_public"],
+  viewer: ["base.group_viewer", "base.group_public"],
+  editor: ["base.group_editor", "base.group_viewer", "base.group_public"],
+  admin: ["base.group_system", "base.group_editor", "base.group_viewer", "base.group_public"],
+};
+
+const BUILTIN_IMPLIED_GROUPS: Record<string, string[]> = {
+  "base.group_system": ["base.group_editor"],
+  "base.group_editor": ["base.group_viewer"],
+  "base.group_viewer": ["base.group_public"],
+  "base.group_public": [],
+};
+
+function parseRuleGroups(groupsJson?: string | null): string[] {
+  if (!groupsJson || !groupsJson.trim()) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(groupsJson);
+  } catch {
+    throw new PolicyError("Malformed rule groups JSON", "INVALID_RULE_DOMAIN", 400);
+  }
+  if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === "string")) {
+    throw new PolicyError(
+      "Rule groups_json must be a JSON string array",
+      "INVALID_RULE_DOMAIN",
+      400,
+    );
+  }
+  return parsed.map((g) => g.trim()).filter(Boolean);
+}
+
+function resolveEffectiveGroups(
+  role: CrewRoleOrPublic,
+  actorGroups: string[] | undefined,
+  impliedGroups?: Map<string, string[]>,
+): Set<string> {
+  const effective = new Set<string>(DEFAULT_ROLE_BASE_GROUPS[role] ?? ["base.group_public"]);
+  const queue: string[] = [...effective];
+  for (const g of actorGroups ?? []) {
+    const trimmed = g.trim();
+    if (trimmed && !effective.has(trimmed)) {
+      effective.add(trimmed);
+      queue.push(trimmed);
+    }
+  }
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const nextGroups = impliedGroups?.get(current) ?? BUILTIN_IMPLIED_GROUPS[current] ?? [];
+    for (const implied of nextGroups) {
+      if (!effective.has(implied)) {
+        effective.add(implied);
+        queue.push(implied);
+      }
+    }
+  }
+  return effective;
+}
+
+const OP_FLAG_MAP: Record<
+  RecordRuleOperation,
+  "can_read" | "can_create" | "can_update" | "can_delete"
+> = {
+  read: "can_read",
+  create: "can_create",
+  update: "can_update",
+  delete: "can_delete",
+};
+
+function selectMatchingGroupRules(
+  groupRules: IrRuleRecordLike[],
+  role: CrewRoleOrPublic,
+  effectiveGroups: Set<string>,
+  actorGroups?: string[],
+): { hasImplicitAdminBypass: boolean; matching: IrRuleRecordLike[] } {
+  if (role === "admin") {
+    const explicitAdminOrGroup = groupRules.filter((r) => {
+      const ruleGroups = parseRuleGroups(r.groups_json);
+      if (ruleGroups.length > 0) {
+        return (
+          ruleGroups.includes("base.group_system") ||
+          Boolean(actorGroups?.some((ag) => ruleGroups.includes(ag)))
+        );
+      }
+      return r.role === "admin";
+    });
+    if (explicitAdminOrGroup.length === 0) {
+      return { hasImplicitAdminBypass: true, matching: [] };
+    }
+  }
+
+  const userRank = ROLE_RANK[role] ?? 0;
+  const matching = groupRules.filter((r) => {
+    const ruleGroups = parseRuleGroups(r.groups_json);
+    if (ruleGroups.length > 0) {
+      return ruleGroups.some((g) => effectiveGroups.has(g));
+    }
+    return (ROLE_RANK[r.role] ?? 99) <= userRank;
+  });
+  return { hasImplicitAdminBypass: false, matching };
+}
+
+/**
+ * Pure evaluator for operation-aware `ir_rules` supporting global (AND) and group (OR) rules.
+ */
+export function evaluateModelRecordRules(params: {
+  rules: IrRuleRecordLike[];
+  role: CrewRoleOrPublic;
+  actor: ActorContext;
+  operation: RecordRuleOperation;
+  actorGroups?: string[];
+  impliedGroups?: Map<string, string[]>;
+}): RecordRuleEvaluationResult {
+  const { rules, role, actor, operation, actorGroups, impliedGroups } = params;
+  if (rules.length === 0) {
+    return { allowed: role === "admin", domain: null };
+  }
+
+  const opFlag = OP_FLAG_MAP[operation];
+  const effectiveGroups = resolveEffectiveGroups(role, actorGroups, impliedGroups);
+
+  const globalRules = rules.filter((r) => r.scope === "global");
+  const groupRules = rules.filter((r) => (r.scope ?? "group") !== "global");
+
+  const applicableGlobal = globalRules.filter((r) => Boolean(r[opFlag]));
+  const globalDomains: Array<Record<string, unknown>> = [];
+  for (const rule of applicableGlobal) {
+    if (!rule.domain_json || !rule.domain_json.trim()) continue;
+    const parsed = parseStoredRuleDomain(rule.domain_json, actor, role);
+    if (Object.keys(parsed).length > 0) {
+      globalDomains.push(parsed);
+    }
+  }
+  const globalDomain: Record<string, unknown> | null =
+    globalDomains.length === 0
+      ? null
+      : globalDomains.length === 1
+        ? globalDomains[0]!
+        : { $and: globalDomains };
+
+  if (groupRules.length === 0) {
+    const allowed = role === "admin" ? true : applicableGlobal.length > 0;
+    return { allowed, domain: allowed ? globalDomain : null };
+  }
+
+  const { hasImplicitAdminBypass, matching } = selectMatchingGroupRules(
+    groupRules,
+    role,
+    effectiveGroups,
+    actorGroups,
+  );
+  if (hasImplicitAdminBypass) {
+    return { allowed: true, domain: globalDomain };
+  }
+
+  const allowedGroupRules = matching.filter((r) => Boolean(r[opFlag]));
+  if (allowedGroupRules.length === 0) {
+    return { allowed: false, domain: null };
+  }
+
+  let hasUnrestrictedGroupRule = false;
+  const groupDomains: Array<Record<string, unknown>> = [];
+  for (const rule of allowedGroupRules) {
+    if (!rule.domain_json || !rule.domain_json.trim()) {
+      hasUnrestrictedGroupRule = true;
+      continue;
+    }
+    const parsed = parseStoredRuleDomain(rule.domain_json, actor, role);
+    if (Object.keys(parsed).length === 0) {
+      hasUnrestrictedGroupRule = true;
+    } else {
+      groupDomains.push(parsed);
+    }
+  }
+
+  const groupDomain: Record<string, unknown> | null =
+    hasUnrestrictedGroupRule || groupDomains.length === 0
+      ? null
+      : groupDomains.length === 1
+        ? groupDomains[0]!
+        : { $or: groupDomains };
+
+  if (!globalDomain && !groupDomain) {
+    return { allowed: true, domain: null };
+  }
+  if (globalDomain && !groupDomain) {
+    return { allowed: true, domain: globalDomain };
+  }
+  if (!globalDomain && groupDomain) {
+    return { allowed: true, domain: groupDomain };
+  }
+  return { allowed: true, domain: { $and: [globalDomain!, groupDomain!] } };
 }
 
 export class AddonRuntimeController {
@@ -815,21 +1161,66 @@ export class AddonRuntimeController {
       }
     }
 
+    const declaredGroupKeys = new Set<string>();
+    for (const item of def.data ?? []) {
+      if (item.model === "res.groups" && typeof item.values.group_key === "string") {
+        declaredGroupKeys.add(item.values.group_key);
+      }
+    }
+    const existingGroupRows = (def.rules ?? []).some((r) => (r.groups?.length ?? 0) > 0)
+      ? await resGroupsModel.repository.find({})
+      : [];
+    const registeredGroupKeys = new Set<string>([
+      ...existingGroupRows.map((g) => g.group_key),
+      ...declaredGroupKeys,
+    ]);
+
     for (const rule of def.rules ?? []) {
-      await irRuleModel.repository.upsert(
-        { model_name: rule.model_name, role: rule.role },
-        {
+      const role: CrewRoleOrPublic = rule.role ?? "public";
+      const scope = rule.scope ?? "group";
+      const groups = (rule.groups ?? []).map((g) => g.trim()).filter(Boolean);
+      if (rule.groups && groups.length !== rule.groups.length) {
+        throw new Error(`Rule for '${rule.model_name}' contains an empty group reference.`);
+      }
+      if (groups.length > 0 && registeredGroupKeys.size > 0) {
+        for (const groupKey of groups) {
+          if (!registeredGroupKeys.has(groupKey)) {
+            throw new Error(
+              `Rule '${rule.rule_key ?? `${rule.model_name}::${role}`}' references unknown group '${groupKey}'.`,
+            );
+          }
+        }
+      }
+      const ruleKey = rule.rule_key ?? `${rule.model_name}::${role}`;
+      const payload = {
+        rule_key: ruleKey,
+        model_name: rule.model_name,
+        role,
+        addon: addonName,
+        scope,
+        groups_json: JSON.stringify(groups),
+        can_read: rule.can_read ?? false,
+        can_create: rule.can_create ?? false,
+        can_update: rule.can_update ?? false,
+        can_delete: rule.can_delete ?? false,
+        domain_json: rule.domain ? JSON.stringify(rule.domain) : null,
+      };
+      if (rule.rule_key) {
+        await irRuleModel.repository.upsert({ rule_key: rule.rule_key }, payload, SYSTEM_ACTOR);
+      } else {
+        const candidates = await irRuleModel.repository.find({
           model_name: rule.model_name,
-          role: rule.role,
-          addon: addonName,
-          can_read: rule.can_read ?? false,
-          can_create: rule.can_create ?? false,
-          can_update: rule.can_update ?? false,
-          can_delete: rule.can_delete ?? false,
-          domain_json: rule.domain ? JSON.stringify(rule.domain) : null,
-        },
-        SYSTEM_ACTOR,
-      );
+          role,
+        });
+        const legacyMatch = candidates.find(
+          (row) => row.rule_key === null || row.rule_key === ruleKey,
+        );
+        if (legacyMatch) {
+          await irRuleModel.repository.update(legacyMatch.id, payload, SYSTEM_ACTOR);
+        } else {
+          await irRuleModel.repository.create(payload, SYSTEM_ACTOR);
+        }
+      }
     }
 
     for (const view of def.views ?? []) {
@@ -1091,58 +1482,128 @@ export class AddonRuntimeController {
     );
   }
 
-  async getModelPermissions(modelName: string, role: CrewRoleOrPublic): Promise<ModelAclFlags> {
-    const rules = await irRuleModel.repository.find({ model_name: modelName });
-    if (rules.length === 0) {
-      return role === "admin"
-        ? { canRead: true, canCreate: true, canUpdate: true, canDelete: true }
-        : { canRead: false, canCreate: false, canUpdate: false, canDelete: false };
+  private async loadImpliedGroupsMap(): Promise<Map<string, string[]>> {
+    const map = new Map<string, string[]>();
+    const rows = await resGroupsModel.repository.find({});
+    for (const row of rows) {
+      try {
+        const parsed = JSON.parse(row.implied_ids_json) as unknown;
+        if (Array.isArray(parsed)) {
+          map.set(
+            row.group_key,
+            parsed.filter((item): item is string => typeof item === "string"),
+          );
+        }
+      } catch {
+        // Keep empty implications for malformed group rows.
+      }
     }
-    const exact = rules.find((r) => r.role === role);
-    if (exact) {
-      return {
-        canRead: exact.can_read,
-        canCreate: exact.can_create,
-        canUpdate: exact.can_update,
-        canDelete: exact.can_delete,
-      };
+    return map;
+  }
+
+  private evaluateOperationFlag(params: {
+    rules: IrRuleRecordLike[];
+    role: CrewRoleOrPublic;
+    operation: RecordRuleOperation;
+    actorGroups?: string[];
+    impliedGroups?: Map<string, string[]>;
+  }): boolean {
+    const { rules, role, operation, actorGroups, impliedGroups } = params;
+    if (rules.length === 0) return role === "admin";
+    const opFlag = OP_FLAG_MAP[operation];
+    const effectiveGroups = resolveEffectiveGroups(role, actorGroups, impliedGroups);
+    const globalRules = rules.filter((r) => r.scope === "global");
+    const groupRules = rules.filter((r) => (r.scope ?? "group") !== "global");
+    if (groupRules.length === 0) {
+      return role === "admin" ? true : globalRules.some((r) => Boolean(r[opFlag]));
     }
-    if (role === "admin") {
-      return { canRead: true, canCreate: true, canUpdate: true, canDelete: true };
-    }
-    // Check fallback rule for lower rank (e.g. editor reading viewer rule)
-    const userRank = ROLE_RANK[role] ?? 0;
-    const eligible = rules.filter((r) => (ROLE_RANK[r.role] ?? 99) <= userRank);
+    const { hasImplicitAdminBypass, matching } = selectMatchingGroupRules(
+      groupRules,
+      role,
+      effectiveGroups,
+      actorGroups,
+    );
+    if (hasImplicitAdminBypass) return true;
+    return matching.some((r) => Boolean(r[opFlag]));
+  }
+
+  async getModelPermissions(
+    modelName: string,
+    role: CrewRoleOrPublic,
+    actorGroups?: string[],
+  ): Promise<ModelAclFlags> {
+    const [rules, impliedGroups] = await Promise.all([
+      irRuleModel.repository.find({ model_name: modelName }),
+      this.loadImpliedGroupsMap(),
+    ]);
     return {
-      canRead: eligible.some((r) => r.can_read),
-      canCreate: eligible.some((r) => r.can_create),
-      canUpdate: eligible.some((r) => r.can_update),
-      canDelete: eligible.some((r) => r.can_delete),
+      canRead: this.evaluateOperationFlag({
+        rules,
+        role,
+        operation: "read",
+        actorGroups,
+        impliedGroups,
+      }),
+      canCreate: this.evaluateOperationFlag({
+        rules,
+        role,
+        operation: "create",
+        actorGroups,
+        impliedGroups,
+      }),
+      canUpdate: this.evaluateOperationFlag({
+        rules,
+        role,
+        operation: "update",
+        actorGroups,
+        impliedGroups,
+      }),
+      canDelete: this.evaluateOperationFlag({
+        rules,
+        role,
+        operation: "delete",
+        actorGroups,
+        impliedGroups,
+      }),
     };
+  }
+
+  async evaluateRuleForOperation(
+    modelName: string,
+    role: CrewRoleOrPublic,
+    actor: ActorContext,
+    operation: RecordRuleOperation,
+    actorGroups?: string[],
+  ): Promise<RecordRuleEvaluationResult> {
+    const [rules, impliedGroups] = await Promise.all([
+      irRuleModel.repository.find({ model_name: modelName }),
+      this.loadImpliedGroupsMap(),
+    ]);
+    return evaluateModelRecordRules({
+      rules,
+      role,
+      actor,
+      operation,
+      actorGroups,
+      impliedGroups,
+    });
   }
 
   async getModelRuleDomain(
     modelName: string,
     role: CrewRoleOrPublic,
     actor: ActorContext,
+    operation: RecordRuleOperation = "read",
+    actorGroups?: string[],
   ): Promise<Record<string, unknown> | null> {
-    const rules = await irRuleModel.repository.find({ model_name: modelName });
-    if (rules.length === 0) return null;
-    const exact = rules.find((r) => r.role === role);
-    if (exact) {
-      if (!exact.domain_json) return null;
-      return parseStoredRuleDomain(exact.domain_json, actor, role);
-    }
-    if (role === "admin") {
-      return null;
-    }
-    const userRank = ROLE_RANK[role] ?? 0;
-    const eligible = rules
-      .filter((r) => (ROLE_RANK[r.role] ?? 99) <= userRank)
-      .sort((a, b) => (ROLE_RANK[b.role] ?? 0) - (ROLE_RANK[a.role] ?? 0));
-    const highestWithDomain = eligible.find((r) => Boolean(r.domain_json));
-    if (!highestWithDomain?.domain_json) return null;
-    return parseStoredRuleDomain(highestWithDomain.domain_json, actor, role);
+    const result = await this.evaluateRuleForOperation(
+      modelName,
+      role,
+      actor,
+      operation,
+      actorGroups,
+    );
+    return result.domain;
   }
 
   /**
@@ -1206,9 +1667,7 @@ export class AddonRuntimeController {
 
     const fieldRows = await irModelFieldModel.repository.find({ model_name: modelName });
     let fields: RegisteredFieldMetadata[] = fieldRows
-      .filter(
-        (f) => !f.deprecated && !/password_hash|encrypted_private|_secret/i.test(f.field_name),
-      )
+      .filter((f) => !f.deprecated && canReadField(desc, f.field_name, role))
       .map((f) => ({
         id: f.id,
         model_name: f.model_name,
@@ -1227,10 +1686,7 @@ export class AddonRuntimeController {
 
     if (fields.length === 0) {
       fields = [...desc.fields.entries()]
-        .filter(
-          ([fieldName]) =>
-            fieldName !== "_attrs" && !/password_hash|encrypted_private|_secret/i.test(fieldName),
-        )
+        .filter(([fieldName]) => fieldName !== "_attrs" && canReadField(desc, fieldName, role))
         .map(([fieldName, spec]) => {
           const selection = spec.enumValues ? [...spec.enumValues] : null;
           return {
@@ -1296,12 +1752,20 @@ export class AddonRuntimeController {
 
     const mappedViews: RuntimeViewDescriptor["views"] =
       activeViews.length > 0
-        ? activeViews.map((v) => ({
-            view_type: v.view_type,
-            addon: v.addon,
-            priority: v.priority,
-            spec: JSON.parse(v.spec_json) as Record<string, unknown>,
-          }))
+        ? activeViews.map((v) => {
+            const spec = JSON.parse(v.spec_json) as Record<string, unknown>;
+            if (Array.isArray(spec.columns)) {
+              spec.columns = spec.columns.filter(
+                (col): col is string => typeof col === "string" && canReadField(desc, col, role),
+              );
+            }
+            return {
+              view_type: v.view_type,
+              addon: v.addon,
+              priority: v.priority,
+              spec,
+            };
+          })
         : [
             {
               view_type: "list",
@@ -1313,7 +1777,7 @@ export class AddonRuntimeController {
                   .filter((f) => f.field_type !== "json")
                   .slice(0, 8)
                   .map((f) => f.field_name),
-                searchKeys: desc.searchFields ?? [],
+                searchKeys: (desc.searchFields ?? []).filter((f) => canReadField(desc, f, role)),
               },
             },
           ];
@@ -1327,6 +1791,7 @@ export class AddonRuntimeController {
       fields,
       views: mappedViews,
       actionBindings,
+      ...(role === "admin" ? { fieldPolicies: getEffectiveFieldPolicies(desc) } : {}),
     };
   }
 }

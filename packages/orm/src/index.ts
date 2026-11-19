@@ -2,6 +2,8 @@ export {
   defineModel,
   uuidv7,
   BaseRepository,
+  ScopedRepository,
+  matchesFilter,
   AUDIT_DDL,
   ormAuditMigrations,
   ensureAuditTable,
@@ -14,6 +16,7 @@ export type {
   ModelRecord,
   QueryFilterOperators,
   FindOptions,
+  WriteGuardOptions,
 } from "./define-model.js";
 export { modelRegistry, extendModel, onModelWrite } from "./registry.js";
 export type {
@@ -35,11 +38,13 @@ export type { BaseMetadata, RecordStatus, RecordSource } from "./base-metadata.j
 export {
   createActorContext,
   DEFAULT_TENANT_ID,
+  isSystemActor,
   normalizeTenantId,
+  requireActorTenantId,
   SYSTEM_ACTOR,
 } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
-export { ConflictError } from "./errors.js";
+export { ConflictError, PolicyError, type PolicyErrorCode } from "./errors.js";
 export { initDb, initD1Db, initPostgresDb, closeDb, getDb } from "./driver.js";
 export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
@@ -67,6 +72,7 @@ export type { BackupCommandOptions, ExternalCommandRunner } from "./backup.js";
 export { compileTupleDomainToFilter } from "./model-meta.js";
 export type {
   ConstrainContext,
+  FieldPolicySpec,
   ModelActionContext,
   ModelActionDef,
   ModelComputedFieldFn,

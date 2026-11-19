@@ -1,14 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { modelRegistry } from "@moonwitness/orm";
-import type { AddonRuntimeController } from "./runtime.js";
+import type { AddonRuntimeController, CrewRoleOrPublic } from "./runtime.js";
+import { canReadField } from "./field-policy.js";
 import {
   defaultFailClosedAuthBridge,
   resolveActorContextFromBridge,
   type BaseAddonAuthBridge,
 } from "./host-context.js";
-
-const SENSITIVE_META_FIELD_RE = /password_hash|_token|_secret|encrypted_private/i;
 
 function jsonTypeForCodec(codec: string): string {
   switch (codec) {
@@ -26,6 +25,7 @@ function jsonTypeForCodec(codec: string): string {
 export function buildMetadataRegistryFromModels(
   runtime: AddonRuntimeController,
   extraModels: RegisteredModel[] = [],
+  role: CrewRoleOrPublic = "public",
 ): MetadataRegistry {
   const models: RegisteredModel[] = [];
   const seen = new Set<string>();
@@ -33,7 +33,7 @@ export function buildMetadataRegistryFromModels(
     if (!desc.publicFields || desc.publicFields.length === 0) continue;
     if (!runtime.isModelEnabled(desc.name)) continue;
     const publicFields = desc.publicFields
-      .filter((name) => !SENSITIVE_META_FIELD_RE.test(name))
+      .filter((name) => canReadField(desc, name, role))
       .map((name) => {
         const spec = desc.fields.get(name);
         const type =

@@ -1,10 +1,11 @@
 import { z } from "zod";
 import type { ActorContext } from "./actor-context.js";
-import type { ModelFeatureOptions } from "./model-meta.js";
+import type { FieldPolicySpec, ModelFeatureOptions } from "./model-meta.js";
 import {
   assertIdentifier,
   compileModelDdl,
   fieldSpec,
+  METADATA_NAMES,
   type FieldSpec,
   type ModelIndex,
   type RuntimeCustomFieldSpec,
@@ -204,6 +205,23 @@ class OrmModelRegistry {
     const ddl = compileModelDdl(base.table, fields, mergedIndexes, base.extensible);
     const customFields = [...(this.customFields.get(name) ?? [])];
 
+    let clonedFieldPolicies: Record<string, FieldPolicySpec> | undefined;
+    if (base.fieldPolicies) {
+      clonedFieldPolicies = {};
+      for (const [fieldName, policy] of Object.entries(base.fieldPolicies)) {
+        if (!fields.has(fieldName) && !METADATA_NAMES.has(fieldName)) {
+          throw new Error(
+            `Unknown field '${fieldName}' in fieldPolicies for model '${base.name}'.`,
+          );
+        }
+        clonedFieldPolicies[fieldName] = {
+          ...(policy.readRoles ? { readRoles: [...policy.readRoles] } : {}),
+          ...(policy.writeRoles ? { writeRoles: [...policy.writeRoles] } : {}),
+          ...(policy.sensitive !== undefined ? { sensitive: policy.sensitive } : {}),
+        };
+      }
+    }
+
     const descriptor: RegisteredModelDescriptor = {
       name: base.name,
       table: base.table,
@@ -221,6 +239,7 @@ class OrmModelRegistry {
       actions: base.actions,
       computed: base.computed,
       hooks: base.hooks,
+      fieldPolicies: clonedFieldPolicies,
       fields,
       fieldOrigins,
       indexes: mergedIndexes,

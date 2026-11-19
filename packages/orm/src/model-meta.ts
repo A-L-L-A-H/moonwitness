@@ -1,9 +1,15 @@
 import type { z } from "zod";
 import type { ActorContext } from "./actor-context.js";
-import type { BaseRepository } from "./define-model.js";
+import type { BaseRepository, ScopedRepository } from "./define-model.js";
 
 export type ModelRole = "admin" | "editor" | "viewer" | "public";
 export type ModelWriteAction = "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DELETE";
+
+export interface FieldPolicySpec {
+  readRoles?: ModelRole[];
+  writeRoles?: ModelRole[];
+  sensitive?: boolean;
+}
 
 /** Odoo `@api.constrains`: runs inside the write transaction before the SQL statement. */
 export interface ConstrainContext {
@@ -68,12 +74,13 @@ export interface ModelActionContext {
   actor: ActorContext;
   record: Record<string, unknown> | null;
   input: unknown;
-  repository: BaseRepository;
+  repository: BaseRepository | ScopedRepository;
 }
 
 /** Odoo `type="object"` method exposed over `POST /m/:model[/:id]/call/:action` and `POST /rpc`. */
 export interface ModelActionDef {
   scope: "model" | "record";
+  operation?: "read" | "create" | "update" | "delete";
   roles?: ModelRole[];
   label?: string;
   input?: z.ZodType;
@@ -89,6 +96,7 @@ export interface ModelFeatureOptions {
   actions?: Record<string, ModelActionDef>;
   computed?: ModelComputedFields;
   hooks?: ModelLifecycleHooks;
+  fieldPolicies?: Record<string, FieldPolicySpec>;
 }
 
 function compileSingleTupleClause(clause: unknown): Record<string, unknown> {
