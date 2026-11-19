@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
-  closeDb,
+  closeDbAsync,
   ConflictError,
   createActorContext,
   defineModel,
@@ -120,7 +120,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     const cleanups: Array<() => Promise<void>> = [];
 
     afterEach(async () => {
-      closeDb();
+      await closeDbAsync();
       modelRegistry.clearHookErrors();
       while (cleanups.length > 0) {
         const cleanup = cleanups.pop()!;
@@ -129,7 +129,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     });
 
     afterAll(() => {
-      closeDb();
+      await closeDbAsync();
     });
 
     it("1a. boots real Fastify host (buildApp) on PostgreSQL 16 with health/readiness, authBridge actor context, RPC, and 2-tenant isolation", async () => {
@@ -140,7 +140,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -226,7 +226,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -585,7 +585,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -895,7 +895,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -1152,7 +1152,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     it("3. enforces transactional rollback atomicity & OutboxDispatcher delivery/backoff/dead-letter/lease-recovery on PostgreSQL", async () => {
       const isolated = await createIsolatedPostgresDb(POSTGRES_CONFORMANCE_URL);
       cleanups.push(async () => {
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -1348,7 +1348,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 

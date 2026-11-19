@@ -162,6 +162,39 @@ describe("PostgresDriver", () => {
     expect(mock.pool.end).toHaveBeenCalledTimes(1);
   });
 
+  it("awaits pool shutdown and deduplicates concurrent async close calls", async () => {
+    const mock = createMockPool();
+    const driver = new PostgresDriver();
+    await driver.init("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
+
+    let finishShutdown: (() => void) | null = null;
+    mock.pool.end = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishShutdown = resolve;
+        }),
+    );
+
+    const firstClose = driver.closeAsync();
+    const secondClose = driver.closeAsync();
+    expect(mock.pool.end).toHaveBeenCalledTimes(1);
+
+    let firstSettled = false;
+    void firstClose.then(() => {
+      firstSettled = true;
+    });
+    await Promise.resolve();
+    expect(firstSettled).toBe(false);
+
+    if (!finishShutdown) {
+      throw new Error("Expected pool shutdown callback to be registered");
+    }
+    finishShutdown();
+
+    await Promise.all([firstClose, secondClose]);
+    expect(firstSettled).toBe(true);
+  });
+
   it("manages BEGIN/COMMIT and ROLLBACK on transaction errors", async () => {
     const mock = createMockPool();
     const driver = new PostgresDriver();
