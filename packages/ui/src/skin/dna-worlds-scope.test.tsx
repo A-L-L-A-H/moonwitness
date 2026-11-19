@@ -60,6 +60,9 @@ describe("SkinScope canonical semantic variable precedence", () => {
     expect(scope.style.getPropertyValue("--dna-accent-secondary")).toBe(
       resolved.semantic.accentSecondary,
     );
+    expect(scope.style.getPropertyValue("--dna-world-accent")).toBe(
+      resolved.atmosphere.worldAccent,
+    );
   });
 
   it("preserves explicit caller overrides after canonical token resolution", () => {
