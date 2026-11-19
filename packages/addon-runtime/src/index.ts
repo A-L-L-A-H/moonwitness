@@ -130,9 +130,16 @@ export {
   validateServiceEndpointUrl,
   validateRiotAiRuntimeConfig,
   validateMemoryRuntimeConfig,
+  OPTIONAL_OPS_SERVICES,
+  isOptionalOpsServiceEnabled,
+  probeOptionalOpsServices,
   type EdgeLoopbackErrorPayload,
   type TraceContext,
   type UpstreamCorrelationInput,
+  type OptionalOpsServiceKey,
+  type OptionalOpsServiceSpec,
+  type OpsServiceHealthStatus,
+  type OptionalOpsServiceState,
 } from "./upstream.js";
 export {
   opsJobSchema,

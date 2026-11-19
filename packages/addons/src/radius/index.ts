@@ -1,11 +1,12 @@
 import type { FastifyInstance } from "fastify";
-import type {
-  AddonDefinition,
-  AddonHostContext,
-  AddonManifestInput,
-  IrMenuInput,
-  IrRuleInput,
-  IrViewInput,
+import {
+  isOptionalOpsServiceEnabled,
+  type AddonDefinition,
+  type AddonHostContext,
+  type AddonManifestInput,
+  type IrMenuInput,
+  type IrRuleInput,
+  type IrViewInput,
 } from "@moonwitness/addon-runtime";
 import manifestData from "./manifest.json" with { type: "json" };
 import { radiusClientModel, radiusSessionModel } from "./models.js";
@@ -77,7 +78,7 @@ export function createRadiusAddon(
     rules: radiusRules,
     views: radiusViews,
     menus: radiusMenus,
-    shouldAutoEnable: () => process.env.MW_ADDON_RADIUS_DISABLED !== "1",
+    shouldAutoEnable: () => isOptionalOpsServiceEnabled("radius"),
     registerRoutes:
       options.registerRoutes ??
       (async (scope) => {

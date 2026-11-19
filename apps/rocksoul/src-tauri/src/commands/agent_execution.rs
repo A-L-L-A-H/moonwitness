@@ -2,19 +2,116 @@ use crate::db;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    path::Path,
+    io::Read,
+    path::{Component, Path},
     process::{Child, Command, Stdio},
-    sync::{Mutex, OnceLock},
-    time::{SystemTime, UNIX_EPOCH},
+    sync::{Arc, Mutex, OnceLock},
+    thread,
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use tauri::AppHandle;
 use uuid::Uuid;
 
 const ALLOWLISTED_EXECUTABLES: &[&str] = &["git", "node", "pnpm", "cargo", "gh", "timeout"];
+const SAFE_ENV_ALLOWLIST: &[&str] = &[
+    "PATH",
+    "PATHEXT",
+    "SYSTEMROOT",
+    "COMSPEC",
+    "WINDIR",
+    "HOME",
+    "USERPROFILE",
+    "TMP",
+    "TEMP",
+    "TMPDIR",
+    "LANG",
+    "LC_ALL",
+    "TERM",
+];
+const MAX_CAPTURED_OUTPUT_BYTES: usize = 256 * 1024;
 
-fn supervised_children() -> &'static Mutex<HashMap<String, Child>> {
-    static REGISTRY: OnceLock<Mutex<HashMap<String, Child>>> = OnceLock::new();
+#[allow(dead_code)]
+struct SupervisedHandle {
+    child: Child,
+    output: Arc<Mutex<String>>,
+    started_at: Instant,
+    timeout: Duration,
+}
+
+fn supervised_children() -> &'static Mutex<HashMap<String, SupervisedHandle>> {
+    static REGISTRY: OnceLock<Mutex<HashMap<String, SupervisedHandle>>> = OnceLock::new();
     REGISTRY.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn append_bounded_output(buf: &Arc<Mutex<String>>, chunk: &[u8]) {
+    let text = String::from_utf8_lossy(chunk);
+    if let Ok(mut guard) = buf.lock() {
+        if guard.len() >= MAX_CAPTURED_OUTPUT_BYTES {
+            return;
+        }
+        let remaining = MAX_CAPTURED_OUTPUT_BYTES - guard.len();
+        if text.len() <= remaining {
+            guard.push_str(&text);
+        } else {
+            let mut end = remaining;
+            while end > 0 && !text.is_char_boundary(end) {
+                end -= 1;
+            }
+            guard.push_str(&text[..end]);
+            guard.push_str("\n...[truncated]");
+        }
+    }
+}
+
+fn spawn_pipe_drainer<R: Read + Send + 'static>(reader: R, buf: Arc<Mutex<String>>) {
+    thread::spawn(move || {
+        let mut reader = reader;
+        let mut chunk = [0u8; 4096];
+        loop {
+            match reader.read(&mut chunk) {
+                Ok(0) | Err(_) => break,
+                Ok(n) => append_bounded_output(&buf, &chunk[..n]),
+            }
+        }
+    });
+}
+
+fn terminate_process_tree(pid: u32, child: &mut Child) {
+    #[cfg(windows)]
+    {
+        let _ = Command::new("taskkill")
+            .args(["/F", "/T", "/PID", &pid.to_string()])
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = pid;
+    }
+    let _ = child.kill();
+    let _ = child.wait();
+}
+
+pub fn validate_worktree_dir(worktree_dir: &Path) -> Result<(), String> {
+    if worktree_dir.as_os_str().is_empty()
+        || worktree_dir
+            .components()
+            .any(|component| matches!(component, Component::ParentDir))
+    {
+        return Err(format!(
+            "Worktree path rejected due to traversal or empty path: {}",
+            worktree_dir.display()
+        ));
+    }
+    if !worktree_dir.exists() || !worktree_dir.is_dir() {
+        return Err(format!(
+            "Worktree path must exist and be an isolated directory: {}",
+            worktree_dir.display()
+        ));
+    }
+    Ok(())
 }
 
 #[derive(Debug, Deserialize)]
@@ -49,40 +146,77 @@ pub fn spawn_supervised_process(
     command: &str,
     args: &[String],
 ) -> Result<u32, String> {
-    if !worktree_dir.exists() || !worktree_dir.is_dir() {
-        return Err(format!(
-            "Worktree path must exist and be an isolated directory: {}",
-            worktree_dir.display()
-        ));
-    }
+    spawn_supervised_process_with_timeout(run_id, worktree_dir, command, args, 600)
+}
+
+pub fn spawn_supervised_process_with_timeout(
+    run_id: &str,
+    worktree_dir: &Path,
+    command: &str,
+    args: &[String],
+    timeout_seconds: u64,
+) -> Result<u32, String> {
+    validate_worktree_dir(worktree_dir)?;
     let executable = resolve_command_executable(command)?;
     validate_command_args(args)?;
 
-    let child = Command::new(&executable)
-        .args(args)
+    let mut cmd = Command::new(&executable);
+    cmd.args(args)
         .current_dir(worktree_dir)
+        .env_clear()
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::piped());
+    for key in SAFE_ENV_ALLOWLIST {
+        if let Ok(val) = std::env::var(key) {
+            cmd.env(key, val);
+        }
+    }
+
+    let mut child = cmd
         .spawn()
         .map_err(|e| format!("Failed to spawn supervised executable '{executable}': {e}"))?;
 
+    let output = Arc::new(Mutex::new(String::new()));
+    if let Some(stdout) = child.stdout.take() {
+        spawn_pipe_drainer(stdout, Arc::clone(&output));
+    }
+    if let Some(stderr) = child.stderr.take() {
+        spawn_pipe_drainer(stderr, Arc::clone(&output));
+    }
+
     let pid = child.id();
+    let clamped_timeout = Duration::from_secs(timeout_seconds.clamp(1, 3600));
     let mut guard = supervised_children()
         .lock()
         .map_err(|_| "Supervised process registry lock poisoned".to_string())?;
-    guard.insert(run_id.to_string(), child);
+    guard.insert(
+        run_id.to_string(),
+        SupervisedHandle {
+            child,
+            output,
+            started_at: Instant::now(),
+            timeout: clamped_timeout,
+        },
+    );
     Ok(pid)
 }
 
+#[allow(dead_code)]
 pub fn poll_supervised_process(run_id: &str) -> Result<Option<i32>, String> {
     let mut guard = supervised_children()
         .lock()
         .map_err(|_| "Supervised process registry lock poisoned".to_string())?;
-    let Some(child) = guard.get_mut(run_id) else {
+    let Some(handle) = guard.get_mut(run_id) else {
         return Ok(None);
     };
-    match child.try_wait().map_err(|e| e.to_string())? {
+    if handle.started_at.elapsed() >= handle.timeout {
+        let mut removed = guard.remove(run_id).expect("checked entry exists");
+        let pid = removed.child.id();
+        terminate_process_tree(pid, &mut removed.child);
+        return Err("timed_out".to_string());
+    }
+    match handle.child.try_wait().map_err(|e| e.to_string())? {
         Some(status) => {
             guard.remove(run_id);
             Ok(Some(status.code().unwrap_or(-1)))
@@ -91,19 +225,26 @@ pub fn poll_supervised_process(run_id: &str) -> Result<Option<i32>, String> {
     }
 }
 
+#[allow(dead_code)]
+pub fn read_supervised_output(run_id: &str) -> Option<String> {
+    let guard = supervised_children().lock().ok()?;
+    let handle = guard.get(run_id)?;
+    let raw = handle.output.lock().ok()?.clone();
+    Some(redact_secrets(&raw))
+}
+
 pub fn kill_supervised_process(run_id: &str) -> Result<Option<u32>, String> {
-    let child_opt = {
+    let handle_opt = {
         let mut guard = supervised_children()
             .lock()
             .map_err(|_| "Supervised process registry lock poisoned".to_string())?;
         guard.remove(run_id)
     };
-    let Some(mut child) = child_opt else {
+    let Some(mut handle) = handle_opt else {
         return Ok(None);
     };
-    let pid = child.id();
-    let _ = child.kill();
-    let _ = child.wait();
+    let pid = handle.child.id();
+    terminate_process_tree(pid, &mut handle.child);
     Ok(Some(pid))
 }
 
@@ -365,15 +506,26 @@ pub async fn evaluate_agent_worktree_evidence(
     worktree_path: String,
 ) -> Result<AgentRunExecutionResult, String> {
     let worktree_dir = Path::new(&worktree_path);
-    if !worktree_dir.exists() || !worktree_dir.is_dir() {
-        return Err(format!("Invalid worktree directory: {worktree_path}"));
-    }
+    validate_worktree_dir(worktree_dir)?;
 
     let status_output = Command::new("git")
         .args(["status", "--porcelain"])
         .current_dir(worktree_dir)
         .output()
         .map_err(|e| format!("Failed to run git status: {e}"))?;
+
+    if !status_output.status.success() {
+        let exit_code = status_output.status.code().unwrap_or(-1) as i64;
+        let stderr = redact_secrets(&String::from_utf8_lossy(&status_output.stderr));
+        return Ok(AgentRunExecutionResult {
+            run_id: Uuid::new_v4().to_string(),
+            status: "failed".to_string(),
+            exit_code: Some(exit_code),
+            summary: format!("git status failed with exit {exit_code}: {}", stderr.trim()),
+            changed_files: Vec::new(),
+            diff_stat: String::new(),
+        });
+    }
 
     let changed = String::from_utf8_lossy(&status_output.stdout);
     let changed_files: Vec<String> = changed
@@ -395,19 +547,39 @@ pub async fn evaluate_agent_worktree_evidence(
     Ok(AgentRunExecutionResult {
         run_id: Uuid::new_v4().to_string(),
         status: "completed".to_string(),
-        exit_code: Some(0),
+        exit_code: Some(status_output.status.code().unwrap_or(0) as i64),
         summary: format!("Captured {} changed files in worktree", changed_files.len()),
         changed_files,
         diff_stat,
     })
 }
 
+#[allow(dead_code)]
+pub fn reconcile_stale_agent_runs(connection: &rusqlite::Connection) -> Result<usize, String> {
+    let updated_runs = connection
+        .execute(
+            "UPDATE agent_runs SET status = 'failed', finished_at = CURRENT_TIMESTAMP WHERE status = 'running'",
+            [],
+        )
+        .map_err(|e| e.to_string())?;
+    connection
+        .execute(
+            "UPDATE agent_supervisors SET status = 'recovered', ended_at = CURRENT_TIMESTAMP WHERE status IN ('starting', 'running')",
+            [],
+        )
+        .map_err(|e| e.to_string())?;
+    Ok(updated_runs)
+}
+
 #[cfg(test)]
 mod tests {
     use super::{
-        kill_supervised_process, poll_supervised_process, resolve_command_executable,
-        spawn_supervised_process, validate_command_args,
+        evaluate_agent_worktree_evidence, kill_supervised_process, poll_supervised_process,
+        read_supervised_output, reconcile_stale_agent_runs, resolve_command_executable,
+        spawn_supervised_process, spawn_supervised_process_with_timeout, validate_command_args,
+        validate_worktree_dir,
     };
+    use rusqlite::Connection;
     use std::{env, path::Path, thread::sleep, time::Duration};
     use uuid::Uuid;
 
@@ -460,6 +632,7 @@ mod tests {
         let live_pid = spawn_supervised_process(&live_id, &worktree_dir, "node", &args)
             .expect("node sleep child should spawn cleanly");
         assert!(live_pid > 0);
+        assert!(read_supervised_output(&live_id).is_some());
         assert_eq!(poll_supervised_process(&live_id).expect("live poll"), None);
 
         let killed = kill_supervised_process(&live_id).expect("kill child");
@@ -468,5 +641,53 @@ mod tests {
             kill_supervised_process(&live_id).expect("idempotent kill"),
             None
         );
+    }
+
+    #[test]
+    fn enforces_timeout_and_rejects_traversal_and_non_git_truthfully() {
+        assert!(validate_worktree_dir(Path::new("../escape")).is_err());
+
+        let run_id = format!("timeout-run-{}", Uuid::new_v4());
+        let worktree_dir = env::temp_dir();
+        let args = vec!["-e".to_string(), "setTimeout(() => {}, 15000)".to_string()];
+        spawn_supervised_process_with_timeout(&run_id, &worktree_dir, "node", &args, 1)
+            .expect("node sleep child should spawn cleanly");
+        sleep(Duration::from_millis(1150));
+        let err = poll_supervised_process(&run_id).expect_err("expected timeout");
+        assert_eq!(err, "timed_out");
+
+        let non_git = tauri::async_runtime::block_on(evaluate_agent_worktree_evidence(
+            worktree_dir.to_string_lossy().to_string(),
+        ))
+        .expect("non-git status returns truthful failed result");
+        assert_eq!(non_git.status, "failed");
+        assert_ne!(non_git.exit_code, Some(0));
+    }
+
+    #[test]
+    fn reconciles_stale_running_supervisors_on_startup() {
+        let conn = Connection::open_in_memory().expect("in-memory sqlite");
+        conn.execute_batch(
+            "CREATE TABLE agent_runs (id TEXT PRIMARY KEY, status TEXT NOT NULL, finished_at TEXT);
+             CREATE TABLE agent_supervisors (id TEXT PRIMARY KEY, run_id TEXT NOT NULL, status TEXT NOT NULL, ended_at TEXT);
+             INSERT INTO agent_runs (id, status) VALUES ('run-1', 'running');
+             INSERT INTO agent_supervisors (id, run_id, status) VALUES ('sup-1', 'run-1', 'running');",
+        )
+        .expect("seed schema");
+
+        let updated = reconcile_stale_agent_runs(&conn).expect("reconcile");
+        assert_eq!(updated, 1);
+        let run_status: String = conn
+            .query_row("SELECT status FROM agent_runs WHERE id = 'run-1'", [], |r| r.get(0))
+            .expect("query run");
+        let sup_status: String = conn
+            .query_row(
+                "SELECT status FROM agent_supervisors WHERE id = 'sup-1'",
+                [],
+                |r| r.get(0),
+            )
+            .expect("query sup");
+        assert_eq!(run_status, "failed");
+        assert_eq!(sup_status, "recovered");
     }
 }

@@ -55,7 +55,28 @@ describe("operational endpoints", () => {
   it("reports readiness with database connectivity at /readyz", async () => {
     const response = await app.inject({ method: "GET", url: "/api/v1/readyz" });
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({ status: "ready", database: "ok" });
+    expect(response.json()).toMatchObject({
+      status: "ready",
+      database: "ok",
+      services: {
+        radius: {
+          enabled: expect.any(Boolean),
+          status: expect.stringMatching(/^(disabled|healthy|unhealthy)$/),
+        },
+        snmp: {
+          enabled: expect.any(Boolean),
+          status: expect.stringMatching(/^(disabled|healthy|unhealthy)$/),
+        },
+        syslog: {
+          enabled: expect.any(Boolean),
+          status: expect.stringMatching(/^(disabled|healthy|unhealthy)$/),
+        },
+        storage: {
+          enabled: expect.any(Boolean),
+          status: expect.stringMatching(/^(disabled|healthy|unhealthy)$/),
+        },
+      },
+    });
   });
 
   it("sets safe security headers", async () => {

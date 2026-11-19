@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyReply } from "fastify";
 import { getDb } from "@moonwitness/orm";
-import { irAddonModel } from "@moonwitness/addon-runtime";
+import { irAddonModel, probeOptionalOpsServices } from "@moonwitness/addon-runtime";
 import {
   createApiMetricsCollector,
   type AddonMetricSummary,
@@ -71,7 +71,8 @@ export async function registerHealthRoutes(
     if (database !== "ok") {
       return reply.code(503).send({ status: "unavailable", database });
     }
-    return reply.code(200).send({ status: "ready", database });
+    const services = await probeOptionalOpsServices({ timeoutMs: 250 });
+    return reply.code(200).send({ status: "ready", database, services });
   };
   fastify.get("/readyz", readyHandler);
   fastify.get("/health/ready", readyHandler);
