@@ -1,3 +1,5 @@
+import { PolicyError } from "./errors.js";
+
 export type ActorSource = "seed" | "api" | "import" | "migration";
 
 export const DEFAULT_TENANT_ID = "default";
@@ -35,3 +37,17 @@ export function createActorContext(
 }
 
 export const SYSTEM_ACTOR: ActorContext = createActorContext(null, "seed");
+
+/** Returns true only for internal system seed/migration actors. */
+export function isSystemActor(actor: ActorContext): boolean {
+  return actor.actorId === null && (actor.source === "seed" || actor.source === "migration");
+}
+
+/** Validates that the actor carries an explicit non-blank tenantId and returns it normalized. */
+export function requireActorTenantId(actor: ActorContext): string {
+  const raw = actor.tenantId;
+  if (typeof raw !== "string" || !raw.trim()) {
+    throw new PolicyError("Actor context requires an explicit tenantId", "TENANT_REQUIRED", 403);
+  }
+  return normalizeTenantId(raw);
+}

@@ -13,11 +13,13 @@ import {
   ChapterBanner,
   FilmStrip,
 } from "@moonwitness/ui";
+import type { Locale } from "@/configs/i18n";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import { artSrc } from "@/lib/art";
 import { useScrollReveal } from "@/lib/motion/use-scroll-reveal";
 
 interface StoryUnit {
-  id: string;
+  id: "s1" | "s2" | "s3" | "s4";
   tag: string;
   tagColor: string;
   title: string;
@@ -27,62 +29,105 @@ interface StoryUnit {
   rotation: number;
 }
 
-const STORIES: StoryUnit[] = [
+const STORYTELLING_EXTRAS: Record<
+  Locale,
   {
-    id: "s1",
-    tag: "PEOPLE",
-    tagColor: "var(--pink)",
-    title: "THE BATTERIES",
-    excerpt:
-      "A garage band in Jakarta channels something older than rock'n'roll — frequencies that predate electricity.",
-    art: "night-shift",
-    marginalia: "// jakarta // night session",
-    rotation: -1.5,
+    filmStripLabel: string;
+    marginalia: Record<StoryUnit["id"], string>;
+  }
+> = {
+  en: {
+    filmStripLabel: "Story chapters",
+    marginalia: {
+      s1: "// jakarta // night session",
+      s2: "// skyline // 3am frequency",
+      s3: "// prayer × radio // malay realm",
+      s4: "// urban legend or // field report?",
+    },
   },
-  {
-    id: "s2",
-    tag: "PLACES",
-    tagColor: "var(--blue)",
-    title: "NEON CITIES",
-    excerpt:
-      "Mapping the underground circuit of cities that never sleep — Seoul, Istanbul, Lagos. The skyline tells a different story at 3 AM.",
-    art: "city-shadow",
-    marginalia: "// skyline // 3am frequency",
-    rotation: 1,
+  id: {
+    filmStripLabel: "Bab kisah",
+    marginalia: {
+      s1: "// jakarta // sesi malam",
+      s2: "// cakrawala // frekuensi 3 pagi",
+      s3: "// doa × radio // alam melayu",
+      s4: "// legenda kota atau // laporan lapangan?",
+    },
   },
-  {
-    id: "s3",
-    tag: "STORIES",
-    tagColor: "var(--yellow)",
-    title: "PENDETA ONLINE",
-    excerpt:
-      "A spiritual guide in rural Malaysia receives what he calls ‘signals from the other side’ — transmitted through prayer and radio static.",
-    art: "signal-sky",
-    marginalia: "// prayer × radio // malay realm",
-    rotation: -0.8,
+  ar: {
+    filmStripLabel: "فصول القصص",
+    marginalia: {
+      s1: "// جاكرتا // جلسة ليلية",
+      s2: "// أفق المدينة // تردد الثالثة فجراً",
+      s3: "// دعاء × مذياع // عالم الملايو",
+      s4: "// أسطورة حضرية أم // تقرير ميداني؟",
+    },
   },
-  {
-    id: "s4",
-    tag: "WORLDS",
-    tagColor: "var(--purple)",
-    title: "ZILL",
-    excerpt:
-      "A fiction project that reads like a field report. A city that might not exist, documented by someone who swears they were there.",
-    art: "mirror-archive",
-    marginalia: "// urban legend or // field report?",
-    rotation: 1.2,
-  },
-];
+};
 
 const SETTLE_S = 0.55;
 const STAGGER_S = 0.1;
 
 export function Storytelling() {
   const [revealRef, revealed] = useScrollReveal(0.1, "0px 0px -40px 0px");
+  const { dictionary, locale, direction } = useTranslation();
+  const copy = dictionary?.chronicle?.landing?.storytelling;
+  const extras = STORYTELLING_EXTRAS[locale] ?? STORYTELLING_EXTRAS.en;
+
+  const stories: StoryUnit[] = [
+    {
+      id: "s1",
+      tag: copy?.peopleTag ?? "PEOPLE",
+      tagColor: "var(--pink)",
+      title: copy?.peopleTitle ?? "THE BATTERIES",
+      excerpt:
+        copy?.peopleExcerpt ??
+        "A garage band in Jakarta channels frequencies older than electricity.",
+      art: "night-shift",
+      marginalia: extras.marginalia.s1,
+      rotation: -1.5,
+    },
+    {
+      id: "s2",
+      tag: copy?.placesTag ?? "PLACES",
+      tagColor: "var(--blue)",
+      title: copy?.placesTitle ?? "NEON CITIES",
+      excerpt:
+        copy?.placesExcerpt ??
+        "Mapping the underground circuit of cities that never sleep at 3 AM.",
+      art: "city-shadow",
+      marginalia: extras.marginalia.s2,
+      rotation: 1,
+    },
+    {
+      id: "s3",
+      tag: copy?.storiesTag ?? "STORIES",
+      tagColor: "var(--yellow)",
+      title: copy?.storiesTitle ?? "PENDETA ONLINE",
+      excerpt:
+        copy?.storiesExcerpt ??
+        "A spiritual guide receives signals through prayer and radio static.",
+      art: "signal-sky",
+      marginalia: extras.marginalia.s3,
+      rotation: -0.8,
+    },
+    {
+      id: "s4",
+      tag: copy?.worldsTag ?? "WORLDS",
+      tagColor: "var(--purple)",
+      title: copy?.worldsTitle ?? "ZILL",
+      excerpt:
+        copy?.worldsExcerpt ?? "A fiction project documented like an eyewitness field report.",
+      art: "mirror-archive",
+      marginalia: extras.marginalia.s4,
+      rotation: 1.2,
+    },
+  ];
 
   return (
     <section
       id="storytelling"
+      dir={direction}
       className="relative scroll-mt-20 overflow-x-clip bg-[var(--background)] py-24"
     >
       <Halftone tone="pink" className="pointer-events-none absolute inset-0 opacity-20" />
@@ -94,18 +139,16 @@ export function Storytelling() {
             meta={
               <span className="flex items-center gap-2">
                 <SprayCan className="h-5 w-5 text-[var(--pink)]" />
-                STORY WORLD // FICTION FILES
+                {copy?.eyebrow ?? "CHRONICLE CHAPTERS"}
               </span>
             }
-            title={
-              <>
-                STRANGE PEOPLE.{" "}
-                <span className="text-[var(--pink)] brush-underline">BIGGER HORIZONS.</span>
-              </>
-            }
+            title={copy?.title ?? "STORIES IN ORBIT"}
           />
-          <FilmStrip label="Story chapters">
-            {STORIES.map((story, i) => (
+          <p className="mt-4 font-mono text-xs tracking-wide text-[var(--muted-foreground)]">
+            {copy?.subtitle ?? "Four narrative coordinates from the MoonWitness storyworld."}
+          </p>
+          <FilmStrip label={extras.filmStripLabel}>
+            {stories.map((story, i) => (
               <a
                 key={story.id}
                 href={`#story-${story.id}`}
@@ -127,7 +170,7 @@ export function Storytelling() {
             ))}
           </FilmStrip>
           <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-5">
-            {STORIES.map((story, i) => {
+            {stories.map((story, i) => {
               const artRight = i % 2 === 1;
               const art = ARTWORK[story.art];
               return (

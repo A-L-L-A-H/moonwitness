@@ -59,7 +59,11 @@ export function TopRail({
     >
       <BrandLink href={brandHref} className="hud-brand flex min-h-11 items-center gap-2">
         <Crown className="h-5 w-8 shrink-0 text-[var(--primary)]" />
-        <span className="font-brush text-sm leading-none text-[var(--foreground)] sm:text-lg">
+        <span
+          dir="ltr"
+          data-ltr="true"
+          className="font-brush text-sm leading-none text-[var(--foreground)] sm:text-lg"
+        >
           MOON<span className="text-[var(--primary)]">WITNESS</span>
         </span>
         {subtitle ? (
@@ -89,20 +93,38 @@ export interface SideRailProps {
   className?: string | undefined;
 }
 
+function isRtlDirection(element: HTMLElement): boolean {
+  const dirAncestor = element.closest("[dir]");
+  if (dirAncestor) {
+    const attr = dirAncestor.getAttribute("dir")?.toLowerCase();
+    if (attr === "rtl") return true;
+    if (attr === "ltr") return false;
+  }
+  if (typeof getComputedStyle === "function") {
+    return getComputedStyle(element).direction === "rtl";
+  }
+  return false;
+}
+
 function navigateRail(event: KeyboardEvent<HTMLDivElement>) {
   if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
   const links = Array.from(event.currentTarget.querySelectorAll<HTMLAnchorElement>("a[href]"));
   const index = links.findIndex((link) => link === event.target);
   if (index < 0) return;
+  const rtl = isRtlDirection(event.currentTarget);
   let next: number;
   switch (event.key) {
     case "ArrowDown":
-    case "ArrowRight":
       next = (index + 1) % links.length;
       break;
     case "ArrowUp":
-    case "ArrowLeft":
       next = (index - 1 + links.length) % links.length;
+      break;
+    case "ArrowRight":
+      next = (index + (rtl ? -1 : 1) + links.length) % links.length;
+      break;
+    case "ArrowLeft":
+      next = (index + (rtl ? 1 : -1) + links.length) % links.length;
       break;
     case "Home":
       next = 0;
@@ -244,7 +266,9 @@ export function Gauge({ label, value, tone = "pink", percent, className }: Gauge
         <span className="truncate font-mono text-[10px] tracking-[0.18em] text-[var(--paper)]">
           {label}
         </span>
-        <span className={cn("font-mono text-sm font-bold", TONE_TEXT[tone])}>{value}</span>
+        <span data-ltr="true" className={cn("font-mono text-sm font-bold", TONE_TEXT[tone])}>
+          {value}
+        </span>
       </div>
       {clamped !== null ? (
         <div className="mt-1 h-1 w-full bg-[var(--line)]" role="presentation">

@@ -1,31 +1,65 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import type { ArtKey } from "@moonwitness/contracts/types";
 import { ArrowRight, Crown } from "@moonwitness/ui/icons";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import { artSrc } from "@/lib/art";
 
-const PANELS: {
+interface StoryPanel {
+  id: string;
   label: string;
   title: string;
   art: ArtKey;
   href: string;
-}[] = [
-  { label: "PEOPLE", title: "THE BATTERIES", art: "night-shift", href: "#storytelling" },
-  { label: "PLACES", title: "NEON CITIES", art: "city-shadow", href: "#storytelling" },
-  { label: "STORIES", title: "PENDETA ONLINE", art: "signal-sky", href: "#storytelling" },
-  { label: "WORLDS", title: "ZILL", art: "mirror-archive", href: "#storytelling" },
-];
+}
 
 export function LandingStoryStrip() {
+  const { dictionary, direction } = useTranslation();
+  const copy = dictionary?.chronicle?.landing?.storyStrip;
+
+  const panels: StoryPanel[] = [
+    {
+      id: "people",
+      label: copy?.peopleLabel ?? "PEOPLE",
+      title: copy?.peopleTitle ?? "THE BATTERIES",
+      art: "night-shift",
+      href: "#storytelling",
+    },
+    {
+      id: "places",
+      label: copy?.placesLabel ?? "PLACES",
+      title: copy?.placesTitle ?? "NEON CITIES",
+      art: "city-shadow",
+      href: "#storytelling",
+    },
+    {
+      id: "stories",
+      label: copy?.storiesLabel ?? "STORIES",
+      title: copy?.storiesTitle ?? "PENDETA ONLINE",
+      art: "signal-sky",
+      href: "#storytelling",
+    },
+    {
+      id: "worlds",
+      label: copy?.worldsLabel ?? "WORLDS",
+      title: copy?.worldsTitle ?? "ZILL",
+      art: "mirror-archive",
+      href: "#storytelling",
+    },
+  ];
+
   return (
     <section
-      aria-label="Explore the Moonwitness story world"
+      dir={direction}
+      aria-label={copy?.ariaLabel ?? "Explore the MoonWitness story world"}
       className="relative z-10 -mt-2 border-y-2 border-[var(--border)] bg-[var(--muted)] px-3 py-4 sm:px-6 sm:py-5"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-        {PANELS.map((panel, index) => (
+        {panels.map((panel, index) => (
           <Link
-            key={panel.label}
+            key={panel.id}
             href={panel.href}
             className={`comic-panel group relative block aspect-[1.65] min-h-28 border-[var(--paper)] transition-transform hover:-translate-y-1 motion-reduce:transition-none ${
               index % 2 === 0 ? "-rotate-[0.7deg]" : "rotate-[0.7deg]"
@@ -49,7 +83,7 @@ export function LandingStoryStrip() {
               ) : (
                 <ArrowRight
                   aria-hidden="true"
-                  className="h-4 w-4 shrink-0 text-[var(--pink)] transition-transform group-hover:translate-x-1 motion-reduce:transition-none"
+                  className="h-4 w-4 shrink-0 text-[var(--pink)] transition-transform group-hover:translate-x-1 motion-reduce:transition-none rtl:rotate-180 rtl:group-hover:-translate-x-1"
                 />
               )}
             </span>

@@ -10,7 +10,11 @@ import {
   defineModel,
   getDb,
   initDb,
+  isSystemActor,
   listAppliedMigrations,
+  PolicyError,
+  requireActorTenantId,
+  SYSTEM_ACTOR,
 } from "../index.js";
 
 const noteSchema = z.object({
@@ -143,16 +147,167 @@ describe("multi-tenant isolation on BaseRepository", () => {
     expect(await noteModel.repository.delete(rowA.id, actorB)).toBeNull();
 
     // Tenant B upsert with same business title creates an isolated Tenant B copy
-    const upsertedB = await noteModel.repository.upsert(
+    const uniqueNoteModel = defineModel({
+      name: "test.unique_note",
+      table: "test_unique_notes",
+      schema: noteSchema,
+      indexes: [{ fields: ["tenant_id", "title"], unique: true }],
+    });
+    await getDb().exec(uniqueNoteModel.ddl);
+    const uRowA = await uniqueNoteModel.repository.create(
+      { title: "alpha-doc", body: "secret-a" },
+      actorA,
+    );
+    const upsertedB = await uniqueNoteModel.repository.upsert(
       { title: "alpha-doc" },
       { body: "owned-by-b" },
       actorB,
     );
-    expect(upsertedB.id).not.toBe(rowA.id);
+    expect(upsertedB.id).not.toBe(uRowA.id);
     expect(upsertedB.tenant_id).toBe("tenant-b");
+
+    // Tenant A record remains untouched
+    const reloadedU = await uniqueNoteModel.repository.findOne(uRowA.id, { tenantId: "tenant-a" });
+    expect(reloadedU?.body).toBe("secret-a");
+
+    // Non-unique selector is rejected on upsert
+    await expect(
+      noteModel.repository.upsert({ title: "alpha-doc" }, { body: "bad" }, actorB),
+    ).rejects.toThrow(/unique index/i);
 
     // Tenant A record remains untouched
     const reloadedA = await noteModel.repository.findOne(rowA.id, { tenantId: "tenant-a" });
     expect(reloadedA?.body).toBe("secret-a");
+  });
+});
+
+describe("ScopedRepository and actor tenant enforcement (#491)", () => {
+  it("validates isSystemActor and requireActorTenantId", () => {
+    expect(isSystemActor(SYSTEM_ACTOR)).toBe(true);
+    expect(isSystemActor(createActorContext(null, "migration"))).toBe(true);
+    expect(isSystemActor(createActorContext(null, "api"))).toBe(false);
+    expect(isSystemActor(createActorContext("u1", "seed"))).toBe(false);
+
+    expect(() => requireActorTenantId(createActorContext("u1", "api"))).toThrowError(PolicyError);
+    try {
+      requireActorTenantId(createActorContext("u1", "api", undefined, "   "));
+    } catch (err) {
+      expect(err).toBeInstanceOf(PolicyError);
+      expect((err as PolicyError).code).toBe("TENANT_REQUIRED");
+      expect((err as PolicyError).statusCode).toBe(403);
+    }
+    expect(requireActorTenantId(createActorContext("u1", "api", undefined, " acme "))).toBe("acme");
+  });
+
+  it("enforces tenant binding on forActor(), rejects conflicting tenantId, and scopes history", async () => {
+    expect(() => noteModel.repository.forActor(createActorContext("u1", "api"))).toThrowError(
+      PolicyError,
+    );
+    expect(() => noteModel.repository.forActor(createActorContext(null, "api"))).toThrowError(
+      PolicyError,
+    );
+
+    const actorA = createActorContext("user-a", "api", "req-a", "tenant-a");
+    const actorB = createActorContext("user-b", "api", "req-b", "tenant-b");
+    const scopedA = noteModel.repository.forActor(actorA);
+    const scopedB = noteModel.repository.forActor(actorB);
+    const scopedSystem = noteModel.repository.forActor(SYSTEM_ACTOR);
+
+    const createdA = await scopedA.create({ title: "scoped-a", body: "secret" });
+    const createdB = await scopedB.create({ title: "scoped-b", body: "secret-b" });
+
+    // System actor without tenantId can read across tenants
+    expect(await scopedSystem.count()).toBe(2);
+
+    // Explicit system actor with tenantId is pinned to that tenant
+    const scopedSystemA = noteModel.repository.forActor(
+      createActorContext(null, "seed", undefined, "tenant-a"),
+    );
+    expect(await scopedSystemA.count()).toBe(1);
+
+    // Conflicting opts.tenantId is rejected with TENANT_MISMATCH
+    await expect(scopedA.find({}, { tenantId: "tenant-b" })).rejects.toMatchObject({
+      code: "TENANT_MISMATCH",
+      statusCode: 403,
+    });
+    await expect(scopedA.findOne(createdA.id, { tenantId: "tenant-b" })).rejects.toMatchObject({
+      code: "TENANT_MISMATCH",
+      statusCode: 403,
+    });
+    await expect(scopedA.count({}, { tenantId: "tenant-b" })).rejects.toMatchObject({
+      code: "TENANT_MISMATCH",
+      statusCode: 403,
+    });
+    await expect(
+      scopedA.readGroup({ groupBy: ["title"], tenantId: "tenant-b" }),
+    ).rejects.toMatchObject({
+      code: "TENANT_MISMATCH",
+      statusCode: 403,
+    });
+
+    // Cross-tenant create and update tenant_id mutation are rejected
+    await expect(
+      noteModel.repository.create({ title: "x", tenant_id: "tenant-b" }, actorA),
+    ).rejects.toMatchObject({ code: "TENANT_MISMATCH", statusCode: 403 });
+    await expect(scopedA.create({ title: "x", tenant_id: "tenant-b" })).rejects.toMatchObject({
+      code: "TENANT_MISMATCH",
+      statusCode: 403,
+    });
+    await expect(
+      noteModel.repository.update(createdA.id, { tenant_id: "tenant-b" }, actorA),
+    ).rejects.toMatchObject({ code: "TENANT_MISMATCH", statusCode: 403 });
+    await expect(scopedA.update(createdA.id, { tenant_id: "tenant-b" })).rejects.toMatchObject({
+      code: "TENANT_MISMATCH",
+      statusCode: 403,
+    });
+
+    // History returns [] for records outside actor's tenant
+    expect(await scopedA.history(createdA.id)).toHaveLength(1);
+    expect(await scopedB.history(createdA.id)).toEqual([]);
+    expect(await scopedB.history(createdB.id)).toHaveLength(1);
+  });
+
+  it("isolates relation hydration per tenant even without explicit opts.tenantId", async () => {
+    const parentModel = defineModel({
+      name: "test.rel_parent",
+      table: "test_rel_parents",
+      schema: z.object({ code: z.string(), label: z.string() }),
+      indexes: [{ fields: ["tenant_id", "code"], unique: true }],
+    });
+    const childModel = defineModel({
+      name: "test.rel_child",
+      table: "test_rel_children",
+      schema: z.object({ parent_code: z.string(), title: z.string() }),
+      relations: {
+        parent_code: { model: "test.rel_parent", targetField: "code" },
+      },
+    });
+    await getDb().exec(parentModel.ddl);
+    await getDb().exec(childModel.ddl);
+
+    const actorA = createActorContext("u-a", "api", undefined, "tenant-a");
+    const actorB = createActorContext("u-b", "api", undefined, "tenant-b");
+    await parentModel.repository.create({ code: "shared-code", label: "Parent A" }, actorA);
+    await parentModel.repository.create({ code: "shared-code", label: "Parent B" }, actorB);
+    await childModel.repository.create({ parent_code: "shared-code", title: "Child A" }, actorA);
+    await childModel.repository.create({ parent_code: "shared-code", title: "Child B" }, actorB);
+
+    const allChildren = await childModel.repository.find(
+      {},
+      { with: ["parent_code"], orderBy: "title ASC" },
+    );
+    expect(allChildren).toHaveLength(2);
+    const hydratedA = (allChildren[0] as unknown as Record<string, unknown>).$parent_code as Record<
+      string,
+      unknown
+    >;
+    const hydratedB = (allChildren[1] as unknown as Record<string, unknown>).$parent_code as Record<
+      string,
+      unknown
+    >;
+    expect(hydratedA.label).toBe("Parent A");
+    expect(hydratedA.tenant_id).toBe("tenant-a");
+    expect(hydratedB.label).toBe("Parent B");
+    expect(hydratedB.tenant_id).toBe("tenant-b");
   });
 });

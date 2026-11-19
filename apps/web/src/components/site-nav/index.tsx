@@ -1,19 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { GlobeIcon, Menu, SearchIcon, X } from "@moonwitness/ui/icons";
 import { Button, DnaBrandLogo, useSkin, type BrandLogoId } from "@moonwitness/ui";
 import { SanctuaryGateLink } from "@/components/sanctuary-gate-link";
 import { SkinSwitcher } from "@/components/skin-switcher";
-import { links } from "./links";
-import { MobileMenu } from "./mobile-menu";
+import type { Locale } from "@/configs/i18n";
+import { useTranslation } from "@/hocs/TranslationWrapper";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
+import {
+  buildArchiveSearchHref,
+  getChronicleNavLinks,
+  links as defaultLinks,
+  resolveChronicleHref,
+} from "./links";
+import { LocaleSelector, MobileMenu } from "./mobile-menu";
 import { SearchDialog } from "./search-dialog";
 
 export function SiteNav() {
   const router = useRouter();
+  const pathname = usePathname() ?? "";
   const { dnaId } = useSkin();
+  const { dictionary, locale, setLocale } = useTranslation();
+  const navDict = dictionary.chronicle?.navigation;
+  const searchDict = dictionary.chronicle?.search;
+  const aboutDict = dictionary.chronicle?.landing?.about;
+  const navLinks = useMemo(() => getChronicleNavLinks(navDict), [navDict]);
+
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuToggleRef = useRef<HTMLButtonElement>(null);
@@ -25,6 +40,23 @@ export function SiteNav() {
     requestAnimationFrame(() => searchTriggerRef.current?.focus());
   }, []);
 
+  const toHref = useCallback(
+    (slug: string) => resolveChronicleHref(slug, pathname, locale),
+    [locale, pathname],
+  );
+
+  const handleSelectLocale = useCallback(
+    (nextLocale: Locale) => {
+      setLocale(nextLocale);
+      if (getLocaleFromPath(pathname) !== null) {
+        const search = typeof window !== "undefined" ? window.location.search : "";
+        const hash = typeof window !== "undefined" ? window.location.hash : "";
+        router.push(getLocalizedUrl(`${pathname}${search}${hash}`, nextLocale));
+      }
+    },
+    [pathname, router, setLocale],
+  );
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -34,7 +66,7 @@ export function SiteNav() {
       },
       { rootMargin: "-40% 0px -55% 0px" },
     );
-    for (const link of links) {
+    for (const link of defaultLinks) {
       const el = document.getElementById(link.id);
       if (el) observer.observe(el);
     }
@@ -44,8 +76,28 @@ export function SiteNav() {
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
     setSearchOpen(false);
-    router.push(query.trim() ? `/dock?q=${encodeURIComponent(query.trim())}` : "/dock");
+    router.push(buildArchiveSearchHref(query, pathname, locale));
   }
+
+  const switchLanguageLabel =
+    dictionary.sanctuary?.navigation?.switchLanguage ??
+    dictionary.shell?.language ??
+    "Switch Language";
+  const sanctuaryLabel = navDict?.sanctuary ?? "A-L-L-A-H.COM";
+  const searchAriaLabel = searchDict?.dialogTitle ?? navDict?.searchButton ?? "Search the archive";
+  const searchButtonTitle = navDict?.searchButton ?? "Search signals";
+  const missionControlLabel = navDict?.missionControl ?? "Mission Control";
+  const joinCrewLabel = aboutDict?.title ?? "JOIN THE CREW";
+  const openMenuText = navDict?.openMenu ?? "Open menu";
+  const closeMenuText = navDict?.closeMenu ?? "Close menu";
+  const menuToggleAriaLabel =
+    locale === "en"
+      ? menuOpen
+        ? `Toggle menu (${closeMenuText})`
+        : `Toggle menu (${openMenuText})`
+      : menuOpen
+        ? closeMenuText
+        : openMenuText;
 
   return (
     <>
@@ -59,9 +111,9 @@ export function SiteNav() {
           }
         }}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6">
           <Link
-            href="/moonwitness"
+            href={toHref("/moonwitness")}
             className="flex items-center gap-2.5 max-lg:min-h-11"
             aria-label="Moonwitness home"
           >
@@ -76,14 +128,14 @@ export function SiteNav() {
             </span>
           </Link>
 
-          <nav className="ml-6 hidden items-center gap-1 lg:flex" aria-label="Primary">
-            {links.map((link) => (
+          <nav className="ms-3 hidden items-center gap-1 lg:flex xl:ms-6" aria-label="Primary">
+            {navLinks.map((link) => (
               <a
                 key={link.id}
                 href={`#${link.id}`}
                 onClick={() => setActive(link.id)}
                 aria-current={active === link.id ? "true" : undefined}
-                className={`px-3 py-1.5 font-brush text-sm tracking-wider transition-colors ${
+                className={`whitespace-nowrap px-2 py-1.5 font-brush text-xs tracking-wider transition-colors xl:px-3 xl:text-sm ${
                   active === link.id
                     ? "text-[var(--primary)] underline decoration-[var(--primary)] decoration-4 underline-offset-8"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -92,33 +144,45 @@ export function SiteNav() {
                 {link.label}
               </a>
             ))}
-            <SanctuaryGateLink className="whitespace-nowrap px-2.5 py-1.5 font-brush text-sm tracking-wider text-[var(--primary)] transition-colors hover:text-[var(--foreground)] xl:px-3">
-              A-L-L-A-H
+            <SanctuaryGateLink className="whitespace-nowrap px-2 py-1.5 font-brush text-xs tracking-wider text-[var(--primary)] transition-colors hover:text-[var(--foreground)] xl:px-3 xl:text-sm">
+              {sanctuaryLabel}
             </SanctuaryGateLink>
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ms-auto flex items-center gap-1.5 sm:gap-2">
+            <LocaleSelector
+              locale={locale}
+              onSelectLocale={handleSelectLocale}
+              groupLabel={switchLanguageLabel}
+              variant="desktop"
+            />
             <SkinSwitcher />
             <Button
               type="button"
               variant="plain"
               onClick={() => setSearchOpen(true)}
               ref={searchTriggerRef}
-              aria-label="Search the archive"
+              aria-label={searchAriaLabel}
+              title={searchButtonTitle}
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] transition-colors hover:bg-[var(--muted)]"
             >
               <SearchIcon className="h-5 w-5" />
             </Button>
             <Link
-              href="/mission-control"
-              aria-label="Open Mission Control"
+              href={toHref("/mission-control")}
+              aria-label={missionControlLabel}
+              title={missionControlLabel}
               className="hidden rounded-md p-2 text-[var(--foreground)] transition-colors hover:bg-[var(--muted)] sm:block"
             >
               <GlobeIcon className="h-5 w-5" />
             </Link>
-            <Link href="/shadow" className="hidden sm:block">
-              <Button variant="outline" size="sm" className="px-5 py-2 text-sm">
-                JOIN THE CREW →
+            <Link href={toHref("/shadow")} className="hidden sm:block">
+              <Button
+                variant="outline"
+                size="sm"
+                className="whitespace-nowrap px-3 py-2 text-xs xl:px-5 xl:text-sm"
+              >
+                {joinCrewLabel} →
               </Button>
             </Link>
             <Button
@@ -127,7 +191,7 @@ export function SiteNav() {
               className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md p-2 text-[var(--foreground)] lg:hidden"
               onClick={() => setMenuOpen((v) => !v)}
               ref={menuToggleRef}
-              aria-label="Toggle menu"
+              aria-label={menuToggleAriaLabel}
               aria-expanded={menuOpen}
             >
               {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -137,10 +201,12 @@ export function SiteNav() {
 
         {menuOpen && (
           <MobileMenu
-            links={links}
+            links={navLinks}
             active={active}
             onSelect={setActive}
             onClose={() => setMenuOpen(false)}
+            locale={locale}
+            onSelectLocale={handleSelectLocale}
           />
         )}
       </header>

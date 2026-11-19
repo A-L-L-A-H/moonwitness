@@ -40,8 +40,10 @@ function rowToObject(row: unknown, columns: string[]): Record<string, unknown> {
  * Turso URLs are intentionally not configured in this slice.
  */
 export class LibSqlDriver implements LibSqlExecutor {
+  readonly kind = "sqlite" as const;
   readonly dialect = "sqlite" as const;
   private client: Client | null = null;
+  private txQueue: Promise<unknown> = Promise.resolve();
 
   async init(dbPath: string): Promise<void> {
     if (this.client) {
@@ -92,31 +94,37 @@ export class LibSqlDriver implements LibSqlExecutor {
   }
 
   async transaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> {
-    const client = this.requireClient();
-    const transaction: Transaction = await client.transaction("write");
-    const executor: LibSqlExecutor = {
-      run: (sql, params = []) => transaction.execute({ sql, args: params as never }),
-      all: async <R = Record<string, unknown>>(sql: string, params: unknown[] = []) => {
-        const result = await transaction.execute({ sql, args: params as never });
-        return result.rows.map((row) => rowToObject(row, result.columns)) as R[];
-      },
-      get: async <R = Record<string, unknown>>(sql: string, params: unknown[] = []) => {
-        const result = await transaction.execute({ sql, args: params as never });
-        const row = result.rows[0];
-        return row ? (rowToObject(row, result.columns) as R) : undefined;
-      },
-      exec: (sql) => transaction.executeMultiple(sql),
+    const run = async (): Promise<T> => {
+      const client = this.requireClient();
+      const transaction: Transaction = await client.transaction("write");
+      const executor: LibSqlExecutor = {
+        run: (sql, params = []) => transaction.execute({ sql, args: params as never }),
+        all: async <R = Record<string, unknown>>(sql: string, params: unknown[] = []) => {
+          const result = await transaction.execute({ sql, args: params as never });
+          return result.rows.map((row) => rowToObject(row, result.columns)) as R[];
+        },
+        get: async <R = Record<string, unknown>>(sql: string, params: unknown[] = []) => {
+          const result = await transaction.execute({ sql, args: params as never });
+          const row = result.rows[0];
+          return row ? (rowToObject(row, result.columns) as R) : undefined;
+        },
+        exec: (sql) => transaction.executeMultiple(sql),
+      };
+
+      try {
+        const result = await fn(executor);
+        await transaction.commit();
+        return result;
+      } catch (error) {
+        if (!transaction.closed) {
+          await transaction.rollback();
+        }
+        throw error;
+      }
     };
 
-    try {
-      const result = await fn(executor);
-      await transaction.commit();
-      return result;
-    } catch (error) {
-      if (!transaction.closed) {
-        await transaction.rollback();
-      }
-      throw error;
-    }
+    const next = this.txQueue.then(run, run);
+    this.txQueue = next.catch(() => {});
+    return next;
   }
 }

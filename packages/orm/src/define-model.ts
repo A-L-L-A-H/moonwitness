@@ -1,10 +1,17 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { z } from "zod";
-import { getDb } from "./driver.js";
+import { getDb, unwrapDriverHandle } from "./driver.js";
 import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
-import { ConflictError } from "./errors.js";
+import { ConflictError, PolicyError } from "./errors.js";
 import type { BaseMetadata, RecordStatus } from "./base-metadata.js";
 import type { ActorContext } from "./actor-context.js";
-import { DEFAULT_TENANT_ID, normalizeTenantId, SYSTEM_ACTOR } from "./actor-context.js";
+import {
+  DEFAULT_TENANT_ID,
+  isSystemActor,
+  normalizeTenantId,
+  requireActorTenantId,
+  SYSTEM_ACTOR,
+} from "./actor-context.js";
 import {
   assertIdentifier,
   fieldSpec,
@@ -16,7 +23,11 @@ import {
   type ZodObjectLike,
 } from "./schema-utils.js";
 import { modelRegistry, type RegisteredModelDescriptor } from "./registry.js";
-import type { ModelFeatureOptions, ModelWriteAction } from "./model-meta.js";
+import {
+  normalizeComputedFieldDef,
+  type ModelFeatureOptions,
+  type ModelWriteAction,
+} from "./model-meta.js";
 
 export type { ZodObjectLike, Codec, FieldSpec, ModelIndex };
 
@@ -32,6 +43,12 @@ export interface QueryFilterOperators {
   $in?: unknown[];
   $like?: string;
   $ilike?: string;
+  $not?: unknown;
+}
+
+export interface WriteGuardOptions {
+  ruleDomain?: Record<string, unknown> | null;
+  createRuleDomain?: Record<string, unknown> | null;
 }
 
 export interface FindOptions {
@@ -40,8 +57,12 @@ export interface FindOptions {
   offset?: number;
   orderBy?: string | Array<{ field: string; direction?: "ASC" | "DESC" }>;
   tenantId?: string;
+  /** Declarative column projection allowlist (validated against declared columns). */
+  fields?: string[];
   /** Declarative full-text needle matched in SQL across the model's `searchFields`. */
   q?: string;
+  /** Optional allowlist of columns eligible for `q` search (e.g. readable fields). */
+  allowedSearchFields?: string[];
   /** Batch-hydrate `relations` without N+1 queries (attaches `$<relation>` onto each record). */
   with?: string[];
 }
@@ -108,21 +129,77 @@ CREATE TABLE IF NOT EXISTS _orm_audit_log (
 CREATE INDEX IF NOT EXISTS idx_audit_model_entity ON _orm_audit_log (model, entity_id, changed_at);
 `.trim();
 
+export const OUTBOX_DDL = `
+CREATE TABLE IF NOT EXISTS _orm_outbox_events (
+  id TEXT PRIMARY KEY,
+  model TEXT NOT NULL,
+  entity_id TEXT NOT NULL,
+  action TEXT NOT NULL,
+  tenant_id TEXT NOT NULL,
+  actor_id TEXT,
+  request_id TEXT,
+  event_version INTEGER NOT NULL DEFAULT 1,
+  payload_json TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  attempts INTEGER NOT NULL DEFAULT 0,
+  next_attempt_at TEXT NOT NULL,
+  last_error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_outbox_status_next_attempt ON _orm_outbox_events (status, next_attempt_at);
+CREATE INDEX IF NOT EXISTS idx_outbox_model_entity ON _orm_outbox_events (model, entity_id, created_at);
+`.trim();
+
 export const ormAuditMigrations = [
   {
     id: "orm_001_create_audit_log",
     owner: "__base",
     up: AUDIT_DDL,
   },
+  {
+    id: "orm_002_create_outbox_events",
+    owner: "__base",
+    up: OUTBOX_DDL,
+  },
 ];
 
 const auditedDrivers = new WeakSet<LibSqlExecutor>();
+const MAX_HOOK_DEPTH = 4;
+const MAX_RELATION_DEPTH = 2;
+const MAX_WITH_RELATIONS = 16;
+const SENSITIVE_OUTBOX_KEY_RE = /password_hash|_token|_secret|encrypted_private/i;
+const hookDepthStorage = new AsyncLocalStorage<number>();
 
-export async function ensureAuditTable(): Promise<void> {
+export async function ensureAuditTable(executor?: LibSqlExecutor): Promise<void> {
   const db = getDb();
-  if (auditedDrivers.has(db)) return;
-  await db.exec(AUDIT_DDL);
-  auditedDrivers.add(db);
+  const rawDb = unwrapDriverHandle(db);
+  if (!executor && auditedDrivers.has(rawDb)) return;
+  const target = executor ?? db;
+  await target.exec(`${AUDIT_DDL};\n${OUTBOX_DDL}`);
+  auditedDrivers.add(rawDb);
+}
+
+export const ensureOutboxTable = ensureAuditTable;
+
+function sanitizeOutboxValue(value: unknown, sensitiveFields: Set<string>): unknown {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeOutboxValue(item, sensitiveFields));
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      if (SENSITIVE_OUTBOX_KEY_RE.test(k) || sensitiveFields.has(k)) {
+        continue;
+      }
+      out[k] = sanitizeOutboxValue(v, sensitiveFields);
+    }
+    return out;
+  }
+  return value;
 }
 
 /** UUID v7 (time-sortable) generated from crypto primitives. */
@@ -195,19 +272,164 @@ const FILTER_OPERATOR_KEYS = new Set([
   "$in",
   "$like",
   "$ilike",
+  "$not",
 ]);
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" && value !== null && !Array.isArray(value) && !(value instanceof Date)
+  );
+}
+
 function isOperatorFilterObject(value: unknown): value is QueryFilterOperators {
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    Array.isArray(value) ||
-    value instanceof Date
-  ) {
+  if (!isPlainObject(value)) {
     return false;
   }
   const keys = Object.keys(value);
   return keys.length > 0 && keys.every((key) => FILTER_OPERATOR_KEYS.has(key));
+}
+
+function likeToRegExp(pattern: string, caseInsensitive: boolean): RegExp {
+  let regex = "^";
+  for (const ch of pattern) {
+    if (ch === "%") {
+      regex += ".*";
+    } else if (ch === "_") {
+      regex += ".";
+    } else {
+      regex += ch.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+  }
+  regex += "$";
+  return new RegExp(regex, caseInsensitive ? "is" : "s");
+}
+
+function valuesEqual(a: unknown, b: unknown): boolean {
+  if ((a === null || a === undefined) && (b === null || b === undefined)) {
+    return true;
+  }
+  if (a === null || a === undefined || b === null || b === undefined) {
+    return false;
+  }
+  if (a instanceof Date || b instanceof Date) {
+    const timeA = a instanceof Date ? a.getTime() : new Date(String(a)).getTime();
+    const timeB = b instanceof Date ? b.getTime() : new Date(String(b)).getTime();
+    if (Number.isNaN(timeA) || Number.isNaN(timeB)) return false;
+    return timeA === timeB;
+  }
+  if (typeof a === "object" || typeof b === "object") {
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+  return a === b;
+}
+
+function compareOrdered(actual: unknown, expected: unknown): number | null {
+  if (actual === null || actual === undefined || expected === null || expected === undefined) {
+    return null;
+  }
+  if (actual instanceof Date || expected instanceof Date) {
+    const timeA = actual instanceof Date ? actual.getTime() : new Date(String(actual)).getTime();
+    const timeB =
+      expected instanceof Date ? expected.getTime() : new Date(String(expected)).getTime();
+    if (Number.isNaN(timeA) || Number.isNaN(timeB)) return null;
+    return timeA - timeB;
+  }
+  if (typeof actual === "number" && typeof expected === "number") {
+    return actual - expected;
+  }
+  const strA = String(actual);
+  const strB = String(expected);
+  return strA < strB ? -1 : strA > strB ? 1 : 0;
+}
+
+function matchesFieldCondition(actual: unknown, condition: unknown): boolean {
+  if (isOperatorFilterObject(condition)) {
+    for (const [op, opVal] of Object.entries(condition) as Array<
+      [keyof QueryFilterOperators, unknown]
+    >) {
+      if (opVal === undefined) continue;
+      if (op === "$ne") {
+        if (opVal === null) {
+          if (actual === null || actual === undefined) return false;
+        } else if (valuesEqual(actual, opVal)) {
+          return false;
+        }
+      } else if (op === "$gt") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp <= 0) return false;
+      } else if (op === "$gte") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp < 0) return false;
+      } else if (op === "$lt") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp >= 0) return false;
+      } else if (op === "$lte") {
+        const cmp = compareOrdered(actual, opVal);
+        if (cmp === null || cmp > 0) return false;
+      } else if (op === "$in") {
+        if (!Array.isArray(opVal) || !opVal.some((entry) => valuesEqual(actual, entry))) {
+          return false;
+        }
+      } else if (op === "$like") {
+        if (
+          actual === null ||
+          actual === undefined ||
+          !likeToRegExp(String(opVal), false).test(String(actual))
+        ) {
+          return false;
+        }
+      } else if (op === "$ilike") {
+        if (
+          actual === null ||
+          actual === undefined ||
+          !likeToRegExp(String(opVal), true).test(String(actual))
+        ) {
+          return false;
+        }
+      } else if (op === "$not") {
+        if (matchesFieldCondition(actual, opVal)) return false;
+      }
+    }
+    return true;
+  }
+  if (condition === null) {
+    return actual === null || actual === undefined;
+  }
+  return valuesEqual(actual, condition);
+}
+
+/** Evaluates an ORM filter AST in memory against a decoded record. */
+export function matchesFilter(
+  record: Record<string, unknown>,
+  filter: Record<string, unknown> | null | undefined,
+): boolean {
+  if (!filter || Object.keys(filter).length === 0) return true;
+  for (const [key, value] of Object.entries(filter)) {
+    if (value === undefined) continue;
+    if (key === "$and") {
+      if (!Array.isArray(value)) return false;
+      if (!value.every((sub) => isPlainObject(sub) && matchesFilter(record, sub))) {
+        return false;
+      }
+      continue;
+    }
+    if (key === "$or") {
+      if (!Array.isArray(value) || value.length === 0) return false;
+      if (!value.some((sub) => isPlainObject(sub) && matchesFilter(record, sub))) {
+        return false;
+      }
+      continue;
+    }
+    if (key === "$not") {
+      if (!isPlainObject(value)) return false;
+      if (matchesFilter(record, value)) return false;
+      continue;
+    }
+    if (!matchesFieldCondition(record[key], value)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
@@ -228,7 +450,19 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   private descriptor(): Pick<
     RegisteredModelDescriptor,
-    "fields" | "fullSchema" | "extensible" | "customFields"
+    | "fields"
+    | "fullSchema"
+    | "extensible"
+    | "customFields"
+    | "allowFreeformExtra"
+    | "indexes"
+    | "computed"
+    | "computedOrder"
+    | "storedComputedFields"
+    | "relations"
+    | "hooks"
+    | "fieldPolicies"
+    | "many2manyTables"
   > {
     const reg = modelRegistry.get(this.name);
     if (reg) return reg;
@@ -237,6 +471,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       fullSchema: this.fallbackFullSchema,
       extensible: false,
       customFields: [],
+      indexes: [],
+      computedOrder: [],
+      storedComputedFields: new Set<string>(),
+      many2manyTables: [],
     };
   }
 
@@ -342,6 +580,15 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         }
         continue;
       }
+      if (key === "$not") {
+        if (!value || typeof value !== "object" || Array.isArray(value)) {
+          throw new Error(`Operator '$not' on model '${this.name}' requires a filter object.`);
+        }
+        const nested: string[] = [];
+        this.compileFilters(value as Record<string, unknown>, nested, params);
+        clauses.push(nested.length ? `NOT (${nested.join(" AND ")})` : "1 = 0");
+        continue;
+      }
       this.validateColumn(key);
       if (isOperatorFilterObject(value)) {
         for (const [op, opVal] of Object.entries(value) as Array<
@@ -367,8 +614,19 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
             if (opVal.length === 0) {
               clauses.push("1 = 0");
             } else {
-              clauses.push(`${key} IN (${opVal.map(() => "?").join(", ")})`);
-              for (const entry of opVal) params.push(encodeFilterValue(entry));
+              const hasNull = opVal.some((entry) => entry === null);
+              const nonNulls = opVal.filter((entry) => entry !== null && entry !== undefined);
+              if (hasNull && nonNulls.length === 0) {
+                clauses.push(`${key} IS NULL`);
+              } else if (hasNull) {
+                clauses.push(
+                  `(${key} IS NULL OR ${key} IN (${nonNulls.map(() => "?").join(", ")}))`,
+                );
+                for (const entry of nonNulls) params.push(encodeFilterValue(entry));
+              } else {
+                clauses.push(`${key} IN (${nonNulls.map(() => "?").join(", ")})`);
+                for (const entry of nonNulls) params.push(encodeFilterValue(entry));
+              }
             }
           } else if (op === "$like") {
             clauses.push(`${key} LIKE ?`);
@@ -376,6 +634,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           } else if (op === "$ilike") {
             clauses.push(`LOWER(${key}) LIKE LOWER(?)`);
             params.push(String(opVal));
+          } else if (op === "$not") {
+            const nested: string[] = [];
+            this.compileFilters({ [key]: opVal }, nested, params);
+            clauses.push(nested.length ? `NOT (${nested.join(" AND ")})` : "1 = 0");
           }
         }
         continue;
@@ -404,7 +666,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   private buildWhere(
     filters: Record<string, unknown> = {},
-    opts: { includeDeleted?: boolean; tenantId?: string; q?: string } = {},
+    opts: {
+      includeDeleted?: boolean;
+      tenantId?: string;
+      q?: string;
+      allowedSearchFields?: string[];
+    } = {},
   ): { where: string; params: unknown[] } {
     const clauses: string[] = [];
     const params: unknown[] = [];
@@ -420,7 +687,11 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
     const needle = opts.q?.trim();
     if (needle) {
-      const columns = this.searchColumns();
+      let columns = this.searchColumns();
+      if (opts.allowedSearchFields !== undefined) {
+        const allowed = new Set(opts.allowedSearchFields);
+        columns = columns.filter((col) => allowed.has(col));
+      }
       if (columns.length === 0) {
         clauses.push("1 = 0");
       } else {
@@ -501,6 +772,53 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     filters: Record<string, unknown> = {},
     opts: FindOptions = {},
   ): Promise<ModelRecord<TBusiness>[]> {
+    const withPaths = opts.with ?? [];
+    if (withPaths.length > MAX_WITH_RELATIONS) {
+      throw new Error(
+        `Too many relations requested in 'with' on model '${this.name}' (max ${MAX_WITH_RELATIONS}).`,
+      );
+    }
+    for (const relPath of withPaths) {
+      const segments = relPath.split(".").filter(Boolean);
+      if (segments.length === 0 || segments.length > MAX_RELATION_DEPTH) {
+        throw new Error(
+          `Relation hydration path '${relPath}' on model '${this.name}' exceeds maximum depth of ${MAX_RELATION_DEPTH}.`,
+        );
+      }
+      for (const seg of segments) {
+        assertIdentifier(seg, "relation name");
+      }
+    }
+
+    let requestedFieldsSet: Set<string> | null = null;
+    let selectClause = "*";
+    let helperColumnsToStrip: string[] = [];
+    if (opts.fields !== undefined) {
+      if (opts.fields.length === 0) {
+        throw new Error(`FindOptions.fields on model '${this.name}' must not be empty.`);
+      }
+      opts.fields.forEach((col) => this.validateColumn(col));
+      requestedFieldsSet = new Set(opts.fields);
+      const internalCols = new Set(requestedFieldsSet);
+      if (withPaths.length > 0) {
+        internalCols.add("id");
+        internalCols.add("tenant_id");
+        const relations = this.descriptor().relations ?? {};
+        for (const relPath of withPaths) {
+          const topRel = relPath.split(".")[0]!;
+          const rel = relations[topRel];
+          if (!rel) continue;
+          if (rel.type === "one2many") {
+            internalCols.add(rel.targetField ?? "id");
+          } else if (rel.type !== "many2many") {
+            internalCols.add(topRel);
+          }
+        }
+      }
+      helperColumnsToStrip = [...internalCols].filter((col) => !requestedFieldsSet!.has(col));
+      selectClause = [...internalCols].join(", ");
+    }
+
     const { where, params } = this.buildWhere(filters, opts);
     const orderClause = this.buildOrderBy(opts.orderBy);
     let paginationClause = "";
@@ -521,30 +839,48 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     }
 
     const rows = await getDb().all<Record<string, unknown>>(
-      `SELECT * FROM ${this.table}${where}${orderClause}${paginationClause}`,
+      `SELECT ${selectClause} FROM ${this.table}${where}${orderClause}${paginationClause}`,
       execParams,
     );
     const decoded = rows.map((row) => this.decodeRow<ModelRecord<TBusiness>>(row));
-    this.applyComputedFields(decoded as unknown as Array<Record<string, unknown>>);
-    if (opts.with && opts.with.length > 0) {
+    if (!requestedFieldsSet) {
+      this.applyComputedFields(decoded as unknown as Array<Record<string, unknown>>);
+    }
+    if (withPaths.length > 0) {
       await this.hydrateRelations(
         decoded as unknown as Array<Record<string, unknown>>,
-        opts.with,
+        withPaths,
         opts.tenantId,
       );
+    }
+    if (helperColumnsToStrip.length > 0) {
+      for (const row of decoded as unknown as Array<Record<string, unknown>>) {
+        for (const col of helperColumnsToStrip) {
+          delete row[col];
+        }
+      }
     }
     return decoded;
   }
 
   private applyComputedFields(rows: Array<Record<string, unknown>>): void {
-    const computed = modelRegistry.get(this.name)?.computed;
+    const desc = modelRegistry.get(this.name);
+    const computed = desc?.computed;
     if (!computed || rows.length === 0) return;
+    const order = desc?.computedOrder.length ? desc.computedOrder : Object.keys(computed);
     for (const row of rows) {
-      for (const [field, fn] of Object.entries(computed)) {
+      for (const field of order) {
+        const def = computed[field];
+        if (!def) continue;
+        const norm = normalizeComputedFieldDef(def);
         try {
-          row[field] = fn(row);
-        } catch {
-          row[field] = null;
+          row[field] = norm.compute(row);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          throw new Error(
+            `Failed to compute field '${field}' on model '${this.name}': ${message}`,
+            { cause: err },
+          );
         }
       }
     }
@@ -556,10 +892,22 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     tenantId?: string,
   ): Promise<void> {
     if (rows.length === 0 || requested.length === 0) return;
-    const relations = modelRegistry.get(this.name)?.relations;
+    const desc = modelRegistry.get(this.name);
+    const relations = desc?.relations;
     if (!relations) return;
 
-    for (const relName of requested) {
+    const topLevelGroups = new Map<string, string[]>();
+    for (const relPath of requested) {
+      const [head, ...rest] = relPath.split(".").filter(Boolean);
+      if (!head) continue;
+      const nestedList = topLevelGroups.get(head) ?? [];
+      if (rest.length > 0) {
+        nestedList.push(rest.join("."));
+      }
+      topLevelGroups.set(head, nestedList);
+    }
+
+    for (const [relName, nestedPaths] of topLevelGroups) {
       const relation = relations[relName];
       if (!relation) continue;
       const targetDesc = modelRegistry.get(relation.model);
@@ -571,6 +919,27 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         targetDesc.softDelete,
         targetDesc.fields,
       );
+      const rowTenants =
+        tenantId === undefined
+          ? [
+              ...new Set(
+                rows
+                  .map((r) => r.tenant_id)
+                  .filter((t): t is string => typeof t === "string" && t.length > 0),
+              ),
+            ]
+          : [];
+      const scopedFindOpts: FindOptions = {
+        ...(tenantId !== undefined
+          ? { tenantId }
+          : rowTenants.length === 1
+            ? { tenantId: rowTenants[0] }
+            : {}),
+        ...(nestedPaths.length > 0 ? { with: [...new Set(nestedPaths)] } : {}),
+      };
+      const multiTenantFilter =
+        tenantId === undefined && rowTenants.length > 1 ? { tenant_id: { $in: rowTenants } } : {};
+      const compositeKey = tenantId === undefined && rowTenants.length > 1;
 
       if (relation.type === "one2many") {
         const inverseField = relation.inverseField;
@@ -588,18 +957,102 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           continue;
         }
         const relatedRows = await targetRepo.find(
-          { [inverseField]: { $in: parentKeys } },
-          tenantId !== undefined ? { tenantId } : {},
+          { [inverseField]: { $in: parentKeys }, ...multiTenantFilter },
+          scopedFindOpts,
         );
         const grouped = new Map<string, Array<Record<string, unknown>>>();
         for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
-          const key = String(relRow[inverseField] ?? "");
+          const baseKey = String(relRow[inverseField] ?? "");
+          const key = compositeKey
+            ? `${String(relRow.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
           const list = grouped.get(key) ?? [];
           list.push(relRow);
           grouped.set(key, list);
         }
         for (const row of rows) {
-          const key = String(row[parentKeyField] ?? "");
+          const baseKey = String(row[parentKeyField] ?? "");
+          const key = compositeKey
+            ? `${String(row.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
+          row[`$${relName}`] = grouped.get(key) ?? [];
+        }
+      } else if (relation.type === "many2many") {
+        const joinSpec = desc?.many2manyTables.find((spec) => spec.relationName === relName);
+        const joinTable = joinSpec?.table ?? relation.through ?? `${this.table}_${relName}_rel`;
+        const sourceCol = joinSpec?.sourceColumn ?? relation.sourceKey ?? "source_id";
+        const targetCol = joinSpec?.targetColumn ?? relation.targetKey ?? "target_id";
+        const targetField = relation.targetField ?? "id";
+        assertIdentifier(joinTable, "join table");
+        assertIdentifier(sourceCol, "join source column");
+        assertIdentifier(targetCol, "join target column");
+
+        const sourceIds = [
+          ...new Set(
+            rows
+              .map((r) => r.id)
+              .filter((v): v is string | number => v !== null && v !== undefined),
+          ),
+        ];
+        if (sourceIds.length === 0) {
+          for (const row of rows) row[`$${relName}`] = [];
+          continue;
+        }
+
+        const joinWhereParts: string[] = [
+          `${sourceCol} IN (${sourceIds.map(() => "?").join(", ")})`,
+        ];
+        const joinParams: unknown[] = [...sourceIds];
+        if (tenantId !== undefined) {
+          joinWhereParts.push("tenant_id = ?");
+          joinParams.push(normalizeTenantId(tenantId));
+        } else if (rowTenants.length === 1) {
+          joinWhereParts.push("tenant_id = ?");
+          joinParams.push(normalizeTenantId(rowTenants[0]!));
+        } else if (rowTenants.length > 1) {
+          joinWhereParts.push(`tenant_id IN (${rowTenants.map(() => "?").join(", ")})`);
+          joinParams.push(...rowTenants.map((t) => normalizeTenantId(t)));
+        }
+
+        const joinRows = await getDb().all<Record<string, unknown>>(
+          `SELECT tenant_id, ${sourceCol} AS source_id, ${targetCol} AS target_id FROM ${joinTable} WHERE ${joinWhereParts.join(" AND ")}`,
+          joinParams,
+        );
+        if (joinRows.length === 0) {
+          for (const row of rows) row[`$${relName}`] = [];
+          continue;
+        }
+
+        const targetIds = [...new Set(joinRows.map((jr) => jr.target_id).filter(Boolean))];
+        const relatedRows = await targetRepo.find(
+          { [targetField]: { $in: targetIds }, ...multiTenantFilter },
+          scopedFindOpts,
+        );
+        const targetByKey = new Map<string, Record<string, unknown>>();
+        for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
+          const baseKey = String(relRow[targetField] ?? "");
+          const key = compositeKey
+            ? `${String(relRow.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
+          targetByKey.set(key, relRow);
+        }
+
+        const grouped = new Map<string, Array<Record<string, unknown>>>();
+        for (const jr of joinRows) {
+          const tId = String(jr.tenant_id ?? DEFAULT_TENANT_ID);
+          const sKey = compositeKey ? `${tId}\0${String(jr.source_id)}` : String(jr.source_id);
+          const tKey = compositeKey ? `${tId}\0${String(jr.target_id)}` : String(jr.target_id);
+          const targetRow = targetByKey.get(tKey);
+          if (!targetRow) continue;
+          const list = grouped.get(sKey) ?? [];
+          list.push(targetRow);
+          grouped.set(sKey, list);
+        }
+        for (const row of rows) {
+          const baseKey = String(row.id ?? "");
+          const key = compositeKey
+            ? `${String(row.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
           row[`$${relName}`] = grouped.get(key) ?? [];
         }
       } else {
@@ -616,17 +1069,27 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           continue;
         }
         const relatedRows = await targetRepo.find(
-          { [targetField]: { $in: fkValues } },
-          tenantId !== undefined ? { tenantId } : {},
+          { [targetField]: { $in: fkValues }, ...multiTenantFilter },
+          scopedFindOpts,
         );
         const map = new Map<string, Record<string, unknown>>();
         for (const relRow of relatedRows as unknown as Array<Record<string, unknown>>) {
-          map.set(String(relRow[targetField] ?? ""), relRow);
+          const baseKey = String(relRow[targetField] ?? "");
+          const key = compositeKey
+            ? `${String(relRow.tenant_id ?? DEFAULT_TENANT_ID)}\0${baseKey}`
+            : baseKey;
+          map.set(key, relRow);
         }
         for (const row of rows) {
           const fk = row[relName];
-          row[`$${relName}`] =
-            fk !== null && fk !== undefined ? (map.get(String(fk)) ?? null) : null;
+          if (fk === null || fk === undefined) {
+            row[`$${relName}`] = null;
+            continue;
+          }
+          const key = compositeKey
+            ? `${String(row.tenant_id ?? DEFAULT_TENANT_ID)}\0${String(fk)}`
+            : String(fk);
+          row[`$${relName}`] = map.get(key) ?? null;
         }
       }
     }
@@ -634,7 +1097,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
   async findOne(
     id: string,
-    opts: { includeDeleted?: boolean; tenantId?: string; with?: string[] } = {},
+    opts: { includeDeleted?: boolean; tenantId?: string; with?: string[]; fields?: string[] } = {},
   ): Promise<ModelRecord<TBusiness> | null> {
     const rows = await this.find({ id }, opts);
     return rows[0] ?? null;
@@ -659,31 +1122,348 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     return Number(row?.total ?? 0);
   }
 
+  forActor(actor: ActorContext): ScopedRepository<TBusiness> {
+    return new ScopedRepository<TBusiness>(this, actor);
+  }
+
+  private assertNoDirectComputedWrite(rawData: Record<string, unknown>): void {
+    const computed = this.descriptor().computed;
+    if (!computed) return;
+    for (const key of Object.keys(rawData)) {
+      if (key in computed && rawData[key] !== undefined) {
+        throw new Error(`Cannot directly write computed field '${key}' on model '${this.name}'.`);
+      }
+    }
+  }
+
+  private computeStoredFields(parsed: Record<string, unknown>): Record<string, unknown> {
+    const { computed, computedOrder, storedComputedFields, fullSchema } = this.descriptor();
+    if (!computed || computedOrder.length === 0) return parsed;
+    const working: Record<string, unknown> = { ...parsed };
+    for (const field of computedOrder) {
+      const def = computed[field];
+      if (!def) continue;
+      const norm = normalizeComputedFieldDef(def);
+      try {
+        const value = norm.compute(working);
+        working[field] = value;
+        if (norm.stored) {
+          parsed[field] = value;
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        throw new Error(`Failed to compute field '${field}' on model '${this.name}': ${message}`, {
+          cause: err,
+        });
+      }
+    }
+    if (storedComputedFields.size > 0) {
+      return fullSchema.parse(parsed) as Record<string, unknown>;
+    }
+    return parsed;
+  }
+
+  private async runAfterCommitHook(
+    hookName: "afterSave" | "afterDelete" | "afterArchive" | "afterRestore",
+    hookFn:
+      | ((ctx: {
+          model: string;
+          action: ModelWriteAction;
+          before: Record<string, unknown> | null;
+          values: Record<string, unknown>;
+          actor: ActorContext;
+        }) => void | Promise<void>)
+      | undefined,
+    ctx: {
+      model: string;
+      action: ModelWriteAction;
+      before: Record<string, unknown> | null;
+      values: Record<string, unknown>;
+      actor: ActorContext;
+    },
+    entityId: string,
+  ): Promise<void> {
+    if (!hookFn) return;
+    const depth = hookDepthStorage.getStore() ?? 0;
+    if (depth >= MAX_HOOK_DEPTH) {
+      modelRegistry.recordHookError({
+        model: this.name,
+        action: ctx.action,
+        hook: hookName,
+        entityId,
+        error: `Max after-commit hook reentrancy depth (${MAX_HOOK_DEPTH}) exceeded`,
+      });
+      return;
+    }
+    try {
+      await hookDepthStorage.run(depth + 1, () => hookFn(ctx));
+    } catch (err) {
+      modelRegistry.recordHookError({
+        model: this.name,
+        action: ctx.action,
+        hook: hookName,
+        entityId,
+        error: err instanceof Error ? err.message : String(err),
+        cause: err,
+      });
+    }
+  }
+
+  private resolveUpsertSelector(
+    whereFilters: Record<string, unknown>,
+    actor: ActorContext,
+  ): { conflictCols: string[]; resolvedTenantId: string; scopeByTenant: boolean } {
+    if (!isPlainObject(whereFilters)) {
+      throw new Error(`upsert on model '${this.name}' requires a plain filter object.`);
+    }
+    const selectorEntries = Object.entries(whereFilters).filter(([, v]) => v !== undefined);
+    if (selectorEntries.length === 0) {
+      throw new Error(
+        `upsert on model '${this.name}' requires 'id' or all fields of a declared unique index in whereFilters.`,
+      );
+    }
+    for (const [col, val] of selectorEntries) {
+      this.validateColumn(col);
+      if (isOperatorFilterObject(val) || Array.isArray(val)) {
+        throw new Error(
+          `upsert selector on '${this.name}.${col}' must be a scalar value, not an operator object.`,
+        );
+      }
+    }
+
+    if (
+      actor.tenantId !== undefined &&
+      whereFilters.tenant_id !== undefined &&
+      normalizeTenantId(String(whereFilters.tenant_id)) !== normalizeTenantId(actor.tenantId)
+    ) {
+      throw new PolicyError("Cross-tenant upsert is forbidden", "TENANT_MISMATCH", 403);
+    }
+
+    const resolvedTenantId =
+      actor.tenantId !== undefined
+        ? normalizeTenantId(actor.tenantId)
+        : whereFilters.tenant_id !== undefined
+          ? normalizeTenantId(String(whereFilters.tenant_id))
+          : DEFAULT_TENANT_ID;
+
+    const selectorKeys = new Set(selectorEntries.map(([k]) => k));
+    if (selectorKeys.has("id") && whereFilters.id !== null) {
+      return {
+        conflictCols: ["id"],
+        resolvedTenantId,
+        scopeByTenant: actor.tenantId !== undefined || selectorKeys.has("tenant_id"),
+      };
+    }
+
+    const indexes = this.descriptor().indexes;
+    const matchedUnique = indexes.find(
+      (idx) =>
+        idx.unique === true &&
+        idx.fields.length > 0 &&
+        idx.fields.every((field) => selectorKeys.has(field) || field === "tenant_id"),
+    );
+    if (!matchedUnique) {
+      throw new Error(
+        `upsert on model '${this.name}' requires 'id' or all fields of a declared unique index in whereFilters.`,
+      );
+    }
+    return {
+      conflictCols: [...matchedUnique.fields],
+      resolvedTenantId,
+      scopeByTenant:
+        actor.tenantId !== undefined ||
+        selectorKeys.has("tenant_id") ||
+        matchedUnique.fields.includes("tenant_id"),
+    };
+  }
+
   async upsert(
     whereFilters: Record<string, unknown>,
     data: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness>> {
-    const existing = await this.find(whereFilters, {
-      limit: 1,
-      ...(actor.tenantId !== undefined ? { tenantId: actor.tenantId } : {}),
-    });
-    if (existing[0]) {
-      const updated = await this.update(existing[0].id, data, actor);
-      if (updated) return updated;
+    await ensureAuditTable();
+    this.assertNoDirectComputedWrite(data);
+    const { conflictCols, resolvedTenantId, scopeByTenant } = this.resolveUpsertSelector(
+      whereFilters,
+      actor,
+    );
+    if (
+      actor.tenantId !== undefined &&
+      data.tenant_id !== undefined &&
+      normalizeTenantId(String(data.tenant_id)) !== normalizeTenantId(actor.tenantId)
+    ) {
+      throw new PolicyError("Cross-tenant upsert is forbidden", "TENANT_MISMATCH", 403);
     }
-    return this.create({ ...whereFilters, ...data }, actor);
+
+    const { hooks } = this.descriptor();
+    const effectiveFilter: Record<string, unknown> = { ...whereFilters };
+    if (scopeByTenant && effectiveFilter.tenant_id === undefined) {
+      effectiveFilter.tenant_id = resolvedTenantId;
+    }
+    const { where, params } = this.buildWhere(effectiveFilter, {});
+
+    let outcomeAction: "CREATE" | "UPDATE" = "CREATE";
+    let beforeSnapshot: Record<string, unknown> | null = null;
+
+    const committed = await getDb().transaction(async (tx) => {
+      const existingRow = await tx.get<Record<string, unknown>>(
+        `SELECT * FROM ${this.table}${where} LIMIT 1`,
+        params,
+      );
+      if (existingRow) {
+        const updated = await this.updateInTx(tx, existingRow, data, actor, guard);
+        if (updated) {
+          outcomeAction = "UPDATE";
+          beforeSnapshot = updated.before;
+          return { parsed: updated.parsed, decoded: updated.decoded, now: updated.now };
+        }
+      }
+
+      const rawCreate = {
+        ...whereFilters,
+        ...data,
+        ...(scopeByTenant && data.tenant_id === undefined && whereFilters.tenant_id === undefined
+          ? { tenant_id: resolvedTenantId }
+          : {}),
+      };
+      const prepared = await this.prepareCreateInTx(tx, rawCreate, actor, guard);
+      const { parsed, now } = prepared;
+      const cols = Object.keys(parsed);
+      cols.forEach((column) => this.validateColumn(column));
+      const placeholders = cols.map(() => "?").join(", ");
+      const values = this.encodeRow(parsed);
+
+      const conflictSet = new Set(conflictCols);
+      const protectedOnConflict = new Set(["id", "create_uid", "create_date", "tenant_id"]);
+      const dataUpdateCols = Object.keys(data).filter(
+        (col) => !conflictSet.has(col) && !protectedOnConflict.has(col) && cols.includes(col),
+      );
+      for (const storedCol of this.descriptor().storedComputedFields) {
+        if (
+          !conflictSet.has(storedCol) &&
+          !dataUpdateCols.includes(storedCol) &&
+          cols.includes(storedCol)
+        ) {
+          dataUpdateCols.push(storedCol);
+        }
+      }
+      const updateClauses = [
+        ...dataUpdateCols.map((col) => `${col} = excluded.${col}`),
+        "write_uid = excluded.write_uid",
+        "write_date = excluded.write_date",
+        "source = excluded.source",
+        `version = ${this.table}.version + 1`,
+        ...(this.softDelete
+          ? ["status = 'active'", "deleted_uid = NULL", "deleted_date = NULL"]
+          : []),
+      ];
+
+      await tx.run(
+        `INSERT INTO ${this.table} (${cols.join(", ")}) VALUES (${placeholders}) ON CONFLICT (${conflictCols.join(", ")}) DO UPDATE SET ${updateClauses.join(", ")}`,
+        values,
+      );
+
+      const persistedRaw = await tx.get<Record<string, unknown>>(
+        `SELECT * FROM ${this.table}${where} LIMIT 1`,
+        params,
+      );
+      const finalParsed = persistedRaw
+        ? (this.decodeRow<Record<string, unknown>>(persistedRaw) as Record<string, unknown>)
+        : parsed;
+      const actualVersion = Number(finalParsed.version ?? 1);
+      outcomeAction = actualVersion > 1 ? "UPDATE" : "CREATE";
+      await this.writeAudit(tx, finalParsed, outcomeAction, null, actor);
+      await this.writeOutbox(tx, finalParsed, outcomeAction, null, actor);
+      return {
+        parsed: finalParsed,
+        decoded: this.decodeRow<ModelRecord<TBusiness>>(finalParsed),
+        now,
+      };
+    });
+
+    if (outcomeAction === "CREATE") {
+      await this.applyRetention(String(committed.parsed.tenant_id));
+    }
+    this.applyComputedFields([committed.decoded as unknown as Record<string, unknown>]);
+    await this.runAfterCommitHook(
+      "afterSave",
+      hooks?.afterSave,
+      {
+        model: this.name,
+        action: outcomeAction,
+        before: beforeSnapshot,
+        values: committed.decoded as unknown as Record<string, unknown>,
+        actor,
+      },
+      String(committed.parsed.id),
+    );
+    await modelRegistry.emitWrite({
+      model: this.name,
+      entityId: String(committed.parsed.id),
+      action: outcomeAction,
+      record: committed.decoded as Record<string, unknown>,
+      before: beforeSnapshot,
+      actor,
+      timestamp: committed.now.toISOString(),
+    });
+    return committed.decoded;
   }
 
   async createMany(
     records: Record<string, unknown>[],
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness>[]> {
-    const created: ModelRecord<TBusiness>[] = [];
-    for (const item of records) {
-      created.push(await this.create(item, actor));
+    if (records.length === 0) return [];
+    await ensureAuditTable();
+    const { hooks } = this.descriptor();
+
+    const committedItems = await getDb().transaction(async (tx) => {
+      const results: Array<{
+        parsed: Record<string, unknown>;
+        decoded: ModelRecord<TBusiness>;
+        now: Date;
+      }> = [];
+      for (const item of records) {
+        results.push(await this.createInTx(tx, item, actor, guard));
+      }
+      return results;
+    });
+
+    const tenants = [...new Set(committedItems.map((item) => String(item.parsed.tenant_id)))];
+    for (const tId of tenants) {
+      await this.applyRetention(tId);
     }
-    return created;
+
+    const decodedList = committedItems.map((item) => item.decoded);
+    this.applyComputedFields(decodedList as unknown as Array<Record<string, unknown>>);
+
+    for (const item of committedItems) {
+      await this.runAfterCommitHook(
+        "afterSave",
+        hooks?.afterSave,
+        {
+          model: this.name,
+          action: "CREATE",
+          before: null,
+          values: item.decoded as unknown as Record<string, unknown>,
+          actor,
+        },
+        String(item.parsed.id),
+      );
+      await modelRegistry.emitWrite({
+        model: this.name,
+        entityId: String(item.parsed.id),
+        action: "CREATE",
+        record: item.decoded as Record<string, unknown>,
+        before: null,
+        actor,
+        timestamp: item.now.toISOString(),
+      });
+    }
+    return decodedList;
   }
 
   private applyDefaults(
@@ -757,17 +1537,41 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     tx: LibSqlExecutor,
     current: Record<string, unknown>,
   ): Promise<void> {
+    const currentTenant = String(current.tenant_id ?? DEFAULT_TENANT_ID);
     for (const other of modelRegistry.list()) {
       for (const [field, relation] of Object.entries(other.relations ?? {})) {
         if (relation.type === "one2many") continue;
         if (relation.model !== this.name || relation.onDelete === "ignore") continue;
+        if (relation.type === "many2many") {
+          const joinSpec = other.many2manyTables.find((spec) => spec.relationName === field);
+          if (!joinSpec) continue;
+          const value = current[joinSpec.targetField];
+          if (value === undefined || value === null) continue;
+          const row = await tx.get<{ ok: number }>(
+            `SELECT 1 AS ok FROM ${joinSpec.table} WHERE ${joinSpec.targetColumn} = ? AND tenant_id = ? LIMIT 1`,
+            [encodeFilterValue(value), currentTenant],
+          );
+          if (row) {
+            throw new ConflictError(
+              `Cannot delete '${this.name}' ${String(current.id)}: referenced by '${other.name}.${field}' (restrict).`,
+            );
+          }
+          continue;
+        }
         const targetField = relation.targetField ?? "id";
         const value = current[targetField];
         if (value === undefined || value === null) continue;
         const deletedClause = other.softDelete ? " AND status != 'deleted'" : "";
+        if (relation.onDelete === "set null") {
+          await tx.run(
+            `UPDATE ${other.table} SET ${field} = NULL WHERE ${field} = ? AND tenant_id = ?${deletedClause}`,
+            [encodeFilterValue(value), currentTenant],
+          );
+          continue;
+        }
         const row = await tx.get<{ ok: number }>(
           `SELECT 1 AS ok FROM ${other.table} WHERE ${field} = ? AND tenant_id = ?${deletedClause} LIMIT 1`,
-          [encodeFilterValue(value), String(current.tenant_id)],
+          [encodeFilterValue(value), currentTenant],
         );
         if (row) {
           throw new ConflictError(
@@ -776,6 +1580,187 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         }
       }
     }
+
+    for (const joinSpec of this.descriptor().many2manyTables) {
+      if (joinSpec.onDelete === "ignore") continue;
+      const sourceVal = current.id;
+      if (sourceVal === undefined || sourceVal === null) continue;
+      const row = await tx.get<{ ok: number }>(
+        `SELECT 1 AS ok FROM ${joinSpec.table} WHERE ${joinSpec.sourceColumn} = ? AND tenant_id = ? LIMIT 1`,
+        [encodeFilterValue(sourceVal), currentTenant],
+      );
+      if (row) {
+        throw new ConflictError(
+          `Cannot delete '${this.name}' ${String(current.id)}: referenced by many2many '${joinSpec.relationName}' (restrict).`,
+        );
+      }
+    }
+  }
+
+  private resolveMany2ManyJoin(relationName: string) {
+    const desc = modelRegistry.get(this.name);
+    const relation = desc?.relations?.[relationName];
+    if (!relation || relation.type !== "many2many") {
+      throw new Error(
+        `Relation '${relationName}' on model '${this.name}' is not a many2many relation.`,
+      );
+    }
+    const targetDesc = modelRegistry.get(relation.model);
+    if (!targetDesc) {
+      throw new Error(
+        `Many2many relation '${this.name}.${relationName}' targets unknown model '${relation.model}'.`,
+      );
+    }
+    const joinSpec = desc?.many2manyTables.find((spec) => spec.relationName === relationName);
+    const joinTable = joinSpec?.table ?? relation.through ?? `${this.table}_${relationName}_rel`;
+    const sourceCol = joinSpec?.sourceColumn ?? relation.sourceKey ?? "source_id";
+    const targetCol = joinSpec?.targetColumn ?? relation.targetKey ?? "target_id";
+    const targetField = relation.targetField ?? "id";
+    assertIdentifier(joinTable, "join table");
+    assertIdentifier(sourceCol, "join source column");
+    assertIdentifier(targetCol, "join target column");
+    assertIdentifier(targetField, "relation target column");
+    return { targetDesc, joinTable, sourceCol, targetCol, targetField };
+  }
+
+  private async validateMany2ManyTargetsInTx(
+    tx: LibSqlExecutor,
+    relationName: string,
+    sourceTenantId: string,
+    targetIds: string[],
+  ): Promise<void> {
+    if (targetIds.length === 0) return;
+    const { targetDesc, targetField } = this.resolveMany2ManyJoin(relationName);
+    const deletedClause = targetDesc.softDelete ? " AND status != 'deleted'" : "";
+    const foundRows = await tx.all<Record<string, unknown>>(
+      `SELECT ${targetField} AS target_val, tenant_id FROM ${targetDesc.table} WHERE ${targetField} IN (${targetIds.map(() => "?").join(", ")})${deletedClause}`,
+      targetIds,
+    );
+    const byTargetVal = new Map<string, string[]>();
+    for (const row of foundRows) {
+      const key = String(row.target_val);
+      const list = byTargetVal.get(key) ?? [];
+      list.push(String(row.tenant_id ?? DEFAULT_TENANT_ID));
+      byTargetVal.set(key, list);
+    }
+    for (const tid of targetIds) {
+      const tenants = byTargetVal.get(tid);
+      if (!tenants || tenants.length === 0) {
+        throw new Error(
+          `Many2many relation '${this.name}.${relationName}' references missing ${targetDesc.name}.${targetField}='${tid}'.`,
+        );
+      }
+      if (!tenants.includes(sourceTenantId)) {
+        throw new PolicyError(
+          `Cross-tenant many2many link is forbidden on '${this.name}.${relationName}'`,
+          "TENANT_MISMATCH",
+          403,
+        );
+      }
+    }
+  }
+
+  private async assertMany2ManySourceInTx(
+    tx: LibSqlExecutor,
+    sourceId: string,
+    actor: ActorContext,
+  ): Promise<string> {
+    const deletedClause = this.softDelete ? " AND status != 'deleted'" : "";
+    const sourceRow = await tx.get<Record<string, unknown>>(
+      `SELECT id, tenant_id FROM ${this.table} WHERE id = ?${deletedClause}`,
+      [sourceId],
+    );
+    if (!sourceRow) {
+      throw new Error(`Source record '${this.name}' (${sourceId}) not found.`);
+    }
+    const sourceTenantId = normalizeTenantId(String(sourceRow.tenant_id ?? DEFAULT_TENANT_ID));
+    if (actor.tenantId !== undefined && normalizeTenantId(actor.tenantId) !== sourceTenantId) {
+      throw new PolicyError("Cross-tenant relation mutation is forbidden", "TENANT_MISMATCH", 403);
+    }
+    return sourceTenantId;
+  }
+
+  async attachRelation(
+    sourceId: string,
+    relationName: string,
+    targetIds: string | string[],
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<{ attached: number }> {
+    const { joinTable, sourceCol, targetCol } = this.resolveMany2ManyJoin(relationName);
+    const ids = [...new Set((Array.isArray(targetIds) ? targetIds : [targetIds]).filter(Boolean))];
+    return getDb().transaction(async (tx) => {
+      const sourceTenantId = await this.assertMany2ManySourceInTx(tx, sourceId, actor);
+      await this.validateMany2ManyTargetsInTx(tx, relationName, sourceTenantId, ids);
+      let attached = 0;
+      for (const tid of ids) {
+        const res = await tx.run(
+          `INSERT INTO ${joinTable} (id, tenant_id, ${sourceCol}, ${targetCol}) VALUES (?, ?, ?, ?) ON CONFLICT (tenant_id, ${sourceCol}, ${targetCol}) DO NOTHING`,
+          [uuidv7(), sourceTenantId, sourceId, tid],
+        );
+        attached += res.rowsAffected;
+      }
+      return { attached };
+    });
+  }
+
+  async detachRelation(
+    sourceId: string,
+    relationName: string,
+    targetIds: string | string[],
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<{ detached: number }> {
+    const { joinTable, sourceCol, targetCol } = this.resolveMany2ManyJoin(relationName);
+    const ids = [...new Set((Array.isArray(targetIds) ? targetIds : [targetIds]).filter(Boolean))];
+    if (ids.length === 0) return { detached: 0 };
+    return getDb().transaction(async (tx) => {
+      const sourceTenantId = await this.assertMany2ManySourceInTx(tx, sourceId, actor);
+      const res = await tx.run(
+        `DELETE FROM ${joinTable} WHERE tenant_id = ? AND ${sourceCol} = ? AND ${targetCol} IN (${ids.map(() => "?").join(", ")})`,
+        [sourceTenantId, sourceId, ...ids],
+      );
+      return { detached: res.rowsAffected };
+    });
+  }
+
+  async replaceRelation(
+    sourceId: string,
+    relationName: string,
+    targetIds: string[],
+    actor: ActorContext = SYSTEM_ACTOR,
+  ): Promise<{ attached: number; detached: number }> {
+    const { joinTable, sourceCol, targetCol } = this.resolveMany2ManyJoin(relationName);
+    const ids = [...new Set(targetIds.filter(Boolean))];
+    return getDb().transaction(async (tx) => {
+      const sourceTenantId = await this.assertMany2ManySourceInTx(tx, sourceId, actor);
+      await this.validateMany2ManyTargetsInTx(tx, relationName, sourceTenantId, ids);
+      const existing = await tx.all<{ target_id: string }>(
+        `SELECT ${targetCol} AS target_id FROM ${joinTable} WHERE tenant_id = ? AND ${sourceCol} = ?`,
+        [sourceTenantId, sourceId],
+      );
+      const existingSet = new Set(existing.map((r) => String(r.target_id)));
+      const nextSet = new Set(ids);
+      const toRemove = [...existingSet].filter((id) => !nextSet.has(id));
+      const toAdd = ids.filter((id) => !existingSet.has(id));
+
+      let detached = 0;
+      if (toRemove.length > 0) {
+        const delRes = await tx.run(
+          `DELETE FROM ${joinTable} WHERE tenant_id = ? AND ${sourceCol} = ? AND ${targetCol} IN (${toRemove.map(() => "?").join(", ")})`,
+          [sourceTenantId, sourceId, ...toRemove],
+        );
+        detached = delRes.rowsAffected;
+      }
+
+      let attached = 0;
+      for (const tid of toAdd) {
+        const insRes = await tx.run(
+          `INSERT INTO ${joinTable} (id, tenant_id, ${sourceCol}, ${targetCol}) VALUES (?, ?, ?, ?) ON CONFLICT (tenant_id, ${sourceCol}, ${targetCol}) DO NOTHING`,
+          [uuidv7(), sourceTenantId, sourceId, tid],
+        );
+        attached += insRes.rowsAffected;
+      }
+      return { attached, detached };
+    });
   }
 
   private async applyRetention(tenantId: string): Promise<void> {
@@ -801,13 +1786,22 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     }
   }
 
-  async create(
+  private async prepareCreateInTx(
+    tx: LibSqlExecutor,
     rawData: Record<string, unknown>,
-    actor: ActorContext = SYSTEM_ACTOR,
-  ): Promise<ModelRecord<TBusiness>> {
-    await ensureAuditTable();
+    actor: ActorContext,
+    guard?: WriteGuardOptions,
+  ): Promise<{ parsed: Record<string, unknown>; now: Date }> {
+    if (
+      actor.tenantId !== undefined &&
+      rawData.tenant_id !== undefined &&
+      normalizeTenantId(String(rawData.tenant_id)) !== normalizeTenantId(actor.tenantId)
+    ) {
+      throw new PolicyError("Cross-tenant create is forbidden", "TENANT_MISMATCH", 403);
+    }
+    this.assertNoDirectComputedWrite(rawData);
     const data = this.applyDefaults(rawData, actor);
-    const hooks = modelRegistry.get(this.name)?.hooks;
+    const { fullSchema, extensible, customFields, allowFreeformExtra, hooks } = this.descriptor();
     if (hooks?.beforeSave) {
       await hooks.beforeSave({
         model: this.name,
@@ -817,7 +1811,6 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         actor,
       });
     }
-    const { fullSchema, extensible, customFields } = this.descriptor();
     const now = new Date();
     const resolvedTenantId =
       actor.tenantId !== undefined
@@ -841,45 +1834,180 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       tenant_id: resolvedTenantId,
     };
     if (extensible) {
-      record._attrs = validateAttrsPayload(data._attrs, customFields);
+      record._attrs = validateAttrsPayload(data._attrs, customFields, { allowFreeformExtra });
     }
-    const parsed = fullSchema.parse(record) as Record<string, unknown>;
+    const baseParsed = fullSchema.parse(record) as Record<string, unknown>;
+    const parsed = this.computeStoredFields(baseParsed);
 
+    if (guard?.createRuleDomain && !matchesFilter(parsed, guard.createRuleDomain)) {
+      throw new PolicyError(`Create on '${this.name}' violates record rule`, "RULE_FORBIDDEN", 403);
+    }
+    await this.assertRelations(tx, parsed);
+    await this.runConstrains("CREATE", null, parsed, actor);
+    return { parsed, now };
+  }
+
+  private async createInTx(
+    tx: LibSqlExecutor,
+    rawData: Record<string, unknown>,
+    actor: ActorContext,
+    guard?: WriteGuardOptions,
+  ): Promise<{ parsed: Record<string, unknown>; decoded: ModelRecord<TBusiness>; now: Date }> {
+    const { parsed, now } = await this.prepareCreateInTx(tx, rawData, actor, guard);
     const cols = Object.keys(parsed);
     cols.forEach((column) => this.validateColumn(column));
     const placeholders = cols.map(() => "?").join(", ");
     const values = this.encodeRow(parsed);
 
-    await getDb().transaction(async (tx) => {
-      await this.assertRelations(tx, parsed);
-      await this.runConstrains("CREATE", null, parsed, actor);
-      await tx.run(
-        `INSERT INTO ${this.table} (${cols.join(", ")}) VALUES (${placeholders})`,
-        values,
-      );
-      await this.writeAudit(tx, parsed, "CREATE", null, actor);
-    });
-    await this.applyRetention(String(parsed.tenant_id));
+    await tx.run(`INSERT INTO ${this.table} (${cols.join(", ")}) VALUES (${placeholders})`, values);
+    await this.writeAudit(tx, parsed, "CREATE", null, actor);
+    await this.writeOutbox(tx, parsed, "CREATE", null, actor);
+    return {
+      parsed,
+      decoded: this.decodeRow<ModelRecord<TBusiness>>(parsed),
+      now,
+    };
+  }
 
-    const decoded = this.decodeRow<ModelRecord<TBusiness>>(parsed);
+  private async updateInTx(
+    tx: LibSqlExecutor,
+    currentRow: Record<string, unknown>,
+    rawData: Record<string, unknown>,
+    actor: ActorContext,
+    guard?: WriteGuardOptions,
+  ): Promise<{
+    parsed: Record<string, unknown>;
+    decoded: ModelRecord<TBusiness>;
+    before: Record<string, unknown>;
+    now: Date;
+  } | null> {
+    this.assertNoDirectComputedWrite(rawData);
+    const data = { ...rawData };
+    const { fullSchema, extensible, customFields, allowFreeformExtra, hooks } = this.descriptor();
+
+    const current = this.decodeRow<Record<string, unknown>>(currentRow);
+    const id = String(current.id);
+    if (this.softDelete && current.status === "deleted") {
+      return null;
+    }
+    if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
+      return null;
+    }
+    if (guard?.ruleDomain && !matchesFilter(current, guard.ruleDomain)) {
+      return null;
+    }
+    if (
+      rawData.tenant_id !== undefined &&
+      normalizeTenantId(String(rawData.tenant_id)) !== String(current.tenant_id)
+    ) {
+      throw new PolicyError("Changing tenant_id is forbidden", "TENANT_MISMATCH", 403);
+    }
+    if (data.version !== undefined && Number(data.version) !== Number(current.version)) {
+      throw new ConflictError(
+        `Version conflict on '${this.name}' ${id}: expected version ${String(current.version)}, got ${String(data.version)}.`,
+      );
+    }
+    if (hooks?.beforeSave) {
+      await hooks.beforeSave({
+        model: this.name,
+        action: "UPDATE",
+        before: current,
+        values: data,
+        actor,
+      });
+    }
+
+    const now = new Date();
+    const updated: Record<string, unknown> = {
+      ...current,
+      ...data,
+      id: current.id,
+      create_uid: current.create_uid,
+      create_date: current.create_date,
+      write_uid: actor.actorId,
+      write_date: now,
+      status: current.status,
+      deleted_uid: current.deleted_uid,
+      deleted_date: current.deleted_date,
+      version: Number(current.version) + 1,
+      source: actor.source,
+      source_ref: current.source_ref,
+      tenant_id: current.tenant_id,
+    };
+    if (extensible) {
+      const mergedAttrs = {
+        ...((current._attrs as Record<string, unknown> | undefined) ?? {}),
+        ...((data._attrs as Record<string, unknown> | undefined) ?? {}),
+      };
+      updated._attrs = validateAttrsPayload(mergedAttrs, customFields, { allowFreeformExtra });
+    }
+    const baseParsed = fullSchema.parse(updated) as Record<string, unknown>;
+    const parsed = this.computeStoredFields(baseParsed);
+    if (guard?.ruleDomain && !matchesFilter(parsed, guard.ruleDomain)) {
+      throw new PolicyError(`Update on '${this.name}' violates record rule`, "RULE_FORBIDDEN", 403);
+    }
+    await this.assertRelations(tx, parsed);
+    await this.runConstrains("UPDATE", current, parsed, actor);
+
+    const cols = Object.keys(parsed).filter((column) => column !== "id");
+    cols.forEach((column) => this.validateColumn(column));
+    const setClause = cols.map((column) => `${column} = ?`).join(", ");
+    const values = this.encodeRow(
+      Object.fromEntries(cols.map((column) => [column, parsed[column]])),
+    );
+
+    const result = await tx.run(
+      `UPDATE ${this.table} SET ${setClause} WHERE id = ? AND version = ?`,
+      [...values, id, current.version],
+    );
+    if (result.rowsAffected !== 1) {
+      throw new ConflictError(
+        `Version conflict on '${this.name}' ${id}: record changed while updating.`,
+      );
+    }
+
+    await this.writeAudit(tx, parsed, "UPDATE", current, actor);
+    await this.writeOutbox(tx, parsed, "UPDATE", current, actor);
+    return {
+      parsed,
+      decoded: this.decodeRow<ModelRecord<TBusiness>>(parsed),
+      before: current,
+      now,
+    };
+  }
+
+  async create(
+    rawData: Record<string, unknown>,
+    actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>> {
+    await ensureAuditTable();
+    const { hooks } = this.descriptor();
+    const committed = await getDb().transaction((tx) => this.createInTx(tx, rawData, actor, guard));
+    await this.applyRetention(String(committed.parsed.tenant_id));
+
+    const decoded = committed.decoded;
     this.applyComputedFields([decoded as unknown as Record<string, unknown>]);
-    if (hooks?.afterSave) {
-      await hooks.afterSave({
+    await this.runAfterCommitHook(
+      "afterSave",
+      hooks?.afterSave,
+      {
         model: this.name,
         action: "CREATE",
         before: null,
         values: decoded as unknown as Record<string, unknown>,
         actor,
-      });
-    }
+      },
+      String(committed.parsed.id),
+    );
     await modelRegistry.emitWrite({
       model: this.name,
-      entityId: String(parsed.id),
+      entityId: String(committed.parsed.id),
       action: "CREATE",
       record: decoded as Record<string, unknown>,
       before: null,
       actor,
-      timestamp: now.toISOString(),
+      timestamp: committed.now.toISOString(),
     });
     return decoded;
   }
@@ -888,136 +2016,70 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     id: string,
     rawData: Record<string, unknown>,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
     await ensureAuditTable();
-    const data = { ...rawData };
-    const hooks = modelRegistry.get(this.name)?.hooks;
-    const { fullSchema, extensible, customFields } = this.descriptor();
+    const { hooks } = this.descriptor();
 
-    let beforeSnapshot: Record<string, unknown> | null = null;
-    const decoded = await getDb().transaction(async (tx) => {
+    const committed = await getDb().transaction(async (tx) => {
       const currentRow = await tx.get<Record<string, unknown>>(
         `SELECT * FROM ${this.table} WHERE id = ?`,
         [id],
       );
       if (!currentRow) return null;
-
-      const current = this.decodeRow<Record<string, unknown>>(currentRow);
-      if (this.softDelete && current.status === "deleted") {
-        return null;
-      }
-      if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
-        return null;
-      }
-      if (data.version !== undefined && Number(data.version) !== Number(current.version)) {
-        throw new ConflictError(
-          `Version conflict on '${this.name}' ${id}: expected version ${String(current.version)}, got ${String(data.version)}.`,
-        );
-      }
-      beforeSnapshot = current;
-      if (hooks?.beforeSave) {
-        await hooks.beforeSave({
-          model: this.name,
-          action: "UPDATE",
-          before: current,
-          values: data,
-          actor,
-        });
-      }
-
-      const now = new Date();
-      const updated: Record<string, unknown> = {
-        ...current,
-        ...data,
-        id: current.id,
-        create_uid: current.create_uid,
-        create_date: current.create_date,
-        write_uid: actor.actorId,
-        write_date: now,
-        status: current.status,
-        deleted_uid: current.deleted_uid,
-        deleted_date: current.deleted_date,
-        version: Number(current.version) + 1,
-        source: actor.source,
-        source_ref: current.source_ref,
-        tenant_id: current.tenant_id,
-      };
-      if (extensible) {
-        const mergedAttrs = {
-          ...((current._attrs as Record<string, unknown> | undefined) ?? {}),
-          ...((data._attrs as Record<string, unknown> | undefined) ?? {}),
-        };
-        updated._attrs = validateAttrsPayload(mergedAttrs, customFields);
-      }
-      const parsed = fullSchema.parse(updated) as Record<string, unknown>;
-      await this.assertRelations(tx, parsed);
-      await this.runConstrains("UPDATE", current, parsed, actor);
-
-      const cols = Object.keys(parsed).filter((column) => column !== "id");
-      cols.forEach((column) => this.validateColumn(column));
-      const setClause = cols.map((column) => `${column} = ?`).join(", ");
-      const values = this.encodeRow(
-        Object.fromEntries(cols.map((column) => [column, parsed[column]])),
-      );
-
-      const result = await tx.run(
-        `UPDATE ${this.table} SET ${setClause} WHERE id = ? AND version = ?`,
-        [...values, id, current.version],
-      );
-      if (result.rowsAffected !== 1) {
-        throw new ConflictError(
-          `Version conflict on '${this.name}' ${id}: record changed while updating.`,
-        );
-      }
-
-      await this.writeAudit(tx, parsed, "UPDATE", current, actor);
-      return this.decodeRow<ModelRecord<TBusiness>>(parsed);
+      return this.updateInTx(tx, currentRow, rawData, actor, guard);
     });
 
-    if (decoded) {
-      this.applyComputedFields([decoded as unknown as Record<string, unknown>]);
-      if (hooks?.afterSave) {
-        await hooks.afterSave({
-          model: this.name,
-          action: "UPDATE",
-          before: beforeSnapshot,
-          values: decoded as unknown as Record<string, unknown>,
-          actor,
-        });
-      }
-      await modelRegistry.emitWrite({
+    if (!committed) return null;
+    const decoded = committed.decoded;
+    this.applyComputedFields([decoded as unknown as Record<string, unknown>]);
+    await this.runAfterCommitHook(
+      "afterSave",
+      hooks?.afterSave,
+      {
         model: this.name,
-        entityId: id,
         action: "UPDATE",
-        record: decoded as Record<string, unknown>,
-        before: beforeSnapshot,
+        before: committed.before,
+        values: decoded as unknown as Record<string, unknown>,
         actor,
-        timestamp: new Date().toISOString(),
-      });
-    }
+      },
+      id,
+    );
+    await modelRegistry.emitWrite({
+      model: this.name,
+      entityId: id,
+      action: "UPDATE",
+      record: decoded as Record<string, unknown>,
+      before: committed.before,
+      actor,
+      timestamp: committed.now.toISOString(),
+    });
     return decoded;
   }
 
   async archive(
     id: string,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
-    return this.setStatus(id, "archived", "ARCHIVE", actor);
+    return this.setStatus(id, "archived", "ARCHIVE", actor, { guard });
   }
 
   async restore(
     id: string,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
-    return this.setStatus(id, "active", "RESTORE", actor);
+    return this.setStatus(id, "active", "RESTORE", actor, { guard });
   }
 
   /** Soft delete — never issues a physical DELETE. */
   async delete(
     id: string,
     actor: ActorContext = SYSTEM_ACTOR,
+    guard?: WriteGuardOptions,
   ): Promise<ModelRecord<TBusiness> | null> {
-    return this.setStatus(id, "deleted", "DELETE", actor, { setDeletedFields: true });
+    return this.setStatus(id, "deleted", "DELETE", actor, { setDeletedFields: true, guard });
   }
 
   async history(id: string, opts?: { limit?: number; offset?: number }): Promise<AuditEntry[]> {
@@ -1046,10 +2108,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     status: RecordStatus,
     action: AuditAction,
     actor: ActorContext,
-    opts: { setDeletedFields?: boolean } = {},
+    opts: { setDeletedFields?: boolean; guard?: WriteGuardOptions } = {},
   ): Promise<ModelRecord<TBusiness> | null> {
     await ensureAuditTable();
-    const { fullSchema } = this.descriptor();
+    const { fullSchema, hooks } = this.descriptor();
 
     let beforeSnapshot: Record<string, unknown> | null = null;
     const decoded = await getDb().transaction(async (tx) => {
@@ -1061,6 +2123,9 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 
       const current = this.decodeRow<Record<string, unknown>>(currentRow);
       if (actor.tenantId !== undefined && current.tenant_id !== normalizeTenantId(actor.tenantId)) {
+        return null;
+      }
+      if (opts.guard?.ruleDomain && !matchesFilter(current, opts.guard.ruleDomain)) {
         return null;
       }
       beforeSnapshot = current;
@@ -1075,6 +2140,25 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
           ? { deleted_uid: actor.actorId, deleted_date: now }
           : { deleted_uid: null, deleted_date: null }),
       };
+
+      const beforeHook =
+        action === "DELETE"
+          ? hooks?.beforeDelete
+          : action === "ARCHIVE"
+            ? hooks?.beforeArchive
+            : action === "RESTORE"
+              ? hooks?.beforeRestore
+              : undefined;
+      if (beforeHook) {
+        await beforeHook({
+          model: this.name,
+          action,
+          before: current,
+          values: updated,
+          actor,
+        });
+      }
+
       const parsed = fullSchema.parse(updated) as Record<string, unknown>;
       if (action === "DELETE") await this.assertNotReferenced(tx, current);
       await this.runConstrains(action, current, parsed, actor);
@@ -1096,10 +2180,38 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       }
 
       await this.writeAudit(tx, parsed, action, current, actor);
+      await this.writeOutbox(tx, parsed, action, current, actor);
       return this.decodeRow<ModelRecord<TBusiness>>(parsed);
     });
 
     if (decoded) {
+      this.applyComputedFields([decoded as unknown as Record<string, unknown>]);
+      const afterHookName =
+        action === "DELETE"
+          ? "afterDelete"
+          : action === "ARCHIVE"
+            ? "afterArchive"
+            : "afterRestore";
+      const afterHookFn =
+        action === "DELETE"
+          ? hooks?.afterDelete
+          : action === "ARCHIVE"
+            ? hooks?.afterArchive
+            : action === "RESTORE"
+              ? hooks?.afterRestore
+              : undefined;
+      await this.runAfterCommitHook(
+        afterHookName,
+        afterHookFn,
+        {
+          model: this.name,
+          action,
+          before: beforeSnapshot,
+          values: decoded as unknown as Record<string, unknown>,
+          actor,
+        },
+        id,
+      );
       await modelRegistry.emitWrite({
         model: this.name,
         entityId: id,
@@ -1111,6 +2223,51 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       });
     }
     return decoded;
+  }
+
+  private async writeOutbox(
+    tx: LibSqlExecutor,
+    record: Record<string, unknown>,
+    action: AuditAction,
+    before: Record<string, unknown> | null,
+    actor: ActorContext,
+  ): Promise<void> {
+    const fieldPolicies = this.descriptor().fieldPolicies ?? {};
+    const sensitiveFields = new Set(
+      Object.entries(fieldPolicies)
+        .filter(([, policy]) => policy.sensitive === true)
+        .map(([field]) => field),
+    );
+    const nowIso = new Date().toISOString();
+    const payloadJson = JSON.stringify({
+      entityVersion: Number(record.version ?? 1),
+      record: sanitizeOutboxValue(record, sensitiveFields),
+      before: before ? sanitizeOutboxValue(before, sensitiveFields) : null,
+    });
+    await tx.run(
+      `INSERT INTO _orm_outbox_events (
+        id, model, entity_id, action, tenant_id, actor_id, request_id,
+        event_version, payload_json, status, attempts, next_attempt_at,
+        last_error, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        uuidv7(),
+        this.name,
+        String(record.id),
+        action,
+        String(record.tenant_id ?? DEFAULT_TENANT_ID),
+        actor.actorId,
+        actor.requestId ?? null,
+        1,
+        payloadJson,
+        "pending",
+        0,
+        nowIso,
+        null,
+        nowIso,
+        nowIso,
+      ],
+    );
   }
 
   private async writeAudit(
@@ -1137,6 +2294,251 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         entry.request_id,
       ],
     );
+  }
+}
+
+function isActorContextArg(value: unknown): value is ActorContext {
+  return typeof value === "object" && value !== null && "actorId" in value && "source" in value;
+}
+
+/** Tenant- and actor-bound wrapper around `BaseRepository`. */
+export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
+  readonly name: string;
+  readonly table: string;
+  readonly softDelete: boolean;
+  readonly resolvedTenantId: string | undefined;
+  private readonly effectiveActor: ActorContext;
+
+  constructor(
+    private readonly repo: BaseRepository<TBusiness>,
+    public readonly actor: ActorContext,
+  ) {
+    this.name = repo.name;
+    this.table = repo.table;
+    this.softDelete = repo.softDelete;
+
+    if (isSystemActor(actor)) {
+      this.resolvedTenantId =
+        actor.tenantId !== undefined ? requireActorTenantId(actor) : undefined;
+    } else {
+      this.resolvedTenantId = requireActorTenantId(actor);
+    }
+    this.effectiveActor =
+      this.resolvedTenantId !== undefined ? { ...actor, tenantId: this.resolvedTenantId } : actor;
+  }
+
+  get fullSchema(): ZodObjectLike {
+    return this.repo.fullSchema;
+  }
+
+  forActor(actor: ActorContext): ScopedRepository<TBusiness> {
+    if (this.resolvedTenantId !== undefined) {
+      const nextTenant = requireActorTenantId(actor);
+      if (nextTenant !== this.resolvedTenantId) {
+        throw new PolicyError("Cross-tenant access is forbidden", "TENANT_MISMATCH", 403);
+      }
+    }
+    return this.repo.forActor(actor);
+  }
+
+  private resolveQueryTenantId(requestedTenantId?: string): string | undefined {
+    if (this.resolvedTenantId !== undefined) {
+      if (
+        requestedTenantId !== undefined &&
+        normalizeTenantId(requestedTenantId) !== this.resolvedTenantId
+      ) {
+        throw new PolicyError("Cross-tenant access is forbidden", "TENANT_MISMATCH", 403);
+      }
+      return this.resolvedTenantId;
+    }
+    return requestedTenantId !== undefined ? normalizeTenantId(requestedTenantId) : undefined;
+  }
+
+  private resolveWriteArgs(
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): { actor: ActorContext; guard?: WriteGuardOptions } {
+    if (isActorContextArg(guardOrActor)) {
+      if (
+        this.resolvedTenantId !== undefined &&
+        guardOrActor.tenantId !== undefined &&
+        normalizeTenantId(guardOrActor.tenantId) !== this.resolvedTenantId
+      ) {
+        throw new PolicyError("Cross-tenant access is forbidden", "TENANT_MISMATCH", 403);
+      }
+      return { actor: this.effectiveActor, guard: maybeGuard };
+    }
+    return { actor: this.effectiveActor, guard: guardOrActor };
+  }
+
+  async readGroup(opts: {
+    filters?: Record<string, unknown>;
+    groupBy: string[];
+    aggregates?: Record<string, { fn: "count" | "sum" | "avg" | "min" | "max"; field?: string }>;
+    tenantId?: string;
+    includeDeleted?: boolean;
+    q?: string;
+    orderBy?: string;
+    limit?: number;
+  }): Promise<Array<Record<string, unknown>>> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.readGroup({
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async find(
+    filters: Record<string, unknown> = {},
+    opts: FindOptions = {},
+  ): Promise<ModelRecord<TBusiness>[]> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.find(filters, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async findOne(
+    id: string,
+    opts: { includeDeleted?: boolean; tenantId?: string; with?: string[]; fields?: string[] } = {},
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.findOne(id, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async attachRelation(
+    sourceId: string,
+    relationName: string,
+    targetIds: string | string[],
+  ): Promise<{ attached: number }> {
+    return this.repo.attachRelation(sourceId, relationName, targetIds, this.effectiveActor);
+  }
+
+  async detachRelation(
+    sourceId: string,
+    relationName: string,
+    targetIds: string | string[],
+  ): Promise<{ detached: number }> {
+    return this.repo.detachRelation(sourceId, relationName, targetIds, this.effectiveActor);
+  }
+
+  async replaceRelation(
+    sourceId: string,
+    relationName: string,
+    targetIds: string[],
+  ): Promise<{ attached: number; detached: number }> {
+    return this.repo.replaceRelation(sourceId, relationName, targetIds, this.effectiveActor);
+  }
+
+  async list(
+    filters: Record<string, unknown> = {},
+    opts: FindOptions = {},
+  ): Promise<ModelRecord<TBusiness>[]> {
+    return this.find(filters, opts);
+  }
+
+  async count(
+    filters: Record<string, unknown> = {},
+    opts: {
+      includeDeleted?: boolean;
+      tenantId?: string;
+      q?: string;
+      allowedSearchFields?: string[];
+    } = {},
+  ): Promise<number> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.count(filters, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async upsert(
+    whereFilters: Record<string, unknown>,
+    data: Record<string, unknown>,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.upsert(whereFilters, data, actor, guard);
+  }
+
+  async createMany(
+    records: Record<string, unknown>[],
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>[]> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.createMany(records, actor, guard);
+  }
+
+  async create(
+    rawData: Record<string, unknown>,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness>> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    if (
+      this.resolvedTenantId !== undefined &&
+      rawData.tenant_id !== undefined &&
+      normalizeTenantId(String(rawData.tenant_id)) !== this.resolvedTenantId
+    ) {
+      throw new PolicyError("Cross-tenant create is forbidden", "TENANT_MISMATCH", 403);
+    }
+    return this.repo.create(rawData, actor, guard);
+  }
+
+  async update(
+    id: string,
+    rawData: Record<string, unknown>,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.update(id, rawData, actor, guard);
+  }
+
+  async archive(
+    id: string,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.archive(id, actor, guard);
+  }
+
+  async restore(
+    id: string,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.restore(id, actor, guard);
+  }
+
+  async delete(
+    id: string,
+    guardOrActor?: WriteGuardOptions | ActorContext,
+    maybeGuard?: WriteGuardOptions,
+  ): Promise<ModelRecord<TBusiness> | null> {
+    const { actor, guard } = this.resolveWriteArgs(guardOrActor, maybeGuard);
+    return this.repo.delete(id, actor, guard);
+  }
+
+  async history(
+    id: string,
+    opts?: { limit?: number; offset?: number; tenantId?: string },
+  ): Promise<AuditEntry[]> {
+    const tenantId = this.resolveQueryTenantId(opts?.tenantId);
+    if (tenantId !== undefined) {
+      const existing = await this.repo.findOne(id, { includeDeleted: true, tenantId });
+      if (!existing) return [];
+    }
+    return this.repo.history(id, opts);
   }
 }
 
@@ -1194,6 +2596,8 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     actions,
     computed,
     hooks,
+    fieldPolicies,
+    allowFreeformExtra,
   } = options;
 
   assertIdentifier(table, "table");
@@ -1220,6 +2624,8 @@ export function defineModel<TBusiness extends ZodObjectLike>(
     actions,
     computed,
     hooks,
+    fieldPolicies,
+    allowFreeformExtra,
   });
 
   const repo = new BaseRepository<TBusiness>(

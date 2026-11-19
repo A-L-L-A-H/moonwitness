@@ -142,7 +142,204 @@
     "title": "A-L-L-A-H.COM — Sanctuary of Light",
     "fourScriptures": "Four Scriptures Studio",
     "canonCodex": "The Canon Codex",
-    "mtimeObservatory": "Explainable M-Time Observatory"
+    "mtimeObservatory": "Explainable M-Time Observatory",
+    "navigation": {
+      "gate": "Imperium Gate",
+      "worlds": "Nine Worlds",
+      "codex": "Canon Codex",
+      "scriptures": "Four Scriptures",
+      "mtime": "M-Time Observatory",
+      "search": "Universal Search",
+      "switchLanguage": "Switch Language",
+      "quietMode": "Quiet Mode"
+    },
+    "subpages": {
+      "backToGate": "Return to Imperium Gate",
+      "gateBreadcrumb": "A-L-L-A-H.COM",
+      "openWorkspace": "Open Workspace",
+      "referenceCountLabel": "{count} verified references"
+    },
+    "worlds": {
+      "heading": "Nine Worlds Atlas",
+      "subheading": "Autonomous creative, research, and infrastructure realms orbiting one monocentric sanctuary.",
+      "activeWorldLabel": "Active Realm",
+      "domainsCount": "{count} domains active"
+    },
+    "codex": {
+      "heading": "The Canon Codex",
+      "subheading": "Four foundational doors uniting epistemic rigor, universe atlas, governance, and sovereign assurance.",
+      "entryDoorsLabel": "Canon Entry Doors",
+      "openChamber": "Enter Chamber"
+    },
+    "scriptures": {
+      "heading": "Four Scriptures Studio",
+      "subheading": "Parallel neutral study across Taurat, Zabur, Injil, and Al-Qur'an with verifiable provenance.",
+      "corporaLabel": "Revealed Corpora",
+      "compareMode": "Parallel Comparison",
+      "citationLabel": "Source Citation"
+    },
+    "mtime": {
+      "heading": "Explainable M-Time Observatory",
+      "subheading": "Deterministic lunar visibility criteria, Hijri calendar telemetry, prayer times, and Qibla azimuth.",
+      "criteriaLabel": "Visibility Criteria",
+      "azimuthLabel": "Qibla Azimuth",
+      "hijriDateLabel": "Hijri Ephemeris"
+    },
+    "a11y": {
+      "skipToContent": "Skip to main content",
+      "primaryNav": "Sanctuary primary navigation",
+      "toggleLocaleLabel": "Cycle language ({locale})",
+      "statusRegion": "Sanctuary status announcements"
+    }
+  },
+  "chronicle": {
+    "navigation": {
+      "home": "HOME",
+      "signals": "SIGNALS",
+      "storytelling": "STORIES",
+      "shadow": "SHADOW",
+      "crew": "CREW",
+      "archive": "ARCHIVE",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "searchButton": "Search signals",
+      "dock": "Archive Dock",
+      "missionControl": "Mission Control",
+      "sanctuary": "A-L-L-A-H.COM"
+    },
+    "search": {
+      "dialogTitle": "Search the archive",
+      "label": "SEARCH THE SIGNALS",
+      "close": "Close search",
+      "placeholder": "stories, signals, people, places…",
+      "submit": "GO",
+      "helper": "Searches the Dock timeline chronicle."
+    },
+    "landing": {
+      "storyStrip": {
+        "ariaLabel": "Explore the MoonWitness story world",
+        "peopleLabel": "PEOPLE",
+        "peopleTitle": "THE BATTERIES",
+        "placesLabel": "PLACES",
+        "placesTitle": "NEON CITIES",
+        "storiesLabel": "STORIES",
+        "storiesTitle": "PENDETA ONLINE",
+        "worldsLabel": "WORLDS",
+        "worldsTitle": "ZILL"
+      },
+      "signals": {
+        "badge": "FREQUENCY LOGS // PIRATE FEED",
+        "titlePrefix": "THE",
+        "titleAccent": "SIGNALS",
+        "sticker": "FICTIONAL STORIES",
+        "storyCardLabel": "FICTIONAL SIGNAL",
+        "storyCardTitle": "A SIGNAL FROM BELOW",
+        "storyCardDesc": "A story from the MoonWitness storyworld. Strange sounds and a deeper current carried across the night.",
+        "storyCardCta": "READ SIGNAL STORY",
+        "collabCardLabel": "STORYTELLING",
+        "collabCardTitle": "SAME MOON, DIFFERENT ROOFTOPS",
+        "collabCardDesc": "Field notes from intersecting lives across cities sharing one sky.",
+        "collabCardCta": "EXPLORE STORIES",
+        "portalCardLabel": "ARCHIVE DOCK",
+        "portalCardTitle": "SIGNAL TRANSMISSIONS",
+        "portalCardDesc": "Browse indexed timeline dispatches and field recordings from the dock.",
+        "portalCardCta": "OPEN ARCHIVE"
+      },
+      "transmission": {
+        "number": "001",
+        "eyebrow": "TRANSMISSION / STORY FILE",
+        "titlePrefix": "THE VOICES IN THE",
+        "titleAccent": "FOG",
+        "badge": "FICTION",
+        "tapeLabel": "STORY ART",
+        "figcaption": "TRANSMISSION ARCHIVE // RECOVERED TAPE 001 · FICTIONAL STORY FILE",
+        "narrativeTag": "FICTIONAL NARRATIVE · DEMO STORY",
+        "body": "Three observers in the old textile district each hear the same frequency rise, fall, and answer back.",
+        "quote": "We kept the tape rolling until the fog cleared over the harbor.",
+        "readMore": "OPEN FULL DOSSIER"
+      },
+      "storytelling": {
+        "eyebrow": "CHRONICLE CHAPTERS",
+        "title": "STORIES IN ORBIT",
+        "subtitle": "Four narrative coordinates from the MoonWitness storyworld.",
+        "peopleTag": "PEOPLE",
+        "peopleTitle": "THE BATTERIES",
+        "peopleExcerpt": "A garage band in Jakarta channels frequencies older than electricity.",
+        "placesTag": "PLACES",
+        "placesTitle": "NEON CITIES",
+        "placesExcerpt": "Mapping the underground circuit of cities that never sleep at 3 AM.",
+        "storiesTag": "STORIES",
+        "storiesTitle": "PENDETA ONLINE",
+        "storiesExcerpt": "A spiritual guide receives signals through prayer and radio static.",
+        "worldsTag": "WORLDS",
+        "worldsTitle": "ZILL",
+        "worldsExcerpt": "A fiction project documented like an eyewitness field report."
+      },
+      "shadow": {
+        "restrictedTag": "RESTRICTED FREQUENCY // LEVEL 4",
+        "title": "THE SHADOW LAYER",
+        "description": "Encrypted dispatches, internal field logs, and private publishing tools for authorized crew.",
+        "cta": "ENTER THE SHADOW",
+        "liveSignalLabel": "Latest recovered dispatch",
+        "unavailable": "Shadow telemetry feed is currently offline."
+      },
+      "crew": {
+        "eyebrow": "SUBVERSIVE NETWORK // GLOBAL FREQUENCIES",
+        "titlePrefix": "A GLOBAL MAP OF",
+        "titleAccent": "WITNESSES.",
+        "subtitle": "Same moon, different story coordinates. Select a profile to inspect their dispatch.",
+        "collageLabel": "DEMO COLLAGE",
+        "sticker": "DEMO CHARACTERS. SAME STORY SKY.",
+        "cta": "EXPLORE THE CREW"
+      },
+      "archive": {
+        "eyebrow": "CHRONICLE FEED",
+        "title": "SIGNAL ARCHIVE",
+        "subtitle": "Chronological dispatches preserved in the public Dock.",
+        "loading": "Loading archive…",
+        "unavailable": "Archive unavailable.",
+        "retry": "Retry archive",
+        "retrying": "Retrying archive…",
+        "empty": "No timeline events available.",
+        "openDock": "OPEN ARCHIVE DOCK",
+        "previous": "Previous archive items",
+        "next": "Next archive items"
+      },
+      "about": {
+        "title": "JOIN THE CREW",
+        "subtitle": "More stories. More places. More perspectives. A brighter world.",
+        "joinCta": "BECOME A MOONWITNESS",
+        "missionControlCta": "MISSION CONTROL"
+      },
+      "footer": {
+        "tagline": "// Create · Curate · Publish",
+        "sanctuary": "A-L-L-A-H",
+        "archive": "Archive",
+        "shadow": "The Shadow",
+        "missionControl": "Mission Control",
+        "backToTop": "Back to top ↑"
+      }
+    }
+  },
+  "operations": {
+    "commandPalette": {
+      "title": "Sovereign Command Palette",
+      "placeholder": "Type a command, module, skin, or DNA world…",
+      "empty": "No matching commands.",
+      "modulesGroup": "Modules & Workspaces",
+      "modelsGroup": "Live ORM Models",
+      "skinsGroup": "Visual Skins",
+      "worldsGroup": "DNA Worlds",
+      "shortcutHint": "Press Ctrl+K or Cmd+K to toggle"
+    },
+    "workspace": {
+      "planeLabel": "ARSY Operations Plane",
+      "liveModelsCount": "{count} live models registered",
+      "activeModuleLabel": "Active Module",
+      "healthStatus": "Control Plane Health",
+      "telemetryRefresh": "Refresh Telemetry",
+      "openConsole": "Open Operations Console"
+    }
   },
   "common": {
     "loading": "Loading…",

@@ -19,6 +19,7 @@
     "api:build": "pnpm --filter @moonwitness/api build",
     "api:start": "pnpm --filter @moonwitness/api start",
     "api:test": "pnpm --filter @moonwitness/api test",
+    "test:conformance:pg": "node -e \"const cp = require('node:child_process'); const url = process.env.TEST_POSTGRES_URL || process.env.POSTGRES_TEST_URL || ''; const env = { ...process.env, ...(url ? { TEST_POSTGRES_URL: url, POSTGRES_TEST_URL: url } : {}) }; const run = (args) => { const r = cp.spawnSync('pnpm', args, { stdio: 'inherit', env, shell: process.platform === 'win32' }); if (r.status !== 0) process.exit(r.status ?? 1); }; run(['--filter', '@moonwitness/orm', 'exec', 'vitest', 'run', 'src/__tests__/postgres.live.test.ts']); run(['--filter', '@moonwitness/api', 'exec', 'vitest', 'run', 'src/pg-conformance.test.ts']);\"",
     "web:dev": "pnpm --filter @moonwitness/web dev",
     "web:build": "pnpm --filter @moonwitness/web build",
     "web:start": "pnpm --filter @moonwitness/web start",

@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { cookies, headers } from "next/headers";
 import localFont from "next/font/local";
 import { SkipLink } from "@moonwitness/ui";
+import themeConfig from "@/configs/themeConfig";
+import { resolveRequestLocale } from "@/utils/i18n";
 import "./globals.css";
 
 // Saksi — proprietary MoonWitness type family (see packages/assets/fonts).
@@ -80,10 +83,39 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  let pathname: string | null = null;
+  let acceptLanguage: string | null = null;
+  let cookieLocale: string | null = null;
+
+  try {
+    const headerStore = await headers();
+    pathname =
+      headerStore.get("x-mw-pathname") ??
+      headerStore.get("next-url") ??
+      headerStore.get("x-invoke-path");
+    acceptLanguage = headerStore.get("accept-language");
+  } catch {
+    // Fallback cleanly outside request contexts
+  }
+
+  try {
+    const cookieStore = await cookies();
+    cookieLocale = cookieStore.get(themeConfig.localeCookieName)?.value ?? null;
+  } catch {
+    // Fallback cleanly outside request contexts
+  }
+
+  const { lang, dir } = resolveRequestLocale({
+    pathname,
+    cookieLocale,
+    acceptLanguage,
+  });
+
   return (
     <html
-      lang="en"
+      lang={lang}
+      dir={dir}
       className={`${brush.variable} ${hand.variable} ${mono.variable} ${cinzel.variable}`}
     >
       <body className="min-h-screen antialiased">

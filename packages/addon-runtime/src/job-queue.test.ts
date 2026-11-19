@@ -2,15 +2,20 @@ import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { closeDb, createActorContext, initDb, modelRegistry } from "@moonwitness/orm";
+import { closeDb, createActorContext, getDb, initDb, modelRegistry } from "@moonwitness/orm";
 import {
   claimNextJob,
   completeJob,
+  dispatchOutboxBatch,
   enqueueJob,
+  enqueueOutboxEvent,
   ensureJobQueueSchema,
+  ensureOutboxSchema,
   failJob,
   opsJobModel,
+  OutboxDispatcher,
   processNextJob,
+  recoverExpiredOutboxLeases,
 } from "./job-queue.js";
 
 describe("durable ORM job queue (ops.job)", () => {
@@ -141,5 +146,138 @@ describe("durable ORM job queue (ops.job)", () => {
     expect(recovered?.locked_by).toBe("healthy-worker");
     expect(recovered?.attempts).toBe(2);
     expect(modelRegistry.get("ops.job")).toBeDefined();
+  });
+
+  it("dispatches transactional outbox events with per-subscriber isolation, backoff, dead-lettering, and lease recovery (#502)", async () => {
+    await ensureOutboxSchema();
+    const t0 = new Date("2026-11-18T12:00:00.000Z");
+
+    const dispatcher = new OutboxDispatcher({
+      workerId: "outbox-w1",
+      maxAttempts: 3,
+      baseBackoffMs: 1_000,
+      leaseTtlMs: 30_000,
+    });
+
+    const auditCalls: string[] = [];
+    const webhookCalls: string[] = [];
+    let failWebhook = true;
+
+    dispatcher.subscribe({
+      name: "audit",
+      pattern: "*",
+      handler: ({ event }) => {
+        auditCalls.push(`${event.id}:${event.action}`);
+      },
+    });
+    dispatcher.subscribe({
+      name: "webhook",
+      pattern: "crm.*",
+      handler: ({ event }) => {
+        webhookCalls.push(`${event.id}:${event.action}`);
+        if (failWebhook) {
+          throw new Error("downstream 503");
+        }
+      },
+    });
+
+    const ev = await enqueueOutboxEvent({
+      model: "crm.lead",
+      entityId: "lead-1",
+      action: "CREATE",
+      tenantId: "tenant-a",
+      actorId: "u-1",
+      requestId: "req-100",
+      payload: { name: "Acme" },
+      nextAttemptAt: t0,
+    });
+
+    // Tick 1: audit succeeds, webhook fails -> audit stays delivered, webhook enters backoff
+    const b1 = await dispatcher.dispatchBatch({ now: t0 });
+    expect(b1.delivered).toBe(1);
+    expect(b1.retried).toBe(1);
+    expect(auditCalls).toHaveLength(1);
+    expect(webhookCalls).toHaveLength(1);
+
+    const midEvent = await dispatcher.getEvent(ev.id);
+    expect(midEvent?.status).toBe("pending");
+    expect(midEvent?.last_error).toContain("downstream 503");
+
+    // Before backoff expires (t0 + 500ms): neither subscriber runs
+    const bEarly = await dispatcher.dispatchBatch({ now: new Date(t0.getTime() + 500) });
+    expect(bEarly.processed).toBe(0);
+
+    // Tick 2 at t0 + 1500ms: webhook succeeds; audit MUST NOT be re-invoked!
+    failWebhook = false;
+    const b2 = await dispatcher.dispatchBatch({ now: new Date(t0.getTime() + 1_500) });
+    expect(b2.delivered).toBe(1);
+    expect(auditCalls).toHaveLength(1);
+    expect(webhookCalls).toHaveLength(2);
+
+    const doneEvent = await dispatcher.getEvent(ev.id);
+    expect(doneEvent?.status).toBe("delivered");
+    expect(doneEvent?.last_error).toBeNull();
+
+    // Dead-lettering after maxAttempts=2
+    const failEvent = await enqueueOutboxEvent({
+      model: "crm.lead",
+      entityId: "lead-2",
+      action: "UPDATE",
+      payload: { stage: "won" },
+      nextAttemptAt: t0,
+    });
+    const deadDispatcher = new OutboxDispatcher({
+      workerId: "dead-w",
+      maxAttempts: 2,
+      baseBackoffMs: 1_000,
+    });
+    deadDispatcher.subscribe({
+      name: "always-fail",
+      pattern: "crm.*",
+      handler: () => {
+        throw new Error("permanent error");
+      },
+    });
+    const d1 = await deadDispatcher.dispatchBatch({ now: t0 });
+    expect(d1.retried).toBe(1);
+    const d2 = await deadDispatcher.dispatchBatch({ now: new Date(t0.getTime() + 2_000) });
+    expect(d2.deadLettered).toBe(1);
+    expect((await deadDispatcher.getEvent(failEvent.id))?.status).toBe("dead_letter");
+
+    // Crash/restart lease recovery test + concurrent claim isolation
+    const crashEvent = await enqueueOutboxEvent({
+      model: "ops.ticket",
+      entityId: "tk-1",
+      action: "CREATE",
+      payload: { title: "Alert" },
+      nextAttemptAt: t0,
+    });
+    const staleCreated = new Date(t0.getTime() - 120_000).toISOString();
+    const staleExpires = new Date(t0.getTime() - 60_000).toISOString();
+    await getDb().run(
+      `INSERT INTO _orm_outbox_deliveries (
+        event_id, subscriber, status, attempts, next_attempt_at,
+        lease_owner, lease_expires_at, last_error, delivered_at, created_at, updated_at
+      ) VALUES (?, ?, 'processing', 1, ?, 'crashed-worker', ?, NULL, NULL, ?, ?)`,
+      [crashEvent.id, "ops-sub", staleCreated, staleExpires, staleCreated, staleCreated],
+    );
+
+    const recovered = await recoverExpiredOutboxLeases({ now: t0, leaseTtlMs: 30_000 });
+    expect(recovered.recoveredDeliveries).toBe(1);
+
+    const deliveredBy: string[] = [];
+    const sub = {
+      name: "ops-sub",
+      pattern: "ops.*",
+      handler: async ({ event }: { event: { id: string } }) => {
+        deliveredBy.push(event.id);
+      },
+    };
+    const [w1, w2] = await Promise.all([
+      dispatchOutboxBatch([sub], { workerId: "w-1", now: t0 }),
+      dispatchOutboxBatch([sub], { workerId: "w-2", now: t0 }),
+    ]);
+    expect(w1.delivered + w2.delivered).toBe(1);
+    expect(deliveredBy).toEqual([crashEvent.id]);
   });
 });

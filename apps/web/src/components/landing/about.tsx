@@ -8,7 +8,7 @@ import { ArrowRight, Crown } from "@moonwitness/ui/icons";
 import { Grain, Button } from "@moonwitness/ui";
 import { artSrc } from "@/lib/art";
 import { useScrollReveal } from "@/lib/motion/use-scroll-reveal";
-import { useSanctuaryLocale } from "@/lib/sanctuary-locale";
+import { useTranslation } from "@/hocs/TranslationWrapper";
 import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 
 const EASE = "var(--ease-ink-out)";
@@ -30,13 +30,21 @@ export function About() {
   const [ref, revealed] = useScrollReveal(0.2);
   const pathname = usePathname() ?? "";
   const pathLocale = getLocaleFromPath(pathname);
-  const { locale } = useSanctuaryLocale();
+  const { locale, dictionary } = useTranslation();
+  const about = dictionary.chronicle.landing.about;
   const toHref = (slug: string) => (pathLocale ? getLocalizedUrl(slug, pathLocale) : slug);
+  const stickerLine =
+    locale === "id"
+      ? "KISAH TERUS MENGORBIT."
+      : locale === "ar"
+        ? "القصص تواصل الدوران."
+        : "STORIES KEEP ORBITING.";
 
   return (
     <section
       ref={ref}
       id="about"
+      aria-labelledby="about-heading"
       className="relative scroll-mt-20 overflow-hidden border-t-2 border-[var(--border)]"
     >
       <div
@@ -61,40 +69,26 @@ export function About() {
           className="motion-reduce:!transition-none"
           style={layerStyle(revealed, 0.55, 0.25, "translateY(28px)")}
         >
-          <Crown className="mx-auto mb-4 h-10 w-14 text-[var(--yellow)]" />
-          <h2 className="font-brush text-5xl leading-tight text-[var(--pink)] drop-shadow-[3px_3px_0_rgba(0,0,0,0.9)] sm:text-7xl">
-            {locale === "id"
-              ? "GABUNG BERSAMA KRU"
-              : locale === "ar"
-                ? "انضمّ إلى الطاقم"
-                : "JOIN THE CREW"}
+          <Crown aria-hidden="true" className="mx-auto mb-4 h-10 w-14 text-[var(--yellow)]" />
+          <h2
+            id="about-heading"
+            className="font-brush text-5xl leading-tight text-[var(--pink)] drop-shadow-[3px_3px_0_rgba(0,0,0,0.9)] sm:text-7xl"
+          >
+            {about.title}
           </h2>
           <p className="mx-auto mt-4 max-w-xl font-hand text-2xl text-[var(--foreground)]">
-            {locale === "id"
-              ? "Lebih banyak kisah. Lebih banyak ruang. Perspektif lebih luas. Dunia yang lebih terang."
-              : locale === "ar"
-                ? "مزيد من الحكايات. مزيد من الآفاق. عالمٌ أكثر إشراقاً."
-                : "More stories. More places. More perspectives. A brighter world."}
+            {about.subtitle}
           </p>
         </div>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
           <Link href={toHref("/shadow")}>
             <Button size="lg" className="px-8 py-4 text-xl">
-              {locale === "id"
-                ? "JADI MOONWITNESS"
-                : locale === "ar"
-                  ? "كن شاهد القمر"
-                  : "BECOME A MOONWITNESS"}{" "}
-              <ArrowRight className="h-5 w-5" />
+              {about.joinCta} <ArrowRight aria-hidden="true" className="h-5 w-5" />
             </Button>
           </Link>
           <Link href={toHref("/mission-control")}>
             <Button variant="outline" size="lg" className="px-8 py-4 text-xl">
-              {locale === "id"
-                ? "KENDALI MISI"
-                : locale === "ar"
-                  ? "مركز القيادة"
-                  : "MISSION CONTROL"}
+              {about.missionControlCta}
             </Button>
           </Link>
         </div>
@@ -105,11 +99,7 @@ export function About() {
           style={layerStyle(revealed, 0.45, 0.5, "rotate(-8deg) scale(0.8)")}
         >
           <div className="sticker sticker-yellow mx-auto inline-block rotate-2 px-4 py-2 font-hand text-lg font-bold">
-            {locale === "id"
-              ? "KISAH TERUS MENGORBIT."
-              : locale === "ar"
-                ? "القصص تواصل الدوران."
-                : "STORIES KEEP ORBITING."}
+            {stickerLine}
           </div>
         </div>
       </div>

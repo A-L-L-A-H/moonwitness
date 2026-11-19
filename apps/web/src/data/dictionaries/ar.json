@@ -142,7 +142,204 @@
     "title": "A-L-L-A-H.COM — محراب النور",
     "fourScriptures": "استوديو الكتب الأربعة",
     "canonCodex": "مدونة الكانون",
-    "mtimeObservatory": "مرصد المواقيت المفسر"
+    "mtimeObservatory": "مرصد المواقيت المفسر",
+    "navigation": {
+      "gate": "بوابة الإمبراطورية",
+      "worlds": "العوالم التسعة",
+      "codex": "مدونة الكانون",
+      "scriptures": "الكتب الأربعة",
+      "mtime": "مرصد المواقيت",
+      "search": "البحث الشامل",
+      "switchLanguage": "تبديل اللغة",
+      "quietMode": "الوضع الهادئ"
+    },
+    "subpages": {
+      "backToGate": "العودة إلى بوابة الإمبراطورية",
+      "gateBreadcrumb": "A-L-L-A-H.COM",
+      "openWorkspace": "افتح مساحة العمل",
+      "referenceCountLabel": "{count} مرجعاً موثقاً"
+    },
+    "worlds": {
+      "heading": "أطلس العوالم التسعة",
+      "subheading": "نطاقات إبداعية وبحثية وبنية تحتية مستقلة تدور حول محراب واحد موحد المركز.",
+      "activeWorldLabel": "العالم النشط",
+      "domainsCount": "{count} نطاقات نشطة"
+    },
+    "codex": {
+      "heading": "مدونة الكانون",
+      "subheading": "أربعة أبواب تأسيسية تجمع الدقة المعرفية وأطلس العوالم والحوكمة والضمان السيادي.",
+      "entryDoorsLabel": "أبواب الكانون",
+      "openChamber": "ادخل الحجرة"
+    },
+    "scriptures": {
+      "heading": "استوديو الكتب الأربعة",
+      "subheading": "دراسة مقارنة محايدة بين التوراة والزبور والإنجيل والقرآن الكريم بإسناد موثق.",
+      "corporaLabel": "المدونات المنزلة",
+      "compareMode": "المقارنة المتوازية",
+      "citationLabel": "توثيق المصدر"
+    },
+    "mtime": {
+      "heading": "مرصد المواقيت المفسر",
+      "subheading": "معايير رؤية الهلال الحتمية وقياس التقويم الهجري ومواقيت الصلاة وسمت القبلة.",
+      "criteriaLabel": "معايير الرؤية",
+      "azimuthLabel": "سمت القبلة",
+      "hijriDateLabel": "التقويم الهجري"
+    },
+    "a11y": {
+      "skipToContent": "انتقل إلى المحتوى الرئيسي",
+      "primaryNav": "التنقل الرئيسي في المحراب",
+      "toggleLocaleLabel": "تبديل اللغة ({locale})",
+      "statusRegion": "إعلانات حالة المحراب"
+    }
+  },
+  "chronicle": {
+    "navigation": {
+      "home": "الرئيسية",
+      "signals": "الإشارات",
+      "storytelling": "القصص",
+      "shadow": "الظل",
+      "crew": "الطاقم",
+      "archive": "الأرشيف",
+      "openMenu": "افتح القائمة",
+      "closeMenu": "أغلق القائمة",
+      "searchButton": "ابحث في الإشارات",
+      "dock": "رصيف الأرشيف",
+      "missionControl": "مركز القيادة",
+      "sanctuary": "A-L-L-A-H.COM"
+    },
+    "search": {
+      "dialogTitle": "ابحث في الأرشيف",
+      "label": "ابحث في الإشارات",
+      "close": "أغلق البحث",
+      "placeholder": "قصص، إشارات، أشخاص، أماكن…",
+      "submit": "انطلق",
+      "helper": "يبحث في سجل الخط الزمني لرصيف الأرشيف."
+    },
+    "landing": {
+      "storyStrip": {
+        "ariaLabel": "استكشف عالم قصص شاهد القمر",
+        "peopleLabel": "الأشخاص",
+        "peopleTitle": "THE BATTERIES",
+        "placesLabel": "الأماكن",
+        "placesTitle": "مدن النيون",
+        "storiesLabel": "القصص",
+        "storiesTitle": "PENDETA ONLINE",
+        "worldsLabel": "العوالم",
+        "worldsTitle": "ZILL"
+      },
+      "signals": {
+        "badge": "سجلات التردد // بث حر",
+        "titlePrefix": "نبض",
+        "titleAccent": "الإشارات",
+        "sticker": "قصص خيالية",
+        "storyCardLabel": "إشارة روائية",
+        "storyCardTitle": "إشارة من الأعماق",
+        "storyCardDesc": "حكاية من عالم شاهد القمر: أصوات غريبة وتيار أعمق يسري عبر الليل.",
+        "storyCardCta": "اقرأ قصة الإشارة",
+        "collabCardLabel": "السرد القصصي",
+        "collabCardTitle": "قمر واحد وأسطح شتى",
+        "collabCardDesc": "ملاحظات ميدانية لحياة متقاطعة في مدن تتشارك سماءً واحدة.",
+        "collabCardCta": "استكشف القصص",
+        "portalCardLabel": "رصيف الأرشيف",
+        "portalCardTitle": "إرسالات الإشارة",
+        "portalCardDesc": "تصفح البرقيات المفهرسة والتسجيلات الميدانية من رصيف الأرشيف.",
+        "portalCardCta": "افتح الأرشيف"
+      },
+      "transmission": {
+        "number": "001",
+        "eyebrow": "إرسال / ملف قصة",
+        "titlePrefix": "الأصوات في",
+        "titleAccent": "الضباب",
+        "badge": "خيال",
+        "tapeLabel": "عمل فني",
+        "figcaption": "أرشيف الإرسال // الشريط المستعاد 001 · ملف قصة خيالية",
+        "narrativeTag": "سرد روائي · قصة تجريبية",
+        "body": "ثلاثة مراقبين في حي النسيج القديم يسمعون التردد ذاته يعلو ويهبط ثم يتلقى إجابة.",
+        "quote": "أبقينا الشريط يدور حتى انقشع الضباب فوق الميناء.",
+        "readMore": "افتح الملف الكامل"
+      },
+      "storytelling": {
+        "eyebrow": "فصول السجل",
+        "title": "قصص في المدار",
+        "subtitle": "أربع إحداثيات سردية من عالم شاهد القمر.",
+        "peopleTag": "الأشخاص",
+        "peopleTitle": "THE BATTERIES",
+        "peopleExcerpt": "فرقة شبابية في جاكرتا تلتقط ترددات أقدم من الكهرباء.",
+        "placesTag": "الأماكن",
+        "placesTitle": "مدن النيون",
+        "placesExcerpt": "رسم خرائط المسارات السرية لمدن لا تنام عند الثالثة فجراً.",
+        "storiesTag": "القصص",
+        "storiesTitle": "PENDETA ONLINE",
+        "storiesExcerpt": "مرشد روحي يستقبل الإشارات بين الدعاء وتشويش المذياع.",
+        "worldsTag": "العوالم",
+        "worldsTitle": "ZILL",
+        "worldsExcerpt": "مشروع روائي مكتوب بصيغة تقرير ميداني لشهود عيان."
+      },
+      "shadow": {
+        "restrictedTag": "تردد مقيد // المستوى 4",
+        "title": "طبقة الظل",
+        "description": "برقيات مشفرة وسجلات ميدانية داخلية وأدوات نشر خاصة للطاقم المصرح له.",
+        "cta": "ادخل إلى الظل",
+        "liveSignalLabel": "أحدث برقية مستعادة",
+        "unavailable": "موجز قياس الظل غير متصل حالياً."
+      },
+      "crew": {
+        "eyebrow": "شبكة بديلة // ترددات عالمية",
+        "titlePrefix": "خريطة عالمية",
+        "titleAccent": "للشهود.",
+        "subtitle": "القمر نفسه وإحداثيات قصص مختلفة. اختر ملفاً لقراءة برقيته.",
+        "collageLabel": "مجمعة تجريبية",
+        "sticker": "شخصيات تجريبية تحت سماء قصة واحدة.",
+        "cta": "استكشف الطاقم"
+      },
+      "archive": {
+        "eyebrow": "موجز السجل",
+        "title": "أرشيف الإشارات",
+        "subtitle": "برقيات مرتبة زمنياً محفوظة في رصيف الأرشيف العام.",
+        "loading": "جارٍ تحميل الأرشيف…",
+        "unavailable": "الأرشيف غير متاح حالياً.",
+        "retry": "إعادة محاولة الأرشيف",
+        "retrying": "جارٍ إعادة المحاولة…",
+        "empty": "لا توجد أحداث زمنية متاحة.",
+        "openDock": "افتح رصيف الأرشيف",
+        "previous": "عناصر الأرشيف السابقة",
+        "next": "عناصر الأرشيف التالية"
+      },
+      "about": {
+        "title": "انضم إلى الطاقم",
+        "subtitle": "مزيد من القصص. مزيد من الآفاق. عالم أكثر إشراقاً.",
+        "joinCta": "كن شاهد القمر",
+        "missionControlCta": "مركز القيادة"
+      },
+      "footer": {
+        "tagline": "// إبداع · توثيق · نشر",
+        "sanctuary": "A-L-L-A-H",
+        "archive": "الأرشيف",
+        "shadow": "الظل",
+        "missionControl": "مركز القيادة",
+        "backToTop": "العودة للأعلى ↑"
+      }
+    }
+  },
+  "operations": {
+    "commandPalette": {
+      "title": "لوحة الأوامر السيادية",
+      "placeholder": "اكتب أمراً أو وحدة أو سمة أو عالماً…",
+      "empty": "لا توجد أوامر مطابقة.",
+      "modulesGroup": "الوحدات ومساحات العمل",
+      "modelsGroup": "نماذج ORM الحية",
+      "skinsGroup": "السمات البصرية",
+      "worldsGroup": "عوالم DNA",
+      "shortcutHint": "اضغط Ctrl+K أو Cmd+K للتبديل"
+    },
+    "workspace": {
+      "planeLabel": "مستوى عمليات عرشي",
+      "liveModelsCount": "{count} نموذجاً حياً مسجلاً",
+      "activeModuleLabel": "الوحدة النشطة",
+      "healthStatus": "صحة مستوى التحكم",
+      "telemetryRefresh": "تحديث القياسات",
+      "openConsole": "افتح وحدة العمليات"
+    }
   },
   "common": {
     "loading": "جارٍ التحميل…",

@@ -23,37 +23,48 @@ export interface TranslationContextValue {
 
 const DEFAULT_DICT = getDictionarySync(i18n.defaultLocale);
 
-const TranslationContext = createContext<TranslationContextValue>({
+const FALLBACK_TRANSLATION_CONTEXT: TranslationContextValue = {
   locale: i18n.defaultLocale,
   direction: i18n.langDirection[i18n.defaultLocale],
   dictionary: DEFAULT_DICT,
   setLocale: () => {},
-});
+};
+
+export const TranslationContext = createContext<TranslationContextValue | null>(null);
 
 const LOCALE_STORAGE_KEY = "allah-sanctuary-lang-v1";
+const LOCALE_COOKIE_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
 
 function applyDocumentLocale(next: Locale): void {
-  if (typeof window === "undefined") return;
+  if (typeof document === "undefined") return;
   document.documentElement.lang = next;
   document.documentElement.dir = i18n.langDirection[next];
 }
 
-function persistLocaleClient(next: Locale, persistUnprefixed = false): void {
-  if (typeof window === "undefined") return;
-  if (persistUnprefixed && (next === "en" || next === "id")) {
-    try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, next);
-    } catch {
-      // Ignore localStorage failure
-    }
-  }
+function readLocaleCookie(): Locale | null {
+  if (typeof document === "undefined") return null;
   try {
-    const maxAge = 365 * 24 * 60 * 60;
-    document.cookie = `${themeConfig.localeCookieName}=${encodeURIComponent(next)}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    const prefix = `${themeConfig.localeCookieName}=`;
+    for (const part of document.cookie.split(";")) {
+      const trimmed = part.trim();
+      if (trimmed.startsWith(prefix)) {
+        const raw = decodeURIComponent(trimmed.slice(prefix.length));
+        return isValidLocale(raw) ? raw : null;
+      }
+    }
   } catch {
-    // Ignore cookie failure
+    // Ignore malformed cookie values
   }
-  applyDocumentLocale(next);
+  return null;
+}
+
+function writeLocaleCookie(next: Locale): void {
+  if (typeof document === "undefined") return;
+  try {
+    document.cookie = `${themeConfig.localeCookieName}=${encodeURIComponent(next)}; path=/; max-age=${LOCALE_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax`;
+  } catch {
+    // Ignore cookie write failures
+  }
 }
 
 export function TranslationWrapper({
@@ -65,15 +76,19 @@ export function TranslationWrapper({
   dictionary?: Dictionary;
   children: ReactNode;
 }) {
+  const hasExplicitLang = lang !== undefined && lang !== "";
   const initialLocale: Locale = isValidLocale(lang) ? lang : i18n.defaultLocale;
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
 
   useEffect(() => {
-    if (isValidLocale(lang)) {
-      setLocaleState(lang);
-      persistLocaleClient(lang, false);
+    if (hasExplicitLang) {
+      const resolved: Locale = isValidLocale(lang) ? lang : i18n.defaultLocale;
+      setLocaleState(resolved);
+      writeLocaleCookie(resolved);
+      applyDocumentLocale(resolved);
       return;
     }
+
     const pathLocale =
       typeof window !== "undefined" ? getLocaleFromPath(window.location.pathname) : null;
     if (pathLocale) {
@@ -81,28 +96,36 @@ export function TranslationWrapper({
       applyDocumentLocale(pathLocale);
       return;
     }
+
+    const cookieLocale = readLocaleCookie();
+    if (cookieLocale) {
+      setLocaleState(cookieLocale);
+      applyDocumentLocale(cookieLocale);
+      return;
+    }
+
     let resolved: Locale = i18n.defaultLocale;
     try {
       const saved = window.localStorage.getItem(LOCALE_STORAGE_KEY);
-      if (saved === "id" || saved === "en") {
-        resolved = saved;
-      } else if (saved === "ar") {
-        window.localStorage.setItem(LOCALE_STORAGE_KEY, "en");
+      if (saved !== null) {
+        resolved = isValidLocale(saved) ? saved : i18n.defaultLocale;
+        writeLocaleCookie(resolved);
+        window.localStorage.removeItem(LOCALE_STORAGE_KEY);
       }
     } catch {
       // Ignore storage access failure
     }
+
     setLocaleState(resolved);
     applyDocumentLocale(resolved);
-  }, [lang]);
+  }, [hasExplicitLang, lang]);
 
-  const setLocale = useCallback(
-    (next: Locale) => {
-      setLocaleState(next);
-      persistLocaleClient(next, !isValidLocale(lang) && next !== "ar");
-    },
-    [lang],
-  );
+  const setLocale = useCallback((next: Locale) => {
+    const resolved: Locale = isValidLocale(next) ? next : i18n.defaultLocale;
+    setLocaleState(resolved);
+    writeLocaleCookie(resolved);
+    applyDocumentLocale(resolved);
+  }, []);
 
   const dictionary = useMemo(() => {
     if (initialDictionary && locale === initialLocale) {
@@ -113,13 +136,18 @@ export function TranslationWrapper({
 
   const direction = i18n.langDirection[locale];
 
-  return (
-    <TranslationContext.Provider value={{ locale, direction, dictionary, setLocale }}>
-      {children}
-    </TranslationContext.Provider>
+  const contextValue = useMemo<TranslationContextValue>(
+    () => ({ locale, direction, dictionary, setLocale }),
+    [locale, direction, dictionary, setLocale],
   );
+
+  return <TranslationContext.Provider value={contextValue}>{children}</TranslationContext.Provider>;
+}
+
+export function useOptionalTranslation(): TranslationContextValue | null {
+  return useContext(TranslationContext);
 }
 
 export function useTranslation(): TranslationContextValue {
-  return useContext(TranslationContext);
+  return useContext(TranslationContext) ?? FALLBACK_TRANSLATION_CONTEXT;
 }

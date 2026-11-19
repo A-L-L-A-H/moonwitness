@@ -6,7 +6,9 @@ import {
   createActorContext,
   defineModel,
   initDb,
+  matchesFilter,
   modelRegistry,
+  PolicyError,
   syncModels,
 } from "../index.js";
 
@@ -125,6 +127,7 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
       name: "t.era",
       table: "t_eras",
       schema: z.object({ key: z.string() }),
+      indexes: [{ fields: ["tenant_id", "key"], unique: true }],
     });
     const event = defineModel({
       name: "t.event",
@@ -170,6 +173,7 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
       name: "t.team",
       table: "t_teams",
       schema: z.object({ code: z.string(), name: z.string() }),
+      indexes: [{ fields: ["tenant_id", "code"], unique: true }],
       relations: {
         members: {
           model: "t.member",
@@ -249,5 +253,81 @@ describe("ORM Odoo-grade engine: domains, readGroup, defaults, constrains, relat
     >;
     expect(membersList).toHaveLength(2);
     expect(membersList.map((m) => m.full_name).sort()).toEqual(["Ada Lovelace", "Alan Turing"]);
+  });
+
+  it("evaluates matchesFilter across logical, comparison, LIKE, and $not operators", () => {
+    const rec = {
+      id: "1",
+      owner_id: "u1",
+      state: "open",
+      priority: 5,
+      note: null,
+      title: "Router Alert",
+    };
+    expect(matchesFilter(rec, null)).toBe(true);
+    expect(matchesFilter(rec, { owner_id: "u1", note: null })).toBe(true);
+    expect(matchesFilter(rec, { note: { $ne: null } })).toBe(false);
+    expect(matchesFilter(rec, { priority: { $gte: 5, $lt: 10 } })).toBe(true);
+    expect(matchesFilter(rec, { state: { $in: ["open", "pending"] } })).toBe(true);
+    expect(matchesFilter(rec, { title: { $like: "Router%" } })).toBe(true);
+    expect(matchesFilter(rec, { title: { $ilike: "%alert%" } })).toBe(true);
+    expect(matchesFilter(rec, { $or: [{ state: "closed" }, { priority: { $gt: 4 } }] })).toBe(true);
+    expect(matchesFilter(rec, { $not: { state: "closed" } })).toBe(true);
+    expect(matchesFilter(rec, { state: { $not: "open" } })).toBe(false);
+  });
+
+  it("enforces transaction-safe WriteGuardOptions on create, update, archive, restore, and delete", async () => {
+    const doc = defineModel({
+      name: "t.guarded",
+      table: "t_guarded",
+      schema: z.object({ owner_id: z.string(), title: z.string() }),
+    });
+    await syncModels([doc]);
+    const scoped = doc.repository.forActor(actorA);
+    const guard = {
+      ruleDomain: { owner_id: "u1" },
+      createRuleDomain: { owner_id: "u1" },
+    };
+
+    await expect(scoped.create({ owner_id: "u2", title: "forged" }, guard)).rejects.toBeInstanceOf(
+      PolicyError,
+    );
+    expect(await scoped.count()).toBe(0);
+
+    const own = await scoped.create({ owner_id: "u1", title: "mine" }, guard);
+    const foreign = await doc.repository.create({ owner_id: "u2", title: "theirs" }, actorA);
+
+    // Outside ruleDomain returns null without mutating
+    expect(await scoped.update(foreign.id, { title: "hijack" }, guard)).toBeNull();
+    expect(await scoped.archive(foreign.id, guard)).toBeNull();
+    expect(await scoped.delete(foreign.id, guard)).toBeNull();
+
+    // Update attempting ownership escape throws RULE_FORBIDDEN and rolls back
+    await expect(scoped.update(own.id, { owner_id: "u2" }, guard)).rejects.toMatchObject({
+      code: "RULE_FORBIDDEN",
+      statusCode: 403,
+    });
+    const reloaded = await scoped.findOne(own.id);
+    expect(reloaded?.owner_id).toBe("u1");
+
+    const archived = await scoped.archive(own.id, guard);
+    expect(archived?.status).toBe("archived");
+    const restored = await scoped.restore(own.id, guard);
+    expect(restored?.status).toBe("active");
+    const deleted = await scoped.delete(own.id, guard);
+    expect(deleted?.status).toBe("deleted");
+  });
+
+  it("validates fieldPolicies keys against declared model fields at registration time", () => {
+    expect(() =>
+      defineModel({
+        name: "t.bad_policy",
+        table: "t_bad_policy",
+        schema: z.object({ name: z.string() }),
+        fieldPolicies: {
+          nonexistent_field: { readRoles: ["admin"] },
+        },
+      }),
+    ).toThrow(/Unknown field 'nonexistent_field' in fieldPolicies/);
   });
 });

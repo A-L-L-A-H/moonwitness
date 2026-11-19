@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { artSrc } from "@/lib/art";
+import { useTranslation } from "@/hocs/TranslationWrapper";
+import { getLocaleFromPath, getLocalizedUrl } from "@/utils/i18n";
 import { ArrowRight, CassetteTape, Smiley } from "@moonwitness/ui/icons";
 import { DistressedSticker, Staple, kindColors } from "@moonwitness/ui";
 import { Button } from "@moonwitness/ui";
@@ -11,7 +14,16 @@ import { useTimelineEvents } from "@/lib/api/timeline";
 
 function ArchiveStrip() {
   const ref = useRef<HTMLDivElement>(null);
-  const { data, isPending, isError, isFetching, refetch } = useTimelineEvents({ limit: 8 });
+  const { locale, dictionary } = useTranslation();
+  const archive = dictionary.chronicle.landing.archive;
+  const pathname = usePathname() ?? "";
+  const pathLocale = getLocaleFromPath(pathname);
+  const toHref = (slug: string) => (pathLocale ? getLocalizedUrl(slug, pathLocale) : slug);
+  const evidencePrefix = locale === "id" ? "BUKTI" : locale === "ar" ? "دليل" : "EVIDENCE";
+  const { data, isPending, isError, isFetching, errorUpdateCount, refetch } = useTimelineEvents({
+    limit: 8,
+  });
+  const showError = isError || (isPending && errorUpdateCount > 0);
   const items = data?.data ?? [];
   const [edges, setEdges] = useState({ left: true, right: true });
   useEffect(() => {
@@ -51,18 +63,14 @@ function ArchiveStrip() {
         : "smooth",
     });
   };
-  const unavailable = isPending || isError || !items.length;
+  const unavailable = isPending || showError || !items.length;
 
   return (
     <div className="relative">
-      {isPending ? (
-        <p role="status" className="min-h-44 py-8 text-sm text-[var(--foreground)]">
-          Loading archive…
-        </p>
-      ) : isError ? (
+      {showError ? (
         <div className="min-h-44 py-8">
           <p role="alert" className="text-sm text-[var(--foreground)]">
-            Archive unavailable.
+            {archive.unavailable}
           </p>
           <Button
             type="button"
@@ -71,25 +79,29 @@ function ArchiveStrip() {
             disabled={isFetching}
             className="archive-control mt-4 min-h-11 border-2 border-[var(--border)] px-4 py-2 text-sm text-[var(--foreground)]"
           >
-            {isFetching ? "Retrying archive…" : "Retry archive"}
+            {isFetching ? archive.retrying : archive.retry}
           </Button>
         </div>
+      ) : isPending ? (
+        <p role="status" className="min-h-44 py-8 text-sm text-[var(--foreground)]">
+          {archive.loading}
+        </p>
       ) : !items.length ? (
         <p role="status" className="min-h-44 py-8 text-sm text-[var(--foreground)]">
-          No timeline events available.
+          {archive.empty}
         </p>
       ) : null}
       <div
         ref={ref}
         className="flex snap-x snap-proximity gap-5 overflow-x-auto pb-6 pt-2"
-        aria-label="Archive event previews"
+        aria-label={archive.title}
         style={{ scrollbarWidth: "thin" }}
       >
         {!unavailable &&
           items.map((ev, index) => (
             <Link
               key={ev.id}
-              href={`/dock?event=${encodeURIComponent(ev.id)}`}
+              href={toHref(`/dock?event=${encodeURIComponent(ev.id)}`)}
               className="archive-preview photocopy-grit group relative w-64 shrink-0 snap-start overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:rotate-1"
             >
               <Staple className="top-1 left-2 -rotate-12" />
@@ -114,19 +126,20 @@ function ArchiveStrip() {
               </div>
               <div className="bg-[var(--card)] p-3.5 text-[var(--card-foreground)]">
                 <div className="font-mono text-[10px] text-[var(--primary)] flex items-center gap-1">
-                  <CassetteTape className="h-3 w-4 text-[var(--primary)]" /> EVIDENCE #{index + 101}
+                  <CassetteTape aria-hidden="true" className="h-3 w-4 text-[var(--primary)]" />{" "}
+                  {evidencePrefix} #{index + 101}
                 </div>
-                <div className="cmyk-slip mt-1 font-brush text-base leading-snug text-[var(--card-foreground)] group-hover:text-[var(--primary)]">
-                  {ev.title.toUpperCase()}
+                <div className="cmyk-slip mt-1 font-brush text-base uppercase leading-snug text-[var(--card-foreground)] group-hover:text-[var(--primary)]">
+                  {ev.title}
                 </div>
               </div>
             </Link>
           ))}
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-[var(--border)] pt-4">
-        <Link href="/dock">
+        <Link href={toHref("/dock")}>
           <Button className="min-h-11 px-4 py-3 text-sm">
-            BROWSE FULL ARCHIVE <ArrowRight className="h-4 w-4" />
+            {archive.openDock} <ArrowRight aria-hidden="true" className="h-4 w-4" />
           </Button>
         </Link>
         <div className="flex shrink-0 gap-2">
@@ -135,7 +148,7 @@ function ArchiveStrip() {
             variant="plain"
             disabled={unavailable || edges.left}
             onClick={() => scroll(-1)}
-            aria-label="Scroll archive left"
+            aria-label={archive.previous}
             className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-[var(--foreground)]"
           >
             ←
@@ -145,7 +158,7 @@ function ArchiveStrip() {
             variant="plain"
             disabled={unavailable || edges.right}
             onClick={() => scroll(1)}
-            aria-label="Scroll archive right"
+            aria-label={archive.next}
             className="archive-control flex min-h-11 min-w-11 items-center justify-center font-mono font-bold text-[var(--foreground)]"
           >
             →
@@ -157,21 +170,34 @@ function ArchiveStrip() {
 }
 
 export function Archive() {
+  const { dictionary } = useTranslation();
+  const archive = dictionary.chronicle.landing.archive;
+
   return (
-    <section id="archive" className="mx-auto max-w-7xl scroll-mt-20 px-4 py-24 sm:px-6">
+    <section
+      id="archive"
+      aria-labelledby="archive-heading"
+      className="mx-auto max-w-7xl scroll-mt-20 px-4 py-24 sm:px-6"
+    >
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <DistressedSticker variant="hazard" text="REDACTED DOSSIER ARCHIVE" className="mb-3" />
-          <h2 className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl">
-            A TIMELINE OF <span className="text-[var(--accent)]">SIGNALS.</span>
+          <DistressedSticker variant="hazard" text={archive.eyebrow} className="mb-3" />
+          <h2
+            id="archive-heading"
+            className="cmyk-slip font-brush text-4xl text-[var(--foreground)] sm:text-5xl"
+          >
+            {archive.title}
           </h2>
           <p className="mt-2 font-mono text-xs text-[var(--muted-foreground)]">
-            Past transmissions, underground sightings, and leaked police scanner recordings.
+            {archive.subtitle}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <DistressedSticker variant="barcode" code="REEL-882-ARCH" className="-rotate-3" />
-          <Smiley className="hidden h-12 w-12 rotate-12 text-[var(--pink)] sm:block" />
+          <Smiley
+            aria-hidden="true"
+            className="hidden h-12 w-12 rotate-12 text-[var(--pink)] sm:block"
+          />
         </div>
       </div>
       <ArchiveStrip />

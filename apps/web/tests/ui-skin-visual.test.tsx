@@ -46,6 +46,14 @@ beforeEach(() => {
       unobserve() {}
     },
   );
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      disconnect() {}
+      unobserve() {}
+    },
+  );
   localStorage.clear();
   container = document.createElement("div");
   document.body.append(container);

@@ -233,7 +233,7 @@
   margin-top: 0.9rem;
   padding: 0.45rem 0.85rem;
   background: rgba(8, 9, 13, 0.88);
-  border-left: 4px solid var(--brand-yellow, #f6d438);
+  border-inline-start: 4px solid var(--brand-yellow, #f6d438);
   color: var(--brand-yellow, #f6d438);
   font-family: var(--font-comic-display);
   font-size: 0.95rem;
@@ -362,7 +362,7 @@
 [data-dna="01-imperium-lumen"] .mw-world-tile-index {
   position: absolute;
   top: 6px;
-  left: 6px;
+  inset-inline-start: 6px;
   padding: 2px 6px;
   background: var(--brand-ink, #08090d);
   color: var(--brand-yellow, #f6d438);
@@ -607,4 +607,52 @@
   [data-dna="01-imperium-lumen"] .spatial-sheen {
     display: none;
   }
+}
+
+/* ============================================================================
+   RTL LOGICAL & BIDI OVERRIDES (01-imperium-lumen)
+   ============================================================================ */
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *)
+  :is(.font-mono, [data-ltr="true"], code) {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *)
+  :is(
+    .mw-site-nav-link,
+    .mw-illustrated-hero-kicker,
+    .mw-illustrated-hero-subtitle,
+    .mw-illustrated-hero-callout,
+    .mw-illustrated-hero-description,
+    .mw-editorial-aside-panel,
+    .mw-world-explorer-heading,
+    .mw-world-tile-title,
+    .mw-world-tile-cta,
+    .mw-section-kicker,
+    .mw-section-title
+  ) {
+  letter-spacing: 0;
+}
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *) .mw-site-nav-link.is-active {
+  transform: skewX(6deg);
+}
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *) .mw-illustrated-hero-subtitle {
+  transform: rotate(1.5deg) skewX(6deg);
+}
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *) .mw-illustrated-hero-callout {
+  transform: rotate(1.2deg) skewX(5deg);
+}
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *) .mw-world-explorer-heading {
+  transform: skewX(6deg);
+}
+
+[data-dna="01-imperium-lumen"]:is([dir="rtl"], [dir="rtl"] *)
+  :is(.mw-world-tile, .mw-world-atlas-tab, .mw-section-heading) {
+  text-align: start;
 }

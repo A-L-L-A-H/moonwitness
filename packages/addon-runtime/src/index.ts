@@ -67,16 +67,31 @@ export {
 } from "./ir-models.js";
 export { CronRunner, globalCronRunner, type CronExecutionResult } from "./cron-runner.js";
 export {
+  ADDON_NAME_REGEX,
+  SEMVER_REGEX,
   AddonManifestSignatureSchema,
   AddonManifestSchema,
   AddonRegistry,
   AddonRegistryError,
+  isValidSemVer,
+  parseSemVer,
+  compareSemVer,
+  isValidSemVerRange,
+  satisfiesSemVer,
+  parseDependencySpec,
+  planUpgrade,
   type AddonContext,
   type AddonManifest,
   type AddonManifestInput,
   type AddonManifestSignature,
+  type InstalledAddonSnapshot,
+  type ParsedDependencySpec,
+  type ParsedSemVer,
   type RegisteredAddon,
   type RegistryState,
+  type UpgradePlan,
+  type UpgradePlanAction,
+  type UpgradePlanInputAddon,
 } from "./registry.js";
 export {
   canonicalizeAddonManifestPayload,
@@ -89,20 +104,27 @@ export {
 } from "./signing.js";
 export {
   AddonRuntimeController,
+  evaluateModelRecordRules,
   type AddonDefinition,
   type AddonDataRecord,
+  type AddonInstallPhase,
+  type AddonReconcileResult,
   type ActionBindingsSpec,
   type CustomActionSpec,
   type CrewRoleOrPublic,
   type IrCronInput,
   type IrRuleInput,
+  type IrRuleRecordLike,
   type IrSequenceInput,
   type IrViewInput,
   type IrMenuInput,
   type ModelAclFlags,
+  type RecordRuleEvaluationResult,
+  type RecordRuleOperation,
   type RegisteredFieldMetadata,
   type RuntimeViewDescriptor,
 } from "./runtime.js";
+export { canReadField, canWriteField } from "./field-policy.js";
 export { registerGenericModelRoutes } from "./generic-crud.js";
 export {
   defaultFailClosedAuthBridge,
@@ -152,11 +174,27 @@ export {
   completeJob,
   failJob,
   processNextJob,
+  ensureOutboxSchema,
+  enqueueOutboxEvent,
+  recoverExpiredOutboxLeases,
+  dispatchOutboxBatch,
+  OutboxDispatcher,
   type OpsJobRecord,
   type EnqueueJobInput,
   type ClaimJobOptions,
   type FailJobOptions,
   type JobHandler,
+  type OutboxEventStatus,
+  type OutboxEventRecord,
+  type OutboxDeliveryRecord,
+  type OutboxDispatchContext,
+  type OutboxSubscriberHandler,
+  type OutboxSubscriber,
+  type EnqueueOutboxEventInput,
+  type RecoverOutboxLeasesOptions,
+  type RecoverOutboxLeasesResult,
+  type DispatchOutboxOptions,
+  type DispatchOutboxBatchResult,
 } from "./job-queue.js";
 
 export interface BaseManifest {
