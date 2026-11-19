@@ -11,6 +11,7 @@ interface FieldContextValue {
   inputId: string;
   descriptionId: string;
   errorId: string;
+  hasDescription: boolean;
   hasError: boolean;
 }
 
@@ -18,11 +19,12 @@ const FieldContext = React.createContext<FieldContextValue | null>(null);
 
 export interface FieldProps extends React.HTMLAttributes<HTMLDivElement> {
   error?: React.ReactNode;
+  hasDescription?: boolean;
   skin?: SkinName;
 }
 
 const Field = React.forwardRef<HTMLDivElement, FieldProps>(
-  ({ className, error, skin, children, ...props }, ref) => {
+  ({ className, error, hasDescription = false, skin, children, ...props }, ref) => {
     const uid = React.useId();
     const { skin: resolvedSkin, dnaId } = useComponentSkin(skin);
     const hasError = Boolean(error);
@@ -32,6 +34,7 @@ const Field = React.forwardRef<HTMLDivElement, FieldProps>(
           inputId: `${uid}-control`,
           descriptionId: `${uid}-description`,
           errorId: `${uid}-error`,
+          hasDescription,
           hasError,
         }}
       >
@@ -71,13 +74,21 @@ FieldLabel.displayName = "FieldLabel";
 const FieldControl = React.forwardRef<HTMLElement, { children: React.ReactElement }>(
   ({ children }, ref) => {
     const ctx = React.useContext(FieldContext);
+    const childDescription = (
+      children.props as React.HTMLAttributes<HTMLElement>
+    )["aria-describedby"];
+    const describedByIds = [
+      ...(childDescription?.split(/\s+/).filter(Boolean) ?? []),
+      ...(ctx?.hasDescription ? [ctx.descriptionId] : []),
+      ...(ctx?.hasError ? [ctx.errorId] : []),
+    ];
+    const describedBy = [...new Set(describedByIds)].join(" ") || undefined;
+
     return (
       <Slot
         ref={ref}
         id={ctx?.inputId}
-        aria-describedby={
-          ctx ? `${ctx.descriptionId}${ctx.hasError ? ` ${ctx.errorId}` : ""}` : undefined
-        }
+        aria-describedby={describedBy}
         aria-invalid={ctx?.hasError || undefined}
       >
         {children}

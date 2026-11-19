@@ -61,7 +61,7 @@ function FormField({ name, label, description, error, children, className }: For
   const form = React.useContext(FormContext);
   const resolvedError = error ?? form.getError(name);
   return (
-    <Field error={resolvedError} className={className}>
+    <Field error={resolvedError} hasDescription={Boolean(description)} className={className}>
       {label ? <FieldLabel>{label}</FieldLabel> : null}
       <FieldControl>{children}</FieldControl>
       {description ? <FieldDescription>{description}</FieldDescription> : null}
