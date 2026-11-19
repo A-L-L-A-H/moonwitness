@@ -23,11 +23,7 @@ function renderTable(columns: Parameters<typeof DataTable<Row>>[0]["columns"]) {
   act(() => {
     root.render(
       <SkinProvider defaultSkin="archive" persist={false}>
-        <DataTable<Row>
-          data={rows}
-          columns={columns}
-          getRowKey={(row) => row.id}
-        />
+        <DataTable<Row> data={rows} columns={columns} getRowKey={(row) => row.id} />
       </SkinProvider>,
     );
   });
