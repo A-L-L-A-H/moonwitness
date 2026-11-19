@@ -1,0 +1,15 @@
+{
+  "name": "celestial",
+  "version": "1.0.0",
+  "description": "AEQ4 Temporal Engine, Jean Meeus Lunar Ephemeris, Hijri Calendar, and Spherical Qibla Bearing Engine",
+  "category": "epistemic",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["celestial.aeq4", "celestial.lunar", "celestial.qibla"],
+  "provides": {
+    "routes": ["/api/v1/celestial/now", "/api/v1/celestial/qibla"],
+    "models": ["celestial.snapshot"],
+    "auditActions": ["celestial.capture"]
+  }
+}

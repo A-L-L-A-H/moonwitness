@@ -19,7 +19,12 @@
     "./storage": "./src/storage/index.ts",
     "./syslog": "./src/syslog/index.ts",
     "./timeline": "./src/timeline/index.ts",
-    "./witness-research": "./src/witness-research/index.ts"
+    "./witness-research": "./src/witness-research/index.ts",
+    "./mizan": "./src/mizan/index.ts",
+    "./celestial": "./src/celestial/index.ts",
+    "./khidra": "./src/khidra/index.ts",
+    "./cab": "./src/cab/index.ts",
+    "./geo": "./src/geo/index.ts"
   },
   "scripts": {
     "build": "echo \"addons: no build output\"",

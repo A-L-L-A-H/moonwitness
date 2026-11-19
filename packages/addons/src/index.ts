@@ -14,6 +14,11 @@ import { createStorageAddon } from "./storage/index.js";
 import { createSyslogAddon } from "./syslog/index.js";
 import { createTimelineAddon } from "./timeline/index.js";
 import { createWitnessResearchAddon } from "./witness-research/index.js";
+import { createMizanAddon } from "./mizan/index.js";
+import { createCelestialAddon } from "./celestial/index.js";
+import { createKhidraAddon } from "./khidra/index.js";
+import { createCabAddon } from "./cab/index.js";
+import { createGeoAddon } from "./geo/index.js";
 
 export * from "./ai/index.js";
 export * from "./audit/index.js";
@@ -30,9 +35,14 @@ export * from "./storage/index.js";
 export * from "./syslog/index.js";
 export * from "./timeline/index.js";
 export * from "./witness-research/index.js";
+export * from "./mizan/index.js";
+export * from "./celestial/index.js";
+export * from "./khidra/index.js";
+export * from "./cab/index.js";
+export * from "./geo/index.js";
 
 /**
- * Returns the canonical 15 MoonWitness domain addons in topological dependency order.
+ * Returns the canonical 20 MoonWitness domain addons in topological dependency order.
  */
 export function createPlatformAddons(host: AddonHostContext): AddonDefinition[] {
   const { prefix, auth } = host;
@@ -52,5 +62,10 @@ export function createPlatformAddons(host: AddonHostContext): AddonDefinition[] 
     createCanonLoreAddon({ prefix, auth }),
     createWitnessResearchAddon({ prefix, auth }),
     createEpistemicAddon({ prefix, auth }),
+    createMizanAddon({ prefix, auth }),
+    createCelestialAddon({ prefix, auth }),
+    createKhidraAddon({ prefix, auth }),
+    createCabAddon({ prefix, auth }),
+    createGeoAddon({ prefix, auth }),
   ];
 }

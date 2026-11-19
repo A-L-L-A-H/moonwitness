@@ -1,0 +1,15 @@
+{
+  "name": "geo",
+  "version": "1.0.0",
+  "description": "Indonesia-First Deep Administrative Geo-Graph and Kemendagri/BPS Reference Engine",
+  "category": "reference",
+  "depends": ["__base"],
+  "autoInstall": true,
+  "defaultEnabled": true,
+  "capabilities": ["geo.indonesia", "geo.reconciliation"],
+  "provides": {
+    "routes": ["/api/v1/geo/summary"],
+    "models": ["geo.province", "geo.city"],
+    "auditActions": []
+  }
+}
