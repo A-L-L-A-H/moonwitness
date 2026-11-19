@@ -14,18 +14,19 @@ Shared MoonWitness Design DNA skin engine, tokens, primitives, composites, artwo
 
 Use the canonical resolver and skin boundary for new consumer code. The package keeps separate public entry points because token resolution is server-safe while the React skin runtime is client-side.
 
-| Public entry point | Canonical responsibility |
-| --- | --- |
+| Public entry point       | Canonical responsibility                                                                                                                           |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@moonwitness/ui/tokens` | Base Imperium Lumen brand/semantic token definitions and server-safe base CSS variable map (`IMPERIUM_LUMEN_TOKENS`, `imperiumLumenCssVariables`). |
-| `@moonwitness/ui/dna` | Server-safe DNA/skin/mode/density resolution (`resolveCanonicalTokens`, `canonicalTokensToCssVariables`) and canonical token types. |
-| `@moonwitness/ui/skin` | Client-side visual scope and state APIs: `SkinRoot`, `SkinScope`, `SkinProvider`, `useSkin`, `useThemeMode`, and presets. |
+| `@moonwitness/ui/dna`    | Server-safe DNA/skin/mode/density resolution (`resolveCanonicalTokens`, `canonicalTokensToCssVariables`) and canonical token types.                |
+| `@moonwitness/ui/skin`   | Client-side visual scope and state APIs: `SkinRoot`, `SkinScope`, `SkinProvider`, `useSkin`, `useThemeMode`, and presets.                          |
 
 Use `SkinRoot` once at an application's visual root. Use `SkinScope` for a deliberately different DNA/skin presentation inside a route or subtree. Add `SkinProvider` when the application needs the interactive React context, persistence, or `useSkin` controls; it is a state provider, not a replacement for the app's visual identity boundary.
 
 ```tsx
+import type { ReactNode } from "react";
 import { SkinRoot } from "@moonwitness/ui/skin";
 
-export function AppRoot({ children }: { children: React.ReactNode }) {
+export function AppRoot({ children }: { children: ReactNode }) {
   return (
     <SkinRoot
       dnaId="05-riot-anarchy"
