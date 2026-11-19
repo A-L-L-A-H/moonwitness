@@ -105,7 +105,8 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
     const max = Math.max(1, ...data.map((d) => d.value));
     const width = Math.max(120, data.length * 48);
     return [
-      <svg key="chart-svg"
+      <svg
+        key="chart-svg"
         ref={ref}
         role="img"
         aria-label={accessibleData ? undefined : ariaLabel}
@@ -138,7 +139,8 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
         })}
       </svg>,
       accessibleData ? (
-        <AccessibleChartTable key="accessible-data"
+        <AccessibleChartTable
+          key="accessible-data"
           ariaLabel={ariaLabel}
           rows={data.map((point) => ({ label: point.label, value: point.value }))}
         />
@@ -202,7 +204,8 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
         : "";
 
     return [
-      <svg key="chart-svg"
+      <svg
+        key="chart-svg"
         ref={ref}
         role="img"
         aria-label={accessibleData ? undefined : ariaLabel}
@@ -232,7 +235,8 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
         ) : null}
       </svg>,
       accessibleData ? (
-        <AccessibleChartTable key="accessible-data"
+        <AccessibleChartTable
+          key="accessible-data"
           ariaLabel={ariaLabel}
           rows={data.map((point, index) =>
             typeof point === "number"
@@ -298,7 +302,8 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
         : "";
 
     return [
-      <svg key="chart-svg"
+      <svg
+        key="chart-svg"
         ref={ref}
         role="img"
         aria-label={accessibleData ? undefined : ariaLabel}
@@ -372,7 +377,8 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
         ))}
       </svg>,
       accessibleData ? (
-        <AccessibleChartTable key="accessible-data"
+        <AccessibleChartTable
+          key="accessible-data"
           ariaLabel={ariaLabel}
           rows={data.map((point) => ({ label: point.label, value: point.value }))}
         />
@@ -427,14 +433,11 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
     const accessibleLabel = ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`;
 
     return [
-      <svg key="chart-svg"
+      <svg
+        key="chart-svg"
         ref={ref}
         role="img"
-        aria-label={
-          accessibleData
-            ? undefined
-            : (ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`)
-        }
+        aria-label={accessibleData ? undefined : accessibleLabel}
         aria-hidden={accessibleData || undefined}
         viewBox="0 0 88 88"
         width={size}
@@ -482,8 +485,9 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
         ) : null}
       </svg>,
       accessibleData ? (
-        <AccessibleChartTable key="accessible-data"
-          ariaLabel={ariaLabel ?? `${label ?? "Gauge"} ${displayValue}${unit}`}
+        <AccessibleChartTable
+          key="accessible-data"
+          ariaLabel={accessibleLabel}
           rows={[{ label: label ?? "Value", value: `${displayValue}${unit}` }]}
         />
       ) : null,
