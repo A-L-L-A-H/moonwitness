@@ -58,17 +58,34 @@ describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
     expect(BRAND_TOKENS.white).toBe(IMPERIUM_LUMEN_TOKENS.brand.white);
   });
 
-  it("resolves valid tokens across all 7 DNAs x 6 skins x 2 modes without undefined or object strings", () => {
+  it(`resolves required tokens across ${DNA_IDS.length} DNAs × ${SKINS.length} skins × 2 modes`, () => {
+    const requiredCssVars = [
+      "--dna-canvas",
+      "--dna-surface",
+      "--dna-text",
+      "--dna-accent",
+      "--dna-focus",
+      "--background",
+      "--foreground",
+      "--ring",
+      "--radius",
+    ] as const;
+
     for (const dnaId of DNA_IDS) {
       for (const skin of SKINS) {
         for (const mode of ["dark", "light"] as const) {
+          const context = `${dnaId}:${skin}:${mode}`;
           const resolved = resolveCanonicalTokens({ dnaId, skin, mode });
-          expect(assertCanonicalTokensValid(resolved)).toEqual([]);
+          expect(assertCanonicalTokensValid(resolved), `Invalid resolved tokens for ${context}`).toEqual([]);
+
           const vars = canonicalTokensToCssVariables(resolved);
-          expect(vars["--background"]).toMatch(/^hsl\(/);
-          expect(vars["--foreground"]).toMatch(/^hsl\(/);
-          expect(vars["--ring"]).toMatch(/^hsl\(/);
-          expect(vars["--radius"]).not.toContain("[object");
+          for (const name of requiredCssVars) {
+            expect(vars[name], `Missing ${name} for ${context}`).toBeTruthy();
+          }
+          expect(vars["--background"], `Invalid background for ${context}`).toMatch(/^hsl\(/);
+          expect(vars["--foreground"], `Invalid foreground for ${context}`).toMatch(/^hsl\(/);
+          expect(vars["--ring"], `Invalid ring for ${context}`).toMatch(/^hsl\(/);
+          expect(vars["--radius"], `Invalid radius for ${context}`).not.toContain("[object");
         }
       }
     }
@@ -204,6 +221,6 @@ describe("Canonical Design Token Engine (@moonwitness/ui/dna)", () => {
         }
       }
     }
-    expect(count).toBe(140);
+    expect(count).toBe(DNA_IDS.length * SKINS.length * 2);
   });
 });
