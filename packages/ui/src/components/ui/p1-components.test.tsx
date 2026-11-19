@@ -353,7 +353,7 @@ describe("PR 6 P1 Advanced & Composed Components", () => {
     };
     const getReferencedIds = (control: HTMLInputElement) => {
       const describedBy = control.getAttribute("aria-describedby") ?? "";
-      return describedBy.split(/\\s+/).filter(Boolean);
+      return describedBy.split(/\s+/).filter(Boolean);
     };
 
     const plainIds = getReferencedIds(getControl("plain-control"));
