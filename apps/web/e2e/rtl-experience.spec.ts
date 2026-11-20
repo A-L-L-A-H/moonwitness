@@ -93,6 +93,12 @@ async function mockRtlApi(page: Page): Promise<void> {
         },
       });
     }
+    if (path.endsWith("/api/v1/control/resources")) {
+      return route.fulfill({ status: 200, json: {} });
+    }
+    if (path.endsWith("/api/v1/control/audit")) {
+      return route.fulfill({ status: 200, json: [] });
+    }
     if (path.endsWith("/api/v1/command-center/state")) {
       return route.fulfill({
         status: 200,
@@ -394,8 +400,10 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     await expect
       .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
       .toBe("rtl");
+    await expect(page.getByText("VERIFYING SOVEREIGN SESSION…")).toBeHidden();
 
     const railLinks = page.locator(".console-shell-rail .hud-nav-items a[href]");
+    await expect(railLinks).toHaveCount(7);
     const linkCount = await railLinks.count();
     expect(linkCount).toBeGreaterThanOrEqual(3);
 
