@@ -369,12 +369,19 @@ export class PostgresDriver implements OrmDriverHandle {
       this.connectionString = null;
       throw new Error("PostgreSQL Pool constructor is unavailable in 'pg' module.");
     }
-    this.pool = new PoolCtor({
+    const pool = new PoolCtor({
       connectionString,
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
     }) as PoolLike;
+    // Swallow pool-level errors (e.g. 57P01 termination during teardown) so
+    // they never surface as unhandled 'error' events that crash test runs.
+    (pool as unknown as { on: (event: string, listener: (error: unknown) => void) => void }).on(
+      "error",
+      () => {},
+    );
+    this.pool = pool;
   }
 
   getConnectionString(): string | null {
