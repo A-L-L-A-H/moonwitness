@@ -9,7 +9,9 @@ let root: Root;
 
 function renderDiff(hunks: readonly DiffHunk[]) {
   act(() => {
-    root.render(<DiffViewer fileName="src/example.ts" hunks={hunks} data-testid="diff-viewer" />);
+    root.render(
+      <DiffViewer fileName="src/example.ts" hunks={hunks} data-testid="diff-viewer" />,
+    );
   });
 }
 
@@ -35,7 +37,9 @@ describe("DiffViewer", () => {
     expect(container.querySelector('[role="region"]')?.getAttribute("aria-label")).toBe(
       "src/example.ts diff",
     );
-    expect(container.querySelector('[role="status"]')?.textContent).toBe("No changes to display.");
+    expect(container.querySelector('[role="status"]')?.textContent).toBe(
+      "No changes to display.",
+    );
     expect(container.querySelectorAll("li")).toHaveLength(0);
   });
 
