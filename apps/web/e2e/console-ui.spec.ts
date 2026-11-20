@@ -168,6 +168,9 @@ async function hudStyle(surface: Locator) {
         style.borderLeftColor,
       ],
       shadow: style.boxShadow,
+      borderRadius: style.borderRadius,
+      fontFamily: style.fontFamily,
+      letterSpacing: style.letterSpacing,
     });
   });
 }
@@ -302,7 +305,7 @@ for (const viewport of viewports) {
       await expect(page.getByRole("heading", { name: /recent workspace/i })).toBeInViewport();
       await expect(episodes).toHaveAttribute("aria-current", "location");
       await expect(nav.locator('[aria-current="page"]')).toHaveCount(0);
-      await nav.getByRole("link", { name: "Archive", exact: true }).focus();
+      await nav.getByRole("link", { name: "Archive Dock", exact: true }).focus();
       await page.keyboard.press("Enter");
       await expect(page).toHaveURL(/\/dock$/);
       await expect(page.getByRole("heading", { level: 1, name: /dock/i })).toBeVisible();
