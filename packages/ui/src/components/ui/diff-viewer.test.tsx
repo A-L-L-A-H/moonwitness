@@ -9,9 +9,7 @@ let root: Root;
 
 function renderDiff(hunks: readonly DiffHunk[]) {
   act(() => {
-    root.render(
-      <DiffViewer fileName="src/example.ts" hunks={hunks} data-testid="diff-viewer" />,
-    );
+    root.render(<DiffViewer fileName="src/example.ts" hunks={hunks} data-testid="diff-viewer" />);
   });
 }
 
