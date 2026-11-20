@@ -197,7 +197,11 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
     const last = coords[coords.length - 1];
     const areaPoints =
       coords.length >= 2 && first && last
-        ? `${first.x.toFixed(1)},${height - padding} ${linePoints} ${last.x.toFixed(1)},${height - padding}`
+        ? [
+            `${first.x.toFixed(1)},${height - padding}`,
+            linePoints,
+            `${last.x.toFixed(1)},${height - padding}`,
+          ].join(" ")
         : "";
 
     return (
