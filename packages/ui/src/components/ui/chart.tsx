@@ -229,7 +229,9 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
             </circle>
           ) : null}
         </svg>
-        {accessibleData ? <AccessibleChartData label={ariaLabel} points={accessiblePoints} /> : null}
+        {accessibleData ? (
+          <AccessibleChartData label={ariaLabel} points={accessiblePoints} />
+        ) : null}
       </>
     );
   },
