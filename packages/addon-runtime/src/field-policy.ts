@@ -54,11 +54,15 @@ export function resolveEffectiveGroups(
   return effective;
 }
 
-function toEffectiveGroupSet(role: CrewRoleOrPublic, actorGroups?: Iterable<string>): Set<string> {
+function toEffectiveGroupSet(
+  role: CrewRoleOrPublic,
+  actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
+): Set<string> {
   if (actorGroups instanceof Set) {
     return actorGroups;
   }
-  return resolveEffectiveGroups(role, actorGroups);
+  return resolveEffectiveGroups(role, actorGroups, impliedGroups);
 }
 
 function isPlainRecord(value: unknown): value is Record<string, unknown> {
@@ -80,6 +84,7 @@ export function canReadField(
   field: string,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): boolean {
   const policy = desc?.fieldPolicies?.[field];
   const hasReadAllowlist = policy?.readRoles !== undefined || policy?.readGroups !== undefined;
@@ -87,7 +92,7 @@ export function canReadField(
     const roleAllowed = policy?.readRoles !== undefined && policy.readRoles.includes(role);
     if (roleAllowed) return true;
     if (policy?.readGroups !== undefined) {
-      const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+      const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
       if (policy.readGroups.some((g) => effectiveGroups.has(g))) {
         return true;
       }
@@ -113,6 +118,7 @@ export function canWriteField(
   field: string,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): boolean {
   const policy = desc?.fieldPolicies?.[field];
   const hasWriteAllowlist = policy?.writeRoles !== undefined || policy?.writeGroups !== undefined;
@@ -120,7 +126,7 @@ export function canWriteField(
     const roleAllowed = policy?.writeRoles !== undefined && policy.writeRoles.includes(role);
     if (roleAllowed) return true;
     if (policy?.writeGroups !== undefined) {
-      const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+      const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
       if (policy.writeGroups.some((g) => effectiveGroups.has(g))) {
         return true;
       }
@@ -139,8 +145,9 @@ export function canReadRelation(
   relName: string,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): boolean {
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   if (
     (desc?.fields.has(relName) || desc?.fieldPolicies?.[relName] !== undefined) &&
     !canReadField(desc, relName, role, effectiveGroups)
@@ -151,7 +158,7 @@ export function canReadRelation(
   if (relSpec) {
     const fkField =
       relSpec.sourceKey ?? (desc?.fields.has(`${relName}_id`) ? `${relName}_id` : undefined);
-    if (fkField && !canReadField(desc, fkField, role, effectiveGroups)) {
+    if (fkField && !canReadField(desc, fkField, role, effectiveGroups, impliedGroups)) {
       return false;
     }
   }
@@ -194,13 +201,14 @@ export function assertWritableBodyFields(
   body: Record<string, unknown>,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): void {
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   for (const [field, value] of Object.entries(body)) {
     if (value === undefined) continue;
-    if (!canWriteField(desc, field, role, effectiveGroups)) {
+    if (!canWriteField(desc, field, role, effectiveGroups, impliedGroups)) {
       throw new PolicyError(
-        `Write access to field '${field}' on '${desc.name}' is forbidden`,
+        "Write access to field '" + field + "' on '" + desc.name + "' is forbidden",
         "FIELD_WRITE_FORBIDDEN",
         403,
       );
@@ -213,15 +221,15 @@ export function assertWritableActionInputFields(
   input: unknown,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
   depth = 0,
 ): void {
   if (depth > 8 || input === null || input === undefined || typeof input !== "object") {
     return;
   }
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
   if (Array.isArray(input)) {
     for (const item of input) {
-      assertWritableActionInputFields(desc, item, role, effectiveGroups, depth + 1);
+      assertWritableActionInputFields(desc, item, role, actorGroups, impliedGroups, depth + 1);
     }
     return;
   }
@@ -234,15 +242,15 @@ export function assertWritableActionInputFields(
       desc.fields.has(key) ||
       desc.fieldPolicies?.[key] !== undefined ||
       SENSITIVE_FIELD_RE.test(key);
-    if (isKnownModelField && !canWriteField(desc, key, role, effectiveGroups)) {
+    if (isKnownModelField && !canWriteField(desc, key, role, actorGroups, impliedGroups)) {
       throw new PolicyError(
-        `Write access to field '${key}' on '${desc.name}' is forbidden`,
+        "Write access to field '" + key + "' on '" + desc.name + "' is forbidden",
         "FIELD_WRITE_FORBIDDEN",
         403,
       );
     }
     if (Array.isArray(value) || isPlainRecord(value)) {
-      assertWritableActionInputFields(desc, value, role, effectiveGroups, depth + 1);
+      assertWritableActionInputFields(desc, value, role, actorGroups, impliedGroups, depth + 1);
     }
   }
 }
@@ -252,12 +260,13 @@ export function assertReadableFilterFields(
   fields: Iterable<string>,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): void {
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   for (const field of fields) {
-    if (!canReadField(desc, field, role, effectiveGroups)) {
+    if (!canReadField(desc, field, role, effectiveGroups, impliedGroups)) {
       throw new PolicyError(
-        `Read access to field '${field}' on '${desc.name}' is forbidden`,
+        "Read access to field '" + field + "' on '" + desc.name + "' is forbidden",
         "FIELD_READ_FORBIDDEN",
         403,
       );
@@ -270,15 +279,20 @@ export function assertReadableRelations(
   relations: Iterable<string> | undefined,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): void {
   if (!relations) return;
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   for (const relPath of relations) {
     let currentDesc: RegisteredModelDescriptor | undefined = desc;
     for (const seg of relPath.split(".").filter(Boolean)) {
-      if (!canReadRelation(currentDesc, seg, role, effectiveGroups)) {
+      if (!canReadRelation(currentDesc, seg, role, effectiveGroups, impliedGroups)) {
         throw new PolicyError(
-          `Read access to field '${seg}' on '${currentDesc?.name ?? desc.name}' is forbidden`,
+          "Read access to field '" +
+            seg +
+            "' on '" +
+            (currentDesc?.name ?? desc.name) +
+            "' is forbidden",
           "FIELD_READ_FORBIDDEN",
           403,
         );
@@ -334,30 +348,33 @@ export function sanitizeRecordForRole(
   record: Record<string, unknown>,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): Record<string, unknown> {
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(record)) {
     if (key.startsWith("$") && key.length > 1) {
       const relName = key.slice(1);
-      if (!canReadRelation(desc, relName, role, effectiveGroups)) {
+      if (!canReadRelation(desc, relName, role, effectiveGroups, impliedGroups)) {
         continue;
       }
       const relSpec = desc?.relations?.[relName];
       const relDesc = relSpec ? modelRegistry.get(relSpec.model) : undefined;
       if (Array.isArray(value)) {
         out[key] = value.map((item) =>
-          isPlainRecord(item) ? sanitizeRecordForRole(relDesc, item, role, effectiveGroups) : item,
+          isPlainRecord(item)
+            ? sanitizeRecordForRole(relDesc, item, role, effectiveGroups, impliedGroups)
+            : item,
         );
       } else if (isPlainRecord(value)) {
-        out[key] = sanitizeRecordForRole(relDesc, value, role, effectiveGroups);
+        out[key] = sanitizeRecordForRole(relDesc, value, role, effectiveGroups, impliedGroups);
       } else {
         out[key] = value;
       }
       continue;
     }
 
-    if (!canReadField(desc, key, role, effectiveGroups)) {
+    if (!canReadField(desc, key, role, effectiveGroups, impliedGroups)) {
       continue;
     }
     out[key] = value;
@@ -370,6 +387,7 @@ export function sanitizeActionResultForRole(
   result: unknown,
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): unknown {
   if (result === null || result === undefined || typeof result !== "object") {
     return result;
@@ -377,7 +395,7 @@ export function sanitizeActionResultForRole(
   if (result instanceof Date) {
     return result;
   }
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   if (Array.isArray(result)) {
     return result.map((item) => sanitizeActionResultForRole(desc, item, role, effectiveGroups));
   }
@@ -386,11 +404,18 @@ export function sanitizeActionResultForRole(
     result as Record<string, unknown>,
     role,
     effectiveGroups,
+    impliedGroups,
   );
   for (const [key, value] of Object.entries(sanitized)) {
     if (key.startsWith("$")) continue;
     if (Array.isArray(value) || (isPlainRecord(value) && !(value instanceof Date))) {
-      sanitized[key] = sanitizeActionResultForRole(undefined, value, role, effectiveGroups);
+      sanitized[key] = sanitizeActionResultForRole(
+        undefined,
+        value,
+        role,
+        effectiveGroups,
+        impliedGroups,
+      );
     }
   }
   return sanitized;
@@ -401,8 +426,9 @@ export function sanitizeHistoryEntriesForRole<T extends { diff: unknown }>(
   entries: T[],
   role: CrewRoleOrPublic,
   actorGroups?: Iterable<string>,
+  impliedGroups?: Map<string, string[]>,
 ): T[] {
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups);
+  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   return entries.map((entry) => {
     const rawDiff = entry.diff;
     let parsed: unknown = rawDiff;
@@ -418,7 +444,7 @@ export function sanitizeHistoryEntriesForRole<T extends { diff: unknown }>(
     }
     const filteredDiff: Record<string, unknown> = {};
     for (const [field, change] of Object.entries(parsed)) {
-      if (canReadField(desc, field, role, effectiveGroups)) {
+      if (canReadField(desc, field, role, effectiveGroups, impliedGroups)) {
         filteredDiff[field] = change;
       }
     }

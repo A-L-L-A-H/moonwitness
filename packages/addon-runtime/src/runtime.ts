@@ -1933,6 +1933,10 @@ export class AddonRuntimeController {
     return resolveEffectiveGroups(role, actorGroups, impliedGroups);
   }
 
+  async getImpliedGroupsMap(): Promise<Map<string, string[]>> {
+    return this.loadImpliedGroupsMap();
+  }
+
   private evaluateOperationFlag(params: {
     rules: IrRuleRecordLike[];
     role: CrewRoleOrPublic;

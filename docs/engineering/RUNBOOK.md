@@ -34,7 +34,7 @@ Every response sets `x-content-type-options: nosniff`, `x-frame-options: DENY`, 
 - **Private ROCKSOUL/Memory data:** keep local backup keys and backup destinations inside their owner-controlled trust zones. Never transfer private archives or database backups to the public VPS by default.
 - **Legacy SQLite utilities:** `scripts/backup-sqlite.mjs` and `scripts/restore-sqlite.mjs` are retained temporarily for controlled archival/recovery of pre-existing data during migration. They are not an approved runtime backup path; do not create new SQLite databases or use them instead of PostgreSQL backups. Remove them after migration and restore verification are complete.
 
-`packages/orm` still contains legacy SQLite branches for compatibility and historical tests; those are not the approved persistence target. PostgreSQL integration and backup helper coverage is exercised in CI through `POSTGRES_TEST_URL` and `packages/orm/src/__tests__/postgres.live.test.ts`.
+`packages/orm` still contains legacy SQLite branches for compatibility and historical tests; those are not the approved persistence target. Mandatory PostgreSQL 16 conformance and backup helper coverage is exercised in CI `postgres-integration` through `pnpm test:conformance:pg` using explicit `TEST_POSTGRES_URL` / `POSTGRES_TEST_URL` (failing fast if missing or non-PostgreSQL, with no `DATABASE_URL`, SQLite, or D1 fallback), `packages/orm/src/__tests__/postgres.live.test.ts`, and `apps/api/src/pg-conformance.test.ts`.
 
 ## Migration recovery
 
