@@ -735,6 +735,12 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
           client_secret: z.string(),
           encrypted_private_key: z.string(),
           sensitive_note: z.string().default("private"),
+          settings: z
+            .object({
+              label: z.string(),
+              nested: z.object({ refresh_token: z.string() }),
+            })
+            .default({ label: "default", nested: { refresh_token: "default-refresh" } }),
         }),
         fieldPolicies: {
           sensitive_note: { sensitive: true },
@@ -774,10 +780,26 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
           client_secret: "sec-val",
           encrypted_private_key: "priv-val",
           sensitive_note: "secret-note",
+          settings: { label: "profile", nested: { refresh_token: "nested-token-val" } },
         },
         actorA,
       );
-      await secretModel.repository.update(created.id, { username: "alice2" }, actorA);
+      await secretModel.repository.update(
+        created.id,
+        {
+          username: "alice2",
+          password_hash: "hash-val-2",
+          api_token: "tok-val-2",
+          client_secret: "sec-val-2",
+          encrypted_private_key: "priv-val-2",
+          sensitive_note: "secret-note-2",
+          settings: {
+            label: "profile-updated",
+            nested: { refresh_token: "nested-token-val-2" },
+          },
+        },
+        actorA,
+      );
       await secretModel.repository.archive(created.id, actorA);
       await secretModel.repository.restore(created.id, actorA);
       await secretModel.repository.delete(created.id, actorA);
@@ -814,7 +836,55 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
         expect(payload.record).not.toHaveProperty("client_secret");
         expect(payload.record).not.toHaveProperty("encrypted_private_key");
         expect(payload.record).not.toHaveProperty("sensitive_note");
+        expect(
+          (payload.record.settings as { nested: Record<string, unknown> }).nested,
+        ).not.toHaveProperty("refresh_token");
       }
+
+      const auditRows = await getDb().all<{ action: string; diff: string }>(
+        "SELECT action, diff FROM _orm_audit_log WHERE model = 't502.account' AND entity_id = ? ORDER BY rowid ASC",
+        [created.id],
+      );
+      expect(auditRows.map((row) => row.action)).toEqual([
+        "CREATE",
+        "UPDATE",
+        "ARCHIVE",
+        "RESTORE",
+        "DELETE",
+      ]);
+      for (const row of auditRows) {
+        for (const secret of [
+          "hash-val",
+          "tok-val",
+          "sec-val",
+          "priv-val",
+          "secret-note",
+          "nested-token-val",
+        ]) {
+          expect(row.diff).not.toContain(secret);
+        }
+      }
+
+      const createDiff = JSON.parse(auditRows[0]!.diff) as Record<string, unknown>;
+      expect(createDiff.username).toEqual({ before: null, after: "alice" });
+      expect(createDiff.password_hash).toEqual({ before: null, after: "[REDACTED]" });
+      expect(createDiff.api_token).toEqual({ before: null, after: "[REDACTED]" });
+      expect(createDiff.sensitive_note).toEqual({ before: null, after: "[REDACTED]" });
+      expect(createDiff.settings).toEqual({
+        before: null,
+        after: { label: "profile", nested: { refresh_token: "[REDACTED]" } },
+      });
+
+      const updateDiff = JSON.parse(auditRows[1]!.diff) as Record<string, unknown>;
+      expect(updateDiff.username).toEqual({ before: "alice", after: "alice2" });
+      expect(updateDiff.password_hash).toEqual({
+        before: "[REDACTED]",
+        after: "[REDACTED]",
+      });
+      expect(updateDiff.settings).toEqual({
+        before: { label: "profile", nested: { refresh_token: "[REDACTED]" } },
+        after: { label: "profile-updated", nested: { refresh_token: "[REDACTED]" } },
+      });
     });
   });
 });
