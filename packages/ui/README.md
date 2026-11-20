@@ -28,7 +28,6 @@ pnpm --filter @moonwitness/ui ui:contrast  # vitest run src/dx/contrast.test.ts
 - **Owner:** UI & Design System Platform (`packages/ui`)
 - **Contracts:** [docs/dna/00-ENGINE-CONTRACT.md](../../docs/dna/00-ENGINE-CONTRACT.md), [docs/dna/README.md](../../docs/dna/README.md), [docs/dna/09-UI-ARCHITECTURE-STATUS.md](../../docs/dna/09-UI-ARCHITECTURE-STATUS.md)
 
-
 ## DiffViewer component
 
 Render precomputed, read-only diff hunks without adding a diff engine:
