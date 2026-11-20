@@ -741,7 +741,7 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
               nested: z.object({ refresh_token: z.string() }),
             })
             .default({ label: "default", nested: { refresh_token: "default-refresh" } }),
-          credentials: z.array(z.object({ access_token: z.string() })).default([]),
+          providerData: z.array(z.object({ access_token: z.string() })).default([]),
         }),
         fieldPolicies: {
           sensitive_note: { sensitive: true },
@@ -782,7 +782,7 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
           encrypted_private_key: "priv-val",
           sensitive_note: "secret-note",
           settings: { label: "profile", nested: { refresh_token: "nested-token-val" } },
-          credentials: [{ access_token: "array-token-val" }],
+          providerData: [{ access_token: "array-token-val" }],
         },
         actorA,
       );
@@ -799,7 +799,7 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
             label: "profile-updated",
             nested: { refresh_token: "nested-token-val-2" },
           },
-          credentials: [{ access_token: "array-token-val-2" }],
+          providerData: [{ access_token: "array-token-val-2" }],
         },
         actorA,
       );
@@ -878,7 +878,7 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
         before: null,
         after: { label: "profile", nested: { refresh_token: "[REDACTED]" } },
       });
-      expect(createDiff.credentials).toEqual({
+      expect(createDiff.providerData).toEqual({
         before: null,
         after: [{ access_token: "[REDACTED]" }],
       });
@@ -893,7 +893,7 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
         before: { label: "profile", nested: { refresh_token: "[REDACTED]" } },
         after: { label: "profile-updated", nested: { refresh_token: "[REDACTED]" } },
       });
-      expect(updateDiff.credentials).toEqual({
+      expect(updateDiff.providerData).toEqual({
         before: [{ access_token: "[REDACTED]" }],
         after: [{ access_token: "[REDACTED]" }],
       });
