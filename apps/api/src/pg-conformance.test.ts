@@ -45,6 +45,7 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
   const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
   const dbName = `mw_pg_conf_${suffix}`;
   const adminPool = new Pool({ connectionString: baseUrl, max: 2 });
+  adminPool.on("error", () => {});
   try {
     await adminPool.query(`CREATE DATABASE "${dbName}"`);
   } catch (error) {
@@ -155,6 +156,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           app = null;
         }
         await closeDbAsync();
+        await new Promise((resolve) => setTimeout(resolve, 250));
         await isolated.drop();
       });
 
