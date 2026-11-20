@@ -69,7 +69,7 @@ export async function applyMigrations(
 
     await db.transaction(async (tx) => {
       if (isPostgres) {
-        await tx.exec(`SELECT pg_advisory_xact_lock(${migrationLockKey(migration.id)})`);
+        await tx.exec(`SELECT pg_advisory_xact_lock(${migrationLockKey(migration.id)}::bigint)`);
       }
 
       // Re-read the ledger inside the locked transaction to close the race window.

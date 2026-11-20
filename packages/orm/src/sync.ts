@@ -731,7 +731,7 @@ export async function syncModels(
 
   if (isPostgres) {
     await db.transaction(async (tx) => {
-      await tx.all(`SELECT pg_advisory_xact_lock(${PG_SYNC_ADVISORY_LOCK_KEY})`);
+      await tx.all(`SELECT pg_advisory_xact_lock(${PG_SYNC_ADVISORY_LOCK_KEY}::bigint)`);
       await runSync(tx);
     });
   } else {
