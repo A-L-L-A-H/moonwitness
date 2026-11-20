@@ -53,7 +53,7 @@ This audit changes no runtime code, schema, or behavior. It records the current 
 ### 2.2 Membership authority
 
 - The active auth-user model stores the current company and permitted company IDs on `auth_users`; `mapUserRecord()` parses `company_ids_json` into `AuthUser.companyIds`.
-- `createAuthMidIdentityStore()` adapts the auth store to MID. Its `PublicUser` result contains ID, username, email, role, and display name; the MID `PublicUser` type contains no tenant or membership fields.
+- `createAuthMidIdentityStore()` adapts the auth store to MID. Its `PublicUser` result contains ID, username, email, role, and display name; the MID `PublicUser` type contains no tenant or membership fields. Its `findActiveSsoSession()` projection also returns only those public-user fields, not `companyId`/`companyIds`.
 - No active `tenant_memberships` or `tenant.membership` model was found in the inspected runtime package paths. This means the current source does not expose a normalized membership row with an explicit active/suspended status or membership-local role.
 - `res.company.is_active` exists, but `resolveRequestTenant()` only normalizes a requested slug and checks the user's role/array; it does not query the company registry to verify that the selected company exists or is active.
 
@@ -66,7 +66,7 @@ The active API request path is:
 1. `resolveAuthIdentityFromRequest()` in `packages/addons/src/auth/mid-jwt.ts` tries the `mw_session` cookie and then a MID Bearer token.
 2. Cookie-session resolution calls `getSessionWithUser()`; the returned identity includes `companyId` and `companyIds` from the persisted auth user.
 3. Bearer resolution verifies the ES256 token and user. It adds `tenantId` only when the verified token contains `tenant_id` or `tid`; it does not copy `companyId`/`companyIds` from the loaded user into the returned Bearer identity.
-4. `resolveRequestTenant()` in `apps/api/src/middleware/auth.ts` uses `user.tenantId`, then `user.companyId`, then `default`. It reads `x-tenant-id`; an admin may select any normalized value, while a non-admin may select only a value in `user.companyIds`. An invalid or unauthorized selection silently falls back to the default tenant rather than returning a distinct tenant-selection error.
+4. `resolveRequestTenant()` in `apps/api/src/middleware/auth.ts` uses `user.tenantId`, then `user.companyId`, then `default`. It reads `x-tenant-id`; an admin may select any normalized value, while a non-admin may select only a value in `user.companyIds`. An invalid or unauthorized selection silently falls back to the user's default company/tenant (or `default`) rather than returning a distinct tenant-selection error.
 5. `apps/api/src/bootstrap.ts` exposes the auth bridge. Its `resolveActorContext` builds an ORM actor using the authenticated user and `resolveRequestTenant()`.
 6. Addon routes that call `resolveActorTenantFromBridge()` then pass the result as `FindOptions.tenantId` to repository reads/counts. For example, the CRM, CAB, project, timeline, and other routes use this pattern.
 7. The ORM adds `tenant_id = ?` when a repository query receives `FindOptions.tenantId`. The API's configured PostgreSQL URL selects `PostgresDriver` through `initDb()`; this database-driver selection does not itself establish RLS or tenant membership.
@@ -75,7 +75,7 @@ The active API request path is:
 
 The active issuer in `packages/mid/src/app.ts` builds access and ID token claims from `sub`, `iss`, `aud`, timestamps, token-use, scope, username, name, email, and global role. It does **not** add `tenant_id`, `tid`, `company_id`, or membership claims. The discovery document's supported claims list likewise does not advertise tenant claims.
 
-The API verifier in `packages/addons/src/auth/mid-jwt.ts` supports reading optional `tenant_id`/`tid`, but the active issuer does not emit either. A normal Bearer access token from this issuer therefore reaches `resolveRequestTenant()` without a tenant or company list and resolves to `default`, unless a future issuer or an external token source supplies the optional claim.
+The API verifier in `packages/addons/src/auth/mid-jwt.ts` supports reading optional `tenant_id`/`tid`, but the active issuer does not emit either. Although the verifier loads the local user record, it constructs the Bearer identity from the public-user projection plus the optional token tenant claim; it does not copy `companyId`/`companyIds` from that record. A normal Bearer access token from this issuer therefore reaches `resolveRequestTenant()` without a tenant or company list and resolves to `default`, unless a future issuer or an external token source supplies the optional claim.
 
 This is a concrete difference between cookie and Bearer identity. PaaS design must explicitly decide whether tenant selection is resolved from an authoritative membership query, a signed token claim backed by current membership state, or another approved mechanism. Do not infer that current OIDC tokens carry tenant membership.
 
