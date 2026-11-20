@@ -29,6 +29,7 @@ import {
   type CrewRoleOrPublic,
 } from "@moonwitness/addon-runtime";
 import { createSession, createUser } from "@moonwitness/addons/auth";
+import { irAutomationModel, irWebhookModel, irWebhookLogModel } from "@moonwitness/addons";
 import { buildApp } from "./app";
 import { resolvePostgresConformanceUrl } from "./pg-conformance-config";
 
@@ -143,6 +144,8 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
         await closeDbAsync();
         await isolated.drop();
       });
+
+      await syncModels([irAutomationModel, irWebhookModel, irWebhookLogModel]);
 
       app = await buildApp({ dbPath: isolated.dbUrl, prefix: "/api/v1" });
 
