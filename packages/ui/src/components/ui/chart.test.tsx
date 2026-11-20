@@ -62,7 +62,8 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     );
 
     expect(container.querySelectorAll('svg[data-mw-chart="sparkline"]').length).toBe(2);
-    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(6);
+    const hiddenSvgs = container.querySelectorAll("svg[aria-hidden='true']");
+    expect(hiddenSvgs).toHaveLength(6);
     expect(
       container.querySelectorAll("table[data-mw-chart-data-alternative='true']"),
     ).toHaveLength(6);
@@ -73,7 +74,7 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(container.querySelector("table caption")?.textContent).toBe("CPU 74% data");
   });
 
-  it("exposes chart values as accessible tables while hiding decorative SVGs", () => {
+  it("exposes accessible chart data and hides decorative SVGs", () => {
     const inbound = [
       { label: "00:00", value: 12 },
       { label: "00:05", value: 0 },
@@ -110,12 +111,13 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(tables[3]?.caption?.textContent).toBe("CPU utilisation data");
     expect(tables[3]?.textContent).toContain("74%");
     expect(container.querySelectorAll("svg[role='img']")).toHaveLength(0);
-    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(5);
+    const hiddenSvgs = container.querySelectorAll("svg[aria-hidden='true']");
+    expect(hiddenSvgs).toHaveLength(5);
     expect(tables[4]?.caption?.textContent).toBe("Empty chart data");
     expect(tables[4]?.textContent).toContain("No data available");
   });
 
-  it("can preserve an SVG image label when its accessible data table is disabled", () => {
+  it("supports SVG-only mode when accessible data is disabled", () => {
     renderNode(
       <BarChart
         data={[{ label: "Active", value: 4 }]}
@@ -127,7 +129,10 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     const chart = container.querySelector("svg[role='img']");
     expect(chart?.getAttribute("aria-label")).toBe("Active sessions");
     expect(chart?.hasAttribute("aria-hidden")).toBe(false);
-    expect(container.querySelector("table[data-mw-chart-data-alternative='true']")).toBeNull();
+    const alternativeTable = container.querySelector(
+      "table[data-mw-chart-data-alternative='true']",
+    );
+    expect(alternativeTable).toBeNull();
   });
 
   it("renders all 10 skins inside SkinMatrixCompare and formats CSS/JSON exports", () => {
