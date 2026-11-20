@@ -10,7 +10,6 @@ import {
   defineModel,
   getDb,
   initPostgresDb,
-  isPostgresUrl,
   modelRegistry,
   PolicyError,
   syncModels,

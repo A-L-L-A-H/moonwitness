@@ -28,7 +28,21 @@ export function AuthGuard({
   const { session, loading } = useCurrentSessionState();
   const policy = resolveRoutePolicy(pathname);
 
-  if (policy.access === "public" || policy.access === "guest-only") {
+  if (policy.access === "public") {
+    return <>{children}</>;
+  }
+
+  if (policy.access === "guest-only") {
+    if (loading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center font-mono text-xs text-[var(--muted-foreground)]">
+          VERIFYING SOVEREIGN SESSION…
+        </div>
+      );
+    }
+    if (session) {
+      return <AuthRedirect lang={locale} />;
+    }
     return <>{children}</>;
   }
 
