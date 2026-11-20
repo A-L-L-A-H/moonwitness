@@ -60,6 +60,15 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
     dbName,
     drop: async () => {
       try {
+        // Terminate remaining backend connections before dropping so the
+        // process does not emit unhandled 57P01 errors on live sockets.
+        await adminPool
+          .query(
+            `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()`,
+            [dbName],
+          )
+          .catch(() => {});
+        await new Promise((resolve) => setTimeout(resolve, 50));
         await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`);
       } finally {
         await adminPool.end();
@@ -131,6 +140,10 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
 
     afterAll(async () => {
       await closeDbAsync();
+    });
+    afterAll(async () => {
+      // Allow PG client pool to fully drain and avoid unhandled 57P01 terminations
+      await new Promise((resolve) => setTimeout(resolve, 100));
     });
 
     it("1a. boots real Fastify host (buildApp) on PostgreSQL 16 with health/readiness, authBridge actor context, RPC, and 2-tenant isolation", async () => {
