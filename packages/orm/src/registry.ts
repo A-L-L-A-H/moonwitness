@@ -247,6 +247,20 @@ function resolveTargetUniqueness(
   );
 }
 
+function resolveSourceUniqueness(
+  sourceModel: string,
+  sourceIndexes: ModelIndex[],
+): "single" | "tenant_composite" {
+  const hasTenantCompositeUnique = sourceIndexes.some(
+    (idx) =>
+      idx.unique &&
+      idx.fields.length === 2 &&
+      idx.fields.includes("tenant_id") &&
+      idx.fields.includes("id"),
+  );
+  return hasTenantCompositeUnique ? "tenant_composite" : "single";
+}
+
 class OrmModelRegistry {
   private readonly bases = new Map<string, StoredModelBase>();
   private readonly extensions = new Map<string, ModelExtensionDef[]>();
@@ -504,6 +518,7 @@ class OrmModelRegistry {
               target.indexes,
             );
           }
+          const sourceUniqueness = resolveSourceUniqueness(base.name, base.indexes);
           many2manyTables.push({
             relationName: relName,
             table: joinTable,
@@ -517,7 +532,7 @@ class OrmModelRegistry {
             onDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
             sourceOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
             targetOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
-            sourceUniqueness: "single",
+            sourceUniqueness,
             targetUniqueness,
           });
           continue;
