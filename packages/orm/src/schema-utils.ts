@@ -30,6 +30,7 @@ export interface Many2ManyJoinTableSpec {
   onDelete: "restrict" | "ignore";
   sourceOnDelete: "restrict" | "ignore";
   targetOnDelete: "restrict" | "ignore";
+  sourceUniqueness: TargetUniqueness;
   targetUniqueness: TargetUniqueness;
 }
 
@@ -289,9 +290,9 @@ export function compileMany2ManyJoinTableDdl(spec: Many2ManyJoinTableSpec): stri
   assertIdentifier(spec.table, "join table");
   assertIdentifier(spec.sourceColumn, "join source column");
   assertIdentifier(spec.targetColumn, "join target column");
-  const sourceOnDelete = spec.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
-  const targetOnDelete = spec.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
-  const sourceFkRef = `FOREIGN KEY (tenant_id, "${spec.sourceColumn}") REFERENCES "${spec.sourceTable}"(tenant_id, id) ON DELETE ${sourceOnDelete}`;
+  const sourceOnDelete = spec.sourceOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+  const targetOnDelete = spec.targetOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+  const sourceFkRef = `FOREIGN KEY ("${spec.sourceColumn}") REFERENCES "${spec.sourceTable}"(id) ON DELETE ${sourceOnDelete}`;
   let targetFkRef: string;
   if (spec.targetUniqueness === "single") {
     targetFkRef = `FOREIGN KEY ("${spec.targetColumn}") REFERENCES "${spec.targetTable}"("${spec.targetField}") ON DELETE ${targetOnDelete}`;
