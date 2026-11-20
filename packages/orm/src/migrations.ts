@@ -44,7 +44,7 @@ export function migrationLockKey(migrationId: string): bigint {
     hash ^= BigInt(migrationId.charCodeAt(i));
     hash = (hash * 0x100000001b3n) & 0xffffffffffffffffn;
   }
-  return hash;
+  return hash & 0x7fffffffffffffffn;
 }
 
 /**

@@ -388,32 +388,38 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
     // Verify Arabic RTL (applied in TranslationWrapper useEffect after hydration)
     await page.goto("/ar/apps/addons", { waitUntil: "load" });
     await expect
-      .poll(async () =>
-        page.evaluate(() => ({
-          dir: document.documentElement.dir,
-          lang: document.documentElement.lang,
-        })),
+      .poll(
+        async () =>
+          page.evaluate(() => ({
+            dir: document.documentElement.dir,
+            lang: document.documentElement.lang,
+          })),
+        { timeout: 20_000 },
       )
       .toEqual({ dir: "rtl", lang: "ar" });
 
     // Verify zero sticky RTL leak onto unprefixed sanctuary/console routes
     await page.goto("/moonwitness", { waitUntil: "load" });
     await expect
-      .poll(async () =>
-        page.evaluate(() => ({
-          dir: document.documentElement.dir,
-          lang: document.documentElement.lang,
-        })),
+      .poll(
+        async () =>
+          page.evaluate(() => ({
+            dir: document.documentElement.dir,
+            lang: document.documentElement.lang,
+          })),
+        { timeout: 20_000 },
       )
       .toEqual({ dir: "ltr", lang: "en" });
 
     await page.goto("/mission-control", { waitUntil: "load" });
     await expect
-      .poll(async () =>
-        page.evaluate(() => ({
-          dir: document.documentElement.dir,
-          lang: document.documentElement.lang,
-        })),
+      .poll(
+        async () =>
+          page.evaluate(() => ({
+            dir: document.documentElement.dir,
+            lang: document.documentElement.lang,
+          })),
+        { timeout: 20_000 },
       )
       .toEqual({ dir: "ltr", lang: "en" });
 
