@@ -151,7 +151,10 @@ const DiffViewer = React.forwardRef<HTMLDivElement, DiffViewerProps>(
                         </span>
                         <span
                           aria-hidden="true"
-                          className="select-none px-2 py-1 text-end font-mono text-[var(--muted-foreground)]"
+                          className={cn(
+                            "select-none px-2 py-1 text-end font-mono",
+                            "text-[var(--muted-foreground)]",
+                          )}
                         >
                           {line.newLineNumber ?? ""}
                         </span>
