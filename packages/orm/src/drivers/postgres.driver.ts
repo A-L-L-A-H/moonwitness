@@ -352,10 +352,15 @@ export class PostgresDriver implements OrmDriverHandle {
   readonly dialect = "postgres" as const;
   private pool: PoolLike | null = null;
   private connectionString: string | null = null;
+  private closePromise: Promise<void> | null = null;
 
   async init(connectionString: string, poolOverride?: PoolLike): Promise<void> {
     if (this.pool) {
       throw new Error("Database already initialized. Close it before re-initializing.");
+    }
+    if (this.closePromise) {
+      await this.closePromise;
+      this.closePromise = null;
     }
     this.connectionString = connectionString;
     if (poolOverride) {
@@ -381,12 +386,22 @@ export class PostgresDriver implements OrmDriverHandle {
   }
 
   close(): void {
+    void this.closeAsync().catch(() => {});
+  }
+
+  async closeAsync(): Promise<void> {
+    if (this.closePromise) {
+      await this.closePromise;
+      return;
+    }
+
     const current = this.pool;
     this.pool = null;
     this.connectionString = null;
-    if (current) {
-      void current.end().catch(() => {});
-    }
+    if (!current) return;
+
+    this.closePromise = current.end();
+    await this.closePromise;
   }
 
   private requirePool(): PoolLike {
