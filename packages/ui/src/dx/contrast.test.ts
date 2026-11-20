@@ -35,10 +35,7 @@ describe("semantic token contrast matrix", () => {
 
   it("covers every registered skin palette in dark and light mode", () => {
     const expectedIds = Object.keys(SKIN_SURFACE_PALETTES)
-      .flatMap((skinName) => [
-        `skin:${skinName}:dark`,
-        `skin:${skinName}:light`,
-      ])
+      .flatMap((skinName) => [`skin:${skinName}:dark`, `skin:${skinName}:light`])
       .sort();
     const actualIds = skinResults.map((result) => result.dnaId).sort();
 
@@ -47,12 +44,8 @@ describe("semantic token contrast matrix", () => {
 
   it("uses separate text and focus contrast thresholds", () => {
     for (const result of allResults) {
-      const focusPairs = result.pairs.filter((pair) =>
-        pair.pairName.startsWith("focus "),
-      );
-      const textPairs = result.pairs.filter(
-        (pair) => !pair.pairName.startsWith("focus "),
-      );
+      const focusPairs = result.pairs.filter((pair) => pair.pairName.startsWith("focus "));
+      const textPairs = result.pairs.filter((pair) => !pair.pairName.startsWith("focus "));
 
       expect(focusPairs).toHaveLength(2);
       expect(focusPairs.every((pair) => pair.minimumRequired === 3.0)).toBe(true);
