@@ -292,13 +292,28 @@ export function compileMany2ManyJoinTableDdl(spec: Many2ManyJoinTableSpec): stri
   assertIdentifier(spec.targetColumn, "join target column");
   const sourceOnDelete = spec.sourceOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
   const targetOnDelete = spec.targetOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
-  const sourceFkRef = `FOREIGN KEY ("${spec.sourceColumn}") REFERENCES "${spec.sourceTable}"(id) ON DELETE ${sourceOnDelete}`;
-  let targetFkRef: string;
-  if (spec.targetUniqueness === "single") {
-    targetFkRef = `FOREIGN KEY ("${spec.targetColumn}") REFERENCES "${spec.targetTable}"("${spec.targetField}") ON DELETE ${targetOnDelete}`;
+  
+  let sourceTargetCols: string;
+  if (spec.sourceUniqueness === "single") {
+    sourceTargetCols = "(id)";
   } else {
-    targetFkRef = `FOREIGN KEY (tenant_id, "${spec.targetColumn}") REFERENCES "${spec.targetTable}"(tenant_id, "${spec.targetField}") ON DELETE ${targetOnDelete}`;
+    sourceTargetCols = "(tenant_id, \"id\")";
   }
+  
+  let targetTargetCols: string;
+  if (spec.targetUniqueness === "single") {
+    targetTargetCols = `("${spec.targetField}")`;
+  } else {
+    targetTargetCols = `(tenant_id, "${spec.targetField}")`;
+  }
+  
+  const sourceFkCols = spec.sourceUniqueness === "single" ? `"${spec.sourceColumn}"` : `tenant_id, "${spec.sourceColumn}"`;
+  const targetFkCols = spec.targetUniqueness === "single" ? `"${spec.targetColumn}"` : `tenant_id, "${spec.targetColumn}"`;
+  
+  const sourceFkRef = `FOREIGN KEY (${sourceFkCols}) REFERENCES "${spec.sourceTable}" ${sourceTargetCols} ON DELETE ${sourceOnDelete}`;
+  
+  const targetFkRef = `FOREIGN KEY (${targetFkCols}) REFERENCES "${spec.targetTable}" ${targetTargetCols} ON DELETE ${targetOnDelete}`;
+  
   return [
     `CREATE TABLE IF NOT EXISTS ${spec.table} (\n  id TEXT PRIMARY KEY,\n  tenant_id TEXT NOT NULL DEFAULT 'default',\n  "${spec.sourceColumn}" TEXT NOT NULL,\n  "${spec.targetColumn}" TEXT NOT NULL,\n  ${sourceFkRef},\n  ${targetFkRef}\n)`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_${spec.table}_unique ON ${spec.table} (tenant_id, ${spec.sourceColumn}, ${spec.targetColumn})`,

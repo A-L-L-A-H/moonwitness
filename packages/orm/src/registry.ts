@@ -249,8 +249,15 @@ function resolveTargetUniqueness(
 
 function resolveSourceUniqueness(
   sourceModel: string,
+  sourceFields: Map<string, FieldSpec>,
   sourceIndexes: ModelIndex[],
 ): "single" | "tenant_composite" {
+  const hasSingleUnique = sourceIndexes.some(
+    (idx) => idx.unique && idx.fields.length === 1 && idx.fields[0] === "id",
+  );
+  if (hasSingleUnique) {
+    return "single";
+  }
   const hasTenantCompositeUnique = sourceIndexes.some(
     (idx) =>
       idx.unique &&
@@ -258,7 +265,10 @@ function resolveSourceUniqueness(
       idx.fields.includes("tenant_id") &&
       idx.fields.includes("id"),
   );
-  return hasTenantCompositeUnique ? "tenant_composite" : "single";
+  if (hasTenantCompositeUnique) {
+    return "tenant_composite";
+  }
+  return "single";
 }
 
 class OrmModelRegistry {
@@ -518,7 +528,11 @@ class OrmModelRegistry {
               target.indexes,
             );
           }
-          const sourceUniqueness = resolveSourceUniqueness(base.name, base.indexes);
+          const sourceUniqueness = resolveSourceUniqueness(
+            base.name,
+            fields,
+            base.indexes,
+          );
           many2manyTables.push({
             relationName: relName,
             table: joinTable,
