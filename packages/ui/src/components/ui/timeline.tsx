@@ -88,9 +88,7 @@ const Timeline = React.forwardRef<HTMLDivElement, TimelineProps>(
                   </span>
                   <div className={cn("min-w-0 flex-1", isCompact ? "pb-0" : "pb-1")}>
                     <div
-                      className={cn(
-                        "flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm",
-                      )}
+                      className={cn("flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm")}
                     >
                       <span className="min-w-0 font-semibold text-[var(--foreground)]">
                         {item.title}
