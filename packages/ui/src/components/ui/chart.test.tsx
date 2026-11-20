@@ -40,7 +40,9 @@ afterEach(() => {
 });
 
 describe("Telemetry charts and SkinMatrixCompare", () => {
-  it("renders Sparkline, LineChart, AreaChart, BarChart, and RadialGauge with semantic tokens", () => {
+  it(
+    "renders Sparkline, LineChart, AreaChart, BarChart, and RadialGauge with semantic tokens",
+    () => {
     const series = [
       { label: "T1", value: 12 },
       { label: "T2", value: 28 },
@@ -71,7 +73,8 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     const gauge = container.querySelector('svg[data-mw-chart="radial-gauge"]');
     expect(gauge?.getAttribute("aria-hidden")).toBe("true");
     expect(container.querySelector("table caption")?.textContent).toBe("CPU 74% data");
-  });
+    },
+  );
 
   it("exposes chart values as accessible tables while hiding decorative SVGs", () => {
     const inbound = [
