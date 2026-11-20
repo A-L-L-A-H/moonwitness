@@ -208,7 +208,7 @@ export function assertWritableBodyFields(
     if (value === undefined) continue;
     if (!canWriteField(desc, field, role, effectiveGroups, impliedGroups)) {
       throw new PolicyError(
-        `Write access to field '${field}' on '${desc.name}' is forbidden`,
+        "Write access to field '" + field + "' on '" + desc.name + "' is forbidden",
         "FIELD_WRITE_FORBIDDEN",
         403,
       );
@@ -227,7 +227,6 @@ export function assertWritableActionInputFields(
   if (depth > 8 || input === null || input === undefined || typeof input !== "object") {
     return;
   }
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   if (Array.isArray(input)) {
     for (const item of input) {
       assertWritableActionInputFields(desc, item, role, actorGroups, impliedGroups, depth + 1);
@@ -243,9 +242,9 @@ export function assertWritableActionInputFields(
       desc.fields.has(key) ||
       desc.fieldPolicies?.[key] !== undefined ||
       SENSITIVE_FIELD_RE.test(key);
-    if (isKnownModelField && !canWriteField(desc, key, role, effectiveGroups, impliedGroups)) {
+    if (isKnownModelField && !canWriteField(desc, key, role, actorGroups, impliedGroups)) {
       throw new PolicyError(
-        `Write access to field '${key}' on '${desc.name}' is forbidden`,
+        "Write access to field '" + key + "' on '" + desc.name + "' is forbidden",
         "FIELD_WRITE_FORBIDDEN",
         403,
       );
@@ -267,7 +266,7 @@ export function assertReadableFilterFields(
   for (const field of fields) {
     if (!canReadField(desc, field, role, effectiveGroups, impliedGroups)) {
       throw new PolicyError(
-        `Read access to field '${field}' on '${desc.name}' is forbidden`,
+        "Read access to field '" + field + "' on '" + desc.name + "' is forbidden",
         "FIELD_READ_FORBIDDEN",
         403,
       );
@@ -289,7 +288,7 @@ export function assertReadableRelations(
     for (const seg of relPath.split(".").filter(Boolean)) {
       if (!canReadRelation(currentDesc, seg, role, effectiveGroups, impliedGroups)) {
         throw new PolicyError(
-          `Read access to field '${seg}' on '${currentDesc?.name ?? desc.name}' is forbidden`,
+          "Read access to field '" + seg + "' on '" + (currentDesc?.name ?? desc.name) + "' is forbidden",
           "FIELD_READ_FORBIDDEN",
           403,
         );
