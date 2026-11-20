@@ -10,6 +10,7 @@ export {
   ensureAuditTable,
   ensureOutboxTable,
 } from "./define-model.js";
+export { doctorModels } from "./doctor.js";
 export type {
   DefineModelOptions,
   DefineModelReturn,
@@ -56,7 +57,18 @@ export {
 } from "./actor-context.js";
 export type { ActorContext, ActorSource } from "./actor-context.js";
 export { ConflictError, PolicyError, type PolicyErrorCode } from "./errors.js";
-export { initDb, initD1Db, initPostgresDb, closeDb, getDb, withQueryBudget } from "./driver.js";
+export {
+  initDb,
+  initD1Db,
+  initPostgresDb,
+  closeDb,
+  closeDbAsync,
+  getDb,
+  withQueryBudget,
+  runWithTransactionExecutor,
+  getTransactionExecutor,
+  isInTransaction,
+} from "./driver.js";
 export type { OrmDriverHandle } from "./driver.js";
 export { LibSqlDriver } from "./drivers/sqlite.driver.js";
 export type { LibSqlExecutor } from "./drivers/sqlite.driver.js";

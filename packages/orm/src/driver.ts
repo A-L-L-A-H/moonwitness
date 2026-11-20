@@ -18,6 +18,10 @@ interface QueryBudgetState {
 }
 
 const queryBudgetStorage = new AsyncLocalStorage<QueryBudgetState>();
+
+/** Transaction executor bound to the current async context. */
+const transactionStorage = new AsyncLocalStorage<OrmDriverHandle>();
+
 const rawHandleMap = new WeakMap<OrmDriverHandle, OrmDriverHandle>();
 
 /** Unwrap any query-budget proxy around an ORM driver handle. */
@@ -131,7 +135,37 @@ export function closeDb(): void {
   }
 }
 
+/**
+ * Awaitable close: waits for the active driver to finish closing (PostgreSQL
+ * pool teardown) before returning. Falls back to synchronous close for
+ * drivers without an async close path. Safe to call when nothing is open.
+ */
+export async function closeDbAsync(): Promise<void> {
+  const current = db;
+  db = null;
+  if (!current) return;
+  const asyncClosable = current as OrmDriverHandle & { closeAsync?: () => Promise<void> };
+  if (typeof asyncClosable.closeAsync === "function") {
+    await asyncClosable.closeAsync();
+    return;
+  }
+  current.close();
+}
+
+/**
+ * Get the active database executor.
+ * Returns the transaction-bound executor if inside a transaction callback,
+ * otherwise returns the global driver handle (wrapped with query budget if active).
+ */
 export function getDb(): OrmDriverHandle {
+  const txExecutor = transactionStorage.getStore();
+  if (txExecutor) {
+    const budget = queryBudgetStorage.getStore();
+    if (!budget) return txExecutor;
+    const wrapped = wrapExecutorWithBudget(txExecutor, budget);
+    rawHandleMap.set(wrapped, txExecutor);
+    return wrapped;
+  }
   if (!db) {
     throw new Error("Database not initialized. Call initDb() first.");
   }
@@ -140,4 +174,31 @@ export function getDb(): OrmDriverHandle {
   const wrapped = wrapExecutorWithBudget(db, budget);
   rawHandleMap.set(wrapped, db);
   return wrapped;
+}
+
+/**
+ * Run `fn` with `executor` bound as the active transaction executor for the current async context.
+ * Used by driver implementations to bind their transaction connection.
+ * The executor is also passed to `fn` for direct use.
+ */
+export function runWithTransactionExecutor<T>(
+  executor: OrmDriverHandle,
+  fn: (tx: OrmDriverHandle) => Promise<T>,
+): Promise<T> {
+  return transactionStorage.run(executor, () => fn(executor));
+}
+
+/**
+ * Get the currently active transaction executor, if any.
+ * Returns undefined outside a transaction callback.
+ */
+export function getTransactionExecutor(): OrmDriverHandle | undefined {
+  return transactionStorage.getStore();
+}
+
+/**
+ * Check if currently inside a transaction callback.
+ */
+export function isInTransaction(): boolean {
+  return transactionStorage.getStore() !== undefined;
 }

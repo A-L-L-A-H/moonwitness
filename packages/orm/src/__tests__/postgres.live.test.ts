@@ -178,4 +178,170 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
       closeDb();
     }
   });
+
+  it("[MW-0830] syncModels adds missing FK on an existing model table", async () => {
+    const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
+    const authorTable = `pg_830_author_${suffix}`;
+    const bookTable = `pg_830_book_${suffix}`;
+
+    const authorModel = defineModel({
+      name: `pg_830.author_${suffix}`,
+      table: authorTable,
+      schema: z.object({
+        name: z.string().min(1),
+      }),
+    });
+
+    await initDb(POSTGRES_TEST_URL);
+    try {
+      // Sync author table first
+      await syncModels([authorModel]);
+
+      // Pre-create book table WITHOUT FK (simulating existing-table drift)
+      await getDb().exec(
+        `CREATE TABLE IF NOT EXISTS ${bookTable} (
+          id TEXT PRIMARY KEY,
+          title TEXT NOT NULL,
+          author TEXT,
+          tenant_id TEXT NOT NULL DEFAULT 'default',
+          create_date TEXT NOT NULL,
+          write_date TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'active',
+          version INTEGER NOT NULL DEFAULT 1,
+          source TEXT NOT NULL DEFAULT 'api'
+        )`,
+      );
+
+      const bookModel = defineModel({
+        name: `pg_830.book_${suffix}`,
+        table: bookTable,
+        schema: z.object({
+          title: z.string().min(1),
+          author: z.string().optional(),
+        }),
+        relations: {
+          author: {
+            type: "many2one",
+            model: `pg_830.author_${suffix}`,
+            targetField: "id",
+            onDelete: "set null",
+          },
+        },
+      });
+
+      const _report = await syncModels([authorModel, bookModel]);
+
+      // Verify FK was added to pg_constraint
+      const fkRows = await getDb().all<{ conname: string }>(
+        `SELECT con.conname FROM pg_constraint con
+         JOIN pg_class rel ON rel.oid = con.conrelid
+         JOIN pg_namespace n ON n.oid = rel.relnamespace
+         WHERE n.nspname = 'public' AND rel.relname = $1 AND con.contype = 'f'`,
+        [bookTable.toLowerCase()],
+      );
+      expect(fkRows.length).toBeGreaterThan(0);
+
+      // Re-running sync is idempotent - no duplicate FKs
+      const _report2 = await syncModels([authorModel, bookModel]);
+      const fkRows2 = await getDb().all<{ conname: string }>(
+        `SELECT con.conname FROM pg_constraint con
+         JOIN pg_class rel ON rel.oid = con.conrelid
+         JOIN pg_namespace n ON n.oid = rel.relnamespace
+         WHERE n.nspname = 'public' AND rel.relname = $1 AND con.contype = 'f'`,
+        [bookTable.toLowerCase()],
+      );
+      expect(fkRows2.length).toBe(fkRows.length);
+    } finally {
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${bookTable}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${authorTable}`)
+        .catch(() => {});
+      closeDb();
+    }
+  });
+
+  it("[MW-0831] syncModels adds FKs on existing Many2many join tables", async () => {
+    const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
+    const userTable = `pg_831_user_${suffix}`;
+    const tagTable = `pg_831_tag_${suffix}`;
+    const joinTable = `pg_831_user_tags_${suffix}`;
+
+    const userModel = defineModel({
+      name: `pg_831.user_${suffix}`,
+      table: userTable,
+      schema: z.object({
+        name: z.string().min(1),
+      }),
+    });
+
+    const tagModel = defineModel({
+      name: `pg_831.tag_${suffix}`,
+      table: tagTable,
+      schema: z.object({
+        name: z.string().min(1),
+      }),
+    });
+
+    await initDb(POSTGRES_TEST_URL);
+    try {
+      await syncModels([userModel, tagModel]);
+
+      // Pre-create join table WITHOUT FKs (simulating existing join table drift)
+      await getDb().exec(
+        `CREATE TABLE IF NOT EXISTS ${joinTable} (
+          id TEXT PRIMARY KEY,
+          tenant_id TEXT NOT NULL DEFAULT 'default',
+          source_id TEXT NOT NULL,
+          target_id TEXT NOT NULL
+        )`,
+      );
+
+      const m2mModel = defineModel({
+        name: `pg_831.tagged_${suffix}`,
+        table: joinTable,
+        schema: z.object({
+          name: z.string().min(1).nullable(),
+        }),
+        relations: {
+          users: { type: "many2many", model: `pg_831.user_${suffix}`, through: joinTable },
+        },
+      });
+
+      await syncModels([m2mModel]);
+
+      // Verify both FKs were added to pg_constraint
+      const fkRows = await getDb().all<{ conname: string; confrelid: number }>(
+        `SELECT con.conname, con.confrelid FROM pg_constraint con
+         JOIN pg_class rel ON rel.oid = con.conrelid
+         JOIN pg_namespace n ON n.oid = rel.relnamespace
+         WHERE n.nspname = 'public' AND rel.relname = $1 AND con.contype = 'f'`,
+        [joinTable.toLowerCase()],
+      );
+      expect(fkRows.length).toBe(2);
+
+      // Re-running sync is idempotent
+      const _report2 = await syncModels([m2mModel]);
+      const fkRows2 = await getDb().all<{ conname: string }>(
+        `SELECT con.conname FROM pg_constraint con
+         JOIN pg_class rel ON rel.oid = con.conrelid
+         JOIN pg_namespace n ON n.oid = rel.relnamespace
+         WHERE n.nspname = 'public' AND rel.relname = $1 AND con.contype = 'f'`,
+        [joinTable.toLowerCase()],
+      );
+      expect(fkRows2.length).toBe(fkRows.length);
+    } finally {
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${joinTable}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${tagTable}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${userTable}`)
+        .catch(() => {});
+      closeDb();
+    }
+  });
 });

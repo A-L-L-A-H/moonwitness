@@ -145,7 +145,11 @@ export function createAddonHostContext(prefix: string, seedDemo: boolean): Addon
   };
 }
 
-async function registerAddonTree(target: FastifyInstance, host: AddonHostContext): Promise<void> {
+async function registerAddonTree(
+  target: FastifyInstance,
+  host: AddonHostContext,
+  extraAddons: AddonDefinition[] = [],
+): Promise<void> {
   const runtime = new AddonRuntimeController();
   const prefix = host.prefix;
 
@@ -172,6 +176,7 @@ async function registerAddonTree(target: FastifyInstance, host: AddonHostContext
       },
     },
     ...createPlatformAddons(host),
+    ...extraAddons,
   ];
 
   await runtime.syncAll(addons, target, {
@@ -298,6 +303,6 @@ export async function buildCoreApp(options: CoreAppOptions = {}): Promise<Fastif
   }
 
   const host = createAddonHostContext(prefix, seed);
-  await registerAddonTree(fastify, host);
+  await registerAddonTree(fastify, host, options.addons);
   return fastify;
 }
