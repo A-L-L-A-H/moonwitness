@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { getDb } from "./driver.js";
+import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 
 export interface Migration {
   id: string;
@@ -14,7 +15,7 @@ const POSTGRES_NON_TRANSACTIONAL_STATEMENT =
   /(?:^|;)\s*(?:CREATE\s+(?:UNIQUE\s+)?INDEX\s+CONCURRENTLY\b|DROP\s+INDEX\s+CONCURRENTLY\b|REINDEX\b[^;]*\bCONCURRENTLY\b|VACUUM\b|CREATE\s+DATABASE\b|DROP\s+DATABASE\b|ALTER\s+SYSTEM\b|CHECKPOINT\b)/i;
 
 async function acquirePostgresMigrationLock(
-  tx: Awaited<ReturnType<typeof getDb>> extends never ? never : import("./drivers/sqlite.driver.js").LibSqlExecutor,
+  tx: LibSqlExecutor,
   lockKey: string,
 ): Promise<void> {
   await tx.get(
