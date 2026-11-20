@@ -102,7 +102,10 @@ const DiffViewer = React.forwardRef<HTMLDivElement, DiffViewerProps>(
               <section key={hunk.id} className="min-w-0">
                 {hunk.header ? (
                   <h4
-                    className="border-b border-[var(--border)] bg-[var(--muted)]/40 px-3 py-2 font-mono text-xs text-[var(--muted-foreground)]"
+                    className={cn(
+                      "border-b border-[var(--border)] bg-[var(--muted)]/40",
+                      "px-3 py-2 font-mono text-xs text-[var(--muted-foreground)]",
+                    )}
                   >
                     {hunk.header}
                   </h4>
@@ -114,24 +117,35 @@ const DiffViewer = React.forwardRef<HTMLDivElement, DiffViewerProps>(
                   {hunk.lines.map((line) => {
                     const kindLabel = LINE_KIND_LABELS[line.kind];
                     const lineNumbers = [
-                      line.oldLineNumber !== undefined ? `old line ${line.oldLineNumber}` : null,
-                      line.newLineNumber !== undefined ? `new line ${line.newLineNumber}` : null,
+                      line.oldLineNumber !== undefined
+                        ? `old line ${line.oldLineNumber}`
+                        : null,
+                      line.newLineNumber !== undefined
+                        ? `new line ${line.newLineNumber}`
+                        : null,
                     ].filter(Boolean);
-                    const lineLabel = lineNumbers.length > 0 ? `, ${lineNumbers.join(", ")}` : "";
+                    const lineLabel =
+                      lineNumbers.length > 0 ? `, ${lineNumbers.join(", ")}` : "";
 
                     return (
                       <li
                         key={line.id}
-                        aria-label={`${kindLabel}${lineLabel}: ${line.content || "blank line"}`}
+                        aria-label={
+                          `${kindLabel}${lineLabel}: ${line.content || "blank line"}`
+                        }
                         data-change-kind={line.kind}
                         className={cn(
-                          "grid min-w-max grid-cols-[3.5rem_3.5rem_7.5rem_minmax(0,1fr)] border-s-[3px] text-xs",
+                          "grid min-w-max grid-cols-[3.5rem_3.5rem_7.5rem_minmax(0,1fr)]",
+                          "border-s-[3px] text-xs",
                           lineKindClasses(line.kind),
                         )}
                       >
                         <span
                           aria-hidden="true"
-                          className="select-none px-2 py-1 text-end font-mono text-[var(--muted-foreground)]"
+                          className={cn(
+                            "select-none px-2 py-1 text-end font-mono",
+                            "text-[var(--muted-foreground)]",
+                          )}
                         >
                           {line.oldLineNumber ?? ""}
                         </span>
@@ -150,7 +164,10 @@ const DiffViewer = React.forwardRef<HTMLDivElement, DiffViewerProps>(
                           {kindLabel}
                         </span>
                         <pre
-                          className="m-0 min-w-max whitespace-pre px-3 py-1 font-mono text-[var(--foreground)]"
+                          className={cn(
+                            "m-0 min-w-max whitespace-pre px-3 py-1 font-mono",
+                            "text-[var(--foreground)]",
+                          )}
                         >
                           <code>{line.content.length > 0 ? line.content : " "}</code>
                         </pre>
