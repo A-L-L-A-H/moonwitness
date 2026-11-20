@@ -27,3 +27,26 @@ pnpm --filter @moonwitness/ui ui:contrast  # vitest run src/dx/contrast.test.ts
 
 - **Owner:** UI & Design System Platform (`packages/ui`)
 - **Contracts:** [docs/dna/00-ENGINE-CONTRACT.md](../../docs/dna/00-ENGINE-CONTRACT.md), [docs/dna/README.md](../../docs/dna/README.md), [docs/dna/09-UI-ARCHITECTURE-STATUS.md](../../docs/dna/09-UI-ARCHITECTURE-STATUS.md)
+
+## DiffViewer component
+
+Render precomputed, read-only diff hunks without adding a diff engine:
+
+```tsx
+import { DiffViewer, type DiffHunk } from "@moonwitness/ui";
+
+const hunks: DiffHunk[] = [
+  {
+    id: "hunk-1",
+    header: "@@ -1,2 +1,2 @@",
+    lines: [
+      { id: "before", kind: "removed", content: "const retries = 2;", oldLineNumber: 1 },
+      { id: "after", kind: "added", content: "const retries = 3;", newLineNumber: 1 },
+    ],
+  },
+];
+
+<DiffViewer fileName="src/config.ts" hunks={hunks} />;
+```
+
+The caller owns diff computation, file loading, ordering and authorization. The component only presents added, removed and unchanged lines, with visible text labels and an accessible file/change description.
