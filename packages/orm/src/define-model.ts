@@ -168,7 +168,9 @@ const auditedDrivers = new WeakSet<LibSqlExecutor>();
 const MAX_HOOK_DEPTH = 4;
 const MAX_RELATION_DEPTH = 2;
 const MAX_WITH_RELATIONS = 16;
-const SENSITIVE_OUTBOX_KEY_RE = /password_hash|_token|_secret|encrypted_private/i;
+const SENSITIVE_DATA_KEY_RE =
+  /password|passwd|passphrase|pwd|token|secret|api[_-]?key|private[_-]?key|credential|authorization|bearer|cookie|session|encrypted[_-]?private|refresh[_-]?token|access[_-]?token|signing[_-]?key|client[_-]?key|salt/i;
+const AUDIT_REDACTION_MARKER = "[REDACTED]";
 const hookDepthStorage = new AsyncLocalStorage<number>();
 
 export async function ensureAuditTable(executor?: LibSqlExecutor): Promise<void> {
@@ -182,24 +184,35 @@ export async function ensureAuditTable(executor?: LibSqlExecutor): Promise<void>
 
 export const ensureOutboxTable = ensureAuditTable;
 
-function sanitizeOutboxValue(value: unknown, sensitiveFields: Set<string>): unknown {
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
+function isSensitiveDataKey(key: string, sensitiveFields: ReadonlySet<string>): boolean {
+  return sensitiveFields.has(key) || SENSITIVE_DATA_KEY_RE.test(key);
+}
+
+function sanitizeSensitiveValue(
+  value: unknown,
+  sensitiveFields: ReadonlySet<string>,
+  mode: "omit" | "redact",
+): unknown {
+  if (value instanceof Date) return value.toISOString();
   if (Array.isArray(value)) {
-    return value.map((item) => sanitizeOutboxValue(item, sensitiveFields));
+    return value.map((item) => sanitizeSensitiveValue(item, sensitiveFields, mode));
   }
   if (value && typeof value === "object") {
     const out: Record<string, unknown> = {};
-    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      if (SENSITIVE_OUTBOX_KEY_RE.test(k) || sensitiveFields.has(k)) {
+    for (const [key, nestedValue] of Object.entries(value as Record<string, unknown>)) {
+      if (isSensitiveDataKey(key, sensitiveFields)) {
+        if (mode === "redact") out[key] = AUDIT_REDACTION_MARKER;
         continue;
       }
-      out[k] = sanitizeOutboxValue(v, sensitiveFields);
+      out[key] = sanitizeSensitiveValue(nestedValue, sensitiveFields, mode);
     }
     return out;
   }
   return value;
+}
+
+function sanitizeOutboxValue(value: unknown, sensitiveFields: ReadonlySet<string>): unknown {
+  return sanitizeSensitiveValue(value, sensitiveFields, "omit");
 }
 
 /** UUID v7 (time-sortable) generated from crypto primitives. */
@@ -2545,6 +2558,13 @@ export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
 }
 
 function auditHookFor(model: string) {
+  const descriptor = modelRegistry.get(model);
+  const sensitiveFields = new Set(
+    Object.entries(descriptor?.fieldPolicies ?? {})
+      .filter(([, policy]) => policy.sensitive === true)
+      .map(([field]) => field),
+  );
+
   return (
     record: Record<string, unknown>,
     action: AuditAction,
@@ -2555,12 +2575,18 @@ function auditHookFor(model: string) {
     if (before) {
       for (const key of Object.keys(record)) {
         if (JSON.stringify(before[key]) !== JSON.stringify(record[key])) {
-          diff[key] = { before: before[key], after: record[key] };
+          diff[key] = {
+            before: sanitizeSensitiveValue(before[key], sensitiveFields, "redact"),
+            after: sanitizeSensitiveValue(record[key], sensitiveFields, "redact"),
+          };
         }
       }
     } else {
       for (const key of Object.keys(record)) {
-        diff[key] = { before: null, after: record[key] };
+        diff[key] = {
+          before: null,
+          after: sanitizeSensitiveValue(record[key], sensitiveFields, "redact"),
+        };
       }
     }
     return {
