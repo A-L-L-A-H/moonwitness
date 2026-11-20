@@ -18,6 +18,10 @@ export type {
   ModelRecord,
   QueryFilterOperators,
   FindOptions,
+  FindPageOptions,
+  PageResult,
+  SortSpec,
+  PageCursor,
   WriteGuardOptions,
 } from "./define-model.js";
 export { modelRegistry, extendModel, onModelWrite } from "./registry.js";

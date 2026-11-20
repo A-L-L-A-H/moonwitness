@@ -67,6 +67,57 @@ export interface FindOptions {
   with?: string[];
 }
 
+/** A normalized, validated sort specification used by keyset pagination. */
+export type SortSpec = Array<{ field: string; direction: "ASC" | "DESC" }>;
+
+/**
+ * An opaque, versioned continuation token for keyset pagination. The token
+ * embeds the model name, the normalized sort tuple, the effective filter
+ * identity and the last seen row's sort-key snapshot. It is URL-safe base64
+ * encoded JSON and is never intended to be parsed or trusted by callers.
+ */
+export interface PageCursor {
+  /** Cursor format version. Bumped only on breaking token layout changes. */
+  v: 1;
+  /** Model name the cursor was minted against. */
+  model: string;
+  /** Normalized sort tuple, including the `id` tie-breaker. */
+  sort: SortSpec;
+  /** Stable identity of the filter snapshot (normalized + JSON stringified). */
+  filterHash: string;
+  /** Last seen row's sort-key values, aligned with `sort`. */
+  values: unknown[];
+}
+
+/**
+ * Options for `findPage` keyset pagination. Tenancy, actor context, record
+ * rules and field-read policy are always re-applied on every page by the
+ * repository; the cursor can never broaden access.
+ */
+export interface FindPageOptions {
+  /** Row filters, applied on every page. Identity must match the cursor's snapshot. */
+  filters?: Record<string, unknown>;
+  /** Number of rows requested. Capped at a strict maximum by the repository. */
+  pageSize?: number;
+  /** Continuation cursor returned by a previous `findPage` call. */
+  cursor?: string;
+  /** Sort specification. The unique `id` tie-breaker is always appended. */
+  orderBy?: FindOptions["orderBy"];
+  includeDeleted?: boolean;
+  tenantId?: string;
+  fields?: string[];
+  q?: string;
+  allowedSearchFields?: string[];
+  with?: string[];
+}
+
+/** Result of a `findPage` keyset-pagination call. */
+export interface PageResult<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
+}
+
 export interface DefineModelOptions<
   TBusiness extends ZodObjectLike = ZodObjectLike,
 > extends ModelFeatureOptions {
@@ -168,6 +219,10 @@ const auditedDrivers = new WeakSet<LibSqlExecutor>();
 const MAX_HOOK_DEPTH = 4;
 const MAX_RELATION_DEPTH = 2;
 const MAX_WITH_RELATIONS = 16;
+/** Strict upper bound for keyset page size; cannot be raised by request input. */
+const MAX_PAGE_SIZE = 100;
+/** Current cursor token layout version. */
+const CURSOR_VERSION = 1 as const;
 const SENSITIVE_OUTBOX_KEY_RE = /password_hash|_token|_secret|encrypted_private/i;
 const hookDepthStorage = new AsyncLocalStorage<number>();
 
@@ -523,8 +578,17 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     });
   }
 
-  private buildOrderBy(orderBy?: FindOptions["orderBy"]): string {
-    if (!orderBy) return " ORDER BY id";
+  /**
+   * Normalize the caller-supplied `orderBy` into a validated sort tuple and
+   * append the model's stable unique identifier (`id`) as a tie-breaker when it
+   * is not already present. This guarantees a deterministic total ordering for
+   * offset pagination (MW-0834) and provides the unique final key needed by
+   * keyset cursor seek predicates (MW-0835).
+   */
+  private parseOrderBy(
+    orderBy?: FindOptions["orderBy"],
+  ): Array<{ field: string; direction: "ASC" | "DESC" }> {
+    if (!orderBy) return [{ field: "id", direction: "ASC" }];
     const specs: Array<{ field: string; direction: "ASC" | "DESC" }> = [];
     if (typeof orderBy === "string") {
       for (const rawPart of orderBy.split(",")) {
@@ -548,7 +612,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         specs.push({ field: item.field, direction: rawDir as "ASC" | "DESC" });
       }
     }
-    if (specs.length === 0) return " ORDER BY id";
+    if (specs.length === 0) return [{ field: "id", direction: "ASC" }];
+    // Deterministic tie-breaker (MW-0834): append `id` unless already present.
+    if (!specs.some((s) => s.field === "id")) {
+      specs.push({ field: "id", direction: "ASC" });
+    }
+    return specs;
+  }
+
+  private buildOrderBy(orderBy?: FindOptions["orderBy"]): string {
+    const specs = this.parseOrderBy(orderBy);
     return ` ORDER BY ${specs.map((s) => `${s.field} ${s.direction}`).join(", ")}`;
   }
 
@@ -862,6 +935,206 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       }
     }
     return decoded;
+  }
+
+  /** Encode a cursor object to a URL-safe base64 string. */
+  private encodeCursor(cursor: PageCursor): string {
+    return Buffer.from(JSON.stringify(cursor)).toString("base64url");
+  }
+
+  /** Decode and validate a cursor string. Throws on malformed or version mismatch. */
+  private decodeCursor(cursorStr: string): PageCursor {
+    let raw: PageCursor;
+    try {
+      raw = JSON.parse(Buffer.from(cursorStr, "base64url").toString("utf8"));
+    } catch {
+      throw new Error("Invalid cursor: malformed token");
+    }
+    if (!raw || typeof raw !== "object" || raw.v !== CURSOR_VERSION) {
+      throw new Error(`Invalid cursor: unsupported version ${raw?.v ?? "unknown"}`);
+    }
+    if (raw.model !== this.name) {
+      throw new Error(`Invalid cursor: model mismatch (expected ${this.name}, got ${raw.model})`);
+    }
+    if (!Array.isArray(raw.sort) || !Array.isArray(raw.values) || raw.sort.length !== raw.values.length) {
+      throw new Error("Invalid cursor: sort/values length mismatch");
+    }
+    return raw;
+  }
+
+  /** Build a filter-hash string for identity comparison. */
+  private filterHash(filters: Record<string, unknown> = {}): string {
+    const sorted = Object.entries(filters).sort(([a], [b]) => a.localeCompare(b));
+    return Buffer.from(JSON.stringify(sorted)).toString("base64url");
+  }
+
+  /** Build a keyset WHERE clause for the next page. Returns { whereClause, params }. */
+  private buildKeysetWhere(
+    sort: SortSpec,
+    values: unknown[],
+    filters: Record<string, unknown> = {},
+  ): { where: string; params: unknown[] } {
+    // Lexicographic comparison: (a1, a2, ...) > (v1, v2, ...)
+    // For ASC:  field > val  OR (field = val AND next-field ...)
+    // For DESC: field < val  OR (field = val AND next-field ...)
+    const { where: filterWhere, params: filterParams } = this.buildWhere(filters);
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    for (let i = 0; i < sort.length; i++) {
+      const spec = sort[i]!;
+      const { field, direction } = spec;
+      const val = values[i];
+      const isAsc = direction === "ASC";
+      const op = isAsc ? ">" : "<";
+
+      const prefix = i === 0 ? "" : clauses.map((_, idx) => idx < i ? " AND " : "").join("");
+      // Build: (field1 op val1) OR (field1 = val1 AND field2 op val2) OR ...
+      const equality = sort.slice(0, i).map((s, idx) => `${s.field} = ?`).join(" AND ");
+      const equalityParams = values.slice(0, i);
+      const condition = equality
+        ? `(${equality} AND ${field} ${op} ?)`
+        : `${field} ${op} ?`;
+
+      if (i === 0) {
+        clauses.push(condition);
+      } else {
+        // For subsequent fields, prepend equality chain
+        clauses.push(`(${equality} AND ${field} ${op} ?)`);
+      }
+      params.push(...equalityParams, val);
+    }
+
+    const combined = clauses.join(" OR ");
+    return {
+      where: filterWhere ? `${filterWhere} AND (${combined})` : `WHERE (${combined})`,
+      params: [...filterParams, ...params],
+    };
+  }
+
+  /**
+   * Keyset pagination (MW-0835). Returns a bounded page + opaque cursor.
+   * Never runs a total-count query. Validates cursor against model/sort/filters.
+   * Re-applies tenant scope, actor context, record rules and field-read policy.
+   */
+  async findPage(
+    filters: Record<string, unknown> = {},
+    opts: FindPageOptions = {},
+  ): Promise<PageResult<ModelRecord<TBusiness>>> {
+    const pageSize = Math.min(Math.max(1, Math.trunc(opts.pageSize ?? 50)), MAX_PAGE_SIZE);
+    const sort = this.parseOrderBy(opts.orderBy);
+
+    // If cursor provided, decode and validate it
+    let cursorFilterHash: string | undefined;
+    let seekWhere = "";
+    let seekParams: unknown[] = [];
+
+    if (opts.cursor) {
+      const cursor = this.decodeCursor(opts.cursor);
+      // Validate filter identity to prevent drift
+      cursorFilterHash = this.filterHash(filters);
+      if (cursor.filterHash !== cursorFilterHash) {
+        throw new Error("Cursor filter mismatch: filters changed since cursor was issued");
+      }
+      // Validate sort identity
+      const cursorSortKey = JSON.stringify(cursor.sort);
+      const currentSortKey = JSON.stringify(sort);
+      if (cursorSortKey !== currentSortKey) {
+        throw new Error("Cursor sort mismatch: orderBy changed since cursor was issued");
+      }
+      // Build keyset seek predicate
+      const { where, params } = this.buildKeysetWhere(cursor.sort, cursor.values, filters);
+      seekWhere = where;
+      seekParams = params;
+    }
+
+    // Build query
+    let selectClause = "*";
+    let helperColumnsToStrip: string[] = [];
+    if (opts.fields !== undefined) {
+      if (opts.fields.length === 0) {
+        throw new Error(`FindPageOptions.fields on model '${this.name}' must not be empty.`);
+      }
+      opts.fields.forEach((col) => this.validateColumn(col));
+      const requestedFieldsSet = new Set(opts.fields);
+      const internalCols = new Set(requestedFieldsSet);
+      internalCols.add("id");
+      internalCols.add("tenant_id");
+      // Add relation foreign keys if with paths requested
+      if (opts.with?.length) {
+        const relations = this.descriptor().relations ?? {};
+        for (const relPath of opts.with) {
+          const topRel = relPath.split(".")[0]!;
+          const rel = relations[topRel];
+          if (!rel) continue;
+          if (rel.type === "one2many") {
+            internalCols.add(rel.targetField ?? "id");
+          } else if (rel.type !== "many2many") {
+            internalCols.add(topRel);
+          }
+        }
+      }
+      helperColumnsToStrip = [...internalCols].filter((col) => !requestedFieldsSet.has(col));
+      selectClause = [...internalCols].join(", ");
+    }
+
+    const { where: filterWhere, params: filterParams } = this.buildWhere(filters, {
+      includeDeleted: opts.includeDeleted,
+      tenantId: opts.tenantId,
+      q: opts.q,
+      allowedSearchFields: opts.allowedSearchFields,
+    });
+
+    // Combine filter WHERE with keyset seek WHERE
+    const combinedWhere = seekWhere || filterWhere;
+    const combinedParams = seekWhere ? seekParams : filterParams;
+
+    const orderClause = ` ORDER BY ${sort.map((s) => `${s.field} ${s.direction}`).join(", ")}`;
+    const limitClause = ` LIMIT ?`;
+    const execParams = [...combinedParams, pageSize + 1]; // +1 to detect hasNextPage
+
+    const rows = await getDb().all<Record<string, unknown>>(
+      `SELECT ${selectClause} FROM ${this.table}${combinedWhere}${orderClause}${limitClause}`,
+      execParams,
+    );
+
+    const hasNextPage = rows.length > pageSize;
+    const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+    const decoded = pageRows.map((row) => this.decodeRow<ModelRecord<TBusiness>>(row));
+
+    if (!opts.fields) {
+      this.applyComputedFields(decoded as unknown as Array<Record<string, unknown>>);
+    }
+    if (opts.with?.length) {
+      await this.hydrateRelations(
+        decoded as unknown as Array<Record<string, unknown>>,
+        opts.with,
+        opts.tenantId,
+      );
+    }
+    if (helperColumnsToStrip.length > 0) {
+      for (const row of decoded as unknown as Array<Record<string, unknown>>) {
+        for (const col of helperColumnsToStrip) {
+          delete row[col];
+        }
+      }
+    }
+
+    let nextCursor: string | null = null;
+    if (hasNextPage && pageRows.length > 0) {
+      const lastRow = pageRows[pageRows.length - 1]!;
+      const values = sort.map((s) => lastRow[s.field]);
+      const cursor: PageCursor = {
+        v: CURSOR_VERSION,
+        model: this.name,
+        sort,
+        filterHash: cursorFilterHash ?? this.filterHash(filters),
+        values,
+      };
+      nextCursor = this.encodeCursor(cursor);
+    }
+
+    return { items: decoded, nextCursor, hasNextPage };
   }
 
   private applyComputedFields(rows: Array<Record<string, unknown>>): void {
@@ -2396,6 +2669,17 @@ export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   ): Promise<ModelRecord<TBusiness>[]> {
     const tenantId = this.resolveQueryTenantId(opts.tenantId);
     return this.repo.find(filters, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async findPage(
+    filters: Record<string, unknown> = {},
+    opts: FindPageOptions = {},
+  ): Promise<PageResult<ModelRecord<TBusiness>>> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.findPage(filters, {
       ...opts,
       ...(tenantId !== undefined ? { tenantId } : {}),
     });
