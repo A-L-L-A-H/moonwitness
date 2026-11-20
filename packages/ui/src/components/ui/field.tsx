@@ -11,6 +11,7 @@ interface FieldContextValue {
   inputId: string;
   descriptionId: string;
   errorId: string;
+  hasDescription: boolean;
   hasError: boolean;
 }
 
@@ -20,37 +21,6 @@ export interface FieldProps extends React.HTMLAttributes<HTMLDivElement> {
   error?: React.ReactNode;
   skin?: SkinName;
 }
-
-const Field = React.forwardRef<HTMLDivElement, FieldProps>(
-  ({ className, error, skin, children, ...props }, ref) => {
-    const uid = React.useId();
-    const { skin: resolvedSkin, dnaId } = useComponentSkin(skin);
-    const hasError = Boolean(error);
-    return (
-      <FieldContext.Provider
-        value={{
-          inputId: `${uid}-control`,
-          descriptionId: `${uid}-description`,
-          errorId: `${uid}-error`,
-          hasError,
-        }}
-      >
-        <div
-          ref={ref}
-          data-skin={resolvedSkin}
-          data-dna={dnaId}
-          data-invalid={hasError ? "true" : undefined}
-          className={cn("grid gap-1.5", className)}
-          {...props}
-        >
-          {children}
-          {error ? <FieldError>{error}</FieldError> : null}
-        </div>
-      </FieldContext.Provider>
-    );
-  },
-);
-Field.displayName = "Field";
 
 const FieldLabel = React.forwardRef<
   React.ElementRef<typeof Label>,
@@ -68,16 +38,27 @@ const FieldLabel = React.forwardRef<
 });
 FieldLabel.displayName = "FieldLabel";
 
+function mergeDescriptionIds(...values: Array<string | undefined>): string | undefined {
+  const ids = values.flatMap((value) => value?.split(/\s+/).filter(Boolean) ?? []);
+  const uniqueIds = [...new Set(ids)];
+  return uniqueIds.length > 0 ? uniqueIds.join(" ") : undefined;
+}
+
 const FieldControl = React.forwardRef<HTMLElement, { children: React.ReactElement }>(
   ({ children }, ref) => {
     const ctx = React.useContext(FieldContext);
+    const childProps = children.props as { "aria-describedby"?: string };
+    const describedBy = mergeDescriptionIds(
+      childProps["aria-describedby"],
+      ctx?.hasDescription ? ctx.descriptionId : undefined,
+      ctx?.hasError ? ctx.errorId : undefined,
+    );
+
     return (
       <Slot
         ref={ref}
         id={ctx?.inputId}
-        aria-describedby={
-          ctx ? `${ctx.descriptionId}${ctx.hasError ? ` ${ctx.errorId}` : ""}` : undefined
-        }
+        aria-describedby={describedBy}
         aria-invalid={ctx?.hasError || undefined}
       >
         {children}
@@ -122,5 +103,46 @@ const FieldError = React.forwardRef<
   );
 });
 FieldError.displayName = "FieldError";
+
+function containsFieldDescription(children: React.ReactNode): boolean {
+  return React.Children.toArray(children).some((child) => {
+    if (!React.isValidElement<{ children?: React.ReactNode }>(child)) return false;
+    return child.type === FieldDescription || containsFieldDescription(child.props.children);
+  });
+}
+
+const Field = React.forwardRef<HTMLDivElement, FieldProps>(
+  ({ className, error, skin, children, ...props }, ref) => {
+    const uid = React.useId();
+    const { skin: resolvedSkin, dnaId } = useComponentSkin(skin);
+    const hasError = Boolean(error);
+    const hasDescription = containsFieldDescription(children);
+
+    return (
+      <FieldContext.Provider
+        value={{
+          inputId: `${uid}-control`,
+          descriptionId: `${uid}-description`,
+          errorId: `${uid}-error`,
+          hasDescription,
+          hasError,
+        }}
+      >
+        <div
+          ref={ref}
+          data-skin={resolvedSkin}
+          data-dna={dnaId}
+          data-invalid={hasError ? "true" : undefined}
+          className={cn("grid gap-1.5", className)}
+          {...props}
+        >
+          {children}
+          {error ? <FieldError>{error}</FieldError> : null}
+        </div>
+      </FieldContext.Provider>
+    );
+  },
+);
+Field.displayName = "Field";
 
 export { Field, FieldLabel, FieldControl, FieldDescription, FieldError };

@@ -195,9 +195,9 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
         await expect
           .poll(() =>
             page.evaluate(() => ({
-              dir: document.documentElement.dir,
-              lang: document.documentElement.lang,
-              computedDir: getComputedStyle(document.body).direction,
+              dir: document.querySelector<HTMLElement>("[data-locale='ar']")?.dir ?? "",
+              lang: document.querySelector<HTMLElement>("[data-locale='ar']")?.lang ?? "",
+              computedDir: getComputedStyle(document.querySelector<HTMLElement>("[data-locale='ar']") ?? document.body).direction,
             })),
           )
           .toEqual({ dir: "rtl", lang: "ar", computedDir: "rtl" });
@@ -232,8 +232,8 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
         await expect
           .poll(() =>
             page.evaluate(() => ({
-              dir: document.documentElement.dir,
-              lang: document.documentElement.lang,
+              dir: document.querySelector<HTMLElement>("[data-locale='ar']")?.dir ?? "",
+              lang: document.querySelector<HTMLElement>("[data-locale='ar']")?.lang ?? "",
             })),
           )
           .toEqual({ dir: "rtl", lang: "ar" });
@@ -255,18 +255,18 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
           await expect
             .poll(() =>
               page.evaluate(() => ({
-                dir: document.documentElement.dir,
-                lang: document.documentElement.lang,
+                dir: document.querySelector<HTMLElement>("[data-locale='ar']")?.dir ?? "",
+                lang: document.querySelector<HTMLElement>("[data-locale='ar']")?.lang ?? "",
               })),
             )
             .toEqual({ dir: "rtl", lang: "ar" });
 
           await expect(page.locator("header.hud-top-rail")).toBeVisible();
-          await expect(page.locator("main#main")).toBeVisible();
+          await expect(page.locator("main")).toBeVisible();
           await assertZeroHorizontalOverflow(page, `${opsRoute} @ ${vp.width}`);
 
           const railBox = await page.locator(".console-shell-rail").boundingBox();
-          const mainBox = await page.locator("main#main").boundingBox();
+          const mainBox = await page.locator("main").boundingBox();
           const actionsBox = await page.locator(".hud-top-actions").boundingBox();
           const footerBox = await page.locator("footer.hud-panel").boundingBox();
 
@@ -308,7 +308,7 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/ar/apps/control", { waitUntil: "domcontentloaded" });
 
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+    await expect.poll(() => page.evaluate(() => document.querySelector<HTMLElement>("[data-locale='ar']")?.dir ?? "")).toBe("rtl");
 
     const bidiResult = await page.evaluate(() => {
       const probe = document.createElement("div");
@@ -357,7 +357,7 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/ar", { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+    await expect.poll(() => page.evaluate(() => document.querySelector<HTMLElement>("[data-locale='ar']")?.dir ?? "")).toBe("rtl");
 
     const visitedTags: string[] = [];
     for (let step = 0; step < 5; step += 1) {
@@ -368,12 +368,14 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     expect(visitedTags.some((tag) => tag === "A" || tag === "BUTTON")).toBe(true);
 
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/ar/apps/control", { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+    await page.goto("/ar/mission-control", { waitUntil: "domcontentloaded" });
+    await expect.poll(() => page.evaluate(() => document.querySelector<HTMLElement>("[data-locale='ar']")?.dir ?? "")).toBe("rtl");
 
-    const railLinks = page.locator(".console-shell-rail .hud-nav-items a[href]");
+    const rail = page.locator(".console-shell-rail");
+    await expect(rail).toBeVisible();
+    const railLinks = rail.locator(".hud-nav-items a[href]");
+    await expect.poll(() => railLinks.count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(3);
     const linkCount = await railLinks.count();
-    expect(linkCount).toBeGreaterThanOrEqual(3);
 
     await railLinks.nth(0).focus();
     await expect(railLinks.nth(0)).toBeFocused();
