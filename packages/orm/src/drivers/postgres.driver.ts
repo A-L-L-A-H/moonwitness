@@ -390,6 +390,23 @@ export class PostgresDriver implements OrmDriverHandle {
     }
   }
 
+  /**
+   * Awaitable close: waits for the underlying pool to finish ending so that
+   * immediately dropping the database afterwards cannot observe live
+   * connections (SQLSTATE 57P01). Safe to call repeatedly and after `close()`.
+   */
+  async closeAsync(): Promise<void> {
+    const current = this.pool;
+    this.pool = null;
+    this.connectionString = null;
+    if (!current) return;
+    try {
+      await current.end();
+    } catch {
+      // Pool already ended or terminated externally; treat as closed.
+    }
+  }
+
   private requirePool(): PoolLike {
     if (!this.pool) {
       throw new Error("Database not initialized. Call initDb() first.");

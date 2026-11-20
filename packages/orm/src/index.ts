@@ -62,6 +62,7 @@ export {
   initD1Db,
   initPostgresDb,
   closeDb,
+  closeDbAsync,
   getDb,
   withQueryBudget,
   runWithTransactionExecutor,

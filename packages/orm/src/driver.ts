@@ -136,6 +136,23 @@ export function closeDb(): void {
 }
 
 /**
+ * Awaitable close: waits for the active driver to finish closing (PostgreSQL
+ * pool teardown) before returning. Falls back to synchronous close for
+ * drivers without an async close path. Safe to call when nothing is open.
+ */
+export async function closeDbAsync(): Promise<void> {
+  const current = db;
+  db = null;
+  if (!current) return;
+  const asyncClosable = current as OrmDriverHandle & { closeAsync?: () => Promise<void> };
+  if (typeof asyncClosable.closeAsync === "function") {
+    await asyncClosable.closeAsync();
+    return;
+  }
+  current.close();
+}
+
+/**
  * Get the active database executor.
  * Returns the transaction-bound executor if inside a transaction callback,
  * otherwise returns the global driver handle (wrapped with query budget if active).
