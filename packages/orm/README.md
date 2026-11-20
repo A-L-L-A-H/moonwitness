@@ -29,7 +29,10 @@ Reusable PostgreSQL, libSQL/SQLite, and Cloudflare D1 ORM layer for MoonWitness 
 
 - `applyMigrations([{ id, up }])` records applied migrations in `_orm_schema_migrations` with checksum and timestamp.
 - Deterministic and idempotent: reruns skip already-applied migrations; modified SQL for an applied id is rejected (checksum mismatch).
-- Each migration runs in a transaction; failures roll back and are not recorded.
+- PostgreSQL creates/verifies the migration ledger under a transaction-scoped advisory lock. Each migration then acquires a stable lock derived from its ID and re-reads the ledger inside the same transaction before executing SQL.
+- Migration SQL and its checksum ledger row commit or roll back together. Concurrent PostgreSQL runners therefore apply one winner and report the same migration as skipped after the winner commits.
+- PostgreSQL migrations must be transactional. Statements such as `CREATE INDEX CONCURRENTLY`, `DROP INDEX CONCURRENTLY`, `VACUUM`, `CREATE DATABASE`, and `ALTER SYSTEM` are rejected with an actionable error; they require a separately reviewed non-transactional migration contract.
+- Checksum mismatches fail closed; an existing migration ledger entry is never overwritten.
 
 ## Exports
 
