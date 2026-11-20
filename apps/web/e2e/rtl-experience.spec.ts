@@ -372,8 +372,8 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
 
     const railLinks = page.locator(".console-shell-rail .hud-nav-items a[href]");
+    await expect.poll(() => railLinks.count(), { timeout: 15_000 }).toBeGreaterThanOrEqual(3);
     const linkCount = await railLinks.count();
-    expect(linkCount).toBeGreaterThanOrEqual(3);
 
     await railLinks.nth(0).focus();
     await expect(railLinks.nth(0)).toBeFocused();

@@ -801,7 +801,7 @@ test.describe("Consolidated Console Hubs & Legacy Redirects", () => {
 
     await page.goto("/models/timeline.event");
     await expect(page).toHaveURL(/\/addons\?model=timeline\.event$/);
-    await expect(page.getByText("MODEL EXPLORER")).toBeVisible();
+    await expect(page.getByRole("main").getByText("MODEL EXPLORER", { exact: true })).toBeVisible();
   });
 
   test("switches Control Plane hub tabs smoothly without page reload errors", async ({ page }) => {
