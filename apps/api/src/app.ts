@@ -1,5 +1,5 @@
 import type { AddonDefinition } from "@moonwitness/addon-runtime";
-import { closeDbAsync, initDb } from "@moonwitness/orm";
+import { initDb, closeDb } from "@moonwitness/orm";
 import type { FastifyInstance } from "fastify";
 import { env, resolveApiDatabaseUrl } from "./shared/env";
 import { buildCoreApp } from "./bootstrap";
@@ -23,11 +23,11 @@ export async function buildApp(options: BootstrapOptions = {}): Promise<FastifyI
       addons: options.addons,
     });
     fastify.addHook("onClose", async () => {
-      await closeDbAsync();
+      closeDb();
     });
     return fastify;
   } catch (error) {
-    await closeDbAsync();
+    closeDb();
     throw error;
   }
 }
