@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { z } from "zod";
-import { getDb, unwrapDriverHandle } from "./driver.js";
+import { getDb, isInTransaction, unwrapDriverHandle } from "./driver.js";
 import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 import { ConflictError, PolicyError } from "./errors.js";
 import type { BaseMetadata, RecordStatus } from "./base-metadata.js";
@@ -1258,12 +1258,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       const rowTenants =
         tenantId === undefined
           ? [
-              ...new Set(
-                rows
-                  .map((r) => r.tenant_id)
-                  .filter((t): t is string => typeof t === "string" && t.length > 0),
-              ),
-            ]
+            ...new Set(
+              rows
+                .map((r) => r.tenant_id)
+                .filter((t): t is string => typeof t === "string" && t.length > 0),
+            ),
+          ]
           : [];
       const scopedFindOpts: FindOptions = {
         ...(tenantId !== undefined
@@ -1503,12 +1503,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     hookName: "afterSave" | "afterDelete" | "afterArchive" | "afterRestore",
     hookFn:
       | ((ctx: {
-          model: string;
-          action: ModelWriteAction;
-          before: Record<string, unknown> | null;
-          values: Record<string, unknown>;
-          actor: ActorContext;
-        }) => void | Promise<void>)
+        model: string;
+        action: ModelWriteAction;
+        before: Record<string, unknown> | null;
+        values: Record<string, unknown>;
+        actor: ActorContext;
+      }) => void | Promise<void>)
       | undefined,
     ctx: {
       model: string;
@@ -2161,8 +2161,8 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       actor.tenantId !== undefined
         ? normalizeTenantId(actor.tenantId)
         : normalizeTenantId(
-            typeof data.tenant_id === "string" ? data.tenant_id : DEFAULT_TENANT_ID,
-          );
+          typeof data.tenant_id === "string" ? data.tenant_id : DEFAULT_TENANT_ID,
+        );
     const record: Record<string, unknown> = {
       ...data,
       id: data.id ?? uuidv7(),
@@ -2328,7 +2328,11 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   ): Promise<ModelRecord<TBusiness>> {
     await ensureAuditTable();
     const { hooks } = this.descriptor();
-    const committed = await getDb().transaction((tx) => this.createInTx(tx, rawData, actor, guard));
+
+    const committed = isInTransaction()
+      ? await this.createInTx(getDb(), rawData, actor, guard)
+      : await getDb().transaction((tx) => this.createInTx(tx, rawData, actor, guard));
+
     await this.applyRetention(String(committed.parsed.tenant_id));
 
     const decoded = committed.decoded;
@@ -2366,14 +2370,23 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     await ensureAuditTable();
     const { hooks } = this.descriptor();
 
-    const committed = await getDb().transaction(async (tx) => {
-      const currentRow = await tx.get<Record<string, unknown>>(
-        `SELECT * FROM ${this.table} WHERE id = ?`,
-        [id],
-      );
-      if (!currentRow) return null;
-      return this.updateInTx(tx, currentRow, rawData, actor, guard);
-    });
+    const committed = isInTransaction()
+      ? await getDb().transaction(async (tx) => {
+          const currentRow = await tx.get<Record<string, unknown>>(
+            `SELECT * FROM ${this.table} WHERE id = ?`,
+            [id],
+          );
+          if (!currentRow) return null;
+          return this.updateInTx(tx, currentRow, rawData, actor, guard);
+        })
+      : await getDb().transaction(async (tx) => {
+          const currentRow = await tx.get<Record<string, unknown>>(
+            `SELECT * FROM ${this.table} WHERE id = ?`,
+            [id],
+          );
+          if (!currentRow) return null;
+          return this.updateInTx(tx, currentRow, rawData, actor, guard);
+        });
 
     if (!committed) return null;
     const decoded = committed.decoded;

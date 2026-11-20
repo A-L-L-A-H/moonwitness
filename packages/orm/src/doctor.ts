@@ -1,9 +1,10 @@
 import { getDb } from "./driver.js";
-import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 import { modelRegistry, type RegisteredModelDescriptor } from "./registry.js";
-import { assertIdentifier } from "./schema-utils.js";
-import type { SyncModelsOptions, SyncReport, MissingFkReport } from "./sync.js";
-import { inspectTableCatalog } from "./sync.js";
+import { assertIdentifier, METADATA_NAMES } from "./schema-utils.js";
+import type { SyncReport } from "./sync.js";
+import type { MissingFkReport } from "./fk-drift.js";
+import { inspectTableCatalog } from "./fk-drift.js";
+import { createHash } from "node:crypto";
 
 export interface DoctorOptions {
   models?: Array<string | { name: string }>;
@@ -49,9 +50,8 @@ async function doctorModels(
       schemaDrift.push({ model: descriptor.name, expectedHash, actualHash });
     }
 
-    const existingCols = new Set(catalog.columns.map((col) => col.toLowerCase()));
     const expectedLower = new Set(
-      [...(descriptor as any).fields.keys()].map((name) => name.toLowerCase()),
+      [...METADATA_NAMES, ...descriptor.fields.keys()].map((name) => name.toLowerCase()),
     );
     for (const colName of catalog.columns) {
       if (!expectedLower.has(colName.toLowerCase())) {
@@ -59,8 +59,12 @@ async function doctorModels(
       }
     }
 
-    if (isPostgres && catalog.foreignKeys) {
-      // Check model table FKs
+    // Check model table FKs - works on both SQLite and Postgres
+    // SQLite: inspectTableCatalog returns foreignKeys from PRAGMA foreign_key_list
+    // Postgres: inspectTableCatalog returns foreignKeys from pg_constraint
+    if (catalog.foreignKeys == null) {
+      // Inspection failed, skip FK detection
+    } else {
       for (const fk of descriptor.foreignKeys) {
         const expectedColumns = fk.columns.sort();
         const expectedTargetTable = fk.targetTable;
@@ -115,11 +119,11 @@ async function doctorModels(
           if (onDeleteMismatch) {
             missingFks.push({
               table,
-              column: fk.columns[0],
+              column: fk.columns[0]!,
               targetTable: expectedTargetTable,
-              targetColumn: fk.targetColumns[0],
+              targetColumn: fk.targetColumns[0]!,
               expectedOnDelete,
-              existingOnDelete,
+              existingOnDelete: existingOnDelete ?? "RESTRICT",
               kind: "ondelete_mismatch",
               relationName,
               side: "source",
@@ -127,9 +131,9 @@ async function doctorModels(
           } else if (validatedMismatch) {
             missingFks.push({
               table,
-              column: fk.columns[0],
+              column: fk.columns[0]!,
               targetTable: expectedTargetTable,
-              targetColumn: fk.targetColumns[0],
+              targetColumn: fk.targetColumns[0]!,
               expectedOnDelete,
               existingOnDelete: "NOT VALIDATED",
               kind: "validated_mismatch",
@@ -163,9 +167,9 @@ async function doctorModels(
             if (badRows.length > 0) {
               missingFks.push({
                 table,
-                column: fk.columns[0],
+                column: fk.columns[0]!,
                 targetTable: expectedTargetTable,
-                targetColumn: fk.targetColumns[0],
+                targetColumn: fk.targetColumns[0]!,
                 expectedOnDelete,
                 kind: "missing",
                 relationName,
@@ -179,121 +183,206 @@ async function doctorModels(
       // Check join table FKs
       for (const m2m of descriptor.many2manyTables) {
         const jCat = await inspectTableCatalog(db, m2m.table, isPostgres);
-        if (jCat.columns.length === 0 || !jCat.foreignKeys) continue;
+        if (jCat.columns.length === 0 || jCat.foreignKeys == null) continue;
 
-        const target = modelRegistry.get(m2m.targetModel);
-        if (!target) continue;
+        const sourceTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
+        const targetTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", m2m.targetField] : [m2m.targetField];
+        const onDelete = m2m.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
 
-        const fkSpecs = [
-          {
-            columns: [m2m.sourceColumn],
-            targetTable: m2m.sourceTable,
-            targetColumns: ["tenant_id", "id"],
-            onDelete: m2m.sourceOnDelete,
-            relationName: m2m.relationName,
-            side: "source" as const,
-          },
-          {
-            columns: [m2m.targetColumn],
-            targetTable: m2m.targetTable,
-            targetColumns: ["tenant_id", m2m.targetField],
-            onDelete: m2m.targetOnDelete,
-            relationName: m2m.relationName,
-            side: "target" as const,
-          },
-        ];
+        // Build expected FK from join table spec - source side
+        const jfk = {
+          columns: [m2m.sourceColumn],
+          targetTable: m2m.sourceTable,
+          targetColumns: sourceTargetCols,
+          onDelete,
+        };
 
-        for (const fkSpec of fkSpecs) {
-          const expectedColumns = fkSpec.columns.sort();
-          const expectedTargetTable = fkSpec.targetTable;
-          const expectedTargetColumns = fkSpec.targetColumns.sort();
-          const expectedOnDelete = fkSpec.onDelete;
+        const expectedColumns = jfk.columns.sort();
+        const expectedTargetTable = jfk.targetTable;
+        const expectedTargetColumns = jfk.targetColumns.sort();
+        const expectedOnDelete = jfk.onDelete;
 
-          let foundEquivalent = false;
-          let onDeleteMismatch = false;
-          let existingOnDelete: string | undefined;
-          let validatedMismatch = false;
+        let foundEquivalent = false;
+        let onDeleteMismatch = false;
+        let existingOnDelete: string | undefined;
+        let validatedMismatch = false;
 
-          for (const existingFk of jCat.foreignKeys) {
-            const existingColumns = existingFk.constrainedColumns.sort();
-            const existingTargetTable = existingFk.referencedTable;
-            const existingTargetColumns = existingFk.referencedColumns.sort();
-            const existingOnDeleteCandidate = existingFk.onDelete;
+        for (const existingFk of jCat.foreignKeys) {
+          const existingColumns = existingFk.constrainedColumns.sort();
+          const existingTargetTable = existingFk.referencedTable;
+          const existingTargetColumns = existingFk.referencedColumns.sort();
+          const existingOnDeleteCandidate = existingFk.onDelete;
 
-            const columnsMatch =
-              JSON.stringify(expectedColumns) === JSON.stringify(existingColumns);
-            const targetTableMatch =
-              expectedTargetTable.toLowerCase() === existingTargetTable.toLowerCase();
-            const targetColumnsMatch =
-              JSON.stringify(expectedTargetColumns) === JSON.stringify(existingTargetColumns);
-            const onDeleteMatch = expectedOnDelete === existingOnDeleteCandidate;
+          const columnsMatch = JSON.stringify(expectedColumns) === JSON.stringify(existingColumns);
+          const targetTableMatch =
+            expectedTargetTable.toLowerCase() === existingTargetTable.toLowerCase();
+          const targetColumnsMatch =
+            JSON.stringify(expectedTargetColumns) === JSON.stringify(existingTargetColumns);
+          const onDeleteMatch = expectedOnDelete === existingOnDeleteCandidate;
 
-            if (columnsMatch && targetTableMatch && targetColumnsMatch && onDeleteMatch) {
-              foundEquivalent = true;
-              break;
-            }
-
-            if (columnsMatch && targetTableMatch && targetColumnsMatch && !onDeleteMatch) {
-              onDeleteMismatch = true;
-              existingOnDelete = existingOnDeleteCandidate;
-              break;
-            }
-
-            if (columnsMatch && targetTableMatch && targetColumnsMatch && !existingFk.validated) {
-              validatedMismatch = true;
-            }
+          if (columnsMatch && targetTableMatch && targetColumnsMatch && onDeleteMatch) {
+            foundEquivalent = true;
+            break;
           }
 
-          if (!foundEquivalent) {
-            if (onDeleteMismatch) {
-              missingFks.push({
-                table: m2m.table,
-                column: fkSpec.columns[0],
-                targetTable: expectedTargetTable,
-                targetColumn: expectedTargetColumns[0],
-                expectedOnDelete,
-                existingOnDelete,
-                kind: "ondelete_mismatch",
-                relationName: fkSpec.relationName,
-                side: fkSpec.side,
-              });
-            } else if (validatedMismatch) {
-              missingFks.push({
-                table: m2m.table,
-                column: fkSpec.columns[0],
-                targetTable: expectedTargetTable,
-                targetColumn: expectedTargetColumns[0],
-                expectedOnDelete,
-                existingOnDelete: "NOT VALIDATED",
-                kind: "validated_mismatch",
-                relationName: fkSpec.relationName,
-                side: fkSpec.side,
-              });
-            } else {
-              // Check for orphan rows
-              const badJoinRows = await db.all<{
-                id: string;
-                tenant_id: string;
-                source_val: unknown;
-                target_val: unknown;
-              }>(
-                `SELECT j.id AS id, j.tenant_id AS tenant_id, j."${m2m.sourceColumn}" AS source_val, j."${m2m.targetColumn}" AS target_val
-                 FROM ${m2m.table} j
-                 WHERE ${fkSpec.side === "source" ? `NOT EXISTS (SELECT 1 FROM ${m2m.sourceTable} src WHERE src.id = j."${m2m.sourceColumn}" AND src.tenant_id = j.tenant_id)` : `NOT EXISTS (SELECT 1 FROM ${m2m.targetTable} tgt WHERE tgt.${m2m.targetField} = j."${m2m.targetColumn}" AND tgt.tenant_id = j.tenant_id)`}`,
-              );
+          if (columnsMatch && targetTableMatch && targetColumnsMatch && !onDeleteMatch) {
+            onDeleteMismatch = true;
+            existingOnDelete = existingOnDeleteCandidate;
+            break;
+          }
 
-              if (badJoinRows.length > 0) {
-                missingFks.push({
-                  table: m2m.table,
-                  column: fkSpec.columns[0],
-                  targetTable: expectedTargetTable,
-                  targetColumn: expectedTargetColumns[0],
-                  expectedOnDelete,
-                  kind: "missing",
-                  relationName: fkSpec.relationName,
-                  side: fkSpec.side,
-                });
-              }
+          if (columnsMatch && targetTableMatch && targetColumnsMatch && !existingFk.validated) {
+            validatedMismatch = true;
+          }
+        }
+
+        if (!foundEquivalent) {
+          if (onDeleteMismatch) {
+            missingFks.push({
+              table: m2m.table,
+              column: m2m.sourceColumn,
+              targetTable: expectedTargetTable,
+              targetColumn: m2m.targetField,
+              expectedOnDelete,
+              existingOnDelete: existingOnDelete ?? "RESTRICT",
+              kind: "ondelete_mismatch",
+              relationName: m2m.relationName,
+              side: "join",
+            });
+          } else if (validatedMismatch) {
+            missingFks.push({
+              table: m2m.table,
+              column: m2m.sourceColumn,
+              targetTable: expectedTargetTable,
+              targetColumn: m2m.targetField,
+              expectedOnDelete,
+              existingOnDelete: "NOT VALIDATED",
+              kind: "validated_mismatch",
+              relationName: m2m.relationName,
+              side: "join",
+            });
+          } else {
+            // Check for orphan rows in join table
+            const badRows = await db.all<{ id: string; tenant_id: string; fk_val: unknown }>(
+              `SELECT j.id AS id, j.tenant_id AS tenant_id, j.${m2m.sourceColumn} AS fk_val
+               FROM ${m2m.table} j
+               WHERE j.${m2m.sourceColumn} IS NOT NULL
+                 AND NOT EXISTS (
+                   SELECT 1 FROM ${expectedTargetTable} tgt
+                   WHERE tgt.${m2m.targetField} = j.${m2m.sourceColumn} AND tgt.tenant_id = j.tenant_id
+                 )`,
+            );
+
+            if (badRows.length > 0) {
+              missingFks.push({
+                table: m2m.table,
+                column: m2m.sourceColumn,
+                targetTable: expectedTargetTable,
+                targetColumn: m2m.targetField,
+                expectedOnDelete,
+                kind: "missing",
+                relationName: m2m.relationName,
+                side: "join",
+              });
+            }
+          }
+        }
+
+        // Also check target side FK
+        const jfkTarget = {
+          columns: [m2m.targetColumn],
+          targetTable: m2m.targetTable,
+          targetColumns: targetTargetCols,
+          onDelete,
+        };
+
+        const expectedColumnsTarget = jfkTarget.columns.sort();
+        const expectedTargetTableTarget = jfkTarget.targetTable;
+        const expectedTargetColumnsTarget = jfkTarget.targetColumns.sort();
+        const expectedOnDeleteTarget = jfkTarget.onDelete;
+
+        let foundEquivalentTarget = false;
+        let onDeleteMismatchTarget = false;
+        let existingOnDeleteTarget: string | undefined;
+        let validatedMismatchTarget = false;
+
+        for (const existingFk of jCat.foreignKeys) {
+          const existingColumns = existingFk.constrainedColumns.sort();
+          const existingTargetTable = existingFk.referencedTable;
+          const existingTargetColumns = existingFk.referencedColumns.sort();
+          const existingOnDeleteCandidate = existingFk.onDelete;
+
+          const columnsMatch = JSON.stringify(expectedColumnsTarget) === JSON.stringify(existingColumns);
+          const targetTableMatch =
+            expectedTargetTableTarget.toLowerCase() === existingTargetTable.toLowerCase();
+          const targetColumnsMatch =
+            JSON.stringify(expectedTargetColumnsTarget) === JSON.stringify(existingTargetColumns);
+          const onDeleteMatch = expectedOnDeleteTarget === existingOnDeleteCandidate;
+
+          if (columnsMatch && targetTableMatch && targetColumnsMatch && onDeleteMatch) {
+            foundEquivalentTarget = true;
+            break;
+          }
+
+          if (columnsMatch && targetTableMatch && targetColumnsMatch && !onDeleteMatch) {
+            onDeleteMismatchTarget = true;
+            existingOnDeleteTarget = existingOnDeleteCandidate;
+            break;
+          }
+
+          if (columnsMatch && targetTableMatch && targetColumnsMatch && !existingFk.validated) {
+            validatedMismatchTarget = true;
+          }
+        }
+
+        if (!foundEquivalentTarget) {
+          if (onDeleteMismatchTarget) {
+            missingFks.push({
+              table: m2m.table,
+              column: m2m.targetColumn,
+              targetTable: expectedTargetTableTarget,
+              targetColumn: m2m.targetField,
+              expectedOnDelete: expectedOnDeleteTarget,
+              existingOnDelete: existingOnDeleteTarget ?? "RESTRICT",
+              kind: "ondelete_mismatch",
+              relationName: m2m.relationName,
+              side: "join",
+            });
+          } else if (validatedMismatchTarget) {
+            missingFks.push({
+              table: m2m.table,
+              column: m2m.targetColumn,
+              targetTable: expectedTargetTableTarget,
+              targetColumn: m2m.targetField,
+              expectedOnDelete: expectedOnDeleteTarget,
+              existingOnDelete: "NOT VALIDATED",
+              kind: "validated_mismatch",
+              relationName: m2m.relationName,
+              side: "join",
+            });
+          } else {
+            // Check for orphan rows in join table on target side
+            const badRows = await db.all<{ id: string; tenant_id: string; fk_val: unknown }>(
+              `SELECT j.id AS id, j.tenant_id AS tenant_id, j.${m2m.targetColumn} AS fk_val
+               FROM ${m2m.table} j
+               WHERE j.${m2m.targetColumn} IS NOT NULL
+                 AND NOT EXISTS (
+                   SELECT 1 FROM ${expectedTargetTableTarget} tgt
+                   WHERE tgt.${m2m.targetField} = j.${m2m.targetColumn} AND tgt.tenant_id = j.tenant_id
+                 )`,
+            );
+
+            if (badRows.length > 0) {
+              missingFks.push({
+                table: m2m.table,
+                column: m2m.targetColumn,
+                targetTable: expectedTargetTableTarget,
+                targetColumn: m2m.targetField,
+                expectedOnDelete: expectedOnDeleteTarget,
+                kind: "missing",
+                relationName: m2m.relationName,
+                side: "join",
+              });
             }
           }
         }
@@ -310,9 +399,6 @@ async function doctorModels(
     schemaHashes: {},
     missingFks,
   };
-
-  const hasErrors = missingFks.some((fk) => fk.kind === "ondelete_mismatch" || fk.kind === "validated_mismatch");
-  const hasWarnings = missingFks.some((fk) => fk.kind === "missing") || deprecatedColumns.length > 0 || schemaDrift.length > 0;
 
   return {
     ok: missingFks.length === 0 && deprecatedColumns.length === 0 && schemaDrift.length === 0,
@@ -346,8 +432,7 @@ function computeActualSchemaHash(
     existingColumns: catalog.columns.sort(),
     existingIndexes: catalog.indexes.sort(),
   };
-  const crypto = require("node:crypto");
-  return crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+  return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
 }
 
 function resolveDescriptors(
@@ -399,7 +484,6 @@ function sortDescriptorsByRelationDeps(
 }
 
 function computeModelSchemaHash(descriptor: RegisteredModelDescriptor): string {
-  const crypto = require("node:crypto");
   const payload = {
     name: descriptor.name,
     table: descriptor.table,
@@ -417,20 +501,20 @@ function computeModelSchemaHash(descriptor: RegisteredModelDescriptor): string {
       })),
     indexes: descriptor.indexes,
   };
-  return crypto.createHash("sha256").update(JSON.stringify(payload)).digest("hex");
+  return createHash("sha256").update(JSON.stringify(payload)).digest("hex");
 }
 
 function formatTableOutput(result: DoctorResult): string {
   const lines: string[] = [];
-  lines.push("╔══════════════════════════════════════════════════════════════╗");
+  lines.push("╔═══════════════════════════════════════════════════════════════╗");
   lines.push("║                    ORM Doctor Report                          ║");
-  lines.push("╠══════════════════════════════════════════════════════════════╣");
+  lines.push("╠═══════════════════════════════════════════════════════════════╣");
   lines.push(`║ Status: ${result.ok ? "✓ CLEAN" : "✗ ISSUES FOUND".padEnd(44)} ║`);
-  lines.push("╠══════════════════════════════════════════════════════════════╣");
+  lines.push("╠═══════════════════════════════════════════════════════════════╣");
 
   if (result.missingFks.length > 0) {
     lines.push("║ MISSING / DRIFTING FOREIGN KEYS                               ║");
-    lines.push("╠══════════════════════════════════════════════════════════════╣");
+    lines.push("╠═══════════════════════════════════════════════════════════════╣");
     for (const fk of result.missingFks) {
       const kindIcon = fk.kind === "missing" ? "⚠" : fk.kind === "ondelete_mismatch" ? "✗" : "!";
       lines.push(`║ ${kindIcon} [${fk.kind.toUpperCase()}] ${fk.table}.${fk.column} -> ${fk.targetTable}.${fk.targetColumn}`);
@@ -443,7 +527,7 @@ function formatTableOutput(result: DoctorResult): string {
 
   if (result.deprecatedColumns.length > 0) {
     lines.push("║ DEPRECATED COLUMNS (not in model schema)                      ║");
-    lines.push("╠══════════════════════════════════════════════════════════════╣");
+    lines.push("╠═══════════════════════════════════════════════════════════════╣");
     for (const col of result.deprecatedColumns) {
       lines.push(`║ ⚠ ${col.table}.${col.column}`);
     }
@@ -452,7 +536,7 @@ function formatTableOutput(result: DoctorResult): string {
 
   if (result.schemaDrift.length > 0) {
     lines.push("║ SCHEMA DRIFT (hash mismatch)                                  ║");
-    lines.push("╠══════════════════════════════════════════════════════════════╣");
+    lines.push("╠═══════════════════════════════════════════════════════════════╣");
     for (const drift of result.schemaDrift) {
       lines.push(`║ ! ${drift.model}: expected ${drift.expectedHash.slice(0, 16)}... != actual ${drift.actualHash.slice(0, 16)}...`);
     }
@@ -463,14 +547,14 @@ function formatTableOutput(result: DoctorResult): string {
     lines.push("║ No issues detected. Schema is in sync with models.            ║");
   }
 
-  lines.push("╚══════════════════════════════════════════════════════════════╝");
+  lines.push("╚═══════════════════════════════════════════════════════════════╝");
   return lines.join("\n");
 }
 
 export async function doctorCli(args: string[] = process.argv.slice(2)): Promise<void> {
   const format = args.includes("--json") ? "json" : "table";
   const modelsArg = args.find((a) => a.startsWith("--model="));
-  const models = modelsArg ? modelsArg.split("=")[1].split(",") : undefined;
+  const models = modelsArg ? modelsArg.split("=")[1]?.split(",") : undefined;
   const dialectArg = args.find((a) => a.startsWith("--dialect="));
   const dialect = dialectArg ? (dialectArg.split("=")[1] as "sqlite" | "postgres") : undefined;
   const exitOnError = args.includes("--exit-on-error");
@@ -497,4 +581,3 @@ export async function doctorCli(args: string[] = process.argv.slice(2)): Promise
 }
 
 export { doctorModels };
-export type { DoctorOptions, DoctorResult };
