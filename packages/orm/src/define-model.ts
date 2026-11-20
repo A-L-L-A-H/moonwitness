@@ -171,6 +171,64 @@ const MAX_WITH_RELATIONS = 16;
 const SENSITIVE_OUTBOX_KEY_RE = /password_hash|_token|_secret|encrypted_private/i;
 const hookDepthStorage = new AsyncLocalStorage<number>();
 
+/** Fixed marker persisted in `_orm_audit_log.diff` in place of a sensitive value. */
+export const AUDIT_REDACTED = "[REDACTED]";
+
+/**
+ * Sensitive field names declared on a model via `fieldPolicies.sensitive: true`.
+ * Cached per model name; registration happens at module load, so the cache is
+ * safe for the process lifetime.
+ */
+const sensitiveFieldsCache = new Map<string, Set<string>>();
+function sensitiveFieldsFor(model: string): Set<string> {
+  const cached = sensitiveFieldsCache.get(model);
+  if (cached) return cached;
+  const desc = modelRegistry.get(model);
+  const fields = new Set<string>();
+  if (desc?.fieldPolicies) {
+    for (const [fieldName, policy] of Object.entries(desc.fieldPolicies)) {
+      if (policy.sensitive === true) fields.add(fieldName);
+    }
+  }
+  sensitiveFieldsCache.set(model, fields);
+  return fields;
+}
+
+function isSensitiveAuditKey(key: string, sensitiveFields: ReadonlySet<string>): boolean {
+  return SENSITIVE_OUTBOX_KEY_RE.test(key) || sensitiveFields.has(key);
+}
+
+/**
+ * Recursively replaces sensitive values (credential key patterns and model-declared
+ * sensitive fields) with `AUDIT_REDACTED` in-place-safe copies for audit diffs.
+ * Non-sensitive values — including nested objects and arrays — are preserved verbatim.
+ */
+function redactForAudit(value: unknown, sensitiveFields: ReadonlySet<string>): unknown {
+  if (value instanceof Date) return value.toISOString();
+  if (Array.isArray(value)) {
+    return value.map((item) => redactForAudit(item, sensitiveFields));
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      out[key] = isSensitiveAuditKey(key, sensitiveFields)
+        ? AUDIT_REDACTED
+        : redactForAudit(nested, sensitiveFields);
+    }
+    return out;
+  }
+  return value;
+}
+
+function redactAuditFieldValue(
+  key: string,
+  value: unknown,
+  sensitiveFields: ReadonlySet<string>,
+): unknown {
+  if (isSensitiveAuditKey(key, sensitiveFields)) return AUDIT_REDACTED;
+  return redactForAudit(value, sensitiveFields);
+}
+
 export async function ensureAuditTable(executor?: LibSqlExecutor): Promise<void> {
   const db = getDb();
   const rawDb = unwrapDriverHandle(db);
@@ -1336,6 +1394,13 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       const placeholders = cols.map(() => "?").join(", ");
       const values = this.encodeRow(parsed);
 
+      // Pre-insert snapshot for the ON CONFLICT DO UPDATE winner path: when a
+      // concurrent transaction inserts the same key first, this INSERT becomes a
+      // conflict-update and the snapshot provides the truthful audit `before`.
+      const conflictBefore = existingRow
+        ? this.decodeRow<Record<string, unknown>>(existingRow)
+        : null;
+
       const conflictSet = new Set(conflictCols);
       const protectedOnConflict = new Set(["id", "create_uid", "create_date", "tenant_id"]);
       const dataUpdateCols = Object.keys(data).filter(
@@ -1375,8 +1440,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         : parsed;
       const actualVersion = Number(finalParsed.version ?? 1);
       outcomeAction = actualVersion > 1 ? "UPDATE" : "CREATE";
-      await this.writeAudit(tx, finalParsed, outcomeAction, null, actor);
-      await this.writeOutbox(tx, finalParsed, outcomeAction, null, actor);
+      const conflictBeforeForAudit =
+        outcomeAction === "UPDATE" && beforeSnapshot === null ? conflictBefore : beforeSnapshot;
+      await this.writeAudit(tx, finalParsed, outcomeAction, conflictBeforeForAudit, actor);
+      await this.writeOutbox(tx, finalParsed, outcomeAction, conflictBeforeForAudit, actor);
       return {
         parsed: finalParsed,
         decoded: this.decodeRow<ModelRecord<TBusiness>>(finalParsed),
@@ -2551,16 +2618,23 @@ function auditHookFor(model: string) {
     before: Record<string, unknown> | null,
     actor: ActorContext,
   ): AuditEntry => {
+    const sensitiveFields = sensitiveFieldsFor(model);
     const diff: Record<string, { before: unknown; after: unknown }> = {};
     if (before) {
       for (const key of Object.keys(record)) {
         if (JSON.stringify(before[key]) !== JSON.stringify(record[key])) {
-          diff[key] = { before: before[key], after: record[key] };
+          diff[key] = {
+            before: redactAuditFieldValue(key, before[key], sensitiveFields),
+            after: redactAuditFieldValue(key, record[key], sensitiveFields),
+          };
         }
       }
     } else {
       for (const key of Object.keys(record)) {
-        diff[key] = { before: null, after: record[key] };
+        diff[key] = {
+          before: null,
+          after: redactAuditFieldValue(key, record[key], sensitiveFields),
+        };
       }
     }
     return {
