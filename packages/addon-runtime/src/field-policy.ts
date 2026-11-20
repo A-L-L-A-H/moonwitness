@@ -288,7 +288,11 @@ export function assertReadableRelations(
     for (const seg of relPath.split(".").filter(Boolean)) {
       if (!canReadRelation(currentDesc, seg, role, effectiveGroups, impliedGroups)) {
         throw new PolicyError(
-          "Read access to field '" + seg + "' on '" + (currentDesc?.name ?? desc.name) + "' is forbidden",
+          "Read access to field '" +
+            seg +
+            "' on '" +
+            (currentDesc?.name ?? desc.name) +
+            "' is forbidden",
           "FIELD_READ_FORBIDDEN",
           403,
         );
