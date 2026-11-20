@@ -326,7 +326,9 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/ar/apps/control", { waitUntil: "domcontentloaded" });
 
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+      .toBe("rtl");
 
     const bidiResult = await page.evaluate(() => {
       const probe = document.createElement("div");
@@ -375,7 +377,9 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/ar", { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+      .toBe("rtl");
 
     const visitedTags: string[] = [];
     for (let step = 0; step < 5; step += 1) {
@@ -387,7 +391,9 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/ar/apps/control", { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+      .toBe("rtl");
 
     const railLinks = page.locator(".console-shell-rail .hud-nav-items a[href]");
     const linkCount = await railLinks.count();

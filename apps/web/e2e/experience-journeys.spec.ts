@@ -97,14 +97,31 @@ async function mockJourneyApis(page: Page, role: "admin" | "viewer" = "admin"): 
       return route.fulfill({
         status: 200,
         json: {
+          reachable: true,
           host: {
             hostname: "arsy-journey-node",
             os: "linux",
             arch: "x86_64",
             kernel: "6.8.0",
-            uptime_secs: 3600,
+            is_root: true,
+            capabilities: {
+              systemd: false,
+              docker: false,
+              files: true,
+              cron: false,
+              users: false,
+              firewall: false,
+              host_metrics: true,
+              network: false,
+              ssh: false,
+              cert: false,
+              mount: false,
+              alert: false,
+              kubernetes: false,
+            },
           },
           metrics: {
+            time: "2026-11-20T12:00:00Z",
             cpu_pct: 14.5,
             load1: 0.25,
             load5: 0.2,
@@ -118,6 +135,7 @@ async function mockJourneyApis(page: Page, role: "admin" | "viewer" = "admin"): 
             disk_path: "/",
             swap_used: 0,
             swap_total: 0,
+            uptime_sec: 3600,
           },
           units: [],
           certificates: [],
@@ -272,11 +290,15 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
           await expect(page).toHaveURL(/\/id$/);
           await page.locator('header.mw-site-nav [title="Ganti Bahasa"]').click();
           await expect(page).toHaveURL(/\/ar$/);
-          await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
+          await expect
+            .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+            .toBe("rtl");
 
           await page.goBack();
           await expect(page).toHaveURL(/\/id$/);
-          await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("ltr");
+          await expect
+            .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+            .toBe("ltr");
 
           await page.goBack();
           await expect(page).toHaveURL(/\/en$/);
@@ -300,7 +322,9 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
 
         await page.goto("/ar/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.getByText("أناس. أماكن. حكايات.")).toBeVisible();
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+          .toBe("rtl");
 
         await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.locator("#home h1")).toContainText(/MOONWITNESS/i);
@@ -390,11 +414,15 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await page.getByRole("button", { name: "Change language" }).click();
         await page.getByRole("button", { name: /العربية/ }).click();
         await expect(page).toHaveURL(/\/ar\/apps\/addons\?model=witness\.claim/);
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+          .toBe("rtl");
 
         await page.goBack();
         await expect(page).toHaveURL(/\/en\/apps\/addons\?model=witness\.claim/);
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("ltr");
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+          .toBe("ltr");
 
         expect(pageErrors).toEqual([]);
       });
