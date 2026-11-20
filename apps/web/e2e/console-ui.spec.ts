@@ -275,7 +275,7 @@ for (const viewport of viewports) {
     test("rail supports Tab, arrows, Home/End, section and route navigation", async ({ page }) => {
       await openConsole(page);
       const nav = page.getByRole("navigation", { name: "The Empire", exact: true });
-      const dashboard = nav.getByRole("link", { name: "Dashboard", exact: true });
+      const dashboard = nav.getByRole("link", { name: "Mission Control", exact: true });
       const studio = nav.getByRole("link", { name: "Story Studio", exact: true });
       const episodes = nav.getByRole("link", { name: "Episodes", exact: true });
       await dashboard.focus();
