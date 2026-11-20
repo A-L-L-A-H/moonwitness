@@ -93,7 +93,7 @@ test.describe("Chronicle navigation & search localization", () => {
     await page.getByRole("button", { name: "Cari di arsip" }).click();
     const dialog = page.getByRole("dialog", { name: "Cari di arsip" });
     await dialog.getByRole("textbox", { name: "CARI SINYAL" }).fill("signal / moon");
-    await dialog.getByRole("button", { name: "CARI" }).click();
+    await dialog.getByRole("button", { name: "CARI", exact: true }).click();
 
     await expect(page).toHaveURL(/\/dock\?/);
     expect(new URL(page.url()).pathname).toBe("/dock");

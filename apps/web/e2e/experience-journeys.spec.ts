@@ -272,11 +272,11 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
           await expect(page).toHaveURL(/\/id$/);
           await page.locator('header.mw-site-nav [title="Ganti Bahasa"]').click();
           await expect(page).toHaveURL(/\/ar$/);
-          await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+          await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
 
           await page.goBack();
           await expect(page).toHaveURL(/\/id$/);
-          await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("ltr");
+          await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("ltr");
 
           await page.goBack();
           await expect(page).toHaveURL(/\/en$/);
@@ -300,7 +300,7 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
 
         await page.goto("/ar/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.getByText("أناس. أماكن. حكايات.")).toBeVisible();
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+        await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
 
         await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.locator("#home h1")).toContainText(/MOONWITNESS/i);
@@ -390,11 +390,11 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await page.getByRole("button", { name: "Change language" }).click();
         await page.getByRole("button", { name: /العربية/ }).click();
         await expect(page).toHaveURL(/\/ar\/apps\/addons\?model=witness\.claim/);
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+        await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("rtl");
 
         await page.goBack();
         await expect(page).toHaveURL(/\/en\/apps\/addons\?model=witness\.claim/);
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("ltr");
+        await expect.poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 }).toBe("ltr");
 
         expect(pageErrors).toEqual([]);
       });

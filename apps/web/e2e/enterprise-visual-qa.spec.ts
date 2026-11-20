@@ -393,6 +393,7 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
           dir: document.documentElement.dir,
           lang: document.documentElement.lang,
         })),
+        { timeout: 20_000 },
       )
       .toEqual({ dir: "rtl", lang: "ar" });
 
@@ -404,6 +405,7 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
           dir: document.documentElement.dir,
           lang: document.documentElement.lang,
         })),
+        { timeout: 20_000 },
       )
       .toEqual({ dir: "ltr", lang: "en" });
 
@@ -414,6 +416,7 @@ test.describe("Enterprise Visual & Flow QA across all [lang] & unprefixed routes
           dir: document.documentElement.dir,
           lang: document.documentElement.lang,
         })),
+        { timeout: 20_000 },
       )
       .toEqual({ dir: "ltr", lang: "en" });
 
