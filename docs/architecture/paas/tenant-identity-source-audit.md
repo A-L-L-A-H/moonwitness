@@ -39,14 +39,14 @@ This audit changes no runtime code, schema, or behavior. It records the current 
 
 ### 2.1 Identifier and registry
 
-| Concern | Source-level finding | Evidence |
-| --- | --- | --- |
-| ORM tenant metadata | `BaseMetadata.tenant_id: string`; legacy/model sync adds it as `TEXT NOT NULL DEFAULT 'default'`. | `packages/orm/src/base-metadata.ts`, `packages/orm/src/sync.ts` |
-| Default tenant | `DEFAULT_TENANT_ID = "default"`. | `packages/orm/src/actor-context.ts` |
-| Identifier grammar | Trimmed string slug matching `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$` (maximum 64 characters). | `packages/orm/src/actor-context.ts` |
-| Company/tenant registry | `resCompanyModel`, model name `res.company`, table `res_companies`, `slug` max 64, unique slug; `resTenantModel = resCompanyModel`. | `packages/addon-runtime/src/ir-models.ts` |
-| User's current company | `auth_users.company_id`, string default `"default"`. | `packages/addons/src/auth/models.ts` |
-| User's allowed companies | `auth_users.company_ids_json`, JSON-encoded string array defaulting to `["default"]`. | `packages/addons/src/auth/models.ts`, `packages/addons/src/auth/service.ts` |
+| Concern                  | Source-level finding                                                                                                                | Evidence                                                                    |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| ORM tenant metadata      | `BaseMetadata.tenant_id: string`; legacy/model sync adds it as `TEXT NOT NULL DEFAULT 'default'`.                                   | `packages/orm/src/base-metadata.ts`, `packages/orm/src/sync.ts`             |
+| Default tenant           | `DEFAULT_TENANT_ID = "default"`.                                                                                                    | `packages/orm/src/actor-context.ts`                                         |
+| Identifier grammar       | Trimmed string slug matching `^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$` (maximum 64 characters).                                           | `packages/orm/src/actor-context.ts`                                         |
+| Company/tenant registry  | `resCompanyModel`, model name `res.company`, table `res_companies`, `slug` max 64, unique slug; `resTenantModel = resCompanyModel`. | `packages/addon-runtime/src/ir-models.ts`                                   |
+| User's current company   | `auth_users.company_id`, string default `"default"`.                                                                                | `packages/addons/src/auth/models.ts`                                        |
+| User's allowed companies | `auth_users.company_ids_json`, JSON-encoded string array defaulting to `["default"]`.                                               | `packages/addons/src/auth/models.ts`, `packages/addons/src/auth/service.ts` |
 
 **Current-code conclusion:** use the string slug as the existing tenant identifier when describing current runtime behavior. This is a source observation, not approval of the long-term PaaS identifier. Whether the PaaS contract preserves slugs as immutable tenant IDs or introduces an opaque tenant UUID with a slug mapping is an **OPEN ARCHITECTURE DECISION** for #561.
 
@@ -141,17 +141,17 @@ The tracked `apps/edge/wrangler.jsonc` declares the Worker entry point, assets, 
 
 ## 8. Gaps and unresolved decisions
 
-| Priority | Gap / decision | Why it blocks public PaaS | Required owner decision or evidence |
-| --- | --- | --- | --- |
-| P0 | Define the tenant identifier contract (existing string slug vs. opaque tenant ID + slug mapping). | Every database row, API contract, membership record, node protocol, and domain binding depends on a stable tenant key. | #561 architecture ADR. |
-| P0 | Define normalized membership authority and lifecycle. | JSON company IDs do not model active/suspended membership, provenance, or tenant-local roles. | #561; threat model #562. |
-| P0 | Reconcile cookie and Bearer tenant context. | Active MID tokens do not carry tenant claims; API verifier and resolver produce different identity shapes. | #561 and #562; add tests for both paths. |
-| P0 | Define who may select a tenant and what happens for invalid/non-member/inactive tenant IDs. | Admin role currently bypasses membership lookup; middleware silently falls back for invalid or unauthorized selections. | #561/#562; explicit permission model and deny behavior. |
-| P0 | Authenticate the Edge Worker caller and prove deployed ingress policy. | Caller-supplied tenant/actor headers are currently trusted by the handler. | #562 threat model and an independently testable ingress design. |
-| P0 | Establish PostgreSQL RLS on all tenant-owned PaaS tables, with forced RLS and a constrained DB role. | Application filters alone cannot defend against missed route/raw-SQL predicates. | #562 threat model and #564 security gate; migration and two-tenant integration tests. |
-| P0/P1 | Close the repository transaction-binding gap. | A transaction callback does not guarantee ORM repository calls join that transaction; atomic membership and provisioning operations need a reliable boundary. | Coordinate with #544; do not duplicate its ORM files. |
-| P1 | Define tenant behavior for global job workers and outbox subscribers. | Optional tenant fields and implicit `default` values make tenant propagation dependent on each caller. | Include in #561/#562 and verify with cross-tenant worker tests. |
-| P1 | Audit all direct SQL and unscoped `BaseRepository` call sites. | Tenant scoping is explicit at call sites, not automatic on every database operation. | Scoped implementation work after #564; keep ownership per package/path. |
+| Priority | Gap / decision                                                                                       | Why it blocks public PaaS                                                                                                                                     | Required owner decision or evidence                                                   |
+| -------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| P0       | Define the tenant identifier contract (existing string slug vs. opaque tenant ID + slug mapping).    | Every database row, API contract, membership record, node protocol, and domain binding depends on a stable tenant key.                                        | #561 architecture ADR.                                                                |
+| P0       | Define normalized membership authority and lifecycle.                                                | JSON company IDs do not model active/suspended membership, provenance, or tenant-local roles.                                                                 | #561; threat model #562.                                                              |
+| P0       | Reconcile cookie and Bearer tenant context.                                                          | Active MID tokens do not carry tenant claims; API verifier and resolver produce different identity shapes.                                                    | #561 and #562; add tests for both paths.                                              |
+| P0       | Define who may select a tenant and what happens for invalid/non-member/inactive tenant IDs.          | Admin role currently bypasses membership lookup; middleware silently falls back for invalid or unauthorized selections.                                       | #561/#562; explicit permission model and deny behavior.                               |
+| P0       | Authenticate the Edge Worker caller and prove deployed ingress policy.                               | Caller-supplied tenant/actor headers are currently trusted by the handler.                                                                                    | #562 threat model and an independently testable ingress design.                       |
+| P0       | Establish PostgreSQL RLS on all tenant-owned PaaS tables, with forced RLS and a constrained DB role. | Application filters alone cannot defend against missed route/raw-SQL predicates.                                                                              | #562 threat model and #564 security gate; migration and two-tenant integration tests. |
+| P0/P1    | Close the repository transaction-binding gap.                                                        | A transaction callback does not guarantee ORM repository calls join that transaction; atomic membership and provisioning operations need a reliable boundary. | Coordinate with #544; do not duplicate its ORM files.                                 |
+| P1       | Define tenant behavior for global job workers and outbox subscribers.                                | Optional tenant fields and implicit `default` values make tenant propagation dependent on each caller.                                                        | Include in #561/#562 and verify with cross-tenant worker tests.                       |
+| P1       | Audit all direct SQL and unscoped `BaseRepository` call sites.                                       | Tenant scoping is explicit at call sites, not automatic on every database operation.                                                                          | Scoped implementation work after #564; keep ownership per package/path.               |
 
 ### Non-authoritative legacy material
 
@@ -159,14 +159,14 @@ The tracked `apps/edge/wrangler.jsonc` declares the Worker entry point, assets, 
 
 ## 9. Verification boundary
 
-| Check | Audit result |
-| --- | --- |
-| Required code paths exist at pinned `dev` commit | **SOURCE-INSPECTED** |
-| Required scripts/migration APIs exist | **SOURCE-INSPECTED** |
-| Local focused tests/typecheck/lint | **NOT RUN** — no repository shell/worktree execution is available in this audit session |
-| Live PostgreSQL tenant/RLS tests | **NOT RUN** — no test database credentials or live DB execution |
-| Deployed Cloudflare Access / Worker ingress controls | **UNKNOWN** — account-level policies are not in repository source |
-| Full route/raw-SQL/job tenant coverage | **NOT CERTIFIED** — requires implementation-level test inventory and execution |
+| Check                                                | Audit result                                                                            |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Required code paths exist at pinned `dev` commit     | **SOURCE-INSPECTED**                                                                    |
+| Required scripts/migration APIs exist                | **SOURCE-INSPECTED**                                                                    |
+| Local focused tests/typecheck/lint                   | **NOT RUN** — no repository shell/worktree execution is available in this audit session |
+| Live PostgreSQL tenant/RLS tests                     | **NOT RUN** — no test database credentials or live DB execution                         |
+| Deployed Cloudflare Access / Worker ingress controls | **UNKNOWN** — account-level policies are not in repository source                       |
+| Full route/raw-SQL/job tenant coverage               | **NOT CERTIFIED** — requires implementation-level test inventory and execution          |
 
 The PR CI is the required automated validation for this documentation-only change. A successful documentation check does not certify the security behavior listed above.
 
