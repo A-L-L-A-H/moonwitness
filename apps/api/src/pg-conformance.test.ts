@@ -58,8 +58,23 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
     dbUrl: targetUrl.toString(),
     dbName,
     drop: async () => {
+      const deadline = Date.now() + 10_000;
       try {
-        await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`);
+        while (true) {
+          const activeSessions = await adminPool.query<{ count: number }>(
+            "SELECT count(*)::int AS count FROM pg_stat_activity WHERE datname = $1",
+            [dbName],
+          );
+          const count = activeSessions.rows[0]?.count ?? 0;
+          if (count === 0) break;
+          if (Date.now() >= deadline) {
+            throw new Error(
+              `Cannot drop PostgreSQL conformance database '${dbName}': ${count} session(s) remain after ORM shutdown.`,
+            );
+          }
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+        await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}"`);
       } finally {
         await adminPool.end();
       }
@@ -121,11 +136,23 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
 
     afterEach(async () => {
       modelRegistry.clearHookErrors();
+      const failures: unknown[] = [];
       while (cleanups.length > 0) {
         const cleanup = cleanups.pop()!;
-        await cleanup().catch(() => {});
+        try {
+          await cleanup();
+        } catch (error) {
+          failures.push(error);
+        }
       }
-      await closeDbAsync();
+      try {
+        await closeDbAsync();
+      } catch (error) {
+        failures.push(error);
+      }
+      if (failures.length > 0) {
+        throw new AggregateError(failures, "PostgreSQL conformance cleanup failed.");
+      }
     });
 
     afterAll(async () => {
