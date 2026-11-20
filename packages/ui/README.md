@@ -50,4 +50,3 @@ const hunks: DiffHunk[] = [
 ```
 
 The caller owns diff computation, file loading, ordering and authorization. The component only presents added, removed and unchanged lines, with visible text labels and an accessible file/change description.
-
