@@ -101,7 +101,9 @@ const DiffViewer = React.forwardRef<HTMLDivElement, DiffViewerProps>(
             {hunks.map((hunk) => (
               <section key={hunk.id} className="min-w-0">
                 {hunk.header ? (
-                  <h4 className="border-b border-[var(--border)] bg-[var(--muted)]/40 px-3 py-2 font-mono text-xs text-[var(--muted-foreground)]">
+                  <h4
+                    className="border-b border-[var(--border)] bg-[var(--muted)]/40 px-3 py-2 font-mono text-xs text-[var(--muted-foreground)]"
+                  >
                     {hunk.header}
                   </h4>
                 ) : null}
@@ -147,7 +149,9 @@ const DiffViewer = React.forwardRef<HTMLDivElement, DiffViewerProps>(
                         >
                           {kindLabel}
                         </span>
-                        <pre className="m-0 min-w-max whitespace-pre px-3 py-1 font-mono text-[var(--foreground)]">
+                        <pre
+                          className="m-0 min-w-max whitespace-pre px-3 py-1 font-mono text-[var(--foreground)]"
+                        >
                           <code>{line.content.length > 0 ? line.content : " "}</code>
                         </pre>
                       </li>
