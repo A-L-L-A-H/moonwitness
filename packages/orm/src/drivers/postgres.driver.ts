@@ -1,6 +1,7 @@
 import type { ResultSet } from "@libsql/client";
 import type { OrmDriverHandle } from "../driver.js";
 import type { LibSqlExecutor } from "./sqlite.driver.js";
+import { runWithTransactionExecutor } from "../driver.js";
 import { splitSqlStatements } from "./d1.driver.js";
 
 export interface PgQueryResultLike {
@@ -417,18 +418,34 @@ export class PostgresDriver implements OrmDriverHandle {
 
   async transaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> {
     const client = await this.requirePool().connect();
-    const executor: LibSqlExecutor = {
+    const executor: OrmDriverHandle = {
       run: (sql, params = []) => runWithQueryable(client, sql, params),
       all: <R = Record<string, unknown>>(sql: string, params: unknown[] = []) =>
         allWithQueryable<R>(client, sql, params),
       get: <R = Record<string, unknown>>(sql: string, params: unknown[] = []) =>
         getWithQueryable<R>(client, sql, params),
       exec: (sql) => execWithQueryable(client, sql),
+      transaction: async <T>(nestedFn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> => {
+        const savepointName = `sp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        await client.query(`SAVEPOINT ${savepointName}`);
+        try {
+          const result = await nestedFn(executor);
+          await client.query(`RELEASE SAVEPOINT ${savepointName}`);
+          return result;
+        } catch (error) {
+          await client.query(`ROLLBACK TO SAVEPOINT ${savepointName}`).catch(() => {});
+          throw error;
+        }
+      },
+      close: () => client.release(),
+      getConnectionString: () => this.connectionString,
+      kind: "postgres" as const,
+      dialect: "postgres" as const,
     };
 
     try {
       await client.query("BEGIN");
-      const result = await fn(executor);
+      const result = await runWithTransactionExecutor(executor, fn);
       await client.query("COMMIT");
       return result;
     } catch (error) {

@@ -9,6 +9,15 @@ import {
   formatSqlDefaultLiteral,
   METADATA_NAMES,
 } from "./schema-utils.js";
+import {
+  findForeignKeyDrift,
+  findInvalidReferenceRows,
+  inspectTableCatalog as inspectFkCatalog,
+  modelForeignKeyExpectations,
+  many2ManyForeignKeyExpectations,
+  type IntegrityLookupContext,
+  type MissingFkReport,
+} from "./fk-drift.js";
 
 export interface SyncModelsOptions {
   legacyBackfill?: boolean;
@@ -21,6 +30,8 @@ export interface SyncReport {
   deprecatedColumns: Array<{ table: string; column: string }>;
   createdIndexes: string[];
   schemaHashes: Record<string, string>;
+  addedFks: Array<{ table: string; columns: string[]; targetTable: string; targetColumns: string[]; onDelete: string }>;
+  fkDrift: MissingFkReport[];
 }
 
 export interface RelationIntegrityViolation {
@@ -331,6 +342,8 @@ export async function syncModels(
     deprecatedColumns: [],
     createdIndexes: [],
     schemaHashes: {},
+    addedFks: [],
+    fkDrift: [],
   };
 
   const runSync = async (executor: LibSqlExecutor): Promise<void> => {
@@ -436,6 +449,78 @@ export async function syncModels(
           );
           existingIndexes.add(idxName.toLowerCase());
           report.createdIndexes.push(idxName);
+        }
+      }
+
+      // Reconcile missing FK constraints on existing model tables (PostgreSQL only)
+      if (isPostgres) {
+        const fkCatalog = await inspectFkCatalog(executor, table, true);
+        const modelFkExpectations = modelForeignKeyExpectations(descriptor);
+        for (const expectation of modelFkExpectations) {
+          const drift = findForeignKeyDrift(expectation, fkCatalog.foreignKeys ?? []);
+          if (drift && drift.kind === "missing") {
+            const context: IntegrityLookupContext = {
+              sourceModel: descriptor.name,
+              sourceTable: descriptor.table,
+              relationName: expectation.relationName ?? "",
+              targetModel: expectation.targetTable,
+              targetTable: expectation.targetTable,
+              sourceSoftDelete: descriptor.softDelete,
+              targetSoftDelete: (modelRegistry.get(expectation.targetTable)?.softDelete) ?? false,
+            };
+            const violations = await findInvalidReferenceRows(executor, expectation, context);
+            if (violations.length > 0) {
+              report.fkDrift.push(drift);
+              continue;
+            }
+            // Add the missing FK constraint
+            const fkName = `fk_${table}_${expectation.columns.join("_")}`;
+            await executor.exec(
+              `ALTER TABLE "${table}" ADD CONSTRAINT ${fkName} FOREIGN KEY (${expectation.columns.map(c => `"${c}"`).join(", ")}) REFERENCES "${expectation.targetTable}"(${expectation.targetColumns.map(c => `"${c}"`).join(", ")}) ON DELETE ${expectation.onDelete}`,
+            );
+            report.addedFks.push({
+              table,
+              columns: expectation.columns,
+              targetTable: expectation.targetTable,
+              targetColumns: expectation.targetColumns,
+              onDelete: expectation.onDelete,
+            });
+          } else if (drift) {
+            report.fkDrift.push(drift);
+          }
+        }
+
+        // Reconcile many2many join table FKs
+        for (const m2m of descriptor.many2manyTables) {
+          if (seenJoinTables.has(m2m.table)) continue;
+          seenJoinTables.add(m2m.table);
+          const jCat = await inspectFkCatalog(executor, m2m.table, true);
+          if (jCat.columns.length === 0) continue; // Will be created fresh below
+          const m2mExpectations = many2ManyForeignKeyExpectations(descriptor);
+          for (const pair of m2mExpectations) {
+            if (pair.expectation.tableName !== m2m.table) continue;
+            const drift = findForeignKeyDrift(pair.expectation, jCat.foreignKeys ?? []);
+            if (drift && drift.kind === "missing") {
+              const violations = await findInvalidReferenceRows(executor, pair.expectation, pair.context);
+              if (violations.length > 0) {
+                report.fkDrift.push(drift);
+                continue;
+              }
+              const fkName = `fk_${m2m.table}_${pair.expectation.columns.join("_")}`;
+              await executor.exec(
+                `ALTER TABLE "${m2m.table}" ADD CONSTRAINT ${fkName} FOREIGN KEY (${pair.expectation.columns.map(c => `"${c}"`).join(", ")}) REFERENCES "${pair.expectation.targetTable}"(${pair.expectation.targetColumns.map(c => `"${c}"`).join(", ")}) ON DELETE ${pair.expectation.onDelete}`,
+              );
+              report.addedFks.push({
+                table: m2m.table,
+                columns: pair.expectation.columns,
+                targetTable: pair.expectation.targetTable,
+                targetColumns: pair.expectation.targetColumns,
+                onDelete: pair.expectation.onDelete,
+              });
+            } else if (drift) {
+              report.fkDrift.push(drift);
+            }
+          }
         }
       }
 

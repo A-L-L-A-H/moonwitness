@@ -15,6 +15,8 @@ export interface ForeignKeySpec {
   onDelete: "RESTRICT" | "SET NULL";
 }
 
+export type TargetUniqueness = "single" | "tenant_composite";
+
 export interface Many2ManyJoinTableSpec {
   relationName: string;
   table: string;
@@ -26,6 +28,7 @@ export interface Many2ManyJoinTableSpec {
   targetField: string;
   targetColumn: string;
   onDelete: "restrict" | "ignore";
+  targetUniqueness: TargetUniqueness;
 }
 
 export interface ValidateAttrsOptions {
@@ -284,8 +287,10 @@ export function compileMany2ManyJoinTableDdl(spec: Many2ManyJoinTableSpec): stri
   assertIdentifier(spec.table, "join table");
   assertIdentifier(spec.sourceColumn, "join source column");
   assertIdentifier(spec.targetColumn, "join target column");
+  const sourceOnDelete = spec.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+  const targetOnDelete = spec.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
   return [
-    `CREATE TABLE IF NOT EXISTS ${spec.table} (\n  id TEXT PRIMARY KEY,\n  tenant_id TEXT NOT NULL DEFAULT 'default',\n  "${spec.sourceColumn}" TEXT NOT NULL,\n  "${spec.targetColumn}" TEXT NOT NULL\n)`,
+    `CREATE TABLE IF NOT EXISTS ${spec.table} (\n  id TEXT PRIMARY KEY,\n  tenant_id TEXT NOT NULL DEFAULT 'default',\n  "${spec.sourceColumn}" TEXT NOT NULL,\n  "${spec.targetColumn}" TEXT NOT NULL,\n  FOREIGN KEY (tenant_id, "${spec.sourceColumn}") REFERENCES "${spec.sourceTable}"(tenant_id, id) ON DELETE ${sourceOnDelete},\n  FOREIGN KEY (tenant_id, "${spec.targetColumn}") REFERENCES "${spec.targetTable}"(tenant_id, "${spec.targetField}") ON DELETE ${targetOnDelete}\n)`,
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_${spec.table}_unique ON ${spec.table} (tenant_id, ${spec.sourceColumn}, ${spec.targetColumn})`,
     `CREATE INDEX IF NOT EXISTS idx_${spec.table}_target ON ${spec.table} (tenant_id, ${spec.targetColumn})`,
   ].join(";\n");

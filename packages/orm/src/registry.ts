@@ -493,8 +493,9 @@ class OrmModelRegistry {
           assertIdentifier(targetField, "relation target column");
 
           const target = this.composed.get(rel.model);
+          let targetUniqueness: "single" | "tenant_composite" = "single";
           if (target) {
-            resolveTargetUniqueness(
+            targetUniqueness = resolveTargetUniqueness(
               base.name,
               relName,
               rel.model,
@@ -514,6 +515,7 @@ class OrmModelRegistry {
             targetField,
             targetColumn,
             onDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            targetUniqueness,
           });
           continue;
         }
