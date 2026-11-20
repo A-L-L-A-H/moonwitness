@@ -302,7 +302,7 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
         name: `pg_831.tagged_${suffix}`,
         table: joinTable,
         schema: z.object({
-          name: z.string().min(1),
+          name: z.string().min(1).nullable(),
         }),
         relations: {
           users: { type: "many2many", model: `pg_831.user_${suffix}`, through: joinTable },
