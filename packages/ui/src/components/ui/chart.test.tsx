@@ -63,7 +63,9 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
 
     expect(container.querySelectorAll('svg[data-mw-chart="sparkline"]').length).toBe(2);
     expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(6);
-    expect(container.querySelectorAll("table[data-mw-chart-data-alternative='true']")).toHaveLength(6);
+    expect(
+      container.querySelectorAll("table[data-mw-chart-data-alternative='true']"),
+    ).toHaveLength(6);
     expect(container.querySelector('svg[data-mw-chart="line"]')).not.toBeNull();
     expect(container.querySelector('svg[data-mw-chart="area"]')).not.toBeNull();
     const gauge = container.querySelector('svg[data-mw-chart="radial-gauge"]');
