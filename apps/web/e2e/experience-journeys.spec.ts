@@ -240,6 +240,32 @@ async function mockJourneyApis(page: Page, role: "admin" | "viewer" = "admin"): 
         },
       });
     }
+    if (path.endsWith("/api/v1/control/resources")) {
+      return route.fulfill({ status: 200, json: {} });
+    }
+    if (path.endsWith("/api/v1/control/audit")) {
+      return route.fulfill({ status: 200, json: [] });
+    }
+    if (path.endsWith("/api/v1/control/vpn/status")) {
+      return route.fulfill({
+        status: 200,
+        json: {
+          enabled: false,
+          interface: "wg0",
+          address: "10.0.0.1/24",
+          listen_port: 51820,
+          endpoint: "",
+          manage_firewall: false,
+          public_key: "test-public-key",
+          server_configured: true,
+          peer_count: 0,
+          peers: [],
+          subnets: [],
+          available: true,
+          missing_tools: [],
+        },
+      });
+    }
     return route.fulfill({ status: 200, json: { data: [] } });
   });
 }
