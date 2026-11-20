@@ -250,7 +250,7 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await worldTile.click();
         await expect(worldTile).toHaveAttribute("aria-pressed", "true");
 
-        await page.getByRole("button", { name: "Universal Search" }).click();
+        await page.getByRole("button", { name: "Universal Search", exact: true }).click();
         const searchDialog = page.getByRole("dialog", { name: "Search the Empire of the Light" });
         await expect(searchDialog).toBeVisible();
         await searchDialog.getByRole("searchbox", { name: "Search query" }).fill("Sidra");
@@ -305,11 +305,11 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.locator("#home h1")).toContainText(/MOONWITNESS/i);
 
-        await page.getByRole("button", { name: "Search the archive" }).click();
-        const searchDialog = page.getByRole("dialog", { name: "Search the archive" });
+        await page.getByRole("button", { name: "ابحث في الأرشيف" }).click();
+        const searchDialog = page.getByRole("dialog", { name: "ابحث في الأرشيف" });
         await expect(searchDialog).toBeVisible();
-        await searchDialog.getByRole("textbox", { name: "SEARCH THE SIGNALS" }).fill("signal");
-        await searchDialog.getByRole("button", { name: "GO" }).click();
+        await searchDialog.getByRole("textbox", { name: "ابحث في الإشارات" }).fill("signal");
+        await searchDialog.getByRole("button", { name: "انطلق", exact: true }).click();
 
         await expect(page).toHaveURL(/\/dock\?q=signal/);
         await expect(page.getByRole("textbox", { name: "Search timeline events…" })).toHaveValue(
