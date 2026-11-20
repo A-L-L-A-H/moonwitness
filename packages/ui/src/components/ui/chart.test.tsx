@@ -89,13 +89,14 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
         <LineChart data={outbound} ariaLabel="Outbound traffic" />
         <Sparkline data={[2, 0, 4]} ariaLabel="Packet samples" />
         <RadialGauge value={74} label="CPU" ariaLabel="CPU utilisation" />
+        <BarChart data={[]} ariaLabel="Empty chart" />
       </ChartContainer>,
     );
 
     const tables = Array.from(
       container.querySelectorAll<HTMLTableElement>("table[data-mw-chart-data-alternative='true']"),
     );
-    expect(tables).toHaveLength(4);
+    expect(tables).toHaveLength(5);
     expect(tables[0]?.caption?.textContent).toBe("Inbound traffic data");
     expect(tables[0]?.textContent).toContain("00:05");
     expect(tables[0]?.textContent).toContain("0");
@@ -107,7 +108,24 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     expect(tables[3]?.caption?.textContent).toBe("CPU utilisation data");
     expect(tables[3]?.textContent).toContain("74%");
     expect(container.querySelectorAll("svg[role='img']")).toHaveLength(0);
-    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(4);
+    expect(container.querySelectorAll("svg[aria-hidden='true']")).toHaveLength(5);
+    expect(tables[4]?.caption?.textContent).toBe("Empty chart data");
+    expect(tables[4]?.textContent).toContain("No data available");
+  });
+
+  it("can preserve an SVG image label when its accessible data table is disabled", () => {
+    renderNode(
+      <BarChart
+        data={[{ label: "Active", value: 4 }]}
+        ariaLabel="Active sessions"
+        accessibleData={false}
+      />,
+    );
+
+    const chart = container.querySelector("svg[role='img']");
+    expect(chart?.getAttribute("aria-label")).toBe("Active sessions");
+    expect(chart?.hasAttribute("aria-hidden")).toBe(false);
+    expect(container.querySelector("table[data-mw-chart-data-alternative='true']")).toBeNull();
   });
 
   it("renders all 10 skins inside SkinMatrixCompare and formats CSS/JSON exports", () => {
