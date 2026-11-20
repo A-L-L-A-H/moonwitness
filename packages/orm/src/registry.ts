@@ -515,6 +515,8 @@ class OrmModelRegistry {
             targetField,
             targetColumn,
             onDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            sourceOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            targetOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
             targetUniqueness,
           });
           continue;
@@ -531,10 +533,13 @@ class OrmModelRegistry {
             `Unsupported onDelete policy '${onDeleteRaw}' on relation '${base.name}.${relName}': destructive cascades are not allowed; use 'restrict', 'set null', or 'ignore'.`,
           );
         }
-        const colSpec = fields.get(relName);
-        if (!colSpec && !METADATA_NAMES.has(relName)) {
+        // Support both relation name = field name (e.g., "author") and relation name + "_id" = field name (e.g., "author" -> "author_id")
+        const fkColumnName = relName + "_id";
+        const colSpec = fields.get(relName) ?? fields.get(fkColumnName);
+        const actualFkColumn = fields.has(relName) ? relName : fkColumnName;
+        if (!colSpec && !METADATA_NAMES.has(relName) && !METADATA_NAMES.has(fkColumnName)) {
           throw new Error(
-            `Relation '${base.name}.${relName}' requires a matching field '${relName}' in the model schema.`,
+            `Relation '${base.name}.${relName}' requires a matching field '${relName}' or '${fkColumnName}' in the model schema.`,
           );
         }
         if (onDeleteRaw === "set null" && (!colSpec || (!colSpec.nullable && !colSpec.optional))) {
@@ -556,14 +561,14 @@ class OrmModelRegistry {
           );
           if (uniqueKind === "single") {
             foreignKeys.push({
-              columns: [relName],
+              columns: [actualFkColumn],
               targetTable: target.table,
               targetColumns: [targetField],
               onDelete: onDeleteRaw === "set null" ? "SET NULL" : "RESTRICT",
             });
           } else if (onDeleteRaw !== "set null") {
             foreignKeys.push({
-              columns: ["tenant_id", relName],
+              columns: ["tenant_id", actualFkColumn],
               targetTable: target.table,
               targetColumns: ["tenant_id", targetField],
               onDelete: "RESTRICT",

@@ -978,6 +978,7 @@ export class AddonRuntimeController {
       deprecatedColumns: [],
       createdIndexes: [],
       schemaHashes: {},
+      missingFks: [],
     };
     let appliedMigrations: string[] = [];
     let skippedMigrations: string[] = [];
@@ -1263,6 +1264,7 @@ export class AddonRuntimeController {
       deprecatedColumns: [],
       createdIndexes: [],
       schemaHashes: {},
+      missingFks: [],
     };
     const loadedSoFar: string[] = [];
     const registryState = emptyRegistryState();

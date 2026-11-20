@@ -135,6 +135,11 @@ export function closeDb(): void {
   }
 }
 
+/**
+ * Get the active database executor.
+ * Returns the transaction-bound executor if inside a transaction callback,
+ * otherwise returns the global driver handle (wrapped with query budget if active).
+ */
 export function getDb(): OrmDriverHandle {
   const txExecutor = transactionStorage.getStore();
   if (txExecutor) {

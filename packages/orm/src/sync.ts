@@ -10,14 +10,11 @@ import {
   METADATA_NAMES,
 } from "./schema-utils.js";
 import {
-  findForeignKeyDrift,
-  findInvalidReferenceRows,
-  inspectTableCatalog as inspectFkCatalog,
-  modelForeignKeyExpectations,
-  many2ManyForeignKeyExpectations,
-  type IntegrityLookupContext,
+  inspectTableCatalog,
   type MissingFkReport,
 } from "./fk-drift.js";
+
+export { type MissingFkReport, inspectTableCatalog } from "./fk-drift.js";
 
 export interface SyncModelsOptions {
   legacyBackfill?: boolean;
@@ -30,8 +27,7 @@ export interface SyncReport {
   deprecatedColumns: Array<{ table: string; column: string }>;
   createdIndexes: string[];
   schemaHashes: Record<string, string>;
-  addedFks: Array<{ table: string; columns: string[]; targetTable: string; targetColumns: string[]; onDelete: string }>;
-  fkDrift: MissingFkReport[];
+  missingFks: MissingFkReport[];
 }
 
 export interface RelationIntegrityViolation {
@@ -134,48 +130,6 @@ function sortDescriptorsByRelationDeps(
     visit(desc);
   }
   return sorted;
-}
-
-async function inspectTableCatalog(
-  executor: LibSqlExecutor,
-  table: string,
-  isPostgres: boolean,
-): Promise<{
-  columns: string[];
-  indexes: string[];
-  constraints: Array<{ name: string; type: string }>;
-}> {
-  if (isPostgres) {
-    const colRows = await executor.all<{ name: string }>(
-      "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = ?",
-      [table.toLowerCase()],
-    );
-    const idxRows = await executor.all<{ name: string }>(
-      "SELECT indexname AS name FROM pg_indexes WHERE schemaname = 'public' AND tablename = ?",
-      [table.toLowerCase()],
-    );
-    const conRows = await executor.all<{ name: string; contype: string }>(
-      `SELECT con.conname AS name, con.contype AS contype
-       FROM pg_constraint con
-       JOIN pg_class rel ON rel.oid = con.conrelid
-       JOIN pg_namespace n ON n.oid = rel.relnamespace
-       WHERE n.nspname = 'public' AND rel.relname = ?`,
-      [table.toLowerCase()],
-    );
-    return {
-      columns: colRows.map((r) => String(r.name)),
-      indexes: idxRows.map((r) => String(r.name)),
-      constraints: conRows.map((r) => ({ name: String(r.name), type: String(r.contype) })),
-    };
-  }
-
-  const colRows = await executor.all<{ name: string }>(`PRAGMA table_info(${table})`);
-  const idxRows = await executor.all<{ name: string }>(`PRAGMA index_list(${table})`);
-  return {
-    columns: colRows.map((r) => String(r.name)),
-    indexes: idxRows.map((r) => String(r.name)),
-    constraints: [],
-  };
 }
 
 /**
@@ -291,6 +245,190 @@ export async function preflightRelationIntegrity(
   return { ok: violations.length === 0, violations };
 }
 
+async function reconcileMissingForeignKeys(
+  executor: LibSqlExecutor,
+  descriptor: RegisteredModelDescriptor,
+  catalog: {
+    columns: string[];
+    indexes: string[];
+    constraints: Array<{ name: string; type: string }>;
+    foreignKeys?: Array<{
+      name: string;
+      constrainedColumns: string[];
+      referencedTable: string;
+      referencedColumns: string[];
+      onDelete: string;
+      validated: boolean;
+    }>;
+  },
+  isPostgres: boolean,
+  missingFks: MissingFkReport[],
+): Promise<Array<{ table: string; column: string }>> {
+  const added: Array<{ table: string; column: string }> = [];
+  // SQLite doesn't support ALTER TABLE ADD CONSTRAINT for FKs
+  const existingFks = catalog.foreignKeys ?? [];
+  const table = descriptor.table;
+
+  for (const fk of descriptor.foreignKeys) {
+    const expectedColumns = fk.columns.sort();
+    const expectedTargetTable = fk.targetTable;
+    const expectedTargetColumns = fk.targetColumns.sort();
+    const expectedOnDelete = fk.onDelete;
+
+    // Find the relation name for this FK
+    let relationName: string | undefined;
+    if (descriptor.relations) {
+      for (const [relName, rel] of Object.entries(descriptor.relations)) {
+        if (rel.type === "many2one" && rel.targetField === fk.targetColumns[0]) {
+          relationName = relName;
+          break;
+        }
+      }
+    }
+
+    let foundEquivalent = false;
+    let onDeleteMismatch = false;
+    let existingOnDelete: string | undefined;
+
+    for (const existingFk of existingFks) {
+      const existingColumns = existingFk.constrainedColumns.sort();
+      const existingTargetTable = existingFk.referencedTable;
+      const existingTargetColumns = existingFk.referencedColumns.sort();
+      const existingOnDeleteCandidate = existingFk.onDelete;
+
+      const columnsMatch = JSON.stringify(expectedColumns) === JSON.stringify(existingColumns);
+      const targetTableMatch =
+        expectedTargetTable.toLowerCase() === existingTargetTable.toLowerCase();
+      const targetColumnsMatch =
+        JSON.stringify(expectedTargetColumns) === JSON.stringify(existingTargetColumns);
+      const onDeleteMatch = expectedOnDelete === existingOnDeleteCandidate;
+
+      if (columnsMatch && targetTableMatch && targetColumnsMatch && onDeleteMatch) {
+        foundEquivalent = true;
+        break;
+      }
+
+      if (columnsMatch && targetTableMatch && targetColumnsMatch && !onDeleteMatch) {
+        onDeleteMismatch = true;
+        existingOnDelete = existingOnDeleteCandidate;
+        break;
+      }
+    }
+
+    if (foundEquivalent) continue;
+
+    if (onDeleteMismatch) {
+      missingFks.push({
+        table,
+        column: fk.columns[0]!,
+        targetTable: expectedTargetTable,
+        targetColumn: fk.targetColumns[0]!,
+        expectedOnDelete,
+        existingOnDelete: existingOnDelete ?? "RESTRICT",
+        kind: "ondelete_mismatch",
+        relationName,
+        side: "source",
+      });
+      continue;
+    }
+
+    // Check for validated FK mismatch (FK exists but is not validated)
+    let validatedMismatch = false;
+    for (const existingFk of existingFks) {
+      const existingColumns = existingFk.constrainedColumns.sort();
+      const existingTargetTable = existingFk.referencedTable;
+      const existingTargetColumns = existingFk.referencedColumns.sort();
+
+      const columnsMatch = JSON.stringify(expectedColumns) === JSON.stringify(existingColumns);
+      const targetTableMatch =
+        expectedTargetTable.toLowerCase() === existingTargetTable.toLowerCase();
+      const targetColumnsMatch =
+        JSON.stringify(expectedTargetColumns) === JSON.stringify(existingTargetColumns);
+
+      if (columnsMatch && targetTableMatch && targetColumnsMatch && !existingFk.validated) {
+        validatedMismatch = true;
+        break;
+      }
+    }
+
+    if (validatedMismatch) {
+      missingFks.push({
+        table,
+        column: fk.columns[0]!,
+        targetTable: expectedTargetTable,
+        targetColumn: fk.targetColumns[0]!,
+        expectedOnDelete,
+        existingOnDelete: "NOT VALIDATED",
+        kind: "validated_mismatch",
+        relationName,
+        side: "source",
+      });
+      continue;
+    }
+
+    // Preflight: check for orphan/cross-tenant rows before adding constraint
+    const target = modelRegistry.get(
+      descriptor.relations
+        ? (Object.entries(descriptor.relations).find(
+            ([, v]) => v.targetField === fk.targetColumns[0],
+          )?.[1]?.model ?? "")
+        : "",
+    );
+    const targetField = fk.targetColumns[0];
+    const targetTable = fk.targetTable;
+    const srcDeletedFilter = descriptor.softDelete ? " AND src.status != 'deleted'" : "";
+    const tgtDeletedFilter = target?.softDelete ? " AND tgt.status != 'deleted'" : "";
+
+    const badRows = await executor.all<{ id: string; tenant_id: string; fk_val: unknown }>(
+      `SELECT src.id AS id, src.tenant_id AS tenant_id, src.${fk.columns[0]} AS fk_val
+       FROM ${table} src
+       WHERE src.${fk.columns[0]} IS NOT NULL${srcDeletedFilter}
+         AND NOT EXISTS (
+           SELECT 1 FROM ${targetTable} tgt
+           WHERE tgt.${targetField} = src.${fk.columns[0]} AND tgt.tenant_id = src.tenant_id${tgtDeletedFilter}
+         )`,
+    );
+
+    if (badRows.length > 0) {
+      missingFks.push({
+        table,
+        column: fk.columns[0]!,
+        targetTable: expectedTargetTable,
+        targetColumn: fk.targetColumns[0]!,
+        expectedOnDelete,
+        kind: "missing",
+        relationName,
+        side: "source",
+      });
+      continue;
+    }
+
+    if (isPostgres) {
+      const constraintName = `fk_${table}_${fk.columns.join("_")}`.substring(0, 63);
+      await executor.exec(
+        `ALTER TABLE "${table}" ADD CONSTRAINT "${constraintName}" ` +
+          `FOREIGN KEY (${fk.columns.map((c) => `"${c}"`).join(", ")}) ` +
+          `REFERENCES "${expectedTargetTable}"(${expectedTargetColumns.map((c) => `"${c}"`).join(", ")}) ` +
+          `ON DELETE ${expectedOnDelete}`,
+      );
+      added.push({ table, column: `constraint:${constraintName}` });
+    } else {
+      missingFks.push({
+        table,
+        column: fk.columns[0]!,
+        targetTable: expectedTargetTable,
+        targetColumn: fk.targetColumns[0]!,
+        expectedOnDelete,
+        kind: "missing",
+        relationName,
+        side: "source",
+      });
+    }
+  }
+
+  return added;
+}
+
 async function backfillLegacyMetadata(
   executor: LibSqlExecutor,
   table: string,
@@ -342,8 +480,7 @@ export async function syncModels(
     deprecatedColumns: [],
     createdIndexes: [],
     schemaHashes: {},
-    addedFks: [],
-    fkDrift: [],
+    missingFks: [],
   };
 
   const runSync = async (executor: LibSqlExecutor): Promise<void> => {
@@ -382,7 +519,7 @@ export async function syncModels(
         continue;
       }
 
-      const existingCols = new Set(catalog.columns.map((col) => col.toLowerCase()));
+      const existingCols = new Set<string>(catalog.columns.map((col: string) => col.toLowerCase()));
 
       if (options.legacyBackfill) {
         const metaAdded = await backfillLegacyMetadata(executor, table, existingCols);
@@ -434,7 +571,7 @@ export async function syncModels(
         }
       }
 
-      const existingIndexes = new Set(catalog.indexes.map((name) => name.toLowerCase()));
+      const existingIndexes = new Set<string>(catalog.indexes.map((name: string) => name.toLowerCase()));
       for (const idx of descriptor.indexes) {
         const columns = idx.fields.map((f) => {
           assertIdentifier(f, "index column");
@@ -452,77 +589,9 @@ export async function syncModels(
         }
       }
 
-      // Reconcile missing FK constraints on existing model tables (PostgreSQL only)
-      if (isPostgres) {
-        const fkCatalog = await inspectFkCatalog(executor, table, true);
-        const modelFkExpectations = modelForeignKeyExpectations(descriptor);
-        for (const expectation of modelFkExpectations) {
-          const drift = findForeignKeyDrift(expectation, fkCatalog.foreignKeys ?? []);
-          if (drift && drift.kind === "missing") {
-            const context: IntegrityLookupContext = {
-              sourceModel: descriptor.name,
-              sourceTable: descriptor.table,
-              relationName: expectation.relationName ?? "",
-              targetModel: expectation.targetTable,
-              targetTable: expectation.targetTable,
-              sourceSoftDelete: descriptor.softDelete,
-              targetSoftDelete: (modelRegistry.get(expectation.targetTable)?.softDelete) ?? false,
-            };
-            const violations = await findInvalidReferenceRows(executor, expectation, context);
-            if (violations.length > 0) {
-              report.fkDrift.push(drift);
-              continue;
-            }
-            // Add the missing FK constraint
-            const fkName = `fk_${table}_${expectation.columns.join("_")}`;
-            await executor.exec(
-              `ALTER TABLE "${table}" ADD CONSTRAINT ${fkName} FOREIGN KEY (${expectation.columns.map(c => `"${c}"`).join(", ")}) REFERENCES "${expectation.targetTable}"(${expectation.targetColumns.map(c => `"${c}"`).join(", ")}) ON DELETE ${expectation.onDelete}`,
-            );
-            report.addedFks.push({
-              table,
-              columns: expectation.columns,
-              targetTable: expectation.targetTable,
-              targetColumns: expectation.targetColumns,
-              onDelete: expectation.onDelete,
-            });
-          } else if (drift) {
-            report.fkDrift.push(drift);
-          }
-        }
-
-        // Reconcile many2many join table FKs
-        for (const m2m of descriptor.many2manyTables) {
-          if (seenJoinTables.has(m2m.table)) continue;
-          seenJoinTables.add(m2m.table);
-          const jCat = await inspectFkCatalog(executor, m2m.table, true);
-          if (jCat.columns.length === 0) continue; // Will be created fresh below
-          const m2mExpectations = many2ManyForeignKeyExpectations(descriptor);
-          for (const pair of m2mExpectations) {
-            if (pair.expectation.tableName !== m2m.table) continue;
-            const drift = findForeignKeyDrift(pair.expectation, jCat.foreignKeys ?? []);
-            if (drift && drift.kind === "missing") {
-              const violations = await findInvalidReferenceRows(executor, pair.expectation, pair.context);
-              if (violations.length > 0) {
-                report.fkDrift.push(drift);
-                continue;
-              }
-              const fkName = `fk_${m2m.table}_${pair.expectation.columns.join("_")}`;
-              await executor.exec(
-                `ALTER TABLE "${m2m.table}" ADD CONSTRAINT ${fkName} FOREIGN KEY (${pair.expectation.columns.map(c => `"${c}"`).join(", ")}) REFERENCES "${pair.expectation.targetTable}"(${pair.expectation.targetColumns.map(c => `"${c}"`).join(", ")}) ON DELETE ${pair.expectation.onDelete}`,
-              );
-              report.addedFks.push({
-                table: m2m.table,
-                columns: pair.expectation.columns,
-                targetTable: pair.expectation.targetTable,
-                targetColumns: pair.expectation.targetColumns,
-                onDelete: pair.expectation.onDelete,
-              });
-            } else if (drift) {
-              report.fkDrift.push(drift);
-            }
-          }
-        }
-      }
+      // Issue #546: reconcile missing FKs on existing model tables
+      const fkAdded = await reconcileMissingForeignKeys(executor, descriptor, catalog, isPostgres, report.missingFks);
+      report.addedColumns.push(...fkAdded);
 
       for (const m2m of descriptor.many2manyTables) {
         if (seenJoinTables.has(m2m.table)) continue;
@@ -533,7 +602,101 @@ export async function syncModels(
           report.createdTables.push(m2m.table);
           report.createdIndexes.push(`idx_${m2m.table}_unique`, `idx_${m2m.table}_target`);
         } else {
-          const jIndexes = new Set(jCat.indexes.map((n) => n.toLowerCase()));
+          // Issue #547: reconcile missing FKs on existing join tables
+          if (isPostgres && jCat.foreignKeys) {
+            const target = modelRegistry.get(m2m.targetModel);
+            if (target) {
+              const sourceTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
+              const targetTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", m2m.targetField] : [m2m.targetField];
+              const onDelete = m2m.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+
+              const fkSpecs = [
+                {
+                  columns: [m2m.sourceColumn],
+                  targetTable: m2m.sourceTable,
+                  targetColumns: sourceTargetCols,
+                  onDelete,
+                  relationName: m2m.relationName,
+                  side: "source" as const,
+                },
+                {
+                  columns: [m2m.targetColumn],
+                  targetTable: m2m.targetTable,
+                  targetColumns: targetTargetCols,
+                  onDelete,
+                  relationName: m2m.relationName,
+                  side: "target" as const,
+                },
+              ];
+
+              for (const fkSpec of fkSpecs) {
+                const expectedColumns = fkSpec.columns.sort();
+                const expectedTargetTable = fkSpec.targetTable;
+                const expectedTargetColumns = fkSpec.targetColumns.sort();
+                const expectedOnDelete = fkSpec.onDelete;
+
+                let foundEquivalent = false;
+                for (const existingFk of jCat.foreignKeys) {
+                  const existingColumns = existingFk.constrainedColumns.sort();
+                  const existingTargetTable = existingFk.referencedTable;
+                  const existingTargetColumns = existingFk.referencedColumns.sort();
+                  const existingOnDelete = existingFk.onDelete;
+
+                  const columnsMatch =
+                    JSON.stringify(expectedColumns) === JSON.stringify(existingColumns);
+                  const targetTableMatch =
+                    expectedTargetTable.toLowerCase() === existingTargetTable.toLowerCase();
+                  const targetColumnsMatch =
+                    JSON.stringify(expectedTargetColumns) === JSON.stringify(existingTargetColumns);
+                  const onDeleteMatch = expectedOnDelete === existingOnDelete;
+
+                  if (columnsMatch && targetTableMatch && targetColumnsMatch && onDeleteMatch) {
+                    foundEquivalent = true;
+                    break;
+                  }
+                }
+
+                if (foundEquivalent) continue;
+
+                // Preflight: check for orphan/cross-tenant rows before adding constraint
+                const badJoinRows = await executor.all<{
+                  id: string;
+                  tenant_id: string;
+                  source_val: unknown;
+                  target_val: unknown;
+                }>(
+                  `SELECT j.id AS id, j.tenant_id AS tenant_id, j."${m2m.sourceColumn}" AS source_val, j."${m2m.targetColumn}" AS target_val
+                   FROM ${m2m.table} j
+                   WHERE ${fkSpec.side === "source" ? `NOT EXISTS (SELECT 1 FROM ${m2m.sourceTable} src WHERE src.id = j."${m2m.sourceColumn}" AND src.tenant_id = j.tenant_id)` : `NOT EXISTS (SELECT 1 FROM ${m2m.targetTable} tgt WHERE tgt.${m2m.targetField} = j."${m2m.targetColumn}" AND tgt.tenant_id = j.tenant_id)`}`,
+                );
+
+                if (badJoinRows.length > 0) {
+                  report.missingFks.push({
+                    table: m2m.table,
+                    column: fkSpec.columns[0]!,
+                    targetTable: expectedTargetTable,
+                    targetColumn: expectedTargetColumns[0]!,
+                    expectedOnDelete,
+                    kind: "missing",
+                    relationName: m2m.relationName,
+                    side: fkSpec.side,
+                  });
+                  continue;
+                }
+
+                const constraintName = `fk_${m2m.table}_${fkSpec.side}`.substring(0, 63);
+                await executor.exec(
+                  `ALTER TABLE "${m2m.table}" ADD CONSTRAINT "${constraintName}" ` +
+                    `FOREIGN KEY ("${fkSpec.columns.join('", "')}") ` +
+                    `REFERENCES "${expectedTargetTable}"(${expectedTargetColumns.map((c) => `"${c}"`).join(", ")}) ` +
+                    `ON DELETE ${expectedOnDelete}`,
+                );
+                report.createdIndexes.push(`constraint:${constraintName}`);
+              }
+            }
+          }
+
+          const jIndexes = new Set<string>(jCat.indexes.map((n: string) => n.toLowerCase()));
           const uIdx = `idx_${m2m.table}_unique`;
           const tIdx = `idx_${m2m.table}_target`;
           if (!jIndexes.has(uIdx.toLowerCase())) {

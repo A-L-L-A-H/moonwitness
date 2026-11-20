@@ -10,6 +10,7 @@ export {
   ensureAuditTable,
   ensureOutboxTable,
 } from "./define-model.js";
+export { doctorModels } from "./doctor.js";
 export type {
   DefineModelOptions,
   DefineModelReturn,
