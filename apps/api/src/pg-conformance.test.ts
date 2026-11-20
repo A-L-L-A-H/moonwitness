@@ -914,6 +914,140 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
       expect(leadGroup.json().groups).toEqual([{ audit_finding: "pg-audit-updated", count: 1 }]);
     });
 
+    it("1d. redacts sensitive audit values recursively on PostgreSQL across create, update, archive, restore, and delete", async () => {
+      const isolated = await createIsolatedPostgresDb(POSTGRES_CONFORMANCE_URL);
+      cleanups.push(async () => {
+        await closeDbAsync();
+        await isolated.drop();
+      });
+      await initPostgresDb(isolated.dbUrl);
+
+      const suffix = isolated.dbName.slice(-8);
+      const auditModel = defineModel({
+        name: `conf.audit_redaction_${suffix}`,
+        table: `conf_audit_redaction_${suffix}`,
+        schema: z.object({
+          username: z.string(),
+          password_hash: z.string(),
+          api_token: z.string(),
+          sensitive_note: z.string(),
+          profile: z.object({
+            label: z.string(),
+            refresh_token: z.string(),
+          }),
+          provider_data: z.array(
+            z.object({
+              provider: z.string(),
+              access_token: z.string(),
+            }),
+          ),
+        }),
+        fieldPolicies: {
+          sensitive_note: { sensitive: true },
+        },
+      });
+      await syncModels([auditModel]);
+
+      const actor = createActorContext(
+        "audit-redaction-operator",
+        "api",
+        "audit-redaction-request",
+        `tenant_${suffix}`,
+      );
+      const created = await auditModel.repository.create(
+        {
+          username: "operator-before",
+          password_hash: "pg-password-before-7b82",
+          api_token: "pg-api-token-before-7b82",
+          sensitive_note: "pg-sensitive-note-before-7b82",
+          profile: { label: "profile-before", refresh_token: "pg-refresh-before-7b82" },
+          provider_data: [
+            { provider: "issuer", access_token: "pg-access-before-7b82" },
+          ],
+        },
+        actor,
+      );
+      await auditModel.repository.update(
+        created.id,
+        {
+          username: "operator-after",
+          password_hash: "pg-password-after-7b82",
+          api_token: "pg-api-token-after-7b82",
+          sensitive_note: "pg-sensitive-note-after-7b82",
+          profile: { label: "profile-after", refresh_token: "pg-refresh-after-7b82" },
+          provider_data: [
+            { provider: "issuer", access_token: "pg-access-after-7b82" },
+          ],
+        },
+        actor,
+      );
+      await auditModel.repository.archive(created.id, actor);
+      await auditModel.repository.restore(created.id, actor);
+      await auditModel.repository.delete(created.id, actor);
+
+      const auditRows = await getDb().all<{ action: string; diff: string }>(
+        "SELECT action, diff FROM _orm_audit_log WHERE model = ? AND entity_id = ?",
+        [auditModel.name, created.id],
+      );
+      expect(auditRows).toHaveLength(5);
+      expect(auditRows.map((row) => row.action)).toEqual(
+        expect.arrayContaining(["CREATE", "UPDATE", "ARCHIVE", "RESTORE", "DELETE"]),
+      );
+
+      const rawDiffs = auditRows.map((row) => row.diff);
+      for (const secret of [
+        "pg-password-before-7b82",
+        "pg-password-after-7b82",
+        "pg-api-token-before-7b82",
+        "pg-api-token-after-7b82",
+        "pg-sensitive-note-before-7b82",
+        "pg-sensitive-note-after-7b82",
+        "pg-refresh-before-7b82",
+        "pg-refresh-after-7b82",
+        "pg-access-before-7b82",
+        "pg-access-after-7b82",
+      ]) {
+        expect(rawDiffs.join("\\n")).not.toContain(secret);
+      }
+
+      const diffByAction = new Map(
+        auditRows.map((row) => [row.action, JSON.parse(row.diff) as Record<string, unknown>]),
+      );
+      const createDiff = diffByAction.get("CREATE")!;
+      expect(createDiff.username).toEqual({ before: null, after: "operator-before" });
+      expect(createDiff.password_hash).toEqual({
+        before: null,
+        after: "[REDACTED]",
+      });
+      expect(createDiff.api_token).toEqual({ before: null, after: "[REDACTED]" });
+      expect(createDiff.sensitive_note).toEqual({
+        before: null,
+        after: "[REDACTED]",
+      });
+      expect(createDiff.profile).toEqual({
+        before: null,
+        after: { label: "profile-before", refresh_token: "[REDACTED]" },
+      });
+      expect(createDiff.provider_data).toEqual({
+        before: null,
+        after: [{ provider: "issuer", access_token: "[REDACTED]" }],
+      });
+
+      const updateDiff = diffByAction.get("UPDATE")!;
+      expect(updateDiff.username).toEqual({
+        before: "operator-before",
+        after: "operator-after",
+      });
+      expect(updateDiff.profile).toEqual({
+        before: { label: "profile-before", refresh_token: "[REDACTED]" },
+        after: { label: "profile-after", refresh_token: "[REDACTED]" },
+      });
+      expect(updateDiff.provider_data).toEqual({
+        before: [{ provider: "issuer", access_token: "[REDACTED]" }],
+        after: [{ provider: "issuer", access_token: "[REDACTED]" }],
+      });
+    });
+
     it("2. enforces model semantics on PostgreSQL: defaults, constrains, many2one, many2many + query budget, computed DAG, hook rollback vs isolation, 409 optimistic locking, and _orm_audit_log", async () => {
       const isolated = await createIsolatedPostgresDb(POSTGRES_CONFORMANCE_URL);
       let app: FastifyInstance | null = null;
