@@ -115,7 +115,8 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
             const barHeight = Math.max(4, Math.round((point.value / max) * (height - 28)));
             const x = idx * 48 + 8;
             const y = height - 22 - barHeight;
-            const fill = point.colorVar ?? DEFAULT_SERIES_VARS[idx % DEFAULT_SERIES_VARS.length];
+            const fill =
+              point.colorVar ?? DEFAULT_SERIES_VARS[idx % DEFAULT_SERIES_VARS.length];
             return (
               <g key={point.label}>
                 <title>{`${point.label}: ${point.value}`}</title>
@@ -184,7 +185,9 @@ const Sparkline = React.forwardRef<SVGSVGElement, SparklineProps>(
 
     const coords = values.map((val, idx) => {
       const x =
-        values.length <= 1 ? padding + innerW / 2 : padding + (idx / (values.length - 1)) * innerW;
+        values.length <= 1
+          ? padding + innerW / 2
+          : padding + (idx / (values.length - 1)) * innerW;
       const y = padding + innerH - ((val - min) / span) * innerH;
       return { x, y, val };
     });
@@ -275,7 +278,8 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
     const innerH = Math.max(1, height - padTop - padBottom);
 
     const coords = data.map((point, idx) => {
-      const x = data.length <= 1 ? padX + innerW / 2 : padX + (idx / (data.length - 1)) * innerW;
+      const x =
+        data.length <= 1 ? padX + innerW / 2 : padX + (idx / (data.length - 1)) * innerW;
       const y = padTop + innerH - ((point.value - min) / span) * innerH;
       return { x, y, point };
     });
@@ -329,7 +333,9 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
             strokeOpacity={0.7}
             strokeWidth={1}
           />
-          {areaPoints ? <polygon points={areaPoints} fill={colorVar} fillOpacity={0.18} /> : null}
+          {areaPoints ? (
+            <polygon points={areaPoints} fill={colorVar} fillOpacity={0.18} />
+          ) : null}
           {coords.length >= 2 ? (
             <polyline
               points={linePoints}
@@ -381,7 +387,8 @@ const AreaChart = React.forwardRef<SVGSVGElement, AreaChartProps>(
 );
 AreaChart.displayName = "AreaChart";
 
-export interface RadialGaugeProps extends Omit<React.SVGAttributes<SVGSVGElement>, "children"> {
+export interface RadialGaugeProps
+  extends Omit<React.SVGAttributes<SVGSVGElement>, "children"> {
   value: number;
   max?: number;
   size?: number;
@@ -431,7 +438,14 @@ const RadialGauge = React.forwardRef<SVGSVGElement, RadialGaugeProps>(
           aria-hidden={accessibleData || undefined}
           focusable={accessibleData ? false : undefined}
         >
-          <circle cx="44" cy="44" r={radius} fill="none" stroke="var(--muted)" strokeWidth="7" />
+          <circle
+            cx="44"
+            cy="44"
+            r={radius}
+            fill="none"
+            stroke="var(--muted)"
+            strokeWidth="7"
+          />
           <circle
             cx="44"
             cy="44"
@@ -497,7 +511,8 @@ const ChartLegend = ({ items }: { items: readonly ChartDataPoint[] }) => (
           aria-hidden="true"
           className="inline-block h-2.5 w-2.5 rounded-sm"
           style={{
-            backgroundColor: item.colorVar ?? DEFAULT_SERIES_VARS[idx % DEFAULT_SERIES_VARS.length],
+            backgroundColor:
+              item.colorVar ?? DEFAULT_SERIES_VARS[idx % DEFAULT_SERIES_VARS.length],
           }}
         />
         <span>{item.label}</span>
@@ -512,7 +527,8 @@ const ChartTooltip = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
     <div
       ref={ref}
       className={cn(
-        "rounded-[var(--mw-badge-radius,0.25rem)] border border-[var(--border)] bg-[var(--popover)] px-2.5 py-1.5 text-xs text-[var(--popover-foreground)] shadow-md",
+        "rounded-[var(--mw-badge-radius,0.25rem)] border border-[var(--border)]",
+        "bg-[var(--popover)] px-2.5 py-1.5 text-xs text-[var(--popover-foreground)] shadow-md",
         className,
       )}
       {...props}
