@@ -517,6 +517,7 @@ class OrmModelRegistry {
             onDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
             sourceOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
             targetOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            sourceUniqueness: "single",
             targetUniqueness,
           });
           continue;
