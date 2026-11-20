@@ -98,17 +98,17 @@ test("timeline preview exposes actual encoded event and empty/error retry states
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/moonwitness");
-  await expect(page.locator("#shadow").getByText("Loading archive preview…")).toBeVisible();
-  await expect(page.locator("#shadow").getByText("No timeline events available.")).toBeVisible();
+  await expect(page.locator("#archive").getByText("Loading archive…")).toBeVisible();
+  await expect(page.locator("#archive").getByText("No timeline events available.")).toBeVisible();
   mode = "error";
   await page.reload();
-  const retry = page.locator("#shadow").getByRole("button", { name: "Retry archive preview" });
+  const retry = page.locator("#archive").getByRole("button", { name: "Retry archive" });
   await expect(retry).toBeVisible({ timeout: 20000 });
   expect((await retry.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   mode = "event";
   await retry.click();
   await expect(
-    page.locator("#shadow").getByRole("link", { name: /QA boundary event/ }),
+    page.locator("#archive").getByRole("link", { name: /QA boundary event/ }),
   ).toHaveAttribute("href", "/dock?event=qa%2Fid%20%261");
 });
 
@@ -142,7 +142,7 @@ test("mobile landing preview opens the query-resolved event detail", async ({ pa
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/moonwitness");
   await page
-    .locator("#shadow")
+    .locator("#archive")
     .getByRole("link", { name: /QA boundary event/ })
     .click();
   await expect(page).toHaveURL(/\/dock\?event=qa%2Fid%20%261/);
@@ -153,7 +153,7 @@ test("mobile landing preview opens the query-resolved event detail", async ({ pa
   await detail.getByRole("button", { name: "Close event detail" }).click();
   await expect(detail).toBeHidden();
   await page.goBack();
-  await expect(page.locator("#shadow")).toBeVisible();
+  await expect(page.locator("#archive")).toBeVisible();
   await page.goForward();
   await expect(detail.getByText("EVENT DETAIL", { exact: true })).toBeVisible();
   await page.reload();
