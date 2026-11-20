@@ -264,7 +264,6 @@ export function SkinScope({
     density,
   });
   const canonicalVars = canonicalTokensToCssVariables(resolved);
-  const vars = dnaWorldCssVariables(world);
 
   return (
     <DnaWorldContext.Provider value={world}>
@@ -277,7 +276,6 @@ export function SkinScope({
         className={className}
         style={{
           ...(canonicalVars as CSSProperties),
-          ...vars,
           backgroundColor: resolved.semantic.canvas,
           color: resolved.semantic.foreground,
           ...style,
