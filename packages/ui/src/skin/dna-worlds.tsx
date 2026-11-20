@@ -62,7 +62,7 @@ export const MASTER_DNA_IDS: readonly MasterDnaId[] = [
 ] as const;
 
 export function isValidDnaId(value: string): value is MasterDnaId {
-  return value in MASTER_DNA_WORLDS;
+  return Object.prototype.hasOwnProperty.call(MASTER_DNA_WORLDS, value);
 }
 
 export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>> = {
@@ -198,8 +198,8 @@ export const MASTER_DNA_WORLDS: Readonly<Record<MasterDnaId, MasterDnaWorldSpec>
 };
 
 export function getDnaWorld(id: MasterDnaId | string): MasterDnaWorldSpec {
-  if (id in MASTER_DNA_WORLDS) {
-    return MASTER_DNA_WORLDS[id as MasterDnaId];
+  if (isValidDnaId(id)) {
+    return MASTER_DNA_WORLDS[id];
   }
   return MASTER_DNA_WORLDS["02-lunar-chronicles"];
 }
