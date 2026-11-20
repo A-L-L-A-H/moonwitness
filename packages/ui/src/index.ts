@@ -417,7 +417,13 @@ export {
   type AreaChartProps,
   type RadialGaugeProps,
 } from "./components/ui/chart";
-export { DiffViewer, type DiffLineKind, type DiffLine, type DiffHunk, type DiffViewerProps } from "./components/ui/diff-viewer";
+export {
+  DiffViewer,
+  type DiffLineKind,
+  type DiffLine,
+  type DiffHunk,
+  type DiffViewerProps,
+} from "./components/ui/diff-viewer";
 
 export { cva, type VariantProps } from "./lib/utils";
 
