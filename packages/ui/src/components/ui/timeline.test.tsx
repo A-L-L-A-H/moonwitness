@@ -42,9 +42,7 @@ describe("Timeline", () => {
   it("renders a stable accessible empty state", () => {
     renderTimeline([]);
 
-    expect(container.querySelector('[role="status"]')?.textContent).toBe(
-      "No events to display.",
-    );
+    expect(container.querySelector('[role="status"]')?.textContent).toBe("No events to display.");
     expect(container.querySelector("ol")).toBeNull();
   });
 
@@ -64,9 +62,7 @@ describe("Timeline", () => {
 
     const timeline = container.querySelector('[data-testid="timeline"]');
     expect(timeline?.getAttribute("data-density")).toBe("compact");
-    expect(container.querySelector("ol")?.getAttribute("aria-label")).toBe(
-      "Deployment activity",
-    );
+    expect(container.querySelector("ol")?.getAttribute("aria-label")).toBe("Deployment activity");
     expect(container.querySelectorAll("li")).toHaveLength(1);
     expect(container.textContent).toContain("Build completed");
     expect(container.textContent).toContain("2026-11-20 09:15 UTC");
