@@ -262,11 +262,11 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
             .toEqual({ dir: "rtl", lang: "ar" });
 
           await expect(page.locator("header.hud-top-rail")).toBeVisible();
-          await expect(page.locator("main#main")).toBeVisible();
+          await expect(page.locator("main")).toBeVisible();
           await assertZeroHorizontalOverflow(page, `${opsRoute} @ ${vp.width}`);
 
           const railBox = await page.locator(".console-shell-rail").boundingBox();
-          const mainBox = await page.locator("main#main").boundingBox();
+          const mainBox = await page.locator("main").boundingBox();
           const actionsBox = await page.locator(".hud-top-actions").boundingBox();
           const footerBox = await page.locator("footer.hud-panel").boundingBox();
 
