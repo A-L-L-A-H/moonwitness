@@ -28,10 +28,24 @@ Status vocabulary: SPECIFIED (documented intent) · IMPLEMENTED (code exists) ·
 
 ## Remaining duplication (tracked, ratcheted)
 
-- `apps/rocksoul` CSS: 456 hex literals (`src/design-system/tokens.css` + feature CSS).
-- `apps/memory/frontend`: separate standalone dashboard that does not consume `@moonwitness/ui`.
+- `apps/rocksoul/src`: **0 palette hex literals** in the current architecture-gate scope for CSS and TSX. The previous count of 456 is a stale historical snapshot and is not the current measured state.
+- `apps/memory/frontend`: separate standalone dashboard that does not consume `@moonwitness/ui`; it remains outside the `apps/*/src` scanner entries described below.
 
-## Verification evidence (executed 2026-11-17, local)
+### Measurement contract
+
+The authoritative measurement is `packages/ui/src/dx/architecture.test.ts`, not a manually copied historical count:
+
+- `appSources("rocksoul", [".css"])` scans CSS recursively under `apps/rocksoul/src`; CSS comments are stripped before counting hex literals.
+- `appSources("rocksoul", [".tsx"])` scans TSX recursively under the same `src` root, excludes `.test.tsx` files, strips JS comments, and counts six-digit palette literals.
+- `STRICT_TOKEN_APPS = ["web", "rocksoul", "edge"]` requires zero CSS and TSX palette literals for ROCKSOUL.
+- `LEGACY_HEX_CEILINGS.rocksoul = 0` independently keeps the CSS ratchet at zero.
+- Run with `pnpm --filter @moonwitness/ui test`; this executes the architecture test as part of the package Vitest suite.
+
+### Current CI evidence (2026-11-20)
+
+The architecture gate passed on PR #680 head `61601470926211e208729752ecd7affe38ae1971` in [GitHub Actions run 44630740449](https://github.com/A-L-L-A-H/moonwitness/actions/runs/44630740449), job **Verify (lint, typecheck, test, build)**. The log records `src/dx/architecture.test.ts` as 33/33 passing and `packages/ui` as 25 test files / 208 tests passing. This is CI evidence for that commit, not a claim that the documentation PR has been merged or released.
+
+## Verification evidence (historical local run, 2026-11-17)
 
 format, ui lint, ui typecheck, ui tests, `ui:contrast`, a-l-l-a-h typecheck/lint/tests, web tests, builds of a-l-l-a-h, web, rocksoul-dx, and `gate:push` (16/16 checks): all exit 0.
 Not executed: Playwright E2E (`@playwright/test` is not installed in the workspace, so `apps/a-l-l-a-h/e2e` is unrun and excluded from tsconfig).
