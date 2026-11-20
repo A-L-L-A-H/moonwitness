@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
-  closeDb,
+  closeDbAsync,
   ConflictError,
   createActorContext,
   defineModel,
@@ -58,8 +58,23 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
     dbUrl: targetUrl.toString(),
     dbName,
     drop: async () => {
+      const deadline = Date.now() + 10_000;
       try {
-        await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`);
+        while (true) {
+          const activeSessions = await adminPool.query<{ count: number }>(
+            "SELECT count(*)::int AS count FROM pg_stat_activity WHERE datname = $1",
+            [dbName],
+          );
+          const count = activeSessions.rows[0]?.count ?? 0;
+          if (count === 0) break;
+          if (Date.now() >= deadline) {
+            throw new Error(
+              `Cannot drop PostgreSQL conformance database '${dbName}': ${count} session(s) remain after ORM shutdown.`,
+            );
+          }
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+        await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}"`);
       } finally {
         await adminPool.end();
       }
@@ -120,16 +135,28 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     const cleanups: Array<() => Promise<void>> = [];
 
     afterEach(async () => {
-      closeDb();
       modelRegistry.clearHookErrors();
+      const failures: unknown[] = [];
       while (cleanups.length > 0) {
         const cleanup = cleanups.pop()!;
-        await cleanup().catch(() => {});
+        try {
+          await cleanup();
+        } catch (error) {
+          failures.push(error);
+        }
+      }
+      try {
+        await closeDbAsync();
+      } catch (error) {
+        failures.push(error);
+      }
+      if (failures.length > 0) {
+        throw new AggregateError(failures, "PostgreSQL conformance cleanup failed.");
       }
     });
 
-    afterAll(() => {
-      closeDb();
+    afterAll(async () => {
+      await closeDbAsync();
     });
 
     it("1a. boots real Fastify host (buildApp) on PostgreSQL 16 with health/readiness, authBridge actor context, RPC, and 2-tenant isolation", async () => {
@@ -140,7 +167,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -226,7 +253,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -585,7 +612,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -895,7 +922,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -1152,7 +1179,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     it("3. enforces transactional rollback atomicity & OutboxDispatcher delivery/backoff/dead-letter/lease-recovery on PostgreSQL", async () => {
       const isolated = await createIsolatedPostgresDb(POSTGRES_CONFORMANCE_URL);
       cleanups.push(async () => {
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
@@ -1348,7 +1375,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           await app.close();
           app = null;
         }
-        closeDb();
+        await closeDbAsync();
         await isolated.drop();
       });
 
