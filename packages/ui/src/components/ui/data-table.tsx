@@ -15,6 +15,7 @@ export interface DataTableColumn<T> {
   readonly header: React.ReactNode;
   readonly accessor: (row: T) => React.ReactNode;
   readonly sortValue?: (row: T) => string | number;
+  /** Raw text for filtering when the rendered accessor returns a non-primitive React node. */
   readonly searchText?: (row: T) => string;
 }
 
@@ -29,6 +30,21 @@ export interface DataTableProps<T> {
   emptyDescription?: string;
   skin?: SkinName;
   className?: string;
+}
+
+function getPrimitiveSearchText(value: React.ReactNode): string {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "bigint") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item: React.ReactNode) => getPrimitiveSearchText(item))
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return "";
 }
 
 export function DataTable<T>({
@@ -54,7 +70,9 @@ export function DataTable<T>({
     if (!q) return [...data];
     return data.filter((row) =>
       columns.some((col) => {
-        const raw = col.searchText ? col.searchText(row) : String(col.accessor(row) ?? "");
+        const raw = col.searchText
+          ? col.searchText(row)
+          : getPrimitiveSearchText(col.accessor(row));
         return raw.toLowerCase().includes(q);
       }),
     );
