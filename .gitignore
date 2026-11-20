@@ -98,3 +98,5 @@ apps/rocksoul/.taste-skill/
 # Local raw image scratch mockups (optimized deliverables live in apps/web/public/art)
 vibe_images/
 arts/
+
+/apps/edge/.wrangler/

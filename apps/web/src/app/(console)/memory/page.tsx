@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { MemoryWorkspace } from "@/components/memory";
+import { MemoryWorkspace } from "@/features/memory";
 
 export const metadata = {
   title: "Memory Vault — MoonWitness",

@@ -83,14 +83,16 @@ export function ConsoleShellAdapter({
   const { locale, dictionary } = useTranslation();
   const hasTranslationProvider = useOptionalTranslation() !== null;
   const session = useCurrentIdentity();
+  const shouldLocalizeConsoleLabels =
+    Boolean(urlLocale) || (hasTranslationProvider && locale !== "en");
 
   const staticItems = useMemo(() => {
     if (urlLocale) {
       return buildEnterpriseNavItems(plane, dictionary, urlLocale, session?.role);
     }
     const unprefixed = operations ? operationsNavItems : navItems;
-    return hasTranslationProvider ? localizeNavItemLabels(unprefixed, dictionary) : unprefixed;
-  }, [dictionary, hasTranslationProvider, operations, plane, session?.role, urlLocale]);
+    return shouldLocalizeConsoleLabels ? localizeNavItemLabels(unprefixed, dictionary) : unprefixed;
+  }, [dictionary, operations, plane, session?.role, shouldLocalizeConsoleLabels, urlLocale]);
 
   const rawItems = useMetaNavigation(plane, staticItems, Boolean(session));
   const items = useMemo(
@@ -150,9 +152,19 @@ export function ConsoleShellAdapter({
       title={breadcrumb}
       brandHref={rootHref}
       subtitle={
-        operations ? dictionary.operations.workspace.planeLabel : dictionary.shell.theEmpire
+        operations
+          ? dictionary.operations.workspace.planeLabel
+          : shouldLocalizeConsoleLabels
+            ? dictionary.shell.theEmpire
+            : "Empire"
       }
-      navLabel={operations ? dictionary.shell.operations : dictionary.shell.theEmpire}
+      navLabel={
+        operations
+          ? dictionary.shell.operations
+          : shouldLocalizeConsoleLabels
+            ? dictionary.shell.theEmpire
+            : "Empire"
+      }
       items={hudItems}
       active={active}
       activeSection={activeSection}
@@ -165,7 +177,13 @@ export function ConsoleShellAdapter({
       headerStart={
         <>
           <Link href={rootHref} className="inline-flex min-h-11 items-center hover:underline">
-            <span>{operations ? dictionary.shell.operations : dictionary.shell.theEmpire}</span>
+            <span>
+              {operations
+                ? dictionary.shell.operations
+                : shouldLocalizeConsoleLabels
+                  ? dictionary.shell.theEmpire
+                  : "Empire"}
+            </span>
           </Link>
           <span aria-hidden>›</span>
         </>

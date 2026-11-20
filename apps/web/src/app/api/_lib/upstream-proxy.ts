@@ -9,6 +9,14 @@ const STRIPPED_REQUEST_HEADERS = new Set([
   "upgrade",
   "host",
   "content-length",
+  "x-role",
+  "x-actor-id",
+  "x-actor-role",
+  "x-user-role",
+  "x-user-id",
+  "x-groups",
+  "x-mw-role",
+  "x-mw-actor",
 ]);
 
 const STRIPPED_RESPONSE_HEADERS = new Set([

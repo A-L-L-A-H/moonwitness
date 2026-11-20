@@ -1,3 +1,4 @@
+import { verifyMemoryWriteAuth } from "../../_lib/memory-auth";
 import { proxyUpstreamRequest } from "../../_lib/upstream-proxy";
 
 export const dynamic = "force-dynamic";
@@ -19,24 +20,32 @@ async function handleMemoryProxy(request: Request): Promise<Response> {
   });
 }
 
+async function handleMemoryMutation(request: Request): Promise<Response> {
+  const authResult = await verifyMemoryWriteAuth(request);
+  if (!authResult.ok) {
+    return authResult.response;
+  }
+  return handleMemoryProxy(request);
+}
+
 export async function GET(request: Request): Promise<Response> {
   return handleMemoryProxy(request);
 }
 
 export async function POST(request: Request): Promise<Response> {
-  return handleMemoryProxy(request);
+  return handleMemoryMutation(request);
 }
 
 export async function PUT(request: Request): Promise<Response> {
-  return handleMemoryProxy(request);
+  return handleMemoryMutation(request);
 }
 
 export async function PATCH(request: Request): Promise<Response> {
-  return handleMemoryProxy(request);
+  return handleMemoryMutation(request);
 }
 
 export async function DELETE(request: Request): Promise<Response> {
-  return handleMemoryProxy(request);
+  return handleMemoryMutation(request);
 }
 
 export async function HEAD(request: Request): Promise<Response> {

@@ -1,9 +1,15 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { AuthRedirect } from "@/components/AuthRedirect";
 import type { Locale } from "@/configs/i18n";
-import { hasRequiredRole, type RoleName } from "@/configs/routePolicy";
+import {
+  evaluateRouteAccess,
+  hasRequiredRole,
+  resolveRoutePolicy,
+  type RoleName,
+} from "@/configs/routePolicy";
 import { useCurrentSessionState } from "@/lib/session";
 import { NotAuthorizedView } from "@/views/NotAuthorized";
 
@@ -18,9 +24,34 @@ export function AuthGuard({
   enforceRedirect?: boolean;
   minRole?: RoleName;
 }) {
+  const pathname = usePathname() ?? "/";
   const { session, loading } = useCurrentSessionState();
+  const policy = resolveRoutePolicy(pathname);
+
+  if (policy.access === "public") {
+    return <>{children}</>;
+  }
+
+  if (policy.access === "guest-only") {
+    if (loading) {
+      return (
+        <div className="flex min-h-screen items-center justify-center font-mono text-xs text-[var(--muted-foreground)]">
+          VERIFYING SOVEREIGN SESSION…
+        </div>
+      );
+    }
+    if (session) {
+      return <AuthRedirect lang={locale} />;
+    }
+    return <>{children}</>;
+  }
+
+  const requiresAuth = policy.access === "protected" || enforceRedirect;
 
   if (loading) {
+    if (!requiresAuth) {
+      return <>{children}</>;
+    }
     return (
       <div className="flex min-h-screen items-center justify-center font-mono text-xs text-[var(--muted-foreground)]">
         VERIFYING SOVEREIGN SESSION…
@@ -28,15 +59,22 @@ export function AuthGuard({
     );
   }
 
-  if (!session) {
-    if (!enforceRedirect) {
-      return <>{children}</>;
+  const decision = evaluateRouteAccess(pathname, {
+    isAuthenticated: Boolean(session),
+    role: session?.role,
+    enforcePreviewAuth: enforceRedirect,
+  });
+
+  if (!decision.allowed) {
+    if (decision.reason === "unauthenticated") {
+      return <AuthRedirect lang={locale} />;
     }
-    return <AuthRedirect lang={locale} />;
+    return <NotAuthorizedView requiredRole={minRole ?? decision.requiredRole ?? policy.minRole} />;
   }
 
-  if (minRole && !hasRequiredRole(session.role, minRole)) {
-    return <NotAuthorizedView requiredRole={minRole} />;
+  const effectiveMinRole = minRole ?? policy.minRole;
+  if (session && effectiveMinRole && !hasRequiredRole(session.role, effectiveMinRole)) {
+    return <NotAuthorizedView requiredRole={effectiveMinRole} />;
   }
 
   return <>{children}</>;

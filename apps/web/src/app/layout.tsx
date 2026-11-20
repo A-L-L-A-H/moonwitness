@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 import localFont from "next/font/local";
 import { SkipLink } from "@moonwitness/ui";
+import { SettingsProvider } from "@core/contexts/settingsContext";
+import { getServerMode, getSettingsFromCookie } from "@core/utils/serverHelpers";
+import { Providers } from "@/components/providers";
 import themeConfig from "@/configs/themeConfig";
+import { assertProductionAuthSafety } from "@/lib/session-shared";
 import { resolveRequestLocale } from "@/utils/i18n";
 import "./globals.css";
 
@@ -106,11 +110,17 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     // Fallback cleanly outside request contexts
   }
 
-  const { lang, dir } = resolveRequestLocale({
-    pathname,
-    cookieLocale,
-    acceptLanguage,
-  });
+  assertProductionAuthSafety(process.env);
+
+  const [{ lang, dir }, settingsCookie, serverMode] = [
+    resolveRequestLocale({
+      pathname,
+      cookieLocale,
+      acceptLanguage,
+    }),
+    await getSettingsFromCookie(),
+    await getServerMode(),
+  ];
 
   return (
     <html
@@ -119,8 +129,12 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       className={`${brush.variable} ${hand.variable} ${mono.variable} ${cinzel.variable}`}
     >
       <body className="min-h-screen antialiased">
-        <SkipLink />
-        {children}
+        <Providers>
+          <SettingsProvider settingsCookie={settingsCookie} mode={serverMode}>
+            <SkipLink />
+            {children}
+          </SettingsProvider>
+        </Providers>
       </body>
     </html>
   );

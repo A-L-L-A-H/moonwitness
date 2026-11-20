@@ -15,10 +15,14 @@ function writeCookie(name: string, value: string, days = 365): void {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Lax`;
 }
 
+export interface UpdateObjectCookieOptions {
+  updateCookie?: boolean;
+}
+
 export function useObjectCookie<T extends object>(
   key: string,
   fallback: T,
-): [T, (value: T | ((prev: T) => T)) => void] {
+): [T, (value: T | ((prev: T) => T), options?: UpdateObjectCookieOptions) => void] {
   const [state, setState] = useState<T>(() => {
     try {
       const raw = readCookie(key);
@@ -41,13 +45,16 @@ export function useObjectCookie<T extends object>(
   }, [key]);
 
   const updateValue = useCallback(
-    (next: T | ((prev: T) => T)) => {
+    (next: T | ((prev: T) => T), options?: UpdateObjectCookieOptions) => {
+      const { updateCookie = true } = options ?? {};
       setState((prev) => {
         const resolved = typeof next === "function" ? (next as (prev: T) => T)(prev) : next;
-        try {
-          writeCookie(key, JSON.stringify(resolved));
-        } catch {
-          // Ignore cookie write failure
+        if (updateCookie) {
+          try {
+            writeCookie(key, JSON.stringify(resolved));
+          } catch {
+            // Ignore cookie write failure
+          }
         }
         return resolved;
       });

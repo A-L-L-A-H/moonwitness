@@ -1,4 +1,7 @@
 import { parseEnv, z } from "@moonwitness/core";
+import { assertProductionAuthSafety } from "@/lib/session";
+
+assertProductionAuthSafety(process.env);
 
 // Membaca dari file .env root di workspace
 const envSchema = {
