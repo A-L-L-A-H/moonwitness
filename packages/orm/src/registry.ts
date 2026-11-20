@@ -528,11 +528,7 @@ class OrmModelRegistry {
               target.indexes,
             );
           }
-          const sourceUniqueness = resolveSourceUniqueness(
-            base.name,
-            fields,
-            base.indexes,
-          );
+          const sourceUniqueness = resolveSourceUniqueness(base.name, fields, base.indexes);
           many2manyTables.push({
             relationName: relName,
             table: joinTable,
