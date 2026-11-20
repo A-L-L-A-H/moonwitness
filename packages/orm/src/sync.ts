@@ -9,10 +9,7 @@ import {
   formatSqlDefaultLiteral,
   METADATA_NAMES,
 } from "./schema-utils.js";
-import {
-  inspectTableCatalog,
-  type MissingFkReport,
-} from "./fk-drift.js";
+import { inspectTableCatalog, type MissingFkReport } from "./fk-drift.js";
 
 export { type MissingFkReport, inspectTableCatalog } from "./fk-drift.js";
 
@@ -28,6 +25,7 @@ export interface SyncReport {
   createdIndexes: string[];
   schemaHashes: Record<string, string>;
   missingFks: MissingFkReport[];
+  addedFks: string[];
 }
 
 export interface RelationIntegrityViolation {
@@ -481,6 +479,7 @@ export async function syncModels(
     createdIndexes: [],
     schemaHashes: {},
     missingFks: [],
+    addedFks: [],
   };
 
   const runSync = async (executor: LibSqlExecutor): Promise<void> => {
@@ -571,7 +570,9 @@ export async function syncModels(
         }
       }
 
-      const existingIndexes = new Set<string>(catalog.indexes.map((name: string) => name.toLowerCase()));
+      const existingIndexes = new Set<string>(
+        catalog.indexes.map((name: string) => name.toLowerCase()),
+      );
       for (const idx of descriptor.indexes) {
         const columns = idx.fields.map((f) => {
           assertIdentifier(f, "index column");
@@ -590,7 +591,13 @@ export async function syncModels(
       }
 
       // Issue #546: reconcile missing FKs on existing model tables
-      const fkAdded = await reconcileMissingForeignKeys(executor, descriptor, catalog, isPostgres, report.missingFks);
+      const fkAdded = await reconcileMissingForeignKeys(
+        executor,
+        descriptor,
+        catalog,
+        isPostgres,
+        report.missingFks,
+      );
       report.addedColumns.push(...fkAdded);
 
       for (const m2m of descriptor.many2manyTables) {
@@ -606,16 +613,21 @@ export async function syncModels(
           if (isPostgres && jCat.foreignKeys) {
             const target = modelRegistry.get(m2m.targetModel);
             if (target) {
-              const sourceTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
-              const targetTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", m2m.targetField] : [m2m.targetField];
-              const onDelete = m2m.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+              const sourceTargetCols =
+                m2m.sourceUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
+              const targetTargetCols =
+                m2m.targetUniqueness === "tenant_composite"
+                  ? ["tenant_id", m2m.targetField]
+                  : [m2m.targetField];
+              const sourceOnDelete = m2m.sourceOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+              const targetOnDelete = m2m.targetOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
 
               const fkSpecs = [
                 {
                   columns: [m2m.sourceColumn],
                   targetTable: m2m.sourceTable,
                   targetColumns: sourceTargetCols,
-                  onDelete,
+                  onDelete: sourceOnDelete,
                   relationName: m2m.relationName,
                   side: "source" as const,
                 },
@@ -623,7 +635,7 @@ export async function syncModels(
                   columns: [m2m.targetColumn],
                   targetTable: m2m.targetTable,
                   targetColumns: targetTargetCols,
-                  onDelete,
+                  onDelete: targetOnDelete,
                   relationName: m2m.relationName,
                   side: "target" as const,
                 },
@@ -692,6 +704,7 @@ export async function syncModels(
                     `ON DELETE ${expectedOnDelete}`,
                 );
                 report.createdIndexes.push(`constraint:${constraintName}`);
+                report.addedFks.push(constraintName);
               }
             }
           }

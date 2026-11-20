@@ -1,9 +1,5 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
-import {
-  PostgresDriver,
-  type PoolLike,
-  type PgClientLike,
-} from "../drivers/postgres.driver.js";
+import { PostgresDriver, type PoolLike, type PgClientLike } from "../drivers/postgres.driver.js";
 import {
   getTransactionExecutor,
   isInTransaction,
@@ -117,17 +113,7 @@ describe("PostgreSQL Transaction Binding (MW-0828)", () => {
         await tx.run("INSERT INTO business (name) VALUES (?)", ["test"]);
         await tx.run(
           "INSERT INTO _orm_audit_log (model, entity_id, action, changed_by, changed_at, diff, entity_version, source, request_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-          [
-            "business",
-            "1",
-            "CREATE",
-            "actor",
-            new Date().toISOString(),
-            "{}",
-            1,
-            "api",
-            null,
-          ],
+          ["business", "1", "CREATE", "actor", new Date().toISOString(), "{}", 1, "api", null],
         );
         await tx.run(
           "INSERT INTO _orm_outbox_events (model, entity_id, action, tenant_id, actor_id, request_id, event_version, payload_json, status, attempts, next_attempt_at, last_error, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",

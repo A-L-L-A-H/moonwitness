@@ -185,8 +185,12 @@ async function doctorModels(
         const jCat = await inspectTableCatalog(db, m2m.table, isPostgres);
         if (jCat.columns.length === 0 || jCat.foreignKeys == null) continue;
 
-        const sourceTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
-        const targetTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", m2m.targetField] : [m2m.targetField];
+        const sourceTargetCols =
+          m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
+        const targetTargetCols =
+          m2m.targetUniqueness === "tenant_composite"
+            ? ["tenant_id", m2m.targetField]
+            : [m2m.targetField];
         const onDelete = m2m.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
 
         // Build expected FK from join table spec - source side
@@ -312,7 +316,8 @@ async function doctorModels(
           const existingTargetColumns = existingFk.referencedColumns.sort();
           const existingOnDeleteCandidate = existingFk.onDelete;
 
-          const columnsMatch = JSON.stringify(expectedColumnsTarget) === JSON.stringify(existingColumns);
+          const columnsMatch =
+            JSON.stringify(expectedColumnsTarget) === JSON.stringify(existingColumns);
           const targetTableMatch =
             expectedTargetTableTarget.toLowerCase() === existingTargetTable.toLowerCase();
           const targetColumnsMatch =
@@ -398,6 +403,7 @@ async function doctorModels(
     createdIndexes: [],
     schemaHashes: {},
     missingFks,
+    addedFks: [],
   };
 
   return {
@@ -517,7 +523,9 @@ function formatTableOutput(result: DoctorResult): string {
     lines.push("╠═══════════════════════════════════════════════════════════════╣");
     for (const fk of result.missingFks) {
       const kindIcon = fk.kind === "missing" ? "⚠" : fk.kind === "ondelete_mismatch" ? "✗" : "!";
-      lines.push(`║ ${kindIcon} [${fk.kind.toUpperCase()}] ${fk.table}.${fk.column} -> ${fk.targetTable}.${fk.targetColumn}`);
+      lines.push(
+        `║ ${kindIcon} [${fk.kind.toUpperCase()}] ${fk.table}.${fk.column} -> ${fk.targetTable}.${fk.targetColumn}`,
+      );
       lines.push(`║    Expected ON DELETE: ${fk.expectedOnDelete}`);
       if (fk.existingOnDelete) lines.push(`║    Existing ON DELETE: ${fk.existingOnDelete}`);
       if (fk.relationName) lines.push(`║    Relation: ${fk.relationName} (${fk.side})`);
@@ -538,7 +546,9 @@ function formatTableOutput(result: DoctorResult): string {
     lines.push("║ SCHEMA DRIFT (hash mismatch)                                  ║");
     lines.push("╠═══════════════════════════════════════════════════════════════╣");
     for (const drift of result.schemaDrift) {
-      lines.push(`║ ! ${drift.model}: expected ${drift.expectedHash.slice(0, 16)}... != actual ${drift.actualHash.slice(0, 16)}...`);
+      lines.push(
+        `║ ! ${drift.model}: expected ${drift.expectedHash.slice(0, 16)}... != actual ${drift.actualHash.slice(0, 16)}...`,
+      );
     }
     lines.push("║──────────────────────────────────────────────────────────────║");
   }
@@ -569,11 +579,21 @@ export async function doctorCli(args: string[] = process.argv.slice(2)): Promise
     }
 
     if (exitOnError && !result.ok) {
-      const hasErrors = result.missingFks.some((fk) => fk.kind === "ondelete_mismatch" || fk.kind === "validated_mismatch");
+      const hasErrors = result.missingFks.some(
+        (fk) => fk.kind === "ondelete_mismatch" || fk.kind === "validated_mismatch",
+      );
       process.exit(hasErrors ? 2 : 1);
     }
 
-    process.exit(result.ok ? 0 : (result.missingFks.some((fk) => fk.kind === "ondelete_mismatch" || fk.kind === "validated_mismatch") ? 2 : 1));
+    process.exit(
+      result.ok
+        ? 0
+        : result.missingFks.some(
+              (fk) => fk.kind === "ondelete_mismatch" || fk.kind === "validated_mismatch",
+            )
+          ? 2
+          : 1,
+    );
   } catch (err) {
     console.error("Doctor failed:", err);
     process.exit(1);

@@ -203,10 +203,9 @@ export function assertWritableBodyFields(
   actorGroups?: Iterable<string>,
   impliedGroups?: Map<string, string[]>,
 ): void {
-  const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   for (const [field, value] of Object.entries(body)) {
     if (value === undefined) continue;
-    if (!canWriteField(desc, field, role, effectiveGroups, impliedGroups)) {
+    if (!canWriteField(desc, field, role, actorGroups, impliedGroups)) {
       throw new PolicyError(
         "Write access to field '" + field + "' on '" + desc.name + "' is forbidden",
         "FIELD_WRITE_FORBIDDEN",

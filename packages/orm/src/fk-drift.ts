@@ -168,9 +168,14 @@ export function many2ManyForeignKeyExpectations(
     const target = modelRegistry.get(m2m.targetModel);
     if (!target) continue;
 
-    const sourceTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
-    const targetTargetCols = m2m.targetUniqueness === "tenant_composite" ? ["tenant_id", m2m.targetField] : [m2m.targetField];
-    const onDelete = m2m.onDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+    const sourceTargetCols =
+      m2m.sourceUniqueness === "tenant_composite" ? ["tenant_id", "id"] : ["id"];
+    const targetTargetCols =
+      m2m.targetUniqueness === "tenant_composite"
+        ? ["tenant_id", m2m.targetField]
+        : [m2m.targetField];
+    const sourceOnDelete = m2m.sourceOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
+    const targetOnDelete = m2m.targetOnDelete === "ignore" ? "NO ACTION" : "RESTRICT";
 
     const srcContext: IntegrityLookupContext = {
       sourceModel: descriptor.name,
@@ -198,7 +203,7 @@ export function many2ManyForeignKeyExpectations(
         columns: [m2m.sourceColumn],
         targetTable: descriptor.table,
         targetColumns: sourceTargetCols,
-        onDelete,
+        onDelete: sourceOnDelete,
         relationName: m2m.relationName,
       },
       context: srcContext,
@@ -210,7 +215,7 @@ export function many2ManyForeignKeyExpectations(
         columns: [m2m.targetColumn],
         targetTable: target.table,
         targetColumns: targetTargetCols,
-        onDelete,
+        onDelete: targetOnDelete,
         relationName: m2m.relationName,
       },
       context: tgtContext,
@@ -357,7 +362,7 @@ export async function inspectTableCatalog(
   }>(`PRAGMA foreign_key_list(${table})`);
 
   // Group by constraint id
-  const fkGroups = new Map<number, typeof fkRows[0][]>();
+  const fkGroups = new Map<number, (typeof fkRows)[0][]>();
   for (const row of fkRows) {
     if (!fkGroups.has(row.id)) fkGroups.set(row.id, []);
     fkGroups.get(row.id)!.push(row);

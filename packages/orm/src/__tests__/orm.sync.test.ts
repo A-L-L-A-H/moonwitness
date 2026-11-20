@@ -250,22 +250,24 @@ describe("ORM FK validation and doctor CLI", () => {
     expect(fk.expectedOnDelete).toBe("SET NULL");
   });
 
-  (isSqlite() ? it.skip : it)("detects ON DELETE mismatch and reports as ondelete_mismatch", async () => {
-    await initDb("file::memory:?cache=shared");
+  (isSqlite() ? it.skip : it)(
+    "detects ON DELETE mismatch and reports as ondelete_mismatch",
+    async () => {
+      await initDb("file::memory:?cache=shared");
 
-    const author = defineModel({
-      name: "sync.author2",
-      table: "sync_authors2",
-      schema: z.object({
-        name: z.string().min(1),
-      }),
-    });
-    await syncModels([author]);
+      const author = defineModel({
+        name: "sync.author2",
+        table: "sync_authors2",
+        schema: z.object({
+          name: z.string().min(1),
+        }),
+      });
+      await syncModels([author]);
 
-    // Create book table WITH a FK that has ON DELETE RESTRICT (but model expects SET NULL)
-    // SQLite doesn't support ALTER TABLE ADD CONSTRAINT, so we create table with inline FK
-    await getDb().exec(
-      `CREATE TABLE IF NOT EXISTS sync_books2 (
+      // Create book table WITH a FK that has ON DELETE RESTRICT (but model expects SET NULL)
+      // SQLite doesn't support ALTER TABLE ADD CONSTRAINT, so we create table with inline FK
+      await getDb().exec(
+        `CREATE TABLE IF NOT EXISTS sync_books2 (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         author TEXT,
@@ -277,58 +279,71 @@ describe("ORM FK validation and doctor CLI", () => {
         source TEXT NOT NULL DEFAULT 'api',
         FOREIGN KEY (author) REFERENCES sync_authors2(id) ON DELETE RESTRICT
       )`,
-    );
+      );
 
-    const book = defineModel({
-      name: "sync.book2",
-      table: "sync_books2",
-      schema: z.object({
-        title: z.string().min(1),
-        author: z.string().optional(),
-      }),
-      relations: {
-        author: { type: "many2one", model: "sync.author2", targetField: "id", onDelete: "set null" },
-      },
-    });
+      const book = defineModel({
+        name: "sync.book2",
+        table: "sync_books2",
+        schema: z.object({
+          title: z.string().min(1),
+          author: z.string().optional(),
+        }),
+        relations: {
+          author: {
+            type: "many2one",
+            model: "sync.author2",
+            targetField: "id",
+            onDelete: "set null",
+          },
+        },
+      });
 
-    const report = await syncModels([author, book]);
-    // SQLite doesn't support ALTER TABLE to fix ON DELETE, so it should report ondelete_mismatch
-    expect(report.missingFks).toHaveLength(1);
-    const fk = report.missingFks[0]!;
-    expect(fk.kind).toBe("ondelete_mismatch");
-    expect(fk.table).toBe("sync_books2");
-    expect(fk.column).toBe("author");
-    expect(fk.expectedOnDelete).toBe("SET NULL");
-    expect(fk.existingOnDelete).toBe("RESTRICT");
-  });
+      const report = await syncModels([author, book]);
+      // SQLite doesn't support ALTER TABLE to fix ON DELETE, so it should report ondelete_mismatch
+      expect(report.missingFks).toHaveLength(1);
+      const fk = report.missingFks[0]!;
+      expect(fk.kind).toBe("ondelete_mismatch");
+      expect(fk.table).toBe("sync_books2");
+      expect(fk.column).toBe("author");
+      expect(fk.expectedOnDelete).toBe("SET NULL");
+      expect(fk.existingOnDelete).toBe("RESTRICT");
+    },
+  );
 
-  (isSqlite() ? it.skip : it)("doctorModels detects missing FK without mutating database", async () => {
-    await initDb("file::memory:?cache=shared");
+  (isSqlite() ? it.skip : it)(
+    "doctorModels detects missing FK without mutating database",
+    async () => {
+      await initDb("file::memory:?cache=shared");
 
-    const author = defineModel({
-      name: "sync.author3",
-      table: "sync_authors3",
-      schema: z.object({
-        name: z.string().min(1),
-      }),
-    });
-    await syncModels([author]);
+      const author = defineModel({
+        name: "sync.author3",
+        table: "sync_authors3",
+        schema: z.object({
+          name: z.string().min(1),
+        }),
+      });
+      await syncModels([author]);
 
-    const book = defineModel({
-      name: "sync.book3",
-      table: "sync_books3",
-      schema: z.object({
-        title: z.string().min(1),
-        author: z.string().optional(),
-      }),
-      relations: {
-        author: { type: "many2one", model: "sync.author3", targetField: "id", onDelete: "set null" },
-      },
-    });
+      const book = defineModel({
+        name: "sync.book3",
+        table: "sync_books3",
+        schema: z.object({
+          title: z.string().min(1),
+          author: z.string().optional(),
+        }),
+        relations: {
+          author: {
+            type: "many2one",
+            model: "sync.author3",
+            targetField: "id",
+            onDelete: "set null",
+          },
+        },
+      });
 
-    // Create book table WITHOUT the FK constraint
-    await getDb().exec(
-      `CREATE TABLE IF NOT EXISTS sync_books3 (
+      // Create book table WITHOUT the FK constraint
+      await getDb().exec(
+        `CREATE TABLE IF NOT EXISTS sync_books3 (
         id TEXT PRIMARY KEY,
         title TEXT NOT NULL,
         author TEXT,
@@ -339,16 +354,17 @@ describe("ORM FK validation and doctor CLI", () => {
         version INTEGER NOT NULL DEFAULT 1,
         source TEXT NOT NULL DEFAULT 'api'
       )`,
-    );
+      );
 
-    const result = await doctorModels([author, book]);
-    expect(result.ok).toBe(false);
-    expect(result.missingFks).toHaveLength(1);
-    const fk = result.missingFks[0]!;
-    expect(fk.kind).toBe("missing");
-    expect(fk.table).toBe("sync_books3");
-    expect(fk.column).toBe("author");
-  });
+      const result = await doctorModels([author, book]);
+      expect(result.ok).toBe(false);
+      expect(result.missingFks).toHaveLength(1);
+      const fk = result.missingFks[0]!;
+      expect(fk.kind).toBe("missing");
+      expect(fk.table).toBe("sync_books3");
+      expect(fk.column).toBe("author");
+    },
+  );
 
   (isSqlite() ? it.skip : it)("doctorModels detects ON DELETE mismatch", async () => {
     await initDb("file::memory:?cache=shared");
@@ -387,7 +403,12 @@ describe("ORM FK validation and doctor CLI", () => {
         author: z.string().optional(),
       }),
       relations: {
-        author: { type: "many2one", model: "sync.author4", targetField: "id", onDelete: "set null" },
+        author: {
+          type: "many2one",
+          model: "sync.author4",
+          targetField: "id",
+          onDelete: "set null",
+        },
       },
     });
 
@@ -482,10 +503,14 @@ describe("ORM FK validation and doctor CLI", () => {
     );
 
     const result = await doctorModels([user, tag]);
-    const joinFkIssues = result.missingFks.filter((fk: { table: string; kind: string }) => fk.table === "sync_user_tags");
+    const joinFkIssues = result.missingFks.filter(
+      (fk: { table: string; kind: string }) => fk.table === "sync_user_tags",
+    );
     expect(joinFkIssues.length).toBeGreaterThan(0);
     // At least one side should have ondelete_mismatch
-    const hasMismatch = joinFkIssues.some((fk: { table: string; kind: string }) => fk.kind === "ondelete_mismatch");
+    const hasMismatch = joinFkIssues.some(
+      (fk: { table: string; kind: string }) => fk.kind === "ondelete_mismatch",
+    );
     expect(hasMismatch).toBe(true);
   });
 });

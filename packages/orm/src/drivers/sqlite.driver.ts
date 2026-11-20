@@ -118,7 +118,9 @@ export class LibSqlDriver implements LibSqlExecutor {
             await transaction.execute({ sql: `RELEASE SAVEPOINT ${savepointName}` });
             return result;
           } catch (error) {
-            await transaction.execute({ sql: `ROLLBACK TO SAVEPOINT ${savepointName}` }).catch(() => {});
+            await transaction
+              .execute({ sql: `ROLLBACK TO SAVEPOINT ${savepointName}` })
+              .catch(() => {});
             throw error;
           }
         },

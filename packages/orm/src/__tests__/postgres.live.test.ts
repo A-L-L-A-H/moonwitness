@@ -220,7 +220,12 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
           author: z.string().optional(),
         }),
         relations: {
-          author: { type: "many2one", model: `pg_830.author_${suffix}`, targetField: "id", onDelete: "set null" },
+          author: {
+            type: "many2one",
+            model: `pg_830.author_${suffix}`,
+            targetField: "id",
+            onDelete: "set null",
+          },
         },
       });
 
@@ -247,8 +252,12 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
       );
       expect(fkRows2.length).toBe(fkRows.length);
     } finally {
-      await getDb().exec(`DROP TABLE IF EXISTS ${bookTable}`).catch(() => {});
-      await getDb().exec(`DROP TABLE IF EXISTS ${authorTable}`).catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${bookTable}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${authorTable}`)
+        .catch(() => {});
       closeDb();
     }
   });
@@ -323,9 +332,15 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
       );
       expect(fkRows2.length).toBe(fkRows.length);
     } finally {
-      await getDb().exec(`DROP TABLE IF EXISTS ${joinTable}`).catch(() => {});
-      await getDb().exec(`DROP TABLE IF EXISTS ${tagTable}`).catch(() => {});
-      await getDb().exec(`DROP TABLE IF EXISTS ${userTable}`).catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${joinTable}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${tagTable}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${userTable}`)
+        .catch(() => {});
       closeDb();
     }
   });

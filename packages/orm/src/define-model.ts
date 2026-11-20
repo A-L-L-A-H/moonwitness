@@ -1258,12 +1258,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       const rowTenants =
         tenantId === undefined
           ? [
-            ...new Set(
-              rows
-                .map((r) => r.tenant_id)
-                .filter((t): t is string => typeof t === "string" && t.length > 0),
-            ),
-          ]
+              ...new Set(
+                rows
+                  .map((r) => r.tenant_id)
+                  .filter((t): t is string => typeof t === "string" && t.length > 0),
+              ),
+            ]
           : [];
       const scopedFindOpts: FindOptions = {
         ...(tenantId !== undefined
@@ -1503,12 +1503,12 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     hookName: "afterSave" | "afterDelete" | "afterArchive" | "afterRestore",
     hookFn:
       | ((ctx: {
-        model: string;
-        action: ModelWriteAction;
-        before: Record<string, unknown> | null;
-        values: Record<string, unknown>;
-        actor: ActorContext;
-      }) => void | Promise<void>)
+          model: string;
+          action: ModelWriteAction;
+          before: Record<string, unknown> | null;
+          values: Record<string, unknown>;
+          actor: ActorContext;
+        }) => void | Promise<void>)
       | undefined,
     ctx: {
       model: string;
@@ -2161,8 +2161,8 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       actor.tenantId !== undefined
         ? normalizeTenantId(actor.tenantId)
         : normalizeTenantId(
-          typeof data.tenant_id === "string" ? data.tenant_id : DEFAULT_TENANT_ID,
-        );
+            typeof data.tenant_id === "string" ? data.tenant_id : DEFAULT_TENANT_ID,
+          );
     const record: Record<string, unknown> = {
       ...data,
       id: data.id ?? uuidv7(),
