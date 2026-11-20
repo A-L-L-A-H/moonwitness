@@ -230,7 +230,7 @@ export function assertWritableActionInputFields(
   const effectiveGroups = toEffectiveGroupSet(role, actorGroups, impliedGroups);
   if (Array.isArray(input)) {
     for (const item of input) {
-      assertWritableActionInputFields(desc, item, role, effectiveGroups, depth + 1);
+      assertWritableActionInputFields(desc, item, role, actorGroups, impliedGroups, depth + 1);
     }
     return;
   }
@@ -251,7 +251,7 @@ export function assertWritableActionInputFields(
       );
     }
     if (Array.isArray(value) || isPlainRecord(value)) {
-      assertWritableActionInputFields(desc, value, role, effectiveGroups, depth + 1);
+      assertWritableActionInputFields(desc, value, role, actorGroups, impliedGroups, depth + 1);
     }
   }
 }
@@ -294,7 +294,7 @@ export function assertReadableRelations(
           403,
         );
       }
-      const nextModel = currentDesc?.relations?.[seg]?.model;
+      const nextModel: string | undefined = currentDesc?.relations?.[seg]?.model;
       currentDesc = nextModel ? modelRegistry.get(nextModel) : undefined;
     }
   }
@@ -359,7 +359,9 @@ export function sanitizeRecordForRole(
       const relDesc = relSpec ? modelRegistry.get(relSpec.model) : undefined;
       if (Array.isArray(value)) {
         out[key] = value.map((item) =>
-          isPlainRecord(item) ? sanitizeRecordForRole(relDesc, item, role, effectiveGroups, impliedGroups) : item,
+          isPlainRecord(item)
+            ? sanitizeRecordForRole(relDesc, item, role, effectiveGroups, impliedGroups)
+            : item,
         );
       } else if (isPlainRecord(value)) {
         out[key] = sanitizeRecordForRole(relDesc, value, role, effectiveGroups, impliedGroups);
@@ -404,7 +406,13 @@ export function sanitizeActionResultForRole(
   for (const [key, value] of Object.entries(sanitized)) {
     if (key.startsWith("$")) continue;
     if (Array.isArray(value) || (isPlainRecord(value) && !(value instanceof Date))) {
-      sanitized[key] = sanitizeActionResultForRole(undefined, value, role, effectiveGroups, impliedGroups);
+      sanitized[key] = sanitizeActionResultForRole(
+        undefined,
+        value,
+        role,
+        effectiveGroups,
+        impliedGroups,
+      );
     }
   }
   return sanitized;

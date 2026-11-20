@@ -41,6 +41,8 @@ export interface CoreAppOptions {
   seed?: boolean;
   /** Skip Swagger UI registration. */
   disableDocs?: boolean;
+  /** Extra addon definitions registered after platform addons. */
+  addons?: AddonDefinition[];
 }
 
 function corsOrigin(): string[] | false {
