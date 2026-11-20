@@ -135,7 +135,9 @@ const BarChart = React.forwardRef<SVGSVGElement, BarChartProps>(
             );
           })}
         </svg>
-        {accessibleData ? <AccessibleChartData label={ariaLabel} points={data} /> : null}
+        {accessibleData ? (
+          <AccessibleChartData label={ariaLabel} points={data} />
+        ) : null}
       </>
     );
   },
@@ -375,7 +377,9 @@ const LineChart = React.forwardRef<SVGSVGElement, LineChartProps>(
             </g>
           ))}
         </svg>
-        {accessibleData ? <AccessibleChartData label={ariaLabel} points={data} /> : null}
+        {accessibleData ? (
+          <AccessibleChartData label={ariaLabel} points={data} />
+        ) : null}
       </>
     );
   },
