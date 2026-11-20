@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { closeDbAsync, getDb, initPostgresDb } from "../driver.js";
 import {
   PostgresDriver,
   isPostgresUrl,
@@ -160,6 +161,68 @@ describe("PostgresDriver", () => {
 
     driver.close();
     expect(mock.pool.end).toHaveBeenCalledTimes(1);
+  });
+
+  it("awaits pool shutdown and deduplicates concurrent async close calls", async () => {
+    const mock = createMockPool();
+    const driver = new PostgresDriver();
+    await driver.init("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
+
+    let finishShutdown: () => void = () => {
+      throw new Error("Pool shutdown callback was not initialized");
+    };
+    mock.pool.end = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishShutdown = resolve;
+        }),
+    );
+
+    const firstClose = driver.closeAsync();
+    const secondClose = driver.closeAsync();
+    expect(mock.pool.end).toHaveBeenCalledTimes(1);
+
+    let firstSettled = false;
+    void firstClose.then(() => {
+      firstSettled = true;
+    });
+    await Promise.resolve();
+    expect(firstSettled).toBe(false);
+
+    finishShutdown();
+
+    await Promise.all([firstClose, secondClose]);
+    expect(firstSettled).toBe(true);
+  });
+
+  it("closeDbAsync clears the active handle and awaits PostgreSQL pool shutdown", async () => {
+    const mock = createMockPool();
+    await initPostgresDb("postgres://user:pass@localhost:5432/moonwitness", mock.pool);
+
+    let finishShutdown: () => void = () => {
+      throw new Error("Pool shutdown callback was not initialized");
+    };
+    mock.pool.end = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishShutdown = resolve;
+        }),
+    );
+
+    const closing = closeDbAsync();
+    expect(() => getDb()).toThrow(/Database not initialized/);
+    expect(mock.pool.end).toHaveBeenCalledTimes(1);
+
+    let settled = false;
+    void closing.then(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+
+    finishShutdown();
+    await closing;
+    expect(settled).toBe(true);
   });
 
   it("manages BEGIN/COMMIT and ROLLBACK on transaction errors", async () => {
