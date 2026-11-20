@@ -1,4 +1,24 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function mockChronicleApi(page: Page): Promise<void> {
+  await page.route("**/api/v1/**", (route) => {
+    const path = new URL(route.request().url()).pathname;
+    if (path.endsWith("/api/v1/auth/me")) {
+      return route.fulfill({
+        status: 200,
+        json: {
+          user: {
+            id: "chronicle-e2e",
+            displayName: "Chronicle QA",
+            username: "chronicle-qa",
+            role: "admin",
+          },
+        },
+      });
+    }
+    return route.fulfill({ json: { data: [], total: 0 } });
+  });
+}
 
 test.describe("Chronicle navigation & search localization", () => {
   test("desktop locale selector switches EN -> ID -> AR on /[lang]/moonwitness preserving query and hash", async ({
@@ -34,7 +54,7 @@ test.describe("Chronicle navigation & search localization", () => {
   });
 
   test("SearchDialog submits localized /ar/dock?q= route on /ar/moonwitness", async ({ page }) => {
-    await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
+    await mockChronicleApi(page);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/ar/moonwitness");
 
@@ -75,7 +95,7 @@ test.describe("Chronicle navigation & search localization", () => {
   test("unprefixed /moonwitness updates locale in place and keeps /dock?q= search path", async ({
     page,
   }) => {
-    await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
+    await mockChronicleApi(page);
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/moonwitness");
 
