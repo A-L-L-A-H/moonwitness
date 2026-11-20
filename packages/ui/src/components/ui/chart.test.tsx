@@ -94,7 +94,9 @@ describe("Telemetry charts and SkinMatrixCompare", () => {
     );
 
     const tables = Array.from(
-      container.querySelectorAll<HTMLTableElement>("table[data-mw-chart-data-alternative='true']"),
+      container.querySelectorAll<HTMLTableElement>(
+        "table[data-mw-chart-data-alternative='true']",
+      ),
     );
     expect(tables).toHaveLength(5);
     expect(tables[0]?.caption?.textContent).toBe("Inbound traffic data");
