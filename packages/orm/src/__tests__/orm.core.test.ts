@@ -12,10 +12,7 @@ import {
   getDb,
   initDb,
   uuidv7,
-  PageCursor,
-  SortSpec,
-  FindPageOptions,
-  PageResult,
+  type PageCursor,
 } from "../index.js";
 
 const taskSchema = z.object({
@@ -430,15 +427,12 @@ describe("pagination: deterministic offset ordering (MW-0834)", () => {
       await taskModel.repository.create(sample({ title: `task-${i}`, priority: i }));
     }
 
-    const rows = await taskModel.repository.find(
-      {},
-      { orderBy: "id DESC, priority ASC" },
-    );
+    const rows = await taskModel.repository.find({}, { orderBy: "id DESC, priority ASC" });
 
     // All rows returned; id DESC is the first sort key
     expect(rows.length).toBe(5);
     for (let i = 1; i < rows.length; i++) {
-      expect(rows[i - 1].id >= rows[i].id).toBe(true);
+      expect(rows[i - 1]!.id >= rows[i]!.id).toBe(true);
     }
   });
 
@@ -477,7 +471,10 @@ describe("pagination: keyset findPage (MW-0835)", () => {
     const allIds: string[] = [];
     let cursor: string | undefined;
     for (let p = 0; p < 3; p++) {
-      const page = await repo.findPage({ priority: 7 }, { pageSize: 10, orderBy: "ratio ASC", cursor });
+      const page = await repo.findPage(
+        { priority: 7 },
+        { pageSize: 10, orderBy: "ratio ASC", cursor },
+      );
       allIds.push(...page.items.map((r) => r.id));
       expect(page.hasNextPage).toBe(p < 2);
       cursor = page.nextCursor ?? undefined;
@@ -493,7 +490,7 @@ describe("pagination: keyset findPage (MW-0835)", () => {
     expect(page.items).toHaveLength(5);
     // All same priority, so ratio DESC should apply
     for (let i = 1; i < page.items.length; i++) {
-      expect(page.items[i - 1].ratio >= page.items[i].ratio).toBe(true);
+      expect(page.items[i - 1]!.ratio >= page.items[i]!.ratio).toBe(true);
     }
     expect(page.nextCursor).toBeTypeOf("string");
   });
@@ -506,10 +503,7 @@ describe("pagination: keyset findPage (MW-0835)", () => {
     }
 
     // NULLs sort FIRST in ASC by default in SQLite/Postgres-compatible semantics
-    const page = await repo.findPage(
-      { priority: 7 },
-      { pageSize: 10, orderBy: "note ASC" },
-    );
+    const page = await repo.findPage({ priority: 7 }, { pageSize: 10, orderBy: "note ASC" });
     expect(page.items.length).toBeGreaterThan(0);
     // All returned rows should have null notes (they come first)
     expect(page.items.every((r) => r.note === null)).toBe(true);
@@ -519,20 +513,29 @@ describe("pagination: keyset findPage (MW-0835)", () => {
     const page1 = await repo.findPage({ priority: 7 }, { pageSize: 5, orderBy: "ratio ASC" });
     // Try to use cursor with different filters
     await expect(
-      repo.findPage({ priority: 8 }, { pageSize: 5, orderBy: "ratio ASC", cursor: page1.nextCursor }),
+      repo.findPage(
+        { priority: 8 },
+        { pageSize: 5, orderBy: "ratio ASC", cursor: page1.nextCursor ?? undefined },
+      ),
     ).rejects.toThrow("Cursor filter mismatch");
   });
 
   it("rejects cursor with sort mismatch", async () => {
     const page1 = await repo.findPage({ priority: 7 }, { pageSize: 5, orderBy: "ratio ASC" });
     await expect(
-      repo.findPage({ priority: 7 }, { pageSize: 5, orderBy: "ratio DESC", cursor: page1.nextCursor }),
+      repo.findPage(
+        { priority: 7 },
+        { pageSize: 5, orderBy: "ratio DESC", cursor: page1.nextCursor ?? undefined },
+      ),
     ).rejects.toThrow("Cursor sort mismatch");
   });
 
   it("rejects malformed cursor", async () => {
     await expect(
-      repo.findPage({ priority: 7 }, { pageSize: 5, orderBy: "ratio ASC", cursor: "not-a-valid-cursor" }),
+      repo.findPage(
+        { priority: 7 },
+        { pageSize: 5, orderBy: "ratio ASC", cursor: "not-a-valid-cursor" },
+      ),
     ).rejects.toThrow("Invalid cursor");
   });
 
@@ -550,7 +553,10 @@ describe("pagination: keyset findPage (MW-0835)", () => {
     expect(otherPage.nextCursor).toBeTypeOf("string");
 
     await expect(
-      repo.findPage({ priority: 7 }, { pageSize: 5, orderBy: "ratio ASC", cursor: otherPage.nextCursor }),
+      repo.findPage(
+        { priority: 7 },
+        { pageSize: 5, orderBy: "ratio ASC", cursor: otherPage.nextCursor ?? undefined },
+      ),
     ).rejects.toThrow("model mismatch");
   });
 
@@ -566,8 +572,12 @@ describe("pagination: keyset findPage (MW-0835)", () => {
     await repo.forActor(tenant1).create(sample({ title: "t1-task", priority: 10 }));
     await repo.forActor(tenant2).create(sample({ title: "t2-task", priority: 10 }));
 
-    const page1 = await repo.forActor(tenant1).findPage({ priority: 10 }, { pageSize: 10, orderBy: "id ASC" });
-    const page2 = await repo.forActor(tenant2).findPage({ priority: 10 }, { pageSize: 10, orderBy: "id ASC" });
+    const page1 = await repo
+      .forActor(tenant1)
+      .findPage({ priority: 10 }, { pageSize: 10, orderBy: "id ASC" });
+    const page2 = await repo
+      .forActor(tenant2)
+      .findPage({ priority: 10 }, { pageSize: 10, orderBy: "id ASC" });
 
     expect(page1.items.every((r) => r.tenant_id === "t1")).toBe(true);
     expect(page2.items.every((r) => r.tenant_id === "t2")).toBe(true);
@@ -588,21 +598,30 @@ describe("pagination: keyset findPage (MW-0835)", () => {
 
   it("supports with relation hydration", async () => {
     // Simple relation test - just verify it doesn't throw
-    const page = await repo.findPage({ priority: 7 }, { pageSize: 3, orderBy: "ratio ASC", with: [] });
+    const page = await repo.findPage(
+      { priority: 7 },
+      { pageSize: 3, orderBy: "ratio ASC", with: [] },
+    );
     expect(page.items).toHaveLength(3);
   });
 });
 
 describe("cursor token structure", () => {
   it("encodes model, sort, filterHash, values in base64url JSON", async () => {
-    const page = await taskModel.repository.findPage({ priority: 5 }, { pageSize: 2, orderBy: "ratio ASC" });
+    const page = await taskModel.repository.findPage(
+      { priority: 5 },
+      { pageSize: 2, orderBy: "ratio ASC" },
+    );
     if (!page.nextCursor) {
       // Not enough rows with priority 5 to emit a cursor — seed some
       await taskModel.repository.create(sample({ title: "cursor-seed-1", priority: 5 }));
       await taskModel.repository.create(sample({ title: "cursor-seed-2", priority: 5 }));
       await taskModel.repository.create(sample({ title: "cursor-seed-3", priority: 5 }));
     }
-    const page2 = await taskModel.repository.findPage({ priority: 5 }, { pageSize: 2, orderBy: "ratio ASC" });
+    const page2 = await taskModel.repository.findPage(
+      { priority: 5 },
+      { pageSize: 2, orderBy: "ratio ASC" },
+    );
     const cursor = page2.nextCursor!;
     const decoded = JSON.parse(Buffer.from(cursor, "base64url").toString("utf8")) as PageCursor;
     expect(decoded.v).toBe(1);

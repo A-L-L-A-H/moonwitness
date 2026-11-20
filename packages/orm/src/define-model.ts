@@ -956,7 +956,11 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     if (raw.model !== this.name) {
       throw new Error(`Invalid cursor: model mismatch (expected ${this.name}, got ${raw.model})`);
     }
-    if (!Array.isArray(raw.sort) || !Array.isArray(raw.values) || raw.sort.length !== raw.values.length) {
+    if (
+      !Array.isArray(raw.sort) ||
+      !Array.isArray(raw.values) ||
+      raw.sort.length !== raw.values.length
+    ) {
       throw new Error("Invalid cursor: sort/values length mismatch");
     }
     return raw;
@@ -988,13 +992,13 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       const isAsc = direction === "ASC";
       const op = isAsc ? ">" : "<";
 
-      const prefix = i === 0 ? "" : clauses.map((_, idx) => idx < i ? " AND " : "").join("");
       // Build: (field1 op val1) OR (field1 = val1 AND field2 op val2) OR ...
-      const equality = sort.slice(0, i).map((s, idx) => `${s.field} = ?`).join(" AND ");
+      const equality = sort
+        .slice(0, i)
+        .map((s) => `${s.field} = ?`)
+        .join(" AND ");
       const equalityParams = values.slice(0, i);
-      const condition = equality
-        ? `(${equality} AND ${field} ${op} ?)`
-        : `${field} ${op} ?`;
+      const condition = equality ? `(${equality} AND ${field} ${op} ?)` : `${field} ${op} ?`;
 
       if (i === 0) {
         clauses.push(condition);
