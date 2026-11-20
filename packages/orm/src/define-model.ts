@@ -211,6 +211,15 @@ function sanitizeSensitiveValue(
   return value;
 }
 
+function sanitizeAuditFieldValue(
+  field: string,
+  value: unknown,
+  sensitiveFields: ReadonlySet<string>,
+): unknown {
+  if (isSensitiveDataKey(field, sensitiveFields)) return AUDIT_REDACTION_MARKER;
+  return sanitizeSensitiveValue(value, sensitiveFields, "redact");
+}
+
 function sanitizeOutboxValue(value: unknown, sensitiveFields: ReadonlySet<string>): unknown {
   return sanitizeSensitiveValue(value, sensitiveFields, "omit");
 }
@@ -2576,8 +2585,8 @@ function auditHookFor(model: string) {
       for (const key of Object.keys(record)) {
         if (JSON.stringify(before[key]) !== JSON.stringify(record[key])) {
           diff[key] = {
-            before: sanitizeSensitiveValue(before[key], sensitiveFields, "redact"),
-            after: sanitizeSensitiveValue(record[key], sensitiveFields, "redact"),
+            before: sanitizeAuditFieldValue(key, before[key], sensitiveFields),
+            after: sanitizeAuditFieldValue(key, record[key], sensitiveFields),
           };
         }
       }
@@ -2585,7 +2594,7 @@ function auditHookFor(model: string) {
       for (const key of Object.keys(record)) {
         diff[key] = {
           before: null,
-          after: sanitizeSensitiveValue(record[key], sensitiveFields, "redact"),
+          after: sanitizeAuditFieldValue(key, record[key], sensitiveFields),
         };
       }
     }
