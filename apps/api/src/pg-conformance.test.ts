@@ -29,6 +29,7 @@ import {
   type CrewRoleOrPublic,
 } from "@moonwitness/addon-runtime";
 import { createSession, createUser } from "@moonwitness/addons/auth";
+import { irAutomationModel, irWebhookModel, irWebhookLogModel } from "@moonwitness/addons/khidra";
 import { buildApp } from "./app";
 import { resolvePostgresConformanceUrl } from "./pg-conformance-config";
 
@@ -145,6 +146,7 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
       });
 
       app = await buildApp({ dbPath: isolated.dbUrl, prefix: "/api/v1" });
+      await syncModels([irAutomationModel, irWebhookModel, irWebhookLogModel]);
 
       const pgVersionRow = await getDb().get<{ version: string }>("SELECT version() AS version");
       expect(pgVersionRow?.version).toMatch(/PostgreSQL 16\./);
