@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { resolveCanonicalTokens } from "../dna/canonical";
 import {
   CrownEmblemIcon,
   DnaBadge,
@@ -174,7 +175,19 @@ describe("@moonwitness/ui imperium skin & scoped CSS layer", () => {
 
     const scopeEl = container.querySelector('[data-dna="03-rocksoul"]') as HTMLElement;
     expect(scopeEl).not.toBeNull();
-    expect(scopeEl.style.getPropertyValue("--dna-accent")).toBe("#f5b027");
+    const rocksoulTokens = resolveCanonicalTokens({
+      dnaId: "03-rocksoul",
+      skin: "editorial",
+      mode: "dark",
+      density: "comfortable",
+    });
+    expect(scopeEl.style.getPropertyValue("--dna-accent")).toBe(rocksoulTokens.semantic.primary);
+    expect(scopeEl.style.getPropertyValue("--dna-world-accent")).toBe(
+      rocksoulTokens.atmosphere.worldAccent,
+    );
+    expect(rocksoulTokens.atmosphere.worldAccent).toBe(
+      MASTER_DNA_WORLDS["03-rocksoul"].palette.accent,
+    );
     const button = container.querySelector("button");
     expect(button?.className).toContain("mw-dna-button");
     expect(button?.className).not.toContain("btn-chamfer");

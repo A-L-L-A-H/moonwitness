@@ -30,7 +30,11 @@ export function getToken(path: TokenPath, theme: DNATokens = defaultTheme): Toke
   const parts = path.split('.');
   let current: unknown = theme;
   for (const part of parts) {
-    if (current && typeof current === 'object' && part in current) {
+    if (
+      current &&
+      typeof current === "object" &&
+      Object.prototype.hasOwnProperty.call(current, part)
+    ) {
       current = (current as Record<string, unknown>)[part];
     } else return undefined;
   }

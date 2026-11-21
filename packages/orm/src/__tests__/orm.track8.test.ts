@@ -563,7 +563,11 @@ describe("Track 8 ORM hardening & capabilities (#495-#502, #505, #507, #508)", (
       expect(txQueries.some((q) => /\bPRAGMA\b/i.test(q))).toBe(false);
 
       await applyMigrations([{ id: "pg_m1", up: "CREATE TABLE pg_m1(id TEXT PRIMARY KEY)" }]);
-      expect(queries.some((q) => q.includes("information_schema.columns"))).toBe(true);
+      expect(
+        txQueries.some(
+          (q) => q.includes("information_schema.columns") && q.includes("_orm_schema_migrations"),
+        ),
+      ).toBe(true);
       expect(queries.some((q) => /\bPRAGMA\b/i.test(q))).toBe(false);
 
       expect(await verifyBackupIntegrity()).toEqual({ ok: true, errors: [] });

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { getDb } from "./driver.js";
+import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 
 export interface Migration {
   id: string;
@@ -7,8 +8,52 @@ export interface Migration {
   owner?: string;
 }
 
+const POSTGRES_LEDGER_LOCK = "moonwitness:orm:migration-ledger";
+
+const POSTGRES_NON_TRANSACTIONAL_STATEMENT =
+  /(?:^|;)\s*(?:CREATE\s+(?:UNIQUE\s+)?INDEX\s+CONCURRENTLY\b|DROP\s+INDEX\s+CONCURRENTLY\b|REINDEX\b[^;]*\bCONCURRENTLY\b|VACUUM\b|CREATE\s+DATABASE\b|DROP\s+DATABASE\b|ALTER\s+SYSTEM\b|CHECKPOINT\b)/i;
+
+async function acquirePostgresMigrationLock(tx: LibSqlExecutor, lockKey: string): Promise<void> {
+  await tx.exec(`SELECT pg_advisory_xact_lock(${migrationLockKey(lockKey)}::bigint)`);
+}
+
+function assertPostgresMigrationIsTransactional(migration: Migration): void {
+  const withoutComments = migration.up
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/--[^\r\n]*/g, " ");
+  const statement = POSTGRES_NON_TRANSACTIONAL_STATEMENT.exec(withoutComments)?.[0]?.trim();
+  if (statement) {
+    throw new Error(
+      `Migration '${migration.id}' contains a PostgreSQL statement that cannot run inside a transaction (${statement}). Non-transactional migrations require a separately reviewed migration contract.`,
+    );
+  }
+}
+
 async function ensureMigrationsTable(): Promise<void> {
   const db = getDb();
+  const isPostgres = (db.kind ?? db.dialect) === "postgres";
+  if (isPostgres) {
+    await db.transaction(async (tx) => {
+      await acquirePostgresMigrationLock(tx, POSTGRES_LEDGER_LOCK);
+      await tx.exec(`
+        CREATE TABLE IF NOT EXISTS _orm_schema_migrations (
+          id TEXT PRIMARY KEY,
+          owner TEXT,
+          checksum TEXT NOT NULL,
+          applied_at TEXT NOT NULL
+        )
+      `);
+      const columns = await tx.all<{ name: string }>(
+        "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '_orm_schema_migrations'",
+      );
+      const hasOwner = columns.some((col) => String(col.name).toLowerCase() === "owner");
+      if (!hasOwner) {
+        await tx.exec("ALTER TABLE _orm_schema_migrations ADD COLUMN owner TEXT");
+      }
+    });
+    return;
+  }
+
   await db.exec(`
     CREATE TABLE IF NOT EXISTS _orm_schema_migrations (
       id TEXT PRIMARY KEY,
@@ -17,12 +62,7 @@ async function ensureMigrationsTable(): Promise<void> {
       applied_at TEXT NOT NULL
     )
   `);
-  const isPostgres = (db.kind ?? db.dialect) === "postgres";
-  const columns = isPostgres
-    ? await db.all<{ name: string }>(
-        "SELECT column_name AS name FROM information_schema.columns WHERE table_schema = 'public' AND table_name = '_orm_schema_migrations'",
-      )
-    : await db.all<{ name: string }>("PRAGMA table_info(_orm_schema_migrations)");
+  const columns = await db.all<{ name: string }>("PRAGMA table_info(_orm_schema_migrations)");
   const hasOwner = columns.some((col) => String(col.name).toLowerCase() === "owner");
   if (!hasOwner) {
     await db.exec("ALTER TABLE _orm_schema_migrations ADD COLUMN owner TEXT");
@@ -65,11 +105,14 @@ export async function applyMigrations(
   const isPostgres = (db.kind ?? db.dialect) === "postgres";
 
   for (const migration of migrations) {
+    if (isPostgres) {
+      assertPostgresMigrationIsTransactional(migration);
+    }
     const hash = checksum(migration.up);
 
-    await db.transaction(async (tx) => {
+    const outcome = await db.transaction(async (tx) => {
       if (isPostgres) {
-        await tx.exec(`SELECT pg_advisory_xact_lock(${migrationLockKey(migration.id)}::bigint)`);
+        await acquirePostgresMigrationLock(tx, migration.id);
       }
 
       // Re-read the ledger inside the locked transaction to close the race window.
@@ -84,8 +127,7 @@ export async function applyMigrations(
             `Migration '${migration.id}' checksum mismatch. Existing migrations must not be modified.`,
           );
         }
-        skipped.push(migration.id);
-        return;
+        return "skipped" as const;
       }
 
       await tx.exec(migration.up);
@@ -93,8 +135,14 @@ export async function applyMigrations(
         "INSERT INTO _orm_schema_migrations (id, owner, checksum, applied_at) VALUES (?, ?, ?, ?)",
         [migration.id, migration.owner ?? null, hash, new Date().toISOString()],
       );
-      applied.push(migration.id);
+      return "applied" as const;
     });
+
+    if (outcome === "applied") {
+      applied.push(migration.id);
+    } else {
+      skipped.push(migration.id);
+    }
   }
 
   return { applied, skipped };

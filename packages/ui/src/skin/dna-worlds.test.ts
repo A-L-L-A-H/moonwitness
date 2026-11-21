@@ -4,6 +4,7 @@ import {
   MASTER_DNA_WORLDS,
   dnaWorldCssVariables,
   getDnaWorld,
+  isValidDnaId,
   listDnaWorlds,
 } from "./dna-worlds";
 
@@ -24,6 +25,18 @@ describe("7 Master DNA Worlds Registry", () => {
   it("falls back safely to 02-lunar-chronicles on unknown dna id", () => {
     const fallback = getDnaWorld("non-existent-world");
     expect(fallback.id).toBe("02-lunar-chronicles");
+  });
+
+  it("rejects inherited object keys and preserves valid world resolution", () => {
+    for (const value of ["toString", "constructor", "__proto__", "", "unknown-world"]) {
+      expect(isValidDnaId(value)).toBe(false);
+      expect(getDnaWorld(value).id).toBe("02-lunar-chronicles");
+    }
+
+    for (const id of MASTER_DNA_IDS) {
+      expect(isValidDnaId(id)).toBe(true);
+      expect(getDnaWorld(id)).toBe(MASTER_DNA_WORLDS[id]);
+    }
   });
 
   it("generates complete semantic CSS custom properties per world", () => {

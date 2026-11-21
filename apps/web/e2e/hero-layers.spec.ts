@@ -161,10 +161,24 @@ test("live reduction ends scoped intro, never replays, and unmount stops detache
     "[data-hero-annotations]",
   ]) {
     await expect(root.locator(selector)).toHaveCSS("opacity", "1");
-    await expect(root.locator(selector)).toHaveCSS("transform", "none");
+    await expect
+      .poll(() =>
+        root.locator(selector).evaluate((element) => {
+          const transform = getComputedStyle(element).transform;
+          return transform === "none" || transform === "matrix(1, 0, 0, 1, 0, 0)";
+        }),
+      )
+      .toBe(true);
   }
   await page.emulateMedia({ reducedMotion: "no-preference" });
-  await expect(root.locator("[data-hero-headline]")).toHaveCSS("transform", "none");
+  await expect
+    .poll(() =>
+      root.locator("[data-hero-headline]").evaluate((element) => {
+        const transform = getComputedStyle(element).transform;
+        return transform === "none" || transform === "matrix(1, 0, 0, 1, 0, 0)";
+      }),
+    )
+    .toBe(true);
   await root.evaluate((el) => {
     const state = { writes: 0 };
     (window as unknown as { heroQA: typeof state }).heroQA = state;
