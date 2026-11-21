@@ -27,6 +27,7 @@ export interface VerifiedMidUser {
   tenantId?: string;
   companyId?: string;
   companyIds?: string[];
+  groups?: string[];
 }
 
 const JWKS_CACHE_TTL_MS = 300_000;
@@ -139,7 +140,11 @@ export async function verifyMidBearerToken(
         ? rawClaims.tid.trim()
         : undefined;
   const pub = getUserPublic(user);
-  return claimTenant ? { ...pub, tenantId: claimTenant } : pub;
+  return {
+    ...pub,
+    ...(claimTenant ? { tenantId: claimTenant } : {}),
+    groups: user.groups,
+  };
 }
 
 /** Resolve caller identity from session cookie or MoonWitness ID Bearer JWT. */
@@ -160,6 +165,7 @@ export async function resolveAuthIdentityFromRequest(request: FastifyRequest): P
           displayName: session.displayName,
           companyId: session.companyId,
           companyIds: session.companyIds,
+          groups: session.groups,
         },
         expiredSessionCookie: false,
       };

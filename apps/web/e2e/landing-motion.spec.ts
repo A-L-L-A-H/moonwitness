@@ -98,11 +98,11 @@ test("timeline preview exposes actual encoded event and empty/error retry states
   });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/moonwitness");
-  await expect(page.locator("#shadow").getByText("Loading archive preview…")).toBeVisible();
+  await expect(page.locator("#shadow").getByText("Loading archive…")).toBeVisible();
   await expect(page.locator("#shadow").getByText("No timeline events available.")).toBeVisible();
   mode = "error";
   await page.reload();
-  const retry = page.locator("#shadow").getByRole("button", { name: "Retry archive preview" });
+  const retry = page.locator("#shadow").getByRole("button", { name: "Retry archive" });
   await expect(retry).toBeVisible({ timeout: 20000 });
   expect((await retry.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   mode = "event";
@@ -250,7 +250,7 @@ test("transmission is a static, honest fiction panel with an immediate CTA", asy
   ])
     await expect(section.getByText(claim, { exact: false })).toHaveCount(0);
   await expect(section.getByText(/fiction/i).first()).toBeVisible();
-  const cta = section.getByRole("link", { name: /read the full transmission/i });
+  const cta = section.getByRole("link", { name: /open full dossier/i });
   await expect(cta).toHaveAttribute("href", "/dock");
   await expect(cta).toHaveCSS("opacity", "1");
   expect((await cta.boundingBox())!.height).toBeGreaterThanOrEqual(44);

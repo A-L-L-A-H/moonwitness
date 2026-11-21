@@ -315,4 +315,87 @@ describe("@moonwitness/edge centralized addon thin host", () => {
     const logsRes = await handleEdgeRequest(new Request("https://edge.local/api/sync/logs"), env);
     expect(((await logsRes.json()) as { data: unknown[] }).data.length).toBe(3);
   });
+
+  it("supports bi-directional pub/sub publish, incremental events delta, and SSE stream", async () => {
+    const publishRes = await handleEdgeRequest(
+      new Request("https://edge.local/api/pubsub/publish", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-tenant-id": "rocksoul-local" },
+        body: JSON.stringify({
+          projects: [
+            {
+              code: "rocksoul-desktop",
+              name: "ROCKSOUL Desktop",
+              summary: "Mirrored from Rust ORM",
+              project_status: "active",
+            },
+          ],
+          tasks: [
+            {
+              project_code: "rocksoul-desktop",
+              title: "Realtime Pub/Sub Sync",
+              priority: "high",
+              task_status: "in_progress",
+            },
+          ],
+        }),
+      }),
+      env,
+    );
+    expect(publishRes.status).toBe(200);
+    expect(await publishRes.json()).toMatchObject({
+      ok: true,
+      projectsUpserted: 1,
+      tasksUpserted: 1,
+    });
+
+    const deltaRes = await handleEdgeRequest(
+      new Request("https://edge.local/api/pubsub/events", {
+        headers: { "x-tenant-id": "rocksoul-local" },
+      }),
+      env,
+    );
+    expect(deltaRes.status).toBe(200);
+    const delta = (await deltaRes.json()) as {
+      ok: boolean;
+      cursor: string;
+      projects: Array<{ code: string }>;
+      tasks: Array<{ title: string; task_status: string }>;
+      events: Array<{ model: string; action: string }>;
+    };
+    expect(delta.ok).toBe(true);
+    expect(delta.projects.map((p) => p.code)).toContain("rocksoul-desktop");
+    expect(delta.tasks.map((t) => t.title)).toContain("Realtime Pub/Sub Sync");
+    expect(delta.events.length).toBeGreaterThanOrEqual(2);
+
+    // Incremental fetch using returned cursor yields empty delta
+    const emptyDelta = await handleEdgeRequest(
+      new Request(
+        `https://edge.local/api/pubsub/events?since=${encodeURIComponent(delta.cursor)}`,
+        {
+          headers: { "x-tenant-id": "rocksoul-local" },
+        },
+      ),
+      env,
+    );
+    expect(emptyDelta.status).toBe(200);
+    const emptyJson = (await emptyDelta.json()) as {
+      projects: unknown[];
+      tasks: unknown[];
+    };
+    expect(emptyJson.projects).toHaveLength(0);
+    expect(emptyJson.tasks).toHaveLength(0);
+
+    const streamRes = await handleEdgeRequest(
+      new Request("https://edge.local/api/pubsub/stream", {
+        headers: { "x-tenant-id": "rocksoul-local" },
+      }),
+      env,
+    );
+    expect(streamRes.status).toBe(200);
+    expect(streamRes.headers.get("content-type")).toContain("text/event-stream");
+    const sseText = await streamRes.text();
+    expect(sseText).toContain("event: orm.pubsub");
+    expect(sseText).toContain("Realtime Pub/Sub Sync");
+  });
 });

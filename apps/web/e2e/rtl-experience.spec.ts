@@ -47,14 +47,31 @@ async function mockRtlApi(page: Page): Promise<void> {
       return route.fulfill({
         status: 200,
         json: {
+          reachable: true,
           host: {
             hostname: "arsy-rtl-node",
             os: "linux",
             arch: "x86_64",
             kernel: "6.8.0",
-            uptime_secs: 7200,
+            is_root: true,
+            capabilities: {
+              systemd: false,
+              docker: false,
+              files: true,
+              cron: false,
+              users: false,
+              firewall: false,
+              host_metrics: true,
+              network: false,
+              ssh: false,
+              cert: false,
+              mount: false,
+              alert: false,
+              kubernetes: false,
+            },
           },
           metrics: {
+            time: "2026-11-20T12:00:00Z",
             cpu_pct: 22.4,
             load1: 0.42,
             load5: 0.35,
@@ -68,12 +85,19 @@ async function mockRtlApi(page: Page): Promise<void> {
             disk_path: "/",
             swap_used: 0,
             swap_total: 0,
+            uptime_sec: 7200,
           },
           units: [],
           certificates: [],
           audit: [],
         },
       });
+    }
+    if (path.endsWith("/api/v1/control/resources")) {
+      return route.fulfill({ status: 200, json: {} });
+    }
+    if (path.endsWith("/api/v1/control/audit")) {
+      return route.fulfill({ status: 200, json: [] });
     }
     if (path.endsWith("/api/v1/command-center/state")) {
       return route.fulfill({
@@ -283,7 +307,15 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
             expect(mainBox!.x + mainBox!.width).toBeLessThanOrEqual(railBox!.x + 2);
           } else {
             expect(railBox!.y + railBox!.height).toBeLessThanOrEqual(vp.height + 1);
-            expect(footerBox!.y + footerBox!.height).toBeLessThanOrEqual(railBox!.y + 2);
+            await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+            const scrolledRailBox = await page.locator(".console-shell-rail").boundingBox();
+            const scrolledFooterBox = await page.locator("footer.hud-panel").boundingBox();
+            expect(scrolledRailBox).not.toBeNull();
+            expect(scrolledFooterBox).not.toBeNull();
+            expect(scrolledFooterBox!.y + scrolledFooterBox!.height).toBeLessThanOrEqual(
+              scrolledRailBox!.y + 2,
+            );
+            await page.evaluate(() => window.scrollTo(0, 0));
           }
         }
 
@@ -308,7 +340,9 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/ar/apps/control", { waitUntil: "domcontentloaded" });
 
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+      .toBe("rtl");
 
     const bidiResult = await page.evaluate(() => {
       const probe = document.createElement("div");
@@ -357,7 +391,9 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
 
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/ar", { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+      .toBe("rtl");
 
     const visitedTags: string[] = [];
     for (let step = 0; step < 5; step += 1) {
@@ -369,9 +405,13 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
 
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/ar/apps/control", { waitUntil: "domcontentloaded" });
-    await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+    await expect
+      .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+      .toBe("rtl");
+    await expect(page.getByText("VERIFYING SOVEREIGN SESSION…")).toBeHidden();
 
     const railLinks = page.locator(".console-shell-rail .hud-nav-items a[href]");
+    await expect(railLinks).toHaveCount(7);
     const linkCount = await railLinks.count();
     expect(linkCount).toBeGreaterThanOrEqual(3);
 

@@ -1,5 +1,5 @@
 import "./fastify-augment.js";
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import manifestData from "../manifest.json" with { type: "json" };
 import { systemModels, runAddonLifecycle } from "./addon.js";
 import type { AddonLifecycleDiagnostics, AddonLifecycleResult } from "./addon.js";
@@ -105,6 +105,7 @@ export {
 export {
   AddonRuntimeController,
   evaluateModelRecordRules,
+  resolveEffectiveGroups,
   type AddonDefinition,
   type AddonDataRecord,
   type AddonInstallPhase,
@@ -124,7 +125,16 @@ export {
   type RegisteredFieldMetadata,
   type RuntimeViewDescriptor,
 } from "./runtime.js";
-export { canReadField, canWriteField } from "./field-policy.js";
+export {
+  assertReadableFilterFields,
+  assertReadableRelations,
+  assertWritableActionInputFields,
+  assertWritableBodyFields,
+  canReadField,
+  canReadRelation,
+  canWriteField,
+  getEffectiveFieldPolicies,
+} from "./field-policy.js";
 export { registerGenericModelRoutes } from "./generic-crud.js";
 export {
   defaultFailClosedAuthBridge,
@@ -272,15 +282,30 @@ export async function registerBaseAddon(
     }
   }
 
-  const registrySource = opts.runtime
-    ? () => buildMetadataRegistryFromModels(opts.runtime!, extraModels)
+  const runtime = opts.runtime;
+  const auth = opts.auth;
+  const registrySource = runtime
+    ? async (request?: FastifyRequest, reply?: FastifyReply) => {
+        if (!request || !auth) {
+          return buildMetadataRegistryFromModels(runtime, extraModels);
+        }
+        if (auth.optionalAuthenticate && reply) {
+          try {
+            await auth.optionalAuthenticate(request, reply);
+          } catch {
+            // Optional authentication failure is non-fatal for public metadata lookup
+          }
+        }
+        const role = auth.getActorRole(request);
+        const actorGroups = auth.getActorGroups?.(request);
+        const effectiveGroups = await runtime.resolveEffectiveActorGroups(role, actorGroups);
+        return buildMetadataRegistryFromModels(runtime, extraModels, role, effectiveGroups);
+      }
     : createMetadataRegistry(merged);
 
   await registerMetadataRoutes(fastify, registrySource);
 
-  if (opts.runtime) {
-    const runtime = opts.runtime;
-    const auth = opts.auth;
+  if (runtime) {
     await registerRuntimeMetaRoutes(fastify, runtime, auth);
     if (opts.apiPrefix) {
       await fastify.register(

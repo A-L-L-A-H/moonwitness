@@ -34,7 +34,15 @@ test.describe("Chronicle navigation & search localization", () => {
   });
 
   test("SearchDialog submits localized /ar/dock?q= route on /ar/moonwitness", async ({ page }) => {
-    await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
+    await page.route("**/api/v1/**", (route) => {
+      const { pathname } = new URL(route.request().url());
+      if (pathname.endsWith("/api/v1/auth/me")) {
+        return route.fulfill({
+          json: { user: { id: "qa-chronicle", username: "qa", role: "admin" } },
+        });
+      }
+      return route.fulfill({ json: { data: [], total: 0 } });
+    });
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/ar/moonwitness");
 
@@ -75,7 +83,15 @@ test.describe("Chronicle navigation & search localization", () => {
   test("unprefixed /moonwitness updates locale in place and keeps /dock?q= search path", async ({
     page,
   }) => {
-    await page.route("**/api/v1/**", (route) => route.fulfill({ json: { data: [], total: 0 } }));
+    await page.route("**/api/v1/**", (route) => {
+      const { pathname } = new URL(route.request().url());
+      if (pathname.endsWith("/api/v1/auth/me")) {
+        return route.fulfill({
+          json: { user: { id: "qa-chronicle", username: "qa", role: "admin" } },
+        });
+      }
+      return route.fulfill({ json: { data: [], total: 0 } });
+    });
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/moonwitness");
 
@@ -93,7 +109,7 @@ test.describe("Chronicle navigation & search localization", () => {
     await page.getByRole("button", { name: "Cari di arsip" }).click();
     const dialog = page.getByRole("dialog", { name: "Cari di arsip" });
     await dialog.getByRole("textbox", { name: "CARI SINYAL" }).fill("signal / moon");
-    await dialog.getByRole("button", { name: "CARI" }).click();
+    await dialog.getByRole("button", { name: "CARI", exact: true }).click();
 
     await expect(page).toHaveURL(/\/dock\?/);
     expect(new URL(page.url()).pathname).toBe("/dock");

@@ -5,7 +5,9 @@ Reusable PostgreSQL, libSQL/SQLite, and Cloudflare D1 ORM layer for MoonWitness 
 ## Driver boundary
 
 - **PostgreSQL (`PostgresDriver`):** Primary production driver when `DATABASE_URL` uses `postgres://` or `postgresql://` (via `pg` pool and automatic SQL translation `translateSqlForPostgres` / `isPostgresUrl`).
-- **SQLite / libSQL (`LibSqlDriver`):** Uses `@libsql/client` for local development, tests, and single-file databases (`:memory:` or `file:` paths).
+  - Supported `PRAGMA` translations are strictly limited to safe schema-inspection queries: `PRAGMA table_info(<ident>)` -> `information_schema.columns` and `PRAGMA index_list(<ident>)` -> `pg_indexes`.
+  - Integrity and unknown SQLite `PRAGMA` statements (`PRAGMA integrity_check`, `PRAGMA foreign_key_check`, `PRAGMA journal_mode = ...`, etc.) fail closed with an explicit unsupported-operation error. Use `verifyIntegrity()` for PostgreSQL-native `pg_index` (`indisvalid` / `indisready`) and `pg_constraint` (`convalidated`) catalog verification.
+- **SQLite / libSQL (`LibSqlDriver`):** Uses `@libsql/client` for local development, tests, and single-file databases (`:memory:` or `file:` paths). Uses SQLite `PRAGMA integrity_check` and `PRAGMA foreign_key_check` inside `verifyIntegrity()`.
 - **Cloudflare D1 (`D1Driver`, `createD1DatabaseFromOrm`):** Adapter compatibility layer for D1 bindings and MID plugin integration (`initD1Db`).
 - All operations are async (`initDb`, `run/all/get/exec`, repository methods, migrations). Callers must `await` results.
 - Transactions are scoped via `getDb().transaction(async (tx) => ...)` and commit/rollback atomically (entity writes + audit writes in the same transaction).

@@ -34,6 +34,7 @@ const rustModels = [
   { rustName: "PlanTrackerEntry", contractName: "PlanTrackerEntry" },
   { rustName: "MonitorSnapshot", contractName: "MonitorSnapshot" },
   { rustName: "MidLoopbackCallback", contractName: "MidLoopbackCallback" },
+  { rustName: "EdgeOrmSyncStatus", contractName: "EdgeOrmSyncStatus" },
 ];
 const [contracts, continuityContracts, registration, models, ...sources] = await Promise.all([
   readFile("src/lib/contracts.d.ts", "utf8"),
@@ -87,6 +88,7 @@ const commandArgs = {
   create_project: ["name", "description"],
   update_project: ["project_id", "name", "description", "status"],
   delete_project: ["project_id"],
+  sync_edge_orm: [],
   create_milestone: ["project_id", "title", "description", "due_at"],
   update_milestone: ["milestone_id", "title", "description", "due_at"],
   delete_milestone: ["milestone_id"],

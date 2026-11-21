@@ -106,7 +106,7 @@ export function Storytelling() {
       title: copy?.storiesTitle ?? "PENDETA ONLINE",
       excerpt:
         copy?.storiesExcerpt ??
-        "A spiritual guide receives signals through prayer and radio static.",
+        "A spiritual guide in rural Malaysia receives what he calls ‘signals from the other side’ — transmitted through prayer and radio static.",
       art: "signal-sky",
       marginalia: extras.marginalia.s3,
       rotation: -0.8,

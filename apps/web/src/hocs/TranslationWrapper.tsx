@@ -84,7 +84,6 @@ export function TranslationWrapper({
     if (hasExplicitLang) {
       const resolved: Locale = isValidLocale(lang) ? lang : i18n.defaultLocale;
       setLocaleState(resolved);
-      writeLocaleCookie(resolved);
       applyDocumentLocale(resolved);
       return;
     }

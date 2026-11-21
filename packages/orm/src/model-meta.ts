@@ -8,6 +8,8 @@ export type ModelWriteAction = "CREATE" | "UPDATE" | "ARCHIVE" | "RESTORE" | "DE
 export interface FieldPolicySpec {
   readRoles?: ModelRole[];
   writeRoles?: ModelRole[];
+  readGroups?: string[];
+  writeGroups?: string[];
   sensitive?: boolean;
 }
 

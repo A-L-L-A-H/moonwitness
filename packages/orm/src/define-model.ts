@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { z } from "zod";
-import { getDb, unwrapDriverHandle } from "./driver.js";
+import { getDb, isInTransaction, unwrapDriverHandle } from "./driver.js";
 import type { LibSqlExecutor } from "./drivers/sqlite.driver.js";
 import { ConflictError, PolicyError } from "./errors.js";
 import type { BaseMetadata, RecordStatus } from "./base-metadata.js";
@@ -65,6 +65,57 @@ export interface FindOptions {
   allowedSearchFields?: string[];
   /** Batch-hydrate `relations` without N+1 queries (attaches `$<relation>` onto each record). */
   with?: string[];
+}
+
+/** A normalized, validated sort specification used by keyset pagination. */
+export type SortSpec = Array<{ field: string; direction: "ASC" | "DESC" }>;
+
+/**
+ * An opaque, versioned continuation token for keyset pagination. The token
+ * embeds the model name, the normalized sort tuple, the effective filter
+ * identity and the last seen row's sort-key snapshot. It is URL-safe base64
+ * encoded JSON and is never intended to be parsed or trusted by callers.
+ */
+export interface PageCursor {
+  /** Cursor format version. Bumped only on breaking token layout changes. */
+  v: 1;
+  /** Model name the cursor was minted against. */
+  model: string;
+  /** Normalized sort tuple, including the `id` tie-breaker. */
+  sort: SortSpec;
+  /** Stable identity of the filter snapshot (normalized + JSON stringified). */
+  filterHash: string;
+  /** Last seen row's sort-key values, aligned with `sort`. */
+  values: unknown[];
+}
+
+/**
+ * Options for `findPage` keyset pagination. Tenancy, actor context, record
+ * rules and field-read policy are always re-applied on every page by the
+ * repository; the cursor can never broaden access.
+ */
+export interface FindPageOptions {
+  /** Row filters, applied on every page. Identity must match the cursor's snapshot. */
+  filters?: Record<string, unknown>;
+  /** Number of rows requested. Capped at a strict maximum by the repository. */
+  pageSize?: number;
+  /** Continuation cursor returned by a previous `findPage` call. */
+  cursor?: string;
+  /** Sort specification. The unique `id` tie-breaker is always appended. */
+  orderBy?: FindOptions["orderBy"];
+  includeDeleted?: boolean;
+  tenantId?: string;
+  fields?: string[];
+  q?: string;
+  allowedSearchFields?: string[];
+  with?: string[];
+}
+
+/** Result of a `findPage` keyset-pagination call. */
+export interface PageResult<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasNextPage: boolean;
 }
 
 export interface DefineModelOptions<
@@ -168,8 +219,70 @@ const auditedDrivers = new WeakSet<LibSqlExecutor>();
 const MAX_HOOK_DEPTH = 4;
 const MAX_RELATION_DEPTH = 2;
 const MAX_WITH_RELATIONS = 16;
+/** Strict upper bound for keyset page size; cannot be raised by request input. */
+const MAX_PAGE_SIZE = 100;
+/** Current cursor token layout version. */
+const CURSOR_VERSION = 1 as const;
 const SENSITIVE_OUTBOX_KEY_RE = /password_hash|_token|_secret|encrypted_private/i;
 const hookDepthStorage = new AsyncLocalStorage<number>();
+
+/** Fixed marker persisted in `_orm_audit_log.diff` in place of a sensitive value. */
+export const AUDIT_REDACTED = "[REDACTED]";
+
+/**
+ * Sensitive field names declared on a model via `fieldPolicies.sensitive: true`.
+ * Cached per model name; registration happens at module load, so the cache is
+ * safe for the process lifetime.
+ */
+const sensitiveFieldsCache = new Map<string, Set<string>>();
+function sensitiveFieldsFor(model: string): Set<string> {
+  const cached = sensitiveFieldsCache.get(model);
+  if (cached) return cached;
+  const desc = modelRegistry.get(model);
+  const fields = new Set<string>();
+  if (desc?.fieldPolicies) {
+    for (const [fieldName, policy] of Object.entries(desc.fieldPolicies)) {
+      if (policy.sensitive === true) fields.add(fieldName);
+    }
+  }
+  sensitiveFieldsCache.set(model, fields);
+  return fields;
+}
+
+function isSensitiveAuditKey(key: string, sensitiveFields: ReadonlySet<string>): boolean {
+  return SENSITIVE_OUTBOX_KEY_RE.test(key) || sensitiveFields.has(key);
+}
+
+/**
+ * Recursively replaces sensitive values (credential key patterns and model-declared
+ * sensitive fields) with `AUDIT_REDACTED` in-place-safe copies for audit diffs.
+ * Non-sensitive values — including nested objects and arrays — are preserved verbatim.
+ */
+function redactForAudit(value: unknown, sensitiveFields: ReadonlySet<string>): unknown {
+  if (value instanceof Date) return value.toISOString();
+  if (Array.isArray(value)) {
+    return value.map((item) => redactForAudit(item, sensitiveFields));
+  }
+  if (value && typeof value === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
+      out[key] = isSensitiveAuditKey(key, sensitiveFields)
+        ? AUDIT_REDACTED
+        : redactForAudit(nested, sensitiveFields);
+    }
+    return out;
+  }
+  return value;
+}
+
+function redactAuditFieldValue(
+  key: string,
+  value: unknown,
+  sensitiveFields: ReadonlySet<string>,
+): unknown {
+  if (isSensitiveAuditKey(key, sensitiveFields)) return AUDIT_REDACTED;
+  return redactForAudit(value, sensitiveFields);
+}
 
 export async function ensureAuditTable(executor?: LibSqlExecutor): Promise<void> {
   const db = getDb();
@@ -523,8 +636,17 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     });
   }
 
-  private buildOrderBy(orderBy?: FindOptions["orderBy"]): string {
-    if (!orderBy) return " ORDER BY id";
+  /**
+   * Normalize the caller-supplied `orderBy` into a validated sort tuple and
+   * append the model's stable unique identifier (`id`) as a tie-breaker when it
+   * is not already present. This guarantees a deterministic total ordering for
+   * offset pagination (MW-0834) and provides the unique final key needed by
+   * keyset cursor seek predicates (MW-0835).
+   */
+  private parseOrderBy(
+    orderBy?: FindOptions["orderBy"],
+  ): Array<{ field: string; direction: "ASC" | "DESC" }> {
+    if (!orderBy) return [{ field: "id", direction: "ASC" }];
     const specs: Array<{ field: string; direction: "ASC" | "DESC" }> = [];
     if (typeof orderBy === "string") {
       for (const rawPart of orderBy.split(",")) {
@@ -548,7 +670,16 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         specs.push({ field: item.field, direction: rawDir as "ASC" | "DESC" });
       }
     }
-    if (specs.length === 0) return " ORDER BY id";
+    if (specs.length === 0) return [{ field: "id", direction: "ASC" }];
+    // Deterministic tie-breaker (MW-0834): append `id` unless already present.
+    if (!specs.some((s) => s.field === "id")) {
+      specs.push({ field: "id", direction: "ASC" });
+    }
+    return specs;
+  }
+
+  private buildOrderBy(orderBy?: FindOptions["orderBy"]): string {
+    const specs = this.parseOrderBy(orderBy);
     return ` ORDER BY ${specs.map((s) => `${s.field} ${s.direction}`).join(", ")}`;
   }
 
@@ -717,6 +848,7 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     tenantId?: string;
     includeDeleted?: boolean;
     q?: string;
+    allowedSearchFields?: string[];
     orderBy?: string;
     limit?: number;
   }): Promise<Array<Record<string, unknown>>> {
@@ -861,6 +993,210 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       }
     }
     return decoded;
+  }
+
+  /** Encode a cursor object to a URL-safe base64 string. */
+  private encodeCursor(cursor: PageCursor): string {
+    return Buffer.from(JSON.stringify(cursor)).toString("base64url");
+  }
+
+  /** Decode and validate a cursor string. Throws on malformed or version mismatch. */
+  private decodeCursor(cursorStr: string): PageCursor {
+    let raw: PageCursor;
+    try {
+      raw = JSON.parse(Buffer.from(cursorStr, "base64url").toString("utf8"));
+    } catch {
+      throw new Error("Invalid cursor: malformed token");
+    }
+    if (!raw || typeof raw !== "object" || raw.v !== CURSOR_VERSION) {
+      throw new Error(`Invalid cursor: unsupported version ${raw?.v ?? "unknown"}`);
+    }
+    if (raw.model !== this.name) {
+      throw new Error(`Invalid cursor: model mismatch (expected ${this.name}, got ${raw.model})`);
+    }
+    if (
+      !Array.isArray(raw.sort) ||
+      !Array.isArray(raw.values) ||
+      raw.sort.length !== raw.values.length
+    ) {
+      throw new Error("Invalid cursor: sort/values length mismatch");
+    }
+    return raw;
+  }
+
+  /** Build a filter-hash string for identity comparison. */
+  private filterHash(filters: Record<string, unknown> = {}): string {
+    const sorted = Object.entries(filters).sort(([a], [b]) => a.localeCompare(b));
+    return Buffer.from(JSON.stringify(sorted)).toString("base64url");
+  }
+
+  /** Build a keyset WHERE clause for the next page. Returns { whereClause, params }. */
+  private buildKeysetWhere(
+    sort: SortSpec,
+    values: unknown[],
+    filters: Record<string, unknown> = {},
+  ): { where: string; params: unknown[] } {
+    // Lexicographic comparison: (a1, a2, ...) > (v1, v2, ...)
+    // For ASC:  field > val  OR (field = val AND next-field ...)
+    // For DESC: field < val  OR (field = val AND next-field ...)
+    const { where: filterWhere, params: filterParams } = this.buildWhere(filters);
+    const clauses: string[] = [];
+    const params: unknown[] = [];
+
+    for (let i = 0; i < sort.length; i++) {
+      const spec = sort[i]!;
+      const { field, direction } = spec;
+      const val = values[i];
+      const isAsc = direction === "ASC";
+      const op = isAsc ? ">" : "<";
+
+      // Build: (field1 op val1) OR (field1 = val1 AND field2 op val2) OR ...
+      const equality = sort
+        .slice(0, i)
+        .map((s) => `${s.field} = ?`)
+        .join(" AND ");
+      const equalityParams = values.slice(0, i);
+      const condition = equality ? `(${equality} AND ${field} ${op} ?)` : `${field} ${op} ?`;
+
+      if (i === 0) {
+        clauses.push(condition);
+      } else {
+        // For subsequent fields, prepend equality chain
+        clauses.push(`(${equality} AND ${field} ${op} ?)`);
+      }
+      params.push(...equalityParams, val);
+    }
+
+    const combined = clauses.join(" OR ");
+    return {
+      where: filterWhere ? `${filterWhere} AND (${combined})` : `WHERE (${combined})`,
+      params: [...filterParams, ...params],
+    };
+  }
+
+  /**
+   * Keyset pagination (MW-0835). Returns a bounded page + opaque cursor.
+   * Never runs a total-count query. Validates cursor against model/sort/filters.
+   * Re-applies tenant scope, actor context, record rules and field-read policy.
+   */
+  async findPage(
+    filters: Record<string, unknown> = {},
+    opts: FindPageOptions = {},
+  ): Promise<PageResult<ModelRecord<TBusiness>>> {
+    const pageSize = Math.min(Math.max(1, Math.trunc(opts.pageSize ?? 50)), MAX_PAGE_SIZE);
+    const sort = this.parseOrderBy(opts.orderBy);
+
+    // If cursor provided, decode and validate it
+    let cursorFilterHash: string | undefined;
+    let seekWhere = "";
+    let seekParams: unknown[] = [];
+
+    if (opts.cursor) {
+      const cursor = this.decodeCursor(opts.cursor);
+      // Validate filter identity to prevent drift
+      cursorFilterHash = this.filterHash(filters);
+      if (cursor.filterHash !== cursorFilterHash) {
+        throw new Error("Cursor filter mismatch: filters changed since cursor was issued");
+      }
+      // Validate sort identity
+      const cursorSortKey = JSON.stringify(cursor.sort);
+      const currentSortKey = JSON.stringify(sort);
+      if (cursorSortKey !== currentSortKey) {
+        throw new Error("Cursor sort mismatch: orderBy changed since cursor was issued");
+      }
+      // Build keyset seek predicate
+      const { where, params } = this.buildKeysetWhere(cursor.sort, cursor.values, filters);
+      seekWhere = where;
+      seekParams = params;
+    }
+
+    // Build query
+    let selectClause = "*";
+    let helperColumnsToStrip: string[] = [];
+    if (opts.fields !== undefined) {
+      if (opts.fields.length === 0) {
+        throw new Error(`FindPageOptions.fields on model '${this.name}' must not be empty.`);
+      }
+      opts.fields.forEach((col) => this.validateColumn(col));
+      const requestedFieldsSet = new Set(opts.fields);
+      const internalCols = new Set(requestedFieldsSet);
+      internalCols.add("id");
+      internalCols.add("tenant_id");
+      // Add relation foreign keys if with paths requested
+      if (opts.with?.length) {
+        const relations = this.descriptor().relations ?? {};
+        for (const relPath of opts.with) {
+          const topRel = relPath.split(".")[0]!;
+          const rel = relations[topRel];
+          if (!rel) continue;
+          if (rel.type === "one2many") {
+            internalCols.add(rel.targetField ?? "id");
+          } else if (rel.type !== "many2many") {
+            internalCols.add(topRel);
+          }
+        }
+      }
+      helperColumnsToStrip = [...internalCols].filter((col) => !requestedFieldsSet.has(col));
+      selectClause = [...internalCols].join(", ");
+    }
+
+    const { where: filterWhere, params: filterParams } = this.buildWhere(filters, {
+      includeDeleted: opts.includeDeleted,
+      tenantId: opts.tenantId,
+      q: opts.q,
+      allowedSearchFields: opts.allowedSearchFields,
+    });
+
+    // Combine filter WHERE with keyset seek WHERE
+    const combinedWhere = seekWhere || filterWhere;
+    const combinedParams = seekWhere ? seekParams : filterParams;
+
+    const orderClause = ` ORDER BY ${sort.map((s) => `${s.field} ${s.direction}`).join(", ")}`;
+    const limitClause = ` LIMIT ?`;
+    const execParams = [...combinedParams, pageSize + 1]; // +1 to detect hasNextPage
+
+    const rows = await getDb().all<Record<string, unknown>>(
+      `SELECT ${selectClause} FROM ${this.table}${combinedWhere}${orderClause}${limitClause}`,
+      execParams,
+    );
+
+    const hasNextPage = rows.length > pageSize;
+    const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+    const decoded = pageRows.map((row) => this.decodeRow<ModelRecord<TBusiness>>(row));
+
+    if (!opts.fields) {
+      this.applyComputedFields(decoded as unknown as Array<Record<string, unknown>>);
+    }
+    if (opts.with?.length) {
+      await this.hydrateRelations(
+        decoded as unknown as Array<Record<string, unknown>>,
+        opts.with,
+        opts.tenantId,
+      );
+    }
+    if (helperColumnsToStrip.length > 0) {
+      for (const row of decoded as unknown as Array<Record<string, unknown>>) {
+        for (const col of helperColumnsToStrip) {
+          delete row[col];
+        }
+      }
+    }
+
+    let nextCursor: string | null = null;
+    if (hasNextPage && pageRows.length > 0) {
+      const lastRow = pageRows[pageRows.length - 1]!;
+      const values = sort.map((s) => lastRow[s.field]);
+      const cursor: PageCursor = {
+        v: CURSOR_VERSION,
+        model: this.name,
+        sort,
+        filterHash: cursorFilterHash ?? this.filterHash(filters),
+        values,
+      };
+      nextCursor = this.encodeCursor(cursor);
+    }
+
+    return { items: decoded, nextCursor, hasNextPage };
   }
 
   private applyComputedFields(rows: Array<Record<string, unknown>>): void {
@@ -1335,6 +1671,13 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
       const placeholders = cols.map(() => "?").join(", ");
       const values = this.encodeRow(parsed);
 
+      // Pre-insert snapshot for the ON CONFLICT DO UPDATE winner path: when a
+      // concurrent transaction inserts the same key first, this INSERT becomes a
+      // conflict-update and the snapshot provides the truthful audit `before`.
+      const conflictBefore = existingRow
+        ? this.decodeRow<Record<string, unknown>>(existingRow)
+        : null;
+
       const conflictSet = new Set(conflictCols);
       const protectedOnConflict = new Set(["id", "create_uid", "create_date", "tenant_id"]);
       const dataUpdateCols = Object.keys(data).filter(
@@ -1374,8 +1717,10 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
         : parsed;
       const actualVersion = Number(finalParsed.version ?? 1);
       outcomeAction = actualVersion > 1 ? "UPDATE" : "CREATE";
-      await this.writeAudit(tx, finalParsed, outcomeAction, null, actor);
-      await this.writeOutbox(tx, finalParsed, outcomeAction, null, actor);
+      const conflictBeforeForAudit =
+        outcomeAction === "UPDATE" && beforeSnapshot === null ? conflictBefore : beforeSnapshot;
+      await this.writeAudit(tx, finalParsed, outcomeAction, conflictBeforeForAudit, actor);
+      await this.writeOutbox(tx, finalParsed, outcomeAction, conflictBeforeForAudit, actor);
       return {
         parsed: finalParsed,
         decoded: this.decodeRow<ModelRecord<TBusiness>>(finalParsed),
@@ -1983,7 +2328,11 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   ): Promise<ModelRecord<TBusiness>> {
     await ensureAuditTable();
     const { hooks } = this.descriptor();
-    const committed = await getDb().transaction((tx) => this.createInTx(tx, rawData, actor, guard));
+
+    const committed = isInTransaction()
+      ? await this.createInTx(getDb(), rawData, actor, guard)
+      : await getDb().transaction((tx) => this.createInTx(tx, rawData, actor, guard));
+
     await this.applyRetention(String(committed.parsed.tenant_id));
 
     const decoded = committed.decoded;
@@ -2021,14 +2370,23 @@ export class BaseRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     await ensureAuditTable();
     const { hooks } = this.descriptor();
 
-    const committed = await getDb().transaction(async (tx) => {
-      const currentRow = await tx.get<Record<string, unknown>>(
-        `SELECT * FROM ${this.table} WHERE id = ?`,
-        [id],
-      );
-      if (!currentRow) return null;
-      return this.updateInTx(tx, currentRow, rawData, actor, guard);
-    });
+    const committed = isInTransaction()
+      ? await getDb().transaction(async (tx) => {
+          const currentRow = await tx.get<Record<string, unknown>>(
+            `SELECT * FROM ${this.table} WHERE id = ?`,
+            [id],
+          );
+          if (!currentRow) return null;
+          return this.updateInTx(tx, currentRow, rawData, actor, guard);
+        })
+      : await getDb().transaction(async (tx) => {
+          const currentRow = await tx.get<Record<string, unknown>>(
+            `SELECT * FROM ${this.table} WHERE id = ?`,
+            [id],
+          );
+          if (!currentRow) return null;
+          return this.updateInTx(tx, currentRow, rawData, actor, guard);
+        });
 
     if (!committed) return null;
     const decoded = committed.decoded;
@@ -2378,6 +2736,7 @@ export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
     tenantId?: string;
     includeDeleted?: boolean;
     q?: string;
+    allowedSearchFields?: string[];
     orderBy?: string;
     limit?: number;
   }): Promise<Array<Record<string, unknown>>> {
@@ -2394,6 +2753,17 @@ export class ScopedRepository<TBusiness extends ZodObjectLike = ZodObjectLike> {
   ): Promise<ModelRecord<TBusiness>[]> {
     const tenantId = this.resolveQueryTenantId(opts.tenantId);
     return this.repo.find(filters, {
+      ...opts,
+      ...(tenantId !== undefined ? { tenantId } : {}),
+    });
+  }
+
+  async findPage(
+    filters: Record<string, unknown> = {},
+    opts: FindPageOptions = {},
+  ): Promise<PageResult<ModelRecord<TBusiness>>> {
+    const tenantId = this.resolveQueryTenantId(opts.tenantId);
+    return this.repo.findPage(filters, {
       ...opts,
       ...(tenantId !== undefined ? { tenantId } : {}),
     });
@@ -2549,16 +2919,23 @@ function auditHookFor(model: string) {
     before: Record<string, unknown> | null,
     actor: ActorContext,
   ): AuditEntry => {
+    const sensitiveFields = sensitiveFieldsFor(model);
     const diff: Record<string, { before: unknown; after: unknown }> = {};
     if (before) {
       for (const key of Object.keys(record)) {
         if (JSON.stringify(before[key]) !== JSON.stringify(record[key])) {
-          diff[key] = { before: before[key], after: record[key] };
+          diff[key] = {
+            before: redactAuditFieldValue(key, before[key], sensitiveFields),
+            after: redactAuditFieldValue(key, record[key], sensitiveFields),
+          };
         }
       }
     } else {
       for (const key of Object.keys(record)) {
-        diff[key] = { before: null, after: record[key] };
+        diff[key] = {
+          before: null,
+          after: redactAuditFieldValue(key, record[key], sensitiveFields),
+        };
       }
     }
     return {

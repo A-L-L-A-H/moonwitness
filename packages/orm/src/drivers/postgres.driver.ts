@@ -1,6 +1,7 @@
 import type { ResultSet } from "@libsql/client";
 import type { OrmDriverHandle } from "../driver.js";
 import type { LibSqlExecutor } from "./sqlite.driver.js";
+import { runWithTransactionExecutor } from "../driver.js";
 import { splitSqlStatements } from "./d1.driver.js";
 
 export interface PgQueryResultLike {
@@ -202,24 +203,19 @@ export function translateSqlForPostgres(sql: string): {
   }
 
   if (/^\s*PRAGMA\s+integrity_check\b/i.test(sql)) {
-    return {
-      sql: "SELECT 'ok' AS integrity_check",
-      isInsertWithoutReturning: false,
-    };
+    throw new Error(
+      "Unsupported PostgreSQL PRAGMA: integrity_check. Use verifyIntegrity() for PostgreSQL catalog verification.",
+    );
   }
 
   if (/^\s*PRAGMA\s+foreign_key_check\b/i.test(sql)) {
-    return {
-      sql: "SELECT 1 AS fk_violation WHERE 1 = 0",
-      isInsertWithoutReturning: false,
-    };
+    throw new Error(
+      "Unsupported PostgreSQL PRAGMA: foreign_key_check. Use verifyIntegrity() for PostgreSQL catalog constraint verification.",
+    );
   }
 
   if (/^\s*PRAGMA\b/i.test(sql)) {
-    return {
-      sql: "SELECT 1 AS ok",
-      isInsertWithoutReturning: false,
-    };
+    throw new Error(`Unsupported PostgreSQL PRAGMA statement: ${sql.trim()}`);
   }
 
   let transformed = sql
@@ -373,12 +369,19 @@ export class PostgresDriver implements OrmDriverHandle {
       this.connectionString = null;
       throw new Error("PostgreSQL Pool constructor is unavailable in 'pg' module.");
     }
-    this.pool = new PoolCtor({
+    const pool = new PoolCtor({
       connectionString,
       max: 10,
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
     }) as PoolLike;
+    // Swallow pool-level errors (e.g. 57P01 termination during teardown) so
+    // they never surface as unhandled 'error' events that crash test runs.
+    (pool as unknown as { on: (event: string, listener: (error: unknown) => void) => void }).on(
+      "error",
+      () => {},
+    );
+    this.pool = pool;
   }
 
   getConnectionString(): string | null {
@@ -391,6 +394,23 @@ export class PostgresDriver implements OrmDriverHandle {
     this.connectionString = null;
     if (current) {
       void current.end().catch(() => {});
+    }
+  }
+
+  /**
+   * Awaitable close: waits for the underlying pool to finish ending so that
+   * immediately dropping the database afterwards cannot observe live
+   * connections (SQLSTATE 57P01). Safe to call repeatedly and after `close()`.
+   */
+  async closeAsync(): Promise<void> {
+    const current = this.pool;
+    this.pool = null;
+    this.connectionString = null;
+    if (!current) return;
+    try {
+      await current.end();
+    } catch {
+      // Pool already ended or terminated externally; treat as closed.
     }
   }
 
@@ -422,18 +442,34 @@ export class PostgresDriver implements OrmDriverHandle {
 
   async transaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> {
     const client = await this.requirePool().connect();
-    const executor: LibSqlExecutor = {
+    const executor: OrmDriverHandle = {
       run: (sql, params = []) => runWithQueryable(client, sql, params),
       all: <R = Record<string, unknown>>(sql: string, params: unknown[] = []) =>
         allWithQueryable<R>(client, sql, params),
       get: <R = Record<string, unknown>>(sql: string, params: unknown[] = []) =>
         getWithQueryable<R>(client, sql, params),
       exec: (sql) => execWithQueryable(client, sql),
+      transaction: async <T>(nestedFn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> => {
+        const savepointName = `sp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        await client.query(`SAVEPOINT ${savepointName}`);
+        try {
+          const result = await nestedFn(executor);
+          await client.query(`RELEASE SAVEPOINT ${savepointName}`);
+          return result;
+        } catch (error) {
+          await client.query(`ROLLBACK TO SAVEPOINT ${savepointName}`).catch(() => {});
+          throw error;
+        }
+      },
+      close: () => client.release(),
+      getConnectionString: () => this.connectionString,
+      kind: "postgres" as const,
+      dialect: "postgres" as const,
     };
 
     try {
       await client.query("BEGIN");
-      const result = await fn(executor);
+      const result = await runWithTransactionExecutor(executor, fn);
       await client.query("COMMIT");
       return result;
     } catch (error) {

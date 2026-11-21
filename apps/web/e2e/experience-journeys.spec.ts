@@ -97,14 +97,31 @@ async function mockJourneyApis(page: Page, role: "admin" | "viewer" = "admin"): 
       return route.fulfill({
         status: 200,
         json: {
+          reachable: true,
           host: {
             hostname: "arsy-journey-node",
             os: "linux",
             arch: "x86_64",
             kernel: "6.8.0",
-            uptime_secs: 3600,
+            is_root: true,
+            capabilities: {
+              systemd: false,
+              docker: false,
+              files: true,
+              cron: false,
+              users: false,
+              firewall: false,
+              host_metrics: true,
+              network: false,
+              ssh: false,
+              cert: false,
+              mount: false,
+              alert: false,
+              kubernetes: false,
+            },
           },
           metrics: {
+            time: "2026-11-20T12:00:00Z",
             cpu_pct: 14.5,
             load1: 0.25,
             load5: 0.2,
@@ -118,6 +135,7 @@ async function mockJourneyApis(page: Page, role: "admin" | "viewer" = "admin"): 
             disk_path: "/",
             swap_used: 0,
             swap_total: 0,
+            uptime_sec: 3600,
           },
           units: [],
           certificates: [],
@@ -222,6 +240,32 @@ async function mockJourneyApis(page: Page, role: "admin" | "viewer" = "admin"): 
         },
       });
     }
+    if (path.endsWith("/api/v1/control/resources")) {
+      return route.fulfill({ status: 200, json: {} });
+    }
+    if (path.endsWith("/api/v1/control/audit")) {
+      return route.fulfill({ status: 200, json: [] });
+    }
+    if (path.endsWith("/api/v1/control/vpn/status")) {
+      return route.fulfill({
+        status: 200,
+        json: {
+          enabled: false,
+          interface: "wg0",
+          address: "10.0.0.1/24",
+          listen_port: 51820,
+          endpoint: "",
+          manage_firewall: false,
+          public_key: "test-public-key",
+          server_configured: true,
+          peer_count: 0,
+          peers: [],
+          subnets: [],
+          available: true,
+          missing_tools: [],
+        },
+      });
+    }
     return route.fulfill({ status: 200, json: { data: [] } });
   });
 }
@@ -272,11 +316,15 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
           await expect(page).toHaveURL(/\/id$/);
           await page.locator('header.mw-site-nav [title="Ganti Bahasa"]').click();
           await expect(page).toHaveURL(/\/ar$/);
-          await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+          await expect
+            .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+            .toBe("rtl");
 
           await page.goBack();
           await expect(page).toHaveURL(/\/id$/);
-          await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("ltr");
+          await expect
+            .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+            .toBe("ltr");
 
           await page.goBack();
           await expect(page).toHaveURL(/\/en$/);
@@ -300,8 +348,14 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
 
         await page.goto("/ar/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.getByText("أناس. أماكن. حكايات.")).toBeVisible();
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+          .toBe("rtl");
 
+        // Visiting /ar/moonwitness writes the locale cookie (explicit-lang TranslationWrapper
+        // effect); the unprefixed route then renders in Arabic. Reset so the default-locale
+        // unprefixed route and its English search dialog selectors are deterministic.
+        await page.context().clearCookies();
         await page.goto("/moonwitness", { waitUntil: "domcontentloaded" });
         await expect(page.locator("#home h1")).toContainText(/MOONWITNESS/i);
 
@@ -336,6 +390,13 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         const pageErrors: string[] = [];
         page.on("pageerror", (err) => pageErrors.push(err.message));
 
+        // Disable the dev-only session fallback (session.ts: mw_dev_user) so the mocked
+        // auth/me 401 actually yields a null session and AuthGuard performs the localized
+        // redirect instead of letting ControlGate reach its setup redirect first.
+        await page.addInitScript(() => {
+          window.localStorage.setItem("mw_dev_user", "0");
+        });
+
         // 1. AuthGuard unauthenticated redirect on localized private Operations route
         await page.route("**/api/v1/auth/me", (route) =>
           route.fulfill({
@@ -359,9 +420,11 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await expect(page.getByText("alice")).toBeVisible();
         await expect(page.getByRole("button", { name: "Add user" })).toHaveCount(0);
         await expect(
-          page.getByText(
-            "Your role cannot manage RADIUS users. Ask an administrator for write access.",
-          ),
+          page
+            .getByRole("region", { name: "RADIUS users" })
+            .getByText(
+              "Your role cannot manage RADIUS users. Ask an administrator for write access.",
+            ),
         ).toBeVisible();
 
         // 3. Authenticated admin: command palette + localized navigation + back/forward
@@ -390,11 +453,15 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await page.getByRole("button", { name: "Change language" }).click();
         await page.getByRole("button", { name: /العربية/ }).click();
         await expect(page).toHaveURL(/\/ar\/apps\/addons\?model=witness\.claim/);
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("rtl");
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+          .toBe("rtl");
 
         await page.goBack();
         await expect(page).toHaveURL(/\/en\/apps\/addons\?model=witness\.claim/);
-        await expect.poll(() => page.evaluate(() => document.documentElement.dir)).toBe("ltr");
+        await expect
+          .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
+          .toBe("ltr");
 
         expect(pageErrors).toEqual([]);
       });

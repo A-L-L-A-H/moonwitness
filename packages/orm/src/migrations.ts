@@ -33,38 +33,68 @@ function checksum(sql: string): string {
   return createHash("sha256").update(sql).digest("hex");
 }
 
+/**
+ * Deterministic 64-bit FNV-1a hash of a migration id, used as the
+ * PostgreSQL transaction-scoped advisory-lock key. Stable across processes
+ * and runtimes, so concurrent migration runners contend on the same lock.
+ */
+export function migrationLockKey(migrationId: string): bigint {
+  let hash = 0xcbf29ce484222325n;
+  for (let i = 0; i < migrationId.length; i += 1) {
+    hash ^= BigInt(migrationId.charCodeAt(i));
+    hash = (hash * 0x100000001b3n) & 0xffffffffffffffffn;
+  }
+  return hash & 0x7fffffffffffffffn;
+}
+
+/**
+ * Apply pending migrations.
+ *
+ * PostgreSQL: each migration runs inside a transaction that first takes a
+ * transaction-scoped advisory lock (`pg_advisory_xact_lock`), then re-reads
+ * the ledger, so concurrent runners serialize: exactly one applies, others
+ * skip. Migration SQL and the ledger insert commit or roll back together.
+ */
 export async function applyMigrations(
   migrations: Migration[],
 ): Promise<{ applied: string[]; skipped: string[] }> {
   await ensureMigrationsTable();
   const applied: string[] = [];
   const skipped: string[] = [];
+  const db = getDb();
+  const isPostgres = (db.kind ?? db.dialect) === "postgres";
 
   for (const migration of migrations) {
-    const existing = await getDb().get<{ id: string; checksum: string }>(
-      "SELECT id, checksum FROM _orm_schema_migrations WHERE id = ?",
-      [migration.id],
-    );
     const hash = checksum(migration.up);
 
-    if (existing) {
-      if (existing.checksum !== hash) {
-        throw new Error(
-          `Migration '${migration.id}' checksum mismatch. Existing migrations must not be modified.`,
-        );
+    await db.transaction(async (tx) => {
+      if (isPostgres) {
+        await tx.exec(`SELECT pg_advisory_xact_lock(${migrationLockKey(migration.id)}::bigint)`);
       }
-      skipped.push(migration.id);
-      continue;
-    }
 
-    await getDb().transaction(async (tx) => {
+      // Re-read the ledger inside the locked transaction to close the race window.
+      const existing = await tx.get<{ id: string; checksum: string }>(
+        "SELECT id, checksum FROM _orm_schema_migrations WHERE id = ?",
+        [migration.id],
+      );
+
+      if (existing) {
+        if (existing.checksum !== hash) {
+          throw new Error(
+            `Migration '${migration.id}' checksum mismatch. Existing migrations must not be modified.`,
+          );
+        }
+        skipped.push(migration.id);
+        return;
+      }
+
       await tx.exec(migration.up);
       await tx.run(
         "INSERT INTO _orm_schema_migrations (id, owner, checksum, applied_at) VALUES (?, ?, ?, ?)",
         [migration.id, migration.owner ?? null, hash, new Date().toISOString()],
       );
+      applied.push(migration.id);
     });
-    applied.push(migration.id);
   }
 
   return { applied, skipped };

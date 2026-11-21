@@ -247,6 +247,30 @@ function resolveTargetUniqueness(
   );
 }
 
+function resolveSourceUniqueness(
+  sourceModel: string,
+  sourceFields: Map<string, FieldSpec>,
+  sourceIndexes: ModelIndex[],
+): "single" | "tenant_composite" {
+  const hasSingleUnique = sourceIndexes.some(
+    (idx) => idx.unique && idx.fields.length === 1 && idx.fields[0] === "id",
+  );
+  if (hasSingleUnique) {
+    return "single";
+  }
+  const hasTenantCompositeUnique = sourceIndexes.some(
+    (idx) =>
+      idx.unique &&
+      idx.fields.length === 2 &&
+      idx.fields.includes("tenant_id") &&
+      idx.fields.includes("id"),
+  );
+  if (hasTenantCompositeUnique) {
+    return "tenant_composite";
+  }
+  return "single";
+}
+
 class OrmModelRegistry {
   private readonly bases = new Map<string, StoredModelBase>();
   private readonly extensions = new Map<string, ModelExtensionDef[]>();
@@ -493,8 +517,9 @@ class OrmModelRegistry {
           assertIdentifier(targetField, "relation target column");
 
           const target = this.composed.get(rel.model);
+          let targetUniqueness: "single" | "tenant_composite" = "single";
           if (target) {
-            resolveTargetUniqueness(
+            targetUniqueness = resolveTargetUniqueness(
               base.name,
               relName,
               rel.model,
@@ -503,6 +528,7 @@ class OrmModelRegistry {
               target.indexes,
             );
           }
+          const sourceUniqueness = resolveSourceUniqueness(base.name, fields, base.indexes);
           many2manyTables.push({
             relationName: relName,
             table: joinTable,
@@ -514,6 +540,10 @@ class OrmModelRegistry {
             targetField,
             targetColumn,
             onDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            sourceOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            targetOnDelete: onDeleteRaw === "ignore" ? "ignore" : "restrict",
+            sourceUniqueness,
+            targetUniqueness,
           });
           continue;
         }
@@ -529,10 +559,13 @@ class OrmModelRegistry {
             `Unsupported onDelete policy '${onDeleteRaw}' on relation '${base.name}.${relName}': destructive cascades are not allowed; use 'restrict', 'set null', or 'ignore'.`,
           );
         }
-        const colSpec = fields.get(relName);
-        if (!colSpec && !METADATA_NAMES.has(relName)) {
+        // Support both relation name = field name (e.g., "author") and relation name + "_id" = field name (e.g., "author" -> "author_id")
+        const fkColumnName = relName + "_id";
+        const colSpec = fields.get(relName) ?? fields.get(fkColumnName);
+        const actualFkColumn = fields.has(relName) ? relName : fkColumnName;
+        if (!colSpec && !METADATA_NAMES.has(relName) && !METADATA_NAMES.has(fkColumnName)) {
           throw new Error(
-            `Relation '${base.name}.${relName}' requires a matching field '${relName}' in the model schema.`,
+            `Relation '${base.name}.${relName}' requires a matching field '${relName}' or '${fkColumnName}' in the model schema.`,
           );
         }
         if (onDeleteRaw === "set null" && (!colSpec || (!colSpec.nullable && !colSpec.optional))) {
@@ -554,14 +587,14 @@ class OrmModelRegistry {
           );
           if (uniqueKind === "single") {
             foreignKeys.push({
-              columns: [relName],
+              columns: [actualFkColumn],
               targetTable: target.table,
               targetColumns: [targetField],
               onDelete: onDeleteRaw === "set null" ? "SET NULL" : "RESTRICT",
             });
           } else if (onDeleteRaw !== "set null") {
             foreignKeys.push({
-              columns: ["tenant_id", relName],
+              columns: ["tenant_id", actualFkColumn],
               targetTable: target.table,
               targetColumns: ["tenant_id", targetField],
               onDelete: "RESTRICT",
@@ -599,15 +632,33 @@ class OrmModelRegistry {
         if (
           !fields.has(fieldName) &&
           !METADATA_NAMES.has(fieldName) &&
-          !(base.computed && fieldName in base.computed)
+          !(base.computed && fieldName in base.computed) &&
+          !(base.relations && fieldName in base.relations)
         ) {
           throw new Error(
             `Unknown field '${fieldName}' in fieldPolicies for model '${base.name}'.`,
           );
         }
+        const normalizeGroupList = (
+          groups: string[] | undefined,
+          key: "readGroups" | "writeGroups",
+        ): string[] | undefined => {
+          if (groups === undefined) return undefined;
+          const cleaned = groups.map((g) => g.trim()).filter(Boolean);
+          if (cleaned.length !== groups.length) {
+            throw new Error(
+              `Field policy '${key}' on '${base.name}.${fieldName}' contains an empty group reference.`,
+            );
+          }
+          return cleaned;
+        };
+        const readGroups = normalizeGroupList(policy.readGroups, "readGroups");
+        const writeGroups = normalizeGroupList(policy.writeGroups, "writeGroups");
         clonedFieldPolicies[fieldName] = {
           ...(policy.readRoles ? { readRoles: [...policy.readRoles] } : {}),
           ...(policy.writeRoles ? { writeRoles: [...policy.writeRoles] } : {}),
+          ...(readGroups !== undefined ? { readGroups } : {}),
+          ...(writeGroups !== undefined ? { writeGroups } : {}),
           ...(policy.sensitive !== undefined ? { sensitive: policy.sensitive } : {}),
         };
       }

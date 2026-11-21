@@ -5,6 +5,7 @@ export interface LibSqlExecutor {
   all<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>;
   get<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | undefined>;
   exec(sql: string): Promise<void>;
+  transaction<T>(fn: (tx: LibSqlExecutor) => Promise<T>): Promise<T>;
 }
 
 function toUrl(path: string): string {
@@ -109,6 +110,20 @@ export class LibSqlDriver implements LibSqlExecutor {
           return row ? (rowToObject(row, result.columns) as R) : undefined;
         },
         exec: (sql) => transaction.executeMultiple(sql),
+        transaction: async <T>(nestedFn: (tx: LibSqlExecutor) => Promise<T>): Promise<T> => {
+          const savepointName = `sp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+          await transaction.execute({ sql: `SAVEPOINT ${savepointName}` });
+          try {
+            const result = await nestedFn(executor);
+            await transaction.execute({ sql: `RELEASE SAVEPOINT ${savepointName}` });
+            return result;
+          } catch (error) {
+            await transaction
+              .execute({ sql: `ROLLBACK TO SAVEPOINT ${savepointName}` })
+              .catch(() => {});
+            throw error;
+          }
+        },
       };
 
       try {

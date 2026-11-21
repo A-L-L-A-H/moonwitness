@@ -145,5 +145,26 @@ describe("useAppStore actions", () => {
 
     await useAppStore.getState().openEcosystemUrl("http://127.0.0.1:3000");
     expect(mockedCall).toHaveBeenCalledWith("open_ecosystem_url", { url: "http://127.0.0.1:3000" });
+
+    mockedCall.mockImplementation(async (command: string) => {
+      if (command === "sync_edge_orm") {
+        return {
+          connected: true,
+          edge_url: "https://moonwitness-edge-tasks.bjo163.workers.dev",
+          cursor: "2026-11-20T02:00:00Z",
+          projects_synced: 1,
+          tasks_synced: 2,
+          outbox_pushed: 0,
+          last_synced_at: "2026-11-20T02:00:00Z",
+          error: null,
+        };
+      }
+      if (command === "get_dashboard") return { repositories: [] };
+      return [];
+    });
+    const syncStatus = await useAppStore.getState().syncEdgeOrm();
+    expect(syncStatus?.connected).toBe(true);
+    expect(useAppStore.getState().edgeOrmStatus?.tasks_synced).toBe(2);
+    expect(mockedCall).toHaveBeenCalledWith("sync_edge_orm");
   });
 });

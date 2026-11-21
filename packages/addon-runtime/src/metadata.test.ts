@@ -193,6 +193,110 @@ describe("dynamic modelRegistry metadata & apiPrefix mount", () => {
 
     await app.close();
   });
+
+  it("filters /_meta/models/:name publicFields using actor group allowlists and implied groups", async () => {
+    const groupedModel = defineModel({
+      name: "meta.grouped",
+      table: "meta_grouped",
+      schema: z.object({
+        slug: z.string(),
+        auditor_note: z.string().default(""),
+        lead_pin: z.string().default(""),
+      }),
+      fieldPolicies: {
+        auditor_note: { readGroups: ["meta.auditors"] },
+        lead_pin: { sensitive: true, readGroups: ["meta.leads"] },
+      },
+      publicFields: ["slug", "auditor_note", "lead_pin"],
+    });
+
+    const runtime = new AddonRuntimeController();
+    const app = Fastify();
+    await runtime.syncAll(
+      [
+        { manifest: { name: "__base", version: "1.0.0", autoInstall: true } },
+        {
+          manifest: {
+            name: "meta_grouped_addon",
+            version: "1.0.0",
+            depends: ["__base"],
+            provides: { models: ["meta.grouped"] },
+          },
+          models: [groupedModel],
+          data: [
+            {
+              id: "meta_auditor",
+              model: "res.groups",
+              key: { group_key: "meta.auditors" },
+              values: {
+                group_key: "meta.auditors",
+                name: "Meta Auditors",
+                category: "meta",
+                implied_ids_json: "[]",
+              },
+            },
+            {
+              id: "meta_lead",
+              model: "res.groups",
+              key: { group_key: "meta.leads" },
+              values: {
+                group_key: "meta.leads",
+                name: "Meta Leads",
+                category: "meta",
+                implied_ids_json: '["meta.auditors"]',
+              },
+            },
+          ],
+        },
+      ],
+      app,
+    );
+    await registerBaseAddon(app, {
+      runtime,
+      apiPrefix: "/api/v1",
+      auth: {
+        authenticate: async () => {},
+        requireRole: () => async () => {},
+        getActorRole: (req) =>
+          (req.headers["x-role"] as "admin" | "editor" | "viewer" | undefined) ?? "public",
+        getActorId: () => "u1",
+        getActorGroups: (req) =>
+          typeof req.headers["x-groups"] === "string"
+            ? req.headers["x-groups"]
+                .split(",")
+                .map((g) => g.trim())
+                .filter(Boolean)
+            : [],
+      },
+    });
+    await app.ready();
+
+    try {
+      const publicRes = await app.inject({ url: "/api/v1/_meta/models/meta.grouped" });
+      expect(publicRes.json().fields.map((f: { name: string }) => f.name)).toEqual(["slug"]);
+
+      const auditorRes = await app.inject({
+        url: "/api/v1/_meta/models/meta.grouped",
+        headers: { "x-role": "viewer", "x-groups": "meta.auditors" },
+      });
+      expect(auditorRes.json().fields.map((f: { name: string }) => f.name)).toEqual([
+        "slug",
+        "auditor_note",
+      ]);
+
+      const leadRes = await app.inject({
+        url: "/api/v1/_meta/models/meta.grouped",
+        headers: { "x-role": "viewer", "x-groups": "meta.leads" },
+      });
+      expect(leadRes.json().fields.map((f: { name: string }) => f.name)).toEqual([
+        "slug",
+        "auditor_note",
+        "lead_pin",
+      ]);
+    } finally {
+      await app.close();
+    }
+  });
 });
 
 function createRoutes() {

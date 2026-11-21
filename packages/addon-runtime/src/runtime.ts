@@ -32,7 +32,13 @@ import {
   irViewModel,
   resGroupsModel,
 } from "./ir-models.js";
-import { canReadField, getEffectiveFieldPolicies } from "./field-policy.js";
+import {
+  canReadField,
+  getEffectiveFieldPolicies,
+  resolveEffectiveGroups,
+  type CrewRoleOrPublic,
+} from "./field-policy.js";
+export { resolveEffectiveGroups, type CrewRoleOrPublic };
 import { opsJobModel } from "./job-queue.js";
 import {
   AddonManifestSchema,
@@ -50,7 +56,6 @@ import {
 } from "./registry.js";
 import { verifyAddonManifestSignature, type AddonSigningPolicy } from "./signing.js";
 
-export type CrewRoleOrPublic = "admin" | "editor" | "viewer" | "public";
 export type RecordRuleOperation = "read" | "create" | "update" | "delete";
 
 export interface IrRuleInput {
@@ -631,20 +636,6 @@ function parseStoredRuleDomain(
   return validateRuleDomainAst(resolved);
 }
 
-const DEFAULT_ROLE_BASE_GROUPS: Record<CrewRoleOrPublic, string[]> = {
-  public: ["base.group_public"],
-  viewer: ["base.group_viewer", "base.group_public"],
-  editor: ["base.group_editor", "base.group_viewer", "base.group_public"],
-  admin: ["base.group_system", "base.group_editor", "base.group_viewer", "base.group_public"],
-};
-
-const BUILTIN_IMPLIED_GROUPS: Record<string, string[]> = {
-  "base.group_system": ["base.group_editor"],
-  "base.group_editor": ["base.group_viewer"],
-  "base.group_viewer": ["base.group_public"],
-  "base.group_public": [],
-};
-
 function parseRuleGroups(groupsJson?: string | null): string[] {
   if (!groupsJson || !groupsJson.trim()) return [];
   let parsed: unknown;
@@ -661,33 +652,6 @@ function parseRuleGroups(groupsJson?: string | null): string[] {
     );
   }
   return parsed.map((g) => g.trim()).filter(Boolean);
-}
-
-function resolveEffectiveGroups(
-  role: CrewRoleOrPublic,
-  actorGroups: string[] | undefined,
-  impliedGroups?: Map<string, string[]>,
-): Set<string> {
-  const effective = new Set<string>(DEFAULT_ROLE_BASE_GROUPS[role] ?? ["base.group_public"]);
-  const queue: string[] = [...effective];
-  for (const g of actorGroups ?? []) {
-    const trimmed = g.trim();
-    if (trimmed && !effective.has(trimmed)) {
-      effective.add(trimmed);
-      queue.push(trimmed);
-    }
-  }
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    const nextGroups = impliedGroups?.get(current) ?? BUILTIN_IMPLIED_GROUPS[current] ?? [];
-    for (const implied of nextGroups) {
-      if (!effective.has(implied)) {
-        effective.add(implied);
-        queue.push(implied);
-      }
-    }
-  }
-  return effective;
 }
 
 const OP_FLAG_MAP: Record<
@@ -1014,6 +978,8 @@ export class AddonRuntimeController {
       deprecatedColumns: [],
       createdIndexes: [],
       schemaHashes: {},
+      missingFks: [],
+      addedFks: [],
     };
     let appliedMigrations: string[] = [];
     let skippedMigrations: string[] = [];
@@ -1299,6 +1265,8 @@ export class AddonRuntimeController {
       deprecatedColumns: [],
       createdIndexes: [],
       schemaHashes: {},
+      missingFks: [],
+      addedFks: [],
     };
     const loadedSoFar: string[] = [];
     const registryState = emptyRegistryState();
@@ -1565,13 +1533,46 @@ export class AddonRuntimeController {
         declaredGroupKeys.add(item.values.group_key);
       }
     }
-    const existingGroupRows = (def.rules ?? []).some((r) => (r.groups?.length ?? 0) > 0)
-      ? await resGroupsModel.repository.find({})
-      : [];
+    const hasFieldPolicyGroups = (def.models ?? []).some((m) =>
+      Object.values(modelRegistry.get(m.name)?.fieldPolicies ?? {}).some(
+        (p) => (p.readGroups?.length ?? 0) > 0 || (p.writeGroups?.length ?? 0) > 0,
+      ),
+    );
+    const existingGroupRows =
+      (def.rules ?? []).some((r) => (r.groups?.length ?? 0) > 0) || hasFieldPolicyGroups
+        ? await resGroupsModel.repository.find({})
+        : [];
     const registeredGroupKeys = new Set<string>([
       ...existingGroupRows.map((g) => g.group_key),
       ...declaredGroupKeys,
     ]);
+
+    for (const m of def.models ?? []) {
+      const desc = modelRegistry.get(m.name);
+      for (const [fieldName, policy] of Object.entries(desc?.fieldPolicies ?? {})) {
+        for (const [policyKey, groupList] of [
+          ["readGroups", policy.readGroups],
+          ["writeGroups", policy.writeGroups],
+        ] as const) {
+          if (!groupList) continue;
+          const cleaned = groupList.map((g) => g.trim()).filter(Boolean);
+          if (cleaned.length !== groupList.length) {
+            throw new Error(
+              `Field policy '${policyKey}' on '${m.name}.${fieldName}' contains an empty group reference.`,
+            );
+          }
+          if (cleaned.length > 0 && registeredGroupKeys.size > 0) {
+            for (const groupKey of cleaned) {
+              if (!registeredGroupKeys.has(groupKey)) {
+                throw new Error(
+                  `Field policy '${policyKey}' on '${m.name}.${fieldName}' references unknown group '${groupKey}'.`,
+                );
+              }
+            }
+          }
+        }
+      }
+    }
 
     for (const rule of def.rules ?? []) {
       const role: CrewRoleOrPublic = rule.role ?? "public";
@@ -1928,6 +1929,18 @@ export class AddonRuntimeController {
     return map;
   }
 
+  async resolveEffectiveActorGroups(
+    role: CrewRoleOrPublic,
+    actorGroups?: Iterable<string>,
+  ): Promise<Set<string>> {
+    const impliedGroups = await this.loadImpliedGroupsMap();
+    return resolveEffectiveGroups(role, actorGroups, impliedGroups);
+  }
+
+  async getImpliedGroupsMap(): Promise<Map<string, string[]>> {
+    return this.loadImpliedGroupsMap();
+  }
+
   private evaluateOperationFlag(params: {
     rules: IrRuleRecordLike[];
     role: CrewRoleOrPublic;
@@ -2080,6 +2093,7 @@ export class AddonRuntimeController {
   async getViewDescriptor(
     modelName: string,
     role: CrewRoleOrPublic,
+    actorGroups?: Iterable<string>,
   ): Promise<RuntimeViewDescriptor | null> {
     const desc = modelRegistry.get(modelName);
     if (!desc) return null;
@@ -2089,12 +2103,16 @@ export class AddonRuntimeController {
       return null;
     }
 
-    const acl = await this.getModelPermissions(modelName, role);
+    const actorGroupList = actorGroups ? [...actorGroups] : undefined;
+    const [acl, effectiveGroups] = await Promise.all([
+      this.getModelPermissions(modelName, role, actorGroupList),
+      this.resolveEffectiveActorGroups(role, actorGroupList),
+    ]);
     if (!acl.canRead) return null;
 
     const fieldRows = await irModelFieldModel.repository.find({ model_name: modelName });
     let fields: RegisteredFieldMetadata[] = fieldRows
-      .filter((f) => !f.deprecated && canReadField(desc, f.field_name, role))
+      .filter((f) => !f.deprecated && canReadField(desc, f.field_name, role, effectiveGroups))
       .map((f) => ({
         id: f.id,
         model_name: f.model_name,
@@ -2113,7 +2131,10 @@ export class AddonRuntimeController {
 
     if (fields.length === 0) {
       fields = [...desc.fields.entries()]
-        .filter(([fieldName]) => fieldName !== "_attrs" && canReadField(desc, fieldName, role))
+        .filter(
+          ([fieldName]) =>
+            fieldName !== "_attrs" && canReadField(desc, fieldName, role, effectiveGroups),
+        )
         .map(([fieldName, spec]) => {
           const selection = spec.enumValues ? [...spec.enumValues] : null;
           return {
@@ -2183,7 +2204,8 @@ export class AddonRuntimeController {
             const spec = JSON.parse(v.spec_json) as Record<string, unknown>;
             if (Array.isArray(spec.columns)) {
               spec.columns = spec.columns.filter(
-                (col): col is string => typeof col === "string" && canReadField(desc, col, role),
+                (col): col is string =>
+                  typeof col === "string" && canReadField(desc, col, role, effectiveGroups),
               );
             }
             return {
@@ -2204,7 +2226,9 @@ export class AddonRuntimeController {
                   .filter((f) => f.field_type !== "json")
                   .slice(0, 8)
                   .map((f) => f.field_name),
-                searchKeys: (desc.searchFields ?? []).filter((f) => canReadField(desc, f, role)),
+                searchKeys: (desc.searchFields ?? []).filter((f) =>
+                  canReadField(desc, f, role, effectiveGroups),
+                ),
               },
             },
           ];
