@@ -10,16 +10,16 @@
 ## Branch
 
 - [ ] This PR targets `dev` (integration) from a single-PR ephemeral branch (`feat/*`, `fix/*`, `chore/*`, `ci/*`, `docs/*`, `refactor/*`, `test/*`) — not `main` or `master`
-- [ ] Only `dev` and `main` persist: this branch will be deleted on merge (`pnpm branches:clean`)
+- [ ] Only `dev` and `main` persist: this branch will be deleted on merge (`bun run branches:clean`)
 - [ ] Promotion PRs (`dev` → `main`) are opened by automation or the repository owner only
 
 ## Verification
 
 <!-- Paste the gate output you actually ran. Do not claim a check you did not run. -->
 
-- [ ] `pnpm gate:quick` — PASS
-- [ ] `pnpm gate:local` — PASS (required before a promotion PR)
-- [ ] `pnpm gate:push` — PASS
+- [ ] `bun run gate:quick` — PASS
+- [ ] `bun run gate:local` — PASS (required before a promotion PR)
+- [ ] `bun run gate:push` — PASS
 
 ```
 <paste gate output here>

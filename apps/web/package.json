@@ -11,9 +11,9 @@
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit",
     "test:brush-lifecycle": "node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config brush-lifecycle.config.ts",
-    "test:cross-world": "pnpm exec next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config cross-world-playwright.config.ts",
-    "test:dock": "pnpm exec next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config dock-playwright.config.ts",
-    "test:operations": "pnpm exec next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config operations-playwright.config.ts",
+    "test:cross-world": "bun x next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config cross-world-playwright.config.ts",
+    "test:dock": "bun x next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config dock-playwright.config.ts",
+    "test:operations": "bun x next build && node --experimental-vm-modules node_modules/@playwright/test/cli.js test --config operations-playwright.config.ts",
     "test": "vitest run",
     "clean": "rm -rf .next .turbo node_modules"
   },

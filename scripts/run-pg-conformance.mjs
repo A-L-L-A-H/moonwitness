@@ -16,7 +16,7 @@ function main() {
   const rawUrl = resolveExplicitTestPostgresUrl(process.env);
   if (!rawUrl) {
     console.error(
-      "[pg-conformance] Fatal: TEST_POSTGRES_URL or POSTGRES_TEST_URL must be explicitly provided for pnpm test:conformance:pg. Silent skipping and DATABASE_URL/SQLite/D1 fallbacks are disabled.",
+      "[pg-conformance] Fatal: TEST_POSTGRES_URL or POSTGRES_TEST_URL must be explicitly provided for bun run test:conformance:pg. Silent skipping and DATABASE_URL/SQLite/D1 fallbacks are disabled.",
     );
     process.exit(1);
   }
@@ -47,25 +47,18 @@ function main() {
   };
 
   const suites = [
-    [
-      "--filter",
-      "@moonwitness/orm",
-      "exec",
-      "vitest",
-      "run",
-      "src/__tests__/postgres.live.test.ts",
-    ],
+    ["--cwd", "packages/orm", "x", "vitest", "run", "src/__tests__/postgres.live.test.ts"],
     ["--filter", "@moonwitness/api", "exec", "vitest", "run", "src/pg-conformance.test.ts"],
   ];
 
   for (const args of suites) {
-    const result = spawnSync("pnpm", args, {
+    const result = spawnSync("bun", args, {
       stdio: "inherit",
       env: childEnv,
       shell: process.platform === "win32",
     });
     if (result.error) {
-      console.error(`[pg-conformance] Failed to spawn pnpm: ${result.error.message}`);
+      console.error(`[pg-conformance] Failed to spawn bun: ${result.error.message}`);
       process.exit(1);
     }
     if (result.status !== 0) {

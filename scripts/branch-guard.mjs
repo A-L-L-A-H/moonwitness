@@ -205,7 +205,7 @@ function main() {
   if (audit.staleMergedBranches.length > 0) {
     log(
       "error",
-      `Merged stale local branch(es) still exist: ${audit.staleMergedBranches.join(", ")}. Run: pnpm branches:clean`,
+      `Merged stale local branch(es) still exist: ${audit.staleMergedBranches.join(", ")}. Run: bun run branches:clean`,
     );
     process.exit(1);
   }

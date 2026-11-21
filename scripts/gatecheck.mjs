@@ -154,31 +154,28 @@ function stepToolchain(gate) {
     "node-version",
     `${process.version} (requires >=20)`,
   );
-  const pnpm = run("pnpm", ["--version"]);
-  if (pnpm.code !== 0) {
-    gate.add(STATE.FAIL, "pnpm", "pnpm is not resolvable on PATH");
+  const bun = run("bun", ["--version"]);
+  if (bun.code !== 0) {
+    gate.add(STATE.FAIL, "bun", "bun is not resolvable on PATH");
   } else {
     const expected = readJson("package.json").packageManager?.split("@")[1];
-    if (expected && pnpm.stdout !== expected) {
+    if (expected && bun.stdout !== expected) {
       gate.add(
         STATE.BLOCKED,
-        "pnpm",
-        `packageManager pins ${expected}, PATH resolves ${pnpm.stdout}`,
+        "bun",
+        `packageManager pins ${expected}, PATH resolves ${bun.stdout}`,
       );
     } else {
-      gate.add(STATE.PASS, "pnpm", pnpm.stdout);
+      gate.add(STATE.PASS, "bun", bun.stdout);
     }
   }
 
+  gate.add(existsSync(join(ROOT, "bun.lock")) ? STATE.PASS : STATE.FAIL, "lockfile", "bun.lock");
+  const workspaces = readJson("package.json").workspaces;
   gate.add(
-    existsSync(join(ROOT, "pnpm-lock.yaml")) ? STATE.PASS : STATE.FAIL,
-    "lockfile",
-    "pnpm-lock.yaml",
-  );
-  gate.add(
-    existsSync(join(ROOT, "pnpm-workspace.yaml")) ? STATE.PASS : STATE.FAIL,
+    Array.isArray(workspaces) && workspaces.length > 0 ? STATE.PASS : STATE.FAIL,
     "workspace",
-    "pnpm-workspace.yaml",
+    "package.json workspaces",
   );
 }
 
@@ -217,7 +214,7 @@ function stepSecretScan(gate) {
   const findings = [];
   for (const file of files) {
     if (!TEXT_EXTENSIONS.has(extname(file))) continue;
-    if (file.includes("node_modules/") || file.endsWith("pnpm-lock.yaml")) continue;
+    if (file.includes("node_modules/") || file.endsWith("bun.lock")) continue;
 
     let content;
     try {
@@ -263,7 +260,7 @@ function stepBranchPolicy(gate) {
     gate.add(
       STATE.FAIL,
       "branch-hygiene",
-      `stale merged local branch(es): ${audit.staleMergedBranches.join(", ")} (run pnpm branches:clean)`,
+      `stale merged local branch(es): ${audit.staleMergedBranches.join(", ")} (run bun run branches:clean)`,
     );
     return;
   }
@@ -289,7 +286,7 @@ function stepWorktree(gate, allowDirty) {
 }
 
 function stepAudit(gate) {
-  const result = run("pnpm", ["audit", "--prod", "--json"]);
+  const result = run("bun", ["audit", "--json"]);
   const raw = result.stdout || result.stderr;
   let report;
   try {
@@ -304,8 +301,10 @@ function stepAudit(gate) {
     return;
   }
 
-  const blocking = Object.values(report.advisories ?? {}).filter(
-    (advisory) => advisory.severity === "high" || advisory.severity === "critical",
+  const blocking = Object.entries(report).flatMap(([moduleName, advisories]) =>
+    (Array.isArray(advisories) ? advisories : [])
+      .filter((advisory) => advisory.severity === "high" || advisory.severity === "critical")
+      .map((advisory) => ({ ...advisory, moduleName })),
   );
 
   if (blocking.length === 0) {
@@ -314,7 +313,11 @@ function stepAudit(gate) {
   }
 
   const accepted = readAuditExceptions();
-  const unaccepted = blocking.filter((advisory) => !accepted.has(advisory.github_advisory_id));
+  const advisoryId = (advisory) =>
+    String(advisory.url ?? "")
+      .split("/")
+      .pop();
+  const unaccepted = blocking.filter((advisory) => !accepted.has(advisoryId(advisory)));
   const acceptedCount = blocking.length - unaccepted.length;
   const detail =
     acceptedCount > 0
@@ -328,7 +331,7 @@ function stepAudit(gate) {
 
   const lines = unaccepted.map(
     (advisory) =>
-      `${advisory.github_advisory_id} ${advisory.module_name} (${advisory.severity}): ${advisory.title} -> patched ${advisory.patched_versions}`,
+      `${advisoryId(advisory)} ${advisory.moduleName} (${advisory.severity}): ${advisory.title} (${advisory.vulnerable_versions})`,
   );
   gate.add(STATE.FAIL, "dependency-audit", detail, lines.join("\n"));
 }
@@ -391,33 +394,28 @@ function stepAppTopology(gate) {
 function quickSteps(gate) {
   stepToolchain(gate);
   stepAppTopology(gate);
-  stepCommand(gate, "docs-governance", "pnpm", ["docs:check"]);
-  stepCommand(gate, "docs-tests", "pnpm", ["docs:test"]);
-  stepCommand(gate, "format", "pnpm", ["format:check"]);
-  stepCommand(gate, "lint", "pnpm", ["lint", "--filter=@moonwitness/*"]);
-  stepCommand(gate, "typecheck", "pnpm", ["typecheck", "--filter=@moonwitness/*"]);
-  stepCommand(gate, "ui-contrast", "pnpm", ["ui:contrast"]);
-  stepCommand(gate, "ui-governance", "pnpm", [
-    "--filter",
-    "@moonwitness/ui",
-    "exec",
-    "vitest",
-    "run",
-    "src/dx/architecture.test.ts",
-  ]);
+  stepCommand(gate, "docs-governance", "bun", ["run", "docs:check"]);
+  stepCommand(gate, "docs-tests", "bun", ["run", "docs:test"]);
+  stepCommand(gate, "format", "bun", ["run", "format:check"]);
+  stepCommand(gate, "lint", "bun", ["run", "lint"]);
+  stepCommand(gate, "typecheck", "bun", ["run", "typecheck"]);
+  stepCommand(gate, "ui-contrast", "bun", ["run", "ui:contrast"]);
+  stepCommand(gate, "ui-governance", "bun", ["x", "vitest", "run", "src/dx/architecture.test.ts"], {
+    cwd: join(ROOT, "packages", "ui"),
+  });
 }
 
 function localSteps(gate) {
   stepToolchain(gate);
   stepAppTopology(gate);
-  stepCommand(gate, "install", "pnpm", ["install", "--frozen-lockfile"]);
-  stepCommand(gate, "docs-governance", "pnpm", ["docs:check"]);
-  stepCommand(gate, "docs-tests", "pnpm", ["docs:test"]);
-  stepCommand(gate, "format", "pnpm", ["format:check"]);
-  stepCommand(gate, "lint", "pnpm", ["lint"]);
-  stepCommand(gate, "typecheck", "pnpm", ["typecheck", "--force"]);
-  stepCommand(gate, "test", "pnpm", ["test"]);
-  stepCommand(gate, "build", "pnpm", ["build"]);
+  stepCommand(gate, "install", "bun", ["install", "--frozen-lockfile"]);
+  stepCommand(gate, "docs-governance", "bun", ["run", "docs:check"]);
+  stepCommand(gate, "docs-tests", "bun", ["run", "docs:test"]);
+  stepCommand(gate, "format", "bun", ["run", "format:check"]);
+  stepCommand(gate, "lint", "bun", ["run", "lint"]);
+  stepCommand(gate, "typecheck", "bun", ["run", "typecheck", "--force"]);
+  stepCommand(gate, "test", "bun", ["run", "test"]);
+  stepCommand(gate, "build", "bun", ["run", "build"]);
 }
 
 function gateQuick() {
@@ -537,7 +535,7 @@ function gateDoctor() {
     gate.add(
       STATE.BLOCKED,
       "branch-hygiene",
-      `stale merged branch(es): ${branchAudit.staleMergedBranches.join(", ")} (run pnpm branches:clean)`,
+      `stale merged branch(es): ${branchAudit.staleMergedBranches.join(", ")} (run bun run branches:clean)`,
     );
   } else if (branchAudit.activeUnmergedExtra.length > 0) {
     gate.add(
@@ -566,7 +564,7 @@ function gateDoctor() {
   gate.add(
     installed ? STATE.PASS : STATE.NA,
     "pre-push-hook",
-    installed ? "installed" : "run pnpm hooks:install",
+    installed ? "installed" : "run bun run hooks:install",
   );
 
   gate.report();
@@ -586,7 +584,7 @@ if (!gateName || !GATES[gateName]) {
   console.log(`
 ${COLORS.bold}MoonWitness gate engine${COLORS.reset}
 
-Usage: pnpm gate:<command> [--allow-dirty]
+Usage: bun run gate:<command> [--allow-dirty]
 
 Commands:
   quick     fast feedback: format, lint, typecheck

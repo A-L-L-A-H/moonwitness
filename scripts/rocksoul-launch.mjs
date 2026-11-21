@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Launch ROCKSOUL desktop (Tauri dev) from the monorepo root.
- * If Vite is already serving 127.0.0.1:1420 (e.g. via `pnpm dev`),
+ * If Vite is already serving 127.0.0.1:1420 (e.g. via `bun run dev`),
  * skip `beforeDevCommand` so Tauri attaches cleanly without a port clash.
  */
 
@@ -32,7 +32,7 @@ function isPortListening(host, port, timeoutMs = 250) {
 
 async function main() {
   const alreadyServing = await isPortListening("127.0.0.1", ROCKSOUL_PORT);
-  const args = ["--filter", "rocksoul-dx", "exec", "tauri", "dev", ...process.argv.slice(2)];
+  const args = ["--cwd", "apps/rocksoul", "x", "tauri", "dev", ...process.argv.slice(2)];
   let tempDir = null;
 
   if (alreadyServing) {
@@ -45,8 +45,8 @@ async function main() {
 
   const child =
     process.platform === "win32"
-      ? spawn("cmd.exe", ["/d", "/c", "pnpm.cmd", ...args], { cwd: ROOT, stdio: "inherit" })
-      : spawn("pnpm", args, { cwd: ROOT, stdio: "inherit" });
+      ? spawn("cmd.exe", ["/d", "/c", "bun.exe", ...args], { cwd: ROOT, stdio: "inherit" })
+      : spawn("bun", args, { cwd: ROOT, stdio: "inherit" });
 
   const cleanupTemp = () => {
     if (tempDir) {

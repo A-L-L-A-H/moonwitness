@@ -30,21 +30,19 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # pnpm disediakan lewat corepack (bawaan Node) supaya tidak bergantung
-      # pada action pihak ketiga yang bisa diblokir allowlist organisasi.
-      - name: Enable pnpm (corepack)
+      # bun dipasang lewat npm (bawaan Node) supaya tidak bergantung pada action pihak ketiga.
+      - name: Install bun
         run: |
-          corepack enable
-          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
-          pnpm --version
+          npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+          bun --version
 
       - name: Install (frozen lockfile)
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Docs Governance
         run: |
-          pnpm docs:test
-          pnpm docs:check
+          bun run docs:test
+          bun run docs:check
 
       - name: Compose Configuration
         env:
@@ -55,22 +53,22 @@ jobs:
         run: docker compose --profile ops config -q
 
       - name: Format
-        run: pnpm format:check
+        run: bun run format:check
 
       - name: Lint
-        run: pnpm lint
+        run: bun run lint
 
       - name: Typecheck
-        run: pnpm typecheck --force
+        run: bun run typecheck --force
 
       - name: Test
-        run: pnpm test
+        run: bun run test
 
       - name: Cross-World WCAG Contrast Guard
-        run: pnpm ui:contrast
+        run: bun run ui:contrast
 
       - name: Build
-        run: pnpm build
+        run: bun run build
 
       - name: Conventional commits (pull requests)
         if: github.event_name == 'pull_request'
@@ -276,13 +274,13 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Enable pnpm (corepack)
+      - name: Install bun
         run: |
-          corepack enable
-          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
+          npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+          bun --version
 
       - name: Install (frozen lockfile)
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Install postgresql-client for pg_dump verification
         run: |
@@ -294,6 +292,6 @@ jobs:
           POSTGRES_TEST_URL: postgresql://moonwitness:moonwitness@127.0.0.1:5432/moonwitness
           TEST_POSTGRES_URL: postgresql://moonwitness:moonwitness@127.0.0.1:5432/moonwitness
         run: |
-          pnpm test:conformance:pg
-          pnpm --filter @moonwitness/orm test
+          bun run test:conformance:pg
+          bun run --filter @moonwitness/orm test
           node --test scripts/backup-db.test.mjs

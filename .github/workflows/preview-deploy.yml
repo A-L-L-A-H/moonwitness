@@ -28,25 +28,24 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Enable pnpm (corepack)
+      - name: Install bun
         run: |
-          corepack enable
-          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
-          pnpm --version
+          npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+          bun --version
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build web
         working-directory: ./apps/web
-        run: pnpm build
+        run: bun run build
 
       - name: Deploy preview to Vercel
         id: deploy
         if: env.VERCEL_TOKEN != '' && env.VERCEL_ORG_ID != '' && env.VERCEL_PROJECT_ID != ''
         working-directory: ./apps/web
         run: |
-          preview_url="$(pnpm --silent dlx vercel@65.15.0 deploy --yes \
+          preview_url="$(bun x vercel@65.15.0 deploy --yes \
             --token "$VERCEL_TOKEN" \
             --scope "$VERCEL_ORG_ID" \
             --project "$VERCEL_PROJECT_ID")"

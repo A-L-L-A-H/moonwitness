@@ -15,11 +15,11 @@
     "lint": "eslint .",
     "typecheck": "tsc --project tsconfig.json",
     "check:commands": "node scripts/check-commands.mjs",
-    "audit": "pnpm audit --audit-level high",
+    "audit": "bun audit --audit-level=high",
     "check:config": "node scripts/check-config.mjs",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "gate:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/gate-check.ps1",
-    "gate:release": "pnpm gate:check && pnpm tauri build",
+    "gate:release": "bun run gate:check && bun x tauri build",
     "icons": "tauri icon src-tauri/icons/rocksoul.svg"
   },
   "dependencies": {

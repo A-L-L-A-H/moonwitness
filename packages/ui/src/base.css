@@ -1336,7 +1336,6 @@
   }
 }
 
-
 /* RTL Mobile Overflow Fixes for Console Shell (Issue #487) */
 @media (max-width: 639px) {
   [dir="rtl"] .console-shell-rail {
@@ -1353,7 +1352,7 @@
     overflow-wrap: anywhere;
     word-break: break-word;
   }
-  
+
   /* Hud top rail - prevent actions overflow */
   [dir="rtl"] .hud-top-rail {
     overflow-x: hidden;
@@ -1367,12 +1366,12 @@
     flex-shrink: 1;
     min-width: 0;
   }
-  
+
   /* Popover content fix for RTL mobile */
   [dir="rtl"] [role="dialog"] {
     max-width: calc(100vw - 1rem);
   }
-  
+
   /* Header search overflow */
   [dir="rtl"] .hud-top-search {
     max-width: 100%;
@@ -1380,7 +1379,7 @@
   [dir="rtl"] .hud-top-search input {
     max-width: 100%;
   }
-  
+
   /* Breadcrumb overflow */
   [dir="rtl"] .hud-breadcrumb {
     overflow-x: hidden;
