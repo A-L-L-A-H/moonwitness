@@ -307,7 +307,15 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
             expect(mainBox!.x + mainBox!.width).toBeLessThanOrEqual(railBox!.x + 2);
           } else {
             expect(railBox!.y + railBox!.height).toBeLessThanOrEqual(vp.height + 1);
-            expect(footerBox!.y + footerBox!.height).toBeLessThanOrEqual(railBox!.y + 2);
+            await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+            const scrolledRailBox = await page.locator(".console-shell-rail").boundingBox();
+            const scrolledFooterBox = await page.locator("footer.hud-panel").boundingBox();
+            expect(scrolledRailBox).not.toBeNull();
+            expect(scrolledFooterBox).not.toBeNull();
+            expect(scrolledFooterBox!.y + scrolledFooterBox!.height).toBeLessThanOrEqual(
+              scrolledRailBox!.y + 2,
+            );
+            await page.evaluate(() => window.scrollTo(0, 0));
           }
         }
 

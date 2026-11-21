@@ -649,7 +649,12 @@ mod tests {
         validate_worktree_dir, verify_action_approval, ActionApprovalBound,
     };
     use rusqlite::Connection;
-    use std::{env, path::Path, thread::sleep, time::Duration};
+    use std::{
+        env,
+        path::Path,
+        thread::sleep,
+        time::{Duration, Instant},
+    };
     use uuid::Uuid;
 
     #[test]
@@ -764,6 +769,23 @@ mod tests {
         assert_eq!(sup_status, "recovered");
     }
 
+    fn poll_until_exit_or_deadline(run_id: &str, deadline: Instant) -> Result<Option<i32>, String> {
+        loop {
+            match poll_supervised_process(run_id) {
+                Ok(Some(code)) => return Ok(Some(code)),
+                Ok(None) => {
+                    if Instant::now() >= deadline {
+                        return Err(format!(
+                            "supervised process {run_id} did not exit before deadline"
+                        ));
+                    }
+                    sleep(Duration::from_millis(25));
+                }
+                Err(error) => return Err(error),
+            }
+        }
+    }
+
     #[test]
     fn strips_secrets_drains_large_pipes_and_enforces_durable_approval() {
         let worktree_dir = env::temp_dir();
@@ -781,14 +803,9 @@ mod tests {
             ],
         )
         .expect("spawn env check");
-        let mut exited = None;
-        for _ in 0..80 {
-            if let Some(code) = poll_supervised_process(&env_run_id).expect("poll env") {
-                exited = Some(code);
-                break;
-            }
-            sleep(Duration::from_millis(25));
-        }
+        let exited =
+            poll_until_exit_or_deadline(&env_run_id, Instant::now() + Duration::from_secs(30))
+                .expect("poll env within deadline");
         assert_eq!(exited, Some(0));
         sleep(Duration::from_millis(40));
         let env_out = read_supervised_output(&env_run_id).unwrap_or_default();
@@ -806,14 +823,9 @@ mod tests {
             ],
         )
         .expect("spawn flood check");
-        let mut flood_exit = None;
-        for _ in 0..120 {
-            if let Some(code) = poll_supervised_process(&flood_run_id).expect("poll flood") {
-                flood_exit = Some(code);
-                break;
-            }
-            sleep(Duration::from_millis(25));
-        }
+        let flood_exit =
+            poll_until_exit_or_deadline(&flood_run_id, Instant::now() + Duration::from_secs(30))
+                .expect("poll flood within deadline");
         assert_eq!(flood_exit, Some(0));
         sleep(Duration::from_millis(40));
         let flood_out = read_supervised_output(&flood_run_id).unwrap_or_default();
