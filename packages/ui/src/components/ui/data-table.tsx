@@ -15,6 +15,7 @@ export interface DataTableColumn<T> {
   readonly header: React.ReactNode;
   readonly accessor: (row: T) => React.ReactNode;
   readonly sortValue?: (row: T) => string | number;
+  /** Raw text for filtering when the rendered accessor returns a non-primitive React node. */
   readonly searchText?: (row: T) => string;
 }
 
@@ -29,6 +30,32 @@ export interface DataTableProps<T> {
   emptyDescription?: string;
   skin?: SkinName;
   className?: string;
+}
+
+const DEFAULT_PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 100;
+
+function getPrimitiveSearchText(value: React.ReactNode): string {
+  if (typeof value === "string" || typeof value === "number" || typeof value === "bigint") {
+    return String(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item: React.ReactNode) => getPrimitiveSearchText(item))
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  return "";
+}
+
+function normalizePageSize(pageSize: number | undefined): number {
+  if (typeof pageSize !== "number" || !Number.isFinite(pageSize) || pageSize < 1) {
+    return DEFAULT_PAGE_SIZE;
+  }
+
+  return Math.min(MAX_PAGE_SIZE, Math.floor(pageSize));
 }
 
 export function DataTable<T>({
@@ -48,13 +75,16 @@ export function DataTable<T>({
   const [sortCol, setSortCol] = React.useState<string | null>(null);
   const [sortDir, setSortDir] = React.useState<"asc" | "desc">("asc");
   const [page, setPage] = React.useState(0);
+  const safePageSize = normalizePageSize(pageSize);
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [...data];
     return data.filter((row) =>
       columns.some((col) => {
-        const raw = col.searchText ? col.searchText(row) : String(col.accessor(row) ?? "");
+        const raw = col.searchText
+          ? col.searchText(row)
+          : getPrimitiveSearchText(col.accessor(row));
         return raw.toLowerCase().includes(q);
       }),
     );
@@ -74,9 +104,14 @@ export function DataTable<T>({
     });
   }, [filtered, columns, sortCol, sortDir]);
 
-  const pageCount = Math.max(1, Math.ceil(sorted.length / pageSize));
-  const safePage = Math.min(page, pageCount - 1);
-  const pageRows = sorted.slice(safePage * pageSize, safePage * pageSize + pageSize);
+  const pageCount = sorted.length === 0 ? 0 : Math.ceil(sorted.length / safePageSize);
+  const maxPageIndex = Math.max(0, pageCount - 1);
+  const safePage = pageCount === 0 ? 0 : Math.min(Math.max(0, page), maxPageIndex);
+  const pageRows = sorted.slice(safePage * safePageSize, safePage * safePageSize + safePageSize);
+
+  React.useEffect(() => {
+    setPage((current) => (current > maxPageIndex ? maxPageIndex : Math.max(0, current)));
+  }, [maxPageIndex]);
 
   const toggleSort = (colId: string) => {
     setPage(0);
@@ -162,7 +197,7 @@ export function DataTable<T>({
           </TableHeader>
           <TableBody>
             {pageRows.map((row, idx) => (
-              <TableRow key={getRowKey(row, safePage * pageSize + idx)}>
+              <TableRow key={getRowKey(row, safePage * safePageSize + idx)}>
                 {columns.map((col) => (
                   <TableCell key={col.id}>{col.accessor(row)}</TableCell>
                 ))}
@@ -184,7 +219,7 @@ export function DataTable<T>({
               size="sm"
               skin={skin}
               disabled={safePage === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              onClick={() => setPage(Math.max(0, safePage - 1))}
             >
               Previous
             </Button>
@@ -193,8 +228,8 @@ export function DataTable<T>({
               variant="outline"
               size="sm"
               skin={skin}
-              disabled={safePage >= pageCount - 1}
-              onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))}
+              disabled={safePage >= maxPageIndex}
+              onClick={() => setPage(Math.min(maxPageIndex, safePage + 1))}
             >
               Next
             </Button>

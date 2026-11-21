@@ -22,18 +22,17 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # pnpm via corepack: tidak butuh action pihak ketiga.
-      - name: Enable pnpm (corepack)
+      # bun dipasang lewat npm: tidak butuh action pihak ketiga.
+      - name: Install bun
         run: |
-          corepack enable
-          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
-          pnpm --version
+          npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+          bun --version
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build web
-        run: pnpm --filter @moonwitness/web build
+        run: bun run --filter @moonwitness/web build
 
       - name: Check bundle size
         id: bundle-size

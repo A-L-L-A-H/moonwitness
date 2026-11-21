@@ -600,8 +600,11 @@ describe("UI & SDK consistency gates (GATE-06..GATE-11)", () => {
       }
     }
 
-    const workspaceYaml = readFileSync(join(REPO_ROOT, "pnpm-workspace.yaml"), "utf8");
-    expect(workspaceYaml).not.toMatch(/["']?engines\//);
+    const rootManifest = JSON.parse(readFileSync(join(REPO_ROOT, "package.json"), "utf8")) as {
+      workspaces?: string[];
+    };
+    const workspaces = JSON.stringify(rootManifest.workspaces ?? []);
+    expect(workspaces).not.toMatch(/["']?engines\//);
     expect(offenders).toEqual([]);
   });
 });

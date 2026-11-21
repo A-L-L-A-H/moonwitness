@@ -2,30 +2,30 @@
   "name": "moonwitness",
   "version": "0.21.0",
   "private": true,
-  "packageManager": "pnpm@12.18.0",
+  "packageManager": "bun@1.4.5",
   "engines": {
     "node": ">=20.0.0"
   },
   "scripts": {
     "build": "turbo run build",
-    "dev": "pnpm --filter \"./apps/*\" --parallel dev",
+    "dev": "bun run --filter \"./apps/*\" dev",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "turbo run clean",
-    "api:dev": "pnpm --filter @moonwitness/api dev",
-    "api:build": "pnpm --filter @moonwitness/api build",
-    "api:start": "pnpm --filter @moonwitness/api start",
-    "api:test": "pnpm --filter @moonwitness/api test",
+    "api:dev": "bun run --filter @moonwitness/api dev",
+    "api:build": "bun run --filter @moonwitness/api build",
+    "api:start": "bun run --filter @moonwitness/api start",
+    "api:test": "bun run --filter @moonwitness/api test",
     "test:conformance:pg": "node scripts/run-pg-conformance.mjs",
-    "web:dev": "pnpm --filter @moonwitness/web dev",
-    "web:build": "pnpm --filter @moonwitness/web build",
-    "web:start": "pnpm --filter @moonwitness/web start",
+    "web:dev": "bun run --filter @moonwitness/web dev",
+    "web:build": "bun run --filter @moonwitness/web build",
+    "web:start": "bun run --filter @moonwitness/web start",
     "rocksoul": "node scripts/rocksoul-launch.mjs",
-    "ui:test": "pnpm --filter @moonwitness/ui test",
-    "ui:contrast": "pnpm --filter @moonwitness/ui run ui:contrast",
+    "ui:test": "bun run --filter @moonwitness/ui test",
+    "ui:contrast": "bun run --filter @moonwitness/ui ui:contrast",
     "docs:check": "node scripts/doc-check.mjs",
     "docs:test": "node --test scripts/doc-check.test.mjs",
     "gate:quick": "node scripts/gatecheck.mjs quick",
@@ -42,5 +42,22 @@
     "prettier": "^3.6.2",
     "turbo": "^2.5.8",
     "typescript": "^5.9.3"
-  }
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "postcss": "^8.5.23",
+    "esbuild": "^0.28.1",
+    "minimatch": "^11.0.1",
+    "underscore": "^1.13.8"
+  },
+  "trustedDependencies": [
+    "@swc/core",
+    "@tailwindcss/oxide",
+    "bcrypt",
+    "esbuild",
+    "sharp"
+  ]
 }

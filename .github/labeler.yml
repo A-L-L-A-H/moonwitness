@@ -17,8 +17,7 @@ documentation:
   - CHANGELOG*
 dependencies:
   - package.json
-  - pnpm-lock.yaml
-  - pnpm-workspace.yaml
+  - bun.lock
   - go.mod
   - go.sum
   - Cargo.toml
@@ -53,8 +52,7 @@ refactor:
   - "**/*.go"
 build:
   - turbo.json
-  - pnpm-workspace.yaml
-  - pnpm-lock.yaml
+  - bun.lock
   - package.json
   - tsconfig*.json
   - tsup.config.ts

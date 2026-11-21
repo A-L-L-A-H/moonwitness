@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
 import { mkdtemp, rm } from "node:fs/promises";
 import { existsSync } from "node:fs";
+import { Pool } from "pg";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -9,12 +10,14 @@ import { afterAll, afterEach, describe, expect, it } from "vitest";
 import { z } from "zod";
 import {
   SYSTEM_ACTOR,
+  applyMigrations,
   backupDatabase,
   closeDb,
   defineModel,
   extendModel,
   getDb,
   initDb,
+  initPostgresDb,
   isPostgresUrl,
   listDatabaseTables,
   syncModels,
@@ -62,6 +65,103 @@ describe.skipIf(!POSTGRES_TEST_URL)("PostgreSQL live integration", () => {
   afterAll(async () => {
     for (const dir of tempDirs) {
       await rm(dir, { recursive: true, force: true }).catch(() => {});
+    }
+  });
+
+  it("serializes concurrent PostgreSQL migration runners and commits migration SQL with its ledger row", async () => {
+    const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
+    const migrationId = `live_pg_race_${suffix}`;
+    const rollbackId = `live_pg_rollback_${suffix}`;
+    const nonTransactionalId = `live_pg_non_tx_${suffix}`;
+    const tableName = `live_pg_migration_race_${suffix}`;
+    const failedTableName = `live_pg_migration_rollback_${suffix}`;
+
+    await initPostgresDb(
+      POSTGRES_TEST_URL,
+      new Pool({ connectionString: POSTGRES_TEST_URL, max: 2 }),
+    );
+    try {
+      const migration = {
+        id: migrationId,
+        owner: "live-postgres-concurrency-test",
+        up: `CREATE TABLE ${tableName} (id TEXT PRIMARY KEY);
+          SELECT pg_sleep(0.2);
+          INSERT INTO ${tableName} (id) VALUES ('applied-once')`,
+      };
+
+      const results = await Promise.all([
+        applyMigrations([migration]),
+        applyMigrations([migration]),
+      ]);
+      expect(results.flatMap((result) => result.applied)).toEqual([migrationId]);
+      expect(results.flatMap((result) => result.skipped)).toEqual([migrationId]);
+
+      const rows = await getDb().all<{ id: string }>(`SELECT id FROM ${tableName}`);
+      expect(rows).toEqual([{ id: "applied-once" }]);
+
+      const ledgerRows = await getDb().all<{ id: string; checksum: string }>(
+        "SELECT id, checksum FROM _orm_schema_migrations WHERE id = ?",
+        [migrationId],
+      );
+      expect(ledgerRows).toHaveLength(1);
+
+      await expect(
+        applyMigrations([
+          {
+            id: migrationId,
+            up: `CREATE TABLE ${tableName} (id TEXT PRIMARY KEY, extra TEXT)`,
+          },
+        ]),
+      ).rejects.toThrow(/checksum mismatch/i);
+
+      await expect(
+        applyMigrations([
+          {
+            id: nonTransactionalId,
+            up: `CREATE INDEX CONCURRENTLY idx_${suffix} ON ${tableName} (id)`,
+          },
+        ]),
+      ).rejects.toThrow(/cannot run inside a transaction/i);
+      const nonTransactionalLedger = await getDb().get<{ id: string }>(
+        "SELECT id FROM _orm_schema_migrations WHERE id = ?",
+        [nonTransactionalId],
+      );
+      expect(nonTransactionalLedger).toBeUndefined();
+
+      await expect(
+        applyMigrations([
+          {
+            id: rollbackId,
+            up: `CREATE TABLE ${failedTableName} (id TEXT PRIMARY KEY);
+              INSERT INTO mw_missing_migration_table (id) VALUES ('fail')`,
+          },
+        ]),
+      ).rejects.toThrow();
+      const failedTable = await getDb().get<{ relation: string | null }>(
+        "SELECT to_regclass(?) AS relation",
+        [`public.${failedTableName}`],
+      );
+      expect(failedTable?.relation).toBeNull();
+      const rollbackLedger = await getDb().get<{ id: string }>(
+        "SELECT id FROM _orm_schema_migrations WHERE id = ?",
+        [rollbackId],
+      );
+      expect(rollbackLedger).toBeUndefined();
+    } finally {
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${tableName}`)
+        .catch(() => {});
+      await getDb()
+        .exec(`DROP TABLE IF EXISTS ${failedTableName}`)
+        .catch(() => {});
+      await getDb()
+        .run("DELETE FROM _orm_schema_migrations WHERE id IN (?, ?, ?)", [
+          migrationId,
+          rollbackId,
+          nonTransactionalId,
+        ])
+        .catch(() => {});
+      closeDb();
     }
   });
 

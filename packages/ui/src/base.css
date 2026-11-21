@@ -1335,3 +1335,55 @@
     scroll-behavior: auto;
   }
 }
+
+/* RTL Mobile Overflow Fixes for Console Shell (Issue #487) */
+@media (max-width: 639px) {
+  [dir="rtl"] .console-shell-rail {
+    overflow-x: hidden;
+  }
+  [dir="rtl"] .console-shell-rail .hud-side-rail {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  [dir="rtl"] .console-shell-rail .hud-nav-items {
+    overflow-x: hidden;
+  }
+  [dir="rtl"] .console-shell-rail .hud-nav-link {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* Hud top rail - prevent actions overflow */
+  [dir="rtl"] .hud-top-rail {
+    overflow-x: hidden;
+  }
+  [dir="rtl"] .hud-top-actions {
+    max-width: calc(100% - 4rem);
+    flex-wrap: wrap;
+    overflow-x: hidden;
+  }
+  [dir="rtl"] .hud-top-actions > * {
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  /* Popover content fix for RTL mobile */
+  [dir="rtl"] [role="dialog"] {
+    max-width: calc(100vw - 1rem);
+  }
+
+  /* Header search overflow */
+  [dir="rtl"] .hud-top-search {
+    max-width: 100%;
+  }
+  [dir="rtl"] .hud-top-search input {
+    max-width: 100%;
+  }
+
+  /* Breadcrumb overflow */
+  [dir="rtl"] .hud-breadcrumb {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

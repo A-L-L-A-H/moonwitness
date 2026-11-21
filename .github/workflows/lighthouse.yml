@@ -31,18 +31,17 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Enable pnpm (corepack)
+      - name: Install bun
         run: |
-          corepack enable
-          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
-          pnpm --version
+          npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+          bun --version
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Build web
         working-directory: ./apps/web
-        run: pnpm build
+        run: bun run build
 
       - name: Run Lighthouse CI
         working-directory: ./apps/web
@@ -56,14 +55,14 @@ jobs:
               const { port } = s.address();
               s.close(() => {
                 const cfg = JSON.parse(fs.readFileSync("lighthouserc.json", "utf8"));
-                cfg.ci.collect.startServerCommand = `PORT=${port} pnpm --filter @moonwitness/web start`;
+                cfg.ci.collect.startServerCommand = `PORT=${port} bun run --filter @moonwitness/web start`;
                 cfg.ci.collect.url = cfg.ci.collect.url.map((u) => u.replace(":3000", `:${port}`));
                 cfg.ci.upload.outputDir = path.resolve(process.cwd(), ".lighthouseci");
                 fs.writeFileSync(path.join(process.env.RUNNER_TEMP, "lighthouserc.json"), JSON.stringify(cfg));
               });
             });
           '
-          pnpm exec lhci autorun --config="$RUNNER_TEMP/lighthouserc.json"
+          bun x lhci autorun --config="$RUNNER_TEMP/lighthouserc.json"
 
       - name: Upload Lighthouse report
         if: always()

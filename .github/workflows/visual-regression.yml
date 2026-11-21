@@ -32,35 +32,34 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      - name: Enable pnpm (corepack)
+      - name: Install bun
         run: |
-          corepack enable
-          corepack prepare "$(node -p "require('./package.json').packageManager")" --activate
-          pnpm --version
+          npm install -g "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+          bun --version
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Cross-World Contrast Gate (dark + light)
-        run: pnpm ui:contrast
+        run: bun run ui:contrast
 
       - name: Build unified @moonwitness/web
-        run: pnpm --filter @moonwitness/web build
+        run: bun run --filter @moonwitness/web build
 
       - name: Install Playwright Chromium
         working-directory: ./apps/web
-        run: pnpm exec playwright install --with-deps chromium
+        run: bun x playwright install --with-deps chromium
 
       - name: Run Deterministic 6-Skin & Cross-World Visual Matrix (including A-L-L-A-H)
         working-directory: ./apps/web
-        run: pnpm exec playwright test --config cross-world-playwright.config.ts
+        run: bun x playwright test --config cross-world-playwright.config.ts
 
       - name: Optional Percy Cloud Diff (when PERCY_TOKEN configured)
         if: env.HAS_PERCY_TOKEN == 'true'
         working-directory: ./apps/web
         run: |
-          pnpm --silent dlx @percy/cli@1.32.12 exec -- \
-            pnpm exec playwright test --config ../../playwright.config.ts --project=chromium --reporter=list
+          bun x @percy/cli@1.32.12 exec -- \
+            bun x playwright test --config ../../playwright.config.ts --project=chromium --reporter=list
         env:
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
 

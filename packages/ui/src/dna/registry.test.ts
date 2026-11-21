@@ -9,7 +9,7 @@ import {
   listThemes,
   themeRegistry,
 } from "./registry";
-import type { DNATokens } from "./tokens";
+import type { DNATokens, TokenPath } from "./tokens";
 
 describe("DNA Registry", () => {
   describe("getToken", () => {
@@ -18,6 +18,15 @@ describe("DNA Registry", () => {
       expect(primary).toBeDefined();
       expect(typeof primary).toBe("object");
       expect((primary as { hex: string }).hex).toBeDefined();
+    });
+
+    it("does not resolve inherited properties from custom theme objects", () => {
+      const customTheme = createTheme({});
+
+      expect(getToken("constructor" as TokenPath, customTheme)).toBeUndefined();
+      expect(getToken("toString" as TokenPath, customTheme)).toBeUndefined();
+      expect(getToken("__proto__.toString" as TokenPath, customTheme)).toBeUndefined();
+      expect(getToken("colors.semantic.constructor" as TokenPath, customTheme)).toBeUndefined();
     });
 
     it("returns undefined for non-existent path", () => {
