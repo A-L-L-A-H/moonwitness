@@ -237,9 +237,11 @@ describe("TranslationWrapper & SanctuaryLocaleProvider single locale ownership",
     expect(snapshots).not.toContain("en");
     expect(text("t-locale")).toBe("ar");
     expect(text("s-locale")).toBe("ar");
+    expect(document.cookie).not.toContain(`${themeConfig.localeCookieName}=ar`);
 
     await click("s-set-en");
     expect(text("t-locale")).toBe("en");
     expect(text("s-locale")).toBe("en");
+    expect(document.cookie).toContain(`${themeConfig.localeCookieName}=en`);
   });
 });

@@ -46,7 +46,7 @@ export function SiteNavigation({
 
         <nav
           aria-label={navLabel}
-          className="mw-site-nav-links hidden min-w-0 items-center gap-1 lg:flex xl:gap-3"
+          className="mw-site-nav-links hidden min-w-0 items-center gap-1 overflow-x-auto lg:flex xl:gap-1.5 2xl:gap-3"
         >
           {items.map((item) => (
             <a
@@ -55,7 +55,7 @@ export function SiteNavigation({
               onClick={item.onSelect}
               aria-current={item.active ? "page" : undefined}
               className={cn(
-                "mw-site-nav-link relative inline-flex min-h-[44px] items-center whitespace-nowrap px-2 py-1.5 text-xs font-bold tracking-[0.05em] uppercase transition-colors xl:px-3 xl:text-sm xl:tracking-[0.06em]",
+                "mw-site-nav-link relative inline-flex min-h-[44px] items-center whitespace-nowrap px-2 py-1.5 text-xs font-bold tracking-[0.05em] uppercase transition-colors xl:px-2.5 2xl:px-3 2xl:text-sm 2xl:tracking-[0.06em]",
                 item.active && "is-active",
               )}
             >
@@ -64,7 +64,11 @@ export function SiteNavigation({
           ))}
         </nav>
 
-        {actions ? <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">{actions}</div> : null}
+        {actions ? (
+          <div className="relative z-10 flex shrink-0 items-center gap-1.5 sm:gap-2">
+            {actions}
+          </div>
+        ) : null}
       </div>
 
       {mobileMenuOpen && mobileDrawer ? mobileDrawer : null}

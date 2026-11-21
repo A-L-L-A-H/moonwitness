@@ -29,6 +29,7 @@ import {
   type CrewRoleOrPublic,
 } from "@moonwitness/addon-runtime";
 import { createSession, createUser } from "@moonwitness/addons/auth";
+import { irAutomationModel, irWebhookModel, irWebhookLogModel } from "@moonwitness/addons/khidra";
 import { buildApp } from "./app";
 import { resolvePostgresConformanceUrl } from "./pg-conformance-config";
 
@@ -44,6 +45,7 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
   const suffix = randomUUID().replace(/-/g, "").slice(0, 12);
   const dbName = `mw_pg_conf_${suffix}`;
   const adminPool = new Pool({ connectionString: baseUrl, max: 2 });
+  adminPool.on("error", () => {});
   try {
     await adminPool.query(`CREATE DATABASE "${dbName}"`);
   } catch (error) {
@@ -59,6 +61,15 @@ async function createIsolatedPostgresDb(baseUrl: string): Promise<IsolatedPostgr
     dbName,
     drop: async () => {
       try {
+        // Terminate remaining backend connections before dropping so the
+        // process does not emit unhandled 57P01 errors on live sockets.
+        await adminPool
+          .query(
+            `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()`,
+            [dbName],
+          )
+          .catch(() => {});
+        await new Promise((resolve) => setTimeout(resolve, 50));
         await adminPool.query(`DROP DATABASE IF EXISTS "${dbName}" WITH (FORCE)`);
       } finally {
         await adminPool.end();
@@ -131,6 +142,10 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
     afterAll(async () => {
       await closeDbAsync();
     });
+    afterAll(async () => {
+      // Allow PG client pool to fully drain and avoid unhandled 57P01 terminations
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    });
 
     it("1a. boots real Fastify host (buildApp) on PostgreSQL 16 with health/readiness, authBridge actor context, RPC, and 2-tenant isolation", async () => {
       const isolated = await createIsolatedPostgresDb(POSTGRES_CONFORMANCE_URL);
@@ -141,10 +156,12 @@ describe.skipIf(!POSTGRES_CONFORMANCE_URL)(
           app = null;
         }
         await closeDbAsync();
+        await new Promise((resolve) => setTimeout(resolve, 250));
         await isolated.drop();
       });
 
       app = await buildApp({ dbPath: isolated.dbUrl, prefix: "/api/v1" });
+      await syncModels([irAutomationModel, irWebhookModel, irWebhookLogModel]);
 
       const pgVersionRow = await getDb().get<{ version: string }>("SELECT version() AS version");
       expect(pgVersionRow?.version).toMatch(/PostgreSQL 16\./);

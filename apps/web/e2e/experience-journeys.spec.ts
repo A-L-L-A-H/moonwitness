@@ -420,9 +420,11 @@ test.describe("Issue #488 — End-to-End Experience Journeys", () => {
         await expect(page.getByText("alice")).toBeVisible();
         await expect(page.getByRole("button", { name: "Add user" })).toHaveCount(0);
         await expect(
-          page.getByText(
-            "Your role cannot manage RADIUS users. Ask an administrator for write access.",
-          ),
+          page
+            .getByRole("region", { name: "RADIUS users" })
+            .getByText(
+              "Your role cannot manage RADIUS users. Ask an administrator for write access.",
+            ),
         ).toBeVisible();
 
         // 3. Authenticated admin: command palette + localized navigation + back/forward

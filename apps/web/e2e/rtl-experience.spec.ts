@@ -93,6 +93,12 @@ async function mockRtlApi(page: Page): Promise<void> {
         },
       });
     }
+    if (path.endsWith("/api/v1/control/resources")) {
+      return route.fulfill({ status: 200, json: {} });
+    }
+    if (path.endsWith("/api/v1/control/audit")) {
+      return route.fulfill({ status: 200, json: [] });
+    }
     if (path.endsWith("/api/v1/command-center/state")) {
       return route.fulfill({
         status: 200,
@@ -301,7 +307,15 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
             expect(mainBox!.x + mainBox!.width).toBeLessThanOrEqual(railBox!.x + 2);
           } else {
             expect(railBox!.y + railBox!.height).toBeLessThanOrEqual(vp.height + 1);
-            expect(footerBox!.y + footerBox!.height).toBeLessThanOrEqual(railBox!.y + 2);
+            await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+            const scrolledRailBox = await page.locator(".console-shell-rail").boundingBox();
+            const scrolledFooterBox = await page.locator("footer.hud-panel").boundingBox();
+            expect(scrolledRailBox).not.toBeNull();
+            expect(scrolledFooterBox).not.toBeNull();
+            expect(scrolledFooterBox!.y + scrolledFooterBox!.height).toBeLessThanOrEqual(
+              scrolledRailBox!.y + 2,
+            );
+            await page.evaluate(() => window.scrollTo(0, 0));
           }
         }
 
@@ -394,8 +408,10 @@ test.describe("Issue #487 — Arabic SSR & RTL Shared UI Experience", () => {
     await expect
       .poll(() => page.evaluate(() => document.documentElement.dir), { timeout: 20_000 })
       .toBe("rtl");
+    await expect(page.getByText("VERIFYING SOVEREIGN SESSION…")).toBeHidden();
 
     const railLinks = page.locator(".console-shell-rail .hud-nav-items a[href]");
+    await expect(railLinks).toHaveCount(7);
     const linkCount = await railLinks.count();
     expect(linkCount).toBeGreaterThanOrEqual(3);
 
